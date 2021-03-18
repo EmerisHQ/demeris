@@ -1,7 +1,9 @@
 {
-  "name": "vue3-template-ts",
-  "version": "0.1.0",
+  "name": "navigator",
+  "version": "0.0.1",
   "private": true,
+  "author": "Tendermint, Inc <hello@tendermint.com>",
+  "homepage": "https://github.com/tendermint/vue",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
