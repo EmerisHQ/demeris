@@ -1,0 +1,16 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "plugin:vue/essential",
+    "@vue/airbnb",
+    "@vue/typescript/recommended",
+    "@vue/prettier",
+    "@vue/prettier/@typescript-eslint"
+  ]
+}
