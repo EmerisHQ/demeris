@@ -4,13 +4,22 @@
     "node": true
   },
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "extends": [
-    "plugin:vue/essential",
-    "@vue/airbnb",
     "@vue/typescript/recommended",
-    "@vue/prettier",
-    "@vue/prettier/@typescript-eslint"
-  ]
+    "plugin:vue/vue3-recommended",
+    "@vue/prettier/@typescript-eslint",
+    "prettier"
+  ],
+  "rules": {
+    "indent": "off",
+    "vue/html-self-closing": "off",
+    "vue/max-attributes-per-line": "off",
+    "vue/singleline-html-element-content-newline": "off"
+  }
 }
