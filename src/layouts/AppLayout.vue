@@ -4,11 +4,11 @@
   </component>
 </template>
 
-<script>
-import DefaultLayout from './DefaultLayout';
-import { markRaw, watch } from 'vue';
+<script lang="ts">
+import DefaultLayout from './DefaultLayout.vue';
+import { markRaw, watch, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
-export default {
+export default defineComponent({
   name: 'AppLayout',
   setup() {
     const layout = markRaw(DefaultLayout);
@@ -27,5 +27,5 @@ export default {
     );
     return { layout };
   },
-};
+});
 </script>
