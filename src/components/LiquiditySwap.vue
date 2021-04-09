@@ -1,6 +1,8 @@
 <template>
   <div class="card">
     <div class="title">Swap</div>
+
+    <!-- Swap Component for DashBoard page -->
     <div v-if="isDashBoard">
       <div class="selector">
         <div class="selector__coin">
@@ -41,8 +43,10 @@
       </div>
     </div>
 
+    <!-- Swap Component for Swap page -->
     <div v-else>swap page component</div>
 
+    <!-- Common Component -->
     <div class="fees">
       <div class="fees__title">Fees</div>
       <div class="fees__detail">
@@ -51,6 +55,7 @@
         <div class="fees__detail-amount">~0.02</div>
       </div>
     </div>
+
     <button class="button-action">Start</button>
   </div>
 </template>
