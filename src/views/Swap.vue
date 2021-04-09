@@ -1,7 +1,6 @@
 <template>
   <AppLayout>
-    <div>
-      <div>Swap</div>
+    <div class="wrapper">
       <LiquiditySwap :is-dash-board="false" />
     </div>
   </AppLayout>
