@@ -50,7 +50,7 @@
         <button class="button__circle-big">Max</button>
         <div class="selector__input">
           <div class="selector__input-info">Estimate</div>
-          <input type="number" class="selector__input-amount" />
+          <input type="number" class="selector__input-amount" value="1000" />
           <div class="selector__input-result">
             <div class="selector__input-result-coin">50 ATOM</div>
             <div class="selector__input-result-arrow">→</div>
@@ -90,6 +90,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 //card
 .card {
+  max-width: 500px;
   padding: 3rem 2rem 4rem;
   margin: 0 1rem;
   border: 2px solid gray;
@@ -185,6 +186,48 @@ export default defineComponent({
 
 //swap
 .swap {
+  padding-top: 3rem;
+  .selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    &__input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      &-info {
+        color: gray;
+        font-size: 0.865rem;
+
+        padding-bottom: 0.5rem;
+      }
+
+      &-amount {
+        width: 100%;
+
+        background-color: transparent;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        outline: none;
+
+        font-size: 2rem;
+        letter-spacing: 2px;
+      }
+
+      &-result {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+
+        &-arrow {
+          padding: 0 1rem;
+        }
+      }
+    }
+  }
 }
 
 //buttons
@@ -212,6 +255,7 @@ export default defineComponent({
     width: 4rem;
     height: 4rem;
     font-size: 1rem;
+    margin: 0;
   }
 }
 
