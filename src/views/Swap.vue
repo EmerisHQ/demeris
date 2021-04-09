@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="home">
+    <div>
       <div>Swap</div>
       <LiquiditySwap :is-dash-board="false" />
     </div>
@@ -11,7 +11,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import LiquiditySwap from '@/components/LiquiditySwap.vue';
 export default {
-  name: 'Home',
+  name: 'Swap',
   components: { AppLayout, LiquiditySwap },
 };
 </script>

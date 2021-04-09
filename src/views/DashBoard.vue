@@ -1,8 +1,12 @@
 <template>
   <AppLayout>
-    <div class="home">
-      <div>DashBoard</div>
-      <LiquiditySwap :is-dash-board="true" />
+    <div class="wrapper">
+      <div class="dashboard">
+        <div>DashBoard</div>
+      </div>
+      <div class="swap">
+        <LiquiditySwap :is-dash-board="true" />
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -11,7 +15,26 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import LiquiditySwap from '@/components/LiquiditySwap.vue';
 export default {
-  name: 'Home',
+  name: 'DashBoard',
   components: { AppLayout, LiquiditySwap },
 };
 </script>
+
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+
+  .dashboard {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-evenly;
+
+    background-color: rgb(172, 206, 207);
+  }
+
+  .swap {
+    flex: 1;
+  }
+}
+</style>
