@@ -28,6 +28,7 @@ export default {
   .dashboard {
     display: flex;
     flex: 1;
+    width: 0;
     align-items: center;
     justify-content: space-evenly;
 
@@ -35,6 +36,7 @@ export default {
   }
 
   .swap {
+    width: 0;
     flex: 1;
   }
 }

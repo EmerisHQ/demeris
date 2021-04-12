@@ -1,17 +1,20 @@
 <template>
   <div class="card">
     <div class="title">Swap</div>
-    <div class="sub-title">1000 ATOM (Cosmos Hub) available</div>
+    <div class="sub-title">
+      {{ availableAmountInfo?.amount }} {{ availableAmountInfo?.denom }} ({{ availableAmountInfo?.source }}) available
+    </div>
 
     <div class="amount">
-      <button class="button__circle-big">Max</button>
+      <button class="button__circle-big" @click="setMaxAmount">Max</button>
       <div class="amount__input">
         <div class="amount__input-info">Estimate</div>
-        <input type="number" class="amount__input-amount" value="1000" />
+        <input type="number" class="amount__input-amount" v-model="swapAmount" />
+
         <div class="amount__input-result">
-          <div class="amount__input-result-coin">50 ATOM</div>
+          <div class="amount__input-result-coin">{{ swapAmount }} {{ fromCoin }}</div>
           <div class="amount__input-result-arrow">→</div>
-          <div class="amount__input-result-coin">158 KAVA</div>
+          <div class="amount__input-result-coin">{{ estimatedReturn }} {{ toCoin }}</div>
         </div>
       </div>
       <button class="button__circle-big">⤵</button>
@@ -21,7 +24,7 @@
       <div class="coin__pair">
         <div class="coin__pair-destination">From</div>
         <div class="coin__pair-image"></div>
-        <div class="coin__pair-selected">ATOM</div>
+        <div class="coin__pair-selected">{{ fromCoin }}</div>
         <div class="coin__pair-arrow">></div>
       </div>
 
@@ -30,21 +33,21 @@
       <div class="coin__pair">
         <div class="coin__pair-destination">To</div>
         <div class="coin__pair-image"></div>
-        <div class="coin__pair-selected">ATOM</div>
+        <div class="coin__pair-selected">{{ toCoin }}</div>
         <div class="coin__pair-arrow">></div>
       </div>
 
-      <button class="button__circle swap__button">↕</button>
+      <button class="button__circle swap__button" @click="changeFromTo">↕</button>
     </div>
     <div class="preview-info">
       <div class="swap">
         <div class="swap__title">Estimated price</div>
         <div class="swap__detail">
           <div class="swap__detail-ele">1</div>
-          <div class="swap__detail-ele">ATOM</div>
+          <div class="swap__detail-ele">{{ fromCoin }}</div>
           <div class="swap__detail-ele">per</div>
-          <div class="swap__detail-ele">3.17</div>
-          <div class="swap__detail-ele">KAVA</div>
+          <div class="swap__detail-ele">{{ price }}</div>
+          <div class="swap__detail-ele">{{ toCoin }}</div>
         </div>
       </div>
 
@@ -52,7 +55,7 @@
         <div class="swap__title">Fees</div>
         <div class="swap__detail">
           <div class="swap__detail-ele">˅</div>
-          <div class="swap__detail-ele">ATOM</div>
+          <div class="swap__detail-ele">{{ fromCoin }}</div>
           <div class="swap__detail-ele">~0.02</div>
         </div>
       </div>
@@ -63,14 +66,44 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, reactive, computed, toRefs } from 'vue';
+import { TEST_DATA } from '@/TEST_DATA';
 export default defineComponent({
   name: 'Swap',
-  props: {
-    isDashBoard: Boolean,
-  },
+  setup() {
+    const swap = reactive({
+      swapAmount: 1000,
+      fromCoin: 'ATOM',
+      toCoin: 'KAVA',
+      selectedPairPoolData: {
+        reserveAmount: { ATOM: 100000, KAVA: 125000 },
+      },
+      price: computed(() => {
+        return (
+          swap.selectedPairPoolData.reserveAmount[swap.toCoin] / swap.selectedPairPoolData.reserveAmount[swap.fromCoin]
+        );
+      }),
+      availableAmountInfo: computed(() => {
+        return TEST_DATA.wallets[swap.fromCoin];
+      }),
+      estimatedReturn: computed(() => {
+        return swap.price * swap.swapAmount;
+      }),
+    });
 
-  //   setup() {},
+    function setMaxAmount() {
+      swap.swapAmount = swap.availableAmountInfo.amount;
+    }
+
+    function changeFromTo() {
+      const originalFromCoin = swap.fromCoin;
+      const originalToCoin = swap.toCoin;
+      swap.fromCoin = originalToCoin;
+      swap.toCoin = originalFromCoin;
+    }
+
+    return { ...toRefs(swap), setMaxAmount, changeFromTo };
+  },
 });
 </script>
 
@@ -106,6 +139,9 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+
+    overflow: hidden;
 
     &-info {
       color: gray;
@@ -136,6 +172,14 @@ export default defineComponent({
         padding: 0 1rem;
       }
     }
+  }
+
+  .transparent {
+    /* background-color: red; */
+    position: absolute;
+    top: 24px;
+    padding-right: 20px;
+    height: 38px;
   }
 }
 
