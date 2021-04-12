@@ -3,32 +3,62 @@
     <div class="title">Swap</div>
     <div class="sub-title">1000 ATOM (Cosmos Hub) available</div>
 
-    <div class="swap">
-      <div class="selector">
-        <button class="button__circle-big">Max</button>
-        <div class="selector__input">
-          <div class="selector__input-info">Estimate</div>
-          <input type="number" class="selector__input-amount" value="1000" />
-          <div class="selector__input-result">
-            <div class="selector__input-result-coin">50 ATOM</div>
-            <div class="selector__input-result-arrow">→</div>
-            <div class="selector__input-result-coin">158 KAVA</div>
-          </div>
+    <div class="amount">
+      <button class="button__circle-big">Max</button>
+      <div class="amount__input">
+        <div class="amount__input-info">Estimate</div>
+        <input type="number" class="amount__input-amount" value="1000" />
+        <div class="amount__input-result">
+          <div class="amount__input-result-coin">50 ATOM</div>
+          <div class="amount__input-result-arrow">→</div>
+          <div class="amount__input-result-coin">158 KAVA</div>
         </div>
-        <button class="button__circle-big">⤵</button>
+      </div>
+      <button class="button__circle-big">⤵</button>
+    </div>
+
+    <div class="coin">
+      <div class="coin__pair">
+        <div class="coin__pair-destination">From</div>
+        <div class="coin__pair-image"></div>
+        <div class="coin__pair-selected">ATOM</div>
+        <div class="coin__pair-arrow">></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="coin__pair">
+        <div class="coin__pair-destination">To</div>
+        <div class="coin__pair-image"></div>
+        <div class="coin__pair-selected">ATOM</div>
+        <div class="coin__pair-arrow">></div>
+      </div>
+
+      <button class="button__circle swap__button">↕</button>
+    </div>
+    <div class="preview-info">
+      <div class="swap">
+        <div class="swap__title">Estimated price</div>
+        <div class="swap__detail">
+          <div class="swap__detail-ele">1</div>
+          <div class="swap__detail-ele">ATOM</div>
+          <div class="swap__detail-ele">per</div>
+          <div class="swap__detail-ele">3.17</div>
+          <div class="swap__detail-ele">KAVA</div>
+        </div>
+      </div>
+
+      <div class="swap">
+        <div class="swap__title">Fees</div>
+        <div class="swap__detail">
+          <div class="swap__detail-ele">˅</div>
+          <div class="swap__detail-ele">ATOM</div>
+          <div class="swap__detail-ele">~0.02</div>
+        </div>
       </div>
     </div>
 
-    <div class="fees">
-      <div class="fees__title">Fees</div>
-      <div class="fees__detail">
-        <div class="fees__detail-arrow">˅</div>
-        <div class="fees__detail-coin">ATOM</div>
-        <div class="fees__detail-amount">~0.02</div>
-      </div>
-    </div>
-
-    <button class="button__square-big">Start</button>
+    <button class="button__square-big">Preview swap</button>
   </div>
 </template>
 
@@ -60,54 +90,133 @@ export default defineComponent({
 
   .sub-title {
     text-align: center;
-    margin-top: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 3rem;
   }
 }
 
 //swap
-.swap {
-  padding-top: 3rem;
 
-  .selector {
+.amount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &-info {
+      color: gray;
+      font-size: 0.865rem;
+
+      padding-bottom: 0.5rem;
+    }
+
+    &-amount {
+      width: 100%;
+
+      background-color: transparent;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      outline: none;
+
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    &-result {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+
+      &-arrow {
+        padding: 0 1rem;
+      }
+    }
+  }
+}
+
+.coin {
+  position: relative;
+  border: 2px solid gray;
+
+  margin-top: 3rem;
+
+  &__pair {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    &__input {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    padding: 1rem;
 
-      &-info {
-        color: gray;
-        font-size: 0.865rem;
-
-        padding-bottom: 0.5rem;
-      }
-
-      &-amount {
-        width: 100%;
-
-        background-color: transparent;
-        font-weight: bold;
-        text-align: center;
-        border: none;
-        outline: none;
-
-        font-size: 2rem;
-        letter-spacing: 2px;
-      }
-
-      &-result {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem;
-
-        &-arrow {
-          padding: 0 1rem;
-        }
-      }
+    &-destination {
+      flex: 1;
     }
+
+    &-image {
+      min-width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: gray;
+    }
+
+    &-selected {
+      flex: 3;
+      padding-left: 1rem;
+    }
+
+    &-arrow {
+      flex: 1;
+      text-align: right;
+
+      font-size: 2rem;
+      font-weight: bold;
+      color: gray;
+    }
+  }
+
+  .swap__button {
+    align-items: center;
+
+    position: absolute;
+    top: 0;
+
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 2rem;
+  }
+}
+
+.divider {
+  border: 1px solid gray;
+}
+
+.preview-info {
+  margin: 4rem 0 3rem;
+}
+
+.swap {
+  display: flex;
+  font-weight: 600;
+
+  &__title {
+    flex: 1;
+  }
+
+  &__detail {
+    display: flex;
+    flex: 1;
+    flex-flow: row-reverse;
+    &-ele {
+      padding: 0 0.25rem;
+    }
+  }
+
+  &:first-child {
+    margin-bottom: 1rem;
   }
 }
 
@@ -120,9 +229,9 @@ export default defineComponent({
 }
 
 .button__circle {
-  width: 3rem;
-  height: 3rem;
-  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.3rem;
   border-radius: 50%;
 
   margin-right: 1rem;
@@ -130,6 +239,8 @@ export default defineComponent({
   border: 1px solid gray;
   background-color: #fff;
   font-size: 2rem;
+
+  text-align: center;
 
   &-big {
     @extend .button__circle;
@@ -163,30 +274,5 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type='number'] {
   -moz-appearance: textfield;
-}
-
-//commons
-.fees {
-  display: flex;
-  padding: 2rem 0;
-  font-weight: 600;
-
-  &__title {
-    flex: 1;
-  }
-
-  &__detail {
-    display: flex;
-    flex: 1;
-    flex-flow: row-reverse;
-
-    &-coin {
-      padding: 0 0.5rem;
-    }
-
-    &-arrow {
-      font-size: 1.25rem;
-    }
-  }
 }
 </style>
