@@ -5,7 +5,7 @@
         <div>DashBoard</div>
       </div>
       <div class="swap">
-        <LiquiditySwap :is-dash-board="true" />
+        <LiquiditySwap />
       </div>
     </div>
   </AppLayout>

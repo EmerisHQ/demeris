@@ -1,51 +1,9 @@
 <template>
   <div class="card">
     <div class="title">Swap</div>
-    <div v-if="!isDashBoard" class="sub-title">1000 ATOM (Cosmos Hub) available</div>
+    <div class="sub-title">1000 ATOM (Cosmos Hub) available</div>
 
-    <!-- Swap Component for DashBoard page -->
-    <div v-if="isDashBoard" class="dashboard">
-      <div class="selector">
-        <div class="selector__coin">
-          <div class="selector__coin-info">
-            <div class="selector__coin-info-name">ATOM</div>
-            <div class="selector__coin-info-source">Cosmos Hub</div>
-          </div>
-          <div class="selector__coin-arrow">˅</div>
-        </div>
-        <div class="selector__amount">
-          <button class="button__square">MAX</button>
-          <div class="selector__amount-input">
-            <input class="selector__amount-input-coin" type="number" value="100" />
-            <div class="selector__amount-input-dollar">~1234.23$</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="divider">
-        <button class="button__circle">↕</button>
-        <div class="price-info">1 ATOM= 0.021864 KAVA</div>
-      </div>
-
-      <div class="selector">
-        <div class="selector__coin">
-          <div class="selector__coin-info">
-            <div class="selector__coin-info-name">ATOM</div>
-            <div class="selector__coin-info-source">Cosmos Hub</div>
-          </div>
-          <div class="selector__coin-arrow">˅</div>
-        </div>
-        <div class="selector__amount">
-          <div class="selector__amount-input">
-            <input class="selector__amount-input-coin" type="number" value="100" />
-            <div class="selector__amount-input-dollar">~1234.23$</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Swap Component for Swap page -->
-    <div v-else class="swap">
+    <div class="swap">
       <div class="selector">
         <button class="button__circle-big">Max</button>
         <div class="selector__input">
@@ -61,7 +19,6 @@
       </div>
     </div>
 
-    <!-- Common Component -->
     <div class="fees">
       <div class="fees__title">Fees</div>
       <div class="fees__detail">
@@ -104,83 +61,6 @@ export default defineComponent({
   .sub-title {
     text-align: center;
     margin-top: 1rem;
-  }
-}
-
-//Dashboard components
-.dashboard {
-  margin-top: 2rem;
-
-  .selector {
-    display: flex;
-    align-items: center;
-
-    border: 2px solid gray;
-
-    &__coin {
-      display: flex;
-      flex: 1;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-
-      &-info {
-        &-name {
-          font-size: 1.25rem;
-          font-weight: 800;
-        }
-
-        /* &-source {
-      } */
-      }
-
-      &-arrow {
-        font-size: 2rem;
-        font-weight: bold;
-        padding: 1rem 1rem 0;
-      }
-    }
-
-    &__amount {
-      display: flex;
-      flex: 1;
-      align-items: center;
-      justify-content: space-between;
-
-      padding: 1rem;
-
-      border-left: 2px solid gray;
-
-      &-input {
-        display: flex;
-        flex-direction: column;
-        background-color: transparent;
-        &-coin {
-          width: 100%;
-          font-size: 2rem;
-          background-color: transparent;
-          font-weight: bold;
-          text-align: right;
-          border: none;
-          outline: none;
-        }
-
-        &-dollar {
-          text-align: right;
-        }
-      }
-    }
-  }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-  }
-
-  .price-info {
-    font-size: 1.25rem;
-    font-weight: 500;
   }
 }
 
@@ -253,7 +133,7 @@ export default defineComponent({
 
   &-big {
     @extend .button__circle;
-    width: 4rem;
+    min-width: 4rem;
     height: 4rem;
     font-size: 1rem;
     margin: 0;
