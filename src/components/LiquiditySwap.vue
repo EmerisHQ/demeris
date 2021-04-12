@@ -9,7 +9,7 @@
       <button class="button__circle-big" @click="setMaxAmount">Max</button>
       <div class="amount__input">
         <div class="amount__input-info">Estimate</div>
-        <input type="number" class="amount__input-amount" v-model="swapAmount" />
+        <input v-model="swapAmount" type="number" class="amount__input-amount" />
 
         <div class="amount__input-result">
           <div class="amount__input-result-coin">{{ swapAmount }} {{ fromCoin }}</div>
@@ -84,7 +84,7 @@ export default defineComponent({
         );
       }),
       availableAmountInfo: computed(() => {
-        return TEST_DATA.wallets[swap.fromCoin];
+        return TEST_DATA.myBalance[swap.fromCoin];
       }),
       estimatedReturn: computed(() => {
         return swap.price * swap.swapAmount;
