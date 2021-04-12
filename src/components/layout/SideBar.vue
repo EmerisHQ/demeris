@@ -3,7 +3,6 @@
     <template #default>
       <SpLinkIcon link="/" text="Dashboard" icon="Dashboard" />
       <SpLinkIcon link="/pool" text="Pool" icon="Form" />
-      <SpLinkIcon link="/swap" text="Swap" icon="Form" />
     </template>
     <template #footer>
       <SpStatusAPI :show-text="sidebarOpen" />

@@ -187,11 +187,12 @@ export default defineComponent({
 //swap
 .swap {
   padding-top: 3rem;
+
   .selector {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    text-align: center;
+
     &__input {
       display: flex;
       flex-direction: column;
