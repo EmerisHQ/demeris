@@ -14,12 +14,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/pool',
     name: 'Pool',
     component: () => import('../views/Pool.vue'),
-  },
-  {
-    path: '/swap',
-    name: 'Swap',
-    component: () => import('../views/Swap.vue'),
-  },
+  }
 ];
 
 const router = createRouter({

@@ -1,37 +1,42 @@
 <template>
-  <header class="header">
-    <div class="header__logo">
-      <div class="header__logo_icon">💎</div>
-      <div class="header__logo_text">
-        <div class="header__logo_text-title">Navigator</div>
-        <div class="header__logo_text-status">Beta</div>
-      </div>
-    </div>
-    <div class="space"></div>
-    <div class="header__wallet">
-      <button class="header__wallet-button">Send</button>
-      <button class="header__wallet-button">Receive</button>
-      <div class="header__wallet-image"></div>
-      <div class="header__wallet__account">
-        <div class="header__wallet__account-name">Name</div>
-        <div class="header__wallet__account-value">$1,000</div>
-      </div>
-    </div>
-  </header>
+  <SpWallet ref="wallet" @:dropdown-opened="$refs.menu.closeDropdown()" />
+  <SpLayout>
+    <template #sidebar>
+      <SideBar />
+    </template>
+    <template #content>
+      <header class="header">
+        <div class="header__logo">
+          <div class="header__logo_icon">💎</div>
+          <div class="header__logo_text">
+            <div class="header__logo_text-title">Navigator</div>
+            <div class="header__logo_text-status">Beta</div>
+          </div>
+        </div>
+        <div class="space"></div>
+        <div class="header__wallet">
+          <button class="header__wallet-button">Send</button>
+          <button class="header__wallet-button">Receive</button>
+          <div class="header__wallet-image"></div>
+          <div class="header__wallet__account">
+            <div class="header__wallet__account-name">Name</div>
+            <div class="header__wallet__account-value">$1,000</div>
+          </div>
+        </div>
+      </header>
 
-  <nav class="nav">
-    <router-link class="nav-link" to="/">Dashboard</router-link>
-    <router-link class="nav-link" to="/pool">Pool</router-link>
-    <router-link class="nav-link" to="/swap">Swap</router-link>
-    <div class="space"></div>
-  </nav>
-  <slot />
+      <slot />
+    </template>
+  </SpLayout>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+import SideBar from '@/components/layout/SideBar.vue';
+export default defineComponent({
   name: 'DefaultLayout',
-};
+  components: { SideBar },
+});
 </script>
 
 <style scoped lang="scss">
