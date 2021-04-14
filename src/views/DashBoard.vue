@@ -23,7 +23,8 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
-  margin-bottom: 3rem;
+  max-width: 1024px;
+  margin: 0 auto;
 
   .dashboard {
     display: flex;
