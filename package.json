@@ -10,9 +10,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@starport/vue": "^0.1.38",
-    "@starport/vuex": "^0.1.41",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.12",
+    "@starport/tendermint-liquidity-js": "^0.1.0",
+    "@starport/vue": "^0.1.44",
+    "@starport/vuex": "^0.1.44",
+    "@types/long": "^4.0.1",
     "core-js": "^3.6.5",
+    "long": "^4.0.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.5",
     "vuex": "^4.0.0-0"
