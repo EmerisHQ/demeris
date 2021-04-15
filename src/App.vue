@@ -21,14 +21,14 @@ export default defineComponent({
 	async created() {
 		await this.$store.dispatch('common/env/init',{
 				starportUrl: '',
-				apiNode: 'http://gravity.bharvest.io:1317',
-				rpcNode: 'http://gravity.bharvest.io:26657',
-				wsNode: 'ws://gravity.bharvest.io:26657/websocket',
+				apiNode: 'https://api.gravity.bharvest.io',
+				rpcNode: 'https://rpc.gravity.bharvest.io',
+				wsNode: 'wss://rpc.gravity.bharvest.io/websocket',
 				chainId: 'swap-testnet-2003',
 				addrPrefix: 'cosmos',
 				chainName: 'Gravity DEX testnet',
 				sdkVersion: 'Stargate',
-				getTXApi: 'http://gravity.bharvest.io:26657/tx?hash=0x'
+				getTXApi: 'https://rpc.gravity.bharvest.io/tx?hash=0x'
 			})
 		this.initialized = true
 	},
