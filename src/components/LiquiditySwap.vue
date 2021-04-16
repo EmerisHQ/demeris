@@ -110,8 +110,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 //card
 .card {
-  max-width: 500px;
-  padding: 3rem 2rem 4rem;
+  max-width: 60rem;
+  padding: 3rem 3rem 4rem;
   margin: 0 1rem;
   border: 2px solid gray;
 
@@ -145,7 +145,7 @@ export default defineComponent({
 
     &-info {
       color: gray;
-      font-size: 0.865rem;
+      font-size: 1.6rem;
 
       padding-bottom: 0.5rem;
     }
@@ -159,7 +159,7 @@ export default defineComponent({
       border: none;
       outline: none;
 
-      font-size: 2rem;
+      font-size: 3.6rem;
       letter-spacing: 2px;
     }
 
@@ -194,7 +194,7 @@ export default defineComponent({
     align-items: center;
     justify-content: space-between;
 
-    padding: 1rem;
+    padding: 2.4rem;
 
     &-destination {
       flex: 1;
@@ -230,7 +230,7 @@ export default defineComponent({
 
     transform: translate(-50%, -50%);
     top: 50%;
-    left: 2rem;
+    left: 3.2rem;
   }
 }
 
@@ -268,13 +268,15 @@ export default defineComponent({
 .button__square {
   background-color: rgb(209, 229, 243);
   border: none;
+  font-size: 1.6rem;
+
   font-weight: bold;
   padding: 0.5rem;
 }
 
 .button__circle {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 4rem;
+  height: 4rem;
   padding: 0.3rem;
   border-radius: 50%;
 
@@ -288,9 +290,9 @@ export default defineComponent({
 
   &-big {
     @extend .button__circle;
-    min-width: 4rem;
-    height: 4rem;
-    font-size: 1rem;
+    min-width: 6rem;
+    height: 6rem;
+    font-size: 1.6rem;
     margin: 0;
   }
 }
@@ -299,7 +301,7 @@ export default defineComponent({
   background-color: rgb(82, 31, 221);
   width: 100%;
   padding: 1rem;
-  font-size: 1.25rem;
+  font-size: 2rem;
   color: #fff;
   font-weight: bold;
 
