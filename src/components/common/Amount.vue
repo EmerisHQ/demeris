@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!--Displays an unstyled amount number.<template>
+  <div>
+    <!--Displays an unstyled amount number.<template>
 			  Props: 
 					amount:number, 
 					base_denom: string,
@@ -11,7 +11,7 @@
 					vuex getter to get base_denom -> currency pricing
 					vuex getter to get user's preferred currency display
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

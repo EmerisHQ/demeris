@@ -1,10 +1,10 @@
 <template>
-	<div>
-		<!-- Displays an icon
+  <div>
+    <!-- Displays an icon
 		props: 
 		  type: string (the icon to display)
 		//-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

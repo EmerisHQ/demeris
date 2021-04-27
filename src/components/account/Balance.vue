@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- 
+  <div>
+    <!-- 
 			Single balance object. 
 			props: [] of balances with same base_denom
 			Displays base_enom badge,  base_denom name, props.balances.length.
@@ -11,7 +11,7 @@
 			dependencies:
 			vuex getter to obtain user's preferred UI lang (i18n texts)?
 		 //-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

@@ -1,13 +1,13 @@
 <template>
-	<div>
-		<!-- Displays list of steps to be performed in order		
+  <div>
+    <!-- Displays list of steps to be performed in order		
 
 		Uses ./Step.vue
 		props:
 		 action: [] of StepObject
 		pending,active,completed states
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

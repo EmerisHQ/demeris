@@ -1,11 +1,11 @@
 <template>
-	<div>
-		<!--Displays an unstyled price number.<template>
+  <div>
+    <!--Displays an unstyled price number.<template>
 			  Props: 
 					base: { amount, denom }
 					quote: {amount, denom }
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

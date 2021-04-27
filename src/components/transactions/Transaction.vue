@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- 
+  <div>
+    <!-- 
 		Displays a transaction direction/type icon
 		Transaction title
 		Transaction datetime
@@ -13,7 +13,7 @@
 
 		We should agree/decide on what types of transactions we're going to support/display
 		//-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

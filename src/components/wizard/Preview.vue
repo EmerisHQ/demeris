@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- Generic wrapper for displaying preview of an action to be performed 
+  <div>
+    <!-- Generic wrapper for displaying preview of an action to be performed 
 		displays: title, description
 		a specific action preview (using components in ./previews)
 		confirmation button
@@ -10,7 +10,7 @@
 		Confirmation button generates an array of steps to be executed in order which are passed as a prop to ./Steps.vue
 		e
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

@@ -1,13 +1,13 @@
 <template>
-	<div>
-		<!--Displays an unstyled chain name<template>
+  <div>
+    <!--Displays an unstyled chain name<template>
 			  Props: 
 					chain_id
 				On hover: tooltip displays both Chain Name and chain_id
 				Dependencies: 
 					vuex getter to get chain name from chain_id
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

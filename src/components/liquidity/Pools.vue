@@ -1,11 +1,11 @@
 <template>
-	<div>
-		<!-- Displays a title , total net profit/loss  and a list of Pool.vue objects  
+  <div>
+    <!-- Displays a title , total net profit/loss  and a list of Pool.vue objects  
 		props: [] of pools
 		dependencies:
 		vuex getter to obtain user's preferred UI lang (i18n texts)?
 		//-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

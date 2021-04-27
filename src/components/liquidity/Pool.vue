@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- Displays pool data  :
+  <div>
+    <!-- Displays pool data  :
 		Avatar/badge of denom A
 		Avatar/badge of denom B
 		denom A name / denom B name
@@ -12,7 +12,7 @@
 		dependencies:
 		vuex getter to obtain user's preferred UI lang (i18n texts)?
 		//-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">
