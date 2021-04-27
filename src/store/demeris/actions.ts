@@ -1,10 +1,10 @@
-import { ActionTree } from 'vuex';
+import { ActionTree,ActionContext } from 'vuex';
 import * as API from '@/types/api'
-
 import { RootState } from '@/store';
 
 import { State } from './state';
 import { DemerisActionTypes } from './action-types';
+import { DemerisMutationTypes } from './mutation-types';
 
 export interface Actions {
   [DemerisActionTypes.GET_BALANCES](): Array<API.Balance>
@@ -18,6 +18,10 @@ export interface Actions {
 	[DemerisActionTypes.GET_VERIFIED_DENOMS](): Array<API.VerifiedDenom>
 	[DemerisActionTypes.GET_PRIMARY_CHANNEL](): API.PrimaryChannel
 	[DemerisActionTypes.GET_CHAIN_STATUS](): API.ChainStatus
+	[DemerisActionTypes.INIT]({ dispatch,rootGetters}: ActionContext<State,RootState>): void
+	[DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State,RootState>): void
+	[DemerisActionTypes.UNSUBSCRIBE](): void
+	[DemerisActionTypes.STORE_UPDATE]({ state, dispatch }: ActionContext<State,RootState>): void
 
 }
 
@@ -34,4 +38,21 @@ export const actions: ActionTree<State, RootState> & Actions = {
 	[DemerisActionTypes.GET_VERIFIED_DENOMS]() {return []},
 	[DemerisActionTypes.GET_PRIMARY_CHANNEL]() {return {} as API.PrimaryChannel},
 	[DemerisActionTypes.GET_CHAIN_STATUS]() { return {} as API.ChainStatus},
+	[DemerisActionTypes.INIT]({ dispatch, rootGetters }) {
+		console.log('Vuex nodule: demeris initialized!')
+		if (rootGetters['common/env/client']) {
+			rootGetters['common/env/client'].on('newblock', () => {
+				dispatch(DemerisActionTypes.STORE_UPDATE)
+			})
+		}
+	},
+	[DemerisActionTypes.RESET_STATE]({commit}) {
+		commit(DemerisMutationTypes.RESET_STATE)
+	},
+	[DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) { 
+		state._Subscriptions.forEach((subscription) => {
+			dispatch(subscription.action, subscription.payload)
+		})
+	},
+	[DemerisActionTypes.UNSUBSCRIBE]() { },
 };

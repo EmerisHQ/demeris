@@ -12,21 +12,22 @@ export type State = {
 	verifiedDenoms:Array<API.VerifiedDenom>
 	primaryChannel: Record<string,API.PrimaryChannel>
 	chainStatus:Record<string,API.ChainStatus>
-	_Subscriptions: Map<string,string>
+	_Subscriptions: Set<ActionDispatch>
 
 }
-
-export const state: State = {
-	balances: {},
-	verifiedPath: {},
-	feeAddress: {},
-	fee: {},
-	feeToken: {},
-	stakingBalances: {},
-	prices: [],
-	chains: [],
-	verifiedDenoms: [],
-	primaryChannel: {},
-	chainStatus: {},
-	_Subscriptions: new Map()
-};
+export function getDefaultState():State {
+	return {
+		balances: {},
+		verifiedPath: {},
+		feeAddress: {},
+		fee: {},
+		feeToken: {},
+		stakingBalances: {},
+		prices: [],
+		chains: [],
+		verifiedDenoms: [],
+		primaryChannel: {},
+		chainStatus: {},
+		_Subscriptions: new Set()
+	}
+}

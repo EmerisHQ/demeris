@@ -12,10 +12,12 @@
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
     "@babel/plugin-proposal-optional-chaining": "^7.13.12",
+    "@starport/client-js": "^0.1.47",
     "@starport/tendermint-liquidity-js": "^0.1.0",
     "@starport/vue": "^0.1.44",
     "@starport/vuex": "^0.1.44",
     "@types/long": "^4.0.1",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "long": "^4.0.0",
     "vue": "^3.0.0",

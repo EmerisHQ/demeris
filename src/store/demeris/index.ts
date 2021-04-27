@@ -9,7 +9,7 @@ import {
 
 import { RootState } from '@/store';
 
-import { state } from './state';
+import { getDefaultState } from './state';
 import { actions, Actions } from './actions';
 import { getters, Getters } from './getters';
 import { mutations, Mutations } from './mutations';
@@ -36,7 +36,7 @@ export type DemerisStore<S = State> = Omit<VuexStore<S>, 'getters' | 'commit' | 
 };
 
 export const store: Module<State, RootState> = {
-  state,
+  state: getDefaultState(),
   mutations,
   getters,
   actions,

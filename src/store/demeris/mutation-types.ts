@@ -12,6 +12,9 @@ export enum DemerisMutationTypes {
   SET_VERIFIED_DENOMS = 'SET_VERIFIED_DENOMS',
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
+  RESET_STATE = 'RESET_STATE',
+  SUBSCRIBE = 'SUBSCRIBE',
+  UNSUBSCRIBE = 'UNSUBSCRIBE'
 }
 export type DemerisMutationArgs = Array<API.Balance> | API.ChainStatus | API.Fee | API.FeeAddress | API.FeeAddress| API.FeeToken | API.PrimaryChannel | Array<API.StakingBalance> | API.VerifiedPath | Array<API.Price> | Array<API.Chain> | Array<API.VerifiedDenom>;
 export type DemerisMutations = {
