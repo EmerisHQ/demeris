@@ -1,5 +1,5 @@
 import * as API from '@/types/api'
-
+import {DemerisSubscriptions} from './action-types'
 export type State = {
 	balances: Record<string,Array<API.Balance>>
 	verifiedPath: Record<string,API.VerifiedPath>
@@ -12,7 +12,7 @@ export type State = {
 	verifiedDenoms:Array<API.VerifiedDenom>
 	primaryChannel: Record<string,API.PrimaryChannel>
 	chainStatus:Record<string,API.ChainStatus>
-	_Subscriptions: Set<ActionDispatch>
+	_Subscriptions: Set<DemerisSubscriptions>
 
 }
 export function getDefaultState():State {

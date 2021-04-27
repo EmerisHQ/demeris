@@ -3,7 +3,7 @@ import * as API from '@/types/api';
 
 import { State,getDefaultState } from './state';
 import { DemerisMutationTypes as MutationTypes , DemerisMutations} from './mutation-types';
-import { DemerisActionTypes } from './action-types';
+import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 
 export type Mutations<S = State> = {
   [MutationTypes.SET_BALANCES](state: S, payload: { params: string; value: Array<API.Balance> }): void;
@@ -18,8 +18,8 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: Array<API.VerifiedDenom>}): void;
   [MutationTypes.SET_VERIFIED_PATH](state: S, payload: {params: string; value: API.VerifiedPath}): void;
   [MutationTypes.RESET_STATE](state: S): void;
-  [MutationTypes.SUBSCRIBE](state: S, subscription: {action: DemerisActionTypes; payload: DemerisMutations}): void;
-  [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: {action: DemerisActionTypes; payload: API.VerifiedPath}): void;
+  [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
+  [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
 };
 
 export const mutations: MutationTree<State> & Mutations = {
@@ -59,10 +59,10 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.RESET_STATE](state: State) {
 		Object.assign(state, getDefaultState())
   },
-  [MutationTypes.SUBSCRIBE](state: State, subscription: { action: DemerisActionTypes, payload: any}) {
+  [MutationTypes.SUBSCRIBE](state: State, subscription) {
 		state._Subscriptions.add(subscription)
   },
-  [MutationTypes.UNSUBSCRIBE](state: State, subscription: { action: DemerisActionTypes, payload: any}) {
+  [MutationTypes.UNSUBSCRIBE](state: State, subscription) {
 		state._Subscriptions.delete(subscription)
   },
 };

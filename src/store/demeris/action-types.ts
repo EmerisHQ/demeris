@@ -1,3 +1,4 @@
+import * as API from '@/types/api';
 export enum DemerisActionTypes {
   GET_BALANCES = 'GET_BALANCES',
   GET_VERIFIED_PATH = 'GET_VERIFIED_PATH',
@@ -14,4 +15,12 @@ export enum DemerisActionTypes {
   RESET_STATE = 'RESET_STATE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
   STORE_UPDATE = 'STORE_UPDATE',
+}
+export type DemerisActionParams = {
+  subscribe: boolean;
+  params?: API.APIRequests
+}
+export type DemerisSubscriptions = {
+  action: Exclude<DemerisActionTypes, typeof DemerisActionTypes.INIT | typeof DemerisActionTypes.RESET_STATE | typeof DemerisActionTypes.UNSUBSCRIBE | typeof DemerisActionTypes.STORE_UPDATE>
+  payload: Omit<DemerisActionParams, "subscribe">
 }
