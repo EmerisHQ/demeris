@@ -18,6 +18,6 @@ export enum DemerisMutationTypes {
 }
 export type DemerisMutationArgs = Array<API.Balance> | API.ChainStatus | API.Fee | API.FeeAddress | API.FeeAddress| API.FeeToken | API.PrimaryChannel | Array<API.StakingBalance> | API.VerifiedPath | Array<API.Price> | Array<API.Chain> | Array<API.VerifiedDenom>;
 export type DemerisMutations = {
-	params?: string;
+	params?: API.APIRequests;
 	value: DemerisMutationArgs 
 }
