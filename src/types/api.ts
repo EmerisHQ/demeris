@@ -1,6 +1,6 @@
 export type IBCDetails = {
   source_chain: string;
-  ibc_dennom: string;
+  ibc_denom: string;
   path: string;
   verified_path: Array<string>;
 };
