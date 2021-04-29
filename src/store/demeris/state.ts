@@ -7,9 +7,9 @@ export type State = {
 	fee:Record<string,API.Fee>
 	feeToken: Record<string,API.FeeToken>
 	stakingBalances:Record<string,Array<API.StakingBalance>>
-	prices:Array<API.Price>
-	chains:Array<API.Chain>
-	verifiedDenoms:Array<API.VerifiedDenom>
+	prices:Array<API.Price> | null
+	chains:Array<API.Chain> | null
+	verifiedDenoms:Array<API.VerifiedDenom> | null
 	primaryChannel: Record<string,API.PrimaryChannel>
 	chainStatus:Record<string,API.ChainStatus>
 	_Subscriptions: Set<DemerisSubscriptions>
@@ -23,9 +23,9 @@ export function getDefaultState():State {
 		fee: {},
 		feeToken: {},
 		stakingBalances: {},
-		prices: [],
-		chains: [],
-		verifiedDenoms: [],
+		prices: null,
+		chains: null,
+		verifiedDenoms: null,
 		primaryChannel: {},
 		chainStatus: {},
 		_Subscriptions: new Set()

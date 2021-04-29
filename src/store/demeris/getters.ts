@@ -5,52 +5,52 @@ import * as API from '@/types/api';
 
 
 export type Getters = {
-  getBalances(state: State): {(params: API.APIRequests):Array<API.Balance>};
-	getVerifiedPath(state: State): {(params: API.APIRequests):API.VerifiedPath};
-	getFeeAddress(state: State): {(params: API.APIRequests):API.FeeAddress};
-	getFee(state: State): {(params: API.APIRequests):API.Fee};
-	getFeeToken(state: State): {(params: API.APIRequests):API.FeeToken};
-	getStakingBalances(state: State): {(params: API.APIRequests):Array<API.StakingBalance>};
-	getPrices(state: State):Array<API.Price>;
-	getChains(state: State):Array<API.Chain>;
-	getVerifiedDenoms(state: State):Array<API.VerifiedDenom>;
-	getPrimaryChannel(state: State): {(params: API.APIRequests):API.PrimaryChannel};
-	getChainStatus(state: State): {(params: API.APIRequests):API.ChainStatus};
+  getBalances(state: State): {(params: API.APIRequests):Array<API.Balance> | null};
+	getVerifiedPath(state: State): {(params: API.APIRequests):API.VerifiedPath | null};
+	getFeeAddress(state: State): {(params: API.APIRequests):API.FeeAddress | null};
+	getFee(state: State): {(params: API.APIRequests):API.Fee | null};
+	getFeeToken(state: State): {(params: API.APIRequests):API.FeeToken | null};
+	getStakingBalances(state: State): {(params: API.APIRequests):Array<API.StakingBalance> | null};
+	getPrices(state: State):Array<API.Price> | null;
+	getChains(state: State):Array<API.Chain> | null;
+	getVerifiedDenoms(state: State):Array<API.VerifiedDenom> | null;
+	getPrimaryChannel(state: State): {(params: API.APIRequests):API.PrimaryChannel | null};
+	getChainStatus(state: State): {(params: API.APIRequests):API.ChainStatus | null};
 }
 
 export const getters: GetterTree<State, RootState> & Getters = {
   getBalances: (state) => (params) => {
-		return state.balances[JSON.stringify(params)] ?? [];
+		return state.balances[JSON.stringify(params)] ?? null;
 	},
 	getVerifiedPath: (state) => (params) => {
-		return state.verifiedPath[JSON.stringify(params)] ?? {} as API.IBCDetails;
+		return state.verifiedPath[JSON.stringify(params)] ?? null;
 	},
 	getFeeAddress: (state) => (params) => {
-		return state.feeAddress[JSON.stringify(params)] ?? {} as API.FeeAddress;
+		return state.feeAddress[JSON.stringify(params)] ?? null;
 	},
 	getFee: (state) => (params) => {
-		return state.fee[JSON.stringify(params)] ?? {} as API.Fee;
+		return state.fee[JSON.stringify(params)] ?? null;
 	},
 	getFeeToken: (state) => (params) => {
-		return state.feeToken[JSON.stringify(params)] ?? {} as API.FeeToken;
+		return state.feeToken[JSON.stringify(params)] ?? null;
 	},
   getStakingBalances: (state) => (params) => {
-		return state.stakingBalances[JSON.stringify(params)] ?? [];
+		return state.stakingBalances[JSON.stringify(params)] ?? null;
 	},
   getPrices: (state) => {
-		return state.prices;
+		return state.prices ?? null;
 	},
   getChains: (state) => {
-		return state.chains;
+		return state.chains ?? null;
 	},
   getVerifiedDenoms: (state) => {
-		return state.verifiedDenoms;
+		return state.verifiedDenoms ?? null;
 	},
   getPrimaryChannel: (state) => (params) => {
-		return state.primaryChannel[JSON.stringify(params)] ?? {} as API.PrimaryChannel;
+		return state.primaryChannel[JSON.stringify(params)] ?? null;
 	},
   getChainStatus: (state) => (params) => {
-		return state.chainStatus[JSON.stringify(params)] ?? {} as API.ChainStatus;
+		return state.chainStatus[JSON.stringify(params)] ?? null;
 	},
 	
 };

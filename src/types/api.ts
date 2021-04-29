@@ -1,3 +1,4 @@
+// TODO: Match types to API responses
 export type IBCDetails = {
   source_chain: string;
   ibc_denom: string;

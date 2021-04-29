@@ -61,6 +61,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters }, { subscribe = false, params  }) {
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/balances/'+(params as API.BalanceReq).address);
       commit(DemerisMutationTypes.SET_BALANCES,{params, value: response.data});
 			if (subscribe) {
@@ -77,6 +78,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_VERIFIED_PATH]({ commit, getters }, { subscribe = false, params }) {
 
 		try {
+      // TODO: Correct API endpoint params
         const response =  await axios.get('/verified_path/'+(params as API.VerifiedPathReq).chain_id);
         commit(DemerisMutationTypes.SET_VERIFIED_PATH,{params, value: response.data});
         if (subscribe) {
@@ -94,6 +96,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
     
 		try {      
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/fee_address/'+(params as API.FeeAddressReq).chain_id);
       commit(DemerisMutationTypes.SET_FEE_ADDRESS,{params, value: response.data});
       if (subscribe) {
@@ -110,6 +113,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/fee/'+(params as API.FeeReq).chain_id);
       commit(DemerisMutationTypes.SET_FEE,{params, value: response.data});
       if (subscribe) {
@@ -126,6 +130,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_FEE_TOKEN]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/fee_token/'+(params as API.FeeTokenReq).chain_id);
       commit(DemerisMutationTypes.SET_FEE_TOKEN,{params, value: response.data});
       if (subscribe) {
@@ -142,6 +147,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/staking_balances/'+(params as API.StakingBalanceReq).address);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES,{params, value: response.data});
       if (subscribe) {
@@ -206,6 +212,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/primary_channel/'+(params as API.PrimaryChannelReq).source_chain_id);
       commit(DemerisMutationTypes.SET_PRIMARY_CHANNEL,{params, value: response.data});
       if (subscribe) {
@@ -222,6 +229,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters }, { subscribe = false, params }) {
         
 		try {
+      // TODO: Correct API endpoint params
       const response =  await axios.get('/chain_status/'+(params as API.ChainStatusReq).chain_id);
       commit(DemerisMutationTypes.SET_CHAIN_STATUS,{params, value: response.data});
       if (subscribe) {
