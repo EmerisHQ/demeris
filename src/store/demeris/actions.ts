@@ -77,7 +77,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_VERIFIED_PATH]({ commit, getters }, { subscribe = false, params }) {
 
 		try {
-        const response =  await axios.get('/verified_path/'+(params as API.VerifiedPathReq).chain_id);
+        const response =  await axios.get('/chain/'+(params as API.VerifiedTraceReq).chain_name+'/denom/verify_trace/'+(params as API.VerifiedTraceReq).hash);
         commit(DemerisMutationTypes.SET_VERIFIED_PATH,{params, value: response.data});
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_PATH, payload: {params} })
