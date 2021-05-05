@@ -10,7 +10,7 @@ export type BalanceResponse = {
   on_chain: string;  
   ibc: IbcInfo | {};
 };
-export type BalanceReq = {
+export type AddrReq = {
   address: string;
 };
 
@@ -115,9 +115,6 @@ export type DelegationsResponse = {
   delegations: Array<Delegation>
 }
 
-export type DelegationsReq = {
-  address: string;
-};
 export type ChainStatus = {
   status: string;
 };

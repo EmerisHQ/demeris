@@ -6,7 +6,7 @@ import { DemerisMutationTypes as MutationTypes , DemerisMutations} from './mutat
 import { DemerisSubscriptions } from './action-types';
 
 export type Mutations<S = State> = {
-  [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: Array<API.Balance> }): void;
+  [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: Array<API.BalanceResponse> }): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: Array<API.Chain> }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: API.ChainStatus }): void;
   [MutationTypes.SET_FEE](state: S, payload: { params: API.APIRequests; value: API.Fee }): void;
@@ -24,7 +24,7 @@ export type Mutations<S = State> = {
 
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
-		state.balances[JSON.stringify(payload.params)]=payload.value as Array<API.Balance>;    
+		state.balances[JSON.stringify(payload.params)]=payload.value as Array<API.BalanceResponse>;    
   },
 	[MutationTypes.SET_CHAINS](state: State, payload: DemerisMutations) {
 		state.chains=payload.value as Array<API.Chain>  

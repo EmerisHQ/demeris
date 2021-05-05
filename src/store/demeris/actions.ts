@@ -7,11 +7,32 @@ import { DemerisActionTypes, DemerisActionParams , DemerisSubscriptions} from '.
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios'
 export interface Actions {
+
+  // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<Array<API.BalanceResponse>>;
-  [DemerisActionTypes.GET_VERIFIED_PATH](
+  [DemerisActionTypes.GET_STAKING_BALANCES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionParams,
+  ): Promise<Array<API.DelegationsResponse>>;
+  [DemerisActionTypes.GET_VERIFIED_DENOMS](
+    { commit,  getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionParams,
+  ): Promise<Array<API.VerifiedDenom>>;
+  [DemerisActionTypes.GET_PRICES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionParams,
+  ): Promise<Array<API.Price>>;
+  [DemerisActionTypes.GET_CHAINS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionParams,
+  ): Promise<Array<API.ChainResponse>>;
+
+
+  // Chain-specific endpoint actions
+  [DemerisActionTypes.GET_VERIFIED_TRACE](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.VerifiedTraceResponse>;
@@ -22,27 +43,15 @@ export interface Actions {
   [DemerisActionTypes.GET_FEE](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
-  ): Promise<API.Fee>;
+  ): Promise<API.FeeResponse>;
   [DemerisActionTypes.GET_FEE_TOKEN](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.FeeToken>;
-  [DemerisActionTypes.GET_STAKING_BALANCES](
-    { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
-  ): Promise<Array<API.StakingBalance>>;
-  [DemerisActionTypes.GET_PRICES](
+  [DemerisActionTypes.GET_CHAIN](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
-  ): Promise<Array<API.Price>>;
-  [DemerisActionTypes.GET_CHAINS](
-    { commit, getters }: ActionContext<State, RootState>,
-    { subscribe }: DemerisActionParams,
-  ): Promise<Array<API.Chain>>;
-  [DemerisActionTypes.GET_VERIFIED_DENOMS](
-    { commit,  getters }: ActionContext<State, RootState>,
-    { subscribe }: DemerisActionParams,
-  ): Promise<Array<API.VerifiedDenom>>;
+  ): Promise<API.ChainResponse>;
   [DemerisActionTypes.GET_PRIMARY_CHANNEL](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
@@ -51,6 +60,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.ChainStatus>;
+
+
+  // Internal module actions
+
   [DemerisActionTypes.INIT]({ dispatch, rootGetters }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE]({ commit }: ActionContext<State, RootState>, subscription:DemerisSubscriptions): void;
@@ -58,11 +71,14 @@ export interface Actions {
 }
 
 export const actions: ActionTree<State, RootState> & Actions = {
+
+  // Cross-chain endpoint actions
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters }, { subscribe = false, params  }) {
 		try {
-      const response =  await axios.get('/balances/'+(params as API.BalanceReq).address);
-      commit(DemerisMutationTypes.SET_BALANCES,{params, value: response.data});
+      const response =  await axios.get('/balances/'+(params as API.AddrReq).address);
+      commit(DemerisMutationTypes.SET_BALANCES,{params, value: response.data.balances});
 			if (subscribe) {
 				commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: {params} })
 			}
@@ -74,76 +90,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
 		}
     return getters['getBalances'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_VERIFIED_PATH]({ commit, getters }, { subscribe = false, params }) {
-
-		try {
-        const response =  await axios.get('/chain/'+(params as API.VerifiedTraceReq).chain_name+'/denom/verify_trace/'+(params as API.VerifiedTraceReq).hash);
-        commit(DemerisMutationTypes.SET_VERIFIED_PATH,{params, value: response.data});
-        if (subscribe) {
-          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_PATH, payload: {params} })
-        }
-      }catch(e) {
-        throw new SpVuexError(
-          'Demeris:GetVerifiedPath',
-          'Could not perform API query.'
-        )
-      }
-      return getters['getVerifiedPath'](JSON.stringify(params));
-    
-  },
-  async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
-    
-		try {      
-      const response =  await axios.get('/fee_address/'+(params as API.FeeAddressReq).chain_id);
-      commit(DemerisMutationTypes.SET_FEE_ADDRESS,{params, value: response.data});
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_ADDRESS, payload: {params} })
-      }
-    }catch(e) {
-      throw new SpVuexError(
-        'Demeris:GetFeeAddress',
-        'Could not perform API query.'
-      )
-    }
-    return getters['getFeeAddress'](JSON.stringify(params));
-  },
-  async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
-    
-		try {
-      const response =  await axios.get('/fee/'+(params as API.FeeReq).chain_id);
-      commit(DemerisMutationTypes.SET_FEE,{params, value: response.data});
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: {params} })
-      }
-    }catch(e) {
-      throw new SpVuexError(
-        'Demeris:GetFee',
-        'Could not perform API query.'
-      )
-    }
-    return getters['getFee'](JSON.stringify(params));
-  },
-  async [DemerisActionTypes.GET_FEE_TOKEN]({ commit, getters }, { subscribe = false, params }) {
-    
-		try {
-      const response =  await axios.get('/fee_token/'+(params as API.FeeTokenReq).chain_id);
-      commit(DemerisMutationTypes.SET_FEE_TOKEN,{params, value: response.data});
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKEN, payload: {params} })
-      }
-    }catch(e) {
-      throw new SpVuexError(
-        'Demeris:GetFeeToken',
-        'Could not perform API query.'
-      )
-    }
-    return getters['getFeeToken'](JSON.stringify(params));
-  },
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
-      const response =  await axios.get('/staking_balances/'+(params as API.StakingBalanceReq).address);
-      commit(DemerisMutationTypes.SET_STAKING_BALANCES,{params, value: response.data});
+      const response =  await axios.get('/staking_balances/'+(params as API.AddrReq).address);
+      commit(DemerisMutationTypes.SET_STAKING_BALANCES,{params, value: response.data.staking_balances});
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: {params} })
       }
@@ -154,6 +105,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
       )
     }
     return getters['getStakingBalances'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit,  getters }, { subscribe = false }) {
+    try
+    {
+      const response =  await axios.get('/verified_denoms');
+      commit(DemerisMutationTypes.SET_VERIFIED_DENOMS, {value: response.data})
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_DENOMS, payload: {} })
+      }
+    }catch(e) {
+      throw new SpVuexError(
+        'Demeris:GetVerifiedDenoms',
+        'Could not perform API query.'
+      )
+    }
+    return getters['getVerifiedDenoms'];
   },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     
@@ -187,26 +154,94 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getChains'];
   },
-  async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit,  getters }, { subscribe = false }) {
-    try
-    {
-      const response =  await axios.get('/verified_denoms');
-      commit(DemerisMutationTypes.SET_VERIFIED_DENOMS, {value: response.data})
+
+  // Chain-specific endpoint actions
+
+  async [DemerisActionTypes.GET_VERIFIED_TRACE]({ commit, getters }, { subscribe = false, params }) {
+
+		try {
+        const response =  await axios.get('/chain/'+(params as API.VerifiedTraceReq).chain_name+'/denom/verify_trace/'+(params as API.VerifiedTraceReq).hash);
+        commit(DemerisMutationTypes.SET_VERIFIED_PATH,{params, value: response.data});
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_TRACE, payload: {params} })
+        }
+      }catch(e) {
+        throw new SpVuexError(
+          'Demeris:GetVerifiedPath',
+          'Could not perform API query.'
+        )
+      }
+      return getters['getVerifiedPath'](JSON.stringify(params));
+    
+  },
+  async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
+    
+		try {      
+      const response =  await axios.get('/chain/'+(params as API.ChainReq).chain_name+'/fee/address');
+      commit(DemerisMutationTypes.SET_FEE_ADDRESS,{params, value: response.data});
       if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_DENOMS, payload: {} })
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_ADDRESS, payload: {params} })
       }
     }catch(e) {
       throw new SpVuexError(
-        'Demeris:GetVerifiedDenoms',
+        'Demeris:GetFeeAddress',
         'Could not perform API query.'
       )
     }
-    return getters['getVerifiedDenoms'];
+    return getters['getFeeAddress'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
+    
+		try {
+      const response =  await axios.get('/chain/'+(params as API.ChainReq).chain_name);
+      commit(DemerisMutationTypes.SET_FEE,{params, value: response.data});
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: {params} })
+      }
+    }catch(e) {
+      throw new SpVuexError(
+        'Demeris:GetChain',
+        'Could not perform API query.'
+      )
+    }
+    return getters['getFee'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
+    
+		try {
+      const response =  await axios.get('/chain/'+(params as API.ChainReq).chain_name+'/fee');
+      commit(DemerisMutationTypes.SET_FEE,{params, value: response.data});
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: {params} })
+      }
+    }catch(e) {
+      throw new SpVuexError(
+        'Demeris:GetFee',
+        'Could not perform API query.'
+      )
+    }
+    return getters['getFee'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_FEE_TOKEN]({ commit, getters }, { subscribe = false, params }) {
+    
+		try {
+      const response =  await axios.get('/chain/'+(params as API.ChainReq).chain_name+'/fee/token');
+      commit(DemerisMutationTypes.SET_FEE_TOKEN,{params, value: response.data});
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKEN, payload: {params} })
+      }
+    }catch(e) {
+      throw new SpVuexError(
+        'Demeris:GetFeeToken',
+        'Could not perform API query.'
+      )
+    }
+    return getters['getFeeToken'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
     
 		try {
-      const response =  await axios.get('/primary_channel/'+(params as API.PrimaryChannelReq).source_chain_id);
+      const response =  await axios.get('/chain/'+(params as API.ChannelsReq).source_chain+'/primary_channel/'+(params as API.ChannelsReq).destination_chain);
       commit(DemerisMutationTypes.SET_PRIMARY_CHANNEL,{params, value: response.data});
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRIMARY_CHANNEL, payload: {params} })
@@ -235,6 +270,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getChainStatus'](JSON.stringify(params));
   },
+
+  // Internal module actions
+
   [DemerisActionTypes.INIT]({ dispatch, rootGetters }) {
     console.log('Vuex nodule: demeris initialized!');
     if (rootGetters['common/env/client']) {

@@ -1,33 +1,31 @@
 import * as API from '@/types/api'
-import {DemerisSubscriptions} from './action-types'
+import { DemerisSubscriptions } from './action-types'
+export type ChainData = {
+	full: API.ChainResponse
+	fee: API.FeeResponse
+	feeAddress: API.FeeAddressesResponse
+	feeToken: API.FeeTokensResponse
+	status: API.ChainStatus
+	primaryChannels: API.ChannelsResponse
+	bech32Config: API.Bech32ConfigResponse
+	verifiedTrace: Record<string,API.VerifiedTraceResponse>
+}
 export type State = {
 	balances: Record<string,Array<API.BalanceResponse>>
-	verifiedPath: Record<string,API.VerifiedTraceResponse>
-	feeAddress:Record<string,API.FeeAddress>
-	fee:Record<string,API.FeeResponse>
-	feeToken: Record<string,API.FeeTokensResponse>
-	stakingBalances:Record<string,Array<API.DelegationsResponse>>
-	prices:Array<API.Price>
-	chains:Array<API.ChainResponse>
+	stakingBalances: Record<string, Array<API.DelegationsResponse>>
 	verifiedDenoms:Array<API.VerifiedDenomsResponse>
-	primaryChannel: Record<string,API.ChannelsResponse>
-	chainStatus:Record<string,API.ChainStatus>
+	prices:Array<API.Price>
+	chains: Record<string,ChainData>,
 	_Subscriptions: Set<DemerisSubscriptions>
 
 }
 export function getDefaultState():State {
 	return {
 		balances: {},
-		verifiedPath: {},
-		feeAddress: {},
-		fee: {},
-		feeToken: {},
 		stakingBalances: {},
-		prices: [],
-		chains: [],
 		verifiedDenoms: [],
-		primaryChannel: {},
-		chainStatus: {},
+		prices: [],
+		chains: {},
 		_Subscriptions: new Set()
 	}
 }

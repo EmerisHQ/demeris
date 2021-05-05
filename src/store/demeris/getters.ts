@@ -5,7 +5,7 @@ import * as API from '@/types/api';
 
 
 export type Getters = {
-  getBalances(state: State): {(params: API.APIRequests):Array<API.Balance>};
+  	getBalances(state: State): {(params: API.APIRequests):Array<API.BalanceResponse>};
 	getVerifiedPath(state: State): {(params: API.APIRequests):API.VerifiedPath};
 	getFeeAddress(state: State): {(params: API.APIRequests):API.FeeAddress};
 	getFee(state: State): {(params: API.APIRequests):API.Fee};
