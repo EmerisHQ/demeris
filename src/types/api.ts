@@ -1,41 +1,123 @@
-export type IBCDetails = {
-  source_chain: string;
-  ibc_dennom: string;
+export type IbcInfo = {
   path: string;
-  verified_path: Array<string>;
+  hash: string;
 };
-export type Balance = {
+export type BalanceResponse = {
   address: string;
   base_denom: string;
   verified: boolean;
-  native: boolean;
   amount: number;
-  on_chain: string;
-  fee_token?: boolean;
-  ibc: IBCDetails | {};
+  on_chain: string;  
+  ibc: IbcInfo | {};
 };
 export type BalanceReq = {
   address: string;
 };
-export type FeeAddress = {
-  chain_name: string;
+
+export type Denom = {
+  name: string;
+  verified: boolean;
+};
+export type Bech32Config = {
+  main_prefix: string;
+  prefix_account: string;
+  prefix_validator: string;
+  prefix_consensus: string;
+  prefix_public: string;
+  prefix_operator: string;
+}
+export type NodeInfo = {
+  endpoint: string;
   chain_id: string;
+  bech32_config: Bech32Config;
+}
+export type ChainResponse = {
+  chain_name: string;
+  display_name: string;
+  native_denoms: Array<Denom>;
+  fee_tokens: Array<Denom>;
+  fee_address:string;
+  price_modifier: number;
+  base_ibc_fee: number;
+  base_fee: number;
+  genesis_hash: string;
+  node_indo: NodeInfo;
+};
+export type SupportedChain = {
+  chain_name: string;
+  display_name: string;
+}
+export type SupportedChainsResponse = {
+  supported_chains: Array<SupportedChain>
+}
+export type ChainReq = {
+  chain_name: string;
+};
+export type Bech32ConfigResponse = {
+  chain_name: string;
+  bech32_config: Bech32Config;
+}
+export type FeeAddress = {
+  chain_name: string;  
+  fee_address: string;
+};
+export type FeeAddressesResponse = {
+  fee_addresses: Array<FeeAddress>
+}
+export type FeeToken = {
+  name: string;
+  verified: boolean;
+};
+export type FeeTokensResponse = {
+  fee_tokens: Array<FeeToken>;
+}
+
+export type FeeResponse = {
+  chain_name: string;
+  fee: string;
+};
+export type CounterpartyResponse = {
+  chain_name: string;
+  counterparty: string;
+  channel_name: string;
+}
+export type ChannelsResponse= {
+  channels: Array<CounterpartyResponse>
+}
+export type ChannelsReq = {
+  source_chain: string;
+  destination_chain?: string;
+}
+export type Trace = {
+  channel: string;
+  port: string;
+  client_id: string;
+  chain_name:string;
+  counterparty_name: string;
+}
+export type VerifiedTraceResponse = {
+  ibc_denom: string;
+  base_denom: string;
+  verified: boolean;
+  path: string;
+  trace: Array<Trace>
+}
+export type VerifiedTraceReq= {
+  chain_name: string;
+  hash:string;
+}
+export type Delegation = {
+  validator_address: string;
+  amount:string;
+}
+export type DelegationsResponse = {
+  delegator: string;
+  delegations: Array<Delegation>
+}
+
+export type DelegationsReq = {
   address: string;
 };
-export type FeeAddressReq = {
-  chain_id: string;
-};
-export type Fee = {
-  base_fee: string;
-};
-
-export type FeeReq = FeeAddressReq;
-
-export type FeeToken = {
-  fee_denom: string;
-};
-export type FeeTokenReq = FeeReq;
-
 export type ChainStatus = {
   status: string;
 };
@@ -43,47 +125,22 @@ export type ChainStatus = {
 export type ChainStatusReq = {
   chain_id: string;
 };
-export type PrimaryChannel = {
-  channel_id: string;
-};
-export type PrimaryChannelReq = {
-  source_chain_id: string;
-  destination_chain_id: string;
-};
 export type VerifiedDenom = {
-  base_denom: string;
-  source_chain: string;
-  logo: string;
+  name: string;
+  verified: boolean;
 };
-export type Chain = {
-  chain_id: string;
-  logo: string;
-};
+export type VerifiedDenomsResponse = {
+  verified_denoms: Array<VerifiedDenom>
+}
 export type Price = {
   base_denom: string;
   chain_id: string;
   price: number;
 };
-export type StakingBalance = {
-  address: string;
-  staking_denom: string;
-  amount: number;
-};
-
-export type StakingBalanceReq = {
-  address: string;
-};
-export type VerifiedPath = IBCDetails;
-export type VerifiedPathReq = {
-  denom: string;
-  chain_id: string;
-};
 export type APIRequests =
   | BalanceReq
-  | VerifiedPathReq
-  | FeeAddressReq
-  | FeeReq
-  | FeeTokenReq
-  | StakingBalanceReq
-  | PrimaryChannelReq
+  | VerifiedTraceReq
+  | ChainReq
+  | DelegationsReq
+  | ChannelsReq
   | ChainStatusReq;

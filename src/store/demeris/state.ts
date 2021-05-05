@@ -1,16 +1,16 @@
 import * as API from '@/types/api'
 import {DemerisSubscriptions} from './action-types'
 export type State = {
-	balances: Record<string,Array<API.Balance>>
-	verifiedPath: Record<string,API.VerifiedPath>
+	balances: Record<string,Array<API.BalanceResponse>>
+	verifiedPath: Record<string,API.VerifiedTraceResponse>
 	feeAddress:Record<string,API.FeeAddress>
-	fee:Record<string,API.Fee>
-	feeToken: Record<string,API.FeeToken>
-	stakingBalances:Record<string,Array<API.StakingBalance>>
+	fee:Record<string,API.FeeResponse>
+	feeToken: Record<string,API.FeeTokensResponse>
+	stakingBalances:Record<string,Array<API.DelegationsResponse>>
 	prices:Array<API.Price>
-	chains:Array<API.Chain>
-	verifiedDenoms:Array<API.VerifiedDenom>
-	primaryChannel: Record<string,API.PrimaryChannel>
+	chains:Array<API.ChainResponse>
+	verifiedDenoms:Array<API.VerifiedDenomsResponse>
+	primaryChannel: Record<string,API.ChannelsResponse>
 	chainStatus:Record<string,API.ChainStatus>
 	_Subscriptions: Set<DemerisSubscriptions>
 

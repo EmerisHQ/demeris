@@ -10,11 +10,11 @@ export interface Actions {
   [DemerisActionTypes.GET_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
-  ): Promise<Array<API.Balance>>;
+  ): Promise<Array<API.BalanceResponse>>;
   [DemerisActionTypes.GET_VERIFIED_PATH](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
-  ): Promise<API.VerifiedPath>;
+  ): Promise<API.VerifiedTraceResponse>;
   [DemerisActionTypes.GET_FEE_ADDRESS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
@@ -46,7 +46,7 @@ export interface Actions {
   [DemerisActionTypes.GET_PRIMARY_CHANNEL](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
-  ): Promise<API.PrimaryChannel>;
+  ): Promise<API.ChannelsResponse>;
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
