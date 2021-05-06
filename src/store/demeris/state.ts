@@ -11,7 +11,7 @@ export type State = {
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
   verifiedDenoms: API.VerifiedDenoms;
-  prices: Array<any>; //TODO
+  prices: Array<any>; //TODO: prices
   chains: Record<string, ChainData>;
   _Subscriptions: Set<DemerisSubscriptions>;
 };

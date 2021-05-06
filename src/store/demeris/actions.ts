@@ -31,7 +31,7 @@ export interface Actions {
   [DemerisActionTypes.GET_PRICES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
-  ): Promise<Array<any>>; //TODO
+  ): Promise<Array<any>>; //TODO prices
 
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
@@ -65,7 +65,7 @@ export interface Actions {
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
-  ): Promise<any>; //TODO
+  ): Promise<any>; //TODO chain status
 
   // Internal module actions
 
@@ -255,7 +255,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get('/chain_status/' + (params as API.ChainReq).chain_name);
-      commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data });
+      commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data }); // TODO: chain status
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
       }
