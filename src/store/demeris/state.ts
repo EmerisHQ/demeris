@@ -1,33 +1,27 @@
-import * as API from '@/types/api'
-import {DemerisSubscriptions} from './action-types'
-export type State = {
-	balances: Record<string,Array<API.Balance>>
-	verifiedPath: Record<string,API.VerifiedPath>
-	feeAddress:Record<string,API.FeeAddress>
-	fee:Record<string,API.Fee>
-	feeToken: Record<string,API.FeeToken>
-	stakingBalances:Record<string,Array<API.StakingBalance>>
-	prices:Array<API.Price> | null
-	chains:Array<API.Chain> | null
-	verifiedDenoms:Array<API.VerifiedDenom> | null
-	primaryChannel: Record<string,API.PrimaryChannel>
-	chainStatus:Record<string,API.ChainStatus>
-	_Subscriptions: Set<DemerisSubscriptions>
+import * as API from '@/types/api';
+import { DemerisSubscriptions } from './action-types';
+export type ChainMeta = {
+  verifiedTraces?: Record<string, API.VerifyTrace>;
+  primaryChannels?: Record<string, API.PrimaryChannel>;
+  status?: boolean; // TODO: chain status
+};
+export type ChainData = API.Chain & ChainMeta;
 
-}
-export function getDefaultState():State {
-	return {
-		balances: {},
-		verifiedPath: {},
-		feeAddress: {},
-		fee: {},
-		feeToken: {},
-		stakingBalances: {},
-		prices: null,
-		chains: null,
-		verifiedDenoms: null,
-		primaryChannel: {},
-		chainStatus: {},
-		_Subscriptions: new Set()
-	}
+export type State = {
+  balances: Record<string, API.Balances>;
+  stakingBalances: Record<string, API.StakingBalances>;
+  verifiedDenoms: API.VerifiedDenoms;
+  prices: Array<any>; //TODO: prices
+  chains: Record<string, ChainData>;
+  _Subscriptions: Set<DemerisSubscriptions>;
+};
+export function getDefaultState(): State {
+  return {
+    balances: {},
+    stakingBalances: {},
+    verifiedDenoms: [],
+    prices: [],
+    chains: {},
+    _Subscriptions: new Set(),
+  };
 }
