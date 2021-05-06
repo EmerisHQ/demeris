@@ -2,7 +2,7 @@ import { ActionTree, ActionContext } from 'vuex';
 import * as API from '@/types/api';
 import { RootState } from '@/store';
 import { SpVuexError } from '@starport/vuex';
-import { State } from './state';
+import { State, ChainData } from './state';
 import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from './action-types';
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios';
@@ -27,7 +27,7 @@ export interface Actions {
   [DemerisActionTypes.GET_CHAINS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
-  ): Promise<API.Chains>;
+  ): Promise<Record<string, ChainData>>;
   [DemerisActionTypes.GET_PRICES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -46,7 +46,11 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.Fee>;
-  [DemerisActionTypes.GET_FEE_TOKEN](
+  [DemerisActionTypes.GET_BECH32_CONFIG](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionParams,
+  ): Promise<API.Bech32Config>;
+  [DemerisActionTypes.GET_FEE_TOKENS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.FeeTokens>;
@@ -187,17 +191,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddress'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BECH32_CONFIG]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name);
-      commit(DemerisMutationTypes.SET_FEE, { params, value: response.data.chain });
+      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/bech32');
+      commit(DemerisMutationTypes.SET_BECH32_CONFIG, { params, value: response.data.bech32_config });
       if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BECH32_CONFIG, payload: { params } });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
+      throw new SpVuexError('Demeris:GetBech32Config', 'Could not perform API query.');
     }
-    return getters['getFee'](JSON.stringify(params));
+    return getters['getBech32Config'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
     try {
@@ -211,17 +215,29 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFee'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_FEE_TOKEN]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_FEE_TOKENS]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/fee/token');
-      commit(DemerisMutationTypes.SET_FEE_TOKEN, { params, value: response.data.fee_tokens });
+      commit(DemerisMutationTypes.SET_FEE_TOKENS, { params, value: response.data.fee_tokens });
       if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKEN, payload: { params } });
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKENS, payload: { params } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetFeeToken', 'Could not perform API query.');
     }
     return getters['getFeeToken'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name);
+      commit(DemerisMutationTypes.SET_FEE, { params, value: response.data.chain });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
+    }
+    return getters['getFee'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
     try {

@@ -23,7 +23,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
   [MutationTypes.SET_BECH32_CONFIG](state: S, payload: { params: API.APIRequests; value: API.Bech32Config }): void;
   [MutationTypes.SET_FEE](state: S, payload: { params: API.APIRequests; value: API.Fee }): void;
-  [MutationTypes.SET_FEE_TOKEN](state: S, payload: { params: API.APIRequests; value: API.FeeTokens }): void;
+  [MutationTypes.SET_FEE_TOKENS](state: S, payload: { params: API.APIRequests; value: API.FeeTokens }): void;
   [MutationTypes.SET_CHAIN](state: S, payload: { value: API.Chain }): void;
   [MutationTypes.SET_PRIMARY_CHANNEL](state: S, payload: { params: API.APIRequests; value: API.PrimaryChannel }): void;
   [MutationTypes.SET_PRIMARY_CHANNELS](
@@ -83,7 +83,7 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name].base_ibc_fee = payload.value as API.Fee; // TODO: Change after MVP
     state.chains[(payload.params as API.ChainReq).chain_name].base_fee = payload.value as API.Fee;
   },
-  [MutationTypes.SET_FEE_TOKEN](state: State, payload: DemerisMutations) {
+  [MutationTypes.SET_FEE_TOKENS](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].fee_tokens = payload.value as API.FeeTokens;
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
