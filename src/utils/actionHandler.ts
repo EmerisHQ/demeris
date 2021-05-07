@@ -1,58 +1,89 @@
 import * as Actions from '@/types/actions';
 import { store } from '../store/index';
 import { Amount } from '@/types/base';
-import { isNative } from './basic';
+import { isNative, getChannel, getDenomHash } from './basic';
 
-export function getChannel(path, index) {
-  let parts = path.split('/');
-  return parts[index * 2 + 1];
-}
-export async function redeem({ amount, chain_id }: { amount: Amount; chain_id: string }) {
+// Basic step-building blocks
+export async function redeem({ amount, chain_name }: { amount: Amount; chain_name: string }) {
   const steps = [];
-  let path =
-    store.getters['demeris/getVerifiedPath'](amount.denom) ??
-    (await store.dispatch('demeris/GET_VERIFIED_PATH', { subscribe: true, params: amount.denom }, { root: true }));
-  if (!path.verified) {
-    throw new Error('Denom not verified');
-  }
-  if (path.native) {
+
+  if (isNative(amount.denom)) {
+    // If NOT an IBC denom, nothing to do
     return steps;
   } else {
-    let i = 0;
-    while (i < path.verified_path.length - 1) {
-      steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: path.verified_path[i],
-          to_chain: path.verified_path[i + 1],
-          through: getChannel(path.path, i),
+    // else we get the trace for this IBC denom
+    const verifyTrace =
+      store.getters['demeris/getVerifyTrace']({
+        chain_name,
+        hash: amount.denom.split('/')[1],
+      }) ??
+      (await store.dispatch(
+        'demeris/GET_VERIFY_TRACE',
+        {
+          subscribe: true,
+          params: {
+            chain_name,
+            hash: amount.denom.split('/')[1],
+          },
         },
-      });
-      i++;
+        { root: true },
+      ));
+    if (!verifyTrace.verified) {
+      //  If we cannot verify the trace, throw error
+      throw new Error('Trace not verified');
+    } else {
+      // We have a verified trace we can follow. add redemption steps
+      let i = 0;
+      while (i < verifyTrace.trace.length - 1) {
+        const hop = verifyTrace.trace[i];
+        steps.push({
+          name: 'ibc_backward',
+          status: 'pending',
+          data: {
+            amount: { amount: amount.amount, denom: getDenomHash(verifyTrace.path, verifyTrace.base_denom, i) },
+            from_chain: hop.chain_name,
+            to_chain: hop.counterparty_name,
+            through: hop.channel,
+          },
+        });
+        i++;
+      }
+      return steps;
     }
   }
 }
 export async function transferToHub({ amount, chain_name }: { amount: Amount; chain_name: string }) {
+  /*
+	This action creates the steps needed to get the chosen amount of chosen denom as a 1-hop token through the primary-channel on the hub
+	*/
+
   const steps = [];
 
   if (isNative(amount.denom)) {
-    if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
-      steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: chain_name,
-          to_chain: 'cosmoshub-4',
-        },
-      });
+    // If NOT an IBC denom
+    if (chain_name == 'gaia') {
+      // If already native to the hub, do nothing
       return steps;
     } else {
-      throw new Error('Denom not verified');
+      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+        // If verified denom on a different chain, ibc_forward through primary channel to the hub
+        steps.push({
+          name: 'ibc_forward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: 'cosmoshub-4',
+          },
+        });
+        return steps;
+      } else {
+        // If not verified denom, throw error
+        throw new Error('Denom not verified');
+      }
     }
   }
+  // If IBC denom, first we get the trace
   const verifyTrace =
     store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
     (await store.dispatch(
@@ -60,10 +91,13 @@ export async function transferToHub({ amount, chain_name }: { amount: Amount; ch
       { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
       { root: true },
     ));
+
   if (!verifyTrace.verified) {
+    //  If we cannot verify the trace, throw error
     throw new Error('Trace not verified');
   }
   if (verifyTrace.trace.length == 1 && chain_name == 'gaia') {
+    // if we can verify the trace and denom is 1-hop on the hub, check what the primary channel is for the source-chain to the hub
     const primaryChannel =
       store.getters['demeris/getPrimaryChannel']({
         chain_name: verifyTrace.trace[0].counterparty_name,
@@ -78,8 +112,10 @@ export async function transferToHub({ amount, chain_name }: { amount: Amount; ch
         { root: true },
       ));
     if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+      // If channels match, denom is already a verified 1-hop token on the hub through the primary channel so no action needed
       return steps;
     } else {
+      // If channels don't match we have to send the denom back through the trace channel and then forward again through the primary channel
       steps.push({
         name: 'ibc_backward',
         status: 'pending',
@@ -103,8 +139,11 @@ export async function transferToHub({ amount, chain_name }: { amount: Amount; ch
     }
   } else {
     if (verifyTrace.trace.length > 1) {
+      // If trace is longer than 1-hop, throw error because user must redeem the denom first (should never reach this part of the code
+      // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
+      // If trace is 1 hop but NOT on the hub. Send back to native chain through the channel in the trace, then forward to the hub
       steps.push({
         name: 'ibc_backward',
         status: 'pending',
@@ -128,59 +167,120 @@ export async function transferToHub({ amount, chain_name }: { amount: Amount; ch
     }
   }
 }
-export async function transferFromHub({ amount, chain_id }: { amount: Amount; chain_id: string }) {
-  // TODO: Match params to API requests
+export async function transferFromHub({ amount, chain_name }: { amount: Amount; chain_name: string }) {
   const steps = [];
-  let path =
-    store.getters['demeris/getVerifiedPath'](amount.denom) ??
-    (await store.dispatch('demeris/GET_VERIFIED_PATH', { subscribe: true, params: amount.denom }, { root: true }));
-  if (!path.verified) {
-    throw new Error('Denom not verified');
+  if (isNative(amount.denom)) {
+    // If NOT an IBC denom
+    if (chain_name == 'gaia') {
+      // We're already on the hub, do nothing
+      return steps;
+    } else {
+      steps.push({
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: 'gaia',
+          to_chain: chain_name,
+        },
+      });
+      return steps;
+    }
   }
-  if (path.native) {
-    steps.push({
-      name: 'ibc_backward',
-      status: 'pending',
-      data: {
-        amount: amount,
-        from_chain: 'cosmoshub-4',
-        to_chain: chain_id,
-      },
-    });
-    return steps;
-  } else {
-    if (path.verified_path.length == 2 && chain_id != path.verified_path[1]) {
+  // If IBC get the trace
+  const verifyTrace =
+    store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+    (await store.dispatch(
+      'demeris/GET_VERIFY_TRACE',
+      { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+      { root: true },
+    ));
+
+  if (!verifyTrace.verified) {
+    //  If we cannot verify the trace, throw error. Should not happen here as transferFromHub is an action to move the tokens after an on-hub operation which has already included these tests
+    throw new Error('Trace not verified');
+  }
+  if (verifyTrace.trace.length == 1) {
+    if (verifyTrace.trace[0].counterparty_name == chain_name) {
+      //if we want to transfer back to the origin chain
       steps.push({
         name: 'ibc_backward',
         status: 'pending',
         data: {
           amount: amount,
-          from_chain: 'cosmoshub-4',
-          to_chain: path.verified_path[1],
+          from_chain: 'gaia',
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
+        },
+      });
+      return steps;
+    } else {
+      //If we want to transfer to some other chain, need to go back to the origin chain then forwards to the target one
+      steps.push({
+        name: 'ibc_backward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: 'gaia',
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
         },
       });
       steps.push({
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: amount.amount, denom: path.base_denom },
-          from_chain: path.verified_path[1],
-          to_chain: chain_id,
+          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+          from_chain: verifyTrace.trace[0].counterparty_name,
+          to_chain: chain_name,
         },
       });
-    } else {
-      if (path.verified_path.length > 2) {
-        throw new Error('Denom must be redeemed first');
-      }
     }
+  } else {
+    throw new Error('Denom must be redeemed first');
   }
 }
-export async function swap() {
-  /*
-		if from/to denoms not single-hop (or native), primary channel, on hub throw errors
-		else return array containing single swap transaction
-	*/
+export async function swap({
+  from,
+  to,
+}: {
+  from: { denom: string; amount: number };
+  to: { denom: string; amount: number };
+}) {
+  // Get the list of available pools
+  const steps = [];
+  const liquidityPools =
+    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await store.dispatch(
+      'tendermint.liquidity.v1beta1/QueryLiquidityPools',
+      { options: { subscribe: false, all: true }, params: {} },
+      { root: true },
+    ));
+  // create our asset pair sorted alphabetically
+  const assetPair = [from.denom, to.denom].sort();
+  // Find the pool for that pair
+  const pool =
+    liquidityPools.pools.find(x => JSON.stringify(x.reserve_coin_denoms) == JSON.stringify(assetPair)) ?? null;
+  if (pool) {
+    //Pool exists, proceed with swap
+    steps.push({
+      name: 'swap',
+      status: 'pending',
+      data: {
+        from,
+        to,
+        pool,
+      },
+    });
+    return steps;
+  } else {
+    //Pool does not exist, throw error for MVP. In the future implement as multiple swaps
+    throw new Error('Pool does not exist');
+  }
 }
+//Todo: transfer, add to liquidity pool, withdraw from liquidity pool
+
+// Action-handler / action composing using the blocks above
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
   const steps = [];
   try {
@@ -188,14 +288,35 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
       case 'swap':
         steps.push(
           ...(await transferToHub({
-            amount: { amount: action.amount, denom: action.from_denom.denom },
-            chain_id: action.from_denom.chain_id,
+            amount: {
+              amount: (action.params as Actions.SwapParams).from.amount,
+              denom: (action.params as Actions.SwapParams).from.denom.denom,
+            },
+            chain_name: (action.params as Actions.SwapParams).from.denom.chain_name,
           })),
         );
         steps.push(
-          ...(await transferToHub({
-            amount: { amount: action.amount, denom: action.from_denom.denom },
-            chain_id: action.from_denom.chain_id,
+          ...(await swap({
+            from: {
+              amount: (action.params as Actions.SwapParams).from.amount,
+              denom: (action.params as Actions.SwapParams).from.denom.denom,
+            },
+            to: {
+              amount: (action.params as Actions.SwapParams).to.amount,
+              denom: (action.params as Actions.SwapParams).to.denom.denom,
+            },
+          })),
+        );
+        steps.push(
+          ...(await transferFromHub({
+            from: {
+              amount: (action.params as Actions.SwapParams).from.amount,
+              denom: (action.params as Actions.SwapParams).from.denom.denom,
+            },
+            to: {
+              amount: (action.params as Actions.SwapParams).to.amount,
+              denom: (action.params as Actions.SwapParams).to.denom.denom,
+            },
           })),
         );
     }
