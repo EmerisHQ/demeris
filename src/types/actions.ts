@@ -42,6 +42,7 @@ export type IBCForwardsData = {
   amount: Base.Amount;
   from_chain: string;
   to_chain: string;
+  through: string;
 };
 export type SwapData = {
   from: Base.Amount;
