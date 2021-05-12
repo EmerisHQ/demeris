@@ -1,0 +1,19 @@
+@font-face {
+    font-family: "Inter var";
+    font-weight: normal;
+    font-display: swap;
+    src: local("Inter var"), 
+    url("/fonts/Inter.var.woff2") format("woff2"), 
+}
+
+html, input, textarea, button {
+    font-family: 'Inter', sans-serif;
+    font-display: fallback;
+}
+
+@supports (font-variation-settings: normal) {
+    html, input, textarea, button {
+        font-family: 'Inter var', sans-serif;
+        font-variant: slashed-zero;
+    }
+}
