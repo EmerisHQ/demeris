@@ -23,28 +23,28 @@ html, input, textarea, button {
     font-weight: 400;
 }
 
-.step-minus-1 {
+.s-minus {
     @extend .font-basic;
     font-size: 1.2rem;
     line-height: 1.6rem;
     letter-spacing: 0.0005rem;
 }
 
-.step-0 {
+.s-0 {
     @extend .font-basic;
     font-size: 1.6rem;
     line-height: 2.1rem;
     letter-spacing: 0;
 }
 
-.step-1 {
+.s-1 {
     @extend .font-basic;
     font-size: 2.1rem;
     line-height: 2.7rem;
     letter-spacing: -0.007rem;
 }
 
-.step-2 {
+.s-2 {
     @extend .font-basic;
     font-size: 2.8rem;
     font-weight: 700;
@@ -52,7 +52,7 @@ html, input, textarea, button {
     letter-spacing: -0.016rem;
 }
 
-.step-5 {
+.s-5 {
     @extend .font-basic;
     font-size: 6.7rem;
     font-weight: 700;
@@ -60,26 +60,26 @@ html, input, textarea, button {
     letter-spacing: -0.055rem;
 }
 
-.leading-solid {
+.l-solid {
    line-height: 2.1rem;
 }
 
-.leading-title {
+.l-title {
     line-height: 2.7rem;
 }
 
-.leading-copy {
+.l-copy {
     line-height: 3.4rem;
 }
 
-.weight-normal {
+.w-normal {
     font-weight: normal;
 }
 
-.weight-medium {
+.w-medium {
     font-weight: 600;
 }
 
-.weight-bold {
+.w-bold {
     font-weight: bold;
 }
