@@ -6,6 +6,16 @@ import { State, ChainData } from './state';
 import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from './action-types';
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios';
+import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+
+export type DemerisConfig = {
+  endpoint: string;
+  refreshTime?: number;
+};
+export type DemerisTxParams = {
+  tx: Tx;
+  chain_name: string;
+};
 export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
@@ -16,6 +26,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_NUMBERS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionParams,
+  ): Promise<API.Numbers>;
   [DemerisActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -71,9 +85,16 @@ export interface Actions {
     { subscribe, params }: DemerisActionParams,
   ): Promise<any>; //TODO chain status
 
+  [DemerisActionTypes.BROADCAST_TX](
+    { commit, getters }: ActionContext<State, RootState>,
+    { tx, chain_name }: DemerisTxParams,
+  ): Promise<any>;
   // Internal module actions
 
-  [DemerisActionTypes.INIT]({ dispatch, rootGetters }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.INIT](
+    { commit, dispatch }: ActionContext<State, RootState>,
+    { endpoint, refreshTime }: DemerisConfig,
+  ): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
@@ -88,7 +109,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/balances/' + (params as API.AddrReq).address);
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balances',
+      );
       commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
@@ -100,7 +123,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/staking_balances/' + (params as API.AddrReq).address);
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/staking_balances',
+      );
       commit(DemerisMutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
@@ -110,9 +135,23 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getStakingBalances'](JSON.stringify(params));
   },
+  async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/numbers',
+      );
+      commit(DemerisMutationTypes.SET_NUMBERS, { params, value: response.data.numbers });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_NUMBERS, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetNumbers', 'Could not perform API query.');
+    }
+    return getters['getNumbers'](JSON.stringify(params));
+  },
   async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get('/verified_denoms');
+      const response = await axios.get(getters['getEndpoint'] + '/verified_denoms');
       commit(DemerisMutationTypes.SET_VERIFIED_DENOMS, { value: response.data.verified_denoms });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFIED_DENOMS, payload: {} });
@@ -124,7 +163,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_FEE_ADDRESSES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/fee/address');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/address',
+      );
       commit(DemerisMutationTypes.SET_FEE_ADDRESSES, { params, value: response.data.fee_addresses });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_ADDRESSES, payload: { params } });
@@ -137,7 +178,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // TODO Prices query
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get('/prices');
+      const response = await axios.get(getters['getEndpoint'] + '/prices');
       commit(DemerisMutationTypes.SET_PRICES, { value: response.data.prices });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
@@ -149,7 +190,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get('/chains');
+      const response = await axios.get(getters['getEndpoint'] + '/chains');
       commit(DemerisMutationTypes.SET_CHAINS, { value: response.data.chains });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAINS, payload: {} });
@@ -165,7 +206,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
-        '/chain/' +
+        getters['getEndpoint'] +
+          '/chain/' +
           (params as API.VerifyTraceReq).chain_name +
           '/denom/verify_trace/' +
           (params as API.VerifyTraceReq).hash,
@@ -181,7 +223,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/fee/address');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/address',
+      );
       commit(DemerisMutationTypes.SET_FEE_ADDRESS, { params, value: response.data.fee_address });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_ADDRESS, payload: { params } });
@@ -193,7 +237,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_BECH32_CONFIG]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/bech32');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/bech32',
+      );
       commit(DemerisMutationTypes.SET_BECH32_CONFIG, { params, value: response.data.bech32_config });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BECH32_CONFIG, payload: { params } });
@@ -205,7 +251,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/fee');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee',
+      );
       commit(DemerisMutationTypes.SET_FEE, { params, value: response.data.fee });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
@@ -217,7 +265,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_FEE_TOKENS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/fee/token');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/token',
+      );
       commit(DemerisMutationTypes.SET_FEE_TOKENS, { params, value: response.data.fee_tokens });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKENS, payload: { params } });
@@ -229,7 +279,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name);
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
       commit(DemerisMutationTypes.SET_FEE, { params, value: response.data.chain });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
@@ -242,7 +292,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
-        '/chain/' +
+        getters['getEndpoint'] +
+          '/chain/' +
           (params as API.ChainReq).chain_name +
           '/primary_channel/' +
           (params as API.ChainReq).destination_chain_name,
@@ -258,7 +309,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_PRIMARY_CHANNELS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain/' + (params as API.ChainReq).chain_name + '/primary_channels');
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/primary_channels',
+      );
       commit(DemerisMutationTypes.SET_PRIMARY_CHANNELS, { params, value: response.data.primary_channels });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRIMARY_CHANNELS, payload: { params } });
@@ -270,7 +323,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/chain_status/' + (params as API.ChainReq).chain_name);
+      const response = await axios.get(getters['getEndpoint'] + '/chain_status/' + (params as API.ChainReq).chain_name);
       commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data }); // TODO: chain status
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
@@ -281,15 +334,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getChainStatus'](JSON.stringify(params));
   },
 
+  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name }: DemerisTxParams) {
+    try {
+      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, tx);
+      return response;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
+    }
+  },
   // Internal module actions
 
-  [DemerisActionTypes.INIT]({ dispatch, rootGetters }) {
+  [DemerisActionTypes.INIT]({ commit, dispatch }, { endpoint, refreshTime }) {
     console.log('Vuex nodule: demeris initialized!');
-    if (rootGetters['common/env/client']) {
-      rootGetters['common/env/client'].on('newblock', () => {
-        dispatch(DemerisActionTypes.STORE_UPDATE);
-      });
-    }
+    commit('INIT', { endpoint });
+    setInterval(() => {
+      dispatch(DemerisActionTypes.STORE_UPDATE);
+    }, refreshTime);
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);

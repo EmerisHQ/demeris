@@ -6,11 +6,12 @@ import * as API from '@/types/api';
 export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances };
   getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances };
+  getNumbers(state: State): { (params: API.APIRequests): API.Numbers };
   getFeeAddresses(state: State): API.FeeAddresses;
   getVerifiedDenoms(state: State): API.VerifiedDenoms;
   getChains(state: State): Record<string, ChainData>;
   getPrices(state: State): any; //TODO prices
-
+  getEndpoint(state: State): string;
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config };
@@ -31,6 +32,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getStakingBalances: state => params => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? [];
   },
+  getNumbers: state => params => {
+    return state.numbers[(params as API.AddrReq).address] ?? [];
+  },
   getFeeAddresses: state => {
     const feeAddresses = [];
     for (const chain of Object.values(state.chains)) {
@@ -46,6 +50,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrices: state => {
     return state.prices; //TODO: Prices
+  },
+  getEndpoint: state => {
+    return state.endpoint; //TODO: Prices
   },
   getVerifyTrace: state => params => {
     return (
