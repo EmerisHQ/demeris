@@ -10,6 +10,7 @@ export type ChainData = API.Chain & ChainMeta;
 export type State = {
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
+  numbers: Record<string, API.Numbers>;
   verifiedDenoms: API.VerifiedDenoms;
   prices: Array<any>; //TODO: prices
   chains: Record<string, ChainData>;
@@ -19,6 +20,7 @@ export function getDefaultState(): State {
   return {
     balances: {},
     stakingBalances: {},
+    numbers: {},
     verifiedDenoms: [],
     prices: [],
     chains: {},

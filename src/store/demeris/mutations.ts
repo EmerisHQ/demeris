@@ -12,7 +12,7 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
-
+  [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
@@ -46,6 +46,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
+  },
+  [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
+    state.numbers[JSON.stringify(payload.params)] = payload.value as API.Numbers;
   },
   [MutationTypes.SET_FEE_ADDRESSES](state: State, payload: DemerisMutations) {
     for (const feeAddress of payload.value as API.FeeAddresses) {

@@ -16,6 +16,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_NUMBERS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionParams,
+  ): Promise<API.Numbers>;
   [DemerisActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -88,7 +92,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/balances/' + (params as API.AddrReq).address);
+      const response = await axios.get('/account/' + (params as API.AddrReq).address + '/balances');
       commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
@@ -100,7 +104,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get('/staking_balances/' + (params as API.AddrReq).address);
+      const response = await axios.get('/account/' + (params as API.AddrReq).address + '/staking_balances');
       commit(DemerisMutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
@@ -109,6 +113,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetStakingBalances', 'Could not perform API query.');
     }
     return getters['getStakingBalances'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get('/account/' + (params as API.AddrReq).address + '/numbers');
+      commit(DemerisMutationTypes.SET_NUMBERS, { params, value: response.data.numbers });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_NUMBERS, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetNumbers', 'Could not perform API query.');
+    }
+    return getters['getNumbers'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit, getters }, { subscribe = false }) {
     try {

@@ -6,6 +6,7 @@ import * as API from '@/types/api';
 export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances };
   getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances };
+  getNumbers(state: State): { (params: API.APIRequests): API.Numbers };
   getFeeAddresses(state: State): API.FeeAddresses;
   getVerifiedDenoms(state: State): API.VerifiedDenoms;
   getChains(state: State): Record<string, ChainData>;
@@ -30,6 +31,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getStakingBalances: state => params => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? [];
+  },
+  getNumbers: state => params => {
+    return state.numbers[(params as API.AddrReq).address] ?? [];
   },
   getFeeAddresses: state => {
     const feeAddresses = [];

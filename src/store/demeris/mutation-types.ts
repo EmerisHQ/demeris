@@ -9,6 +9,7 @@ export enum DemerisMutationTypes {
   SET_FEE = 'SET_FEE',
   SET_FEE_TOKENS = 'SET_FEE_TOKENS',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
+  SET_NUMBERS = 'SET_NUMBERS',
   SET_PRICES = 'SET_PRICES',
   SET_CHAINS = 'SET_CHAINS',
   SET_CHAIN = 'SET_CHAIN',
@@ -31,6 +32,7 @@ export type DemerisMutationArgs =
   | API.PrimaryChannels
   | API.PrimaryChannel
   | API.StakingBalances
+  | API.Numbers
   | API.VerifyTrace
   | API.Chains
   | API.Chain
