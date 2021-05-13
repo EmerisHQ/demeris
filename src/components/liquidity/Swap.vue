@@ -15,14 +15,20 @@
   <div class="swap-widget elevation-card">
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
-      <div class="swap-widget-header__dot-button"></div>
+      <div class="swap-widget-header__dot-button">
+        <IconButton></IconButton>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import IconButton from '@/components/ui/IconButton.vue';
 export default defineComponent({
   name: 'Swap',
+  components: {
+    IconButton,
+  },
 });
 </script>
 
@@ -39,8 +45,6 @@ export default defineComponent({
     &__dot-button {
       width: 2.4rem;
       height: 2.4rem;
-
-      border: 1px solid gray;
     }
   }
 }
