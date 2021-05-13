@@ -1,4 +1,5 @@
 import * as API from '@/types/api';
+import { DemerisConfig } from './actions';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
@@ -17,6 +18,7 @@ export enum DemerisMutationTypes {
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
+  INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
   SUBSCRIBE = 'SUBSCRIBE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
@@ -36,7 +38,8 @@ export type DemerisMutationArgs =
   | API.VerifyTrace
   | API.Chains
   | API.Chain
-  | API.VerifiedDenoms;
+  | API.VerifiedDenoms
+  | DemerisConfig;
 
 export type DemerisMutations = {
   params?: API.APIRequests;

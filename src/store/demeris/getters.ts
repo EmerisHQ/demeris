@@ -11,7 +11,7 @@ export type Getters = {
   getVerifiedDenoms(state: State): API.VerifiedDenoms;
   getChains(state: State): Record<string, ChainData>;
   getPrices(state: State): any; //TODO prices
-
+  getEndpoint(state: State): string;
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config };
@@ -50,6 +50,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrices: state => {
     return state.prices; //TODO: Prices
+  },
+  getEndpoint: state => {
+    return state.endpoint; //TODO: Prices
   },
   getVerifyTrace: state => params => {
     return (

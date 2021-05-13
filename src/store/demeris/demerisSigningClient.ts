@@ -10,9 +10,8 @@ export default class DemerisSigningClient extends SigningStargateClient {
     fee: StdFee,
     memo = '',
     signerData = null,
-  ): Promise<Uint8Array> {
+  ): Promise<unknown> {
     const txRaw = await super.sign(signerAddress, messages, fee, memo, signerData);
-    const txBytes = TxRaw.encode(txRaw).finish();
-    return txBytes;
+    return TxRaw.toJSON(txRaw);
   }
 }

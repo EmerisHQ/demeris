@@ -4,6 +4,7 @@ import * as API from '@/types/api';
 import { State, getDefaultState } from './state';
 import { DemerisMutationTypes as MutationTypes, DemerisMutations } from './mutation-types';
 import { DemerisSubscriptions } from './action-types';
+import { DemerisConfig } from './actions';
 
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
@@ -34,6 +35,7 @@ export type Mutations<S = State> = {
 
   // Internal module mutations
 
+  [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.RESET_STATE](state: S): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -108,6 +110,9 @@ export const mutations: MutationTree<State> & Mutations = {
 
   // Internal module mutations
 
+  [MutationTypes.INIT](state: State, payload: DemerisConfig) {
+    state.endpoint = payload.endpoint;
+  },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
   },

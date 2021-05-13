@@ -18,6 +18,7 @@ export enum DemerisActionTypes {
   GET_PRIMARY_CHANNEL = 'GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'GET_PRIMARY_CHANNELS',
   GET_CHAIN_STATUS = 'GET_CHAIN_STATUS', //TODO chain status
+  BROADCAST_TX = 'BROADCAST_TX',
   // Internal module actions
   INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
