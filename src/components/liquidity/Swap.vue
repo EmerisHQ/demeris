@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="swap-widget">
     <!-- 
 			Displays a swap building component:
 			title, chose denom balance
@@ -12,12 +12,11 @@
 
 			dependencies:
 					vuex getter to obtain user's preferred UI lang (i18n texts)?
-		-->
-  </div>
+		--></div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'Swap'
-})
+  name: 'Swap',
+});
 </script>
