@@ -4,9 +4,8 @@
       <div class="dashboard">
         <div>DashBoard</div>
       </div>
-      <div class="swap">
-        <LiquiditySwap />
-      </div>
+
+      <LiquiditySwap />
     </div>
   </AppLayout>
 </template>
@@ -14,6 +13,7 @@
 <script lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+
 export default {
   name: 'DashBoard',
   components: { AppLayout, LiquiditySwap },
@@ -32,13 +32,8 @@ export default {
     width: 0;
     align-items: center;
     justify-content: space-evenly;
-
+    margin-right: 2rem;
     background-color: rgb(172, 206, 207);
-  }
-
-  .swap {
-    width: 0;
-    flex: 1;
   }
 }
 </style>

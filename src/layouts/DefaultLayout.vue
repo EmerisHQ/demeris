@@ -159,5 +159,6 @@ export default defineComponent({
 
 .layout-frame {
   padding-top: 11rem;
+  min-height: 100vh;
 }
 </style>
