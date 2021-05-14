@@ -6,8 +6,10 @@ import { State, ChainData } from './state';
 import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from './action-types';
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios';
+import { EncodeObject } from '@cosmjs/proto-signing';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 import DemerisSigningClient from './demerisSigningClient';
+import { keyHashfromAddress } from '@/utils/basic';
 
 export type DemerisConfig = {
   endpoint: string;
@@ -18,7 +20,7 @@ export type DemerisTxParams = {
   chain_name: string;
 };
 export type DemerisSignParams = {
-  msgs: Array<unknown>;
+  msgs: Array<EncodeObject>;
   chain_name: string;
 };
 export interface Actions {
@@ -194,9 +196,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const feeUSD =
         getters['getBaseFee']({ chain_name }) ??
         (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
-      let numbers = getters['getNumbers']({ address: getBytesFromAddress(account.address) });
+      const fee = feeUSD; // TODO: Calculate fee from prices
+      const numbers = getters['getNumbers']({ address: keyHashfromAddress(account.address) });
       const signerData = numbers.find(x => x.chain_name == chain_name);
-      return await client.signWMeta(account.address, msgs, fee, null, signerData);
+      const tx = await client.signWMeta(account.address, msgs, fee, null, signerData);
+      return { tx, chain_name };
     } catch (e) {
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
     }
