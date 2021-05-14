@@ -7,6 +7,7 @@ import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from '.
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+import DemerisSigningClient from './demerisSigningClient';
 
 export type DemerisConfig = {
   endpoint: string;
@@ -19,7 +20,6 @@ export type DemerisTxParams = {
 export type DemerisSignParams = {
   msgs: Array<unknown>;
   chain_name: string;
-  address: string;
 };
 export interface Actions {
   // Cross-chain endpoint actions
@@ -45,7 +45,7 @@ export interface Actions {
   ): Promise<API.FeeAddresses>;
   [DemerisActionTypes.SIGN_WITH_KEPLR](
     { getters }: ActionContext<State, RootState>,
-    { msgs, chain_name, address }: DemerisSignParams,
+    { msgs, chain_name }: DemerisSignParams,
   ): Promise<DemerisTxParams>;
 
   [DemerisActionTypes.GET_CHAINS](
@@ -185,10 +185,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters }, { msgs, chain_name, address }) {
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name }) {
     try {
       await window.keplr.enable(chain_name);
-      const offlineSigner = window.getOfflineSigner(chain_name);
+      const offlineSigner = await window.getOfflineSigner(chain_name);
+      const [account] = await offlineSigner.getAccounts();
+      const client = (await DemerisSigningClient.offline(offlineSigner)) as DemerisSigningClient;
+      const feeUSD =
+        getters['getBaseFee']({ chain_name }) ??
+        (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
+      let numbers = getters['getNumbers']({ address: getBytesFromAddress(account.address) });
+      const signerData = numbers.find(x => x.chain_name == chain_name);
+      return await client.signWMeta(account.address, msgs, fee, null, signerData);
     } catch (e) {
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
     }
