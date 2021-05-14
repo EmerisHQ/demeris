@@ -4,12 +4,18 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-    <img src="../../assets/svg/ThreeDotsIcon.svg" alt="my-logo" />
+    <img :src="require(`../../assets/svg/ThreeDotsIcon.svg`)" alt="my-logo" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'Icon',
+  props: {
+    icon_name: {
+      type:String,
+      required: true
+    }
+  }
 });
 </script>

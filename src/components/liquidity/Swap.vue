@@ -16,7 +16,7 @@
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">
-        <IconButton></IconButton>
+        <IconButton :icon_name="'ThreeDotsIcon'"></IconButton>
       </div>
     </div>
   </div>
