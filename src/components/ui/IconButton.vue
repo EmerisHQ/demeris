@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Icon button implementation. Same specs as button only displays Icon instead of text using ./Icon.vue //-->
-    <Icon :icon_name="icon_name"></Icon>
+    <Icon :icon_name="icon_name" />
   </div>
 </template>
 <script lang="ts">
@@ -11,7 +11,7 @@ export default defineComponent({
   name: 'IconButton',
   components: { Icon },
   props: {
-    icon_name: String
+    icon_name: String,
   },
 });
 </script>
