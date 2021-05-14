@@ -16,6 +16,11 @@ export type DemerisTxParams = {
   tx: Tx;
   chain_name: string;
 };
+export type DemerisSignParams = {
+  msgs: Array<unknown>;
+  chain_name: string;
+  address: string;
+};
 export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
@@ -38,6 +43,11 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.FeeAddresses>;
+  [DemerisActionTypes.SIGN_WITH_KEPLR](
+    { getters }: ActionContext<State, RootState>,
+    { msgs, chain_name, address }: DemerisSignParams,
+  ): Promise<DemerisTxParams>;
+
   [DemerisActionTypes.GET_CHAINS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -174,6 +184,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetFeeAddresses', 'Could not perform API query.');
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters }, { msgs, chain_name, address }) {
+    try {
+      await window.keplr.enable(chain_name);
+      const offlineSigner = window.getOfflineSigner(chain_name);
+    } catch (e) {
+      throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
+    }
   },
   // TODO Prices query
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
