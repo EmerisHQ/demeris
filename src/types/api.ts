@@ -195,4 +195,14 @@ export type FeeTokens = Array<Denom>;
 export type FeeTokensResponse = {
   fee_tokens: FeeTokens;
 };
+export type SeqNumber = {
+  chain_name: string;
+  address: string;
+  sequence_number: string;
+  account_number: string;
+};
+export type Numbers = Array<SeqNumber>;
+export type NumbersResponse = {
+  numbers: Array<Numbers>;
+};
 export type APIRequests = AddrReq | VerifyTraceReq | ChainReq;

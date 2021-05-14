@@ -8,8 +8,10 @@ export type ChainMeta = {
 export type ChainData = API.Chain & ChainMeta;
 
 export type State = {
+  endpoint: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
+  numbers: Record<string, API.Numbers>;
   verifiedDenoms: API.VerifiedDenoms;
   prices: Array<any>; //TODO: prices
   chains: Record<string, ChainData>;
@@ -17,8 +19,10 @@ export type State = {
 };
 export function getDefaultState(): State {
   return {
+    endpoint: '',
     balances: {},
     stakingBalances: {},
+    numbers: {},
     verifiedDenoms: [],
     prices: [],
     chains: {},
