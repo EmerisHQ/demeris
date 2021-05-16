@@ -23,8 +23,8 @@
     <div class="swap-widget__controller">
       <div class="swap-widget__controller-divider" />
       <div class="swap-widget__controller-wrapper">
-        <IconButton :name="'UpsideDown'" :shape="'circle'" :status="'normal'" />
-        <IconButton :name="'ThreeDotsIcon'" :shape="'flat'" :status="'normal'" />
+        <IconButton :name="'UpsideDownIcon'" :shape="'circle'" :status="'normal'" />
+        <IconButton :name="'Max'" :shape="'text'" :status="'normal'" />
       </div>
     </div>
     <!-- denomSelector -->

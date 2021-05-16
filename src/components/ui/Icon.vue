@@ -22,6 +22,7 @@ export default defineComponent({
 
   setup(props) {
     const currentIcon = shallowRef('');
+
     import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
       currentIcon.value = val.default;
     });
