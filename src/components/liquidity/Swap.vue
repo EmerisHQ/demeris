@@ -19,7 +19,11 @@
         <IconButton :name="'ThreeDotsIcon'" :shape="'flat'" :status="'normal'" />
       </div>
     </div>
-    <!-- denomSelector -->
+
+    <!-- from Denom -->
+    <DenomSelect />
+
+    <!-- button-divider -->
     <div class="swap-widget__controller">
       <div class="swap-widget__controller-divider" />
       <div class="swap-widget__controller-wrapper">
@@ -27,15 +31,20 @@
         <IconButton :name="'Max'" :shape="'text'" :status="'normal'" />
       </div>
     </div>
-    <!-- denomSelector -->
+
+    <!-- to Denom -->
+    <DenomSelect />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import DenomSelect from '@/components/common/DenomSelect.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+
 export default defineComponent({
   name: 'Swap',
   components: {
+    DenomSelect,
     IconButton,
   },
 });

@@ -12,11 +12,21 @@
 					vuex getter to get  chain name from chain id		
 
 		-->
+    {{ chains }}
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
+import { useStore } from '@/store';
+
 export default defineComponent({
-  name: 'DenomSelect'
-})
+  name: 'DenomSelect',
+  setup() {
+    const store = useStore();
+    const chains = computed(() => store.getters.getChain);
+    console.log(chains);
+    console.log(store.state.demeris.chains);
+    return { chains };
+  },
+});
 </script>
