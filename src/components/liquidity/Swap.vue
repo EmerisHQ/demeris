@@ -16,9 +16,18 @@
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">
-        <IconButton :icon_name="'ThreeDotsIcon'" />
+        <IconButton :name="'ThreeDotsIcon'" :shape="'flat'" :status="'normal'" />
       </div>
     </div>
+    <!-- denomSelector -->
+    <div class="swap-widget__controller">
+      <div class="swap-widget__controller-divider" />
+      <div class="swap-widget__controller-wrapper">
+        <IconButton :name="'UpsideDown'" :shape="'circle'" :status="'normal'" />
+        <IconButton :name="'ThreeDotsIcon'" :shape="'flat'" :status="'normal'" />
+      </div>
+    </div>
+    <!-- denomSelector -->
   </div>
 </template>
 <script lang="ts">
@@ -35,16 +44,42 @@ export default defineComponent({
 <style lang="scss" scoped>
 .swap-widget {
   width: 320px;
+  padding: 3rem 0 2.4rem 0;
 
-  padding: 3rem 2.4rem 2.4rem;
+  background-color: var(--surface);
+
   &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 2.4rem;
 
-    &__dot-button {
+    /* &__dot-button {
       width: 2.4rem;
       height: 2.4rem;
+    } */
+  }
+
+  &__controller {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    height: 3.6rem;
+
+    &-divider {
+      width: 100%;
+      height: 1px;
+      background-color: var(--border-trans);
+    }
+
+    &-wrapper {
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+
+      width: 100%;
+      padding: 0 18px;
     }
   }
 }

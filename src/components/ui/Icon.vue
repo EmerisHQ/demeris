@@ -1,21 +1,40 @@
 <template>
-  <div>
-    <!-- Displays an icon
+  <!-- Displays an icon
 		props: 
 		  type: string (the icon to display)
 		//-->
-    <img :src="require(`@/assets/svg/${icon_name}.svg`)" alt="my-logo" />
-  </div>
+  <IconBase width="24" height="24" :name="name">
+    <component :is="currentIcon" />
+  </IconBase>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, shallowRef } from 'vue';
+import IconBase from '@/components/common/Icons/IconBase.vue';
 export default defineComponent({
   name: 'Icon',
+  components: { IconBase },
   props: {
-    icon_name: {
+    name: {
       type: String,
       required: true,
     },
   },
+
+  setup(props) {
+    const currentIcon = shallowRef('');
+    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
+      currentIcon.value = val.default;
+    });
+
+    return {
+      currentIcon,
+    };
+  },
 });
 </script>
+<style lang="scss" scoped>
+.icon {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+</style>
