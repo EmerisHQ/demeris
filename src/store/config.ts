@@ -1,9 +1,9 @@
 import { env, blocks, wallet,transfers,relayers } from '@starport/vuex'
 import { Store } from 'vuex'
-import { NavigatorState } from './index'
-import liquidityModules from '@starport/tendermint-liquidity-js/index'
+import { RootState } from './index'
+import liquidityModules from '@starport/tendermint-liquidity-js'
 
-export default function init(store:Store<NavigatorState>):void {
+export default function init(store:Store<RootState>):void {
 	for (const moduleInit of Object.values(liquidityModules)) {
 		moduleInit(store)
 	}
