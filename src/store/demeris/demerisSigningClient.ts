@@ -1,7 +1,7 @@
 import { StdFee } from '@cosmjs/amino';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
-import { TxRaw } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+import { Tx, TxRaw } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 
 export default class DemerisSigningClient extends SigningStargateClient {
   public async signWMeta(
@@ -10,8 +10,8 @@ export default class DemerisSigningClient extends SigningStargateClient {
     fee: StdFee,
     memo = '',
     signerData = null,
-  ): Promise<unknown> {
+  ): Promise<Tx> {
     const txRaw = await super.sign(signerAddress, messages, fee, memo, signerData);
-    return TxRaw.toJSON(txRaw);
+    return TxRaw.toJSON(txRaw) as Tx;
   }
 }

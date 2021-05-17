@@ -6,7 +6,10 @@ import { State, ChainData } from './state';
 import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from './action-types';
 import { DemerisMutationTypes } from './mutation-types';
 import axios from 'axios';
+import { EncodeObject } from '@cosmjs/proto-signing';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+import DemerisSigningClient from './demerisSigningClient';
+import { keyHashfromAddress } from '@/utils/basic';
 
 export type DemerisConfig = {
   endpoint: string;
@@ -14,6 +17,10 @@ export type DemerisConfig = {
 };
 export type DemerisTxParams = {
   tx: Tx;
+  chain_name: string;
+};
+export type DemerisSignParams = {
+  msgs: Array<EncodeObject>;
   chain_name: string;
 };
 export interface Actions {
@@ -38,6 +45,11 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.FeeAddresses>;
+  [DemerisActionTypes.SIGN_WITH_KEPLR](
+    { getters }: ActionContext<State, RootState>,
+    { msgs, chain_name }: DemerisSignParams,
+  ): Promise<DemerisTxParams>;
+
   [DemerisActionTypes.GET_CHAINS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -174,6 +186,24 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetFeeAddresses', 'Could not perform API query.');
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name }) {
+    try {
+      await window.keplr.enable(chain_name);
+      const offlineSigner = await window.getOfflineSigner(chain_name);
+      const [account] = await offlineSigner.getAccounts();
+      const client = (await DemerisSigningClient.offline(offlineSigner)) as DemerisSigningClient;
+      const feeUSD =
+        getters['getBaseFee']({ chain_name }) ??
+        (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
+      const fee = feeUSD; // TODO: Calculate fee from prices
+      const numbers = getters['getNumbers']({ address: keyHashfromAddress(account.address) });
+      const signerData = numbers.find(x => x.chain_name == chain_name);
+      const tx = await client.signWMeta(account.address, msgs, fee, null, signerData);
+      return { tx, chain_name };
+    } catch (e) {
+      throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
+    }
   },
   // TODO Prices query
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
