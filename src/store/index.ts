@@ -1,14 +1,20 @@
 import { createStore } from 'vuex';
 import init from './config'
+import { store as demeris, DemerisStore, State as DemerisState } from '@/store/demeris';
 
-export interface NavigatorState {
-  [key: string]:unknown
+export type RootState ={
+  demeris: DemerisState;
+  [key: string]: unknown;
 }
-const store = createStore({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {},
+export type Store = DemerisStore<Pick<RootState, 'demeris'>>
+const initstore = createStore({  
+  modules: {
+    demeris
+  },
 });
-init(store)
-export default store
+init(initstore as Store)
+export const store = initstore
+
+export function useStore(): Store {
+  return store as Store;
+}

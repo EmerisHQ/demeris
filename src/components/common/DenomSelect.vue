@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!--Displays a denom selection component:
+  <div>
+    <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
 				Selected chain name
@@ -12,7 +12,7 @@
 					vuex getter to get  chain name from chain id		
 
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

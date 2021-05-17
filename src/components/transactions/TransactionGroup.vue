@@ -1,11 +1,11 @@
 <template>
-	<div>
-		<!-- Displays a group title  and a list of Transaction.vue objects
+  <div>
+    <!-- Displays a group title  and a list of Transaction.vue objects
 		props: [] of transactions
 		dependencies:
 		vuex getter to obtain user's preferred UI lang (i18n texts)?
 		//-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

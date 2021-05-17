@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- 
+  <div>
+    <!-- 
 		Wallet main component (can be basis for interactions. Waiting on designs)
 		Props: wallet name/address
 		Displays: 
@@ -10,7 +10,7 @@
 		Depends on:
 			vuex getter to obtain account's total balance
 		 //-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

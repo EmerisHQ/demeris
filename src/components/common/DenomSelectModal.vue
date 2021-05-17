@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!--Displays a denom selection component:
+  <div>
+    <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
 				denom name
@@ -15,7 +15,7 @@
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

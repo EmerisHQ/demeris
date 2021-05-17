@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- Displays a single transaction to be performed		
+  <div>
+    <!-- Displays a single transaction to be performed		
 
 		
 		props:
@@ -9,7 +9,7 @@
 		emits started, completed etc. as it progressees
 
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

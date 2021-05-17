@@ -1,11 +1,11 @@
 <template>
-	<div>
-		<!-- Displays a title  and a list of TransactionGroup.vue objects  grouped by Date
+  <div>
+    <!-- Displays a title  and a list of TransactionGroup.vue objects  grouped by Date
 		props: [] of transactions
 		dependencies:
 		vuex getter to obtain user's preferred UI lang (i18n texts)?
 		//-->
-	</div>
+  </div>
 </template>
 
 <script lang="ts">

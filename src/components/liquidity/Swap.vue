@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- 
+  <div>
+    <!-- 
 			Displays a swap building component:
 			title, chose denom balance
 			Max Icon button (using ../ui/Icon.vue)
@@ -13,7 +13,7 @@
 			dependencies:
 					vuex getter to obtain user's preferred UI lang (i18n texts)?
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

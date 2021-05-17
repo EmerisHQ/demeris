@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<!-- Displays a single step		
+  <div>
+    <!-- Displays a single step		
 
 		Uses ./Step.vue
 		props:
@@ -10,7 +10,7 @@
 		emits started, active-step-index , completed etc. as it progressees
 
 		-->
-	</div>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
