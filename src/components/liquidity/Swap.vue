@@ -62,7 +62,8 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     padding: 0 2.4rem;
-
+    
+    color:var(--text);
     /* &__dot-button {
       width: 2.4rem;
       height: 2.4rem;
@@ -75,6 +76,7 @@ export default defineComponent({
     align-items: center;
 
     height: 3.6rem;
+    margin: 2.2rem 0;
 
     &-divider {
       width: 100%;
