@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
-  "homepage": "https://github.com/tendermint/vue",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -16,11 +15,15 @@
     "@starport/tendermint-liquidity-js": "^0.1.0",
     "@starport/vue": "^0.1.47",
     "@starport/vuex": "^0.1.47",
+    "@tailwindcss/postcss7-compat": "^2.0.2",
     "@types/long": "^4.0.1",
+    "autoprefixer": "^9",
     "axios": "^0.21.1",
     "bech32": "^2.0.0",
     "core-js": "^3.6.5",
     "long": "^4.0.0",
+    "postcss": "^7",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "vue": "^3.0.11",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0-0"
@@ -43,6 +46,8 @@
     "node-sass": "^5.0.0",
     "prettier": "^1.19.1",
     "sass-loader": "^10.0.5",
-    "typescript": "~3.9.3"
-  }
+    "typescript": "~3.9.3",
+    "vue-cli-plugin-tailwind": "~2.0.6"
+  },
+  "homepage": "https://github.com/tendermint/vue"
 }
