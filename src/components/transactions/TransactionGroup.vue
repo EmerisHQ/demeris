@@ -11,6 +11,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'TransactionGroup'
-})
+  name: 'TransactionGroup',
+});
 </script>

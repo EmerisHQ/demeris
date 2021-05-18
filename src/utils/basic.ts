@@ -1,6 +1,6 @@
-import { bech32 } from 'bech32';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { bech32 } from 'bech32';
 
 export function toHexString(byteArray) {
   return Array.prototype.map

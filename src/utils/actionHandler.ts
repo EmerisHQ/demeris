@@ -1,7 +1,8 @@
 import * as Actions from '@/types/actions';
-import { store } from '../store/index';
 import { Amount } from '@/types/base';
-import { isNative, getChannel, getDenomHash, generateDenomHash } from './basic';
+
+import { store } from '../store/index';
+import { generateDenomHash,getChannel, getDenomHash, isNative } from './basic';
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: { amount: Amount; chain_name: string }) {
