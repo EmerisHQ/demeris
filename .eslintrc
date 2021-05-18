@@ -22,5 +22,23 @@
     "vue/max-attributes-per-line": "off",
     "@typescript-eslint/camelcase": "off",
     "vue/singleline-html-element-content-newline": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/src/**/*.spec.{j,t}s?(x)"
+      ],
+      "env": {
+        "jest": true
+      }
+    },
+    {
+      "files": [
+        "**/src/**/*.spec.{j,t}s?(x)"
+      ],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }
