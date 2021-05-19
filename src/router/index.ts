@@ -12,6 +12,11 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
+    path: '/assets',
+    name: 'Assets',
+    component: () => import('@/views/Assets.vue'),
+  },
+  {
     path: '/pool',
     name: 'Pool',
     component: () => import('../views/Pool.vue'),
