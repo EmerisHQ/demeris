@@ -1,12 +1,8 @@
 <template>
   <header class="header">
-    <div class="header__logo">
-      <div class="header__logo_icon">💎</div>
-      <div class="header__logo_text">
-        <div class="header__logo_text-title">Navigator</div>
-        <div class="header__logo_text-status">Beta</div>
-      </div>
-    </div>
+    <Logo />
+    <Navbar />
+
     <div class="space"></div>
     <div class="header__wallet">
       <button class="header__wallet-button">Send</button>
@@ -17,12 +13,22 @@
         <div class="header__wallet__account-value">$1,000</div>
       </div> -->
     </div>
+    <Wallet />
   </header>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import Wallet from '@/components/account/Wallet.vue';
+import Logo from '@/components/layout/Logo.vue';
+import Navbar from '@/components/layout/Navbar.vue';
 export default defineComponent({
   name: 'Header',
+  components: {
+    Logo,
+    Navbar,
+    Wallet,
+  },
 });
 </script>
 

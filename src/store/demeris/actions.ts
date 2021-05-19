@@ -10,6 +10,9 @@ import { keyHashfromAddress } from '@/utils/basic';
 
 import {
   DemerisActionParams,
+  DemerisActionsByAddressParams,
+  DemerisActionsByChainParams,
+  DemerisActionsTraceParams,
   DemerisActionTypes,
   DemerisSubscriptions,
   GlobalDemerisActionTypes,
@@ -34,23 +37,23 @@ export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Balances>;
   [DemerisActionTypes.GET_STAKING_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
   [DemerisActionTypes.GET_NUMBERS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Numbers>;
   [DemerisActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe }: DemerisActionParams,
+    { subscribe }: DemerisActionsByAddressParams,
   ): Promise<API.VerifiedDenoms>;
   [DemerisActionTypes.GET_FEE_ADDRESSES](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe }: DemerisActionParams,
   ): Promise<API.FeeAddresses>;
   [DemerisActionTypes.GET_CHAINS](
     { commit, getters }: ActionContext<State, RootState>,
@@ -64,39 +67,39 @@ export interface Actions {
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsTraceParams,
   ): Promise<API.VerifyTrace>;
   [DemerisActionTypes.GET_FEE_ADDRESS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.FeeAddress>;
   [DemerisActionTypes.GET_FEE](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.Fee>;
   [DemerisActionTypes.GET_BECH32_CONFIG](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.Bech32Config>;
   [DemerisActionTypes.GET_FEE_TOKENS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.FeeTokens>;
   [DemerisActionTypes.GET_CHAIN](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe }: DemerisActionParams,
+    { subscribe }: DemerisActionsByChainParams,
   ): Promise<API.Chain>;
   [DemerisActionTypes.GET_PRIMARY_CHANNEL](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.PrimaryChannel>;
   [DemerisActionTypes.GET_PRIMARY_CHANNELS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.PrimaryChannels>;
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionParams,
+    { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<any>; //TODO chain status
 
   [DemerisActionTypes.BROADCAST_TX](
@@ -253,9 +256,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_FEE_ADDRESSES]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get(
-        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/address',
-      );
+      const response = await axios.get(getters['getEndpoint'] + '/chains/fee/addresses');
       commit(DemerisMutationTypes.SET_FEE_ADDRESSES, { params, value: response.data.fee_addresses });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_ADDRESSES, payload: { params } });

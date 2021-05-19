@@ -1,5 +1,11 @@
 <template>
-  <button @click="signIn()">Sign IN</button>
+  <div>
+    <div v-if="isSignedIn">
+      {{ keplrAccountName }}
+      {{ keplrAddress }}
+    </div>
+    <button v-else @click="signIn()">Sign IN</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -12,10 +18,14 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const isSignedIn = computed(() => {
-      return store.getters.isSignedIn;
+      console.log(store);
+      return store.getters['demeris/isSignedIn'];
     });
     const keplrAccountName = computed(() => {
-      return store.getters.getKeplrAccountName;
+      return store.getters['demeris/getKeplrAccountName'];
+    });
+    const keplrAddress = computed(() => {
+      return store.getters['demeris/getKeplrAddress'];
     });
     const signIn = () => {
       store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
@@ -23,6 +33,7 @@ export default defineComponent({
     return {
       isSignedIn,
       keplrAccountName,
+      keplrAddress,
       signIn,
     };
   },

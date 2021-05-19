@@ -1,8 +1,5 @@
 <template>
   <Header />
-  <Navbar />
-
-  <Wallet ref="wallet" />
   <div class="layout-frame">
     <slot />
   </div>
@@ -11,16 +8,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import Wallet from '@/components/account/Wallet.vue';
 import Header from '@/components/layout/Header.vue';
-import Navbar from '@/components/layout/Navbar.vue';
 
 export default defineComponent({
   name: 'DefaultLayout',
   components: {
     Header,
-    Navbar,
-    Wallet,
   },
 });
 </script>

@@ -59,6 +59,18 @@ export type DemerisActionParams = {
   subscribe: boolean;
   params?: API.APIRequests;
 };
+export type DemerisActionsByAddressParams = {
+  subscribe: boolean;
+  params?: API.AddrReq;
+};
+export type DemerisActionsByChainParams = {
+  subscribe: boolean;
+  params?: API.ChainReq;
+};
+export type DemerisActionsTraceParams = {
+  subscribe: boolean;
+  params?: API.VerifyTraceReq;
+};
 export type DemerisSubscriptions = {
   action: Exclude<
     DemerisActionTypes,
