@@ -8,7 +8,9 @@
     "parser": "@typescript-eslint/parser"
   },
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "simple-import-sort",
+    "unused-imports"
   ],
   "extends": [
     "@vue/typescript/recommended",
@@ -21,6 +23,9 @@
     "vue/html-self-closing": "off",
     "vue/max-attributes-per-line": "off",
     "@typescript-eslint/camelcase": "off",
-    "vue/singleline-html-element-content-newline": "off"
+    "vue/singleline-html-element-content-newline": "off",
+    "simple-import-sort/imports": "error",
+		"simple-import-sort/exports": "error",
+		"unused-imports/no-unused-imports-ts": "error",
   }
 }

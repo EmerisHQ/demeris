@@ -22,8 +22,9 @@
 </template>
 
 <script lang="ts">
-import { Chain } from '@/types/api';
 import { computed, defineComponent, PropType } from 'vue';
+
+import { Chain } from '@/types/api';
 
 export default defineComponent({
   props: {

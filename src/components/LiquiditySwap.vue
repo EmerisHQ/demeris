@@ -66,7 +66,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, computed, toRefs } from 'vue';
+import { computed, defineComponent, reactive, toRefs } from 'vue';
+
 import { TEST_DATA } from '@/TEST_DATA';
 export default defineComponent({
   name: 'Swap',

@@ -1,4 +1,5 @@
 import { Pool } from '@starport/tendermint-liquidity-js/tendermint/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/liquidity';
+
 import * as Base from './base';
 
 export type BaseAction = {

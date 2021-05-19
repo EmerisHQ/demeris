@@ -18,6 +18,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'Swap'
-})
+  name: 'Swap',
+});
 </script>
