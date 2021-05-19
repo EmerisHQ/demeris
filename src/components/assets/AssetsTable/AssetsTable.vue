@@ -49,10 +49,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
-import { Balances, Balance } from '@/types/api';
 import groupBy from 'lodash.groupby';
+import { computed, defineComponent, PropType } from 'vue';
+
 import Icon from '@/components/ui/Icon.vue';
+import { Balance,Balances } from '@/types/api';
 
 export default defineComponent({
   name: 'AssetsTable',
