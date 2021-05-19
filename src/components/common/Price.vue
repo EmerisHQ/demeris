@@ -10,6 +10,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'Price'
-})
+  name: 'Price',
+});
 </script>

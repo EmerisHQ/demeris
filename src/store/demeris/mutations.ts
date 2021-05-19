@@ -1,10 +1,11 @@
 import { MutationTree } from 'vuex';
+
 import * as API from '@/types/api';
 
-import { State, getDefaultState } from './state';
-import { DemerisMutationTypes as MutationTypes, DemerisMutations } from './mutation-types';
 import { DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
+import { DemerisMutations,DemerisMutationTypes as MutationTypes } from './mutation-types';
+import { getDefaultState,State } from './state';
 
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations

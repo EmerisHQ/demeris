@@ -1,15 +1,17 @@
-import { ActionTree, ActionContext } from 'vuex';
-import * as API from '@/types/api';
-import { RootState } from '@/store';
-import { SpVuexError } from '@starport/vuex';
-import { State, ChainData } from './state';
-import { DemerisActionTypes, DemerisActionParams, DemerisSubscriptions } from './action-types';
-import { DemerisMutationTypes } from './mutation-types';
-import axios from 'axios';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
-import DemerisSigningClient from './demerisSigningClient';
+import { SpVuexError } from '@starport/vuex';
+import axios from 'axios';
+import { ActionContext,ActionTree } from 'vuex';
+
+import { RootState } from '@/store';
+import * as API from '@/types/api';
 import { keyHashfromAddress } from '@/utils/basic';
+
+import { DemerisActionParams, DemerisActionTypes, DemerisSubscriptions } from './action-types';
+import DemerisSigningClient from './demerisSigningClient';
+import { DemerisMutationTypes } from './mutation-types';
+import { ChainData,State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;

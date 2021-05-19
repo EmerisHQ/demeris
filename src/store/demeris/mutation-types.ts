@@ -1,4 +1,5 @@
 import * as API from '@/types/api';
+
 import { DemerisConfig } from './actions';
 
 export enum DemerisMutationTypes {

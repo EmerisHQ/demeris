@@ -1,4 +1,5 @@
 import * as API from '@/types/api';
+
 import { DemerisSubscriptions } from './action-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;

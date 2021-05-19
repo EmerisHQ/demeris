@@ -17,6 +17,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'Balance'
-})
+  name: 'Balance',
+});
 </script>
