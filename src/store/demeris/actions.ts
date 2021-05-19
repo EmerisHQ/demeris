@@ -2,7 +2,7 @@ import { EncodeObject } from '@cosmjs/proto-signing';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
-import { ActionContext,ActionTree } from 'vuex';
+import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
@@ -16,7 +16,7 @@ import {
 } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
 import { DemerisMutationTypes } from './mutation-types';
-import { ChainData,State } from './state';
+import { ChainData, State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;
@@ -276,7 +276,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
       const fee = feeUSD; // TODO: Calculate fee from prices
       const numbers = getters['getNumbers']({ address: keyHashfromAddress(account.address) });
-      const signerData = numbers.find(x => x.chain_name == chain_name);
+      const signerData = numbers.find((x) => x.chain_name == chain_name);
       const tx = await client.signWMeta(account.address, msgs, fee, null, signerData);
       return { tx, chain_name };
     } catch (e) {
@@ -288,7 +288,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       await window.keplr.enable('cosmoshub-4');
       const key = await window.keplr.getKey('cosmoshub-4');
-      console.log(key);
       commit(DemerisMutationTypes.SET_KEPLR, key);
       return true;
     } catch (e) {
@@ -475,7 +474,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.RESET_STATE);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
-    state._Subscriptions.forEach(subscription => {
+    state._Subscriptions.forEach((subscription) => {
       dispatch(subscription.action, subscription.payload);
     });
   },
