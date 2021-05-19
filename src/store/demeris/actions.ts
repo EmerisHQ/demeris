@@ -8,7 +8,12 @@ import { RootState } from '@/store';
 import * as API from '@/types/api';
 import { keyHashfromAddress } from '@/utils/basic';
 
-import { DemerisActionParams, DemerisActionTypes, DemerisSubscriptions } from './action-types';
+import {
+  DemerisActionParams,
+  DemerisActionTypes,
+  DemerisSubscriptions,
+  GlobalDemerisActionTypes,
+} from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
 import { DemerisMutationTypes } from './mutation-types';
 import { ChainData,State } from './state';
@@ -47,11 +52,6 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionParams,
   ): Promise<API.FeeAddresses>;
-  [DemerisActionTypes.SIGN_WITH_KEPLR](
-    { getters }: ActionContext<State, RootState>,
-    { msgs, chain_name }: DemerisSignParams,
-  ): Promise<DemerisTxParams>;
-
   [DemerisActionTypes.GET_CHAINS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -103,6 +103,11 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { tx, chain_name }: DemerisTxParams,
   ): Promise<any>;
+  [DemerisActionTypes.SIGN_WITH_KEPLR](
+    { commit, getters }: ActionContext<State, RootState>,
+    { msgs, chain_name }: DemerisSignParams,
+  ): Promise<DemerisTxParams>;
+  [DemerisActionTypes.SIGN_IN]({ commit }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
 
   [DemerisActionTypes.INIT](
@@ -116,7 +121,78 @@ export interface Actions {
   ): void;
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }: ActionContext<State, RootState>): void;
 }
-
+export interface GlobalActions {
+  // Cross-chain endpoint actions
+  [GlobalDemerisActionTypes.GET_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_BALANCES]>;
+  [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
+  [GlobalDemerisActionTypes.GET_NUMBERS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS]>;
+  [GlobalDemerisActionTypes.GET_FEE_ADDRESSES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>;
+  [GlobalDemerisActionTypes.GET_VERIFIED_DENOMS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_VERIFIED_DENOMS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_VERIFIED_DENOMS]>;
+  [GlobalDemerisActionTypes.GET_CHAINS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAINS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_CHAINS]>;
+  [GlobalDemerisActionTypes.GET_PRICES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_PRICES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_PRICES]>;
+  [GlobalDemerisActionTypes.GET_VERIFY_TRACE](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>;
+  [GlobalDemerisActionTypes.GET_FEE_ADDRESS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_ADDRESS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_ADDRESS]>;
+  [GlobalDemerisActionTypes.GET_BECH32_CONFIG](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>;
+  [GlobalDemerisActionTypes.GET_FEE](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_FEE]>;
+  [GlobalDemerisActionTypes.GET_FEE_TOKENS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_TOKENS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_TOKENS]>;
+  [GlobalDemerisActionTypes.GET_CHAIN](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN]>;
+  [GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_PRIMARY_CHANNEL]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_PRIMARY_CHANNEL]>;
+  [GlobalDemerisActionTypes.GET_PRIMARY_CHANNELS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_PRIMARY_CHANNELS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_PRIMARY_CHANNELS]>;
+  [GlobalDemerisActionTypes.GET_CHAIN_STATUS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>;
+  [GlobalDemerisActionTypes.BROADCAST_TX](
+    ...args: Parameters<Actions[DemerisActionTypes.BROADCAST_TX]>
+  ): ReturnType<Actions[DemerisActionTypes.BROADCAST_TX]>;
+  [GlobalDemerisActionTypes.SIGN_WITH_KEPLR](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>;
+  [GlobalDemerisActionTypes.SIGN_IN](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
+  [GlobalDemerisActionTypes.INIT](
+    ...args: Parameters<Actions[DemerisActionTypes.INIT]>
+  ): ReturnType<Actions[DemerisActionTypes.INIT]>;
+  [GlobalDemerisActionTypes.RESET_STATE](
+    ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
+  ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
+  [GlobalDemerisActionTypes.UNSUBSCRIBE](
+    ...args: Parameters<Actions[DemerisActionTypes.UNSUBSCRIBE]>
+  ): ReturnType<Actions[DemerisActionTypes.UNSUBSCRIBE]>;
+  [GlobalDemerisActionTypes.STORE_UPDATE](
+    ...args: Parameters<Actions[DemerisActionTypes.STORE_UPDATE]>
+  ): ReturnType<Actions[DemerisActionTypes.STORE_UPDATE]>;
+}
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
@@ -205,6 +281,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return { tx, chain_name };
     } catch (e) {
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
+    }
+  },
+
+  async [DemerisActionTypes.SIGN_IN]({ commit }) {
+    try {
+      await window.keplr.enable('cosmoshub-4');
+      const key = await window.keplr.getKey('cosmoshub-4');
+      console.log(key);
+      commit(DemerisMutationTypes.SET_KEPLR, key);
+      return true;
+    } catch (e) {
+      return false;
     }
   },
   // TODO Prices query

@@ -1,20 +1,25 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import DashBoard from '../views/DashBoard.vue';
+import Portfolio from '../views/Portfolio.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'DashBoard',
-    component: DashBoard,
+    name: 'Portfolio',
+    component: Portfolio,
     meta: {
       layout: 'DefaultLayout',
     },
   },
   {
+    path: '/assets',
+    name: 'Assets',
+    component: () => import('@/views/Assets.vue'),
+  },
+  {
     path: '/pool',
     name: 'Pool',
-    component: () => import('../views/Pool.vue'),
+    component: () => import('@/views/Pools.vue'),
   },
 ];
 

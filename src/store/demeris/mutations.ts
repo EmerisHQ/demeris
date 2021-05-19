@@ -4,7 +4,7 @@ import * as API from '@/types/api';
 
 import { DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import { DemerisMutations,DemerisMutationTypes as MutationTypes } from './mutation-types';
+import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
 import { getDefaultState,State } from './state';
 
 export type Mutations<S = State> = {
@@ -20,6 +20,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: any }): void; // TODO: prices
 
+  [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
@@ -69,6 +70,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
     state.prices = payload.value as any; // TODO: prices
+  },
+  [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
+    state.keplr = payload;
   },
 
   // Chain-specific endpoint mutations

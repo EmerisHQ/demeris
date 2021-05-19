@@ -1,21 +1,30 @@
 <template>
-  <div>
-    <!-- 
-		Wallet main component (can be basis for interactions. Waiting on designs)
-		Props: wallet name/address
-		Displays: 
-			unique wallet avatar (color gradient?)
-			Wallet name or address
-			total balance in preferred_currency
-		Depends on:
-			vuex getter to obtain account's total balance
-		 //-->
-  </div>
+  <button @click="signIn()">Sign IN</button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
+
+import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 export default defineComponent({
   name: 'Wallet',
+  setup() {
+    const store = useStore();
+    const isSignedIn = computed(() => {
+      return store.getters.isSignedIn;
+    });
+    const keplrAccountName = computed(() => {
+      return store.getters.getKeplrAccountName;
+    });
+    const signIn = () => {
+      store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+    };
+    return {
+      isSignedIn,
+      keplrAccountName,
+      signIn,
+    };
+  },
 });
 </script>

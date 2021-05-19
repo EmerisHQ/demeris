@@ -2,8 +2,9 @@ import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
+import { keyHashfromAddress } from '@/utils/basic';
 
-import { ChainData,State } from './state';
+import { ChainData, State } from './state';
 
 export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances };
@@ -14,6 +15,8 @@ export type Getters = {
   getChains(state: State): Record<string, ChainData>;
   getPrices(state: State): any; //TODO prices
   getEndpoint(state: State): string;
+  isSignedIn(state: State): boolean;
+  getKeplrAccountName(state: State): string | null;
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config };
@@ -55,6 +58,19 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getEndpoint: state => {
     return state.endpoint; //TODO: Prices
+  },
+  isSignedIn: state => {
+    return state.keplr ? true : false;
+  },
+  getKeplrAccountName: state => {
+    return state.keplr?.name ?? null;
+  },
+  getKeplrAddress: state => {
+    if (state.keplr) {
+      return keyHashfromAddress(state.keplr.bech32Address);
+    } else {
+      return null;
+    }
   },
   getVerifyTrace: state => params => {
     return (
