@@ -51,10 +51,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.assets__container {
-  max-width: 64rem;
-  margin: 0 auto;
-}
-</style>
