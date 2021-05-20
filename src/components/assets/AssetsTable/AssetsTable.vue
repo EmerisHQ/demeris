@@ -18,7 +18,7 @@
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
         <!-- TODO: Implement the Chain Name component -->
-        <td class="assets-table__row__denom">
+        <td class="assets-table__row__denom uppercase">
           {{ asset.denom }}
         </td>
 
