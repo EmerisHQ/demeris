@@ -65,6 +65,8 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import Button from '@/components/ui/Button.vue';
 
+import { TEST_DATA as TD } from '@/TEST_DATA';
+
 export default defineComponent({
   name: 'Swap',
   components: {
