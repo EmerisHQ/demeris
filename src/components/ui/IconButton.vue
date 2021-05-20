@@ -1,18 +1,26 @@
 <template>
   <!-- Icon button implementation. Same specs as button only displays Icon instead of text using ./Icon.vue //-->
-  <button class="icon-button" :class="[shape, status, shape !== 'flat' ? 'elevation-button' : '']">
+  <button
+    :class="[shape, status, shape !== 'flat' ? 'elevation-button' : '']"
+    class="icon-button"
+    @click="clickFunction"
+  >
     <Icon v-if="isIcon" :name="name" />
     <div v-else class="s-minus">{{ buttonName }}</div>
   </button>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
+import { ButtonFunctionData } from '@/types/setups';
+import useButton from '@/setups/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+
 export default defineComponent({
   name: 'IconButton',
   components: { Icon },
   props: {
     name: { type: String, required: true },
+    data: { type: Object as PropType<ButtonFunctionData>, required: true },
     shape: {
       type: String,
       default: () => {
@@ -21,16 +29,25 @@ export default defineComponent({
     },
     status: { type: String, required: true },
   },
-  setup(props) {
-    const name = String(props.name);
+  setup(props: any) {
+    const { buttonFunction } = useButton();
+    const name = ref(String(props.name));
     const buttonName = ref(props.name);
+
     let isIcon = true;
 
-    if (!name.includes('Icon')) {
+    if (!props.name.includes('Icon')) {
       isIcon = false;
     }
+    console.log(props.data);
+    function clickFunction() {
+      buttonFunction({
+        type: props.data.type,
+        function: props.data.function,
+      });
+    }
 
-    return { isIcon, buttonName };
+    return { isIcon, buttonName, clickFunction };
   },
 });
 </script>

@@ -27,8 +27,24 @@
     <div class="swap-widget__controller">
       <div class="swap-widget__controller-divider" />
       <div class="swap-widget__controller-wrapper">
-        <IconButton :name="'UpsideDownIcon'" :shape="'circle'" :status="'normal'" />
-        <IconButton :name="'Max'" :shape="'text'" :status="'normal'" />
+        <IconButton
+          :name="'UpsideDownIcon'"
+          :shape="'circle'"
+          :status="'normal'"
+          :data="{
+            type: 'custom',
+            function: changePayToReceive,
+          }"
+        />
+        <IconButton
+          :name="'Max'"
+          :shape="'text'"
+          :status="'normal'"
+          :data="{
+            type: 'custom',
+            function: setMax,
+          }"
+        />
       </div>
     </div>
 
@@ -61,6 +77,14 @@ export default defineComponent({
     const buttonName = computed(() => 'Swap');
     const buttonStatus = computed(() => 'normal');
 
+    function changePayToReceive() {
+      alert('change Pay coin to Receive coin');
+    }
+
+    function setMax() {
+      alert('setMax');
+    }
+
     function swap() {
       const swapParams = {
         from: {
@@ -78,6 +102,7 @@ export default defineComponent({
           amount: 2000000,
         },
       };
+
       buttonFunction({
         type: 'custom',
         function: () => {
@@ -86,7 +111,7 @@ export default defineComponent({
       });
     }
 
-    return { swap, buttonName, buttonStatus };
+    return { swap, buttonName, buttonStatus, changePayToReceive, setMax };
   },
 });
 </script>

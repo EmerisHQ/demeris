@@ -1,13 +1,7 @@
 <script lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-
-interface ButtonFunctionData {
-  type: 'custom' | 'router-link' | 'link-go-out' | 'link-current-page';
-  url?: string;
-  function?: Function;
-}
-
+import { ButtonFunctionData } from '@/types/setups';
 export default function () {
   const router = useRouter();
 
@@ -19,8 +13,10 @@ export default function () {
         path: data.url,
       });
     } else if (data.type === 'link-go-out') {
+      // open new page
       window.open(data.url, '_blank');
     } else if (data.type === 'link-current-page') {
+      // replace current page
       window.location.href = data.url;
     }
   }
