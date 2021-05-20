@@ -27,7 +27,7 @@
     <div class="space"></div>
   </nav>
 
-  <div class="layout-frame container">
+  <div class="layout-frame container mx-auto">
     <div class="px-10">
       <slot />
     </div>

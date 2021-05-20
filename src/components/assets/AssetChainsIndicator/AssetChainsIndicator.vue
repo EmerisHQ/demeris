@@ -1,6 +1,6 @@
 <template>
-  <tippy>
-    <div class="asset-chains-indicator flex items-center space-x-4 w-full">
+  <div class="asset-chains-indicator flex">
+    <tippy class="inline-flex items-center space-x-4">
       <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-5">
         <span
           v-for="indicator of indicators"
@@ -15,18 +15,18 @@
         </span>
       </div>
 
-      <div class="asset-chains-indicator__count">
+      <div class="asset-chains-indicator__count whitespace-nowrap">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
         chains
       </div>
-    </div>
 
-    <template #content>
-      <p v-for="balance of filteredBalances" :key="balance.on_chain">
-        {{ `${balance.amount} on ${balance.on_chain}` }}
-      </p>
-    </template>
-  </tippy>
+      <template #content>
+        <p v-for="balance of filteredBalances" :key="balance.on_chain">
+          {{ `${balance.amount} on ${balance.on_chain}` }}
+        </p>
+      </template>
+    </tippy>
+  </div>
 </template>
 
 <script lang="ts">
@@ -83,5 +83,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped></style>

@@ -1,5 +1,5 @@
 <template>
-  <table class="assets-table">
+  <table class="assets-table table-fixed">
     <thead>
       <tr>
         <th class="text-left">Asset</th>
@@ -43,8 +43,8 @@
           $6,150.20
         </td>
 
-        <td class="assets-table__row__chains w-80">
-          <div class="assets-table__row__chains__wrapper">
+        <td class="assets-table__row__chains w-64">
+          <div class="assets-table__row__chains__wrapper w-full flex items-center justify-end space-x-5">
             <AssetChainsIndicator :denom="asset.denom" :balances="balances" class="w-full" />
 
             <button
@@ -139,13 +139,6 @@ export default defineComponent({
 
 .assets-table__row__arrow-button {
   margin-left: 1rem;
-}
-
-.assets-table__row__chains__wrapper {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
 }
 
 .assets-table .asset-chains-indicator {
