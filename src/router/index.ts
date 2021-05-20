@@ -21,6 +21,10 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Pool',
     component: () => import('../views/Pool.vue'),
   },
+  {
+    path: '/playground',
+    component: () => import('../views/Playground.vue'),
+  },
 ];
 
 const router = createRouter({
