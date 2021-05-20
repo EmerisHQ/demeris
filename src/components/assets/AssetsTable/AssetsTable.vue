@@ -2,10 +2,11 @@
   <table class="assets-table">
     <thead>
       <tr>
-        <th class="assets-table__item--text-left">Asset</th>
-        <th class="assets-table__item--text-right">Price</th>
-        <th v-if="!isCompact" class="assets-table__item--text-right">Balance</th>
-        <th class="assets-table__item--text-right">
+        <th class="text-left">Asset</th>
+        <th class="text-right">Price</th>
+        <th class="text-right">24h %</th>
+        <th v-if="!isCompact" class="text-right">Balance</th>
+        <th class="text-right">
           Balance
         </th>
         <th>
@@ -21,27 +22,36 @@
           {{ asset.denom }}
         </td>
 
-        <td class="assets-table__row__price assets-table__item--text-right">
+        <td class="assets-table__row__price text-right">
           <!-- TODO: Get the price -->
           $20.50
         </td>
 
-        <td v-if="!isCompact" class="assets-table__row__balance assets-table__item--text-right">
+        <td class="assets-table__row__price w-32">
+          <div class="flex items-start justify-end space-x-1 text-green-700">
+            <TrendingUpIcon class="w-5 h-5" />
+            <span>52.21%</span>
+          </div>
+        </td>
+
+        <td v-if="!isCompact" class="assets-table__row__balance text-right">
           <span>{{ asset.totalAmount }} {{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__equivalent-balance assets-table__item--text-right">
+        <td class="assets-table__row__equivalent-balance text-right">
           <!-- TODO: Implement the equivalement amount based on price * totalAmount -->
           $6,150.20
         </td>
 
-        <td class="assets-table__row__chains assets-table__item--text-right">
+        <td class="assets-table__row__chains w-80">
           <div class="assets-table__row__chains__wrapper">
-            <!-- TODO: Implement Chain Group component -->
-            <span v-for="chainName of asset.chainsNames" :key="chainName"> {{ chainName }}/ </span>
+            <AssetChainsIndicator :denom="asset.denom" :balances="balances" class="w-full" />
 
-            <button class="assets-table__row__arrow-button" @click="handleClick(asset)">
-              <Icon name="ChevronRightIcon" />
+            <button
+              class="assets-table__row__arrow-button p-2 text-gray-500 hover:text-gray-600"
+              @click="handleClick(asset)"
+            >
+              <ChevronRightIcon class="w-5 h-5" />
             </button>
           </div>
         </td>
@@ -54,13 +64,15 @@
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
-import Icon from '@/components/ui/Icon.vue';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
+import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
 import { Balance, Balances } from '@/types/api';
 
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { Icon },
+  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon },
 
   props: {
     isCompact: {
@@ -99,7 +111,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
 .assets-table {
   width: 100%;
 }
@@ -109,14 +121,6 @@ export default defineComponent({
   padding-bottom: 1rem;
   vertical-align: middle;
   font-weight: 400;
-}
-
-.assets-table__item--text-left {
-  text-align: left;
-}
-
-.assets-table__item--text-right {
-  text-align: right;
 }
 
 .assets-table__row__denom {
@@ -137,14 +141,14 @@ export default defineComponent({
   margin-left: 1rem;
 }
 
-.assets-table__row__chains {
-  width: 25rem;
-}
-
 .assets-table__row__chains__wrapper {
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+}
+
+.assets-table .asset-chains-indicator {
   justify-content: flex-end;
 }
 </style>

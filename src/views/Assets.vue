@@ -1,10 +1,8 @@
 <template>
   <AppLayout>
-    <div class="home">
-      <div class="container">
-        <div>Assets</div>
-        <AssetsTable :balances="balances" />
-      </div>
+    <div>
+      <h1 class="text-4xl font-bold my-8">Assets</h1>
+      <AssetsTable :balances="balances" />
     </div>
   </AppLayout>
 </template>

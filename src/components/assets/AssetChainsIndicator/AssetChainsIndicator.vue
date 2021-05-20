@@ -1,11 +1,11 @@
 <template>
   <tippy>
     <div class="asset-chains-indicator flex items-center space-x-4 w-full">
-      <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-3">
+      <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-5">
         <span
           v-for="indicator of indicators"
           :key="indicator"
-          class="asset-chains-indicator__list__item rounded-full border-2 w-8 h-8 border-blue-300"
+          class="asset-chains-indicator__list__item rounded-full border-2 w-8 h-8 border-blue-300 bg-white"
         />
         <span
           v-if="hasMoreIndicators"
@@ -84,11 +84,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.asset-chains-indicator__list__item {
-  filter: drop-shadow(0px 4px 8px rgba(159, 240, 236, 0.21));
-}
-.asset-chains-indicator__list__more {
-  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.12));
-}
-</style>
+<style scoped></style>

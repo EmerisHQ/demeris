@@ -10,7 +10,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
