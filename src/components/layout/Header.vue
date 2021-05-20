@@ -7,13 +7,8 @@
     <div class="header__wallet">
       <button class="header__wallet-button">Send</button>
       <button class="header__wallet-button">Receive</button>
-      <!-- <div class="header__wallet-image"></div> -->
-      <!-- <div class="header__wallet__account">
-        <div class="header__wallet__account-name">Name</div>
-        <div class="header__wallet__account-value">$1,000</div>
-      </div> -->
+      <Wallet />
     </div>
-    <Wallet />
   </header>
 </template>
 <script lang="ts">
@@ -33,14 +28,17 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.space {
+  flex: 1;
+}
+
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 10rem;
-  padding: 2rem 32rem 2rem 2rem;
-  padding-right: 32rem; // based on SpWallet size
+  padding: 2rem;
 
   display: flex;
   align-items: center;

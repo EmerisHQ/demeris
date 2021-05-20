@@ -110,7 +110,7 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { msgs, chain_name }: DemerisSignParams,
   ): Promise<DemerisTxParams>;
-  [DemerisActionTypes.SIGN_IN]({ commit }: ActionContext<State, RootState>): Promise<boolean>;
+  [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
 
   [DemerisActionTypes.INIT](
@@ -203,7 +203,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
-        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balances',
+        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
       );
       commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
       if (subscribe) {
@@ -217,7 +217,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
-        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/staking_balances',
+        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/stakingbalances',
       );
       commit(DemerisMutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
       if (subscribe) {
@@ -285,11 +285,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.SIGN_IN]({ commit }) {
+  async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       await window.keplr.enable('cosmoshub-4');
       const key = await window.keplr.getKey('cosmoshub-4');
       commit(DemerisMutationTypes.SET_KEPLR, key);
+      dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: getters['getKeplrAddress'] } });
+      dispatch(DemerisActionTypes.GET_STAKING_BALANCES, {
+        subscribe: true,
+        params: { address: getters['getKeplrAddress'] },
+      });
       return true;
     } catch (e) {
       return false;

@@ -2,7 +2,6 @@
   <div>
     <div v-if="isSignedIn">
       {{ keplrAccountName }}
-      {{ keplrAddress }}
     </div>
     <button v-else @click="signIn()">Sign IN</button>
   </div>

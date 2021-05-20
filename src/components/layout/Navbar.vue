@@ -14,16 +14,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.space {
-  flex: 1;
-}
-
 .nav {
-  position: fixed;
-  top: 8rem;
-  left: 0;
-  width: 100%;
-
   display: flex;
   padding: 0 5.2rem 2rem;
 

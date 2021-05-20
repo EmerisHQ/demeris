@@ -2,7 +2,7 @@
   <div class="header__logo">
     <div class="header__logo_icon">💎</div>
     <div class="header__logo_text">
-      <div class="header__logo_text-title">Navigator</div>
+      <div class="header__logo_text-title">Demeris</div>
       <div class="header__logo_text-status">Beta</div>
     </div>
   </div>
