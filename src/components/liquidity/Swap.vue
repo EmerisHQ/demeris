@@ -37,12 +37,14 @@
 
     <!-- swap button -->
     <div class="button-wrapper">
-      <Button />
+      <Button :name="buttonName" :status="buttonStatus" :clickFunction="swap" />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
+import { actionHandler } from '@/utils/actionHandler';
+import useButton from '@/setups/Button.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import Button from '@/components/ui/Button.vue';
@@ -53,6 +55,38 @@ export default defineComponent({
     DenomSelect,
     IconButton,
     Button,
+  },
+  setup() {
+    const { buttonFunction } = useButton();
+    const buttonName = computed(() => 'Swap');
+    const buttonStatus = computed(() => 'normal');
+
+    function swap() {
+      const swapParams = {
+        from: {
+          denom: {
+            denom: 'uatom',
+            chain_name: 'cosmos',
+          },
+          amount: 2000000,
+        },
+        to: {
+          denom: {
+            denom: 'uluna',
+            chain_name: 'terra',
+          },
+          amount: 2000000,
+        },
+      };
+      buttonFunction({
+        type: 'custom',
+        function: () => {
+          actionHandler({ name: 'swap', params: swapParams });
+        },
+      });
+    }
+
+    return { swap, buttonName, buttonStatus };
   },
 });
 </script>
