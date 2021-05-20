@@ -20,7 +20,7 @@
       </div>
     </div>
 
-    <!-- from Denom -->
+    <!-- pay coin selector -->
     <DenomSelect />
 
     <!-- button-divider -->
@@ -32,28 +32,34 @@
       </div>
     </div>
 
-    <!-- to Denom -->
+    <!-- receive coin selector -->
     <DenomSelect />
+
+    <!-- swap button -->
+    <div class="button-wrapper">
+      <Button />
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
   name: 'Swap',
   components: {
     DenomSelect,
     IconButton,
+    Button,
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .swap-widget {
-  width: 320px;
-  padding: 3rem 0 2.4rem 0;
+  width: 32rem;
 
   background-color: var(--surface);
 
@@ -61,9 +67,9 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 2.4rem;
-    
-    color:var(--text);
+    padding: 3rem 2.4rem;
+
+    color: var(--text);
     /* &__dot-button {
       width: 2.4rem;
       height: 2.4rem;
@@ -76,7 +82,6 @@ export default defineComponent({
     align-items: center;
 
     height: 3.6rem;
-    margin: 2.2rem 0;
 
     &-divider {
       width: 100%;
@@ -92,6 +97,10 @@ export default defineComponent({
       width: 100%;
       padding: 0 18px;
     }
+  }
+
+  .button-wrapper {
+    padding: 1.6rem 2.4rem 2.4rem;
   }
 }
 </style>
