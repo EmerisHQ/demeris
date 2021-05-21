@@ -4,6 +4,10 @@
       <AssetChainsIndicator :balances="balances" denom="atom" :max-chains-count="4" />
       <AssetChainsIndicator :balances="balances" denom="kava" />
     </div>
+
+    <div class="p-10 flex flex-col space-y-8 max-w-5xl mx-auto">
+      <Pools :pools="pools" />
+    </div>
   </div>
 </template>
 
@@ -11,11 +15,14 @@
 import { defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import Pools from '@/components/liquidity/Pools.vue';
+import { Pool } from '@/types/actions';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
   components: {
     AssetChainsIndicator,
+    Pools,
   },
   setup() {
     const balances: Balances = [
@@ -77,7 +84,31 @@ export default defineComponent({
       },
     ];
 
-    return { balances };
+		const pools: Pool[] = [
+			{
+				id: 1,
+				reserveCoinDenoms: ['atom', 'kava'],
+				reserveAccountAddress: '',
+				poolCoinDenom: 'atom',
+				typeId: 1,
+			},
+			{
+				id: 1,
+				reserveCoinDenoms: ['atom', 'rune'],
+				reserveAccountAddress: '',
+				poolCoinDenom: 'atom',
+				typeId: 1,
+			},
+			{
+				id: 1,
+				reserveCoinDenoms: ['luna', 'rune'],
+				reserveAccountAddress: '',
+				poolCoinDenom: 'luna',
+				typeId: 1,
+			},
+		]
+
+    return { balances, pools };
   },
 });
 </script>

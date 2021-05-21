@@ -1,16 +1,36 @@
 <template>
-  <div>
-    <!-- Displays a title , total net profit/loss  and a list of Pool.vue objects  
-		props: [] of pools
-		dependencies:
-		vuex getter to obtain user's preferred UI lang (i18n texts)?
-		//-->
+  <div class="pools">
+    <Pool v-for="pool of pools" :key="pool.id" :pool="pool" class="h-56" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
+
+import { Pool as PoolType } from '@/types/actions';
+
+import Pool from './Pool.vue';
+
 export default defineComponent({
   name: 'Pools',
+
+	components: {
+		Pool
+	},
+
+	props: {
+		pools: {
+			type: Array as PropType<PoolType[]>,
+			required: true
+		}
+	}
 });
 </script>
+
+<style scoped>
+.pools {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(10rem, 13rem));
+	gap: 1rem;
+}
+</style>
