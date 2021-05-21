@@ -1,7 +1,7 @@
 <template>
   <!-- Icon button implementation. Same specs as button only displays Icon instead of text using ./Icon.vue //-->
   <button
-    :class="[shape, status, shape !== 'flat' ? 'elevation-button' : '']"
+    :class="[type, status, type !== 'flat' ? 'elevation-button' : '']"
     class="icon-button"
     @click="clickFunction"
   >
@@ -22,7 +22,7 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
     data: { type: Object as PropType<ButtonFunctionData>, required: true },
-    shape: {
+    type: {
       type: String,
       default: () => {
         return '';
@@ -40,7 +40,7 @@ export default defineComponent({
     if (!props.name.includes('Icon')) {
       isIcon = false;
     }
-    console.log(props.data);
+   
     function clickFunction() {
       buttonFunction({
         type: props.data.type,

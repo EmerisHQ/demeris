@@ -29,7 +29,7 @@
       <div class="swap-widget__controller-wrapper">
         <IconButton
           :name="'UpsideDownIcon'"
-          :shape="'circle'"
+          :type="'circle'"
           :status="'normal'"
           :data="{
             type: 'custom',
@@ -38,7 +38,7 @@
         />
         <IconButton
           :name="'Max'"
-          :shape="'text'"
+          :type="'text'"
           :status="'normal'"
           :data="{
             type: 'custom',
