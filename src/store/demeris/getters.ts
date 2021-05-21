@@ -1,7 +1,9 @@
 import { GetterTree } from 'vuex';
+
 import { RootState } from '@/store';
-import { State, ChainData } from './state';
 import * as API from '@/types/api';
+
+import { ChainData,State } from './state';
 
 export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances | null };

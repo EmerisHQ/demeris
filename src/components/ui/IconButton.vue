@@ -11,9 +11,10 @@
 </template>
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { ButtonFunctionData } from '@/types/setups';
-import useButton from '@/setups/Button.vue';
+
 import Icon from '@/components/ui/Icon.vue';
+import useButton from '@/setups/Button.vue';
+import { ButtonFunctionData } from '@/types/setups';
 
 export default defineComponent({
   name: 'IconButton',

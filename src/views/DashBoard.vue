@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+
 
 export default {
   name: 'DashBoard',

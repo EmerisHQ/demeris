@@ -4,8 +4,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
 import '@starport/vue/lib/starport-vue.css';
+
+import { defineComponent } from 'vue';
+
 export default defineComponent({
   name: 'App',
   data() {

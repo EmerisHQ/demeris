@@ -9,6 +9,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 export default defineComponent({
-  name: 'Header'
-})
+  name: 'Header',
+});
 </script>

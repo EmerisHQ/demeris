@@ -1,6 +1,6 @@
 <script lang="ts">
-import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+
 import { ButtonFunctionData } from '@/types/setups';
 export default function () {
   const router = useRouter();

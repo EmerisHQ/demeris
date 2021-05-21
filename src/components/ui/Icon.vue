@@ -9,6 +9,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, shallowRef } from 'vue';
+
 import IconBase from '@/components/common/Icons/IconBase.vue';
 export default defineComponent({
   name: 'Icon',

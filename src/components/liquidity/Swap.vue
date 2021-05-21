@@ -53,19 +53,18 @@
 
     <!-- swap button -->
     <div class="button-wrapper">
-      <Button :name="buttonName" :status="buttonStatus" :clickFunction="swap" />
+      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import { actionHandler } from '@/utils/actionHandler';
-import useButton from '@/setups/Button.vue';
-import DenomSelect from '@/components/common/DenomSelect.vue';
-import IconButton from '@/components/ui/IconButton.vue';
-import Button from '@/components/ui/Button.vue';
+import { computed,defineComponent } from 'vue';
 
-import { TEST_DATA as TD } from '@/TEST_DATA';
+import DenomSelect from '@/components/common/DenomSelect.vue';
+import Button from '@/components/ui/Button.vue';
+import IconButton from '@/components/ui/IconButton.vue';
+import useButton from '@/setups/Button.vue';
+import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'Swap',

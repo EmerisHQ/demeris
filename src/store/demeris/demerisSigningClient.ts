@@ -1,6 +1,6 @@
 import { StdFee } from '@cosmjs/amino';
-import { SigningStargateClient } from '@cosmjs/stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
+import { SigningStargateClient } from '@cosmjs/stargate';
 import { Tx, TxRaw } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 
 export default class DemerisSigningClient extends SigningStargateClient {

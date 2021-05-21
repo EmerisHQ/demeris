@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
-    <button @click="clickFunction" :class="status" class="button s-0 w-medium elevation-button">
+    <button :class="status" class="button s-0 w-medium elevation-button" @click="clickFunction">
       {{ name }}
     </button>
   </div>
