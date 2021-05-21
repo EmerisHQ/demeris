@@ -1,6 +1,60 @@
 export const TEST_DATA = {
-    myBalance: {
-        ATOM: { amount: 1250, denom: 'atom', chain_name: 'cosmos hub' },
-        KAVA: { amount: 800, denom: 'kava', chain_name: 'kava' },
-    }
+    balances: [
+        {
+          amount: 10,
+          base_denom: 'atom',
+          on_chain: 'Cosmos',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 20,
+          base_denom: 'atom',
+          on_chain: 'Kava',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 100,
+          base_denom: 'atom',
+          on_chain: 'Akash',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 42,
+          base_denom: 'atom',
+          on_chain: 'Iris',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 54,
+          base_denom: 'atom',
+          on_chain: 'BSC',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 50,
+          base_denom: 'kava',
+          on_chain: 'Kava',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+        {
+          amount: 100,
+          base_denom: 'kava',
+          on_chain: 'Akash',
+          address: '',
+          verified: true,
+          ibc: {},
+        },
+    ]
 }
