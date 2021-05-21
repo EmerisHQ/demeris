@@ -58,7 +58,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed,defineComponent } from 'vue';
+import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
@@ -75,9 +75,11 @@ export default defineComponent({
   },
   setup() {
     const { buttonFunction } = useButton();
-    const buttonName = computed(() => 'Swap');
-    const buttonStatus = computed(() => 'normal');
-
+    const data = reactive({
+      buttonName: 'swap',
+      buttonStatus: computed(() => 'normal')
+    })
+   
     function changePayToReceive() {
       alert('change Pay coin to Receive coin');
     }
@@ -112,7 +114,7 @@ export default defineComponent({
       });
     }
 
-    return { swap, buttonName, buttonStatus, changePayToReceive, setMax };
+    return { ...toRefs(data), swap,changePayToReceive, setMax };
   },
 });
 </script>
