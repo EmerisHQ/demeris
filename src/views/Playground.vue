@@ -84,29 +84,29 @@ export default defineComponent({
       },
     ];
 
-		const pools: Pool[] = [
-			{
-				id: 1,
-				reserveCoinDenoms: ['atom', 'kava'],
-				reserveAccountAddress: '',
-				poolCoinDenom: 'atom',
-				typeId: 1,
-			},
-			{
-				id: 1,
-				reserveCoinDenoms: ['atom', 'rune'],
-				reserveAccountAddress: '',
-				poolCoinDenom: 'atom',
-				typeId: 1,
-			},
-			{
-				id: 1,
-				reserveCoinDenoms: ['luna', 'rune'],
-				reserveAccountAddress: '',
-				poolCoinDenom: 'luna',
-				typeId: 1,
-			},
-		]
+    const pools: Pool[] = [
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'kava'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['luna', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'luna',
+        typeId: 1,
+      },
+    ];
 
     return { balances, pools };
   },

@@ -14,23 +14,23 @@ import Pool from './Pool.vue';
 export default defineComponent({
   name: 'Pools',
 
-	components: {
-		Pool
-	},
+  components: {
+    Pool,
+  },
 
-	props: {
-		pools: {
-			type: Array as PropType<PoolType[]>,
-			required: true
-		}
-	}
+  props: {
+    pools: {
+      type: Array as PropType<PoolType[]>,
+      required: true,
+    },
+  },
 });
 </script>
 
 <style scoped>
 .pools {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(10rem, 13rem));
-	gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 13rem));
+  gap: 1rem;
 }
 </style>

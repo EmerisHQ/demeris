@@ -35,25 +35,25 @@ export default defineComponent({
 
   components: { TrendingUpIcon },
 
-	props: {
-		pool: {
-			type: Object as PropType<Pool>,
-			required: true
-		}
-	},
+  props: {
+    pool: {
+      type: Object as PropType<Pool>,
+      required: true,
+    },
+  },
 
-	setup(props) {
-		const pairName = computed(() => {
-			return (props.pool as Pool).reserveCoinDenoms.join(' / ')
-		})
+  setup(props) {
+    const pairName = computed(() => {
+      return (props.pool as Pool).reserveCoinDenoms.join(' / ');
+    });
 
-		return { pairName }
-	}
+    return { pairName };
+  },
 });
 </script>
 
 <style scoped>
 .pool {
-	box-shadow: 8px 16px 40px rgba(0, 0, 0, 0.06);
+  box-shadow: 8px 16px 40px rgba(0, 0, 0, 0.06);
 }
 </style>
