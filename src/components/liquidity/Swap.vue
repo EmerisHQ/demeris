@@ -21,7 +21,7 @@
     </div>
 
     <!-- pay coin selector -->
-    <DenomSelect :type="'Pay'" :selected-denom="{ base_denom: 'atom', on_chain: 'Cosmos' }" :user-balance="TEST_DATA" />
+    <DenomSelect :type="'Pay'" :selected-denom="TEST_DATA[0]" :user-balance="TEST_DATA" />
 
     <!-- button-divider -->
     <div class="swap-widget__controller">
@@ -49,11 +49,7 @@
     </div>
 
     <!-- receive coin selector -->
-    <DenomSelect
-      :type="'Receive'"
-      :selected-denom="{ base_denom: 'ATOM', on_chain: 'Cosmos' }"
-      :user-balance="TEST_DATA"
-    />
+    <DenomSelect :type="'Receive'" :selected-denom="TEST_DATA[1]" :user-balance="TEST_DATA" />
 
     <!-- swap button -->
     <div class="button-wrapper">

@@ -11,9 +11,13 @@
 				Dependencies: 
 					vuex getter to get  chain name from chain id		
 		-->
-    <img class="denom-select__coin-image" src="@/assets/coins/atom.png" alt="pay coin" />
+    <img
+      class="denom-select__coin-image"
+      :src="require(`@/assets/coins/${selectedDenom.base_denom.substr(1)}.png`)"
+      alt="pay coin"
+    />
     <div class="denom-select__coin">
-      <div class="denom-select__coin-denom s-0 w-medium">{{ $filters.toUpperCase(selectedDenom.base_denom) }}</div>
+      <div class="denom-select__coin-denom s-0 w-medium">{{ $filters.getCoinName(selectedDenom.base_denom) }}</div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
     <div class="denom-select__coin-amount">
