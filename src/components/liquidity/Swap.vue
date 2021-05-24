@@ -21,7 +21,7 @@
     </div>
 
     <!-- pay coin selector -->
-    <DenomSelect />
+    <DenomSelect :type="'Pay'" :selected-denom="{ base_denom: 'atom', on_chain: 'Cosmos' }" :user-balance="TEST_DATA" />
 
     <!-- button-divider -->
     <div class="swap-widget__controller">
@@ -49,7 +49,11 @@
     </div>
 
     <!-- receive coin selector -->
-    <DenomSelect />
+    <DenomSelect
+      :type="'Receive'"
+      :selected-denom="{ base_denom: 'ATOM', on_chain: 'Cosmos' }"
+      :user-balance="TEST_DATA"
+    />
 
     <!-- swap button -->
     <div class="button-wrapper">
@@ -64,6 +68,7 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import useButton from '@/setups/Button.vue';
+import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -76,10 +81,11 @@ export default defineComponent({
   setup() {
     const { buttonFunction } = useButton();
     const data = reactive({
-      buttonName: 'swap',
-      buttonStatus: computed(() => 'normal')
-    })
-   
+      buttonName: 'Swap',
+      buttonStatus: computed(() => 'normal'),
+      TEST_DATA: TEST_DATA.balances,
+    });
+
     function changePayToReceive() {
       alert('change Pay coin to Receive coin');
     }
@@ -114,7 +120,7 @@ export default defineComponent({
       });
     }
 
-    return { ...toRefs(data), swap,changePayToReceive, setMax };
+    return { ...toRefs(data), swap, changePayToReceive, setMax };
   },
 });
 </script>

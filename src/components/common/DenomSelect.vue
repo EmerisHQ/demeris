@@ -13,23 +13,27 @@
 		-->
     <img class="denom-select__coin-image" src="@/assets/coins/atom.png" alt="pay coin" />
     <div class="denom-select__coin">
-      <div class="denom-select__coin-denom s-0 w-medium">ATOM</div>
-      <div class="denom-select__coin-from s-minus">Cosmos Hub</div>
+      <div class="denom-select__coin-denom s-0 w-medium">{{ $filters.toUpperCase(selectedDenom.base_denom) }}</div>
+      <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
     <div class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type s-minus">Pay</div>
+      <div class="denom-select__coin-amount-type s-minus">{{ type }}</div>
       <input class="denom-select__coin-amount-input s-1" type="number" value="0" />
     </div>
   </div>
 </template>
 <script lang="ts">
-import {defineComponent } from 'vue';
-
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'DenomSelect',
-  created() {
-    console.log(this.$store);
+  props: {
+    type: { type: String, required: true },
+    selectedDenom: { type: Object, required: false, default: null },
+    userBalance: { type: Object, required: true },
+  },
+  setup(props) {
+    console.log(props.userBalance);
   },
 });
 </script>

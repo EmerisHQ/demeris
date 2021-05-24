@@ -5,6 +5,8 @@ import vueLib from '@starport/vue';
 import { createApp } from 'vue';
 import VueTippy from 'vue-tippy';
 
+import stringFilters from '@/filters/string'
+
 import App from './App.vue';
 import router from './router';
 import { store } from './store';
@@ -17,3 +19,7 @@ app
   .use(vueLib)
   .use(VueTippy)
   .mount('#app');
+
+app.config.globalProperties.$filters = {
+  ...stringFilters
+}
