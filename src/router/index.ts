@@ -17,6 +17,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Pool.vue'),
   },
   {
+    path: '/asset/:id',
+    name: 'Asset',
+    component: () => import('@/views/Asset.vue'),
+  },
+  {
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },
