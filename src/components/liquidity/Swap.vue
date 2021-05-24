@@ -37,7 +37,7 @@
           }"
         />
         <IconButton
-          :name="'Max'"
+          :name="`${TEST_DATA[0].amount} ${$filters.getCoinName(TEST_DATA[0].base_denom)} Max `"
           :type="'text'"
           :status="'normal'"
           :data="{
@@ -79,6 +79,8 @@ export default defineComponent({
     const data = reactive({
       buttonName: 'Swap',
       buttonStatus: computed(() => 'normal'),
+      payCoin: null,
+      receiveCoin: null,
       TEST_DATA: TEST_DATA.balances,
     });
 
