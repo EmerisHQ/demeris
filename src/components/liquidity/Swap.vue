@@ -57,7 +57,7 @@
     <DenomSelect
       :type="'Receive'"
       :amount="receiveCoinAmount"
-      :selected-denom="payCoinData"
+      :selected-denom="receiveCoinData"
       :user-balance="userBalances"
     />
 
