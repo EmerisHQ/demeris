@@ -5,8 +5,15 @@
 
     <div class="space"></div>
     <div class="header__wallet">
-      <button class="header__wallet-button">Send</button>
-      <button class="header__wallet-button">Receive</button>
+      <router-link class="header__wallet-button" to="/receive">
+        <div class="sp-icon sp-icon-Download"></div>
+        Receive
+      </router-link>
+
+      <router-link class="header__wallet-button" to="/send">
+        <div class="sp-icon sp-icon-Upload"></div>
+        Send
+      </router-link>
       <Wallet />
     </div>
   </header>
@@ -80,16 +87,14 @@ export default defineComponent({
     display: flex;
     align-items: center;
     &-button {
-      padding: 8px 12px;
-      margin-right: 12px;
-
-      color: #6a5df5;
-
-      border: 2px solid #c7c3fb;
-      border-radius: 6px;
-      background-color: transparent;
-
-      outline: none;
+      display: flex;
+      font-size: 1.6rem;
+      justify-content: center;
+      align-items: center;
+      padding: 0rem 1rem;
+      .sp-icon {
+        margin-right: 1rem;
+      }
     }
 
     /* &-image {

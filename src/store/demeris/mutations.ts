@@ -5,7 +5,7 @@ import * as API from '@/types/api';
 import { DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
 import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
-import { getDefaultState,State } from './state';
+import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
@@ -46,7 +46,7 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
-    state.balances[JSON.stringify(payload.params)] = payload.value as API.Balances;
+    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
@@ -85,9 +85,8 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name].fee_address = payload.value as API.FeeAddress;
   },
   [MutationTypes.SET_BECH32_CONFIG](state: State, payload: DemerisMutations) {
-    state.chains[
-      (payload.params as API.ChainReq).chain_name
-    ].node_info.bech32_config = payload.value as API.Bech32Config;
+    state.chains[(payload.params as API.ChainReq).chain_name].node_info.bech32_config =
+      payload.value as API.Bech32Config;
   },
   [MutationTypes.SET_FEE](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].base_ibc_fee = payload.value as API.Fee; // TODO: Change after MVP
