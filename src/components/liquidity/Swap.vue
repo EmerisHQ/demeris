@@ -21,7 +21,12 @@
     </div>
 
     <!-- pay coin selector -->
-    <DenomSelect :type="'Pay'" :selected-denom="TEST_DATA[0]" :user-balance="TEST_DATA" />
+    <DenomSelect
+      v-model:amount="payCoinAmount"
+      :type="'Pay'"
+      :selected-denom="payCoinData"
+      :user-balance="userBalances"
+    />
 
     <!-- button-divider -->
     <div class="swap-widget__controller">
@@ -37,7 +42,7 @@
           }"
         />
         <IconButton
-          :name="`${TEST_DATA[0].amount} ${$filters.getCoinName(TEST_DATA[0].base_denom)} Max `"
+          :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
           :type="'text'"
           :status="'normal'"
           :data="{
@@ -49,7 +54,12 @@
     </div>
 
     <!-- receive coin selector -->
-    <DenomSelect :type="'Receive'" :selected-denom="TEST_DATA[1]" :user-balance="TEST_DATA" />
+    <DenomSelect
+      :type="'Receive'"
+      :amount="receiveCoinAmount"
+      :selected-denom="payCoinData"
+      :user-balance="userBalances"
+    />
 
     <!-- swap button -->
     <div class="button-wrapper">
@@ -74,22 +84,27 @@ export default defineComponent({
     IconButton,
     Button,
   },
+
   setup() {
     const { buttonFunction } = useButton();
     const data = reactive({
       buttonName: 'Swap',
       buttonStatus: computed(() => 'normal'),
-      payCoin: null,
-      receiveCoin: null,
-      TEST_DATA: TEST_DATA.balances,
+      payCoinData: null,
+      payCoinAmount: 0,
+      receiveCoinAmount: null,
+      receiveCoinData: null,
+      userBalances: TEST_DATA.balances,
     });
+
+    data.payCoinData = data.userBalances[0];
 
     function changePayToReceive() {
       alert('change Pay coin to Receive coin');
     }
 
     function setMax() {
-      alert('setMax');
+      data.payCoinAmount = data.payCoinData.amount;
     }
 
     function swap() {

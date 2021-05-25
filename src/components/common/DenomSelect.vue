@@ -22,12 +22,17 @@
     </div>
     <div class="denom-select__coin-amount">
       <div class="denom-select__coin-amount-type s-minus">{{ type }}</div>
-      <input class="denom-select__coin-amount-input s-1" type="number" value="0" />
+      <input
+        :value="amount"
+        class="denom-select__coin-amount-input s-1"
+        type="bigInt"
+        @input="$emit('update:amount', $event.target.value)"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'DenomSelect',
@@ -35,9 +40,16 @@ export default defineComponent({
     type: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
     userBalance: { type: Object, required: true },
+    amount: { type: BigInt, required: false, default: BigInt(0) },
   },
-  setup(props) {
+  emits: ['update:amount'],
+  setup(props, { emit }) {
     console.log(props.userBalance);
+    const inputAmount = computed({
+      get: () => props.amount,
+      set: value => emit('update:amount', value),
+    });
+    return { inputAmount };
   },
 });
 </script>
