@@ -101,8 +101,12 @@ export default defineComponent({
       buttonName: 'Swap',
       buttonStatus: computed(() => 'normal'),
       payCoinData: null,
-      payCoinAmount: 0,
-      receiveCoinAmount: null,
+      payCoinAmount: null,
+      receiveCoinAmount: computed({
+        //2 eventually become pool price with bigInt type calculation
+        get: () => data.payCoinAmount * 2,
+        set: value => (data.payCoinAmount = value / 2),
+      }),
       receiveCoinData: null,
       userBalances: TEST_DATA.balances,
       isOver: computed(() => (data.payCoinAmount > data.payCoinData.amount ? true : false)),
