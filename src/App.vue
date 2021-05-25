@@ -4,8 +4,6 @@
   </div>
 </template>
 <script lang="ts">
-import '@starport/vue/lib/starport-vue.css';
-
 import { defineComponent } from 'vue';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';

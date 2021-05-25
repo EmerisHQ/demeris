@@ -1,0 +1,16 @@
+@import '@starport/vue/src/styles/_normalize';
+@import '@starport/vue/src/styles/_colors';
+//@import '@starport/vue/src/styles/_icons';
+@import '@starport/vue/src/styles/_fonts';
+@import '_responsive';
+@import '@starport/vue/src/styles/_utility';
+@import '@starport/vue/src/styles/_components';
+@import '@starport/vue/src/styles/_animations';
+
+#app {
+  background: #f5f6f8;
+
+  * {
+    box-sizing: border-box;
+  }
+}

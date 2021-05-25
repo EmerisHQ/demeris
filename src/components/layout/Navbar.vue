@@ -16,8 +16,9 @@ export default defineComponent({
 <style scoped lang="scss">
 .nav {
   display: flex;
-  padding: 0 5.2rem 2rem;
-
+  padding-left: 5.2rem;
+  font-size: 1.6rem;
+  align-items: center;
   &-link {
     width: 8rem;
     margin-right: 2rem;
