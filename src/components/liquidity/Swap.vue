@@ -42,6 +42,7 @@
           }"
         />
         <IconButton
+          v-if="payCoinData"
           :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
           :type="'text'"
           :status="'normal'"
@@ -56,8 +57,8 @@
 
     <!-- receive coin selector -->
     <DenomSelect
+      v-model:amount="receiveCoinAmount"
       :type="'Receive'"
-      :amount="receiveCoinAmount"
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
     />
@@ -102,7 +103,16 @@ export default defineComponent({
     data.payCoinData = data.userBalances[0];
 
     function changePayToReceive() {
-      alert('change Pay coin to Receive coin');
+      const originPayCoinData = data.payCoinData;
+      const originReceiveCoinData = data.receiveCoinData;
+
+      const originPayCoinAmount = data.payCoinAmount;
+      const originReceiveCoinAmount = data.receiveCoinAmount;
+
+      data.payCoinData = originReceiveCoinData;
+      data.receiveCoinData = originPayCoinData;
+      data.payCoinAmount = originReceiveCoinAmount;
+      data.receiveCoinAmount = originPayCoinAmount;
     }
 
     function setMax() {

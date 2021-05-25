@@ -14,7 +14,7 @@
     <img
       class="denom-select__coin-image"
       :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
-      alt="pay coin"
+      :alt="`${type} coin`"
     />
 
     <div v-if="isSelected" class="denom-select__coin">
