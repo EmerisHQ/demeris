@@ -5,7 +5,7 @@
       <AssetChainsIndicator :balances="balances" denom="kava" />
     </div>
 
-    <div class="p-10 flex flex-col space-y-8 max-w-5xl mx-auto">
+    <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
       <Pools :pools="pools" />
     </div>
   </div>
