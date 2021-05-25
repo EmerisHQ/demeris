@@ -1,12 +1,12 @@
 <template>
   <div role="alert" class="alert" :class="`alert--${status}`">
-    <span class="alert__icon w-6 h-6">
+    <span class="alert__icon w-9 h-9">
       <BanIcon v-if="status === 'error'" class="text-red-500" />
       <ExclamationIcon v-else-if="status === 'warning'" class="text-yellow-500" />
       <InformationIcon v-else-if="status === 'info'" class="text-gray-500" />
     </span>
 
-    <div class="alert__content">
+    <div class="alert__content text-sm">
       <slot>
         <p>{{ message }}</p>
       </slot>
@@ -47,7 +47,7 @@ export default defineComponent({
 
 <style lang="postcss" scoped>
 .alert {
-  @apply py-3 px-4 rounded-lg flex items-center space-x-3 border border-transparent text-gray-900;
+  @apply px-8 py-6 rounded-sm flex items-center space-x-5 border border-transparent text-gray-900;
 }
 .alert--error {
   background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);

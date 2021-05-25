@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="text-base font-sans antialiased">
     <router-view />
   </div>
 </template>
