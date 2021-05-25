@@ -3,8 +3,8 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-  <IconBase width="24" height="24" :name="name">
-    <component :is="currentIcon" />
+  <IconBase width="24" height="24" :icon-name="name">
+    <component :is="currentIcon" v-if="isReady" />
   </IconBase>
 </template>
 <script lang="ts">
@@ -23,13 +23,15 @@ export default defineComponent({
 
   setup(props) {
     const currentIcon = shallowRef('');
-
-    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
+    let isReady = false;
+    import(`@/components/common/Icons/${props.name}.vue`).then(val => {
       currentIcon.value = val.default;
+      isReady = true;
     });
 
     return {
       currentIcon,
+      isReady,
     };
   },
 });

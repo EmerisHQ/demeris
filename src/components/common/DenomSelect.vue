@@ -54,7 +54,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
-      set: value => emit('update:amount', BigInt(value)),
+      set: value => emit('update:amount', value),
     });
 
     const isSelected = computed(() => {

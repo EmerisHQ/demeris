@@ -16,7 +16,15 @@
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">
-        <IconButton :name="'ThreeDotsIcon'" :shape="'flat'" :status="'normal'" />
+        <IconButton
+          :name="'ThreeDotsIcon'"
+          :shape="'flat'"
+          :status="'normal'"
+          :data="{
+            type: 'custom',
+            function: openSetting,
+          }"
+        />
       </div>
     </div>
 
@@ -119,6 +127,10 @@ export default defineComponent({
       data.payCoinAmount = data.payCoinData.amount;
     }
 
+    function openSetting() {
+      alert('open setting');
+    }
+
     function swap() {
       const swapParams = {
         from: {
@@ -145,7 +157,7 @@ export default defineComponent({
       });
     }
 
-    return { ...toRefs(data), swap, changePayToReceive, setMax };
+    return { ...toRefs(data), openSetting, changePayToReceive, setMax, swap };
   },
 });
 </script>

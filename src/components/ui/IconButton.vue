@@ -30,9 +30,9 @@ export default defineComponent({
     },
     status: { type: String, required: true },
   },
+  // eslint-disable-next-line
   setup(props: any) {
     const { buttonFunction } = useButton();
-    const name = ref(String(props.name));
     const buttonName = ref(props.name);
 
     let isIcon = true;
