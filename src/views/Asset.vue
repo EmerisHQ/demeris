@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div class="flex space-x-16 mb-10">
-      <div class="flex flex-col space-y-12 w-2/4">
+      <div class="flex flex-col space-y-14 w-2/4">
         <section class="flex flex-col space-y-4">
           <div>
             <button class="font-bold py-2">
@@ -95,7 +95,7 @@
             <button class="px-5 py-3 rounded-3xl bg-black text-white font-medium">Claim</button>
           </div>
 
-          <ul>
+          <ul class="w-full flex flex-col space-y-8">
             <li class="w-full flex items-center space-x-4">
               <div class="flex-1 flex items-center space-x-4">
                 <span class="rounded-lg bg-gray-200 font-medium text-lg w-10 h-10 flex items-center justify-center">
@@ -115,7 +115,36 @@
                 <button class="p-2"><ChevronDownIcon class="w-4 h-4" /></button>
               </div>
             </li>
+
+            <li class="w-full flex items-center space-x-4">
+              <div class="flex-1 flex items-center space-x-4">
+                <span class="rounded-lg bg-gray-200 font-medium text-lg w-10 h-10 flex items-center justify-center">
+                  K
+                </span>
+                <span class="flex-1 font-bold">
+                  KalpaTech
+                </span>
+              </div>
+
+              <span class="w-1/3 text-gray-700 text-right">
+                28.8 ATOM
+              </span>
+
+              <div class="w-1/3 flex items-center space-x-4 justify-end">
+                <span>$590.50</span>
+                <button class="p-2"><ChevronDownIcon class="w-4 h-4" /></button>
+              </div>
+            </li>
           </ul>
+        </section>
+
+        <section class="flex flex-col space-y-8">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold">Pools</h2>
+            <button class="p-2">
+              <PlusIcon class="w-8 h-8" />
+            </button>
+          </div>
         </section>
       </div>
 
