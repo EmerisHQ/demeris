@@ -1,12 +1,12 @@
 <template>
   <div role="alert" class="alert" :class="`alert--${status}`">
-    <span class="alert__icon w-9 h-9">
-      <BanIcon v-if="status === 'error'" class="text-red-500" />
-      <ExclamationIcon v-else-if="status === 'warning'" class="text-yellow-500" />
-      <InformationIcon v-else-if="status === 'info'" class="text-gray-500" />
+    <span class="alert__icon">
+      <BanIcon v-if="status === 'error'" />
+      <ExclamationIcon v-else-if="status === 'warning'" />
+      <InformationIcon v-else-if="status === 'info'" />
     </span>
 
-    <div class="alert__content text-sm">
+    <div class="alert__content">
       <slot>
         <p>{{ message }}</p>
       </slot>
@@ -45,17 +45,48 @@ export default defineComponent({
 });
 </script>
 
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .alert {
-  @apply px-8 py-6 rounded-sm flex items-center space-x-5 border border-transparent text-gray-900;
-}
-.alert--error {
-  background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
-}
-.alert--info {
-  @apply shadow-none border-gray-200 text-gray-600;
-}
-.alert--warning {
-  background: linear-gradient(135deg, #ffe3c1 0%, #fffac9 100%);
+  padding: 1.4rem 1.6rem;
+  border-radius: 0.8rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+
+  &--error {
+    background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
+  }
+
+  &--error &__icon {
+    color: rgba(202, 8, 101, 1);
+  }
+
+  &--info {
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: none;
+    color: rgba(0, 0, 0, 0.667);
+  }
+
+  &--info &__icon {
+    color: rgba(0, 0, 0, 0.33);
+  }
+
+  &--warning {
+    background: linear-gradient(135deg, #ffe3c1 0%, #fffac9 100%);
+  }
+
+  &--warning &__icon {
+    color: rgba(255, 125, 5, 1);
+  }
+
+  &__icon {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  &__content {
+    margin-left: 1.2rem;
+    font-size: 1.2rem;
+  }
 }
 </style>
