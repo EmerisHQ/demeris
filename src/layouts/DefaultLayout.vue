@@ -28,7 +28,7 @@
   </nav>
 
   <div class="layout-frame container mx-auto">
-    <div class="px-10">
+    <div class="px-16 py-25">
       <slot />
     </div>
   </div>

@@ -18,27 +18,28 @@
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
         <!-- TODO: Implement the Chain Name component -->
-        <td class="assets-table__row__denom uppercase">
-          {{ asset.denom }}
+        <td class="assets-table__row__denom font-bold uppercase space-x-8 flex items-center">
+          <div class="w-16 h-16 rounded-full bg-gray-200" />
+          <span>{{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__price text-right">
+        <td class="assets-table__row__price text-right" style="font-feature-settings: zero on;">
           <!-- TODO: Get the price -->
           $20.50
         </td>
 
         <td class="assets-table__row__price w-32">
-          <div class="flex items-start justify-end space-x-1 text-green-700">
-            <TrendingUpIcon class="w-5 h-5" />
+          <div class="flex items-start justify-end space-x-2 text-green-700">
+            <TrendingUpIcon class="w-8 h-8" />
             <span>52.21%</span>
           </div>
         </td>
 
-        <td v-if="!isCompact" class="assets-table__row__balance text-right">
+        <td v-if="!isCompact" class="assets-table__row__balance text-right uppercase text-gray-700">
           <span>{{ asset.totalAmount }} {{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__equivalent-balance text-right">
+        <td class="assets-table__row__equivalent-balance text-right font-bold">
           <!-- TODO: Implement the equivalement amount based on price * totalAmount -->
           $6,150.20
         </td>
@@ -51,7 +52,7 @@
               class="assets-table__row__arrow-button p-2 text-gray-500 hover:text-gray-600"
               @click="handleClick(asset)"
             >
-              <ChevronRightIcon class="w-5 h-5" />
+              <ChevronRightIcon class="w-8 h-8" />
             </button>
           </div>
         </td>
@@ -111,30 +112,22 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style lang="postcss">
 .assets-table {
   width: 100%;
 }
 
 .assets-table th {
   opacity: 0.8;
-  padding-bottom: 1rem;
+  padding-bottom: 2rem;
   vertical-align: middle;
   font-weight: 400;
+  @apply text-gray-700 text-sm;
 }
 
 .assets-table__row__denom {
-  padding: 1.5rem 0;
+  padding: 2rem 0;
   min-width: 4rem;
-  font-weight: 600;
-}
-
-.assets-table__row__balance {
-  opacity: 0.8;
-}
-
-.assets-table__row__equivalent-balance {
-  font-weight: 600;
 }
 
 .assets-table__row__arrow-button {

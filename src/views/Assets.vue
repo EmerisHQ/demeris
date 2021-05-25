@@ -1,7 +1,12 @@
 <template>
   <AppLayout>
-    <div>
-      <h1 class="text-3xl font-bold my-8">Assets</h1>
+    <div class="flex flex-col space-y-12">
+      <div class="flex space-x-12">
+        <router-link to="/assets" class="text-xl font-bold focus:outline-none">Assets</router-link>
+        <router-link custom to="/assets/chains">
+          <span class="text-xl font-bold text-gray-400 focus:outline-none cursor-not-allowed">Chains</span>
+        </router-link>
+      </div>
       <AssetsTable :balances="balances" />
     </div>
   </AppLayout>
