@@ -8,7 +8,7 @@
   </IconBase>
 </template>
 <script lang="ts">
-import { defineComponent, shallowRef } from 'vue';
+import { defineComponent, ref, shallowRef } from 'vue';
 
 import IconBase from '@/components/common/Icons/IconBase.vue';
 export default defineComponent({
@@ -23,10 +23,10 @@ export default defineComponent({
 
   setup(props) {
     const currentIcon = shallowRef('');
-    let isReady = false;
+    const isReady = ref(false);
     import(`@/components/common/Icons/${props.name}.vue`).then(val => {
       currentIcon.value = val.default;
-      isReady = true;
+      isReady.value = true;
     });
 
     return {
