@@ -31,9 +31,10 @@
       <input
         :value="amount"
         class="denom-select__coin-amount-input s-1"
-        type="bigInt"
+        type="number"
         placeholder="0"
-        @input="$emit('update:amount', $event.target.value)"
+        min="0"
+        @input="$emit('update:amount', Math.abs(Number($event.target.value)))"
       />
     </div>
   </div>
@@ -53,7 +54,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
-      set: value => emit('update:amount', value),
+      set: value => emit('update:amount', BigInt(value)),
     });
 
     const isSelected = computed(() => {

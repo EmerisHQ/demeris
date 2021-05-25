@@ -48,6 +48,7 @@
           :data="{
             type: 'custom',
             function: setMax,
+            isOver: isOver,
           }"
         />
       </div>
@@ -95,6 +96,7 @@ export default defineComponent({
       receiveCoinAmount: null,
       receiveCoinData: null,
       userBalances: TEST_DATA.balances,
+      isOver: computed(() => (data.payCoinAmount > data.payCoinData.amount ? true : false)),
     });
 
     data.payCoinData = data.userBalances[0];
