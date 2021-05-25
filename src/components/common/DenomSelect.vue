@@ -11,19 +11,26 @@
 				Dependencies: 
 					vuex getter to get  chain name from chain id		
 		-->
+
     <img
       class="denom-select__coin-image"
       :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
       :alt="`${type} coin`"
+      @click="openDenomSelectModal"
     />
 
-    <div v-if="isSelected" class="denom-select__coin">
-      <div class="denom-select__coin-denom s-0 w-medium">{{ $filters.getCoinName(selectedDenom?.base_denom) }}</div>
+    <div v-if="isSelected" class="denom-select__coin" @click="openDenomSelectModal">
+      <div class="denom-select__coin-denom s-0 w-medium">
+        {{ $filters.getCoinName(selectedDenom?.base_denom) }}
+        <Icon name="SmallDownIcon" :width="'16'" :height="'16'" :view-box="'0 0 16 16'" />
+      </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
 
-    <div v-else class="denom-select__coin">
-      <div class="denom-select__coin-denom s-0 w-medium">Select asset</div>
+    <div v-else class="denom-select__coin" @click="openDenomSelectModal">
+      <div class="denom-select__coin-denom s-0 w-medium">
+        Select asset <Icon name="SmallDownIcon" :width="'16'" :height="'16'" :view-box="'0 0 16 16'" />
+      </div>
     </div>
 
     <div class="denom-select__coin-amount">
@@ -38,12 +45,17 @@
       />
     </div>
   </div>
+
+  <DenomSelectModal v-show="isOpen" />
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'DenomSelect',
+  components: { Icon, DenomSelectModal },
   props: {
     type: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
@@ -61,8 +73,14 @@ export default defineComponent({
       return props?.selectedDenom === null ? false : true;
     });
 
+    const isOpen = ref(false);
+
+    function openDenomSelectModal() {
+      isOpen.value = true;
+    }
+
     console.log(props.userBalance);
-    return { inputAmount, isSelected };
+    return { inputAmount, isSelected, isOpen, openDenomSelectModal };
   },
 });
 </script>
@@ -73,22 +91,31 @@ export default defineComponent({
 
   padding: 1.6rem 2.4rem;
 
-  &__coin-image {
-    width: 2.4rem;
-    height: 2.4rem;
-
-    margin-right: 1.2rem;
-  }
-
   &__coin {
     flex-shrink: 0;
+    cursor: pointer;
 
     &-denom {
+      display: flex;
+      align-items: center;
       color: var(--text);
+
+      svg {
+        margin-left: 0.4rem;
+      }
     }
 
     &-from {
       color: var(--muted);
+    }
+
+    &-image {
+      width: 2.4rem;
+      height: 2.4rem;
+
+      margin-right: 1.2rem;
+
+      cursor: pointer;
     }
   }
 

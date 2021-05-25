@@ -168,8 +168,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .swap-widget {
-  width: 32rem;
+  position: relative;
 
+  width: 32rem;
   background-color: var(--surface);
 
   &-header {

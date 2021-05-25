@@ -3,7 +3,7 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-  <IconBase width="24" height="24" :icon-name="name">
+  <IconBase :width="width" :height="height" :icon-name="name" :view-box="viewBox">
     <component :is="currentIcon" v-if="isReady" />
   </IconBase>
 </template>
@@ -18,6 +18,21 @@ export default defineComponent({
     name: {
       type: String,
       required: true,
+    },
+    width: {
+      type: String,
+      required: false,
+      default: '24',
+    },
+    height: {
+      type: String,
+      required: false,
+      default: '24',
+    },
+    viewBox: {
+      type: String,
+      requird: false,
+      default: '0 0 24 24',
     },
   },
 
