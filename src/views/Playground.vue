@@ -1,12 +1,18 @@
 <template>
   <div class="bg-white">
-    <div class="p-10 flex flex-col space-y-8 w-72 mx-auto">
+    <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
       <AssetChainsIndicator :balances="balances" denom="atom" :max-chains-count="4" />
       <AssetChainsIndicator :balances="balances" denom="kava" />
     </div>
 
     <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
       <Pools :pools="pools" />
+    </div>
+
+    <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+      <Alert status="error" message="Error" />
+      <Alert status="warning" message="Warning" />
+      <Alert status="info" message="Info" />
     </div>
   </div>
 </template>
@@ -16,6 +22,7 @@ import { defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
 import Pools from '@/components/liquidity/Pools.vue';
+import Alert from '@/components/ui/Alert.vue';
 import { Pool } from '@/types/actions';
 import { Balances } from '@/types/api';
 
@@ -23,6 +30,7 @@ export default defineComponent({
   components: {
     AssetChainsIndicator,
     Pools,
+    Alert,
   },
   setup() {
     const balances: Balances = [
