@@ -105,18 +105,10 @@ export default defineComponent({
       buttonStatus: computed(() => {return data.isOver ? 'inactive' : 'normal'}),
       payCoinData: null,
       payCoinAmount: null,
-      payCoinDollarValue: computed(() => {
-        if(data.payCoinAmount) {
-          //TODO: get payCoin Price
-          return `$${data.payCoinAmount * 2}`
-        } else {
-          return ''
-        }
-      }),
       receiveCoinData: null,
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
-        get: () => data.payCoinAmount * 2,
+        get: () => data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null,
         set: value => (data.payCoinAmount = value / 2),
       }),
       userBalances: TEST_DATA.balances,
