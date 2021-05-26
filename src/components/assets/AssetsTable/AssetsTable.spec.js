@@ -31,10 +31,10 @@ describe('Assets Table', () => {
     const rows = wrapper.findAll('.assets-table__row');
     expect(rows).toHaveLength(2);
 
-    expect(rows[0].find('.assets-table__row__denom').text()).toBe('ATOM');
+    expect(rows[0].find('.assets-table__row__asset').text()).toBe('ATOM');
     expect(rows[0].find('.assets-table__row__balance').text()).toBe('60 ATOM');
 
-    expect(rows[1].find('.assets-table__row__denom').text()).toBe('KAVA');
+    expect(rows[1].find('.assets-table__row__asset').text()).toBe('KAVA');
     expect(rows[1].find('.assets-table__row__balance').text()).toBe('120 KAVA');
   });
 
