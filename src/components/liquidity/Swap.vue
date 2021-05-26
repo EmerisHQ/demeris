@@ -18,7 +18,7 @@
       <div class="swap-widget-header__dot-button">
         <IconButton
           :name="'ThreeDotsIcon'"
-          :shape="'flat'"
+          :type="'flat'"
           :status="'normal'"
           :data="{
             type: 'custom',
@@ -98,8 +98,9 @@ export default defineComponent({
   setup() {
     const { buttonFunction } = useButton();
     const data = reactive({
-      buttonName: 'Swap',
-      buttonStatus: computed(() => 'normal'),
+      buttonName: computed(()=> {
+        return data.isOver ? 'Insufficent funds' : 'Swap'}),
+      buttonStatus: computed(() => {return data.isOver ? 'inactive' : 'normal'}),
       payCoinData: null,
       payCoinAmount: null,
       receiveCoinAmount: computed({
