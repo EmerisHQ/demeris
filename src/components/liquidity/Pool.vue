@@ -1,24 +1,24 @@
 <template>
-  <div class="pool flex flex-col rounded-xl p-12 shadow">
-    <div class="pool__main flex-1 flex items-start justify-between">
-      <div class="pool__main__token-pair -space-x-4 inline-flex items-center">
-        <span class="h-16 w-16 rounded-full bg-gray-200" />
-        <span class="h-16 w-16 rounded-full bg-gray-300" />
+  <div class="pool">
+    <div class="pool__main">
+      <div class="pool__main__token-pair">
+        <span class="pool__main__token-pair__token token-a" />
+        <span class="pool__main__token-pair__token token-b" />
       </div>
 
-      <div class="pool__trending inline-flex space-x-1 text-green-700 font-bold">
-        <span class="pool__trending__icon">
-          <TrendingUpIcon class="w-8 h-8" />
+      <div class="pool__main__trending">
+        <span class="pool__main__trending__icon">
+          <TrendingUpIcon />
         </span>
-        <span class="pool__trending__value">
+        <span class="pool__main__trending__value">
           18%
         </span>
       </div>
     </div>
 
-    <div class="pool__footer flex flex-col space-y-1">
-      <p class="pool__pair font-bold uppercase">{{ pairName }}</p>
-      <span class="pool__price">$1,544.05</span>
+    <div class="pool__footer">
+      <p class="pool__footer__pair">{{ pairName }}</p>
+      <span class="pool__footer__price">$1,544.05</span>
     </div>
   </div>
 </template>
@@ -51,3 +51,67 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.pool {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.6rem;
+  padding: 2.4rem;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
+  font-size: 1.6rem;
+
+  &__main {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    &__token-pair {
+      display: inline-flex;
+      align-items: center;
+
+      &__token {
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 9999px;
+
+        &.token-a {
+          background-color: #f7f7f7;
+        }
+
+        &.token-b {
+          margin-left: -0.8rem;
+          background-color: #e5e5e5;
+        }
+      }
+    }
+
+    &__trending {
+      display: inline-flex;
+      font-weight: 600;
+      color: rgb(6, 126, 61);
+
+      &__icon {
+        width: 1.6rem;
+        height: 1.6rem;
+      }
+
+      &__value {
+        margin-left: 0.2rem;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    flex-direction: column;
+
+    &__pair {
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+  }
+}
+</style>

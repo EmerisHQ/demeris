@@ -1,6 +1,6 @@
 <template>
   <div class="pools">
-    <Pool v-for="pool of pools" :key="pool.id" :pool="pool" class="h-115" />
+    <Pool v-for="pool of pools" :key="pool.id" :pool="pool" class="pools__pool" />
   </div>
 </template>
 
@@ -27,10 +27,14 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .pools {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18rem, 22rem));
   gap: 1.6rem;
+
+  &__pool {
+    height: 22.4rem;
+  }
 }
 </style>
