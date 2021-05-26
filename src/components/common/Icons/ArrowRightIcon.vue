@@ -5,16 +5,19 @@
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
     xmlns="http://www.w3.org/2000/svg"
-    style="fill: none"
     version="1.1"
-    viewBox="0 0 24 24"
-    height="24"
-    width="24"
+    viewBox="0 0 16.933333 16.933334"
+    height="64"
+    width="64"
   >
-    <path
-      style="fill: currentColor; stroke: currentColor"
-      d="M 17.58585,9.41426 11.5859,15.41423 13.00009,16.828446 21.414301,8.41423 13.00009,0 11.5859,1.4142 l 6,6.00006 -17.5859,0 v 2 z"
-    />
+    <g transform="translate(0,-280.06665)">
+      <g transform="matrix(0,-0.26458334,0.26458334,0,5.9279688e-5,297.00004)" style="fill: none">
+        <path
+          style="fill: currentColor; stroke-width: 2.988657"
+          d="M 29.011455,52.558073 11.079603,34.626279 6.853,38.852808 32.000202,64 57.147452,38.852808 52.920893,34.626279 34.988771,52.558222 V -1.5e-7 h -5.977316 z"
+        />
+      </g>
+    </g>
   </svg>
 </template>
 
@@ -25,3 +28,10 @@ export default defineComponent({
   name: 'ArrowRightIcon',
 });
 </script>
+
+<style lang="scss" scoped>
+svg {
+  width: 1em;
+  height: 1em;
+}
+</style>

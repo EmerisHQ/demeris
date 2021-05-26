@@ -5,16 +5,19 @@
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
     xmlns="http://www.w3.org/2000/svg"
-    style="fill: none"
     version="1.1"
-    viewBox="0 0 10.799994 6.800004"
-    height="6.800004"
-    width="10.799994"
+    viewBox="0 0 16.933333 16.933334"
+    height="64"
+    width="64"
   >
-    <path
-      style="fill: currentColor; stroke: currentColor"
-      d="M 5.39999,0 10.799994,5.4 9.39999,6.800004 5.39999,2.8 1.4,6.800004 0,5.4 Z"
-    />
+    <g transform="translate(0,-280.06665)">
+      <g transform="matrix(0,-1.2739205,1.2739205,0,4.1346435,295.41247)" style="fill: none">
+        <path
+          style="fill: currentColor"
+          d="m 8.799999,3.399995 -5.4,5.400004 -1.400004,-1.400004 4.000004,-4 -4.000004,-3.99999 1.400004,-1.4 z"
+        />
+      </g>
+    </g>
   </svg>
 </template>
 
@@ -25,3 +28,9 @@ export default defineComponent({
   name: 'CaretUpIcon',
 });
 </script>
+<style lang="scss" scoped>
+svg {
+  width: 1em;
+  height: 1em;
+}
+</style>

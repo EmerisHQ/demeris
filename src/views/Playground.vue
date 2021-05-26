@@ -11,7 +11,8 @@
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
-        <div class="flex flex-row w-1/5 mx-auto">
+        <div class="flex flex-row w-1/5 mx-auto icons">
+          <AlertIcon />
           <ArrowDownIcon />
           <ArrowUpIcon />
           <ArrowLeftIcon />
@@ -20,10 +21,12 @@
           <CaretUpIcon />
           <CaretLeftIcon />
           <CaretRightIcon />
+          <CloseIcon />
           <SwapLRIcon />
           <SwapUDIcon />
           <SendIcon />
           <ReceiveIcon />
+          <HintIcon />
         </div>
       </div>
     </div>
@@ -34,6 +37,7 @@
 import { computed, defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ArrowDownIcon from '@/components/common/Icons/ArrowDownIcon.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
 import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
@@ -42,6 +46,8 @@ import CaretDownIcon from '@/components/common/Icons/CaretDownIcon.vue';
 import CaretLeftIcon from '@/components/common/Icons/CaretLeftIcon.vue';
 import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
 import CaretUpIcon from '@/components/common/Icons/CaretUpIcon.vue';
+import CloseIcon from '@/components/common/Icons/CloseIcon.vue';
+import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
@@ -55,6 +61,7 @@ export default defineComponent({
     AssetChainsIndicator,
     AppLayout,
     Alert,
+    AlertIcon,
     ArrowDownIcon,
     ArrowUpIcon,
     ArrowLeftIcon,
@@ -63,6 +70,8 @@ export default defineComponent({
     CaretUpIcon,
     CaretLeftIcon,
     CaretRightIcon,
+    CloseIcon,
+    HintIcon,
     SwapLRIcon,
     SwapUDIcon,
     SendIcon,
@@ -81,3 +90,9 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+.icons {
+  font-size: 1.6rem;
+  color: red;
+}
+</style>
