@@ -1,79 +1,64 @@
 <template>
   <AppLayout>
-    <div class="flex space-x-16 mb-10">
-      <div class="flex flex-col space-y-35 w-2/4">
-        <section class="flex flex-col space-y-12">
-          <div>
-            <button class="font-bold py-4 flex items-center space-x-2">
-              <span><ArrowLeftIcon class="w-12 h-12" /></span>
-              <span>All assets</span>
-            </button>
-          </div>
+    <div class="asset">
+      <div class="asset__main">
+        <div class="asset__main__back">
+          <button class="asset__main__back__button">
+            <span class="asset__main__back__button__icon"><ArrowLeftIcon /></span>
+            <span>All assets</span>
+          </button>
+        </div>
 
-          <div class="flex space-x-30 items-baseline">
-            <div class="flex flex-col space-y-2">
-              <h2 class="text-xl font-bold">300 ATOM</h2>
-              <h1 class="text-2xl font-bold">$13,184.45</h1>
-              <span class="text-green-700 text-medium">
+        <!-- Stats -->
+
+        <section class="asset__main__stats">
+          <div class="asset__main__stats__container">
+            <div class="asset__main__stats__container__left">
+              <p class="asset__main__stats__container__left__token">300 ATOM</p>
+              <p class="asset__main__stats__container__left__balance">$13,184.45</p>
+              <span class="asset__main__stats__container__left__trending">
                 <span>15% (+$1,719.71)</span>
               </span>
             </div>
 
-            <dl class="flex flex-col space-y-16 justify-between">
-              <div>
-                <dt class="text-gray-700">Available</dt>
-                <dd class="font-bold text-lg">$1,310.36</dd>
+            <dl class="asset__main__stats__container__right">
+              <div class="asset__main__stats__container__right__available">
+                <dt>Available</dt>
+                <dd>$1,310.36</dd>
               </div>
 
-              <div>
-                <dt class="text-gray-700">Price</dt>
-                <dd class="font-bold text-lg">$20.50</dd>
+              <div class="asset__main__stats__container__right__price">
+                <dt>Price</dt>
+                <dd>$20.50</dd>
               </div>
             </dl>
           </div>
         </section>
 
-        <section class="flex flex-col space-y-16">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Chains</h2>
-            <button class="p-5">
-              <PlusIcon class="w-11 h-11" />
+        <!-- Chains -->
+
+        <section class="asset__main__chains asset__list">
+          <div class="asset__list__header">
+            <h2 class="asset__list__header__title">Chains</h2>
+            <button class="asset__list__header__button">
+              <PlusIcon class="asset__list__header__button__icon" />
             </button>
           </div>
 
-          <!-- TODO: Move to a component -->
-          <ul class="w-full flex flex-col space-y-16">
-            <li class="w-full flex items-center space-x-8">
-              <div class="flex-1 flex space-x-8 items-center">
-                <span class="w-16 h-16 bg-gray-200 rounded-full" />
-                <span class="font-bold">Cosmos Hub</span>
+          <ul class="asset__list__wrapper">
+            <li class="asset__list__item asset__main__chains__item">
+              <div class="asset__main__chains__item__asset">
+                <span class="asset__main__chains__item__asset__avatar" />
+                <span class="asset__main__chains__item__asset__denom">Cosmos Hub</span>
               </div>
-              <span class="w-1/3 text-right">
+              <span class="asset__main__chains__item__amount">
                 277.52 ATOM
               </span>
-              <div class="w-1/3 flex space-x-8 items-center">
-                <span class="flex-1 text-right font-bold">
+              <div class="asset__main__chains__item__balance">
+                <span class="asset__main__chains__item__balance__value">
                   $3,690.50
                 </span>
-                <button class="w-16 h-16 rounded-full bg-white shadow flex items-center justify-center p-4">
-                  <DotsIcon />
-                </button>
-              </div>
-            </li>
-
-            <li class="w-full flex items-center space-x-8">
-              <div class="flex-1 flex space-x-8 items-center">
-                <span class="w-16 h-16 bg-gray-200 rounded-full" />
-                <span class="font-bold">THORChain</span>
-              </div>
-              <span class="w-1/3 text-right">
-                22.47 ATOM
-              </span>
-              <div class="w-1/3 flex space-x-8 items-center">
-                <span class="flex-1 text-right font-bold">
-                  $460.70
-                </span>
-                <button class="w-16 h-16 rounded-full bg-white shadow flex items-center justify-center p-4">
+                <button class="asset__main__chains__item__more">
                   <DotsIcon />
                 </button>
               </div>
@@ -81,76 +66,62 @@
           </ul>
         </section>
 
-        <section class="flex flex-col space-y-16">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Staking</h2>
-            <button class="p-5">
-              <PlusIcon class="w-11 h-11" />
+        <!-- Staking -->
+
+        <section class="asset__main__staking asset__list">
+          <div class="asset__list__header">
+            <h2 class="asset__list__header__title">Staking</h2>
+            <button class="asset__list__header__button">
+              <PlusIcon class="asset__list__header__button__icon" />
             </button>
           </div>
 
-          <div class="px-12 py-8 rounded-md shadow-lg flex items-center space-x-8">
-            <span class="flex-1 font-bold">Rewards</span>
-            <span class="text-gray-700">0.495 ATOM</span>
-            <span class="font-bold">+$10.15</span>
-            <button class="px-12 py-6 rounded-3xl bg-black text-white font-medium">Claim</button>
+          <div class="asset__main__staking__rewards">
+            <span class="asset__main__staking__rewards__label">Rewards</span>
+            <span class="asset__main__staking__rewards__amount">0.495 ATOM</span>
+            <span class="asset__main__staking__rewards__balance">+$10.15</span>
+            <button class="asset__main__staking__rewards__button">Claim</button>
           </div>
 
-          <ul class="w-full flex flex-col space-y-16">
-            <li class="w-full flex items-center space-x-8">
-              <div class="flex-1 flex items-center space-x-8">
-                <span class="rounded-sm bg-gray-200 font-medium text-lg w-20 h-20 flex items-center justify-center">
+          <ul class="asset__list__wrapper">
+            <li class="asset__list__item asset__main__staking__item">
+              <div class="asset__main__staking__item__validator">
+                <span class="asset__main__staking__item__validator__avatar">
                   N
                 </span>
-                <span class="flex-1 font-bold">
+                <span class="asset__main__staking__item__validator__name">
                   nylira
                 </span>
               </div>
 
-              <span class="w-1/3 text-gray-700 text-right">
+              <span class="asset__main__staking__item__amount">
                 82.46 ATOM
               </span>
 
-              <div class="w-1/3 flex items-center space-x-8 justify-end">
-                <span class="font-bold">$1,690.50</span>
-                <button class="p-2"><ChevronDownIcon class="w-8 h-8" /></button>
-              </div>
-            </li>
-
-            <li class="w-full flex items-center space-x-8">
-              <div class="flex-1 flex items-center space-x-8">
-                <span class="rounded-sm bg-gray-200 font-medium text-lg w-20 h-20 flex items-center justify-center">
-                  K
-                </span>
-                <span class="flex-1 font-bold">
-                  KalpaTech
-                </span>
-              </div>
-
-              <span class="w-1/3 text-gray-700 text-right">
-                28.8 ATOM
-              </span>
-
-              <div class="w-1/3 flex items-center space-x-8 justify-end">
-                <span class="font-bold">$590.50</span>
-                <button class="p-2"><ChevronDownIcon class="w-8 h-8" /></button>
+              <div class="asset__main__staking__item__balance">
+                <span class="asset__main__staking__item__balance__value">$1,690.50</span>
+                <button class="asset__main__staking__item__more"><ChevronDownIcon /></button>
               </div>
             </li>
           </ul>
         </section>
 
-        <section class="flex flex-col space-y-8">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Pools</h2>
-            <button class="p-5">
-              <PlusIcon class="w-11 h-11" />
+        <!-- Pools -->
+
+        <section class="asset__main__pools asset__list">
+          <div class="asset__list__header">
+            <p class="asset__list__header__title">Pools</p>
+            <button class="asset__list__header__button">
+              <PlusIcon class="asset__list__header__button__icon" />
             </button>
           </div>
         </section>
       </div>
 
-      <div class="flex items-start justify-center">
-        <LiquiditySwap class="w-2/3" />
+      <!-- Swap -->
+
+      <div class="asset__aside">
+        <LiquiditySwap class="asset__aside__swap" />
       </div>
     </div>
   </AppLayout>
@@ -179,3 +150,291 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.asset {
+  display: flex;
+  margin-bottom: 2rem;
+  font-size: 1.6rem;
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+
+    &__back {
+      &__button {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        padding: 0.8rem 0;
+
+        &__icon {
+          margin-right: 0.4rem;
+
+          svg {
+            width: 2.4rem;
+            height: 2.4rem;
+          }
+        }
+      }
+    }
+
+    &__stats {
+      margin-top: 3.2rem;
+      display: flex;
+      flex-direction: column;
+
+      &__container {
+        display: flex;
+        align-items: baseline;
+
+        &__left {
+          display: flex;
+          flex-direction: column;
+
+          &__token {
+            font-weight: 700;
+            font-size: 2.8rem;
+          }
+
+          &__balance {
+            margin-top: 0.8rem;
+            font-weight: 700;
+            font-size: 6.7rem;
+          }
+
+          &__trending {
+            margin-top: 0.8rem;
+            font-weight: 500;
+            color: rgb(6, 126, 62);
+          }
+        }
+
+        &__right {
+          margin-left: 6rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+
+          dt {
+            color: rgba(0, 0, 0, 0.66);
+          }
+
+          dd {
+            margin-top: 0.2rem;
+            font-weight: 600;
+            font-size: 2.1rem;
+          }
+
+          &__price {
+            margin-top: 3.2rem;
+          }
+        }
+      }
+    }
+
+    &__chains {
+      &__item {
+        &__asset {
+          flex: 1 1 0%;
+          display: flex;
+          align-items: center;
+
+          &__avatar {
+            width: 3.2rem;
+            height: 3.2rem;
+            border-radius: 2.4rem;
+            background-color: rgba(0, 0, 0, 0.1);
+          }
+
+          &__denom {
+            margin-left: 1.6rem;
+            font-weight: 600;
+          }
+        }
+
+        &__amount {
+          margin-left: 1.6rem;
+          width: 33.33%;
+          text-align: right;
+        }
+
+        &__balance {
+          margin-left: 1.6rem;
+          width: 33.33%;
+          display: flex;
+          align-items: center;
+
+          &__value {
+            flex: 1 1 0%;
+            text-align: right;
+            font-weight: 600;
+          }
+        }
+
+        &__more {
+          margin-left: 1.6rem;
+          width: 3.2rem;
+          height: 3.2rem;
+          border-radius: 2.6rem;
+          background-color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.8rem;
+          box-shadow: 0px 8px 24px rgba(0, 3, 66, 0.08);
+        }
+      }
+    }
+
+    &__staking {
+      &__rewards {
+        margin-top: 3rem;
+        padding: 1.6rem 2.4rem;
+        border-radius: 1.2rem;
+        box-shadow: 8px 16px 40px rgba(0, 0, 0, 0.07);
+        display: flex;
+        align-items: center;
+
+        &__label {
+          flex: 1;
+          font-weight: 600;
+        }
+
+        &__amount {
+          margin-left: 1.6rem;
+          color: rgba(0, 0, 0, 0.66);
+        }
+
+        &__balance {
+          margin-left: 1.6rem;
+          font-weight: 600;
+          text-align: right;
+        }
+
+        &__button {
+          margin-left: 1.6rem;
+          padding: 1.2rem 2.4rem;
+          background-color: black;
+          color: white;
+          font-weight: 600;
+          border-radius: 2rem;
+        }
+      }
+
+      &__item {
+        &__validator {
+          flex: 1 1 0%;
+          display: flex;
+          align-items: center;
+
+          &__avatar {
+            border-radius: 0.8rem;
+            width: 4rem;
+            height: 4rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          &__name {
+            margin-left: 1.6rem;
+            flex: 1 1 0%;
+            font-weight: bold;
+          }
+        }
+
+        &__amount {
+          margin-left: 1.6rem;
+          width: 33.33%;
+          text-align: right;
+        }
+
+        &__balance {
+          margin-left: 1.6rem;
+          width: 33.33%;
+          display: flex;
+          align-items: center;
+
+          &__value {
+            flex: 1 1 0%;
+            text-align: right;
+            font-weight: 600;
+          }
+        }
+
+        &__more {
+          margin-left: 1.6rem;
+          padding: 0.4rem;
+
+          svg {
+            width: 1.6rem;
+            height: 1.6rem;
+          }
+        }
+      }
+    }
+  }
+
+  &__aside {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-left: 3.2rem;
+
+    &__swap {
+      width: 66.67%;
+    }
+  }
+
+  &__list {
+    margin-top: 7rem;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      &__title {
+        font-size: 2.8rem;
+        font-weight: 700;
+      }
+
+      &__button {
+        padding: 1rem;
+
+        &__icon {
+          width: 2.2rem;
+          height: 2.2rem;
+        }
+      }
+    }
+
+    &__wrapper {
+      margin-top: 3.2rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &__item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    &__item + &__item {
+      margin-top: 3.2rem;
+    }
+  }
+
+  &__list + &__list {
+    margin-top: 7rem;
+  }
+}
+</style>
