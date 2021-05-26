@@ -31,7 +31,7 @@
     <!-- pay coin selector -->
     <DenomSelect
       v-model:amount="payCoinAmount"
-      :input-header="`Pay ${getCoinDollarValue(payCoinData.base_denom, payCoinAmount)}`"
+      :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
       :user-balance="userBalances"
     />
@@ -66,7 +66,7 @@
     <!-- receive coin selector -->
     <DenomSelect
       v-model:amount="receiveCoinAmount"
-      :input-header="'Receive'"
+      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount)}`"
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
     />
@@ -98,7 +98,7 @@ export default defineComponent({
 
   setup() {
     const { buttonFunction } = useButton();
-    const {getCoinDollarValue} = usePrice()
+    const { getCoinDollarValue} = usePrice()
     const data = reactive({
       buttonName: computed(()=> {
         return data.isOver ? 'Insufficent funds' : 'Swap'}),
@@ -120,7 +120,7 @@ export default defineComponent({
         set: value => (data.payCoinAmount = value / 2),
       }),
       userBalances: TEST_DATA.balances,
-      isOver: computed(() => (data.payCoinAmount > data.payCoinData.amount ? true : false)),
+      isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
     });
 
     data.payCoinData = data.userBalances[0];
