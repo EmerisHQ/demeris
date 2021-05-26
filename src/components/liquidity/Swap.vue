@@ -156,12 +156,7 @@ export default defineComponent({
         },
       };
 
-      buttonFunction({
-        type: 'custom',
-        function: () => {
-          actionHandler({ name: 'swap', params: swapParams });
-        },
-      });
+      actionHandler({ name: 'swap', params: swapParams });
     }
 
     return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, setMax, swap };
