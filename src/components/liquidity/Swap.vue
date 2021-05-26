@@ -31,7 +31,7 @@
     <!-- pay coin selector -->
     <DenomSelect
       v-model:amount="payCoinAmount"
-      :type="'Pay'"
+      :input-header="`Pay ${getCoinDollarValue(payCoinData.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
       :user-balance="userBalances"
     />
@@ -66,7 +66,7 @@
     <!-- receive coin selector -->
     <DenomSelect
       v-model:amount="receiveCoinAmount"
-      :type="'Receive'"
+      :input-header="'Receive'"
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
     />
@@ -84,6 +84,7 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import useButton from '@/setups/Button.vue';
+import usePrice from '@/setups/Price.vue'
 import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -97,18 +98,27 @@ export default defineComponent({
 
   setup() {
     const { buttonFunction } = useButton();
+    const {getCoinDollarValue} = usePrice()
     const data = reactive({
       buttonName: computed(()=> {
         return data.isOver ? 'Insufficent funds' : 'Swap'}),
       buttonStatus: computed(() => {return data.isOver ? 'inactive' : 'normal'}),
       payCoinData: null,
       payCoinAmount: null,
+      payCoinDollarValue: computed(() => {
+        if(data.payCoinAmount) {
+          //TODO: get payCoin Price
+          return `$${data.payCoinAmount * 2}`
+        } else {
+          return ''
+        }
+      }),
+      receiveCoinData: null,
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
         get: () => data.payCoinAmount * 2,
         set: value => (data.payCoinAmount = value / 2),
       }),
-      receiveCoinData: null,
       userBalances: TEST_DATA.balances,
       isOver: computed(() => (data.payCoinAmount > data.payCoinData.amount ? true : false)),
     });
@@ -162,7 +172,7 @@ export default defineComponent({
       });
     }
 
-    return { ...toRefs(data), openSetting, changePayToReceive, setMax, swap };
+    return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, setMax, swap };
   },
 });
 </script>

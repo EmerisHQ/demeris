@@ -15,7 +15,7 @@
     <img
       class="denom-select__coin-image"
       :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
-      :alt="`${type} coin`"
+      :alt="`selected coin`"
       @click="openDenomSelectModal"
     />
 
@@ -34,7 +34,7 @@
     </div>
 
     <div class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type s-minus">{{ type }}</div>
+      <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
       <input
         :value="amount"
         class="denom-select__coin-amount-input s-1"
@@ -57,7 +57,7 @@ export default defineComponent({
   name: 'DenomSelect',
   components: { Icon, DenomSelectModal },
   props: {
-    type: { type: String, required: true },
+    inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
     userBalance: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
