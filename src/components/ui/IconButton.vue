@@ -13,7 +13,7 @@
 import { defineComponent, PropType, ref } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
-import useButton from '@/setups/Button.vue';
+import useButton from '@/composables/useButton.vue';
 import { ButtonFunctionData } from '@/types/setups';
 
 export default defineComponent({

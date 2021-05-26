@@ -83,8 +83,8 @@ import { computed, defineComponent, reactive, toRefs } from 'vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
 import IconButton from '@/components/ui/IconButton.vue';
-import useButton from '@/setups/Button.vue';
-import usePrice from '@/setups/Price.vue'
+import useButton from '@/composables/useButton.vue';
+import usePrice from '@/composables/usePrice.vue';
 import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -98,17 +98,20 @@ export default defineComponent({
 
   setup() {
     const { buttonFunction } = useButton();
-    const { getCoinDollarValue} = usePrice()
+    const { getCoinDollarValue } = usePrice();
     const data = reactive({
-      buttonName: computed(()=> {
-        return data.isOver ? 'Insufficent funds' : 'Swap'}),
-      buttonStatus: computed(() => {return data.isOver ? 'inactive' : 'normal'}),
+      buttonName: computed(() => {
+        return data.isOver ? 'Insufficent funds' : 'Swap';
+      }),
+      buttonStatus: computed(() => {
+        return data.isOver ? 'inactive' : 'normal';
+      }),
       payCoinData: null,
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
-        get: () => data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null,
+        get: () => (data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null),
         set: value => (data.payCoinAmount = value / 2),
       }),
       userBalances: TEST_DATA.balances,
