@@ -1,26 +1,25 @@
 <template>
   <tippy>
-    <div class="asset-chains-indicator flex items-center space-x-4 w-full">
+    <div class="asset-chains-indicator flex items-center space-x-5 w-full">
       <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-3">
         <span
           v-for="indicator of indicators"
           :key="indicator"
-          class="asset-chains-indicator__list__item rounded-full border-2 w-8 h-8 border-blue-300"
+          class="asset-chains-indicator__list__item rounded-full border-2 w-12 h-12 border-blue-300"
         />
         <span
           v-if="hasMoreIndicators"
           class="
             asset-chains-indicator__list__more
             rounded-full
-            w-8
-            h-8
+            w-12
+            h-12
             flex
             items-center
             justify-center
             bg-gray-100
-            text-gray-400 text-2xl
+            text-gray-400 text-lg
             select-none
-            leading-loose
           "
         >
           +
