@@ -1,12 +1,12 @@
 <template>
-  <table class="assets-table table-fixed">
+  <table class="assets-table">
     <thead>
       <tr>
-        <th class="text-left">Asset</th>
-        <th class="text-right">Price</th>
-        <th class="text-right">24h %</th>
-        <th v-if="!isCompact" class="text-right">Balance</th>
-        <th class="text-right">
+        <th class="assets-table--u-text-left">Asset</th>
+        <th class="assets-table--u-text-right">Price</th>
+        <th class="assets-table--u-text-right">24h %</th>
+        <th v-if="!isCompact" class="assets-table--u-text-right">Balance</th>
+        <th class="assets-table--u-text-right">
           Balance
         </th>
         <th>
@@ -17,42 +17,36 @@
 
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
-        <!-- TODO: Implement the Chain Name component -->
-        <td class="assets-table__row__denom font-bold uppercase space-x-8 flex items-center">
-          <div class="w-16 h-16 rounded-full bg-gray-200" />
-          <span>{{ asset.denom }}</span>
+        <td class="assets-table__row__asset">
+          <div class="assets-table__row__asset__avatar" />
+          <span class="assets-table__row__asset__denom">{{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__price text-right" style="font-feature-settings: zero on;">
-          <!-- TODO: Get the price -->
+        <td class="assets-table__row__price assets-table--u-text-right">
           $20.50
         </td>
 
-        <td class="assets-table__row__price w-32">
-          <div class="flex items-start justify-end space-x-2 text-green-700">
-            <TrendingUpIcon class="w-8 h-8" />
-            <span>52.21%</span>
+        <td class="assets-table__row__trending">
+          <div class="assets-table__row__trending__wrapper">
+            <TrendingUpIcon class="assets-table__row__trending__icon" />
+            <span class="assets-table__row__trending__value">52.21%</span>
           </div>
         </td>
 
-        <td v-if="!isCompact" class="assets-table__row__balance text-right uppercase text-gray-700">
+        <td v-if="!isCompact" class="assets-table__row__balance assets-table--u-text-right">
           <span>{{ asset.totalAmount }} {{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__equivalent-balance text-right font-bold">
-          <!-- TODO: Implement the equivalement amount based on price * totalAmount -->
+        <td class="assets-table__row__equivalent-balance assets-table--u-text-right">
           $6,150.20
         </td>
 
-        <td class="assets-table__row__chains w-64">
-          <div class="assets-table__row__chains__wrapper w-full flex items-center justify-end space-x-5">
-            <AssetChainsIndicator :denom="asset.denom" :balances="balances" class="w-full" />
+        <td class="assets-table__row__chains">
+          <div class="assets-table__row__chains__wrapper">
+            <AssetChainsIndicator :denom="asset.denom" :balances="balances" />
 
-            <button
-              class="assets-table__row__arrow-button p-2 text-gray-500 hover:text-gray-600"
-              @click="handleClick(asset)"
-            >
-              <ChevronRightIcon class="w-8 h-8" />
+            <button class="assets-table__row__arrow-button" @click="handleClick(asset)">
+              <ChevronRightIcon class="assets-table__row__arrow-button__icon" />
             </button>
           </div>
         </td>
@@ -112,29 +106,93 @@ export default defineComponent({
 });
 </script>
 
-<style lang="postcss">
+<style lang="scss" scoped>
 .assets-table {
   width: 100%;
-}
+  table-layout: fixed;
 
-.assets-table th {
-  opacity: 0.8;
-  padding-bottom: 2rem;
-  vertical-align: middle;
-  font-weight: 400;
-  @apply text-gray-700 text-sm;
-}
+  &--u-text-right {
+    text-align: right;
+  }
 
-.assets-table__row__denom {
-  padding: 2rem 0;
-  min-width: 4rem;
-}
+  &--u-text-left {
+    text-align: left;
+  }
 
-.assets-table__row__arrow-button {
-  margin-left: 1rem;
-}
+  th {
+    color: rgba(0, 0, 0, 0.66);
+    vertical-align: middle;
+    font-size: 1.3rem;
+    font-weight: 400;
+    padding-bottom: 2rem;
+  }
 
-.assets-table .asset-chains-indicator {
-  justify-content: flex-end;
+  &__row {
+    &__asset {
+      padding: 2rem 0;
+      min-width: 4rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+
+      &__avatar {
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 2.4rem;
+        background: rgba(0, 0, 0, 0.1);
+        margin-right: 1.6rem;
+      }
+    }
+
+    &__trending {
+      &__wrapper {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
+        color: rgb(6, 126, 62);
+      }
+
+      &__icon {
+        width: 1.6rem;
+        height: 1.6rem;
+        margin-right: 0.4rem;
+      }
+    }
+
+    &__balance {
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, 0.66);
+    }
+
+    &__equivalent-balance {
+      font-weight: 600;
+    }
+
+    &__chains {
+      &__wrapper {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+    }
+
+    &__arrow-button {
+      padding: 0.2rem;
+      color: rgba(0, 0, 0, 0.4);
+      margin-left: 1rem;
+
+      &__icon {
+        width: 1.6rem;
+        height: 1.6rem;
+      }
+    }
+  }
+
+  .asset-chains-indicator {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 </style>

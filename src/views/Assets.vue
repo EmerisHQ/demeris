@@ -1,14 +1,14 @@
 <template>
   <AppLayout>
-    <div class="flex flex-col space-y-12">
-      <div class="flex space-x-12">
-        <router-link to="/assets" class="text-xl font-bold focus:outline-none">Assets</router-link>
-        <router-link custom to="/assets/chains">
-          <span class="text-xl font-bold text-gray-400 focus:outline-none cursor-not-allowed">Chains</span>
+    <section class="assets">
+      <nav class="assets__nav">
+        <router-link to="/assets" class="assets__nav__item">Assets</router-link>
+        <router-link to="/assets/chains" custom>
+          <span class="assets__nav__item assets__nav__item--inactive">Chains</span>
         </router-link>
-      </div>
-      <AssetsTable :balances="balances" />
-    </div>
+      </nav>
+      <AssetsTable :balances="balances" class="assets__table" />
+    </section>
   </AppLayout>
 </template>
 
@@ -31,3 +31,30 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.assets {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.6rem;
+
+  &__nav {
+    display: flex;
+
+    &__item {
+      font-size: 2.8rem;
+      font-weight: 600;
+      margin-right: 2.4rem;
+
+      &--inactive {
+        color: rgba(0, 0, 0, 0.33);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__table {
+    margin-top: 2.4rem;
+  }
+}
+</style>

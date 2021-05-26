@@ -1,21 +1,11 @@
 <template>
-  <div class="asset-chains-indicator flex">
-    <tippy class="inline-flex items-center space-x-4">
-      <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-5">
-        <span
-          v-for="indicator of indicators"
-          :key="indicator"
-          class="asset-chains-indicator__list__item rounded-full border-2 w-8 h-8 border-blue-300 bg-white"
-        />
-        <span
-          v-if="hasMoreIndicators"
-          class="asset-chains-indicator__list__more rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-400 text-2xl select-none leading-loose"
-        >
-          +
-        </span>
+  <div class="asset-chains-indicator">
+    <tippy class="asset-chains-indicator__wrapper">
+      <div class="asset-chains-indicator__list">
+        <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
       </div>
 
-      <div class="asset-chains-indicator__count whitespace-nowrap">
+      <div class="asset-chains-indicator__count">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
         chains
       </div>
@@ -83,3 +73,40 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.asset-chains-indicator {
+  display: flex;
+
+  &__wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__list {
+    // flex w-1/2 justify-end -space-x-5
+    display: flex;
+    justify-content: flex-end;
+    width: 50%;
+
+    &__item {
+      width: 2.4rem;
+      height: 2.4rem;
+      background: white;
+      border-radius: 2.4rem;
+      border: 2px solid #9ffeed;
+
+      //  border-2 w-8 h-8 border-blue-300 bg-white
+
+      &:not(:first-child) {
+        margin-left: -1.6rem;
+      }
+    }
+  }
+
+  &__count {
+    margin-left: 0.8rem;
+    white-space: nowrap;
+  }
+}
+</style>
