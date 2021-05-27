@@ -9,7 +9,18 @@
         />
         <span
           v-if="hasMoreIndicators"
-          class="asset-chains-indicator__list__more rounded-full w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-400 text-lg select-none"
+          class="
+            asset-chains-indicator__list__more
+            rounded-full
+            w-12
+            h-12
+            flex
+            items-center
+            justify-center
+            bg-gray-100
+            text-gray-400 text-lg
+            select-none
+          "
         >
           +
         </span>
@@ -58,7 +69,7 @@ export default defineComponent({
   setup(props: { maxChainsCount: number; maxIndicators: number; balances: Balances; denom: string }) {
     const filteredBalances = computed(() => {
       return props.balances
-        .filter(item => item.base_denom === props.denom)
+        .filter((item) => item.base_denom === props.denom)
         .sort((a, b) => (b.amount > a.amount ? 1 : -1));
     });
 

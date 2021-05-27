@@ -11,7 +11,7 @@
     width="64"
   >
     <g transform="translate(0,-280.06665)">
-      <g transform="matrix(0,0.26458334,-0.26458334,0,16.933393,280.06659)" style="fill: none">
+      <g transform="matrix(-0.26458334,0,0,-0.26458334,16.933453,296.99998)" style="fill: none">
         <path
           style="fill: currentColor; stroke-width: 2.988657"
           d="M 29.011455,52.558073 11.079603,34.626279 6.853,38.852808 32.000202,64 57.147452,38.852808 52.920893,34.626279 34.988771,52.558222 V -1.5e-7 h -5.977316 z"
@@ -25,9 +25,10 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'ArrowLeftIcon',
+  name: 'ArrowUpIcon',
 });
 </script>
+
 <style lang="scss" scoped>
 svg {
   width: 1em;
