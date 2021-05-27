@@ -1,15 +1,10 @@
-import {
-  CommitOptions,
-  DispatchOptions,
-  Module,
-  Store as VuexStore,
-} from 'vuex';
+import { CommitOptions, DispatchOptions, Module, Store as VuexStore } from 'vuex';
 
 import { RootState } from '@/store';
 
-import { Actions,actions } from './actions';
-import { Getters,getters } from './getters';
-import { Mutations,mutations } from './mutations';
+import { actions, GlobalActions } from './actions';
+import { Getters, getters } from './getters';
+import { Mutations, mutations } from './mutations';
 import type { State } from './state';
 import { getDefaultState } from './state';
 
@@ -19,17 +14,17 @@ export type DemerisStore<S = State> = Omit<VuexStore<S>, 'getters' | 'commit' | 
   commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
     key: K,
     payload: P,
-    options?: CommitOptions
+    options?: CommitOptions,
   ): ReturnType<Mutations[K]>;
 } & {
-  dispatch<K extends keyof Actions>(
+  dispatch<K extends keyof GlobalActions>(
     key: K,
-    payload: Parameters<Actions[K]>[1],
-    options?: DispatchOptions
-  ): ReturnType<Actions[K]>;
+    payload?: Parameters<GlobalActions[K]>[1],
+    options?: DispatchOptions,
+  ): ReturnType<GlobalActions[K]>;
 } & {
   getters: {
-    [K in keyof Getters]: ReturnType<Getters[K]>
+    [K in keyof Getters]: ReturnType<Getters[K]>;
   };
 };
 

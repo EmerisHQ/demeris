@@ -5,21 +5,10 @@ import vueLib from '@starport/vue';
 import { createApp } from 'vue';
 import VueTippy from 'vue-tippy';
 
-import stringFilters from '@/filters/string'
-
 import App from './App.vue';
 import router from './router';
 import { store } from './store';
 
 const app = createApp(App);
 app.config.globalProperties._depsLoaded = true;
-app
-  .use(store)
-  .use(router)
-  .use(vueLib)
-  .use(VueTippy)
-  .mount('#app');
-
-app.config.globalProperties.$filters = {
-  ...stringFilters
-}
+app.use(store).use(router).use(vueLib).use(VueTippy).mount('#app');

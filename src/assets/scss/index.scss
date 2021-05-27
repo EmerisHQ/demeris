@@ -1,4 +1,13 @@
-@import './theme-colors';
-@import './typography';
-@import './elevation';
+@import '@starport/vue/src/styles/_normalize';
+@import '@starport/vue/src/styles/_colors';
+
+@import '@starport/vue/src/styles/_fonts';
+@import '_responsive';
 @import './tailwind';
+#app {
+  background: #f5f6f8;
+
+  * {
+    box-sizing: border-box;
+  }
+}

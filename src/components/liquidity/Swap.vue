@@ -112,13 +112,13 @@ export default defineComponent({
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
         get: () => (data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null),
-        set: value => (data.payCoinAmount = value / 2),
+        set: (value) => (data.payCoinAmount = value / 2),
       }),
       userBalances: TEST_DATA.balances,
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
     });
 
-    data.payCoinData = data.userBalances[0];
+    data.payCoinData = data?.userBalances[0];
 
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;

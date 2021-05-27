@@ -58,9 +58,9 @@ export type Balance = {
   address: string;
   base_denom: string;
   verified: boolean;
-  amount: number;
+  amount: string;
   on_chain: string;
-  ibc: IbcInfo | {};
+  ibc: IbcInfo | Record<string, never>;
 };
 export type Balances = Array<Balance>;
 export type BalancesResponse = {
