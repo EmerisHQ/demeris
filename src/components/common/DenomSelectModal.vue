@@ -1,6 +1,6 @@
 <template>
-  <div class="modal-wrapper">
-    TEST
+  <div class="modal-wrapper elevation-card">
+    <TitleWithGoback :title="'Pay with'" :func="setSteps" />
     <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
@@ -19,8 +19,19 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 export default defineComponent({
   name: 'DenomSelectModal',
+  components: {
+    TitleWithGoback,
+  },
+  setup() {
+    function setSteps() {
+      alert('test');
+    }
+    return { setSteps };
+  },
 });
 </script>
 
@@ -31,6 +42,8 @@ export default defineComponent({
   height: 100%;
   top: 0;
   left: 0;
-  background-color: green;
+
+  background-color: var(--surface);
+  z-index: 10;
 }
 </style>
