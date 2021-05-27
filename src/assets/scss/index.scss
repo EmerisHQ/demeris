@@ -1,11 +1,8 @@
 @import '@starport/vue/src/styles/_normalize';
 @import '@starport/vue/src/styles/_colors';
-@import '_icons';
+
 @import '@starport/vue/src/styles/_fonts';
 @import '_responsive';
-@import '@starport/vue/src/styles/_utility';
-@import '@starport/vue/src/styles/_components';
-@import '@starport/vue/src/styles/_animations';
 @import './tailwind';
 #app {
   background: #f5f6f8;

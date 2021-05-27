@@ -6,15 +6,24 @@
     <div class="space"></div>
     <div class="header__wallet">
       <router-link class="header__wallet-button" to="/receive">
-        <div class="sp-icon sp-icon-Download"></div>
+        <div class="header__wallet-button__icon">
+          <ReceiveIcon />
+        </div>
         Receive
       </router-link>
 
       <router-link class="header__wallet-button" to="/send">
-        <div class="sp-icon sp-icon-Upload"></div>
+        <div class="header__wallet-button__icon">
+          <SendIcon />
+        </div>
         Send
       </router-link>
       <Wallet />
+      <div class="header__menu-button">
+        <div class="header__menu-button__icon">
+          <MenuIcon />
+        </div>
+      </div>
     </div>
   </header>
 </template>
@@ -24,12 +33,19 @@ import { defineComponent } from 'vue';
 import Wallet from '@/components/account/Wallet.vue';
 import Logo from '@/components/layout/Logo.vue';
 import Navbar from '@/components/layout/Navbar.vue';
+
+import MenuIcon from '../common/Icons/MenuIcon.vue';
+import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
+import SendIcon from '../common/Icons/SendIcon.vue';
 export default defineComponent({
   name: 'Header',
   components: {
     Logo,
     Navbar,
     Wallet,
+    ReceiveIcon,
+    SendIcon,
+    MenuIcon,
   },
 });
 </script>
@@ -91,8 +107,8 @@ export default defineComponent({
       font-size: 1.6rem;
       justify-content: center;
       align-items: center;
-      padding: 0rem 1rem;
-      .sp-icon {
+      padding: 0rem 1.5rem;
+      &__icon {
         margin-right: 1rem;
       }
     }
@@ -118,6 +134,13 @@ export default defineComponent({
       &-value {
         font-size: 12px;
       }
+    }
+  }
+  &__menu-button {
+    margin-left: 2.5rem;
+    &__icon {
+      font-size: 2.2rem;
+      color: black;
     }
   }
 }

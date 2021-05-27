@@ -21,6 +21,8 @@
     "axios": "^0.21.1",
     "bech32": "^2.0.0",
     "core-js": "^3.6.5",
+    "crypto-js": "^4.0.0",
+    "gradient-avatar": "^1.0.2",
     "long": "^4.0.0",
     "vue": "^3.0.11",
     "vue-router": "^4.0.3",

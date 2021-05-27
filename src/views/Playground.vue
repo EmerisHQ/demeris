@@ -27,6 +27,7 @@
           <SendIcon />
           <ReceiveIcon />
           <HintIcon />
+          <MenuIcon />
         </div>
       </div>
     </div>
@@ -48,6 +49,7 @@ import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
 import CaretUpIcon from '@/components/common/Icons/CaretUpIcon.vue';
 import CloseIcon from '@/components/common/Icons/CloseIcon.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
+import MenuIcon from '@/components/common/Icons/MenuIcon.vue';
 import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
@@ -76,6 +78,7 @@ export default defineComponent({
     SwapUDIcon,
     SendIcon,
     ReceiveIcon,
+    MenuIcon,
   },
   setup() {
     const store = useStore();
