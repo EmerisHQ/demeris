@@ -11,7 +11,24 @@
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
-        <div class="flex flex-row w-1/5 mx-auto icons">
+
+        <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+          <Input placeholder="Example 1">
+            <template #start>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 2">
+            <template #end>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 3" hint="My hint message" />
+        </div>
+
+        <div class="p-10 flex flex-row w-1/5 mx-auto icons">
           <AlertIcon />
           <ArrowDownIcon />
           <ArrowUpIcon />
@@ -55,6 +72,7 @@ import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Input from '@/components/ui/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 
@@ -79,6 +97,7 @@ export default defineComponent({
     SendIcon,
     ReceiveIcon,
     MenuIcon,
+    Input,
   },
   setup() {
     const store = useStore();
