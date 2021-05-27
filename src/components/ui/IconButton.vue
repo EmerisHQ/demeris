@@ -5,7 +5,7 @@
     class="icon-button"
     @click="clickFunction"
   >
-    <Icon v-if="isIcon" :name="name" />
+    <Icon v-if="isIcon" :name="name" :icon-size="iconSize" />
     <div v-else class="s-minus">{{ buttonName }}</div>
   </button>
 </template>
@@ -21,6 +21,7 @@ export default defineComponent({
   components: { Icon },
   props: {
     name: { type: String, required: true },
+    iconSize: { type: Number, required: false, default: 2.4 },
     data: { type: Object as PropType<ButtonFunctionData>, required: true },
     type: {
       type: String,
@@ -59,6 +60,12 @@ export default defineComponent({
   background-color: var(--surface);
   cursor: pointer;
   padding: 0;
+
+  &__svg {
+    svg {
+      display: inline-block;
+    }
+  }
 }
 
 .flat {

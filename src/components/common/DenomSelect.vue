@@ -22,14 +22,14 @@
     <div v-if="isSelected" class="denom-select__coin" @click="openDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         {{ $filters.getCoinName(selectedDenom?.base_denom) }}
-        <Icon name="SmallDownIcon" :width="'16'" :height="'16'" :view-box="'0 0 16 16'" />
+        <Icon name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
 
     <div v-else class="denom-select__coin" @click="openDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
-        Select asset <Icon name="SmallDownIcon" :width="'16'" :height="'16'" :view-box="'0 0 16 16'" />
+        Select asset <Icon name="SmallDownIcon" :icon-size="1.6" />
       </div>
     </div>
 

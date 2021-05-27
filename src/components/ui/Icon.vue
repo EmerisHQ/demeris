@@ -3,37 +3,22 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-  <IconBase :width="width" :height="height" :icon-name="name" :view-box="viewBox">
+  <div class="icon" :style="`font-size:${iconSize}rem`">
     <component :is="currentIcon" v-if="isReady" />
-  </IconBase>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref, shallowRef } from 'vue';
 
-import IconBase from '@/components/common/Icons/IconBase.vue';
 export default defineComponent({
   name: 'Icon',
-  components: { IconBase },
+
   props: {
     name: {
       type: String,
       required: true,
     },
-    width: {
-      type: String,
-      required: false,
-      default: '24',
-    },
-    height: {
-      type: String,
-      required: false,
-      default: '24',
-    },
-    viewBox: {
-      type: String,
-      requird: false,
-      default: '0 0 24 24',
-    },
+    iconSize: { type: Number, required: false, default: 2.4 },
   },
 
   setup(props) {
@@ -53,7 +38,6 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .icon {
-  width: 2.4rem;
-  height: 2.4rem;
+  display: inline-block;
 }
 </style>
