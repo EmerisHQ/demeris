@@ -11,6 +11,7 @@ export enum DemerisMutationTypes {
   SET_FEE = 'SET_FEE',
   SET_FEE_TOKENS = 'SET_FEE_TOKENS',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
+  SET_KEPLR = 'SET_KEPLR',
   SET_NUMBERS = 'SET_NUMBERS',
   SET_PRICES = 'SET_PRICES',
   SET_CHAINS = 'SET_CHAINS',
@@ -40,9 +41,17 @@ export type DemerisMutationArgs =
   | API.Chains
   | API.Chain
   | API.VerifiedDenoms
-  | DemerisConfig;
+  | DemerisConfig
+  | KeplrKeyData;
 
 export type DemerisMutations = {
   params?: API.APIRequests;
   value: DemerisMutationArgs;
+};
+export type KeplrKeyData = {
+  name: string;
+  algo: string;
+  pubKey: Uint8Array;
+  address: Uint8Array;
+  bech32Address: string;
 };

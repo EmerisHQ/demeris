@@ -16,3 +16,9 @@ export default defineComponent({
   name: 'BanIcon',
 });
 </script>
+<style lang="scss" scoped>
+svg {
+  width: 1em;
+  height: 1em;
+}
+</style>

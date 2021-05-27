@@ -4,8 +4,8 @@ import * as API from '@/types/api';
 
 import { DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import { DemerisMutations,DemerisMutationTypes as MutationTypes } from './mutation-types';
-import { getDefaultState,State } from './state';
+import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
+import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
@@ -20,6 +20,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: any }): void; // TODO: prices
 
+  [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
@@ -45,7 +46,7 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
-    state.balances[JSON.stringify(payload.params)] = payload.value as API.Balances;
+    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
@@ -70,6 +71,9 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
     state.prices = payload.value as any; // TODO: prices
   },
+  [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
+    state.keplr = payload;
+  },
 
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
@@ -81,9 +85,8 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name].fee_address = payload.value as API.FeeAddress;
   },
   [MutationTypes.SET_BECH32_CONFIG](state: State, payload: DemerisMutations) {
-    state.chains[
-      (payload.params as API.ChainReq).chain_name
-    ].node_info.bech32_config = payload.value as API.Bech32Config;
+    state.chains[(payload.params as API.ChainReq).chain_name].node_info.bech32_config =
+      payload.value as API.Bech32Config;
   },
   [MutationTypes.SET_FEE](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].base_ibc_fee = payload.value as API.Fee; // TODO: Change after MVP
