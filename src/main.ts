@@ -11,9 +11,4 @@ import { store } from './store';
 
 const app = createApp(App);
 app.config.globalProperties._depsLoaded = true;
-app
-  .use(store)
-  .use(router)
-  .use(vueLib)
-  .use(VueTippy)
-  .mount('#app');
+app.use(store).use(router).use(vueLib).use(VueTippy).mount('#app');
