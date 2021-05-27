@@ -15,7 +15,6 @@
 <script lang="ts">
 import AssetsTable from '@/components/assets/AssetsTable';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Balances } from '@/types/api';
 
 import balancesFixture from '../../tests/fixtures/balances.json';
 
@@ -25,7 +24,7 @@ export default {
 
   setup() {
     // TODO: Get data from API
-    const balances: Balances = balancesFixture;
+    const balances = balancesFixture;
 
     return { balances };
   },

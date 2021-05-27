@@ -1,6 +1,6 @@
 [
   {
-    "amount": 10,
+    "amount": "10",
     "base_denom": "atom",
     "on_chain": "Cosmos",
     "address": "",
@@ -8,7 +8,7 @@
     "ibc": {}
   },
   {
-    "amount": 20,
+    "amount": "20",
     "base_denom": "atom",
     "on_chain": "Kava",
     "address": "",
@@ -16,7 +16,7 @@
     "ibc": {}
   },
   {
-    "amount": 100,
+    "amount": "100",
     "base_denom": "atom",
     "on_chain": "Akash",
     "address": "",
@@ -24,7 +24,7 @@
     "ibc": {}
   },
   {
-    "amount": 42,
+    "amount": "42",
     "base_denom": "atom",
     "on_chain": "Iris",
     "address": "",
@@ -32,7 +32,7 @@
     "ibc": {}
   },
   {
-    "amount": 54,
+    "amount": "54",
     "base_denom": "atom",
     "on_chain": "BSC",
     "address": "",
@@ -40,7 +40,7 @@
     "ibc": {}
   },
   {
-    "amount": 50,
+    "amount": "50",
     "base_denom": "kava",
     "on_chain": "Kava",
     "address": "",
@@ -48,7 +48,7 @@
     "ibc": {}
   },
   {
-    "amount": 100,
+    "amount": "100",
     "base_denom": "kava",
     "on_chain": "Akash",
     "address": "",

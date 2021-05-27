@@ -1,8 +1,8 @@
 <template>
   <AppLayout>
     <div class="wrapper">
-      <div class="dashboard">
-        <div>DashBoard</div>
+      <div class="portfolio">
+        <div>Portfolio</div>
       </div>
       <div class="swap">
         <LiquiditySwap />
@@ -15,7 +15,7 @@
 import LiquiditySwap from '@/components/LiquiditySwap.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 export default {
-  name: 'DashBoard',
+  name: 'Portfolio',
   components: { AppLayout, LiquiditySwap },
 };
 </script>
@@ -26,7 +26,7 @@ export default {
   max-width: 1024px;
   margin: 0 auto;
 
-  .dashboard {
+  .portfolio {
     display: flex;
     flex: 1;
     width: 0;

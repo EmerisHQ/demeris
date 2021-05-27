@@ -1,6 +1,7 @@
 import * as API from '@/types/api';
 
 import { DemerisSubscriptions } from './action-types';
+import { KeplrKeyData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
@@ -14,6 +15,7 @@ export type State = {
   stakingBalances: Record<string, API.StakingBalances>;
   numbers: Record<string, API.Numbers>;
   verifiedDenoms: API.VerifiedDenoms;
+  keplr: KeplrKeyData;
   prices: Array<any>; //TODO: prices
   chains: Record<string, ChainData>;
   _Subscriptions: Set<DemerisSubscriptions>;
@@ -25,6 +27,7 @@ export function getDefaultState(): State {
     stakingBalances: {},
     numbers: {},
     verifiedDenoms: [],
+    keplr: null,
     prices: [],
     chains: {},
     _Subscriptions: new Set(),

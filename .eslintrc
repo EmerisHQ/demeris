@@ -24,9 +24,9 @@
     "vue/max-attributes-per-line": "off",
     "@typescript-eslint/camelcase": "off",
     "vue/singleline-html-element-content-newline": "off",
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error",
-    "unused-imports/no-unused-imports-ts": "error"
+    "simple-import-sort/imports": "warn",
+		"simple-import-sort/exports": "warn",
+		"unused-imports/no-unused-imports-ts": "error"
   },
   "overrides": [
     {

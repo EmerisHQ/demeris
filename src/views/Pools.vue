@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div class="home">
-      <div>Pool</div>
+      <div>Pools</div>
     </div>
   </AppLayout>
 </template>
@@ -9,7 +9,7 @@
 <script lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 export default {
-  name: 'Home',
+  name: 'Pools',
   components: { AppLayout },
 };
 </script>

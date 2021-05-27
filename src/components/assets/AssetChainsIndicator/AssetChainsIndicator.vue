@@ -48,7 +48,7 @@ export default defineComponent({
   setup(props: { maxChainsCount: number; maxIndicators: number; balances: Balances; denom: string }) {
     const filteredBalances = computed(() => {
       return props.balances
-        .filter(item => item.base_denom === props.denom)
+        .filter((item) => item.base_denom === props.denom)
         .sort((a, b) => (b.amount > a.amount ? 1 : -1));
     });
 

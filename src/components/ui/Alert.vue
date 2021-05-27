@@ -80,8 +80,7 @@ export default defineComponent({
   }
 
   &__icon {
-    width: 1.8rem;
-    height: 1.8rem;
+    font-size: 1.8rem;
   }
 
   &__content {
