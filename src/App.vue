@@ -20,6 +20,18 @@ export default defineComponent({
     },
   },
   async created() {
+    /* 
+        set dark/light mode according to user Preference
+        later, there will be a toggle button and save user's preference to localStorage 
+        for overriding default os/browser setting 
+          // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          //   document.documentElement.setAttribute('color-theme', 'dark');
+          // } else {
+          //   document.documentElement.setAttribute('color-theme', 'light');
+          // }
+      */
+    document.documentElement.setAttribute('color-theme', 'light');
+
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'http://localhost:8000/v1',
       refreshTime: 5000,

@@ -1,0 +1,31 @@
+:root[color-theme='light'] {
+  --text: #000;
+  --muted: rgba(0, 0, 0, 0.67);
+  --inactive: rgba(0, 0, 0, 0.44);
+  --bg: rgba(255, 255, 255, 1);
+  --fg: rgba(247, 247, 247, 1);
+  --fg-trans: rgba(0, 0, 0, 0.03);
+  --surface: rgba(255, 255, 255, 1);
+  --border: rgba(229, 229, 229, 1);
+  --border-trans: rgba(0, 0, 0, 0.1);
+  --positive-text: #008d52;
+  --negative-text: #ec0047;
+  --warning: #ff7d05;
+  --danger: #ffe5e6;
+}
+
+:root[color-theme='dark'] {
+  --text: #fff;
+  --muted: rgba(255, 255, 255, 0.67);
+  --inactive: rgba(255, 255, 255, 0.44);
+  --bg: rgba(0, 0, 0, 1);
+  --fg: rgba(25, 25, 25, 1);
+  --fg-trans: rgba(255, 255, 255, 0.1);
+  --surface: rgba(255, 255, 255, 0.1);
+  --border: rgba(41, 41, 41, 1);
+  --border-trans: rgba(255, 255, 255, 0.16);
+  --positive-text: #3ef9aa;
+  --negative-text: #ff588a;
+  --warning: #ffa34e;
+  --danger: #ffe5e6;
+}

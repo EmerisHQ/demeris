@@ -31,89 +31,89 @@ export type Getters = {
 };
 
 export const getters: GetterTree<State, RootState> & Getters = {
-  getBalances: state => params => {
+  getBalances: (state) => (params) => {
     return state.balances[(params as API.AddrReq).address] ?? [];
   },
-  getStakingBalances: state => params => {
+  getStakingBalances: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? [];
   },
-  getNumbers: state => params => {
+  getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? [];
   },
-  getFeeAddresses: state => {
+  getFeeAddresses: (state) => {
     const feeAddresses = [];
     for (const chain of Object.values(state.chains)) {
       feeAddresses.push({ chain_name: chain.base_fee, fee_address: chain.fee_address });
     }
     return feeAddresses;
   },
-  getVerifiedDenoms: state => {
+  getVerifiedDenoms: (state) => {
     return state.verifiedDenoms;
   },
-  getChains: state => {
+  getChains: (state) => {
     return state.chains;
   },
-  getPrices: state => {
+  getPrices: (state) => {
     return state.prices; //TODO: Prices
   },
-  getEndpoint: state => {
+  getEndpoint: (state) => {
     return state.endpoint; //TODO: Prices
   },
-  isSignedIn: state => {
+  isSignedIn: (state) => {
     return state.keplr ? true : false;
   },
-  getKeplrAccountName: state => {
+  getKeplrAccountName: (state) => {
     return state.keplr?.name ?? null;
   },
-  getKeplrAddress: state => {
+  getKeplrAddress: (state) => {
     if (state.keplr) {
       return keyHashfromAddress(state.keplr.bech32Address);
     } else {
       return null;
     }
   },
-  getVerifyTrace: state => params => {
+  getVerifyTrace: (state) => (params) => {
     return (
       state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces[(params as API.VerifyTraceReq).hash] ??
       ({} as API.VerifyTrace)
     );
   },
-  getFeeAddress: state => params => {
+  getFeeAddress: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].fee_address ?? ({} as API.FeeAddress);
   },
-  getBech32Config: state => params => {
+  getBech32Config: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config ?? ({} as API.Bech32Config);
   },
-  getFee: state => params => {
+  getFee: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].base_fee ?? ({} as API.Fee);
   },
-  getBaseFee: state => params => {
+  getBaseFee: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].base_fee ?? ({} as API.Fee);
   },
-  getIBCFee: state => params => {
+  getIBCFee: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].base_ibc_fee ?? ({} as API.Fee);
   },
-  getFeeTokens: state => params => {
+  getFeeTokens: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].fee_tokens ?? ({} as API.FeeTokens);
   },
-  getChain: state => params => {
+  getChain: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? ({} as ChainData);
   },
-  getPrimaryChannel: state => params => {
+  getPrimaryChannel: (state) => (params) => {
     return (
       state.chains[(params as API.ChainReq).chain_name].primaryChannels[
         (params as API.ChainReq).destination_chain_name
       ] ?? ({} as API.PrimaryChannel)
     );
   },
-  getPrimaryChannels: state => params => {
+  getPrimaryChannels: (state) => (params) => {
     const channels = [];
     for (const channel of Object.values(state.chains[(params as API.ChainReq).chain_name].primaryChannels)) {
       channels.push(channel);
     }
     return channels;
   },
-  getChainStatus: state => params => {
+  getChainStatus: (state) => (params) => {
     state.chains[(params as API.ChainReq).chain_name].status ?? false;
   },
 };

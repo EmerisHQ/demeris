@@ -2,9 +2,16 @@
 @import '@starport/vue/src/styles/_colors';
 
 @import '@starport/vue/src/styles/_fonts';
-@import '_responsive';
+
 @import '_animations';
+@import '_responsive';
+@import '_elevation';
+@import '_icons';
+@import '_responsive';
+@import '_theme-colors';
+@import '_typography';
 @import './tailwind';
+
 #app {
   background: #f5f6f8;
 
