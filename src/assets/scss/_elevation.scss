@@ -1,0 +1,16 @@
+$border-radius: 10px;
+
+.elevation-button {
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
+    border-radius: $border-radius;    
+}
+
+.elevation-card {
+    box-shadow: 0px 16px 40px rgba(0, 0, 0, 0.06);
+    border-radius: $border-radius;
+}
+
+.elevation-panel {
+    box-shadow: 32px 48px 96px -8px rgba(0, 0, 0, 0.12);
+    border-radius: $border-radius;
+}

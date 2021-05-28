@@ -4,7 +4,7 @@
       <div class="portfolio">
         <div>Portfolio</div>
       </div>
-      <div class="swap">
+      <div>
         <LiquiditySwap />
       </div>
     </div>
@@ -12,8 +12,9 @@
 </template>
 
 <script lang="ts">
-import LiquiditySwap from '@/components/LiquiditySwap.vue';
+import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+
 export default {
   name: 'Portfolio',
   components: { AppLayout, LiquiditySwap },
@@ -32,13 +33,8 @@ export default {
     width: 0;
     align-items: center;
     justify-content: space-evenly;
-
+    margin-right: 2rem;
     background-color: rgb(172, 206, 207);
-  }
-
-  .swap {
-    width: 0;
-    flex: 1;
   }
 }
 </style>

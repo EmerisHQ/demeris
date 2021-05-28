@@ -24,5 +24,6 @@ export default defineComponent({
   max-width: 120rem;
   margin: 0 auto;
   height: 100vh;
+  min-height: 100vh;
 }
 </style>
