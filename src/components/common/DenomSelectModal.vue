@@ -1,10 +1,5 @@
 <template>
   <div class="modal-wrapper elevation-card">
-    <TitleWithGoback :title="'Pay with'" :func="setSteps" />
-    <div class="search-bar">
-      <Search />
-    </div>
-
     <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
@@ -19,6 +14,13 @@
 					vuex getter to get  chain name from chain id		
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any-->
+    <TitleWithGoback :title="'Pay with'" :func="setSteps" />
+    <div class="search-bar">
+      <Search />
+    </div>
+    <div v-for="coin in assets" :key="coin.base_denom">
+      <div>{{ coin.base_denom }}</div>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -32,10 +34,14 @@ export default defineComponent({
     TitleWithGoback,
     Search,
   },
-  setup() {
+  props: {
+    assets: Object,
+  },
+  setup(props) {
     function setSteps() {
       alert('test');
     }
+    console.log('assets', props);
     return { setSteps };
   },
 });
@@ -45,7 +51,7 @@ export default defineComponent({
 .modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: 55.5rem;
   top: 0;
   left: 0;
 
