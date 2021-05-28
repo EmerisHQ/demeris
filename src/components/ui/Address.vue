@@ -67,6 +67,10 @@ export default defineComponent({
     background: transparent;
     font-size: 1.6rem;
     resize: none;
+
+    &::placeholder {
+      color: var(--inactive);
+    }
   }
 
   &__controls {
