@@ -11,6 +11,11 @@
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/4 mx-auto">
+          <Address address="cosmos1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg" chain-name="Cosmos Hub" readonly />
+        </div>
+
         <div class="flex flex-row w-1/5 mx-auto icons">
           <AlertIcon />
           <ArrowDownIcon />
@@ -54,6 +59,7 @@ import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
+import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
@@ -62,6 +68,7 @@ export default defineComponent({
   components: {
     AssetChainsIndicator,
     AppLayout,
+    Address,
     Alert,
     AlertIcon,
     ArrowDownIcon,
