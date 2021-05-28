@@ -21,5 +21,6 @@ export default defineComponent({
 <style scoped lang="scss">
 .layout-frame {
   padding-top: 11rem;
+  min-height: 100vh;
 }
 </style>
