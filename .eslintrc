@@ -26,6 +26,6 @@
     "vue/singleline-html-element-content-newline": "off",
     "simple-import-sort/imports": "warn",
 		"simple-import-sort/exports": "warn",
-		"unused-imports/no-unused-imports-ts": "error",
+		"unused-imports/no-unused-imports-ts": "error"
   }
 }
