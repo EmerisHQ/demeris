@@ -15,17 +15,20 @@
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any-->
     <TitleWithGoback :title="'Pay with'" :func="setSteps" />
+
     <div class="search-bar">
       <Search />
     </div>
-    <div v-for="coin in assets" :key="coin.base_denom">
-      <div>{{ coin.base_denom }}</div>
+
+    <div class="coin-list">
+      <CoinList :data="assets" :type="'amount'" />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
 export default defineComponent({
@@ -33,6 +36,7 @@ export default defineComponent({
   components: {
     TitleWithGoback,
     Search,
+    CoinList,
   },
   props: {
     assets: Object,
@@ -59,7 +63,11 @@ export default defineComponent({
   z-index: 10;
 
   .search-bar {
-    padding: 0 2.4rem;
+    padding: 0 2.4rem 2.4rem;
+  }
+
+  .coin-list {
+    padding: 0 1.6rem 0 2.4rem;
   }
 }
 </style>
