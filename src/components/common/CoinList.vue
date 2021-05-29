@@ -11,7 +11,7 @@
         {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : 'TODO' }}
       </div>
     </div>
-    <AssetChainsIndicator :balances="data" denom="uatom" :max-chains-count="4" />
+    <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
   </div>
 </template>
 <script lang="ts">
@@ -26,6 +26,9 @@ export default defineComponent({
   props: {
     data: { type: Object, required: true },
     type: { type: String, required: true },
+  },
+  setup() {
+    //TODO: handling current test data
   },
 });
 </script>

@@ -39,5 +39,19 @@ export const TEST_DATA = {
         verified_path: [],
       },
     },
+    {
+      address: 'cosmos14pmvh0d4fucylhawvcd0hxkrky99hwcnm0usr5',
+      base_denom: 'ukava',
+      verified: false,
+      native: false,
+      amount: 10000,
+      on_chain: 'luna',
+      ibc: {
+        source_chain: 'yeetchain-0',
+        ibc_denom: 'ibc/3F1D3FCF4AE79E1554D670D1AD949A9BA4E4A3C76C63093E17E446A46061A7A2',
+        path: 'transfer/channel-42/transfer/channel-44',
+        verified_path: [],
+      },
+    },
   ],
 };
