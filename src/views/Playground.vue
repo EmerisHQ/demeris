@@ -11,7 +11,28 @@
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
-        <div class="flex flex-row w-1/5 mx-auto icons">
+
+        <div class="p-10 flex flex-col space-y-8 container mx-auto">
+          <Pools :pools="pools" />
+        </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+          <Input placeholder="Example 1">
+            <template #start>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 2">
+            <template #end>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 3" hint="My hint message" />
+        </div>
+
+        <div class="p-10 flex flex-row w-1/5 mx-auto icons">
           <AlertIcon />
           <ArrowDownIcon />
           <ArrowUpIcon />
@@ -54,13 +75,17 @@ import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
+import Pools from '@/components/liquidity/Pools.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Input from '@/components/ui/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
+import { Pool } from '@/types/actions';
 
 export default defineComponent({
   components: {
     AssetChainsIndicator,
+    Pools,
     AppLayout,
     Alert,
     AlertIcon,
@@ -79,6 +104,7 @@ export default defineComponent({
     SendIcon,
     ReceiveIcon,
     MenuIcon,
+    Input,
   },
   setup() {
     const store = useStore();
@@ -87,9 +113,31 @@ export default defineComponent({
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
 
-    return {
-      balances,
-    };
+    const pools: Pool[] = [
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'kava'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['luna', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'luna',
+        typeId: 1,
+      },
+    ];
+
+    return { balances, pools };
   },
 });
 </script>

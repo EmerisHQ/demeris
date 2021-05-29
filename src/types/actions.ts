@@ -55,3 +55,7 @@ export type Step = {
   status: 'pending' | 'active' | 'completed';
   data: IBCBackwardsData | IBCForwardsData | SwapData;
 };
+
+export type {
+  Pool
+}
