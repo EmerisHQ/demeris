@@ -105,7 +105,7 @@ export default defineComponent({
       align-items: center;
       color: var(--text);
 
-      svg {
+      .icon {
         margin-left: 0.4rem;
       }
     }

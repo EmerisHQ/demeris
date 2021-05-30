@@ -41,5 +41,6 @@ export default defineComponent({
 .icon {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 </style>
