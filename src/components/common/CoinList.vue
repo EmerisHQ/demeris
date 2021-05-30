@@ -9,11 +9,11 @@
       <div class="coin-list__info-details">
         <div class="coin-list__info-details-denom s-0 w-medium">{{ $filters.getCoinName(coin.base_denom) }}</div>
         <div class="coin-list__info-details-data s-minus w-normal">
-          {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : 'TODO' }}
+          {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : coin.on_chain }}
         </div>
       </div>
     </div>
-    <div class="coin-list__select">
+    <div v-if="type === 'amount'" class="coin-list__select">
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
@@ -32,7 +32,7 @@ export default defineComponent({
   },
   props: {
     data: { type: Object, required: true },
-    type: { type: String, required: true },
+    type: { type: String, required: false, default: 'chain' },
   },
   setup() {
     //TODO: handling current test data

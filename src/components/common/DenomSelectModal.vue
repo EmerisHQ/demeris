@@ -21,7 +21,7 @@
     </div>
 
     <div class="coin-list">
-      <CoinList :data="assets" :type="'amount'" />
+      <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" />
     </div>
     <div class="white-front-shadow" />
   </div>
