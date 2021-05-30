@@ -16,10 +16,10 @@
       class="denom-select__coin-image"
       :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
       :alt="`selected coin`"
-      @click="openDenomSelectModal"
+      @click="toggleDenomSelectModal"
     />
 
-    <div v-if="isSelected" class="denom-select__coin" @click="openDenomSelectModal">
+    <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         {{ $filters.getCoinName(selectedDenom?.base_denom) }}
         <Icon name="SmallDownIcon" :icon-size="1.6" />
@@ -27,7 +27,7 @@
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
 
-    <div v-else class="denom-select__coin" @click="openDenomSelectModal">
+    <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         Select asset <Icon name="SmallDownIcon" :icon-size="1.6" />
       </div>
@@ -46,7 +46,12 @@
     </div>
   </div>
 
-  <DenomSelectModal v-show="isOpen" :assets="userBalance" />
+  <DenomSelectModal
+    v-show="isOpen"
+    :assets="userBalance"
+    :func="toggleDenomSelectModal"
+    :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
+  />
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
@@ -75,12 +80,12 @@ export default defineComponent({
 
     const isOpen = ref(false);
 
-    function openDenomSelectModal() {
-      isOpen.value = true;
+    function toggleDenomSelectModal() {
+      isOpen.value = !isOpen.value;
     }
 
     console.log(props.userBalance);
-    return { inputAmount, isSelected, isOpen, openDenomSelectModal };
+    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal };
   },
 });
 </script>

@@ -14,7 +14,7 @@
 					vuex getter to get  chain name from chain id		
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any-->
-    <TitleWithGoback :title="'Pay with'" :func="setSteps" />
+    <TitleWithGoback :title="title" :func="func" />
 
     <div class="search-bar">
       <Search />
@@ -39,7 +39,9 @@ export default defineComponent({
     CoinList,
   },
   props: {
-    assets: Object,
+    assets: { type: Object, required: true },
+    func: { type: Function, required: true },
+    title: { type: String, required: true },
   },
   setup(props) {
     function setSteps() {
