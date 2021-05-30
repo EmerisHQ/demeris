@@ -70,6 +70,16 @@ export default defineComponent({
 
   .coin-list {
     padding: 0 1.6rem 0 2.4rem;
+    height: 39.5rem;
+
+    overflow-y: scroll;
+
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera*/
+    }
   }
 }
 </style>
