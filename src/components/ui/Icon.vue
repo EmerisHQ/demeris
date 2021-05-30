@@ -3,7 +3,7 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-  <div class="icon" :style="`font-size:${iconSize}rem`">
+  <div class="icon" :style="`font-size:${iconSize}rem; color: ${color}`">
     <component :is="currentIcon" v-if="isReady" />
   </div>
 </template>
@@ -19,6 +19,7 @@ export default defineComponent({
       required: true,
     },
     iconSize: { type: Number, required: false, default: 2.4 },
+    color: { type: String, required: false, default: 'inherit' },
   },
 
   setup(props) {

@@ -12,16 +12,19 @@
       </div>
     </div>
     <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
+    <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'Button',
   components: {
     AssetChainsIndicator,
+    Icon,
   },
   props: {
     data: { type: Object, required: true },
@@ -29,6 +32,8 @@ export default defineComponent({
   },
   setup() {
     //TODO: handling current test data
+    const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
+    return { iconColor };
   },
 });
 </script>
