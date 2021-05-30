@@ -23,6 +23,7 @@
     <div class="coin-list">
       <CoinList :data="assets" :type="'amount'" />
     </div>
+    <div class="white-front-shadow" />
   </div>
 </template>
 <script lang="ts">
