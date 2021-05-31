@@ -1,43 +1,22 @@
 <template>
-  <tippy>
-    <div class="asset-chains-indicator flex items-center space-x-5 w-full">
-      <div class="asset-chains-indicator__list flex w-1/2 justify-end -space-x-3">
-        <span
-          v-for="indicator of indicators"
-          :key="indicator"
-          class="asset-chains-indicator__list__item rounded-full border-2 w-12 h-12 border-blue-300"
-        />
-        <span
-          v-if="hasMoreIndicators"
-          class="
-            asset-chains-indicator__list__more
-            rounded-full
-            w-12
-            h-12
-            flex
-            items-center
-            justify-center
-            bg-gray-100
-            text-gray-400 text-lg
-            select-none
-          "
-        >
-          +
-        </span>
+  <div class="asset-chains-indicator">
+    <tippy class="asset-chains-indicator__wrapper">
+      <div class="asset-chains-indicator__list">
+        <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
       </div>
 
       <div class="asset-chains-indicator__count">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
         chains
       </div>
-    </div>
 
-    <template #content>
-      <p v-for="balance of filteredBalances" :key="balance.on_chain">
-        {{ `${balance.amount} on ${balance.on_chain}` }}
-      </p>
-    </template>
-  </tippy>
+      <template #content>
+        <p v-for="balance of filteredBalances" :key="balance.on_chain">
+          {{ `${balance.amount} on ${balance.on_chain}` }}
+        </p>
+      </template>
+    </tippy>
+  </div>
 </template>
 
 <script lang="ts">
@@ -95,11 +74,39 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.asset-chains-indicator__list__item {
-  filter: drop-shadow(0px 4px 8px rgba(159, 240, 236, 0.21));
-}
-.asset-chains-indicator__list__more {
-  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.12));
+<style lang="scss" scoped>
+.asset-chains-indicator {
+  display: flex;
+
+  &__wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__list {
+    // flex w-1/2 justify-end -space-x-5
+    display: flex;
+    justify-content: flex-end;
+    width: 50%;
+
+    &__item {
+      width: 2.4rem;
+      height: 2.4rem;
+      background: white;
+      border-radius: 2.4rem;
+      border: 2px solid #9ffeed;
+
+      //  border-2 w-8 h-8 border-blue-300 bg-white
+
+      &:not(:first-child) {
+        margin-left: -1.6rem;
+      }
+    }
+  }
+
+  &__count {
+    margin-left: 0.8rem;
+    white-space: nowrap;
+  }
 }
 </style>
