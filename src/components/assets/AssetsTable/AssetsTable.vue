@@ -6,9 +6,7 @@
         <th class="assets-table--u-text-right">Price</th>
         <th class="assets-table--u-text-right">24h %</th>
         <th v-if="!isCompact" class="assets-table--u-text-right">Balance</th>
-        <th class="assets-table--u-text-right">
-          Balance
-        </th>
+        <th class="assets-table--u-text-right">Balance</th>
         <th>
           <!-- Chains -->
         </th>
@@ -22,9 +20,7 @@
           <span class="assets-table__row__asset__denom">{{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__price assets-table--u-text-right">
-          $20.50
-        </td>
+        <td class="assets-table__row__price assets-table--u-text-right">$20.50</td>
 
         <td class="assets-table__row__trending">
           <div class="assets-table__row__trending__wrapper">
@@ -37,9 +33,7 @@
           <span>{{ asset.totalAmount }} {{ asset.denom }}</span>
         </td>
 
-        <td class="assets-table__row__equivalent-balance assets-table--u-text-right">
-          $6,150.20
-        </td>
+        <td class="assets-table__row__equivalent-balance assets-table--u-text-right">$6,150.20</td>
 
         <td class="assets-table__row__chains">
           <div class="assets-table__row__chains__wrapper">
@@ -87,7 +81,7 @@ export default defineComponent({
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);
-        const chainsNames = balances.map(item => item.on_chain);
+        const chainsNames = balances.map((item) => item.on_chain);
 
         return {
           denom,

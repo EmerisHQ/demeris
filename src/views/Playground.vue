@@ -12,6 +12,11 @@
           <Alert status="info" message="Info" />
         </div>
 
+        <div class="p-10 flex flex-col space-y-8 w-1/4 mx-auto">
+          <Address address="cosmos1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg" chain-name="Cosmos Hub" readonly />
+          <Address v-model:address="address" chain-name="Terra" />
+        </div>
+
         <div class="p-10 flex flex-col space-y-8 container mx-auto">
           <Pools :pools="pools" />
         </div>
@@ -56,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
@@ -76,6 +81,7 @@ import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
 import Pools from '@/components/liquidity/Pools.vue';
+import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Input from '@/components/ui/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -87,6 +93,7 @@ export default defineComponent({
     AssetChainsIndicator,
     Pools,
     AppLayout,
+    Address,
     Alert,
     AlertIcon,
     ArrowDownIcon,
@@ -137,7 +144,9 @@ export default defineComponent({
       },
     ];
 
-    return { balances, pools };
+    const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
+
+    return { balances, pools, address };
   },
 });
 </script>
