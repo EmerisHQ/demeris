@@ -46,9 +46,11 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2.4rem;
+  padding: 1.2rem 0;
+  
   &__info {
     display: flex;
+    align-items: center;
 
     &-image {
       width: 3.2rem;

@@ -16,7 +16,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .search {
   display: flex;
-  padding: 1rem 1.2rem;
+  padding: 1.15rem 1.2rem;
   border-radius: 10px;
   background-color: var(--fg-trans);
 

@@ -58,7 +58,7 @@ export default defineComponent({
 .modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 55.5rem;
+  height: 55.8rem;
   top: 0;
   left: 0;
 
@@ -71,7 +71,7 @@ export default defineComponent({
 
   .coin-list {
     padding: 0 1.6rem 0 2.4rem;
-    height: 39.5rem;
+    height: 37.8rem;
 
     overflow-y: scroll;
 
