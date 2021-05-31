@@ -51,6 +51,7 @@
     :assets="userBalance"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
+    @select="denomSelectHandler"
   />
 </template>
 <script lang="ts">
@@ -67,7 +68,7 @@ export default defineComponent({
     userBalance: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
   },
-  emits: ['update:amount'],
+  emits: ['update:amount', 'select'],
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
@@ -84,8 +85,18 @@ export default defineComponent({
       isOpen.value = !isOpen.value;
     }
 
+    function denomSelectHandler(payload) {
+      console.log(payload.type, payload)
+      if(payload.type === 'Receive') {
+        emit('select', payload)
+      } else {
+        alert('Pay denom select')
+      }
+      toggleDenomSelectModal()
+    }
+
     console.log(props.userBalance);
-    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal };
+    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal, denomSelectHandler };
   },
 });
 </script>

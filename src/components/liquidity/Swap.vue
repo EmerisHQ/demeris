@@ -69,6 +69,7 @@
       :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount)}`"
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
+      @select="denomSelectHandler"
     />
 
     <!-- swap button -->
@@ -83,7 +84,6 @@ import { computed, defineComponent, reactive, toRefs } from 'vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
 import IconButton from '@/components/ui/IconButton.vue';
-import useButton from '@/composables/useButton.vue';
 import usePrice from '@/composables/usePrice.vue';
 import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
@@ -97,7 +97,6 @@ export default defineComponent({
   },
 
   setup() {
-    const { buttonFunction } = useButton();
     const { getCoinDollarValue } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
@@ -137,6 +136,10 @@ export default defineComponent({
       data.payCoinAmount = data.payCoinData.amount;
     }
 
+    function denomSelectHandler(payload) {
+      data.receiveCoinData = payload
+    }
+
     function openSetting() {
       alert('open setting');
     }
@@ -162,7 +165,7 @@ export default defineComponent({
       actionHandler({ name: 'swap', params: swapParams });
     }
 
-    return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, setMax, swap };
+    return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, denomSelectHandler, setMax, swap };
   },
 });
 </script>

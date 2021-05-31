@@ -1,5 +1,5 @@
 <template>
-  <div v-for="coin in data" :key="coin.base_denom" class="coin-list">
+  <div v-for="coin in data" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
     <div class="coin-list__info">
       <img
         class="coin-list__info-image"
@@ -34,6 +34,7 @@ export default defineComponent({
     data: { type: Object, required: true },
     type: { type: String, required: false, default: 'chain' },
   },
+  emits: ['select'],
   setup() {
     //TODO: handling current test data
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
@@ -46,8 +47,11 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
+  
   padding: 1.2rem 0;
   
+  cursor: pointer;
+
   &__info {
     display: flex;
     align-items: center;

@@ -21,7 +21,7 @@
     </div>
 
     <div class="coin-list">
-      <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" />
+      <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" @select="coinListselectHandler" />
     </div>
     <div class="white-front-shadow" />
   </div>
@@ -44,12 +44,20 @@ export default defineComponent({
     func: { type: Function, required: true },
     title: { type: String, required: true },
   },
-  setup(props) {
-    function setSteps() {
-      alert('test');
+  emits: ['select'],
+  setup(props, {emit}) {
+  
+    function coinListselectHandler(payload) {
+      if(props.title === 'Receive') {
+        payload.type = props.title
+        emit('select', payload)
+      } else {
+        alert('open chain select modal')
+      }
     }
+
     console.log('assets', props);
-    return { setSteps };
+    return { coinListselectHandler };
   },
 });
 </script>
