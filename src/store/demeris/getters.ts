@@ -7,51 +7,51 @@ import { keyHashfromAddress } from '@/utils/basic';
 import { ChainData, State } from './state';
 
 export type Getters = {
-  getBalances(state: State): { (params: API.APIRequests): API.Balances };
-  getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances };
-  getNumbers(state: State): { (params: API.APIRequests): API.Numbers };
-  getFeeAddresses(state: State): API.FeeAddresses;
-  getVerifiedDenoms(state: State): API.VerifiedDenoms;
+  getBalances(state: State): { (params: API.APIRequests): API.Balances | null };
+  getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances | null };
+  getNumbers(state: State): { (params: API.APIRequests): API.Numbers | null };
+  getFeeAddresses(state: State): API.FeeAddresses | null;
+  getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
   getPrices(state: State): any; //TODO prices
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getKeplrAccountName(state: State): string | null;
-  getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace };
-  getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress };
-  getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config };
-  getFee(state: State): { (params: API.APIRequests): API.Fee };
-  getBaseFee(state: State): { (params: API.APIRequests): API.Fee };
-  getIBCFee(state: State): { (params: API.APIRequests): API.Fee };
-  getFeeTokens(state: State): { (params: API.APIRequests): API.FeeTokens };
-  getChain(state: State): { (params: API.APIRequests): ChainData };
-  getPrimaryChannel(state: State): { (params: API.APIRequests): API.PrimaryChannel };
-  getPrimaryChannels(state: State): { (params: API.APIRequests): API.PrimaryChannels };
-  getChainStatus(state: State): { (params: API.APIRequests): any }; // TODO chain status
+  getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
+  getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
+  getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config | null };
+  getFee(state: State): { (params: API.APIRequests): API.Fee | null };
+  getBaseFee(state: State): { (params: API.APIRequests): API.Fee | null };
+  getIBCFee(state: State): { (params: API.APIRequests): API.Fee | null };
+  getFeeTokens(state: State): { (params: API.APIRequests): API.FeeTokens | null };
+  getChain(state: State): { (params: API.APIRequests): ChainData | null };
+  getPrimaryChannel(state: State): { (params: API.APIRequests): API.PrimaryChannel | null };
+  getPrimaryChannels(state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
+  getChainStatus(state: State): { (params: API.APIRequests): boolean };
 };
 
 export const getters: GetterTree<State, RootState> & Getters = {
   getBalances: (state) => (params) => {
-    return state.balances[(params as API.AddrReq).address] ?? [];
+    return state.balances[(params as API.AddrReq).address] ?? null;
   },
   getStakingBalances: (state) => (params) => {
-    return state.stakingBalances[(params as API.AddrReq).address] ?? [];
+    return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
   getNumbers: (state) => (params) => {
-    return state.numbers[(params as API.AddrReq).address] ?? [];
+    return state.numbers[(params as API.AddrReq).address] ?? null;
   },
   getFeeAddresses: (state) => {
     const feeAddresses = [];
     for (const chain of Object.values(state.chains)) {
       feeAddresses.push({ chain_name: chain.base_fee, fee_address: chain.fee_address });
     }
-    return feeAddresses;
+    return feeAddresses.length != 0 ? feeAddresses : null;
   },
   getVerifiedDenoms: (state) => {
-    return state.verifiedDenoms;
+    return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
   getChains: (state) => {
-    return state.chains;
+    return Object.keys(state.chains).length != 0 ? state.chains : null;
   },
   getPrices: (state) => {
     return state.prices; //TODO: Prices
@@ -74,36 +74,36 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getVerifyTrace: (state) => (params) => {
     return (
-      state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces[(params as API.VerifyTraceReq).hash] ??
-      ({} as API.VerifyTrace)
+      state.chains[(params as API.VerifyTraceReq).chain_name]?.verifiedTraces[(params as API.VerifyTraceReq).hash] ??
+      null
     );
   },
   getFeeAddress: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].fee_address ?? ({} as API.FeeAddress);
+    return state.chains[(params as API.ChainReq).chain_name]?.fee_address ?? null;
   },
   getBech32Config: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config ?? ({} as API.Bech32Config);
+    return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
   getFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].base_fee ?? ({} as API.Fee);
+    return state.chains[(params as API.ChainReq).chain_name]?.base_fee ?? null;
   },
   getBaseFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].base_fee ?? ({} as API.Fee);
+    return state.chains[(params as API.ChainReq).chain_name]?.base_fee ?? null;
   },
   getIBCFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].base_ibc_fee ?? ({} as API.Fee);
+    return state.chains[(params as API.ChainReq).chain_name]?.base_ibc_fee ?? null;
   },
   getFeeTokens: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name].fee_tokens ?? ({} as API.FeeTokens);
+    return state.chains[(params as API.ChainReq).chain_name]?.fee_tokens ?? null;
   },
   getChain: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name] ?? ({} as ChainData);
+    return state.chains[(params as API.ChainReq).chain_name] ?? null;
   },
   getPrimaryChannel: (state) => (params) => {
     return (
-      state.chains[(params as API.ChainReq).chain_name].primaryChannels[
+      state.chains[(params as API.ChainReq).chain_name]?.primaryChannels[
         (params as API.ChainReq).destination_chain_name
-      ] ?? ({} as API.PrimaryChannel)
+      ] ?? null
     );
   },
   getPrimaryChannels: (state) => (params) => {
@@ -111,9 +111,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
     for (const channel of Object.values(state.chains[(params as API.ChainReq).chain_name].primaryChannels)) {
       channels.push(channel);
     }
-    return channels;
+    return channels.length != 0 ? channels : null;
   },
   getChainStatus: (state) => (params) => {
-    state.chains[(params as API.ChainReq).chain_name].status ?? false;
+    return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
   },
 };

@@ -100,7 +100,7 @@ export interface Actions {
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
-  ): Promise<any>; //TODO chain status
+  ): Promise<boolean>;
 
   [DemerisActionTypes.BROADCAST_TX](
     { commit, getters }: ActionContext<State, RootState>,
@@ -448,8 +448,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response = await axios.get(getters['getEndpoint'] + '/chain_status/' + (params as API.ChainReq).chain_name);
-      commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data }); // TODO: chain status
+      const response = await axios.get(
+        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/status',
+      );
+      commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
       }

@@ -13,10 +13,11 @@
 </template>
 
 <script lang="ts">
+import { computed } from '@vue/runtime-core';
+import { useStore } from 'vuex';
+
 import AssetsTable from '@/components/assets/AssetsTable';
 import AppLayout from '@/layouts/AppLayout.vue';
-
-import balancesFixture from '../../tests/fixtures/balances.json';
 
 export default {
   name: 'Assets',
@@ -24,7 +25,14 @@ export default {
 
   setup() {
     // TODO: Get data from API
-    const balances = balancesFixture;
+
+    const store = useStore();
+
+    const balances = computed(() =>
+      store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
+    );
+
+    //const balances = balancesFixture;
 
     return { balances };
   },
