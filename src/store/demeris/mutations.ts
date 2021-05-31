@@ -33,7 +33,7 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.PrimaryChannels },
   ): void;
-  [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: any }): void; // TODO: chain status
+  [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
 
   // Internal module mutations
 
@@ -109,7 +109,7 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as any; // TODO: chain status
+    state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
   },
 
   // Internal module mutations

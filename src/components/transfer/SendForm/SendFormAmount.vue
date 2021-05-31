@@ -6,6 +6,6 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'TransferFormAmount',
+  name: 'SendFormAmount',
 });
 </script>
