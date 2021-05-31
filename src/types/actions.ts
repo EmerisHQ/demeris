@@ -55,7 +55,11 @@ export type Step = {
   status: 'pending' | 'active' | 'completed';
   data: IBCBackwardsData | IBCForwardsData | SwapData;
 };
+export type TransferForm = {
+  recipient: string;
+  memo: string;
+  isTermChecked?: boolean;
+  amount: Base.Amount;
+};
 
-export type {
-  Pool
-}
+export type { Pool };
