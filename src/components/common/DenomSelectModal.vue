@@ -1,6 +1,8 @@
 <template>
-  <div class="modal-wrapper elevation-card">
-    <!--Displays a denom selection component:
+  <div>
+    <ChainSelectModal v-show="isModalOpen" :assets="assets" :title="'Select chain'" :func="toggleChainSelectModal" />
+    <div v-show="!isModalOpen" class="modal-wrapper">
+      <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
 				denom name
@@ -14,21 +16,23 @@
 					vuex getter to get  chain name from chain id		
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any-->
-    <TitleWithGoback :title="title" :func="func" />
+      <TitleWithGoback :title="title" :func="func" />
 
-    <div class="search-bar">
-      <Search />
-    </div>
+      <div class="search-bar">
+        <Search />
+      </div>
 
-    <div class="coin-list">
-      <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" @select="coinListselectHandler" />
+      <div class="coin-list">
+        <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" @select="coinListselectHandler" />
+      </div>
+      <div class="white-front-shadow" />
     </div>
-    <div class="white-front-shadow" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
@@ -36,6 +40,7 @@ export default defineComponent({
   name: 'DenomSelectModal',
   components: {
     TitleWithGoback,
+    ChainSelectModal,
     Search,
     CoinList,
   },
@@ -45,19 +50,24 @@ export default defineComponent({
     title: { type: String, required: true },
   },
   emits: ['select'],
-  setup(props, {emit}) {
-  
+  setup(props, { emit }) {
     function coinListselectHandler(payload) {
-      if(props.title === 'Receive') {
-        payload.type = props.title
-        emit('select', payload)
+      if (props.title === 'Receive') {
+        payload.type = props.title;
+        emit('select', payload);
       } else {
-        alert('open chain select modal')
+        toggleChainSelectModal();
       }
     }
 
+    const isModalOpen = ref(false);
+
+    function toggleChainSelectModal() {
+      isModalOpen.value = !isModalOpen.value;
+    }
+
     console.log('assets', props);
-    return { coinListselectHandler };
+    return { isModalOpen, toggleChainSelectModal, coinListselectHandler };
   },
 });
 </script>
@@ -69,6 +79,8 @@ export default defineComponent({
   height: 55.8rem;
   top: 0;
   left: 0;
+
+  border-radius: 10px;
 
   background-color: var(--surface);
   z-index: 10;
