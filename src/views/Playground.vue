@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div class="home">
-      <div class="bg-white">
+      <div>
         <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
           <AssetChainsIndicator :balances="balances" denom="stake" :max-chains-count="4" />
         </div>
@@ -58,7 +58,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ArrowDownIcon from '@/components/common/Icons/ArrowDownIcon.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';

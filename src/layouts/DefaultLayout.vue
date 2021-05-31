@@ -20,7 +20,10 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .layout-frame {
-  padding-top: 11rem;
+  padding: calc(4.8rem + 8rem) 3.2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100vh;
   min-height: 100vh;
 }
 </style>

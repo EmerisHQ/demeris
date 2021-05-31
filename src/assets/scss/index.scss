@@ -10,7 +10,8 @@
 @import '_typography';
 @import './tailwind';
 #app {
-  background: #f5f6f8;
+  background: var(--bg);
+  color: var(--text);
 
   * {
     box-sizing: border-box;
