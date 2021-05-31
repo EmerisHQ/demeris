@@ -5,7 +5,7 @@ import { KeplrKeyData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
-  status?: boolean; // TODO: chain status
+  status?: boolean;
 };
 export type ChainData = API.Chain & ChainMeta;
 
