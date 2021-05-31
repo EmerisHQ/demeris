@@ -1,22 +1,22 @@
 <template>
-  <div>
+  <fieldset class="form__field">
     <label>To</label>
     <Address v-model:address="form.recipient" />
-  </div>
+  </fieldset>
 
-  <div>
+  <fieldset class="form__field">
     <label>Reference (memo)</label>
     <Input v-model="form.memo" placeholde="Add reference (memo)" hint="My hint message" />
-  </div>
+  </fieldset>
 
-  <div v-if="form.recipient">
+  <fieldset v-if="form.recipient" class="form__field">
     <Checkbox
       v-model="form.isTermChecked"
       label="I have reviewed the address and understand that if it is incorrect, my sent funds may be lost."
     />
-  </div>
+  </fieldset>
 
-  <div>
+  <div class="form__field">
     <Button name="Confirm" :disabled="isValid" @click="onSubmit" />
   </div>
 </template>

@@ -48,6 +48,7 @@ export default defineComponent({
   &__control {
     appearance: none;
     user-select: none;
+    flex-shrink: 0;
     width: 2rem;
     height: 2rem;
     border-radius: 4px;

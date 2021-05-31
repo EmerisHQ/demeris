@@ -1,19 +1,19 @@
 <template>
-  <div>
+  <form class="send-form">
     <template v-if="step === 'recipient'">
-      <h2>Send to an address</h2>
+      <h2 class="send-form__title s-2">Send to an address</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-if="step === 'amount'">
-      <h2>Enter an amount</h2>
+      <h2 class="send-form__title s-2">Enter an amount</h2>
       <SendFormAmount :form="form" @next="goToStep('review')" />
     </template>
 
     <template v-if="step === 'review'">
-      <h2>Review your transfer details</h2>
+      <h2 class="send-form__title s-2">Review your transfer details</h2>
     </template>
-  </div>
+  </form>
 </template>
 
 <script lang="ts">
@@ -51,7 +51,7 @@ export default defineComponent({
         denom: '',
         amount: 0,
       },
-      isTermChecked: true,
+      isTermChecked: false,
     });
 
     const step = ref(props.step as Step);
@@ -67,3 +67,27 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.send-form {
+  &__title {
+    text-align: center;
+    margin-bottom: 4.8rem;
+  }
+}
+
+.form {
+  &__field {
+    label {
+      display: block;
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    & + & {
+      margin-top: 2.4rem;
+    }
+  }
+}
+</style>
