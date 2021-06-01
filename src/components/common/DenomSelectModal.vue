@@ -29,7 +29,11 @@
       </div>
 
       <div class="coin-list">
-        <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" @select="coinListselectHandler" />
+        <CoinList
+          :data="filterKeyword(assets, keyword)"
+          :type="title === 'Receive' ? 'chain' : 'amount'"
+          @select="coinListselectHandler"
+        />
       </div>
       <WhiteOverlay />
     </div>
@@ -80,8 +84,16 @@ export default defineComponent({
       isModalOpen.value = !isModalOpen.value;
     }
 
+    function filterKeyword(assets, keyword) {
+      const filteredAssets = assets.filter((asset) => {
+        return asset.base_denom.substr(1).indexOf(keyword) !== -1;
+      });
+
+      return filteredAssets;
+    }
+
     console.log('assets', props);
-    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler, keyword };
+    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler, keyword, filterKeyword };
   },
 });
 </script>
