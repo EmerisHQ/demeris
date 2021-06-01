@@ -10,7 +10,7 @@
   </button>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { computed,defineComponent, PropType } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 import useButton from '@/composables/useButton.vue';
@@ -34,7 +34,9 @@ export default defineComponent({
   // eslint-disable-next-line
   setup(props: any) {
     const { buttonFunction } = useButton();
-    const buttonName = ref(props.name);
+    const buttonName = computed(() => {
+      return props.name;
+    });
 
     let isIcon = true;
 
