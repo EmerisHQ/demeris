@@ -63,6 +63,9 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props, { emit }) {
+    const isModalOpen = ref(false);
+    const keyword = ref('');
+
     function coinListselectHandler(payload) {
       if (props.title === 'Receive') {
         payload.type = props.title;
@@ -77,11 +80,9 @@ export default defineComponent({
       toggleChainSelectModal();
     }
 
-    const isModalOpen = ref(false);
-    const keyword = ref('');
-
     function toggleChainSelectModal() {
       isModalOpen.value = !isModalOpen.value;
+      keyword.value = '';
     }
 
     function filterKeyword(assets, keyword) {

@@ -2,6 +2,7 @@
   <div class="search">
     <Icon :name="'MagnifyingGlassIcon'" :icon-size="1.6" />
     <input
+      :value="keyword"
       class="s-0 w-normal"
       type="text"
       placeholder="Search assets"
