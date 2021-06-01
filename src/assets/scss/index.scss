@@ -2,6 +2,8 @@
 @import '@starport/vue/src/styles/_colors';
 
 @import '@starport/vue/src/styles/_fonts';
+
+@import '_animations';
 @import '_responsive';
 @import '_elevation';
 @import '_icons';
@@ -10,8 +12,10 @@
 @import '_typography';
 @import '_snippets';
 @import './tailwind';
+
 #app {
-  background: #f5f6f8;
+  background: var(--bg);
+  color: var(--text);
 
   * {
     box-sizing: border-box;

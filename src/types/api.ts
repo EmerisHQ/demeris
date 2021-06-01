@@ -134,7 +134,9 @@ export type ChainResponse = {
 };
 
 // /chain/:chain/status endpoint data types
-// TODO: Chain status
+export type ChainStatusResponse = {
+  online: boolean;
+};
 
 // /chain/:chain/denom/verify_trace/:hash endpoint data types
 
