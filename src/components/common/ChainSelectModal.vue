@@ -1,5 +1,5 @@
 <template>
-  <div class="chain-select-wrapper elevation-card">
+  <div class="chain-select-wrapper elevation-panel">
     <TitleWithGoback :title="title" :func="func" />
 
     <div class="coin-list">

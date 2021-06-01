@@ -12,7 +12,7 @@
 		dependencies:
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
-  <div class="swap-widget elevation-card" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
+  <div class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">

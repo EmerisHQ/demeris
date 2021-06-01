@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'Button',
