@@ -141,7 +141,11 @@ export default defineComponent({
     }
 
     function denomSelectHandler(payload) {
-      data.receiveCoinData = payload;
+      if (payload.type === 'Receive') {
+        data.receiveCoinData = payload;
+      } else {
+        data.payCoinData = payload;
+      }
     }
 
     function openSetting() {

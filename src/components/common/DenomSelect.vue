@@ -87,12 +87,7 @@ export default defineComponent({
     }
 
     function denomSelectHandler(payload) {
-      console.log(payload.type, payload);
-      if (payload.type === 'Receive') {
-        emit('select', payload);
-      } else {
-        alert('Pay denom select');
-      }
+      emit('select', payload);
       toggleDenomSelectModal();
     }
 

@@ -1,6 +1,12 @@
 <template>
   <div>
-    <ChainSelectModal v-show="isModalOpen" :assets="assets" :title="'Select chain'" :func="toggleChainSelectModal" />
+    <ChainSelectModal
+      v-show="isModalOpen"
+      :assets="assets"
+      :title="'Select chain'"
+      :func="toggleChainSelectModal"
+      @select="chainSelectHandler"
+    />
     <div v-show="!isModalOpen" class="denom-select-modal-wrapper elevation-panel">
       <!--Displays a denom selection component:
 				input field (search box)
@@ -62,6 +68,11 @@ export default defineComponent({
       }
     }
 
+    function chainSelectHandler(payload) {
+      emit('select', payload);
+      toggleChainSelectModal();
+    }
+
     const isModalOpen = ref(false);
 
     function toggleChainSelectModal() {
@@ -69,7 +80,7 @@ export default defineComponent({
     }
 
     console.log('assets', props);
-    return { isModalOpen, toggleChainSelectModal, coinListselectHandler };
+    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler };
   },
 });
 </script>

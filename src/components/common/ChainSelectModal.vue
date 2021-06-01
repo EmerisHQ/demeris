@@ -29,12 +29,8 @@ export default defineComponent({
   emits: ['select'],
   setup(props, { emit }) {
     function coinListselectHandler(payload) {
-      if (props.title === 'Receive') {
-        payload.type = props.title;
-        emit('select', payload);
-      } else {
-        alert('open chain select modal');
-      }
+      payload.type = props.title;
+      emit('select', payload);
     }
 
     console.log('assets', props);
