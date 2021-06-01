@@ -1,7 +1,12 @@
 <template>
   <div class="search">
     <Icon :name="'MagnifyingGlassIcon'" :icon-size="1.6" />
-    <input class="s-0 w-normal" type="text" placeholder="Search assets" />
+    <input
+      class="s-0 w-normal"
+      type="text"
+      placeholder="Search assets"
+      @input="$emit('update:keyword', $event.target.value)"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -11,6 +16,10 @@ import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'Search',
   components: { Icon },
+  props: {
+    keyword: { type: String, required: false, default: null },
+  },
+  emits: ['update:keyword'],
 });
 </script>
 <style lang="scss" scoped>

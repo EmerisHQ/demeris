@@ -34,6 +34,7 @@
       :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
       :user-balance="userBalances"
+      :is-over="isOver"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />

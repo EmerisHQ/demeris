@@ -25,7 +25,7 @@
       <TitleWithGoback :title="title" :func="func" />
 
       <div class="search-bar">
-        <Search />
+        <Search v-model:keyword="keyword" />
       </div>
 
       <div class="coin-list">
@@ -74,13 +74,14 @@ export default defineComponent({
     }
 
     const isModalOpen = ref(false);
+    const keyword = ref('');
 
     function toggleChainSelectModal() {
       isModalOpen.value = !isModalOpen.value;
     }
 
     console.log('assets', props);
-    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler };
+    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler, keyword };
   },
 });
 </script>
