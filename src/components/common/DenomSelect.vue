@@ -68,7 +68,7 @@ export default defineComponent({
     userBalance: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
   },
-  emits: ['update:amount', 'select'],
+  emits: ['update:amount', 'select', 'modalToggle'],
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
@@ -83,16 +83,17 @@ export default defineComponent({
 
     function toggleDenomSelectModal() {
       isOpen.value = !isOpen.value;
+      emit('modalToggle', isOpen.value);
     }
 
     function denomSelectHandler(payload) {
-      console.log(payload.type, payload)
-      if(payload.type === 'Receive') {
-        emit('select', payload)
+      console.log(payload.type, payload);
+      if (payload.type === 'Receive') {
+        emit('select', payload);
       } else {
-        alert('Pay denom select')
+        alert('Pay denom select');
       }
-      toggleDenomSelectModal()
+      toggleDenomSelectModal();
     }
 
     console.log(props.userBalance);

@@ -12,7 +12,7 @@
 		dependencies:
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
-  <div class="swap-widget elevation-card">
+  <div class="swap-widget elevation-card" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">
@@ -34,6 +34,8 @@
       :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
       :user-balance="userBalances"
+      @select="denomSelectHandler"
+      @modalToggle="setChildModalOpenStatus"
     />
 
     <!-- button-divider -->
@@ -70,6 +72,7 @@
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
       @select="denomSelectHandler"
+      @modalToggle="setChildModalOpenStatus"
     />
 
     <!-- swap button -->
@@ -115,6 +118,7 @@ export default defineComponent({
       }),
       userBalances: TEST_DATA.balances,
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      isChildModalOpen: false,
     });
 
     data.payCoinData = data?.userBalances[0];
@@ -137,11 +141,15 @@ export default defineComponent({
     }
 
     function denomSelectHandler(payload) {
-      data.receiveCoinData = payload
+      data.receiveCoinData = payload;
     }
 
     function openSetting() {
       alert('open setting');
+    }
+
+    function setChildModalOpenStatus(payload) {
+      data.isChildModalOpen = payload;
     }
 
     function swap() {
@@ -165,7 +173,16 @@ export default defineComponent({
       actionHandler({ name: 'swap', params: swapParams });
     }
 
-    return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, denomSelectHandler, setMax, swap };
+    return {
+      ...toRefs(data),
+      getCoinDollarValue,
+      openSetting,
+      changePayToReceive,
+      denomSelectHandler,
+      setMax,
+      swap,
+      setChildModalOpenStatus,
+    };
   },
 });
 </script>

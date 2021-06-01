@@ -47,9 +47,9 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
+  height: 6.3rem;
   padding: 1.2rem 0;
-  
+
   cursor: pointer;
 
   &__info {

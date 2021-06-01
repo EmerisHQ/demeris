@@ -1,7 +1,7 @@
 <template>
   <div>
     <ChainSelectModal v-show="isModalOpen" :assets="assets" :title="'Select chain'" :func="toggleChainSelectModal" />
-    <div v-show="!isModalOpen" class="modal-wrapper">
+    <div v-show="!isModalOpen" class="denom-select-modal-wrapper elevation-card">
       <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
@@ -73,14 +73,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.modal-wrapper {
+.denom-select-modal-wrapper {
   position: absolute;
   width: 100%;
   height: 55.8rem;
   top: 0;
   left: 0;
 
-  border-radius: 10px;
+  overflow: hidden;
 
   background-color: var(--surface);
   z-index: 10;

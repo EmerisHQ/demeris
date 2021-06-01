@@ -49,6 +49,8 @@ export default defineComponent({
   top: 0;
   left: 0;
 
+  overflow: hidden;
+
   background-color: var(--surface);
   z-index: 10;
 
