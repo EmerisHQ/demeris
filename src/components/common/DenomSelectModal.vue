@@ -25,7 +25,7 @@
       <div class="coin-list">
         <CoinList :data="assets" :type="title === 'Receive' ? 'chain' : 'amount'" @select="coinListselectHandler" />
       </div>
-      <div class="white-front-shadow" />
+      <WhiteOverlay />
     </div>
   </div>
 </template>
@@ -36,6 +36,7 @@ import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
+import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -43,6 +44,7 @@ export default defineComponent({
     ChainSelectModal,
     Search,
     CoinList,
+    WhiteOverlay,
   },
   props: {
     assets: { type: Object, required: true },

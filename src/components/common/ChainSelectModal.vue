@@ -5,7 +5,7 @@
     <div class="coin-list">
       <CoinList :data="assets" :type="'chain'" @select="coinListselectHandler" />
     </div>
-    <div class="white-front-shadow" />
+    <WhiteOverlay />
   </div>
 </template>
 <script lang="ts">
@@ -13,11 +13,13 @@ import { defineComponent } from 'vue';
 
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
+import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
     TitleWithGoback,
     CoinList,
+    WhiteOverlay,
   },
   props: {
     assets: { type: Object, required: true },
