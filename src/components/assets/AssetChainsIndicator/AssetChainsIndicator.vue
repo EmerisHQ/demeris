@@ -49,7 +49,7 @@ export default defineComponent({
     const filteredBalances = computed(() => {
       return props.balances
         .filter((item) => item.base_denom === props.denom)
-        .sort((a, b) => (b.amount > a.amount ? 1 : -1));
+        .sort((a, b) => (+b.amount > +a.amount ? 1 : -1));
     });
 
     const chainsCount = computed(() => {

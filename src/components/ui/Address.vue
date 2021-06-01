@@ -1,6 +1,6 @@
 <template>
   <div class="address" :class="{ 'address--readonly': readonly, 'elevation-button': !readonly }">
-    <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" />
+    <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" />
     <div class="address__controls">
       <span class="address__chain">{{ chainName }}</span>
       <Clipboard v-if="readonly" :text="address" />
@@ -19,6 +19,8 @@ export default defineComponent({
   components: {
     Clipboard,
   },
+
+  inheritAttrs: false,
 
   props: {
     readonly: {

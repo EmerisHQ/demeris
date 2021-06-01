@@ -1,5 +1,5 @@
 <template>
-  <form class="send-form">
+  <div class="send-form">
     <template v-if="step === 'recipient'">
       <h2 class="send-form__title s-2">Send to an address</h2>
       <SendFormRecipient @next="goToStep('amount')" />
@@ -7,17 +7,17 @@
 
     <template v-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
-      <SendFormAmount :form="form" @next="goToStep('review')" />
+      <SendFormAmount @next="goToStep('review')" />
     </template>
 
     <template v-if="step === 'review'">
       <h2 class="send-form__title s-2">Review your transfer details</h2>
     </template>
-  </form>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, provide, reactive, ref } from 'vue';
+import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
 import { TransferForm } from '@/types/actions';
 
@@ -54,11 +54,13 @@ export default defineComponent({
       isTermChecked: false,
     });
 
-    const step = ref(props.step as Step);
+    const step = computed({
+      get: () => props.step,
+      set: (value) => emit('update:step', value),
+    });
 
     const goToStep = (value: Step) => {
       step.value = value;
-      emit('update:step', step);
     };
 
     provide('transferForm', form);
@@ -72,13 +74,13 @@ export default defineComponent({
 .send-form {
   &__title {
     text-align: center;
-    margin-bottom: 4.8rem;
+    margin-bottom: 3.2rem;
   }
 }
 
 .form {
   &__field {
-    label {
+    & > label {
       display: block;
       font-size: 1.2rem;
       color: var(--muted);
@@ -86,7 +88,7 @@ export default defineComponent({
     }
 
     & + & {
-      margin-top: 2.4rem;
+      margin-top: 3.2rem;
     }
   }
 }

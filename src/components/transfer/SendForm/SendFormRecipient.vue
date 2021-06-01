@@ -16,9 +16,9 @@
     />
   </fieldset>
 
-  <div class="form__field">
-    <Button name="Confirm" :disabled="isValid" @click="onSubmit" />
-  </div>
+  <fieldset class="form__field">
+    <Button name="Confirm" :disabled="!isValid" @click="onSubmit" />
+  </fieldset>
 </template>
 
 <script lang="ts">
