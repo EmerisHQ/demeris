@@ -7,7 +7,15 @@
         :alt="`${coin.base_denom} coin`"
       />
       <div class="coin-list__info-details">
-        <div class="coin-list__info-details-denom s-0 w-medium">{{ $filters.getCoinName(coin.base_denom) }}</div>
+        <div class="coin-list__info-details-denom s-0 w-medium">
+          <span
+            v-for="word in $filters.getCoinName(coin.base_denom)"
+            :key="word"
+            :style="keyword.includes(word.toLowerCase()) ? 'color:red' : 'color:green'"
+          >
+            {{ word }}
+          </span>
+        </div>
         <div class="coin-list__info-details-data s-minus w-normal">
           {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : coin.on_chain }}
         </div>
@@ -33,12 +41,20 @@ export default defineComponent({
   props: {
     data: { type: Object, required: true },
     type: { type: String, required: false, default: 'chain' },
+    keyword: { type: String, required: false, default: '' },
   },
   emits: ['select'],
-  setup() {
+  setup(props) {
     //TODO: handling current test data
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
-    return { iconColor };
+    function setSearchResult(denom) {
+      if (props.keyword) {
+        return '<div>test</div>';
+      } else {
+        return denom;
+      }
+    }
+    return { iconColor, setSearchResult };
   },
 });
 </script>

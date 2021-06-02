@@ -32,6 +32,7 @@
         <CoinList
           :data="filterKeyword(assets, keyword)"
           :type="title === 'Receive' ? 'chain' : 'amount'"
+          :keyword="keyword"
           @select="coinListselectHandler"
         />
       </div>
@@ -87,7 +88,7 @@ export default defineComponent({
 
     function filterKeyword(assets, keyword) {
       const filteredAssets = assets.filter((asset) => {
-        return asset.base_denom.substr(1).indexOf(keyword) !== -1;
+        return asset.base_denom.substr(1).indexOf(keyword.toLowerCase()) !== -1;
       });
 
       return filteredAssets;
