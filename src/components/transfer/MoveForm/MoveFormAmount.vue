@@ -1,58 +1,75 @@
 <template>
-  <div :class="{ 'send-form-amount--insufficient-funds': !hasSufficientFunds }">
-    <fieldset class="form__field send-form-amount">
-      <div class="send-form-amount__input">
-        <input v-model="form.balance.amount" class="send-form-amount__input__control" min="0" placeholder="0" />
-        <span class="send-form-amount__input__denom">{{ state.currentAsset?.denom }}</span>
+  <div :class="{ 'move-form-amount--insufficient-funds': !hasSufficientFunds }">
+    <fieldset class="form__field move-form-amount">
+      <div class="move-form-amount__input">
+        <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
+        <span class="move-form-amount__input__denom">{{ state.currentAsset?.denom }}</span>
       </div>
 
-      <span class="send-form-amount__estimated"> $8,866.34 </span>
+      <span class="move-form-amount__estimated"> $8,866.34 </span>
 
-      <div class="send-form-amount__controls">
-        <label class="send-form-amount__controls__button">
-          <input type="checkbox" name="send-form-amount-usd" />
+      <div class="move-form-amount__controls">
+        <label class="move-form-amount__controls__button">
+          <input type="checkbox" name="move-form-amount-usd" />
           <span class="elevation-button">USD</span>
         </label>
-        <label class="send-form-amount__controls__button">
-          <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
+        <label class="move-form-amount__controls__button">
+          <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
           <span class="elevation-button">Max</span>
         </label>
       </div>
     </fieldset>
 
     <fieldset class="form__field">
-      <div class="send-form-amount__assets">
-        <button
-          v-for="asset of balancesByAsset"
-          :key="asset.denom"
-          :class="{
-            'send-form-amount__assets__item--active': state.currentAsset?.denom === asset.denom,
-          }"
-          class="send-form-amount__assets__item elevation-button"
-          @click="setCurrentAsset(asset)"
-        >
-          <div class="send-form-amount__assets__item__asset">
-            <span class="send-form-amount__assets__item__avatar" />
-            <div class="send-form-amount__assets__item__chain">
-              <p class="send-form-amount__assets__item__denom w-bold">
-                {{ asset.denom }}
-              </p>
-              <p class="send-form-amount__assets__item__name s-minus">
-                {{ asset.chains[0].on_chain }}
-              </p>
-            </div>
+      <div class="move-form-amount__assets elevation-card">
+        <button class="move-form-amount__assets__item denom-item" @click="openAssetsModal">
+          <span class="move-form-amount__assets__item__label s-minus">Move</span>
+
+          <div class="move-form-amount__assets__item__asset">
+            <span class="move-form-amount__assets__item__avatar" />
+            <span class="move-form-amount__assets__item__name w-bold">
+              {{ form.balance.denom }}
+            </span>
           </div>
 
-          <div class="send-form-amount__assets__item__amount">
-            <p class="send-form-amount__assets__item__amount__balance">$13,400</p>
-            <p class="send-form-amount__assets__item__amount__available s-minus">
-              {{ `${asset.chains[0].amount} ${asset.denom.toUpperCase()} available` }}
+          <div class="move-form-amount__assets__item__button">
+            <Icon name="CaretRightIcon" :icon-size="1.2" />
+          </div>
+        </button>
+
+        <button class="move-form-amount__assets__item from-item" @click="openChainsModal">
+          <span class="move-form-amount__assets__item__label s-minus">From</span>
+
+          <div class="move-form-amount__assets__item__asset">
+            <span class="move-form-amount__assets__item__avatar" />
+            <span class="move-form-amount__assets__item__name w-bold">
+              {{ form.on_chain }}
+            </span>
+          </div>
+
+          <div class="move-form-amount__assets__item__amount">
+            <p class="move-form-amount__assets__item__amount__balance s-minus">$13,400</p>
+            <p class="move-form-amount__assets__item__amount__available s-minus">
+              {{ `${state.currentAsset.chains[0].amount} ${form.balance.denom}` }}
             </p>
           </div>
 
-          <button class="send-form-amount__assets__item__button" @click.prevent.stop="">
+          <div class="move-form-amount__assets__item__button">
             <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </button>
+          </div>
+        </button>
+
+        <button class="move-form-amount__assets__item to-item" @click="openChainsModal">
+          <span class="move-form-amount__assets__item__label s-minus">To</span>
+
+          <div class="move-form-amount__assets__item__asset">
+            <span class="move-form-amount__assets__item__avatar" />
+            <span class="move-form-amount__assets__item__name w-bold"> Select chain </span>
+          </div>
+
+          <div class="move-form-amount__assets__item__button">
+            <Icon name="CaretRightIcon" :icon-size="1.2" />
+          </div>
         </button>
       </div>
     </fieldset>
@@ -69,7 +86,7 @@ import { computed, defineComponent, inject, reactive, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { SendAddressForm } from '@/types/actions';
+import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 
 import balancesFixture from '../../../../tests/fixtures/balances.json';
@@ -85,7 +102,7 @@ export default defineComponent({
   emits: ['next'],
 
   setup(_, { emit }) {
-    const form = inject<SendAddressForm>('transferForm');
+    const form = inject<MoveAssetsForm>('moveForm');
 
     const state = reactive({
       currentAsset: undefined,
@@ -122,6 +139,14 @@ export default defineComponent({
       return true;
     };
 
+    const openAssetsModal = () => {
+      // TODO:
+    };
+
+    const openChainsModal = () => {
+      // TODO:
+    };
+
     const onSubmit = () => {
       emit('next');
     };
@@ -129,6 +154,7 @@ export default defineComponent({
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
       form.balance.denom = asset.denom as string;
+      form.on_chain = asset.chains[0].on_chain;
     };
 
     // TODO: Select chain based in user option
@@ -146,13 +172,23 @@ export default defineComponent({
       setCurrentAsset(balancesByAsset.value[0]);
     }
 
-    return { form, balancesByAsset, onSubmit, state, setCurrentAsset, hasSufficientFunds, isValid };
+    return {
+      form,
+      balancesByAsset,
+      onSubmit,
+      state,
+      setCurrentAsset,
+      hasSufficientFunds,
+      isValid,
+      openAssetsModal,
+      openChainsModal,
+    };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.send-form-amount {
+.move-form-amount {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -162,7 +198,7 @@ export default defineComponent({
     color: #ca0865;
   }
 
-  &--insufficient-funds &__assets__item--active &__assets__item__amount__available {
+  &--insufficient-funds &__assets__item__amount__available {
     color: #ca0865;
   }
 
@@ -222,14 +258,27 @@ export default defineComponent({
 
   &__assets {
     &__item {
-      border-radius: 1rem;
       padding: 1.6rem;
       display: flex;
       align-items: stretch;
       width: 100%;
 
+      &.denom-item &__name {
+        text-transform: uppercase;
+      }
+
+      &.from-item &__avatar {
+        background: transparent;
+        border: 2px solid #7782ff;
+      }
+
+      &.to-item &__avatar {
+        background: transparent;
+        border: 2px solid var(--border-trans);
+      }
+
       & + & {
-        margin-top: 1.6rem;
+        border-top: 1px solid var(--border-trans);
       }
 
       &__asset {
@@ -246,27 +295,20 @@ export default defineComponent({
 
       &__avatar {
         position: relative;
-        width: 2.4rem;
-        height: 2.4rem;
+        width: 3rem;
+        height: 3rem;
         border-radius: 2.4rem;
         background-color: rgba(0, 0, 0, 0.3);
-        margin-right: 1.6rem;
-        transition: box-shadow linear 100ms;
+        margin-right: 1.2rem;
+        border: 2px solid transparent;
       }
 
-      &--active &__avatar {
-        border: 2px solid white;
-        box-shadow: 0 0 0 2px #7aafff;
-      }
-
-      &__denom {
-        margin-bottom: 0.2rem;
-        text-transform: uppercase;
-      }
-
-      &__name {
+      &__label {
         color: var(--muted);
         text-align: left;
+        margin-right: 1rem;
+        width: 4rem;
+        align-self: center;
       }
 
       &__amount {
@@ -278,6 +320,7 @@ export default defineComponent({
         &__available {
           transition: color linear 100ms;
           color: var(--muted);
+          margin-top: 0.1rem;
         }
       }
 

@@ -52,12 +52,9 @@
         </div>
       </template>
 
-      <div v-else-if="transferType === 'address'" class="send__content">
-        <SendForm v-model:step="step" />
-      </div>
-
-      <div v-else-if="transferType === 'move'" class="send__content">
-        <h1>Move</h1>
+      <div v-else class="send__content">
+        <SendForm v-if="transferType === 'address'" v-model:step="step" />
+        <MoveForm v-if="transferType === 'move'" v-model:step="step" />
       </div>
     </main>
   </div>
@@ -67,14 +64,15 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import SendForm from '@/components/transfer/SendForm/SendForm.vue';
+import MoveForm from '@/components/transfer/MoveForm';
+import SendForm from '@/components/transfer/SendForm';
 import Icon from '@/components/ui/Icon.vue';
 
-type TransferType = 'move' | 'address';
+type TransferType = 'address' | 'move';
 
 export default {
   name: 'Send',
-  components: { SendForm, Icon },
+  components: { SendForm, MoveForm, Icon },
 
   setup() {
     const router = useRouter();
@@ -99,6 +97,7 @@ export default {
         return;
       }
 
+      step.value = undefined;
       router.back();
     };
 

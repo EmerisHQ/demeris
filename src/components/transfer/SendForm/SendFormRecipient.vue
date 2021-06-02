@@ -28,7 +28,7 @@ import Address from '@/components/ui/Address.vue';
 import Button from '@/components/ui/Button.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Input from '@/components/ui/Input.vue';
-import { TransferForm } from '@/types/actions';
+import { SendAddressForm } from '@/types/actions';
 
 export default defineComponent({
   name: 'SendFormRecipient',
@@ -43,7 +43,7 @@ export default defineComponent({
   emits: ['next'],
 
   setup(_, { emit }) {
-    const form = inject<TransferForm>('transferForm');
+    const form = inject<SendAddressForm>('transferForm');
 
     const isValid = computed(() => {
       return form.isTermChecked;

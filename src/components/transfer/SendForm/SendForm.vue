@@ -21,7 +21,7 @@
         <dd>{{ form.memo || '-' }}</dd>
 
         <dt class="w-bold mt-10">Amount</dt>
-        <dd>{{ form.amount.amount }}{{ form.amount.denom }}</dd>
+        <dd>{{ form.balance.amount }}{{ form.balance.denom }}</dd>
       </dl>
 
       <Button class="mt-10" name="Confirm and continue" @click="goToStep('send')" />
@@ -35,7 +35,7 @@
 import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-import { TransferForm } from '@/types/actions';
+import { SendAddressForm } from '@/types/actions';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
@@ -61,10 +61,10 @@ export default defineComponent({
   emits: ['update:step'],
 
   setup(props, { emit }) {
-    const form: TransferForm = reactive({
+    const form: SendAddressForm = reactive({
       recipient: '',
       memo: '',
-      amount: {
+      balance: {
         denom: '',
         amount: undefined,
       },
