@@ -53,8 +53,8 @@
       </template>
 
       <div v-else class="send__content">
-        <SendForm v-if="transferType === 'address'" v-model:step="step" />
-        <MoveForm v-if="transferType === 'move'" v-model:step="step" />
+        <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
+        <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
       </div>
     </main>
   </div>
@@ -67,6 +67,9 @@ import { useRoute, useRouter } from 'vue-router';
 import MoveForm from '@/components/transfer/MoveForm';
 import SendForm from '@/components/transfer/SendForm';
 import Icon from '@/components/ui/Icon.vue';
+import { Balances } from '@/types/api';
+
+import balancesFixture from '../../tests/fixtures/balances.json';
 
 type TransferType = 'address' | 'move';
 
@@ -79,6 +82,8 @@ export default {
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
     const step = ref(undefined);
+
+    const balances: Balances = balancesFixture;
 
     const showBackButton = computed(() => {
       return !!transferType.value;
@@ -105,7 +110,7 @@ export default {
       router.push('/');
     };
 
-    return { transferType, step, allSteps, goBack, showBackButton, onClose };
+    return { balances, transferType, step, allSteps, goBack, showBackButton, onClose };
   },
 };
 </script>

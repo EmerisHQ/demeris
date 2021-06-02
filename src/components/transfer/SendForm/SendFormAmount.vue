@@ -13,6 +13,7 @@
           <input type="checkbox" name="send-form-amount-usd" />
           <span class="elevation-button">USD</span>
         </label>
+
         <label class="send-form-amount__controls__button">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
           <span class="elevation-button">Max</span>
@@ -33,6 +34,7 @@
         >
           <div class="send-form-amount__assets__item__asset">
             <span class="send-form-amount__assets__item__avatar" />
+
             <div class="send-form-amount__assets__item__chain">
               <p class="send-form-amount__assets__item__denom w-bold">
                 {{ asset.denom }}
@@ -65,14 +67,12 @@
 
 <script lang="ts">
 import groupBy from 'lodash.groupby';
-import { computed, defineComponent, inject, reactive, watch } from 'vue';
+import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
 import { Balances } from '@/types/api';
-
-import balancesFixture from '../../../../tests/fixtures/balances.json';
 
 export default defineComponent({
   name: 'SendFormAmount',
@@ -82,9 +82,16 @@ export default defineComponent({
     Icon,
   },
 
+  props: {
+    balances: {
+      type: Object as PropType<Balances>,
+      required: true,
+    },
+  },
+
   emits: ['next'],
 
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const form = inject<SendAddressForm>('transferForm');
 
     const state = reactive({
@@ -93,7 +100,7 @@ export default defineComponent({
     });
 
     const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(balancesFixture as Balances, 'base_denom');
+      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);

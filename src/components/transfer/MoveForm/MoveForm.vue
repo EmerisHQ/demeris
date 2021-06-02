@@ -2,7 +2,7 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">Move assets</h2>
-      <MoveFormAmount @next="goToStep('review')" />
+      <MoveFormAmount :balances="balances" @next="goToStep('review')" />
     </template>
 
     <template v-if="step === 'review'">
@@ -20,6 +20,7 @@ import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import { MoveAssetsForm } from '@/types/actions';
+import { Balances } from '@/types/api';
 
 import MoveFormAmount from './MoveFormAmount.vue';
 
@@ -34,6 +35,10 @@ export default defineComponent({
   },
 
   props: {
+    balances: {
+      type: Object as PropType<Balances>,
+      required: true,
+    },
     step: {
       type: String as PropType<Step>,
       default: undefined,

@@ -82,14 +82,12 @@
 
 <script lang="ts">
 import groupBy from 'lodash.groupby';
-import { computed, defineComponent, inject, reactive, watch } from 'vue';
+import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
-
-import balancesFixture from '../../../../tests/fixtures/balances.json';
 
 export default defineComponent({
   name: 'SendFormAmount',
@@ -99,9 +97,16 @@ export default defineComponent({
     Icon,
   },
 
+  props: {
+    balances: {
+      type: Object as PropType<Balances>,
+      required: true,
+    },
+  },
+
   emits: ['next'],
 
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const form = inject<MoveAssetsForm>('moveForm');
 
     const state = reactive({
@@ -110,7 +115,7 @@ export default defineComponent({
     });
 
     const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(balancesFixture as Balances, 'base_denom');
+      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);

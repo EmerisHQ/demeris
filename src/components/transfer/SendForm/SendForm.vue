@@ -7,7 +7,7 @@
 
     <template v-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
-      <SendFormAmount @next="goToStep('review')" />
+      <SendFormAmount :balances="balances" @next="goToStep('review')" />
     </template>
 
     <template v-if="step === 'review'">
@@ -36,6 +36,7 @@ import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import { SendAddressForm } from '@/types/actions';
+import { Balances } from '@/types/api';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
@@ -52,6 +53,10 @@ export default defineComponent({
   },
 
   props: {
+    balances: {
+      type: Object as PropType<Balances>,
+      required: true,
+    },
     step: {
       type: String as PropType<Step>,
       default: undefined,
