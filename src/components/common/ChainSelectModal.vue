@@ -2,6 +2,12 @@
   <div class="chain-select-wrapper elevation-panel">
     <TitleWithGoback :title="title" :func="func" />
 
+    <div class="chain-info s-minus w-normal">
+      You have ATOM on 4 chains.
+      <br />
+      Select the chain you wish to swap from.
+    </div>
+
     <div class="coin-list">
       <CoinList :data="assets" :type="'chain'" @select="coinListselectHandler" />
     </div>
@@ -52,13 +58,18 @@ export default defineComponent({
   background-color: var(--surface);
   z-index: 10;
 
+  .chain-info {
+    text-align: center;
+    margin-bottom: 2.4rem;
+  }
+
   .sub-title {
     padding: 0 2.4rem 2.4rem;
   }
 
   .coin-list {
     padding: 0 1.6rem 0 2.4rem;
-    height: 31.6rem;
+    height: 26.8rem;
 
     overflow-y: scroll;
 

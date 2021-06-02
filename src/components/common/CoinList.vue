@@ -76,6 +76,10 @@ export default defineComponent({
   &__select {
     display: flex;
     justify-content: space-between;
+
+    .icon {
+      margin-left: 10px;
+    }
   }
 }
 </style>
