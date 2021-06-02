@@ -1,11 +1,11 @@
 import * as Actions from '@/types/actions';
-import { Amount } from '@/types/base';
+import { Amount, ChainAmount } from '@/types/base';
 
 import { store } from '../store/index';
-import { generateDenomHash,getChannel, getDenomHash, isNative } from './basic';
+import { generateDenomHash, getChannel, getDenomHash, isNative } from './basic';
 
 // Basic step-building blocks
-export async function redeem({ amount, chain_name }: { amount: Amount; chain_name: string }) {
+export async function redeem({ amount, chain_name }: ChainAmount) {
   const result = {
     steps: [],
     output: {
@@ -70,7 +70,186 @@ export async function redeem({ amount, chain_name }: { amount: Amount; chain_nam
     }
   }
 }
-export async function transferToHub({ amount, chain_name }: { amount: Amount; chain_name: string }) {
+export async function transfer({
+  amount,
+  chain_name,
+  destination_chain_name,
+}: {
+  amount: Amount;
+  chain_name: string;
+  destination_chain_name: string;
+}) {
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+  if (isNative(amount.denom)) {
+    // If NOT an IBC denom
+    if (chain_name == destination_chain_name) {
+      result.output = { amount, chain_name };
+      return result;
+    } else {
+      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+        // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
+        const primaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: chain_name,
+            destination_chain_name: destination_chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
+            },
+            { root: true },
+          ));
+        result.steps.push({
+          name: 'ibc_forward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: 'gaia',
+            through: primaryChannel.channel_name,
+          },
+        });
+
+        result.output = {
+          amount: {
+            amount: amount.amount,
+            denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
+          },
+          chain_name: 'gaia',
+        };
+        return result;
+      }
+    }
+  }
+
+  const verifyTrace =
+    store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+    (await store.dispatch(
+      'demeris/GET_VERIFY_TRACE',
+      { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+      { root: true },
+    ));
+
+  if (!verifyTrace.verified) {
+    //  If we cannot verify the trace, throw error
+    throw new Error('Trace not verified');
+  }
+  if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
+    const primaryChannel =
+      store.getters['demeris/getPrimaryChannel']({
+        chain_name: verifyTrace.trace[0].counterparty_name,
+        destination_chain_name: destination_chain_name,
+      }) ??
+      (await store.dispatch(
+        'demeris/GET_PRIMARY_CHANNEL',
+        {
+          subscribe: true,
+          params: {
+            chain_name: verifyTrace.trace[0].counterparty_name,
+            destination_chain_name: destination_chain_name,
+          },
+        },
+        { root: true },
+      ));
+    if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+      result.output = { amount, chain_name };
+      return result;
+    } else {
+      result.steps.push({
+        name: 'ibc_backward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: chain_name,
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
+        },
+      });
+      result.steps.push({
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+          from_chain: verifyTrace.trace[0].counterparty_name,
+          to_chain: destination_chain_name,
+          through: primaryChannel.channel_name,
+        },
+      });
+      result.output = {
+        amount: {
+          amount: amount.amount,
+          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+        },
+        chain_name: destination_chain_name,
+      };
+      return result;
+    }
+  } else {
+    if (verifyTrace.trace.length > 1) {
+      // If trace is longer than 1-hop, throw error because user must redeem the denom first (should never reach this part of the code
+      // as the UI should not allow selection of such a token but leaving it here for consistency)
+      throw new Error('Denom must be redeemed first');
+    } else {
+      const primaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: verifyTrace.trace[0].counterparty_name,
+          destination_chain_name: destination_chain_name,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: true,
+            params: {
+              chain_name: verifyTrace.trace[0].counterparty_name,
+              destination_chain_name: destination_chain_name,
+            },
+          },
+          { root: true },
+        ));
+      result.steps.push({
+        name: 'ibc_backward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: chain_name,
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
+        },
+      });
+      result.steps.push({
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+          from_chain: verifyTrace.trace[0].counterparty_name,
+          to_chain: destination_chain_name,
+          through: primaryChannel.channel_name,
+        },
+      });
+
+      result.output = {
+        amount: {
+          amount: amount.amount,
+          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+        },
+        chain_name: destination_chain_name,
+      };
+      return result;
+    }
+  }
+}
+export async function transferToHub({ amount, chain_name }: ChainAmount) {
   /*
 	This action creates the steps needed to get the chosen amount of chosen denom as a 1-hop token through the primary-channel on the hub
 	*/
@@ -248,7 +427,7 @@ export async function transferToHub({ amount, chain_name }: { amount: Amount; ch
     }
   }
 }
-export async function transferFromHub({ amount, chain_name }: { amount: Amount; chain_name: string }) {
+export async function transferFromHub({ amount, chain_name }: ChainAmount) {
   const result = {
     steps: [],
     output: {
@@ -387,13 +566,7 @@ export async function transferFromHub({ amount, chain_name }: { amount: Amount; 
     throw new Error('Denom must be redeemed first');
   }
 }
-export async function swap({
-  from,
-  to,
-}: {
-  from: { denom: string; amount: number };
-  to: { denom: string; amount: number };
-}) {
+export async function swap({ from, to }: { from: Amount; to: Amount }) {
   // Get the list of available pools
   const result = {
     steps: [],
@@ -416,7 +589,7 @@ export async function swap({
   const assetPair = [from.denom, to.denom].sort();
   // Find the pool for that pair
   const pool =
-    liquidityPools.pools.find(x => JSON.stringify(x.reserve_coin_denoms) == JSON.stringify(assetPair)) ?? null;
+    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
   if (pool) {
     //Pool exists, proceed with swap
     result.steps.push({
@@ -441,6 +614,84 @@ export async function swap({
     throw new Error('Pool does not exist');
   }
 }
+export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+  const liquidityPools =
+    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await store.dispatch(
+      'tendermint.liquidity.v1beta1/QueryLiquidityPools',
+      { options: { subscribe: false, all: true }, params: {} },
+      { root: true },
+    ));
+  // create our asset pair sorted alphabetically
+  const assetPair = [coinA.denom, coinB.denom].sort();
+  // Find the pool for that pair
+  const pool =
+    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
+  if (pool && pool.id == pool_id) {
+    result.steps.push({
+      name: 'addliquidity',
+      status: 'pending',
+      data: {
+        coinA,
+        coinB,
+        pool,
+      },
+    });
+    return result;
+  } else {
+    //Pool does not exist, throw error for MVP. In the future implement as multiple swaps
+    throw new Error('Pool does not exist');
+  }
+}
+export async function withdrawLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+  const liquidityPools =
+    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await store.dispatch(
+      'tendermint.liquidity.v1beta1/QueryLiquidityPools',
+      { options: { subscribe: false, all: true }, params: {} },
+      { root: true },
+    ));
+  // create our asset pair sorted alphabetically
+  const assetPair = [coinA.denom, coinB.denom].sort();
+  // Find the pool for that pair
+  const pool =
+    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
+  if (pool && pool.id == pool_id) {
+    result.steps.push({
+      name: 'addliquidity',
+      status: 'pending',
+      data: {
+        coinA,
+        coinB,
+        pool,
+      },
+    });
+    return result;
+  } else {
+    //Pool does not exist, throw error for MVP. In the future implement as multiple swaps
+    throw new Error('Pool does not exist');
+  }
+}
 //Todo: transfer, add to liquidity pool, withdraw from liquidity pool
 
 // Action-handler / action composing using the blocks above
@@ -449,12 +700,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
   try {
     switch (action.name) {
       case 'swap':
-        const transferToHubStep = await transferToHub({
+        const transferToHubStep = await transfer({
           amount: {
             amount: (action.params as Actions.SwapParams).from.amount,
             denom: (action.params as Actions.SwapParams).from.denom.denom,
           },
           chain_name: (action.params as Actions.SwapParams).from.denom.chain_name,
+          destination_chain_name: 'gaia',
         });
 
         steps.push(...transferToHubStep.steps);
@@ -470,6 +722,31 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         steps.push(...swapStep.steps);
         break;
+      case 'addliquidity':
+        const transferCoinAtoHub = await transfer({
+          amount: {
+            amount: (action.params as Actions.AddLiquidityParams).coinA.amount,
+            denom: (action.params as Actions.AddLiquidityParams).coinA.denom.denom,
+          },
+          chain_name: (action.params as Actions.AddLiquidityParams).coinA.denom.chain_name,
+          destination_chain_name: 'gaia',
+        });
+        steps.push(...transferCoinAtoHub.steps);
+        const transferCoinBtoHub = await transfer({
+          amount: {
+            amount: (action.params as Actions.AddLiquidityParams).coinB.amount,
+            denom: (action.params as Actions.AddLiquidityParams).coinB.denom.denom,
+          },
+          chain_name: (action.params as Actions.AddLiquidityParams).coinB.denom.chain_name,
+          destination_chain_name: 'gaia',
+        });
+        steps.push(...transferCoinBtoHub.steps);
+        const addLiquidityStep = await addLiquidity({
+          pool_id: (action.params as Actions.AddLiquidityParams).pool_id,
+          coinA: transferCoinAtoHub.output.amount,
+          coinB: transferCoinBtoHub.output.amount,
+        });
+        steps.push(...addLiquidityStep.steps);
     }
   } catch (e) {
     console.log('Unable to create action steps');

@@ -19,14 +19,26 @@ export type SwapParams = {
     amount: number;
   };
 };
+export type AddLiquidityParams = {
+  pool_id: bigint;
+  coinA: {
+    denom: MetaDenom;
+    amount: number;
+  };
+  coinB: {
+    denom: MetaDenom;
+    amount: number;
+  };
+};
 export type RedeemParams = {
   denom: MetaDenom;
   amount: number;
 };
 export type Swap = BaseAction & { params: SwapParams };
 export type Redeem = BaseAction & { params: RedeemParams };
+export type AddLiquidity = BaseAction & { params: AddLiquidityParams };
 
-export type Any = Swap | Redeem;
+export type Any = Swap | Redeem | AddLiquidity;
 export type StepTransaction = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -50,12 +62,15 @@ export type SwapData = {
   to: Base.Amount;
   pool: Pool;
 };
+export type AddLiquidityData = {
+  coinA: Base.Amount;
+  coinB: Base.Amount;
+  pool: Pool;
+};
 export type Step = {
   name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity';
   status: 'pending' | 'active' | 'completed';
-  data: IBCBackwardsData | IBCForwardsData | SwapData;
+  data: IBCBackwardsData | IBCForwardsData | SwapData | AddLiquidityData;
 };
 
-export type {
-  Pool
-}
+export type { Pool };
