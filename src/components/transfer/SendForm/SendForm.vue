@@ -12,13 +12,29 @@
 
     <template v-if="step === 'review'">
       <h2 class="send-form__title s-2">Review your transfer details</h2>
+
+      <dl>
+        <dt class="w-bold">Recipient</dt>
+        <dd>{{ form.recipient }}</dd>
+
+        <dt class="w-bold mt-10">Memo</dt>
+        <dd>{{ form.memo || '-' }}</dd>
+
+        <dt class="w-bold mt-10">Amount</dt>
+        <dd>{{ form.amount.amount }}{{ form.amount.denom }}</dd>
+      </dl>
+
+      <Button class="mt-10" name="Confirm and continue" @click="goToStep('send')" />
     </template>
+
+    <template v-if="step === 'send'"> TODO </template>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
 import { TransferForm } from '@/types/actions';
 
 import SendFormAmount from './SendFormAmount.vue';
@@ -30,6 +46,7 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
+    Button,
     SendFormAmount,
     SendFormRecipient,
   },
@@ -37,7 +54,7 @@ export default defineComponent({
   props: {
     step: {
       type: String as PropType<Step>,
-      default: 'recipient',
+      default: undefined,
     },
   },
 
@@ -49,7 +66,7 @@ export default defineComponent({
       memo: '',
       amount: {
         denom: '',
-        amount: 0,
+        amount: undefined,
       },
       isTermChecked: false,
     });
@@ -62,6 +79,10 @@ export default defineComponent({
     const goToStep = (value: Step) => {
       step.value = value;
     };
+
+    if (!props.step) {
+      step.value = 'recipient';
+    }
 
     provide('transferForm', form);
 
