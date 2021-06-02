@@ -1,5 +1,5 @@
 <script lang="ts">
-export default function() {
+export default function () {
   //TODO: get price
   function getCoinPrice(coin: string) {
     if (coin) {
@@ -9,10 +9,10 @@ export default function() {
     }
   }
 
-  function getCoinDollarValue(coin: string, amount: number) {
+  function getCoinDollarValue(coin: string, amount: number, prefix = '') {
     if (coin && amount) {
       const price = getCoinPrice(coin);
-      return `$${(amount * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      return `${prefix}$${(amount * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
     } else {
       return '';
     }

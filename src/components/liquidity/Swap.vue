@@ -69,7 +69,7 @@
     <!-- receive coin selector -->
     <DenomSelect
       v-model:amount="receiveCoinAmount"
-      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount)}`"
+      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
       :selected-denom="receiveCoinData"
       :user-balance="userBalances"
       @select="denomSelectHandler"
@@ -80,6 +80,11 @@
     <div class="button-wrapper">
       <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
     </div>
+
+    <div class="fees s-minus">
+      <div>Fees (included)</div>
+      <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -87,6 +92,7 @@ import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import usePrice from '@/composables/usePrice.vue';
 import { TEST_DATA } from '@/TEST_DATA';
@@ -98,6 +104,7 @@ export default defineComponent({
     DenomSelect,
     IconButton,
     Button,
+    Icon,
   },
 
   setup() {
@@ -120,6 +127,7 @@ export default defineComponent({
       userBalances: TEST_DATA.balances,
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isChildModalOpen: false,
+      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     data.payCoinData = data?.userBalances[0];
@@ -197,6 +205,8 @@ export default defineComponent({
   position: relative;
 
   width: 32rem;
+  height: 42.6rem;
+
   background-color: var(--surface);
 
   &-header {
@@ -237,6 +247,17 @@ export default defineComponent({
 
   .button-wrapper {
     padding: 1.6rem 2.4rem 2.4rem;
+  }
+
+  .fees {
+    display: flex;
+    padding: 0 2.4rem;
+    justify-content: space-between;
+    color: var(--muted);
+
+    .total-fee {
+      display: flex;
+    }
   }
 }
 </style>
