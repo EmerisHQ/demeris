@@ -1,6 +1,6 @@
 <template>
   <div class="search" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
-    <Icon :name="'MagnifyingGlassIcon'" :icon-size="1.6" />
+    <Icon :name="'MagnifyingGlassIcon'" :icon-size="1.6" :color="'#000'" />
     <input
       ref="searchInput"
       :value="keyword"
@@ -61,7 +61,7 @@ export default defineComponent({
     z-index: 8;
     width: 100%;
     outline: none;
-    padding: 1.15rem 1.2rem 1.15rem 4.1rem;
+    padding: 0.95rem 1rem 0.95rem 3.9rem;
     background-color: var(--fg-trans);
     border-radius: 10px;
   }
@@ -110,6 +110,7 @@ export default defineComponent({
     position: absolute;
     z-index: 9;
     height: 100%;
+    padding-bottom: 0.5rem;
   }
 }
 </style>
