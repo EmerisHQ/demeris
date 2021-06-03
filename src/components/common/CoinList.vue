@@ -16,6 +16,9 @@
             {{ word }}
           </span>
         </div>
+        <div v-else-if="type === 'chain'" class="coin-list__info-details-denom s-0 w-medium">
+          {{ coin.on_chain }}
+        </div>
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
           {{ $filters.getCoinName(coin.base_denom) }}
         </div>

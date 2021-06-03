@@ -6,7 +6,7 @@ export const TEST_DATA = {
       verified: true,
       native: true,
       amount: 1337,
-      on_chain: 'cosmos',
+      on_chain: 'Cosmos',
       fee_token: true,
       ibc: {},
     },
@@ -16,7 +16,7 @@ export const TEST_DATA = {
       verified: true,
       native: false,
       amount: 10000,
-      on_chain: 'cosmos',
+      on_chain: 'Terra',
       fee_token: true,
       ibc: {
         source_chain: 'terra-columbus-3',
@@ -31,7 +31,7 @@ export const TEST_DATA = {
       verified: false,
       native: false,
       amount: 10000,
-      on_chain: 'cosmos',
+      on_chain: 'Cosmos',
       ibc: {
         source_chain: 'yeetchain-0',
         ibc_denom: 'ibc/3F1D3FCF4AE79E1554D670D1AD949A9BA4E4A3C76C63093E17E446A46061A7A2',
