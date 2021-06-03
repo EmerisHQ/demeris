@@ -1,5 +1,5 @@
 <template>
-  <div v-for="coin in data" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
+  <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
     <div class="coin-list__info">
       <img
         class="coin-list__info-image"
@@ -68,13 +68,40 @@ export default defineComponent({
     keyword: { type: String, required: false, default: '' },
   },
   emits: ['select'],
-  setup() {
-    //TODO: handling current test data
+  setup(props) {
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
+    const modifiedData = getUniqueCoinList(props.data);
+
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
-    return { iconColor, setWordColorByKeyword };
+
+    function getUniqueCoinList(data) {
+      if (props.type !== 'pay') {
+        return data;
+      }
+
+      const newData = JSON.parse(JSON.stringify(data));
+      let denomNameObejct = {};
+      let modifiedData = [];
+
+      newData.forEach((denom) => {
+        if (denomNameObejct[denom.base_denom]) {
+          denomNameObejct[denom.base_denom].amount += denom.amount;
+          console.log(denom.amount);
+        } else {
+          denomNameObejct[denom.base_denom] = denom;
+        }
+      });
+
+      for (let denom in denomNameObejct) {
+        modifiedData.push(denomNameObejct[denom]);
+      }
+
+      return modifiedData;
+    }
+
+    return { iconColor, setWordColorByKeyword, modifiedData };
   },
 });
 </script>
