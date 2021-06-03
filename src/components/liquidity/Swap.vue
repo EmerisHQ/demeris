@@ -108,7 +108,7 @@ export default defineComponent({
   },
 
   setup() {
-    const { getCoinDollarValue } = usePrice();
+    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
         return data.isOver ? 'Insufficent funds' : 'Swap';
@@ -121,8 +121,9 @@ export default defineComponent({
       receiveCoinData: null,
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
-        get: () => (data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null),
-        set: (value) => (data.payCoinAmount = value / 2),
+        get: () => (data.receiveCoinData?.base_denom ? getReceiveCoinAmount(data.payCoinAmount, 300000, 400000) : null),
+        set: (value) =>
+          data.receiveCoinData?.base_denom ? (data.payCoinAmount = getPayCoinAmount(value, 300000, 400000)) : null,
       }),
       userBalances: TEST_DATA.balances,
       receiveAvailableDenom: computed(() => {

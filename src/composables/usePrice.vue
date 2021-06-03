@@ -18,9 +18,43 @@ export default function () {
     }
   }
 
+  function getPoolPrice(payCoin: string, receiveCoin: string) {
+    //TODO
+    if (payCoin && receiveCoin) {
+      return 2;
+    } else {
+      return null;
+    }
+  }
+
+  function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
+    //TODO: get params to get half-half fee
+    const swapPrice = (fromCoinPoolAmount + 2 * payCoinAmount) / toCoinPoolAmount;
+    return swapPrice;
+  }
+  //TODO: bigInt
+  function getReceiveCoinAmount(payCoinAmount: number, payCoinPoolAmount: number, receiveCoinPoolAmount: number) {
+    const swapFeeRate = 0.9985;
+    const swapPrice = (payCoinPoolAmount + 2 * payCoinAmount) / receiveCoinPoolAmount;
+    const receiveCoinAmount = (payCoinAmount / swapPrice) * swapFeeRate;
+
+    return receiveCoinAmount;
+  }
+
+  function getPayCoinAmount(receiveCoinAmount: number, payCoinPoolAmount: number, receiveCoinPoolAmount: number) {
+    const swapFeeRate = 0.9985;
+    const payCoinAmount =
+      payCoinPoolAmount / receiveCoinPoolAmount / (swapFeeRate / receiveCoinAmount - 2 / receiveCoinPoolAmount);
+    return payCoinAmount;
+  }
+
   return {
     getCoinPrice,
     getCoinDollarValue,
+    getPoolPrice,
+    getSwapPrice,
+    getPayCoinAmount,
+    getReceiveCoinAmount,
   };
 }
 </script>

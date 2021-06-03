@@ -31,7 +31,7 @@
       <div class="coin-list">
         <CoinList
           :data="filterKeyword(assets, keyword)"
-          :type="title === 'Receive' ? 'chain' : 'amount'"
+          :type="title === 'Receive' ? 'receive' : 'pay'"
           :keyword="keyword"
           @select="coinListselectHandler"
         />

@@ -17,28 +17,32 @@
           </span>
         </div>
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
-          {{$filters.getCoinName(coin.base_denom)}}
+          {{ $filters.getCoinName(coin.base_denom) }}
         </div>
         <div v-if="keyword" class="coin-list__info-details-data s-minus w-normal">
-          <div v-if="type === 'amount'">
-            {{coin.amount}}
+          <div v-if="type === 'pay'">
+            {{ coin.amount }}
             <span
-            v-for="word in $filters.getCoinName(coin.base_denom)"
-            :key="word + 'small'"
-            :class="setWordColorByKeyword(keyword, word)"
-          >
-            {{ word }}
-          </span>
+              v-for="word in $filters.getCoinName(coin.base_denom)"
+              :key="word + 'small'"
+              :class="setWordColorByKeyword(keyword, word)"
+            >
+              {{ word }}
+            </span>
             available
           </div>
-          <span v-else>{{coin.on_chain}}</span>
+          <span v-else>{{ coin.on_chain }}</span>
         </div>
         <div v-else class="coin-list__info-details-data s-minus w-normal">
-          {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : coin.on_chain }}
+          {{
+            type === 'pay' || type === 'chain'
+              ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available`
+              : coin.on_chain
+          }}
         </div>
       </div>
     </div>
-    <div v-if="type === 'amount'" class="coin-list__select">
+    <div v-if="type === 'pay'" class="coin-list__select">
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
@@ -61,11 +65,11 @@ export default defineComponent({
     keyword: { type: String, required: false, default: '' },
   },
   emits: ['select'],
-  setup(props) {
+  setup() {
     //TODO: handling current test data
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     function setWordColorByKeyword(keyword, word) {
-      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included'
+      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
     return { iconColor, setWordColorByKeyword };
   },
@@ -112,11 +116,11 @@ export default defineComponent({
   }
 
   .search-not-included {
-    color: var(--inactive)
+    color: var(--inactive);
   }
 
   .search-included {
-    color: var(--text)
+    color: var(--text);
   }
 }
 </style>
