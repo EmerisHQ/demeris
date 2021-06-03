@@ -56,6 +56,17 @@ export type Step = {
   data: IBCBackwardsData | IBCForwardsData | SwapData;
 };
 
-export type {
-  Pool
-}
+export type SendAddressForm = {
+  recipient: string;
+  memo: string;
+  isTermChecked?: boolean;
+  balance: Base.Amount;
+};
+
+export type MoveAssetsForm = {
+  balance: Base.Amount;
+  on_chain: '';
+  to_chain: '';
+};
+
+export type { Pool };

@@ -6,13 +6,13 @@
           <AssetChainsIndicator :balances="balances" denom="stake" :max-chains-count="4" />
         </div>
 
-        <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Alert status="error" message="Error" />
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
 
-        <div class="p-10 flex flex-col space-y-8 w-1/4 mx-auto">
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Address address="cosmos1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg" chain-name="Cosmos Hub" readonly />
           <Address v-model:address="address" chain-name="Terra" />
         </div>
@@ -21,7 +21,7 @@
           <Pools :pools="pools" />
         </div>
 
-        <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Input placeholder="Example 1">
             <template #start>
               <AlertIcon />
@@ -37,7 +37,7 @@
           <Input placeholder="Example 3" hint="My hint message" />
         </div>
 
-        <div class="p-10 flex flex-row w-1/5 mx-auto icons">
+        <div class="p-10 flex flex-row w-1/3 mx-auto icons">
           <AlertIcon />
           <ArrowDownIcon />
           <ArrowUpIcon />
