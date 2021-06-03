@@ -11,7 +11,7 @@
           <span
             v-for="word in $filters.getCoinName(coin.base_denom)"
             :key="word"
-            :class="keyword.includes(word.toLowerCase()) == '' ? 'search-not-included' : 'search-included'"
+            :class="setWordColorByKeyword(keyword, word)"
           >
             {{ word }}
           </span>
@@ -25,7 +25,7 @@
             <span
             v-for="word in $filters.getCoinName(coin.base_denom)"
             :key="word + 'small'"
-            :class="keyword.includes(word.toLowerCase()) == '' ? 'search-not-included' : 'search-included'"
+            :class="setWordColorByKeyword(keyword, word)"
           >
             {{ word }}
           </span>
@@ -64,14 +64,10 @@ export default defineComponent({
   setup(props) {
     //TODO: handling current test data
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
-    function setSearchResult(denom) {
-      if (props.keyword) {
-        return '<div>test</div>';
-      } else {
-        return denom;
-      }
+    function setWordColorByKeyword(keyword, word) {
+      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included'
     }
-    return { iconColor, setSearchResult };
+    return { iconColor, setWordColorByKeyword };
   },
 });
 </script>
