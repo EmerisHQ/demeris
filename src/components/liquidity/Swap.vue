@@ -33,7 +33,7 @@
       v-model:amount="payCoinAmount"
       :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
-      :user-balance="userBalances"
+      :assets="userBalances"
       :is-over="isOver"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
@@ -71,7 +71,7 @@
       v-model:amount="receiveCoinAmount"
       :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
       :selected-denom="receiveCoinData"
-      :user-balance="userBalances"
+      :assets="receiveAvailableDenom"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />
@@ -125,6 +125,12 @@ export default defineComponent({
         set: (value) => (data.payCoinAmount = value / 2),
       }),
       userBalances: TEST_DATA.balances,
+      receiveAvailableDenom: computed(() => {
+        const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
+          return denomInfo.base_denom !== data.payCoinData.base_denom;
+        });
+        return payCoinRemovedDenoms;
+      }),
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isChildModalOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),

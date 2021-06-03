@@ -49,7 +49,7 @@
 
   <DenomSelectModal
     v-show="isOpen"
-    :assets="userBalance"
+    :assets="assets"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
     @select="denomSelectHandler"
@@ -66,7 +66,7 @@ export default defineComponent({
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
-    userBalance: { type: Object, required: true },
+    assets: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
   },
@@ -93,7 +93,7 @@ export default defineComponent({
       toggleDenomSelectModal();
     }
 
-    console.log(props.userBalance);
+    console.log(props.assets);
     return { inputAmount, isSelected, isOpen, toggleDenomSelectModal, denomSelectHandler };
   },
 });
