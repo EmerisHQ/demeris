@@ -19,7 +19,21 @@
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
           {{$filters.getCoinName(coin.base_denom)}}
         </div>
-        <div class="coin-list__info-details-data s-minus w-normal">
+        <div v-if="keyword" class="coin-list__info-details-data s-minus w-normal">
+          <div v-if="type === 'amount'">
+            {{coin.amount}}
+            <span
+            v-for="word in $filters.getCoinName(coin.base_denom)"
+            :key="word + 'small'"
+            :class="keyword.includes(word.toLowerCase()) == '' ? 'search-not-included' : 'search-included'"
+          >
+            {{ word }}
+          </span>
+            available
+          </div>
+          <span v-else>{{coin.on_chain}}</span>
+        </div>
+        <div v-else class="coin-list__info-details-data s-minus w-normal">
           {{ type === 'amount' ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available` : coin.on_chain }}
         </div>
       </div>
