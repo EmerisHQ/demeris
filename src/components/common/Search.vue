@@ -1,6 +1,6 @@
 <template>
   <div class="search" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
-    <Icon :name="'MagnifyingGlassIcon'" :icon-size="1.6" :color="'#000'" />
+    <Icon class="icon-search" :name="'MagnifyingGlassIcon'" :icon-size="1.6" :color="'#000'" />
     <input
       ref="searchInput"
       :value="keyword"
@@ -9,6 +9,7 @@
       placeholder="Search assets"
       @input="$emit('update:keyword', $event.target.value)"
     />
+    <Icon class="icon-reset" :name="'CloseCircleIcon'" :icon-size="1.6" :color="'#000'" />
     <div class="focus-border-1" />
     <div class="focus-border-2" />
   </div>
@@ -105,10 +106,17 @@ export default defineComponent({
     width: 100%;
   }
 
-  .icon {
+  .icon-search {
     margin-left: 1.2rem;
     position: absolute;
     z-index: 9;
+    height: 100%;
+    padding-bottom: 0.5rem;
+  }
+
+  .icon-reset {
+    position: absolute;
+    right: 1.2rem;
     height: 100%;
     padding-bottom: 0.5rem;
   }
