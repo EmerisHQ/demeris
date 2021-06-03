@@ -82,10 +82,12 @@ export default defineComponent({
       rgba(255, 155, 132, 0.74) 26.56%,
       rgba(156, 79, 255, 0) 100%
     );
+    background-color: transparent;
   }
 
   input:focus ~ .focus-border-2 {
     background-image: linear-gradient(0deg, #9ff9ff, #9ff9ff);
+    background-color: transparent;
   }
 
   .focus-border-1 {
@@ -95,6 +97,7 @@ export default defineComponent({
     left: 0;
     height: 100%;
     width: 100%;
+    background-color: var(--surface);
   }
 
   .focus-border-2 {
@@ -104,6 +107,7 @@ export default defineComponent({
     left: 0;
     height: 100%;
     width: 100%;
+     background-color: var(--surface);
   }
 
   .icon-search {
