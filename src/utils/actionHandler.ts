@@ -74,6 +74,185 @@ export async function transfer({
   amount,
   chain_name,
   destination_chain_name,
+  to_address,
+}: {
+  amount: Amount;
+  chain_name: string;
+  destination_chain_name: string;
+  to_address: string;
+}) {
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+
+  if (isNative(amount.denom)) {
+    if (chain_name == destination_chain_name) {
+      result.steps.push({
+        name: 'transfer',
+        status: 'pending',
+        data: {
+          amount,
+          chain_name,
+          to_address,
+        },
+      });
+      return result;
+    } else {
+      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+        // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
+        const primaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: chain_name,
+            destination_chain_name: destination_chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
+            },
+            { root: true },
+          ));
+        result.steps.push({
+          name: 'ibc_forward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: destination_chain_name,
+            to_address,
+            through: primaryChannel.channel_name,
+          },
+        });
+        return result;
+      }
+    }
+  }
+
+  const verifyTrace =
+    store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+    (await store.dispatch(
+      'demeris/GET_VERIFY_TRACE',
+      { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+      { root: true },
+    ));
+
+  if (!verifyTrace.verified) {
+    //  If we cannot verify the trace, throw error
+    throw new Error('Trace not verified');
+  }
+
+  if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
+    const primaryChannel =
+      store.getters['demeris/getPrimaryChannel']({
+        chain_name: verifyTrace.trace[0].counterparty_name,
+        destination_chain_name: destination_chain_name,
+      }) ??
+      (await store.dispatch(
+        'demeris/GET_PRIMARY_CHANNEL',
+        {
+          subscribe: true,
+          params: {
+            chain_name: verifyTrace.trace[0].counterparty_name,
+            destination_chain_name: destination_chain_name,
+          },
+        },
+        { root: true },
+      ));
+    if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+      result.steps.push({
+        name: 'transfer',
+        status: 'pending',
+        data: {
+          amount,
+          chain_name,
+          to_address,
+        },
+      });
+      return result;
+    } else {
+      result.steps.push({
+        name: 'ibc_backward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: chain_name,
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
+        },
+      });
+      result.steps.push({
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+          from_chain: verifyTrace.trace[0].counterparty_name,
+          to_chain: destination_chain_name,
+          to_address,
+          through: primaryChannel.channel_name,
+        },
+      });
+      return result;
+    }
+  } else {
+    if (verifyTrace.trace.length > 1) {
+      // If trace is longer than 1-hop, throw error because user must redeem the denom first (should never reach this part of the code
+      // as the UI should not allow selection of such a token but leaving it here for consistency)
+      throw new Error('Denom must be redeemed first');
+    } else {
+      const primaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: verifyTrace.trace[0].counterparty_name,
+          destination_chain_name: destination_chain_name,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: true,
+            params: {
+              chain_name: verifyTrace.trace[0].counterparty_name,
+              destination_chain_name: destination_chain_name,
+            },
+          },
+          { root: true },
+        ));
+      result.steps.push({
+        name: 'ibc_backward',
+        status: 'pending',
+        data: {
+          amount: amount,
+          from_chain: chain_name,
+          to_chain: verifyTrace.trace[0].counterparty_name,
+          through: verifyTrace.trace[0].channel,
+        },
+      });
+      result.steps.push({
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+          from_chain: verifyTrace.trace[0].counterparty_name,
+          to_chain: destination_chain_name,
+          to_address,
+          through: primaryChannel.channel_name,
+        },
+      });
+
+      return result;
+    }
+  }
+}
+export async function move({
+  amount,
+  chain_name,
+  destination_chain_name,
 }: {
   amount: Amount;
   chain_name: string;
@@ -116,7 +295,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
-            to_chain: 'gaia',
+            to_chain: destination_chain_name,
             through: primaryChannel.channel_name,
           },
         });
@@ -126,7 +305,7 @@ export async function transfer({
             amount: amount.amount,
             denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
           },
-          chain_name: 'gaia',
+          chain_name: destination_chain_name,
         };
         return result;
       }
@@ -653,7 +832,7 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
     throw new Error('Pool does not exist');
   }
 }
-export async function withdrawLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
+export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint; poolCoin: Amount }) {
   const result = {
     steps: [],
     output: {
@@ -671,18 +850,13 @@ export async function withdrawLiquidity({ pool_id, coinA, coinB }: { pool_id: bi
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
     ));
-  // create our asset pair sorted alphabetically
-  const assetPair = [coinA.denom, coinB.denom].sort();
-  // Find the pool for that pair
-  const pool =
-    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
+  const pool = liquidityPools.pools.find((x) => x.poolCoinDenom == poolCoin.denom) ?? null;
   if (pool && pool.id == pool_id) {
     result.steps.push({
-      name: 'addliquidity',
+      name: 'withdrawliquidity',
       status: 'pending',
       data: {
-        coinA,
-        coinB,
+        poolCoin,
         pool,
       },
     });
@@ -692,15 +866,27 @@ export async function withdrawLiquidity({ pool_id, coinA, coinB }: { pool_id: bi
     throw new Error('Pool does not exist');
   }
 }
-//Todo: transfer, add to liquidity pool, withdraw from liquidity pool
 
 // Action-handler / action composing using the blocks above
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
   const steps = [];
   try {
     switch (action.name) {
+      case 'transfer':
+        const transferStep = await transfer({
+          amount: {
+            amount: (action.params as Actions.TransferParams).from.amount,
+            denom: (action.params as Actions.TransferParams).from.denom.denom,
+          },
+          to_address: (action.params as Actions.TransferParams).to.address,
+          chain_name: (action.params as Actions.TransferParams).from.denom.chain_name,
+          destination_chain_name: (action.params as Actions.TransferParams).to.chain_name,
+        });
+
+        steps.push({ name: 'transfer', transactions: [...transferStep.steps] });
+        break;
       case 'swap':
-        const transferToHubStep = await transfer({
+        const transferToHubStep = await move({
           amount: {
             amount: (action.params as Actions.SwapParams).from.amount,
             denom: (action.params as Actions.SwapParams).from.denom.denom,
@@ -709,7 +895,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           destination_chain_name: 'gaia',
         });
 
-        steps.push(...transferToHubStep.steps);
+        steps.push({ name: 'transfer', transactions: [...transferToHubStep.steps] });
         const swapStep = await swap({
           from: {
             amount: transferToHubStep.output.amount.amount,
@@ -720,10 +906,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: (action.params as Actions.SwapParams).to.denom.denom,
           },
         });
-        steps.push(...swapStep.steps);
+        steps.push({ name: 'swap', transactions: [...swapStep.steps] });
         break;
       case 'addliquidity':
-        const transferCoinAtoHub = await transfer({
+        const transferCoinAtoHub = await move({
           amount: {
             amount: (action.params as Actions.AddLiquidityParams).coinA.amount,
             denom: (action.params as Actions.AddLiquidityParams).coinA.denom.denom,
@@ -731,8 +917,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: (action.params as Actions.AddLiquidityParams).coinA.denom.chain_name,
           destination_chain_name: 'gaia',
         });
-        steps.push(...transferCoinAtoHub.steps);
-        const transferCoinBtoHub = await transfer({
+        steps.push({ name: 'transfer', transactions: [...transferCoinAtoHub.steps] });
+        const transferCoinBtoHub = await move({
           amount: {
             amount: (action.params as Actions.AddLiquidityParams).coinB.amount,
             denom: (action.params as Actions.AddLiquidityParams).coinB.denom.denom,
@@ -740,13 +926,30 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: (action.params as Actions.AddLiquidityParams).coinB.denom.chain_name,
           destination_chain_name: 'gaia',
         });
-        steps.push(...transferCoinBtoHub.steps);
+        steps.push({ name: 'transfer', transactions: [...transferCoinBtoHub.steps] });
         const addLiquidityStep = await addLiquidity({
           pool_id: (action.params as Actions.AddLiquidityParams).pool_id,
           coinA: transferCoinAtoHub.output.amount,
           coinB: transferCoinBtoHub.output.amount,
         });
-        steps.push(...addLiquidityStep.steps);
+        steps.push({ name: 'addliquidity', transactions: [...addLiquidityStep.steps] });
+        break;
+      case 'withdrawliquidity':
+        const transferPoolCointoHub = await move({
+          amount: {
+            amount: (action.params as Actions.WithdrawLiquidityParams).poolCoin.amount,
+            denom: (action.params as Actions.WithdrawLiquidityParams).poolCoin.denom.denom,
+          },
+          chain_name: (action.params as Actions.WithdrawLiquidityParams).poolCoin.denom.chain_name,
+          destination_chain_name: 'gaia',
+        });
+        steps.push({ name: 'transfer', transactions: [...transferPoolCointoHub.steps] });
+        const withdrawLiquidityStep = await withdrawLiquidity({
+          pool_id: (action.params as Actions.WithdrawLiquidityParams).pool_id,
+          poolCoin: transferPoolCointoHub.output.amount,
+        });
+        steps.push({ name: 'withdrawliquidity', transactions: [...withdrawLiquidityStep.steps] });
+        break;
     }
   } catch (e) {
     console.log('Unable to create action steps');
@@ -772,7 +975,7 @@ export async function getFeeForChain(chain_name: string): Promise<number> {
   return fee;
 }
 
-export async function feeForStep(step: Actions.Step): Promise<number> {
+export async function feeForStep(step: Actions.StepTransaction): Promise<number> {
   switch (step.name) {
     case 'ibc_backward':
       return await getFeeForChain((step.data as Actions.IBCBackwardsData).from_chain);
