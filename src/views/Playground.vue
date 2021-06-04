@@ -55,6 +55,17 @@
           <HintIcon />
           <MenuIcon />
         </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <div
+            class="border rounded-lg overflow-hidden elevation-card relative p-10"
+            :style="{ width: '30rem', height: '30rem' }"
+          >
+            <Button name="Send Transaction" @click="modalIsOpen = true" />
+
+            <Modal :open="modalIsOpen" variant="bottom" @close="modalIsOpen = false"> Signing transaction... </Modal>
+          </div>
+        </div>
       </div>
     </div>
   </AppLayout>
@@ -83,7 +94,9 @@ import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Button from '@/components/ui/Button.vue';
 import Input from '@/components/ui/Input.vue';
+import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { Pool } from '@/types/actions';
@@ -112,6 +125,8 @@ export default defineComponent({
     ReceiveIcon,
     MenuIcon,
     Input,
+    Modal,
+    Button,
   },
   setup() {
     const store = useStore();
@@ -145,8 +160,9 @@ export default defineComponent({
     ];
 
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
+    const modalIsOpen = ref(false);
 
-    return { balances, pools, address };
+    return { balances, pools, address, modalIsOpen };
   },
 });
 </script>
