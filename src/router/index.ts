@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import Portfolio from '../views/Portfolio.vue';
+import Portfolio from '@/views/Portfolio.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Chains.vue'),
   },
   {
-    path: '/send',
+    path: '/send/:type?',
     name: 'Send',
     component: () => import('@/views/Send.vue'),
   },
