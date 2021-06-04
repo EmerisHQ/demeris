@@ -871,27 +871,50 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
   const steps = [];
   try {
+    let params;
     switch (action.name) {
-      case 'transfer':
-        const transferStep = await transfer({
-          amount: {
-            amount: (action.params as Actions.TransferParams).from.amount,
-            denom: (action.params as Actions.TransferParams).from.denom.denom,
-          },
-          to_address: (action.params as Actions.TransferParams).to.address,
-          chain_name: (action.params as Actions.TransferParams).from.denom.chain_name,
-          destination_chain_name: (action.params as Actions.TransferParams).to.chain_name,
+      case 'redeem':
+        params = (action as Actions.RedeemAction).params;
+        params.forEach(async (denom) => {
+          const redeemStep = await redeem(denom);
+          steps.push({ name: 'transfer', transactions: [...redeemStep.steps] });
         });
+        break;
+      case 'transfer':
+        params = (action as Actions.TransferAction).params;
+        if (params.to.address) {
+          const transferStep = await transfer({
+            amount: {
+              amount: params.from.amount.amount,
+              denom: params.from.amount.denom,
+            },
+            to_address: params.to.address,
+            chain_name: params.from.chain_name,
+            destination_chain_name: params.to.chain_name,
+          });
 
-        steps.push({ name: 'transfer', transactions: [...transferStep.steps] });
+          steps.push({ name: 'transfer', transactions: [...transferStep.steps] });
+        } else {
+          const moveStep = await move({
+            amount: {
+              amount: params.from.amount.amount,
+              denom: params.from.amount.denom,
+            },
+            chain_name: params.from.chain_name,
+            destination_chain_name: params.to.chain_name,
+          });
+
+          steps.push({ name: 'transfer', transactions: [...moveStep.steps] });
+        }
         break;
       case 'swap':
+        params = (action as Actions.SwapAction).params;
         const transferToHubStep = await move({
           amount: {
-            amount: (action.params as Actions.SwapParams).from.amount,
-            denom: (action.params as Actions.SwapParams).from.denom.denom,
+            amount: params.from.amount.amount,
+            denom: params.from.amount.denom,
           },
-          chain_name: (action.params as Actions.SwapParams).from.denom.chain_name,
+          chain_name: params.from.chain_name,
           destination_chain_name: 'gaia',
         });
 
@@ -902,50 +925,52 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: transferToHubStep.output.amount.denom,
           },
           to: {
-            amount: (action.params as Actions.SwapParams).to.amount,
-            denom: (action.params as Actions.SwapParams).to.denom.denom,
+            amount: params.to.amount.amount,
+            denom: params.to.amount.denom,
           },
         });
         steps.push({ name: 'swap', transactions: [...swapStep.steps] });
         break;
       case 'addliquidity':
+        params = (action as Actions.AddLiquidityAction).params;
         const transferCoinAtoHub = await move({
           amount: {
-            amount: (action.params as Actions.AddLiquidityParams).coinA.amount,
-            denom: (action.params as Actions.AddLiquidityParams).coinA.denom.denom,
+            amount: params.coinA.amount.amount,
+            denom: params.coinA.amount.denom,
           },
-          chain_name: (action.params as Actions.AddLiquidityParams).coinA.denom.chain_name,
+          chain_name: params.coinA.chain_name,
           destination_chain_name: 'gaia',
         });
         steps.push({ name: 'transfer', transactions: [...transferCoinAtoHub.steps] });
         const transferCoinBtoHub = await move({
           amount: {
-            amount: (action.params as Actions.AddLiquidityParams).coinB.amount,
-            denom: (action.params as Actions.AddLiquidityParams).coinB.denom.denom,
+            amount: params.coinB.amount.amount,
+            denom: params.coinB.amount.denom,
           },
-          chain_name: (action.params as Actions.AddLiquidityParams).coinB.denom.chain_name,
+          chain_name: params.coinB.chain_name,
           destination_chain_name: 'gaia',
         });
         steps.push({ name: 'transfer', transactions: [...transferCoinBtoHub.steps] });
         const addLiquidityStep = await addLiquidity({
-          pool_id: (action.params as Actions.AddLiquidityParams).pool_id,
+          pool_id: params.pool_id,
           coinA: transferCoinAtoHub.output.amount,
           coinB: transferCoinBtoHub.output.amount,
         });
         steps.push({ name: 'addliquidity', transactions: [...addLiquidityStep.steps] });
         break;
       case 'withdrawliquidity':
+        params = (action as Actions.WithdrawLiquidityAction).params;
         const transferPoolCointoHub = await move({
           amount: {
-            amount: (action.params as Actions.WithdrawLiquidityParams).poolCoin.amount,
-            denom: (action.params as Actions.WithdrawLiquidityParams).poolCoin.denom.denom,
+            amount: params.poolCoin.amount.amount,
+            denom: params.poolCoin.amount.denom,
           },
-          chain_name: (action.params as Actions.WithdrawLiquidityParams).poolCoin.denom.chain_name,
+          chain_name: params.poolCoin.chain_name,
           destination_chain_name: 'gaia',
         });
         steps.push({ name: 'transfer', transactions: [...transferPoolCointoHub.steps] });
         const withdrawLiquidityStep = await withdrawLiquidity({
-          pool_id: (action.params as Actions.WithdrawLiquidityParams).pool_id,
+          pool_id: params.pool_id,
           poolCoin: transferPoolCointoHub.output.amount,
         });
         steps.push({ name: 'withdrawliquidity', transactions: [...withdrawLiquidityStep.steps] });

@@ -5,60 +5,35 @@ import * as Base from './base';
 export type BaseAction = {
   name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer';
 };
-export type MetaDenom = {
-  denom: string;
-  chain_name: string;
-};
 export type SwapParams = {
-  from: {
-    denom: MetaDenom;
-    amount: number;
-  };
-  to: {
-    denom: MetaDenom;
-    amount: number;
-  };
+  from: Base.ChainAmount;
+  to: Base.ChainAmount;
 };
 
 export type TransferParams = {
-  from: {
-    denom: MetaDenom;
-    amount: number;
-  };
+  from: Base.ChainAmount;
   to: {
     chain_name: string;
-    address: string;
+    address?: string;
   };
 };
 export type AddLiquidityParams = {
   pool_id: bigint;
-  coinA: {
-    denom: MetaDenom;
-    amount: number;
-  };
-  coinB: {
-    denom: MetaDenom;
-    amount: number;
-  };
+  coinA: Base.ChainAmount;
+  coinB: Base.ChainAmount;
 };
 export type WithdrawLiquidityParams = {
   pool_id: bigint;
-  poolCoin: {
-    denom: MetaDenom;
-    amount: number;
-  };
+  poolCoin: Base.ChainAmount;
 };
-export type RedeemParams = {
-  denom: MetaDenom;
-  amount: number;
-};
-export type Swap = BaseAction & { params: SwapParams };
-export type Redeem = BaseAction & { params: RedeemParams };
-export type AddLiquidity = BaseAction & { params: AddLiquidityParams };
-export type WithdrawLiquidity = BaseAction & { params: WithdrawLiquidityParams };
-export type Transfer = BaseAction & { params: TransferParams };
+export type RedeemParams = Array<Base.ChainAmount>;
+export type SwapAction = BaseAction & { params: SwapParams };
+export type RedeemAction = BaseAction & { params: RedeemParams };
+export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
+export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
+export type TransferAction = BaseAction & { params: TransferParams };
 
-export type Any = Swap | Redeem | Transfer | AddLiquidity | WithdrawLiquidity;
+export type Any = SwapAction | RedeemAction | TransferAction | AddLiquidityAction | WithdrawLiquidityAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
