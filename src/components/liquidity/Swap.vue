@@ -12,78 +12,81 @@
 		dependencies:
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
-  <div class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
-    <div class="swap-widget-header">
-      <div class="s-2 w-bold">Swap</div>
-      <div class="swap-widget-header__dot-button">
-        <IconButton
-          :name="'ThreeDotsIcon'"
-          :type="'flat'"
-          :status="'normal'"
-          :data="{
-            type: 'custom',
-            function: openSetting,
-          }"
-        />
+  <div class="wrapper">
+    <ReviewModal v-if="true" @close="reviewModalToggle" @goback="gobackFunc" />
+    <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
+      <div class="swap-widget-header">
+        <div class="s-2 w-bold">Swap</div>
+        <div class="swap-widget-header__dot-button">
+          <IconButton
+            :name="'ThreeDotsIcon'"
+            :type="'flat'"
+            :status="'normal'"
+            :data="{
+              type: 'custom',
+              function: openSetting,
+            }"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- pay coin selector -->
-    <DenomSelect
-      v-model:amount="payCoinAmount"
-      :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
-      :selected-denom="payCoinData"
-      :assets="userBalances"
-      :is-over="isOver"
-      @select="denomSelectHandler"
-      @modalToggle="setChildModalOpenStatus"
-    />
+      <!-- pay coin selector -->
+      <DenomSelect
+        v-model:amount="payCoinAmount"
+        :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
+        :selected-denom="payCoinData"
+        :assets="userBalances"
+        :is-over="isOver"
+        @select="denomSelectHandler"
+        @modalToggle="setChildModalOpenStatus"
+      />
 
-    <!-- button-divider -->
-    <div class="swap-widget__controller">
-      <div class="swap-widget__controller-divider" />
-      <div class="swap-widget__controller-wrapper">
-        <IconButton
-          :name="'UpsideDownIcon'"
-          :type="'circle'"
-          :status="'normal'"
-          :data="{
-            type: 'custom',
-            function: changePayToReceive,
-          }"
-        />
-        <IconButton
-          v-if="payCoinData"
-          :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
-          :type="'text'"
-          :status="'normal'"
-          :data="{
-            type: 'custom',
-            function: setMax,
-            isOver: isOver,
-          }"
-        />
+      <!-- button-divider -->
+      <div class="swap-widget__controller">
+        <div class="swap-widget__controller-divider" />
+        <div class="swap-widget__controller-wrapper">
+          <IconButton
+            :name="'UpsideDownIcon'"
+            :type="'circle'"
+            :status="'normal'"
+            :data="{
+              type: 'custom',
+              function: changePayToReceive,
+            }"
+          />
+          <IconButton
+            v-if="payCoinData"
+            :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
+            :type="'text'"
+            :status="'normal'"
+            :data="{
+              type: 'custom',
+              function: setMax,
+              isOver: isOver,
+            }"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- receive coin selector -->
-    <DenomSelect
-      v-model:amount="receiveCoinAmount"
-      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
-      :selected-denom="receiveCoinData"
-      :assets="receiveAvailableDenom"
-      @select="denomSelectHandler"
-      @modalToggle="setChildModalOpenStatus"
-    />
+      <!-- receive coin selector -->
+      <DenomSelect
+        v-model:amount="receiveCoinAmount"
+        :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
+        :selected-denom="receiveCoinData"
+        :assets="receiveAvailableDenom"
+        @select="denomSelectHandler"
+        @modalToggle="setChildModalOpenStatus"
+      />
 
-    <!-- swap button -->
-    <div class="button-wrapper">
-      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
-    </div>
+      <!-- swap button -->
+      <div class="button-wrapper">
+        <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
+      </div>
 
-    <div class="fees s-minus">
-      <div>Fees (included)</div>
-      <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+      <div class="fees s-minus">
+        <div>Fees (included)</div>
+        <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+      </div>
     </div>
   </div>
 </template>
@@ -91,6 +94,7 @@
 import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import ReviewModal from '@/components/common/ReviewModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
@@ -105,6 +109,7 @@ export default defineComponent({
     IconButton,
     Button,
     Icon,
+    ReviewModal,
   },
 
   setup() {
@@ -172,24 +177,52 @@ export default defineComponent({
       data.isChildModalOpen = payload;
     }
 
+    function reviewModalToggle() {
+      alert('review toggle');
+    }
+
+    function gobackFunc() {
+      alert('goback');
+    }
+
     function swap() {
+      // const swapParams = {
+      //   from: {
+      //     amount: {
+      //       denom: 'uatom',
+      //       amount: 2000000,
+      //     },
+      //     chain_name: 'gaia',
+      //   },
+      //   to: {
+      //     amount: {
+      //       denom: 'uluna',
+      //       amount: 2000000,
+      //     },
+      //     chain_name: 'gaia',
+      //   },
+      // };
+
       const swapParams = {
         from: {
           amount: {
-            denom: 'uatom',
-            amount: 2000000,
+            denom: data.payCoinData.base_denom,
+            amount: data.payCoinAmount,
           },
-          chain_name: 'cosmos',
+          chain_name: data.payCoinData.on_chain,
         },
         to: {
           amount: {
-            denom: 'uluna',
-            amount: 2000000,
+            denom: data.receiveCoinData.base_denom,
+            amount: data.receiveCoinAmount,
           },
-          chain_name: 'terra',
+          chain_name: 'gaia',
         },
       };
 
+      console.log('PAY', data.payCoinData, data.payCoinAmount);
+      console.log('RECEIVE', data.receiveCoinData, data.receiveCoinAmount);
+      console.log('SWAP', swapParams);
       actionHandler({ name: 'swap', params: swapParams });
     }
 
@@ -202,18 +235,20 @@ export default defineComponent({
       setMax,
       swap,
       setChildModalOpenStatus,
+      reviewModalToggle,
+      gobackFunc,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.swap-widget {
+.wrapper {
   position: relative;
-
   width: 32rem;
   height: 42.6rem;
-
+}
+.swap-widget {
   background-color: var(--surface);
 
   &-header {
