@@ -175,18 +175,18 @@ export default defineComponent({
     function swap() {
       const swapParams = {
         from: {
-          denom: {
+          amount: {
             denom: 'uatom',
-            chain_name: 'cosmos',
+            amount: 2000000,
           },
-          amount: 2000000,
+          chain_name: 'cosmos',
         },
         to: {
-          denom: {
+          amount: {
             denom: 'uluna',
-            chain_name: 'terra',
+            amount: 2000000,
           },
-          amount: 2000000,
+          chain_name: 'terra',
         },
       };
 
