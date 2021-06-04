@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import Portfolio from '../views/Portfolio.vue';
+import Portfolio from '@/views/Portfolio.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
