@@ -21,7 +21,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .button {
   width: 100%;
-  padding: 1.6rem 0;
+  padding: 1.6rem 2rem;
   color: var(--bg);
 
   border-radius: 8px;

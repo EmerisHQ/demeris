@@ -123,6 +123,11 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     padding: 0.6rem;
+    z-index: 50;
+  }
+
+  &__content {
+    min-height: inherit;
   }
 
   &__body {
@@ -143,7 +148,8 @@ export default defineComponent({
   }
 
   &--dialog &__body {
-    max-width: 40rem;
+    max-width: 80%;
+    width: auto;
   }
 
   &--fullscreen &__body {
