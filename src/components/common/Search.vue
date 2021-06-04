@@ -1,6 +1,5 @@
 <template>
   <div class="search" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
-    <Icon class="icon-search" :name="'MagnifyingGlassIcon'" :icon-size="1.6" :color="'#000'" />
     <input
       ref="searchInput"
       :value="keyword"
@@ -9,7 +8,18 @@
       placeholder="Search assets"
       @input="$emit('update:keyword', $event.target.value)"
     />
-    <Icon class="icon-reset" :name="'CloseCircleIcon'" :icon-size="1.6" :color="'#000'" />
+    <Icon class="icon-search" :name="'MagnifyingGlassIcon'" :icon-size="1.6" />
+    <Icon
+      v-show="keyword !== ''"
+      class="icon-reset"
+      :name="'CloseCircleIcon'"
+      :icon-size="1.6"
+      @click="
+        () => {
+          $emit('update:keyword', '');
+        }
+      "
+    />
     <div class="focus-border-1" />
     <div class="focus-border-2" />
   </div>
@@ -107,22 +117,28 @@ export default defineComponent({
     left: 0;
     height: 100%;
     width: 100%;
-     background-color: var(--surface);
+    background-color: var(--surface);
   }
 
-  .icon-search {
-    margin-left: 1.2rem;
+  .icon {
     position: absolute;
     z-index: 9;
     height: 100%;
     padding-bottom: 0.5rem;
+    color: var(--muted);
+  }
+
+  .icon-search {
+    margin-left: 1.2rem;
   }
 
   .icon-reset {
-    position: absolute;
     right: 1.2rem;
-    height: 100%;
-    padding-bottom: 0.5rem;
+    cursor: pointer;
+  }
+
+  input:focus ~ .icon {
+    color: var(--inactive) !important;
   }
 }
 </style>
