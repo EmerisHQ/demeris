@@ -108,4 +108,17 @@ export type Step = {
   transactions: Array<StepTransaction>;
 };
 
+export type SendAddressForm = {
+  recipient: string;
+  memo: string;
+  isTermChecked?: boolean;
+  balance: Base.Amount;
+};
+
+export type MoveAssetsForm = {
+  balance: Base.Amount;
+  on_chain: '';
+  to_chain: '';
+};
+
 export type { Pool };
