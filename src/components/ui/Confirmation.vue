@@ -1,5 +1,12 @@
 <template>
-  <Modal :open="open" variant="dialog" class="confirmation" @close="emitClose">
+  <Modal
+    :open="open"
+    variant="dialog"
+    width="32rem"
+    class="confirmation"
+    :class="{ 'confirmation--single': !showNoButton }"
+    @close="emitClose"
+  >
     <div class="confirmation__wrapper">
       <h2 class="confirmation__title s-2">{{ title }}</h2>
 
@@ -10,7 +17,7 @@
       </div>
 
       <div class="confirmation__controls">
-        <button v-if="showNo" class="confirmation__controls__button no-button" @click="emitNo">
+        <button v-if="showNoButton" class="confirmation__controls__button no-button" @click="emitNo">
           {{ noText }}
         </button>
 
@@ -39,6 +46,14 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    title: {
+      type: String,
+      default: '',
+    },
+    description: {
+      type: String,
+      default: '',
+    },
     noText: {
       type: String,
       default: 'No',
@@ -47,7 +62,7 @@ export default defineComponent({
       type: String,
       default: 'Yes',
     },
-    showNo: {
+    showNoButton: {
       type: Boolean,
       default: true,
     },
@@ -67,6 +82,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .confirmation {
+  &--single {
+    .yes-button {
+      border: transparent;
+      background: var(--text);
+      color: var(--bg);
+    }
+  }
+
   &__wrapper {
     display: flex;
     align-items: center;
@@ -75,15 +98,19 @@ export default defineComponent({
   }
 
   &__description {
+    text-align: center;
     margin-top: 2.4rem;
+    line-height: 1.5;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
     margin-top: 6rem;
+    width: 100%;
 
     &__button {
+      flex: 1 1 0%;
       border-radius: 0.8rem;
       padding: 1.6rem 2rem;
       border: 1px solid #e6e6e6;

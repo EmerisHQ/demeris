@@ -1,12 +1,12 @@
 <template>
-  <div class="modal" :class="[`modal--${variant}`, { 'modal--closed': !open }]">
-    <div class="modal__body" :class="bodyClass" :style="bodyStyle">
+  <div class="modal" :class="[`modal--${variant}`, { 'modal--closed': !open }]" @click="onOverlayClick">
+    <div class="modal__body elevation-card" :class="bodyClass" :style="bodyStyle" @click.prevent.stop>
       <div class="modal__header">
         <slot name="header">
           <span />
         </slot>
 
-        <button v-if="showCloseButton" class="modal__close" @click="onClose">
+        <button v-if="showCloseButton" class="modal__close" @click="emitClose">
           <Icon name="CloseIcon" :icon-size="1.4" />
         </button>
       </div>
@@ -55,15 +55,15 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    closeOnOverlayClick: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   emits: ['close'],
 
   setup(props, { emit }) {
-    const onClose = () => {
-      emit('close');
-    };
-
     const bodyStyle = computed(() => {
       const styles: CSSProperties = {};
 
@@ -78,7 +78,17 @@ export default defineComponent({
       return styles;
     });
 
-    return { onClose, bodyStyle };
+    const emitClose = () => {
+      emit('close');
+    };
+
+    const onOverlayClick = () => {
+      if (props.closeOnOverlayClick) {
+        emitClose();
+      }
+    };
+
+    return { bodyStyle, emitClose, onOverlayClick };
   },
 });
 </script>
@@ -89,11 +99,12 @@ export default defineComponent({
   inset: 0;
   z-index: 40;
   overflow-y: auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
+  margin: 0 !important;
 
   &--closed {
     height: 0;
