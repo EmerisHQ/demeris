@@ -120,9 +120,9 @@ export default defineComponent({
     align-items: center;
 
     &-image {
-      width: 3.2rem;
-      height: 3.2rem;
-      margin-right: 1.6rem;
+      width: 2.4rem;
+      height: 2.4rem;
+      margin-right: 1.2rem;
     }
 
     &-details {
@@ -141,7 +141,7 @@ export default defineComponent({
     justify-content: space-between;
 
     .icon {
-      margin-left: 10px;
+      margin-left: 1rem;
     }
   }
 

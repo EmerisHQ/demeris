@@ -1,13 +1,14 @@
 <template>
   <div>
     <ChainSelectModal
-      v-show="isModalOpen"
+      v-if="isModalOpen"
       :assets="assets"
       :title="'Select chain'"
       :func="toggleChainSelectModal"
+      :selected-denom="selectedDenom"
       @select="chainSelectHandler"
     />
-    <div v-show="!isModalOpen" class="denom-select-modal-wrapper elevation-panel">
+    <div v-else class="denom-select-modal-wrapper elevation-panel">
       <!--Displays a denom selection component:
 				input field (search box)
 				denom badge
@@ -66,12 +67,14 @@ export default defineComponent({
   setup(props, { emit }) {
     const isModalOpen = ref(false);
     const keyword = ref('');
+    const selectedDenom = ref(null);
 
     function coinListselectHandler(payload) {
       if (props.title === 'Receive') {
         payload.type = props.title;
         emit('select', payload);
       } else {
+        selectedDenom.value = payload.base_denom;
         toggleChainSelectModal();
       }
     }
@@ -95,7 +98,15 @@ export default defineComponent({
     }
 
     console.log('assets', props);
-    return { isModalOpen, toggleChainSelectModal, coinListselectHandler, chainSelectHandler, keyword, filterKeyword };
+    return {
+      isModalOpen,
+      toggleChainSelectModal,
+      coinListselectHandler,
+      chainSelectHandler,
+      keyword,
+      filterKeyword,
+      selectedDenom,
+    };
   },
 });
 </script>
