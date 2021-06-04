@@ -12,7 +12,7 @@
 		dependencies:
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
-  <div class="swap-widget elevation-card">
+  <div class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
     <div class="swap-widget-header">
       <div class="s-2 w-bold">Swap</div>
       <div class="swap-widget-header__dot-button">
@@ -33,7 +33,10 @@
       v-model:amount="payCoinAmount"
       :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
       :selected-denom="payCoinData"
-      :user-balance="userBalances"
+      :assets="userBalances"
+      :is-over="isOver"
+      @select="denomSelectHandler"
+      @modalToggle="setChildModalOpenStatus"
     />
 
     <!-- button-divider -->
@@ -66,14 +69,21 @@
     <!-- receive coin selector -->
     <DenomSelect
       v-model:amount="receiveCoinAmount"
-      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount)}`"
+      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
       :selected-denom="receiveCoinData"
-      :user-balance="userBalances"
+      :assets="receiveAvailableDenom"
+      @select="denomSelectHandler"
+      @modalToggle="setChildModalOpenStatus"
     />
 
     <!-- swap button -->
     <div class="button-wrapper">
       <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
+    </div>
+
+    <div class="fees s-minus">
+      <div>Fees (included)</div>
+      <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
     </div>
   </div>
 </template>
@@ -82,8 +92,8 @@ import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
-import useButton from '@/composables/useButton.vue';
 import usePrice from '@/composables/usePrice.vue';
 import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
@@ -94,11 +104,11 @@ export default defineComponent({
     DenomSelect,
     IconButton,
     Button,
+    Icon,
   },
 
   setup() {
-    const { buttonFunction } = useButton();
-    const { getCoinDollarValue } = usePrice();
+    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
         return data.isOver ? 'Insufficent funds' : 'Swap';
@@ -111,11 +121,20 @@ export default defineComponent({
       receiveCoinData: null,
       receiveCoinAmount: computed({
         //2 eventually become pool price with bigInt type calculation
-        get: () => (data.receiveCoinData?.base_denom ? data.payCoinAmount * 2 : null),
-        set: (value) => (data.payCoinAmount = value / 2),
+        get: () => (data.receiveCoinData?.base_denom ? getReceiveCoinAmount(data.payCoinAmount, 300000, 400000) : null),
+        set: (value) =>
+          data.receiveCoinData?.base_denom ? (data.payCoinAmount = getPayCoinAmount(value, 300000, 400000)) : null,
       }),
       userBalances: TEST_DATA.balances,
+      receiveAvailableDenom: computed(() => {
+        const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
+          return denomInfo.base_denom !== data.payCoinData.base_denom;
+        });
+        return payCoinRemovedDenoms;
+      }),
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      isChildModalOpen: false,
+      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     data.payCoinData = data?.userBalances[0];
@@ -137,8 +156,20 @@ export default defineComponent({
       data.payCoinAmount = data.payCoinData.amount;
     }
 
+    function denomSelectHandler(payload) {
+      if (payload.type === 'Receive') {
+        data.receiveCoinData = payload;
+      } else {
+        data.payCoinData = payload;
+      }
+    }
+
     function openSetting() {
       alert('open setting');
+    }
+
+    function setChildModalOpenStatus(payload) {
+      data.isChildModalOpen = payload;
     }
 
     function swap() {
@@ -162,7 +193,16 @@ export default defineComponent({
       actionHandler({ name: 'swap', params: swapParams });
     }
 
-    return { ...toRefs(data), getCoinDollarValue, openSetting, changePayToReceive, setMax, swap };
+    return {
+      ...toRefs(data),
+      getCoinDollarValue,
+      openSetting,
+      changePayToReceive,
+      denomSelectHandler,
+      setMax,
+      swap,
+      setChildModalOpenStatus,
+    };
   },
 });
 </script>
@@ -172,6 +212,8 @@ export default defineComponent({
   position: relative;
 
   width: 32rem;
+  height: 42.6rem;
+
   background-color: var(--surface);
 
   &-header {
@@ -212,6 +254,17 @@ export default defineComponent({
 
   .button-wrapper {
     padding: 1.6rem 2.4rem 2.4rem;
+  }
+
+  .fees {
+    display: flex;
+    padding: 0 2.4rem;
+    justify-content: space-between;
+    color: var(--muted);
+
+    .total-fee {
+      display: flex;
+    }
   }
 }
 </style>

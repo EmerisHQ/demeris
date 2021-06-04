@@ -3,7 +3,7 @@
 		props: 
 		  type: string (the icon to display)
 		//-->
-  <div class="icon" :style="`font-size:${iconSize}rem`">
+  <div class="icon" :style="`font-size:${iconSize}rem; color: ${color}`">
     <component :is="currentIcon" v-if="isReady" />
   </div>
 </template>
@@ -19,12 +19,13 @@ export default defineComponent({
       required: true,
     },
     iconSize: { type: Number, required: false, default: 2.4 },
+    color: { type: String, required: false, default: 'inherit' },
   },
 
   setup(props) {
     const currentIcon = shallowRef('');
     const isReady = ref(false);
-    import(`@/components/common/Icons/${props.name}.vue`).then(val => {
+    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
       currentIcon.value = val.default;
       isReady.value = true;
     });
@@ -38,6 +39,8 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .icon {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

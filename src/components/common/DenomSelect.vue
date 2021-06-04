@@ -16,10 +16,10 @@
       class="denom-select__coin-image"
       :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
       :alt="`selected coin`"
-      @click="openDenomSelectModal"
+      @click="toggleDenomSelectModal"
     />
 
-    <div v-if="isSelected" class="denom-select__coin" @click="openDenomSelectModal">
+    <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         {{ $filters.getCoinName(selectedDenom?.base_denom) }}
         <Icon name="SmallDownIcon" :icon-size="1.6" />
@@ -27,7 +27,7 @@
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
 
-    <div v-else class="denom-select__coin" @click="openDenomSelectModal">
+    <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         Select asset <Icon name="SmallDownIcon" :icon-size="1.6" />
       </div>
@@ -37,6 +37,7 @@
       <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
       <input
         :value="amount"
+        :class="isOver ? 'over' : ''"
         class="denom-select__coin-amount-input s-1"
         type="number"
         placeholder="0"
@@ -46,7 +47,13 @@
     </div>
   </div>
 
-  <DenomSelectModal v-show="isOpen" />
+  <DenomSelectModal
+    v-show="isOpen"
+    :assets="assets"
+    :func="toggleDenomSelectModal"
+    :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
+    @select="denomSelectHandler"
+  />
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
@@ -59,14 +66,15 @@ export default defineComponent({
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
-    userBalance: { type: Object, required: true },
+    assets: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
+    isOver: { type: Boolean, required: false, default: false },
   },
-  emits: ['update:amount'],
+  emits: ['update:amount', 'select', 'modalToggle'],
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
-      set: value => emit('update:amount', value),
+      set: (value) => emit('update:amount', value),
     });
 
     const isSelected = computed(() => {
@@ -75,12 +83,18 @@ export default defineComponent({
 
     const isOpen = ref(false);
 
-    function openDenomSelectModal() {
-      isOpen.value = true;
+    function toggleDenomSelectModal() {
+      isOpen.value = !isOpen.value;
+      emit('modalToggle', isOpen.value);
     }
 
-    console.log(props.userBalance);
-    return { inputAmount, isSelected, isOpen, openDenomSelectModal };
+    function denomSelectHandler(payload) {
+      emit('select', payload);
+      toggleDenomSelectModal();
+    }
+
+    console.log(props.assets);
+    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal, denomSelectHandler };
   },
 });
 </script>
@@ -100,7 +114,7 @@ export default defineComponent({
       align-items: center;
       color: var(--text);
 
-      svg {
+      .icon {
         margin-left: 0.4rem;
       }
     }
@@ -149,6 +163,10 @@ export default defineComponent({
         -moz-appearance: textfield;
       }
     }
+  }
+
+  .over {
+    color: var(--negative-text);
   }
 }
 </style>
