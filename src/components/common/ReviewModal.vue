@@ -87,7 +87,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .denom-select-modal-wrapper {
-  position: absolute;
+  position: relative;
   width: 100%;
   /* height: 55.8rem; */
 

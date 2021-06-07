@@ -247,7 +247,7 @@ export default defineComponent({
 .wrapper {
   position: relative;
   width: 32rem;
-  height: 42.6rem;
+  /* height: 42.6rem; */
 }
 .swap-widget {
   background-color: var(--surface);
@@ -294,7 +294,7 @@ export default defineComponent({
 
   .fees {
     display: flex;
-    padding: 0 2.4rem;
+    padding: 0 2.4rem 2.4rem;
     justify-content: space-between;
     color: var(--muted);
 

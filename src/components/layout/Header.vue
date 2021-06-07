@@ -56,7 +56,7 @@ export default defineComponent({
 }
 
 .header {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   left: 0;
   width: 100%;
