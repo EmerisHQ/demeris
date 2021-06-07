@@ -13,7 +13,7 @@
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
   <div class="wrapper">
-    <ReviewModal v-if="isOpen" @close="reviewModalToggle" @goback="gobackFunc" />
+    <ReviewModal v-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -98,9 +98,9 @@ import ReviewModal from '@/components/common/ReviewModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
-import useModal from '@/composables/useModal'
-import { TEST_DATA } from '@/TEST_DATA';
+import { SWAP_TEST_DATA,TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -115,7 +115,7 @@ export default defineComponent({
 
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
-    const {isOpen, toggleModal: reviewModalToggle,} = useModal();
+    const { isOpen, toggleModal: reviewModalToggle } = useModal();
 
     const data = reactive({
       buttonName: computed(() => {
@@ -140,6 +140,7 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
+      actionHandlerResult: null,
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isChildModalOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
@@ -185,25 +186,27 @@ export default defineComponent({
     }
 
     function swap() {
-      // const swapParams = {
-      //   from: {
-      //     amount: {
-      //       denom: 'uatom',
-      //       amount: 2000000,
-      //     },
-      //     chain_name: 'gaia',
-      //   },
-      //   to: {
-      //     amount: {
-      //       denom: 'uluna',
-      //       amount: 2000000,
-      //     },
-      //     chain_name: 'gaia',
-      //   },
-      // };
-      reviewModalToggle()
-
       const swapParams = {
+        from: {
+          amount: {
+            denom: 'uatom',
+            amount: 2000000,
+          },
+          chain_name: 'gaia',
+        },
+        to: {
+          amount: {
+            denom: 'uluna',
+            amount: 2000000,
+          },
+          chain_name: 'gaia',
+        },
+      };
+      console.log(SWAP_TEST_DATA);
+      data.actionHandlerResult = SWAP_TEST_DATA;
+      reviewModalToggle();
+
+      const swapParams2 = {
         from: {
           amount: {
             denom: data.payCoinData.base_denom,
@@ -236,7 +239,7 @@ export default defineComponent({
       swap,
       setChildModalOpenStatus,
       isOpen,
-       reviewModalToggle,
+      reviewModalToggle,
       gobackFunc,
     };
   },

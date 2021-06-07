@@ -294,3 +294,5 @@ export const TEST_DATA = {
     // },
   ],
 };
+
+export const SWAP_TEST_DATA = [{ name: 'transfer' }, { name: 'swap' }];
