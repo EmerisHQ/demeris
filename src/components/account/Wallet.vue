@@ -12,23 +12,34 @@
         <div class="header__wallet-badge__details__value">1111</div>
       </div>
     </div>
-    <button v-else @click="signIn()">Sign IN</button>
+    <Button v-else name="Connect my wallet" @click="toggleModal" />
+    <teleport to="body">
+      <ConnectKeplr :open="isModalOpen" @close="toggleModal" />
+    </teleport>
   </div>
 </template>
 
 <script lang="ts">
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
+import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import Button from '@/components/ui/Button.vue';
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+
 export default defineComponent({
   name: 'Wallet',
+
+  components: {
+    Button,
+    ConnectKeplr,
+  },
+
   setup() {
+    const isModalOpen = ref(false);
     const store = useStore();
     const isSignedIn = computed(() => {
-      console.log(store);
       return store.getters['demeris/isSignedIn'];
     });
     const keplrAccountName = computed(() => {
@@ -37,14 +48,15 @@ export default defineComponent({
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });
-    const signIn = () => {
-      store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+    const toggleModal = () => {
+      isModalOpen.value = !isModalOpen.value;
     };
     return {
+      isModalOpen,
+      toggleModal,
       isSignedIn,
       keplrAccountName,
       keplrAddress,
-      signIn,
     };
   },
   methods: {

@@ -1,6 +1,7 @@
 <template>
-  <div class="modal" :class="[`modal--${variant}`, { 'modal--closed': !open }]" @click="onOverlayClick">
-    <div class="modal__body elevation-card" :class="bodyClass" :style="bodyStyle" @click.prevent.stop>
+  <div v-if="open" class="modal" :class="[`modal--${variant}`]">
+    <div class="modal__overlay" @click="onOverlayClick" />
+    <div class="modal__body elevation-card" :class="bodyClass" :style="bodyStyle">
       <div class="modal__header">
         <slot name="header">
           <span />
@@ -99,7 +100,6 @@ export default defineComponent({
   inset: 0;
   z-index: 40;
   overflow-y: auto;
-  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,6 +109,12 @@ export default defineComponent({
   &--closed {
     height: 0;
     width: 0;
+  }
+
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
   }
 
   &__header {
@@ -123,6 +129,11 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     padding: 0.6rem;
+    z-index: 50;
+  }
+
+  &__content {
+    min-height: inherit;
   }
 
   &__body {
@@ -143,7 +154,8 @@ export default defineComponent({
   }
 
   &--dialog &__body {
-    max-width: 40rem;
+    max-width: 80%;
+    width: auto;
   }
 
   &--fullscreen &__body {
