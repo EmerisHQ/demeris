@@ -13,7 +13,7 @@
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
   <div class="wrapper">
-    <ReviewModal v-if="true" @close="reviewModalToggle" @goback="gobackFunc" />
+    <ReviewModal v-if="isOpen" @close="reviewModalToggle" @goback="gobackFunc" />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -99,6 +99,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import usePrice from '@/composables/usePrice.vue';
+import useModal from '@/composables/useModal'
 import { TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -114,6 +115,8 @@ export default defineComponent({
 
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
+    const {isOpen, toggleModal: reviewModalToggle,} = useModal();
+
     const data = reactive({
       buttonName: computed(() => {
         return data.isOver ? 'Insufficent funds' : 'Swap';
@@ -177,10 +180,6 @@ export default defineComponent({
       data.isChildModalOpen = payload;
     }
 
-    function reviewModalToggle() {
-      alert('review toggle');
-    }
-
     function gobackFunc() {
       alert('goback');
     }
@@ -202,6 +201,7 @@ export default defineComponent({
       //     chain_name: 'gaia',
       //   },
       // };
+      reviewModalToggle()
 
       const swapParams = {
         from: {
@@ -235,7 +235,8 @@ export default defineComponent({
       setMax,
       swap,
       setChildModalOpenStatus,
-      reviewModalToggle,
+      isOpen,
+       reviewModalToggle,
       gobackFunc,
     };
   },
