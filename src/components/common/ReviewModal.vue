@@ -27,17 +27,51 @@
         <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
       </div>
     </div>
+    
+    <div class="divider"/>
+
+    <div class="detail">
+      <div class="detail__title s-minus w-bold">Price</div>
+      <div class="detail__row s-minus w-normal">
+      <div class="detail__row-key">Min. received<br/>(if 100% swapped)</div>
+        <div class="detail__row-value">995.54 LUNA</div>
+      </div>
+    </div>
+
+    <div class="divider"/>
+
+    <div class="detail">
+      <div class="detail__title s-minus w-bold">Fees</div>
+      <div class="detail__row s-minus w-normal">
+        <div class="detail__row-key">Transaction fee</div>
+        <div class="detail__row-value">0.02 ATOM</div>
+      </div>
+      <div class="detail__row s-minus w-normal">
+        <div class="detail__row-key">Swap fee</div>
+        <div class="detail__row-value">0.02 ATOM</div>
+      </div>
+    </div>
+
+    <div class="warn s-minus w-normal">
+      Non-revertable transactions. Prices not guaranteed etc.
+    </div>
+
+    <div class="button-wrapper">
+      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="()=>{alert('test')}" />
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
     GobackWithClose,
+    Button
   },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
@@ -55,7 +89,9 @@ export default defineComponent({
 .denom-select-modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 55.8rem;
+  /* height: 55.8rem; */
+
+  margin-bottom: 5rem;
   top: 0;
   left: 0;
 
@@ -99,6 +135,44 @@ export default defineComponent({
         text-align: right;
       }
     }
+  }
+
+  .divider {
+    margin: 0 2.4rem;
+    height: 1px;
+    background-color: var(--border-trans)
+  }
+
+  .detail {
+    padding: 0 2.4rem;
+    &__title {
+      color:var(--text);
+      padding: 1.6rem 0;
+    }
+
+    &__row {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 1.6rem;
+      &-key {
+        color:var(--muted)
+      }
+      &-value {
+
+      }
+    }
+  }
+
+  .warn {
+    margin: 0 2.4rem;
+    padding: 1.2rem;
+    border: 1px solid var(--border-trans);
+    color: var(--muted);
+    border-radius: 8px;
+  }
+
+  .button-wrapper {
+    padding: 2.8rem 2.4rem 2.4rem;
   }
 }
 </style>
