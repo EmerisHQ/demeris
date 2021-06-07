@@ -28,17 +28,21 @@
       </div>
     </div>
     
-    <div class="divider"/>
+    <div class="divider" />
 
     <div class="detail">
       <div class="detail__title s-minus w-bold">Price</div>
       <div class="detail__row s-minus w-normal">
-      <div class="detail__row-key">Min. received<br/>(if 100% swapped)</div>
+        <div class="detail__row-key"><div>Min. received<br />(if 100% swapped)</div>  <HintIcon /></div>
         <div class="detail__row-value">995.54 LUNA</div>
+      </div>
+      <div class="detail__row s-minus w-normal">
+        <div class="detail__row-key"><div>Limit price</div>   <HintIcon />  </div>
+        <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
       </div>
     </div>
 
-    <div class="divider"/>
+    <div class="divider" />
 
     <div class="detail">
       <div class="detail__title s-minus w-bold">Fees</div>
@@ -65,13 +69,15 @@
 import { defineComponent } from 'vue';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import HintIcon from '@/components/common/Icons/HintIcon.vue'
 import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
     GobackWithClose,
-    Button
+    Button,
+    HintIcon
   },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
@@ -154,9 +160,17 @@ export default defineComponent({
       display: flex;
       justify-content: space-between;
       padding-bottom: 1.6rem;
+      
       &-key {
-        color:var(--muted)
+        display:flex;
+        align-items: center;
+        color:var(--muted);
+
+        div {
+          margin-right: 0.4rem;
+        }
       }
+
       &-value {
 
       }
