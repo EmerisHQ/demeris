@@ -13,7 +13,14 @@
           <div class="connect-keplr__controls">
             <Button name="Connect to Keplr" @click="signIn" />
 
-            <button class="connect-keplr__controls__help s-minus">Don’t have Keplr installed?</button>
+            <a
+              href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
+              rel="noopener noreferrer"
+              target="_blank"
+              class="connect-keplr__controls__help s-minus"
+            >
+              Don’t have Keplr installed?
+            </a>
           </div>
         </div>
 
@@ -165,6 +172,9 @@ export default defineComponent({
     &__help {
       margin-top: 1.6rem;
       color: var(--muted);
+      display: block;
+      text-align: center;
+      padding: 0.6rem 0;
     }
   }
 
