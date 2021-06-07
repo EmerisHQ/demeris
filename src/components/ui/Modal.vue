@@ -129,7 +129,6 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     padding: 0.6rem;
-    z-index: 50;
   }
 
   &__content {
@@ -141,11 +140,16 @@ export default defineComponent({
     border-radius: 1.6rem;
     padding: 2.4rem;
     width: 100%;
+    z-index: 40;
   }
 
   &--bottom {
     position: absolute;
     align-items: flex-end;
+  }
+
+  &--bottom &__overlay {
+    position: absolute;
   }
 
   &--bottom &__body {

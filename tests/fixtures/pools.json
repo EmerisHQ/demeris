@@ -1,0 +1,53 @@
+{
+  "pools": [
+    {
+      "id": "1",
+      "type_id": 1,
+      "reserve_coin_denoms": ["uregen", "xrun"],
+      "reserve_account_address": "cosmos16sh2ufmrds5zqmuxhzwhdssgau9h0p68dtgfm8",
+      "pool_coin_denom": "poolD42EAE27636C28206F86B89D76C208EF0B7787473A20118E88511F178179F06A"
+    },
+    {
+      "id": "2",
+      "type_id": 1,
+      "reserve_coin_denoms": ["uatom", "uiris"],
+      "reserve_account_address": "cosmos10d2sku6rjarnhn2va9pf2uv8p6mrwth3g8z7mr",
+      "pool_coin_denom": "pool7B550B734397473BCD4CE9429571870EB6372EF1268E6054B3B9D612AA41D4B5"
+    },
+    {
+      "id": "3",
+      "type_id": 1,
+      "reserve_coin_denoms": ["uatom", "uregen"],
+      "reserve_account_address": "cosmos155rl9yz4ylcwj0mzvdsxq6q7yhkrytc7fgm853",
+      "pool_coin_denom": "poolA507F2905527F0E93F62636060681E25EC322F1EA26E7905FD6AC4325DC2F006"
+    },
+    {
+      "id": "4",
+      "type_id": 1,
+      "reserve_coin_denoms": ["uatom", "udvpn"],
+      "reserve_account_address": "cosmos148v4scadv3q5674upx6k82x2jj7zvn30ngz0hs",
+      "pool_coin_denom": "poolA9D95863AD64414D7ABC09B563A8CA94BC264E2FF34FE2E597746DA521CBA520"
+    },
+    {
+      "id": "5",
+      "type_id": 1,
+      "reserve_coin_denoms": ["ubtsg", "udsm"],
+      "reserve_account_address": "cosmos1g0sjqarq6ghlyxpw3arxurjjw8ky862s0ln6w5",
+      "pool_coin_denom": "pool43E1207460D22FF2182E8F466E0E5271EC43E950587B5D48C160F06E70454BF5"
+    },
+    {
+      "id": "6",
+      "type_id": 1,
+      "reserve_coin_denoms": [
+        "ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+        "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+      ],
+      "reserve_account_address": "cosmos14k44ptahkw6x30umuhvsxx440veyeav6xazs0n",
+      "pool_coin_denom": "poolADAB50AFB7B3B468BF9BE5D9031AB57B324CF59AA403CD0702EEE1EDB1F00256"
+    }
+  ],
+  "pagination": {
+    "next_key": null,
+    "total": "6"
+  }
+}
