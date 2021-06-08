@@ -68,10 +68,8 @@ import { useRouter } from 'vue-router';
 
 import Search from '@/components/common/Search.vue';
 import Button from '@/components/ui/Button.vue';
+import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Pool } from '@/types/actions';
-
-import poolsFixture from '../../tests/fixtures/pools.json';
 
 export default {
   name: 'Pools',
@@ -81,21 +79,11 @@ export default {
     const router = useRouter();
     const keyword = ref<string>('');
 
-    const pools: Pool[] = poolsFixture.pools.map((pool) => ({
-      id: +pool.id,
-      typeId: pool.type_id,
-      reserveCoinDenoms: pool.reserve_coin_denoms,
-      reserveAccountAddress: pool.reserve_account_address,
-      poolCoinDenom: pool.pool_coin_denom,
-    }));
+    const { pools, formatPoolName } = usePools();
 
     const filteredPools = computed(() => {
-      return pools.filter((pool) => pool.reserveCoinDenoms.join().indexOf(keyword.value) !== -1);
+      return pools.value.filter((pool) => pool.reserveCoinDenoms.join().indexOf(keyword.value) !== -1);
     });
-
-    const formatPoolName = (pool: Pool) => {
-      return pool.reserveCoinDenoms.join('/').toUpperCase();
-    };
 
     const openAddLiqudityPage = () => {
       router.push({ name: 'AddLiquidity' });
