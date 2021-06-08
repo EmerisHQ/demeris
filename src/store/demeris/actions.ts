@@ -1,4 +1,4 @@
-import { EncodeObject } from '@cosmjs/proto-signing';
+import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
@@ -32,6 +32,7 @@ export type DemerisTxParams = {
 export type DemerisSignParams = {
   msgs: Array<EncodeObject>;
   chain_name: string;
+  registry: Registry;
 };
 export interface Actions {
   // Cross-chain endpoint actions
@@ -266,12 +267,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name }) {
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, registry }) {
     try {
       await window.keplr.enable(chain_name);
       const offlineSigner = await window.getOfflineSigner(chain_name);
       const [account] = await offlineSigner.getAccounts();
-      const client = (await DemerisSigningClient.offline(offlineSigner)) as DemerisSigningClient;
+      const client = (await DemerisSigningClient.offline(offlineSigner, { registry })) as DemerisSigningClient;
       const feeUSD =
         getters['getBaseFee']({ chain_name }) ??
         (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));

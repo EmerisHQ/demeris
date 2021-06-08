@@ -50,6 +50,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getVerifiedDenoms: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
+  getDisplayDenom:
+    (state) =>
+    ({ name, chain_name }) => {
+      return state.verifiedDenoms.find((x) => x.name == name && x.chain_name == chain_name)?.display_name ?? null;
+    },
   getChains: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
   },

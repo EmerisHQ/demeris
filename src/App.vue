@@ -33,8 +33,23 @@ export default defineComponent({
     document.documentElement.setAttribute('color-theme', 'light');
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
-      endpoint: 'http://localhost:8000/v1',
+      endpoint: 'https://dev.demeris.io/v1',
       refreshTime: 5000,
+    });
+    await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
+      subscribe: true,
+    });
+    await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
+      subscribe: true,
+    });
+    await this.$store.dispatch('common/env/init', {
+      apiNode: 'https://dev.demeris.io/v1/liquidity',
+      rpcNode: null,
+      wsNode: null,
+      chainId: 'cosmos-hub',
+      addrPrefix: 'cosmos',
+      sdkVersion: 'Stargate',
+      getTXApi: null,
     });
     this.initialized = true;
   },

@@ -3,7 +3,8 @@
     <div class="home">
       <div>
         <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
-          <AssetChainsIndicator :balances="balances" denom="stake" :max-chains-count="4" />
+          <AssetChainsIndicator :balances="balances" denom="uatom" :max-chains-count="4" />
+          <AssetChainsIndicator :balances="balances" denom="uakt" :max-chains-count="4" />
         </div>
 
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
