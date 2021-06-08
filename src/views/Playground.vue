@@ -55,6 +55,37 @@
           <HintIcon />
           <MenuIcon />
         </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Open Confirmation" @click="modalIsOpen = 'confirmation'" />
+          <Confirmation
+            :open="modalIsOpen === 'confirmation'"
+            title="Discard transfer?"
+            description="Your KAVA will remain on Kava chain, will not be transferred to Cosmos Hub, and will not be swapped."
+            no-text="Cancel"
+            yes-text="Discard"
+            @close="modalIsOpen = false"
+            @no="modalIsOpen = false"
+          />
+
+          <Button name="Open Modal Fullscreen" @click="modalIsOpen = 'fullscreen'" />
+          <Modal :open="modalIsOpen === 'fullscreen'" variant="fullscreen" @close="modalIsOpen = false">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni placeat accusamus, quam repudiandae odio
+            similique recusandae. Vitae aspernatur eos ad dignissimos, architecto odio quod optio reprehenderit, omnis
+            nihil eveniet molestiae!
+          </Modal>
+
+          <div
+            class="border rounded-lg overflow-hidden elevation-card relative p-10"
+            :style="{ width: '30rem', height: '30rem' }"
+          >
+            <Button name="Send Transaction" @click="modalIsOpen = 'send'" />
+
+            <Modal :open="modalIsOpen === 'send'" variant="bottom" @close="modalIsOpen = false">
+              Signing transaction...
+            </Modal>
+          </div>
+        </div>
       </div>
     </div>
   </AppLayout>
@@ -83,7 +114,10 @@ import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Button from '@/components/ui/Button.vue';
+import Confirmation from '@/components/ui/Confirmation.vue';
 import Input from '@/components/ui/Input.vue';
+import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { Pool } from '@/types/actions';
@@ -112,6 +146,9 @@ export default defineComponent({
     ReceiveIcon,
     MenuIcon,
     Input,
+    Modal,
+    Button,
+    Confirmation,
   },
   setup() {
     const store = useStore();
@@ -145,8 +182,9 @@ export default defineComponent({
     ];
 
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
+    const modalIsOpen = ref(false);
 
-    return { balances, pools, address };
+    return { balances, pools, address, modalIsOpen };
   },
 });
 </script>
