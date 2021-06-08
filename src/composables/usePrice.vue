@@ -1,5 +1,8 @@
 <script lang="ts">
 export default function () {
+  // common setting
+  const priceDecimalDigit = 6;
+
   //TODO: get price
   function getCoinPrice(coin: string) {
     if (coin) {
@@ -27,16 +30,12 @@ export default function () {
     }
   }
 
-  function getSwapPrice(
-    payCoinAmount: number,
-    fromCoinPoolAmount: number,
-    toCoinPoolAmount: number,
-    priceDecimalDigit = 6,
-  ) {
-    //TODO: get params to get half-half fee
+  function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
+    //TODO: get params to get half-half fee, pay coin amount should be modified
     const swapPrice =
       ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** priceDecimalDigit)) /
       BigInt(toCoinPoolAmount);
+    console.log('function swapPrice', swapPrice);
     return swapPrice;
   }
   //TODO: bigInt
@@ -47,17 +46,14 @@ export default function () {
     maxDecimal = 2,
   ) {
     if (payCoinAmount !== null) {
-      const swapFeeRate = 0.9985;
-      const priceDecimalDigit = 6;
+      const swapFeeRate = 0.9985; // TODO: get params
+
       const maxDecimalMultiplier = BigInt(10 ** maxDecimal);
-      const swapPrice =
-        (Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount, priceDecimalDigit)) /
-          10 ** priceDecimalDigit) *
-        10 ** 6;
-      console.log(swapPrice);
+      const swapPrice = Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount));
+
       const receiveCoinAmount =
         ((BigInt(payCoinAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(maxDecimalMultiplier);
-      console.log(swapPrice, receiveCoinAmount);
+
       return (Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate;
     } else {
       return 0;
@@ -70,10 +66,11 @@ export default function () {
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
-    const swapFeeRate = 0.9985;
-    console.log(maxDecimal);
+    const swapFeeRate = 0.9985; // TODO: get params
+
     const payCoinAmount =
       payCoinPoolAmount / receiveCoinPoolAmount / (swapFeeRate / receiveCoinAmount - 2 / receiveCoinPoolAmount);
+    console.log('payCoinAmount', payCoinAmount);
     return payCoinAmount;
   }
 
