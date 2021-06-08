@@ -140,7 +140,6 @@ export default defineComponent({
       const originPayCoinData = data.payCoinData;
       const originReceiveCoinData = data.receiveCoinData;
 
-      const originPayCoinAmount = data.payCoinAmount;
       const originReceiveCoinAmount = data.receiveCoinAmount;
 
       data.payCoinData = originReceiveCoinData;
@@ -173,10 +172,8 @@ export default defineComponent({
     function setConterPairCoinAmount(e) {
       if (e.includes('Pay')) {
         data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
-        console.log('Pay', data.payCoinAmount);
       } else {
         data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
-        console.log('Receive', data.receiveCoinAmount);
       }
     }
 
