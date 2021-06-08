@@ -35,6 +35,7 @@
       :selected-denom="payCoinData"
       :assets="userBalances"
       :is-over="isOver"
+      @change="setConterPairCoinAmount"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />
@@ -72,6 +73,7 @@
       :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
       :selected-denom="receiveCoinData"
       :assets="receiveAvailableDenom"
+      @change="setConterPairCoinAmount"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />
@@ -119,12 +121,17 @@ export default defineComponent({
       payCoinData: null,
       payCoinAmount: null,
       receiveCoinData: null,
-      receiveCoinAmount: computed({
-        //2 eventually become pool price with bigInt type calculation
-        get: () => (data.receiveCoinData?.base_denom ? getReceiveCoinAmount(data.payCoinAmount, 300000, 400000) : null),
-        set: (value) =>
-          data.receiveCoinData?.base_denom ? (data.payCoinAmount = getPayCoinAmount(value, 300000, 400000)) : null,
-      }),
+      receiveCoinAmount: null,
+      // receiveCoinAmount: computed({
+      //   get: () =>
+      //     data.receiveCoinData?.base_denom
+      //       ? getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000)
+      //       : null,
+      //   set: (value) =>
+      //     data.receiveCoinData?.base_denom
+      //       ? (data.payCoinAmount = getPayCoinAmount(value, 100000000000, 100000000000))
+      //       : null,
+      // }),
       userBalances: TEST_DATA.balances,
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
@@ -172,6 +179,16 @@ export default defineComponent({
       data.isChildModalOpen = payload;
     }
 
+    function setConterPairCoinAmount(e) {
+      if (e.includes('Pay')) {
+        data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+        console.log('Pay', data.payCoinAmount);
+      } else {
+        data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+        console.log('Receive', data.receiveCoinAmount);
+      }
+    }
+
     function swap() {
       const swapParams = {
         from: {
@@ -202,6 +219,7 @@ export default defineComponent({
       setMax,
       swap,
       setChildModalOpenStatus,
+      setConterPairCoinAmount,
     };
   },
 });

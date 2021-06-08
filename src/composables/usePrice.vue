@@ -46,7 +46,7 @@ export default function () {
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
-    if (payCoinAmount !== null) {
+    if (payCoinAmount) {
       const swapFeeRate = 0.9985; // TODO: get params
 
       const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
