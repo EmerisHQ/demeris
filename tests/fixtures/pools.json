@@ -34,16 +34,6 @@
       "reserve_coin_denoms": ["ubtsg", "udsm"],
       "reserve_account_address": "cosmos1g0sjqarq6ghlyxpw3arxurjjw8ky862s0ln6w5",
       "pool_coin_denom": "pool43E1207460D22FF2182E8F466E0E5271EC43E950587B5D48C160F06E70454BF5"
-    },
-    {
-      "id": "6",
-      "type_id": 1,
-      "reserve_coin_denoms": [
-        "ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
-        "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
-      ],
-      "reserve_account_address": "cosmos14k44ptahkw6x30umuhvsxx440veyeav6xazs0n",
-      "pool_coin_denom": "poolADAB50AFB7B3B468BF9BE5D9031AB57B324CF59AA403CD0702EEE1EDB1F00256"
     }
   ],
   "pagination": {
