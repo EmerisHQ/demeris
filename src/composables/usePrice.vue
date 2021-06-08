@@ -2,6 +2,7 @@
 export default function () {
   // common setting
   const priceDecimalDigit = 6;
+  const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
 
   //TODO: get price
   function getCoinPrice(coin: string) {
@@ -48,13 +49,17 @@ export default function () {
     if (payCoinAmount !== null) {
       const swapFeeRate = 0.9985; // TODO: get params
 
-      const maxDecimalMultiplier = BigInt(10 ** maxDecimal);
-      const swapPrice = Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount));
+      const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
+      const maxDecimalMultiplier = 10 ** maxDecimal;
+      const swapPrice = Number(getSwapPrice(payCoinMinimalDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
 
       const receiveCoinAmount =
-        ((BigInt(payCoinAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(maxDecimalMultiplier);
+        (((BigInt(payCoinMinimalDenomAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(maxDecimalMultiplier)) /
+        BigInt(10 ** minimalDemomDigit);
 
-      return (Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate;
+      return (
+        Math.trunc((Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate * maxDecimalMultiplier) / maxDecimalMultiplier
+      );
     } else {
       return 0;
     }
