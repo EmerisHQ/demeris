@@ -5,11 +5,11 @@
 				Selected denom name
 				Selected chain name
 				arrow to display full list in modal (DenomSelectModal.vue)
-			  Props: 
+			  Props:
 					denoms: [] of denoms
 					disabled: [] of denoms to display as disabled
-				Dependencies: 
-					vuex getter to get  chain name from chain id		
+				Dependencies:
+					vuex getter to get  chain name from chain id
 		-->
 
     <img
