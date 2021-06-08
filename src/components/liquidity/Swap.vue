@@ -125,7 +125,7 @@ export default defineComponent({
       userBalances: TEST_DATA.balances,
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
-          return denomInfo.base_denom !== data.payCoinData.base_denom;
+          return denomInfo?.base_denom !== data.payCoinData?.base_denom;
         });
         return payCoinRemovedDenoms;
       }),
@@ -146,11 +146,12 @@ export default defineComponent({
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = originPayCoinData;
       data.payCoinAmount = originReceiveCoinAmount;
-      data.receiveCoinAmount = originPayCoinAmount;
+      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function setMax() {
       data.payCoinAmount = data.payCoinData.amount;
+      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function denomSelectHandler(payload) {

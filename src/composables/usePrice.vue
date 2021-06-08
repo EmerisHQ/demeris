@@ -78,7 +78,7 @@ export default function () {
       payCoinPoolAmount /
       receiveCoinPoolAmount /
       (swapFeeRate / receiveCoinMinimalDenomAmount - 2 / receiveCoinPoolAmount);
-    console.log('payCoinAmount', Number(payCoinAmount));
+
     if (payCoinAmount > 0) {
       return (
         Math.trunc(Number((payCoinAmount / 10 ** minimalDemomDigit) * maxDecimalMultiplier)) / maxDecimalMultiplier
