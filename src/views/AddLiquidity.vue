@@ -1,7 +1,7 @@
 <template>
   <div class="add-liquidity">
     <header class="add-liquidity__header">
-      <button v-if="showBackButton" class="add-liquidity__header__button" @click="goBack">
+      <button class="add-liquidity__header__button" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -22,120 +22,148 @@
     </header>
 
     <main class="add-liquidity__wrapper">
-      <h2 class="add-liquidity__title s-2">
-        {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
-      </h2>
+      <template v-if="state.step === 'amount'">
+        <template v-if="!state.isTransferConfirmationOpen">
+          <h2 class="add-liquidity__title s-2">
+            {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
+          </h2>
 
-      <div v-if="hasPool" class="add-liquidity__pool">
-        <div class="add-liquidity__pool__pair">
-          <span class="add-liquidity__pool__pair__avatar token-a" />
-          <span class="add-liquidity__pool__pair__avatar token-b" />
-        </div>
+          <div v-if="hasPool" class="add-liquidity__pool">
+            <div class="add-liquidity__pool__pair">
+              <span class="add-liquidity__pool__pair__avatar token-a" />
+              <span class="add-liquidity__pool__pair__avatar token-b" />
+            </div>
 
-        <span class="add-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
-      </div>
+            <span class="add-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
+          </div>
 
-      <div class="add-liquidity__content">
-        <template v-if="state.step === 'amount'">
-          <!-- TODO: Move to component -->
-          <div class="add-liquidity__input input-a elevation-card">
-            <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
-              <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
-              <p class="add-liquidity__create-warning__description">
-                As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.balance.base_denom) }}/{{
-                  $filters.getCoinName(form.coinB.balance.base_denom)
-                }}
-                pool, you will be creating the pool and setting the price. Proceed with caution.
-              </p>
+          <div class="add-liquidity__content">
+            <div class="add-liquidity__input input-a elevation-card">
+              <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
+                <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
+                <p class="add-liquidity__create-warning__description">
+                  As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.balance.base_denom) }}/{{
+                    $filters.getCoinName(form.coinB.balance.base_denom)
+                  }}
+                  pool, you will be creating the pool and setting the price. Proceed with caution.
+                </p>
+              </Alert>
+
+              <div class="add-liquidity__input__main">
+                <label class="add-liquidity__input__label s-minus">Supply</label>
+                <div>
+                  <DenomSelect
+                    v-model:amount="form.coinA.amount"
+                    :input-header="``"
+                    :selected-denom="form.coinA.balance"
+                    :assets="balances"
+                    @select="coinSelectHandler('coinA', $event)"
+                  />
+                </div>
+              </div>
+
+              <div v-if="form.coinA.balance" class="add-liquidity__input__details">
+                <div class="add-liquidity__input__details__from">
+                  From <span class="w-bold">{{ form.coinA.balance.on_chain || '-' }}</span>
+                </div>
+
+                <div class="add-liquidity__input__details__available">
+                  {{ form.coinA.balance.amount || 0 }}
+                  <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> available
+                </div>
+              </div>
+            </div>
+
+            <div class="add-liquidity__price">
+              <span class="add-liquidity__price__divider" />
+              <div class="add-liquidity__price__container">
+                <template v-if="form.coinA.balance && form.coinB.balance">
+                  1 <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> : 1.78
+                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span>
+                </template>
+                <span v-else>Price</span>
+              </div>
+            </div>
+
+            <div class="add-liquidity__input input-b elevation-card">
+              <div class="add-liquidity__input__main">
+                <label class="add-liquidity__input__label s-minus">Supply</label>
+                <div>
+                  <DenomSelect
+                    v-model:amount="form.coinB.amount"
+                    :input-header="``"
+                    :selected-denom="form.coinB.balance"
+                    :assets="balances"
+                    @select="coinSelectHandler('coinB', $event)"
+                  />
+                </div>
+              </div>
+
+              <div v-if="form.coinB.balance" class="add-liquidity__input__details">
+                <div class="add-liquidity__input__details__from">
+                  From <span class="w-bold">{{ form.coinB.balance.on_chain || '-' }}</span>
+                </div>
+
+                <div class="add-liquidity__input__details__available">
+                  {{ form.coinB.balance.amount || 0 }}
+                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span> available
+                </div>
+              </div>
+            </div>
+
+            <div v-if="hasPair" class="add-liquidity__receive">
+              <div class="add-liquidity__receive__header">
+                <label class="add-liquidity__receive__label s-minus">Receive</label>
+                <Icon v-tippy content="TODO" name="HintIcon" :icon-size="1.6" />
+              </div>
+
+              <div class="add-liquidity__receive__wrapper">
+                <div class="add-liquidity__receive__token">
+                  <div class="add-liquidity__receive__token__avatar" />
+                  <span class="w-bold">G-LK-LP</span>
+                </div>
+
+                <span class="add-liqudity__receive__amount w-bold"> 400 </span>
+              </div>
+            </div>
+
+            <Alert v-if="hasPair && needsTransferToHub" status="info" class="add-liquidity__transfer-info">
+              Your assets will be transferred to Cosmos Hub
             </Alert>
 
-            <div class="add-liquidity__input__main">
-              <label class="add-liquidity__input__label s-minus">Supply</label>
-              <div>
-                <DenomSelect
-                  v-model:amount="form.coinA.amount"
-                  :input-header="``"
-                  :selected-denom="form.coinA.balance"
-                  :assets="balances"
-                  @select="coinSelectHandler('coinA', $event)"
-                />
-              </div>
+            <div class="add-liquidity__controls">
+              <Button name="Continue" @click="goToReview" />
             </div>
-
-            <div v-if="form.coinA.balance" class="add-liquidity__input__details">
-              <div class="add-liquidity__input__details__from">
-                From <span class="w-bold">{{ form.coinA.balance.on_chain || '-' }}</span>
-              </div>
-
-              <div class="add-liquidity__input__details__available">
-                {{ form.coinA.balance.amount || 0 }}
-                <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> available
-              </div>
-            </div>
-          </div>
-
-          <div class="add-liquidity__price">
-            <span class="add-liquidity__price__divider" />
-            <div class="add-liquidity__price__container">
-              <template v-if="form.coinA.balance && form.coinB.balance">
-                1 <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> : 1.78
-                <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span>
-              </template>
-              <span v-else>Price</span>
-            </div>
-          </div>
-
-          <div class="add-liquidity__input input-b elevation-card">
-            <div class="add-liquidity__input__main">
-              <label class="add-liquidity__input__label s-minus">Supply</label>
-              <div>
-                <DenomSelect
-                  v-model:amount="form.coinB.amount"
-                  :input-header="``"
-                  :selected-denom="form.coinB.balance"
-                  :assets="balances"
-                  @select="coinSelectHandler('coinB', $event)"
-                />
-              </div>
-            </div>
-
-            <div v-if="form.coinB.balance" class="add-liquidity__input__details">
-              <div class="add-liquidity__input__details__from">
-                From <span class="w-bold">{{ form.coinB.balance.on_chain || '-' }}</span>
-              </div>
-
-              <div class="add-liquidity__input__details__available">
-                {{ form.coinB.balance.amount || 0 }}
-                <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span> available
-              </div>
-            </div>
-          </div>
-
-          <div v-if="hasPair" class="add-liquidity__receive">
-            <div class="add-liquidity__receive__header">
-              <label class="add-liquidity__receive__label s-minus">Receive</label>
-              <Icon v-tippy content="TODO" name="HintIcon" :icon-size="1.6" />
-            </div>
-
-            <div class="add-liquidity__receive__wrapper">
-              <div class="add-liquidity__receive__token">
-                <div class="add-liquidity__receive__token__avatar" />
-                <span class="w-bold">G-LK-LP</span>
-              </div>
-
-              <span class="add-liqudity__receive__amount w-bold"> 400 </span>
-            </div>
-          </div>
-
-          <Alert v-if="hasPair && needsTransferToHub" status="info" class="add-liquidity__transfer-info">
-            Your assets will be transferred to Cosmos Hub
-          </Alert>
-
-          <div class="add-liquidity__controls">
-            <Button name="Continue" @click="goToStep('review')" />
           </div>
         </template>
-      </div>
+
+        <template v-else>
+          <section class="add-liquidity__content add-liquidity__confirmation">
+            <h2 class="add-liquidity__title s-2">Creating a pool is risky business</h2>
+
+            <div class="add-liquidity__confirmation__placeholder" />
+
+            <p class="add-liquidity__confirmation__description">
+              As the first liquidity provider, you are setting the pool price. This means that if you don’t know what
+              you are doing, you may risk significant loss as a result of arbitrage.
+            </p>
+
+            <div class="add-liquidity__confirmation__controls">
+              <button
+                class="add-liquidity__confirmation__controls__button elevation-button"
+                @click="state.isTransferConfirmationOpen = false"
+              >
+                Cancel
+              </button>
+              <button class="add-liquidity__confirmation__controls__button confirmation-button" @click="goToReview">
+                I understand
+              </button>
+            </div>
+          </section>
+        </template>
+      </template>
+
+      <template v-if="state.step === 'review'"> Review </template>
     </main>
   </div>
 </template>
@@ -165,6 +193,7 @@ export default {
 
     const state = reactive({
       step: 'amount',
+      isTransferConfirmationOpen: false,
     });
 
     const form = reactive({
@@ -216,6 +245,29 @@ export default {
       form[key].balance = balance;
     };
 
+    const goBack = () => {
+      const currentStepIndex = steps.findIndex((item) => item === state.step);
+
+      if (currentStepIndex > 0) {
+        state.step = steps[currentStepIndex - 1];
+        return;
+      }
+
+      router.back();
+    };
+
+    const goToReview = () => {
+      if (state.isTransferConfirmationOpen) {
+        goToStep('review');
+        state.isTransferConfirmationOpen = false;
+        return;
+      }
+
+      if (needsTransferToHub) {
+        state.isTransferConfirmationOpen = true;
+      }
+    };
+
     const goToStep = (step: 'amount' | 'review' | 'send') => {
       state.step = step;
     };
@@ -243,6 +295,8 @@ export default {
       state,
       steps,
       needsTransferToHub,
+      goBack,
+      goToReview,
       goToStep,
       coinSelectHandler,
       formatPoolName,
@@ -279,6 +333,7 @@ export default {
 
     &__title {
       margin-top: 1.2rem;
+      text-align: center;
     }
 
     &__description {
@@ -442,6 +497,46 @@ export default {
   &__transfer-info {
     width: 100%;
     margin-top: 3rem;
+  }
+
+  &__confirmation {
+    text-align: center;
+
+    &__placeholder {
+      background: var(--fg-trans);
+      width: 36rem;
+      height: 15rem;
+      margin-top: 3.4rem;
+      border-radius: 1rem;
+    }
+
+    &__description {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 3.4rem;
+    }
+
+    &__controls {
+      width: 100%;
+      display: flex;
+
+      &__button {
+        margin-top: 4rem;
+        font-weight: 600;
+        padding: 1.6rem 2rem;
+        flex: 1 1 0%;
+        border-radius: 0.8rem;
+
+        &.confirmation-button {
+          background: var(--text);
+          color: var(--bg);
+        }
+
+        & + & {
+          margin-left: 2.4rem;
+        }
+      }
+    }
   }
 
   &__input {
