@@ -58,6 +58,9 @@
         </div>
 
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Send Message" @click="sendMessage" />
+        </div>
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Open Confirmation" @click="modalIsOpen = 'confirmation'" />
           <Confirmation
             :open="modalIsOpen === 'confirmation'"
@@ -120,7 +123,7 @@ import Confirmation from '@/components/ui/Confirmation.vue';
 import Input from '@/components/ui/Input.vue';
 import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useStore } from '@/store';
+import { useAllStores, useStore } from '@/store';
 import { Pool } from '@/types/actions';
 
 export default defineComponent({
@@ -154,6 +157,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
+    const stores = useAllStores();
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
@@ -181,11 +185,22 @@ export default defineComponent({
         typeId: 1,
       },
     ];
+    const sendMessage = async () => {
+      let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+        value: {
+          amount: { denom: 'uatom', amount: '20' },
+          toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+        },
 
+        memo: "a memo'",
+      });
+      console.log(res);
+    };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
 
-    return { balances, pools, address, modalIsOpen };
+    return { balances, pools, address, modalIsOpen, sendMessage };
   },
 });
 </script>

@@ -14,11 +14,6 @@ export default defineComponent({
       initialized: false,
     };
   },
-  computed: {
-    hasWallet() {
-      return this.$store.hasModule(['common', 'wallet']);
-    },
-  },
   async created() {
     /*
         set dark/light mode according to user Preference
@@ -42,7 +37,7 @@ export default defineComponent({
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
       subscribe: true,
     });
-    await this.$store.dispatch('common/env/init', {
+    await this.$store.dispatch('common/env/config', {
       apiNode: 'https://dev.demeris.io/v1/liquidity',
       rpcNode: null,
       wsNode: null,
