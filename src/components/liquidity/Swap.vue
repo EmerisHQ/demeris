@@ -122,16 +122,6 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      // receiveCoinAmount: computed({
-      //   get: () =>
-      //     data.receiveCoinData?.base_denom
-      //       ? getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000)
-      //       : null,
-      //   set: (value) =>
-      //     data.receiveCoinData?.base_denom
-      //       ? (data.payCoinAmount = getPayCoinAmount(value, 100000000000, 100000000000))
-      //       : null,
-      // }),
       userBalances: TEST_DATA.balances,
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {

@@ -39,7 +39,7 @@ export default function () {
     console.log('function swapPrice', swapPrice);
     return swapPrice;
   }
-  //TODO: bigInt
+
   function getReceiveCoinAmount(
     payCoinAmount: number,
     payCoinPoolAmount: number,
@@ -72,11 +72,20 @@ export default function () {
     maxDecimal = 2,
   ) {
     const swapFeeRate = 0.9985; // TODO: get params
-
+    const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** minimalDemomDigit);
+    const maxDecimalMultiplier = 10 ** maxDecimal;
     const payCoinAmount =
-      payCoinPoolAmount / receiveCoinPoolAmount / (swapFeeRate / receiveCoinAmount - 2 / receiveCoinPoolAmount);
-    console.log('payCoinAmount', payCoinAmount);
-    return payCoinAmount;
+      payCoinPoolAmount /
+      receiveCoinPoolAmount /
+      (swapFeeRate / receiveCoinMinimalDenomAmount - 2 / receiveCoinPoolAmount);
+    console.log('payCoinAmount', Number(payCoinAmount));
+    if (payCoinAmount > 0) {
+      return (
+        Math.trunc(Number((payCoinAmount / 10 ** minimalDemomDigit) * maxDecimalMultiplier)) / maxDecimalMultiplier
+      );
+    } else {
+      return 0;
+    }
   }
 
   return {
