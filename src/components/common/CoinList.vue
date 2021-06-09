@@ -7,7 +7,7 @@
   </div>
   <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
     <div class="coin-list__info">
-      <tippy class="tippy-info">
+      <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
         <img
           class="coin-list__info-image"
           :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
@@ -61,7 +61,8 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import tippy from 'tippy.js';
+import { computed, defineComponent, onMounted } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -84,6 +85,17 @@ export default defineComponent({
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
+
+    //mouseenter, mouseleave
+    onMounted(() => {
+      if (props.type === 'chain') {
+        const instance = tippy(document.getElementById('chain/Cosmos/ukava'));
+        setTimeout(() => {
+          instance.setContent('New content');
+          instance.show();
+        }, 1000);
+      }
+    });
 
     function getUniqueCoinList(data) {
       if (props.type !== 'pay') {
