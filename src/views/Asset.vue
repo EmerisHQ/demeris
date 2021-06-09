@@ -134,7 +134,7 @@ import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
 import ChevronDownIcon from '@/components/common/Icons/ChevronDownIcon.vue';
 import DotsIcon from '@/components/common/Icons/DotsIcon.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
-import LiquiditySwap from '@/components/LiquiditySwap.vue';
+import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default defineComponent({
@@ -160,7 +160,7 @@ export default defineComponent({
   &__main {
     display: flex;
     flex-direction: column;
-    width: 50%;
+    width: 60%;
 
     &__back {
       &__button {
@@ -202,6 +202,7 @@ export default defineComponent({
             margin-top: 0.8rem;
             font-weight: 700;
             font-size: 6.7rem;
+						line-height: 1.3;
           }
 
           &__trending {
@@ -218,11 +219,11 @@ export default defineComponent({
           justify-content: space-between;
 
           dt {
-            color: rgba(0, 0, 0, 0.66);
+            color: var(--muted);
           }
 
           dd {
-            margin-top: 0.2rem;
+            margin-top: 0.3rem;
             font-weight: 600;
             font-size: 2.1rem;
           }
@@ -382,11 +383,11 @@ export default defineComponent({
   &__aside {
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-end;
     margin-left: 3.2rem;
 
     &__swap {
-      width: 66.67%;
+      width: 75%;
     }
   }
 

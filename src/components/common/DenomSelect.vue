@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="denom-select">
     <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
@@ -10,13 +10,163 @@
 					disabled: [] of denoms to display as disabled
 				Dependencies: 
 					vuex getter to get  chain name from chain id		
-
 		-->
+
+    <img
+      class="denom-select__coin-image"
+      :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
+      :alt="`selected coin`"
+      @click="toggleDenomSelectModal"
+    />
+
+    <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
+      <div class="denom-select__coin-denom s-0 w-medium">
+        {{ $filters.getCoinName(selectedDenom?.base_denom) }}
+        <Icon name="SmallDownIcon" :icon-size="1.6" />
+      </div>
+      <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
+    </div>
+
+    <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
+      <div class="denom-select__coin-denom s-0 w-medium">
+        Select asset <Icon name="SmallDownIcon" :icon-size="1.6" />
+      </div>
+    </div>
+
+    <div class="denom-select__coin-amount">
+      <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
+      <input
+        :value="amount"
+        :class="isOver ? 'over' : ''"
+        class="denom-select__coin-amount-input s-1"
+        type="number"
+        placeholder="0"
+        min="0"
+        @input="$emit('update:amount', Math.abs(Number($event.target.value)))"
+      />
+    </div>
   </div>
+
+  <DenomSelectModal
+    v-show="isOpen"
+    :assets="assets"
+    :func="toggleDenomSelectModal"
+    :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
+    @select="denomSelectHandler"
+  />
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
+
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'DenomSelect',
+  components: { Icon, DenomSelectModal },
+  props: {
+    inputHeader: { type: String, required: true },
+    selectedDenom: { type: Object, required: false, default: null },
+    assets: { type: Object, required: true },
+    amount: { type: Number, required: false, default: null },
+    isOver: { type: Boolean, required: false, default: false },
+  },
+  emits: ['update:amount', 'select', 'modalToggle'],
+  setup(props, { emit }) {
+    const inputAmount = computed({
+      get: () => props.amount,
+      set: (value) => emit('update:amount', value),
+    });
+
+    const isSelected = computed(() => {
+      return props?.selectedDenom === null ? false : true;
+    });
+
+    const isOpen = ref(false);
+
+    function toggleDenomSelectModal() {
+      isOpen.value = !isOpen.value;
+      emit('modalToggle', isOpen.value);
+    }
+
+    function denomSelectHandler(payload) {
+      emit('select', payload);
+      toggleDenomSelectModal();
+    }
+
+    console.log(props.assets);
+    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal, denomSelectHandler };
+  },
 });
 </script>
+<style lang="scss" scoped>
+.denom-select {
+  display: flex;
+  align-items: center;
+
+  padding: 1.6rem 2.4rem;
+
+  &__coin {
+    flex-shrink: 0;
+    cursor: pointer;
+
+    &-denom {
+      display: flex;
+      align-items: center;
+      color: var(--text);
+
+      .icon {
+        margin-left: 0.4rem;
+      }
+    }
+
+    &-from {
+      color: var(--muted);
+    }
+
+    &-image {
+      width: 2.4rem;
+      height: 2.4rem;
+
+      margin-right: 1.2rem;
+
+      cursor: pointer;
+    }
+  }
+
+  &__coin-amount {
+    text-align: right;
+    width: 100%;
+    margin-left: 1.2rem;
+
+    &-type {
+      color: var(--muted);
+    }
+
+    &-input {
+      width: 100%;
+      text-align: inherit;
+      border: none;
+      outline: none;
+      padding: 0;
+
+      color: var(--text);
+
+      /* Chrome, Safari, Edge, Opera */
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Firefox */
+      & {
+        -moz-appearance: textfield;
+      }
+    }
+  }
+
+  .over {
+    color: var(--negative-text);
+  }
+}
+</style>

@@ -1,17 +1,43 @@
 <template>
   <AppLayout>
     <div class="home">
-      <div class="bg-white">
+      <div>
         <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
           <AssetChainsIndicator :balances="balances" denom="stake" :max-chains-count="4" />
         </div>
 
-        <div class="p-10 flex flex-col space-y-8 w-1/5 mx-auto">
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Alert status="error" message="Error" />
           <Alert status="warning" message="Warning" />
           <Alert status="info" message="Info" />
         </div>
-        <div class="flex flex-row w-1/5 mx-auto icons">
+
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Address address="cosmos1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg" chain-name="Cosmos Hub" readonly />
+          <Address v-model:address="address" chain-name="Terra" />
+        </div>
+
+        <div class="p-10 flex flex-col space-y-8 container mx-auto">
+          <Pools :pools="pools" />
+        </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Input placeholder="Example 1">
+            <template #start>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 2">
+            <template #end>
+              <AlertIcon />
+            </template>
+          </Input>
+
+          <Input placeholder="Example 3" hint="My hint message" />
+        </div>
+
+        <div class="p-10 flex flex-row w-1/3 mx-auto icons">
           <AlertIcon />
           <ArrowDownIcon />
           <ArrowUpIcon />
@@ -29,15 +55,46 @@
           <HintIcon />
           <MenuIcon />
         </div>
+
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Open Confirmation" @click="modalIsOpen = 'confirmation'" />
+          <Confirmation
+            :open="modalIsOpen === 'confirmation'"
+            title="Discard transfer?"
+            description="Your KAVA will remain on Kava chain, will not be transferred to Cosmos Hub, and will not be swapped."
+            no-text="Cancel"
+            yes-text="Discard"
+            @close="modalIsOpen = false"
+            @no="modalIsOpen = false"
+          />
+
+          <Button name="Open Modal Fullscreen" @click="modalIsOpen = 'fullscreen'" />
+          <Modal :open="modalIsOpen === 'fullscreen'" variant="fullscreen" @close="modalIsOpen = false">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni placeat accusamus, quam repudiandae odio
+            similique recusandae. Vitae aspernatur eos ad dignissimos, architecto odio quod optio reprehenderit, omnis
+            nihil eveniet molestiae!
+          </Modal>
+
+          <div
+            class="border rounded-lg overflow-hidden elevation-card relative p-10"
+            :style="{ width: '30rem', height: '30rem' }"
+          >
+            <Button name="Send Transaction" @click="modalIsOpen = 'send'" />
+
+            <Modal :open="modalIsOpen === 'send'" variant="bottom" @close="modalIsOpen = false">
+              Signing transaction...
+            </Modal>
+          </div>
+        </div>
       </div>
     </div>
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
-import AssetChainsIndicator from '@/components/common/AssetChainsIndicator';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ArrowDownIcon from '@/components/common/Icons/ArrowDownIcon.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
@@ -54,14 +111,23 @@ import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
+import Pools from '@/components/liquidity/Pools.vue';
+import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Button from '@/components/ui/Button.vue';
+import Confirmation from '@/components/ui/Confirmation.vue';
+import Input from '@/components/ui/Input.vue';
+import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
+import { Pool } from '@/types/actions';
 
 export default defineComponent({
   components: {
     AssetChainsIndicator,
+    Pools,
     AppLayout,
+    Address,
     Alert,
     AlertIcon,
     ArrowDownIcon,
@@ -79,6 +145,10 @@ export default defineComponent({
     SendIcon,
     ReceiveIcon,
     MenuIcon,
+    Input,
+    Modal,
+    Button,
+    Confirmation,
   },
   setup() {
     const store = useStore();
@@ -87,9 +157,34 @@ export default defineComponent({
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
 
-    return {
-      balances,
-    };
+    const pools: Pool[] = [
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'kava'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['atom', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'atom',
+        typeId: 1,
+      },
+      {
+        id: 1,
+        reserveCoinDenoms: ['luna', 'rune'],
+        reserveAccountAddress: '',
+        poolCoinDenom: 'luna',
+        typeId: 1,
+      },
+    ];
+
+    const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
+    const modalIsOpen = ref(false);
+
+    return { balances, pools, address, modalIsOpen };
   },
 });
 </script>

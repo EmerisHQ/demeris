@@ -124,8 +124,8 @@ export type Chain = {
   fee_tokens?: Array<Denom>;
   fee_address?: string;
   price_modifier?: number;
-  base_ibc_fee?: number;
-  base_fee?: number;
+  base_ibc_fee?: Fee;
+  base_fee?: Fee;
   genesis_hash?: string;
   node_info?: NodeInfo;
 };
@@ -134,7 +134,9 @@ export type ChainResponse = {
 };
 
 // /chain/:chain/status endpoint data types
-// TODO: Chain status
+export type ChainStatusResponse = {
+  online: boolean;
+};
 
 // /chain/:chain/denom/verify_trace/:hash endpoint data types
 
@@ -178,7 +180,11 @@ export type PrimaryChannelResponse = {
 
 // /chain/:chain/fee endpoint data types
 
-export type Fee = number;
+export type Fee = {
+  low: string;
+  average: string;
+  high: string;
+};
 export type FeeResponse = {
   fee: Fee;
 };
