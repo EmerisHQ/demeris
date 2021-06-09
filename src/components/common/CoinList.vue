@@ -7,11 +7,14 @@
   </div>
   <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
     <div class="coin-list__info">
-      <img
-        class="coin-list__info-image"
-        :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-        :alt="`${coin.base_denom} coin`"
-      />
+      <tippy class="tippy-info">
+        <img
+          class="coin-list__info-image"
+          :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
+          :alt="`${coin.base_denom} coin`"
+        />
+        <template #content> {{ $filters.getCoinName(coin.base_denom) }} on {{ coin.on_chain }}</template>
+      </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
           <span
@@ -120,6 +123,10 @@ export default defineComponent({
 
   cursor: pointer;
 
+  .tippy-info {
+    margin-right: 1.2rem;
+  }
+
   &__info {
     display: flex;
     align-items: center;
@@ -127,7 +134,6 @@ export default defineComponent({
     &-image {
       width: 2.4rem;
       height: 2.4rem;
-      margin-right: 1.2rem;
     }
 
     &-details {
