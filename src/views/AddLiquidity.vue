@@ -263,9 +263,12 @@ export default {
         return;
       }
 
-      if (needsTransferToHub) {
+      if (needsTransferToHub.value) {
         state.isTransferConfirmationOpen = true;
+        return;
       }
+
+      goToStep('review');
     };
 
     const goToStep = (step: 'amount' | 'review' | 'send') => {
