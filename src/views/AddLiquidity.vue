@@ -93,7 +93,7 @@
                     v-model:amount="form.coinB.amount"
                     :input-header="``"
                     :selected-denom="form.coinB.balance"
-                    :assets="balances"
+                    :assets="balancesForSecond"
                     @select="coinSelectHandler('coinB', $event)"
                   />
                 </div>
@@ -196,7 +196,7 @@ export default {
       isTransferConfirmationOpen: false,
     });
 
-    const form = reactive({
+    const form = reactive<Record<string, { balance: Balance; amount: number }>>({
       coinA: {
         balance: undefined,
         amount: 0,
@@ -209,6 +209,10 @@ export default {
 
     const { pools, formatPoolName } = usePools();
     const { balances } = useAccount();
+
+    const balancesForSecond = computed(() => {
+      return balances.filter((item) => item.base_denom !== form.coinA.balance?.base_denom);
+    });
 
     const hasPair = computed(() => {
       return form.coinA.balance && form.coinB.balance;
@@ -284,13 +288,16 @@ export default {
 
       if (poolFromRoute) {
         // TODO: Find chain by user balance
+        // @ts-ignore
         form.coinA.balance = { base_denom: poolFromRoute.reserveCoinDenoms[0] };
+        // @ts-ignore
         form.coinB.balance = { base_denom: poolFromRoute.reserveCoinDenoms[1] };
       }
     });
 
     return {
       balances,
+      balancesForSecond,
       pool,
       hasPool,
       hasPair,
