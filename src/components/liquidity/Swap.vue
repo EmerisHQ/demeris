@@ -206,26 +206,27 @@ export default defineComponent({
           chain_name: 'gaia',
         },
       };
+
+      // const swapParams = {
+      //   from: {
+      //     amount: {
+      //       denom: data.payCoinData.base_denom,
+      //       amount: data.payCoinAmount,
+      //     },
+      //     chain_name: data.payCoinData.on_chain,
+      //   },
+      //   to: {
+      //     amount: {
+      //       denom: data.receiveCoinData.base_denom,
+      //       amount: data.receiveCoinAmount,
+      //     },
+      //     chain_name: 'gaia',
+      //   },
+      // };
+
       console.log(SWAP_TEST_DATA);
       data.actionHandlerResult = SWAP_TEST_DATA;
       reviewModalToggle();
-
-      const swapParams2 = {
-        from: {
-          amount: {
-            denom: data.payCoinData.base_denom,
-            amount: data.payCoinAmount,
-          },
-          chain_name: data.payCoinData.on_chain,
-        },
-        to: {
-          amount: {
-            denom: data.receiveCoinData.base_denom,
-            amount: data.receiveCoinAmount,
-          },
-          chain_name: 'gaia',
-        },
-      };
 
       console.log('PAY', data.payCoinData, data.payCoinAmount);
       console.log('RECEIVE', data.receiveCoinData, data.receiveCoinAmount);

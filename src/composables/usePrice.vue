@@ -36,7 +36,7 @@ export default function () {
     const swapPrice =
       ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** priceDecimalDigit)) /
       BigInt(toCoinPoolAmount);
-    console.log('function swapPrice', swapPrice);
+
     return swapPrice;
   }
 

@@ -86,16 +86,16 @@ export default defineComponent({
     HintIcon,
   },
   props: {
-    data: { type: Array, required: true },
+    data: { type: Object, required: true },
   },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
-    console.log(props);
+    console.log('modalProps', props.data);
 
     const processData = reactive({
       currentStep: 0,
       currentData: computed(() => {
-        const currentStepData = props.data[processData.currentStep];
+        const currentStepData = props.data.steps[processData.currentStep];
         const modifiedData = {
           isSwap: false,
           title: '',
