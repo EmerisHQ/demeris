@@ -1,4 +1,10 @@
 <template>
+  <div v-if="modifiedData.length === 0" class="no-result">
+    <div class="no-result__board">
+      <div class="title s-1 w-bold">No results for '{{ keyword }}'</div>
+      <div class="sub-title s-0">Try again with another search</div>
+    </div>
+  </div>
   <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
     <div class="coin-list__info">
       <img
@@ -52,7 +58,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed,defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -150,6 +156,28 @@ export default defineComponent({
 
   .search-included {
     color: var(--text);
+  }
+}
+
+.no-result {
+  position: relative;
+  height: 100%;
+
+  text-align: center;
+
+  &__board {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+
+    transform: translateY(-50%);
+    .title {
+      color: var(--text);
+    }
+
+    .sub-title {
+      color: var(--muted);
+    }
   }
 }
 </style>
