@@ -35,6 +35,7 @@
       :selected-denom="payCoinData"
       :assets="userBalances"
       :is-over="isOver"
+      @change="setConterPairCoinAmount"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />
@@ -72,6 +73,7 @@
       :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
       :selected-denom="receiveCoinData"
       :assets="receiveAvailableDenom"
+      @change="setConterPairCoinAmount"
       @select="denomSelectHandler"
       @modalToggle="setChildModalOpenStatus"
     />
@@ -119,16 +121,11 @@ export default defineComponent({
       payCoinData: null,
       payCoinAmount: null,
       receiveCoinData: null,
-      receiveCoinAmount: computed({
-        //2 eventually become pool price with bigInt type calculation
-        get: () => (data.receiveCoinData?.base_denom ? getReceiveCoinAmount(data.payCoinAmount, 300000, 400000) : null),
-        set: (value) =>
-          data.receiveCoinData?.base_denom ? (data.payCoinAmount = getPayCoinAmount(value, 300000, 400000)) : null,
-      }),
+      receiveCoinAmount: null,
       userBalances: TEST_DATA.balances,
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
-          return denomInfo.base_denom !== data.payCoinData.base_denom;
+          return denomInfo?.base_denom !== data.payCoinData?.base_denom;
         });
         return payCoinRemovedDenoms;
       }),
@@ -143,17 +140,17 @@ export default defineComponent({
       const originPayCoinData = data.payCoinData;
       const originReceiveCoinData = data.receiveCoinData;
 
-      const originPayCoinAmount = data.payCoinAmount;
       const originReceiveCoinAmount = data.receiveCoinAmount;
 
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = originPayCoinData;
       data.payCoinAmount = originReceiveCoinAmount;
-      data.receiveCoinAmount = originPayCoinAmount;
+      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function setMax() {
       data.payCoinAmount = data.payCoinData.amount;
+      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function denomSelectHandler(payload) {
@@ -170,6 +167,14 @@ export default defineComponent({
 
     function setChildModalOpenStatus(payload) {
       data.isChildModalOpen = payload;
+    }
+
+    function setConterPairCoinAmount(e) {
+      if (e.includes('Pay')) {
+        data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      } else {
+        data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+      }
     }
 
     function swap() {
@@ -202,6 +207,7 @@ export default defineComponent({
       setMax,
       swap,
       setChildModalOpenStatus,
+      setConterPairCoinAmount,
     };
   },
 });
