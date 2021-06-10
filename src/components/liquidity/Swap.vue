@@ -116,7 +116,11 @@ export default defineComponent({
         return data.isOver ? 'Insufficent funds' : 'Swap';
       }),
       buttonStatus: computed(() => {
-        return data.isOver ? 'inactive' : 'normal';
+        if (data.isOver || !data.payCoinData || !data.receiveCoinData) {
+          return 'inactive';
+        } else {
+          return 'normal';
+        }
       }),
       payCoinData: null,
       payCoinAmount: null,
