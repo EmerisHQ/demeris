@@ -113,10 +113,16 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
-        return data.isOver ? 'Insufficent funds' : 'Swap';
+        if (data.isOver) {
+          return 'Insufficent funds';
+        } else if (data.isNotEnoughLiquidity) {
+          return 'Insufficient liquidity';
+        } else {
+          return 'Swap';
+        }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.payCoinData || !data.receiveCoinData) {
+        if (data.isOver || !data.payCoinData || !data.receiveCoinData || data.isNotEnoughLiquidity) {
           return 'inactive';
         } else {
           return 'normal';
@@ -134,6 +140,7 @@ export default defineComponent({
         return payCoinRemovedDenoms;
       }),
       isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      isNotEnoughLiquidity: computed(() => true),
       isChildModalOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
