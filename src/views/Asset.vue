@@ -14,7 +14,9 @@
         <section class="asset__main__stats">
           <div class="asset__main__stats__container">
             <div class="asset__main__stats__container__left">
-              <p class="asset__main__stats__container__left__token">300 ATOM</p>
+              <p class="asset__main__stats__container__left__token">
+                {{ `${totalAmount}${$filters.getCoinName(denom)}` }}
+              </p>
               <p class="asset__main__stats__container__left__balance">$13,184.45</p>
               <span class="asset__main__stats__container__left__trending">
                 <span>15% (+$1,719.71)</span>
@@ -46,12 +48,12 @@
           </div>
 
           <ul class="asset__list__wrapper">
-            <li class="asset__list__item asset__main__chains__item">
+            <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
                 <span class="asset__main__chains__item__asset__avatar" />
-                <span class="asset__main__chains__item__asset__denom">Cosmos Hub</span>
+                <span class="asset__main__chains__item__asset__denom">{{ asset.on_chain }}</span>
               </div>
-              <span class="asset__main__chains__item__amount"> 277.52 ATOM </span>
+              <span class="asset__main__chains__item__amount">{{ asset.amount }} {{ $filters.getCoinName(denom) }}</span>
               <div class="asset__main__chains__item__balance">
                 <span class="asset__main__chains__item__balance__value"> $3,690.50 </span>
                 <button class="asset__main__chains__item__more">
@@ -98,7 +100,7 @@
 
         <!-- Pools -->
 
-        <section class="asset__main__pools asset__list">
+        <section v-if="pools.length" class="asset__main__pools asset__list">
           <div class="asset__list__header">
             <p class="asset__list__header__title">Pools</p>
             <button class="asset__list__header__button">
@@ -131,6 +133,8 @@ import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default defineComponent({
@@ -148,11 +152,19 @@ export default defineComponent({
 
   setup() {
     const route = useRoute();
-    const denom = computed(() => route.params.denom);
+    const denom = computed(() => route.params.denom as string);
 
-    const pools = [];
+    const { balancesByDenom } = useAccount();
+    const { poolsByDenom } = usePools();
 
-    return { pools };
+    const assets = computed(() => balancesByDenom(denom.value));
+    const pools = computed(() => poolsByDenom(denom.value));
+
+    const totalAmount = computed(() => {
+      return assets.value.reduce((acc, item) => acc + item.amount, 0);
+    });
+
+    return { denom, assets, pools, totalAmount };
   },
 });
 </script>

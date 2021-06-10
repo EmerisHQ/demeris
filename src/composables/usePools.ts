@@ -19,5 +19,9 @@ export default function usePools() {
     return pool.reserveCoinDenoms.join('/').toUpperCase();
   };
 
-  return { pools, formatPoolName };
+  const poolsByDenom = (denom: string) => {
+    return pools.value.filter((item) => item.reserveCoinDenoms.includes(denom));
+  };
+
+  return { pools, poolsByDenom, formatPoolName };
 }

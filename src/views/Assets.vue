@@ -7,16 +7,16 @@
           <span class="assets__nav__item assets__nav__item--inactive">Chains</span>
         </router-link>
       </nav>
-      <AssetsTable :balances="balances" class="assets__table" />
+      <AssetsTable :balances="balances" class="assets__table" @row-click="openAssetPage" />
     </section>
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
-import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default {
@@ -24,17 +24,14 @@ export default {
   components: { AppLayout, AssetsTable },
 
   setup() {
-    // TODO: Get data from API
+    const router = useRouter();
+    const { balances } = useAccount();
 
-    const store = useStore();
+    const openAssetPage = (asset: Record<string, string>) => {
+      router.push({ name: 'Asset', params: { denom: asset.denom } });
+    };
 
-    const balances = computed(() =>
-      store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-    );
-
-    //const balances = balancesFixture;
-
-    return { balances };
+    return { balances, openAssetPage };
   },
 };
 </script>
