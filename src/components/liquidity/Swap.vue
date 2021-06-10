@@ -80,7 +80,7 @@
 
     <!-- swap button -->
     <div class="button-wrapper">
-      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
+      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
     </div>
 
     <div class="fees s-minus">
@@ -123,6 +123,13 @@ export default defineComponent({
           }
         } else {
           return 'Swap';
+        }
+      }),
+      buttonTooltipText: computed(() => {
+        if (data.buttonName === 'Insufficient liquidity') {
+          return 'Insufficient liquidity available for this swap. Try swapping a smaller amount.';
+        } else {
+          return '';
         }
       }),
       buttonStatus: computed(() => {
