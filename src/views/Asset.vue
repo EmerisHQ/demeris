@@ -3,10 +3,10 @@
     <div class="asset">
       <div class="asset__main">
         <div class="asset__main__back">
-          <button class="asset__main__back__button">
+          <router-link :to="{ name: 'Assets' }" class="asset__main__back__button">
             <span class="asset__main__back__button__icon"><ArrowLeftIcon /></span>
             <span>All assets</span>
-          </button>
+          </router-link>
         </div>
 
         <!-- Stats -->
@@ -51,15 +51,11 @@
                 <span class="asset__main__chains__item__asset__avatar" />
                 <span class="asset__main__chains__item__asset__denom">Cosmos Hub</span>
               </div>
-              <span class="asset__main__chains__item__amount">
-                277.52 ATOM
-              </span>
+              <span class="asset__main__chains__item__amount"> 277.52 ATOM </span>
               <div class="asset__main__chains__item__balance">
-                <span class="asset__main__chains__item__balance__value">
-                  $3,690.50
-                </span>
+                <span class="asset__main__chains__item__balance__value"> $3,690.50 </span>
                 <button class="asset__main__chains__item__more">
-                  <DotsIcon />
+                  <Icon name="SendIcon" :icon-size="1.2" />
                 </button>
               </div>
             </li>
@@ -86,17 +82,11 @@
           <ul class="asset__list__wrapper">
             <li class="asset__list__item asset__main__staking__item">
               <div class="asset__main__staking__item__validator">
-                <span class="asset__main__staking__item__validator__avatar">
-                  N
-                </span>
-                <span class="asset__main__staking__item__validator__name">
-                  nylira
-                </span>
+                <span class="asset__main__staking__item__validator__avatar"> N </span>
+                <span class="asset__main__staking__item__validator__name"> nylira </span>
               </div>
 
-              <span class="asset__main__staking__item__amount">
-                82.46 ATOM
-              </span>
+              <span class="asset__main__staking__item__amount"> 82.46 ATOM </span>
 
               <div class="asset__main__staking__item__balance">
                 <span class="asset__main__staking__item__balance__value">$1,690.50</span>
@@ -115,6 +105,10 @@
               <PlusIcon class="asset__list__header__button__icon" />
             </button>
           </div>
+
+          <div class="asset__main__pools__wrapper">
+            <Pools :pools="pools" />
+          </div>
         </section>
       </div>
 
@@ -128,13 +122,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
+import { useRoute } from 'vue-router';
 
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
 import ChevronDownIcon from '@/components/common/Icons/ChevronDownIcon.vue';
-import DotsIcon from '@/components/common/Icons/DotsIcon.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
+import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import Icon from '@/components/ui/Icon.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default defineComponent({
@@ -142,11 +138,21 @@ export default defineComponent({
 
   components: {
     AppLayout,
-    DotsIcon,
+    Icon,
     PlusIcon,
     ArrowLeftIcon,
     ChevronDownIcon,
     LiquiditySwap,
+    Pools,
+  },
+
+  setup() {
+    const route = useRoute();
+    const denom = computed(() => route.params.denom);
+
+    const pools = [];
+
+    return { pools };
   },
 });
 </script>
@@ -156,6 +162,7 @@ export default defineComponent({
   display: flex;
   margin-bottom: 2rem;
   font-size: 1.6rem;
+  padding-bottom: 4rem;
 
   &__main {
     display: flex;
@@ -187,7 +194,6 @@ export default defineComponent({
 
       &__container {
         display: flex;
-        align-items: baseline;
 
         &__left {
           display: flex;
@@ -196,13 +202,14 @@ export default defineComponent({
           &__token {
             font-weight: 700;
             font-size: 2.8rem;
+            line-height: 1;
           }
 
           &__balance {
             margin-top: 0.8rem;
             font-weight: 700;
             font-size: 6.7rem;
-						line-height: 1.3;
+            line-height: 1.3;
           }
 
           &__trending {
@@ -216,7 +223,6 @@ export default defineComponent({
           margin-left: 6rem;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
 
           dt {
             color: var(--muted);
@@ -252,6 +258,9 @@ export default defineComponent({
           &__denom {
             margin-left: 1.6rem;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
 
@@ -259,6 +268,7 @@ export default defineComponent({
           margin-left: 1.6rem;
           width: 33.33%;
           text-align: right;
+          color: var(--muted);
         }
 
         &__balance {
@@ -294,7 +304,7 @@ export default defineComponent({
         margin-top: 3rem;
         padding: 1.6rem 2.4rem;
         border-radius: 1.2rem;
-        box-shadow: 8px 16px 40px rgba(0, 0, 0, 0.07);
+        background: var(--fg-trans);
         display: flex;
         align-items: center;
 
@@ -305,7 +315,7 @@ export default defineComponent({
 
         &__amount {
           margin-left: 1.6rem;
-          color: rgba(0, 0, 0, 0.66);
+          color: var(--muted);
         }
 
         &__balance {
@@ -352,6 +362,7 @@ export default defineComponent({
           margin-left: 1.6rem;
           width: 33.33%;
           text-align: right;
+          color: var(--muted);
         }
 
         &__balance {
@@ -378,6 +389,12 @@ export default defineComponent({
         }
       }
     }
+
+    &__pools {
+      &__wrapper {
+        margin-top: 2.4rem;
+      }
+    }
   }
 
   &__aside {
@@ -387,7 +404,7 @@ export default defineComponent({
     margin-left: 3.2rem;
 
     &__swap {
-      width: 75%;
+      width: 80%;
     }
   }
 
