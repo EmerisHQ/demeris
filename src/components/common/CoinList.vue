@@ -5,7 +5,19 @@
       <div class="sub-title s-0">Try again with another search</div>
     </div>
   </div>
-  <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
+  <div
+    v-for="coin in modifiedData"
+    :key="coin.base_denom"
+    class="coin-list"
+    @mouseenter="
+      showTooltip(
+        `${type}/${coin.on_chain}/${coin.base_denom}`,
+        `${$filters.getCoinName(coin.base_denom)} on ${coin.on_chain}`,
+      )
+    "
+    @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
+    @click="$emit('select', coin)"
+  >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
         <img
@@ -13,7 +25,6 @@
           :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
           :alt="`${coin.base_denom} coin`"
         />
-        <template #content> {{ $filters.getCoinName(coin.base_denom) }} on {{ coin.on_chain }}</template>
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
@@ -62,7 +73,7 @@
 </template>
 <script lang="ts">
 import tippy from 'tippy.js';
-import { computed, defineComponent, onMounted } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -81,21 +92,25 @@ export default defineComponent({
   setup(props) {
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     const modifiedData = computed(() => getUniqueCoinList(props.data));
+    const tooltipInstance = ref(null);
 
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
 
-    //mouseenter, mouseleave
-    onMounted(() => {
+    function showTooltip(eleId, text) {
       if (props.type === 'chain') {
-        const instance = tippy(document.getElementById('chain/Cosmos/ukava'));
-        setTimeout(() => {
-          instance.setContent('New content');
-          instance.show();
-        }, 1000);
+        tooltipInstance.value = tippy(document.getElementById(eleId));
+        tooltipInstance.value.setContent(text);
+        tooltipInstance.value.show();
       }
-    });
+    }
+
+    function hideTooltip() {
+      if (props.type === 'chain') {
+        tooltipInstance.value.hide();
+      }
+    }
 
     function getUniqueCoinList(data) {
       if (props.type !== 'pay') {
@@ -121,7 +136,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    return { iconColor, setWordColorByKeyword, modifiedData };
+    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip };
   },
 });
 </script>
