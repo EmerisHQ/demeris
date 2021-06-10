@@ -52,7 +52,7 @@ export const mutations: MutationTree<State> & Mutations = {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
   },
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
-    state.numbers[JSON.stringify(payload.params)] = payload.value as API.Numbers;
+    state.numbers[(payload.params as API.AddrReq).address] = payload.value as API.Numbers;
   },
   [MutationTypes.SET_FEE_ADDRESSES](state: State, payload: DemerisMutations) {
     for (const feeAddress of payload.value as API.FeeAddresses) {

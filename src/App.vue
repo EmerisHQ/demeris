@@ -45,6 +45,7 @@ export default defineComponent({
       addrPrefix: 'cosmos',
       sdkVersion: 'Stargate',
       getTXApi: null,
+      offline: true,
     });
     this.initialized = true;
   },

@@ -124,6 +124,7 @@ import Input from '@/components/ui/Input.vue';
 import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
 
 export default defineComponent({
@@ -188,14 +189,19 @@ export default defineComponent({
     const sendMessage = async () => {
       let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
         value: {
-          amount: { denom: 'uatom', amount: '20' },
+          amount: [{ denom: 'uatom', amount: '20' }],
           toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
           fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
         },
-
-        memo: "a memo'",
       });
-      console.log(res);
+      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+        msgs: [res],
+        chain_name: 'cosmos-hub',
+        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
+        memo: 'a memo',
+      });
+      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+      console.log(result);
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
