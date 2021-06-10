@@ -92,7 +92,7 @@
 
               <div class="asset__main__staking__item__balance">
                 <span class="asset__main__staking__item__balance__value">$1,690.50</span>
-                <button class="asset__main__staking__item__more"><ChevronDownIcon /></button>
+                <button class="asset__main__staking__item__more"><Icon name="CaretDownIcon" :icon-size="1.6" /></button>
               </div>
             </li>
           </ul>
@@ -128,7 +128,6 @@ import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
-import ChevronDownIcon from '@/components/common/Icons/ChevronDownIcon.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -145,7 +144,6 @@ export default defineComponent({
     Icon,
     PlusIcon,
     ArrowLeftIcon,
-    ChevronDownIcon,
     LiquiditySwap,
     Pools,
   },
@@ -192,8 +190,8 @@ export default defineComponent({
           margin-right: 0.4rem;
 
           svg {
-            width: 2.4rem;
-            height: 2.4rem;
+            width: 2rem;
+            height: 2rem;
           }
         }
       }
@@ -393,11 +391,6 @@ export default defineComponent({
         &__more {
           margin-left: 1.6rem;
           padding: 0.4rem;
-
-          svg {
-            width: 1.6rem;
-            height: 1.6rem;
-          }
         }
       }
     }
