@@ -78,6 +78,11 @@
       @modalToggle="setChildModalOpenStatus"
     />
 
+    <!-- price alert -->
+    <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
+      <Alert status="warning" message="Prices have changed" />
+    </div>
+
     <!-- swap button -->
     <div class="button-wrapper">
       <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
@@ -93,6 +98,7 @@
 import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
@@ -107,6 +113,7 @@ export default defineComponent({
     IconButton,
     Button,
     Icon,
+    Alert,
   },
 
   setup() {
@@ -119,7 +126,11 @@ export default defineComponent({
           } else if (data.isOver) {
             return 'Insufficent funds';
           } else {
-            return 'Swap';
+            if (data.isPriceChanged) {
+              return 'Update prices';
+            } else {
+              return 'Swap';
+            }
           }
         } else {
           return 'Swap';
@@ -157,6 +168,7 @@ export default defineComponent({
         return data.payCoinData && data.receiveCoinData;
       }),
       isChildModalOpen: false,
+      isPriceChanged: true,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
@@ -250,8 +262,7 @@ export default defineComponent({
   position: relative;
 
   width: 32rem;
-  height: 42.6rem;
-
+  padding-bottom: 2.4rem;
   background-color: var(--surface);
 
   &-header {
@@ -288,6 +299,10 @@ export default defineComponent({
       width: 100%;
       padding: 0 18px;
     }
+  }
+
+  .price-alert-wrapper {
+    padding: 0.8rem 2.4rem;
   }
 
   .button-wrapper {
