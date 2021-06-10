@@ -37,6 +37,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Pools.vue'),
   },
   {
+    path: '/pools/add/:id?',
+    name: 'AddLiquidity',
+    component: () => import('@/views/AddLiquidity.vue'),
+  },
+  {
+    path: '/pools/withdraw/:id',
+    name: 'WithdrawLiquidity',
+    component: () => import('@/views/WithdrawLiquidity.vue'),
+  },
+  {
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },

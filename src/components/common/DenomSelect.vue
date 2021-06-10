@@ -5,11 +5,11 @@
 				Selected denom name
 				Selected chain name
 				arrow to display full list in modal (DenomSelectModal.vue)
-			  Props: 
+			  Props:
 					denoms: [] of denoms
 					disabled: [] of denoms to display as disabled
-				Dependencies: 
-					vuex getter to get  chain name from chain id		
+				Dependencies:
+					vuex getter to get  chain name from chain id
 		-->
 
     <img
@@ -42,7 +42,7 @@
         type="number"
         placeholder="0"
         min="0"
-        @input="$emit('update:amount', Math.abs(Number($event.target.value)))"
+        @input="$emit('update:amount', Math.abs(Number($event.target.value))), $emit('change', inputHeader)"
       />
     </div>
   </div>
@@ -70,7 +70,7 @@ export default defineComponent({
     amount: { type: Number, required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
   },
-  emits: ['update:amount', 'select', 'modalToggle'],
+  emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {
     const inputAmount = computed({
       get: () => props.amount,
