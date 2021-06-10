@@ -113,16 +113,20 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
-        if (data.isOver) {
-          return 'Insufficent funds';
-        } else if (data.isNotEnoughLiquidity) {
-          return 'Insufficient liquidity';
+        if (data.isBothSelected) {
+          if (data.isNotEnoughLiquidity) {
+            return 'Insufficient liquidity';
+          } else if (data.isOver) {
+            return 'Insufficent funds';
+          } else {
+            return 'Swap';
+          }
         } else {
           return 'Swap';
         }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.payCoinData || !data.receiveCoinData || data.isNotEnoughLiquidity) {
+        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity) {
           return 'inactive';
         } else {
           return 'normal';
@@ -139,8 +143,12 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
-      isNotEnoughLiquidity: computed(() => true),
+      isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      //TODO: test
+      isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
+      isBothSelected: computed(() => {
+        return data.payCoinData && data.receiveCoinData;
+      }),
       isChildModalOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
@@ -167,8 +175,12 @@ export default defineComponent({
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
         data.receiveCoinData = payload;
+        data.payCoinAmount = null;
+        data.receiveCoinAmount = null;
       } else {
         data.payCoinData = payload;
+        data.payCoinAmount = null;
+        data.receiveCoinAmount = null;
       }
     }
 
@@ -181,10 +193,12 @@ export default defineComponent({
     }
 
     function setConterPairCoinAmount(e) {
-      if (e.includes('Pay')) {
-        data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
-      } else {
-        data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+      if (data.isBothSelected) {
+        if (e.includes('Pay')) {
+          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+        } else {
+          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+        }
       }
     }
 
