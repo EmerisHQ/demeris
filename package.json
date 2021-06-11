@@ -26,6 +26,7 @@
     "gradient-avatar": "^1.0.2",
     "lodash.groupby": "^4.6.0",
     "long": "^4.0.0",
+    "qrcode": "^1.4.4",
     "vue": "^3.0.11",
     "vue-router": "^4.0.3",
     "vue-tippy": "^6.0.0-alpha.29",
