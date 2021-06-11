@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="denom-select-modal">
     <ChainSelectModal
       v-if="isModalOpen"
       :assets="assets"
@@ -16,11 +16,11 @@
 				denom chain name
 				denom balance  (uses ./Amount.vue)
 				denom balance in preferred currency equivalent (uses ./Amount.vue)
-			  Props: 
-					denoms: [] of denoms 
+			  Props:
+					denoms: [] of denoms
 					disabled: [] of denoms to display as disabled (fro parent DenomSelect.vue)
-				Dependencies: 
-					vuex getter to get  chain name from chain id		
+				Dependencies:
+					vuex getter to get  chain name from chain id
 					vuex getter to get  base_denom -> currency pricing
 					vuex getter to get balance for denom (idf any-->
       <TitleWithGoback :title="title" :func="func" />
@@ -60,7 +60,7 @@ export default defineComponent({
   },
   props: {
     assets: { type: Object, required: true },
-    func: { type: Function, required: true },
+    func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
   },
   emits: ['select'],

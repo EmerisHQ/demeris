@@ -211,7 +211,7 @@ export default {
     const { balances } = useAccount();
 
     const balancesForSecond = computed(() => {
-      return balances.filter((item) => item.base_denom !== form.coinA.balance?.base_denom);
+      return balances.value.filter((item) => item.base_denom !== form.coinA.balance?.base_denom);
     });
 
     const hasPair = computed(() => {

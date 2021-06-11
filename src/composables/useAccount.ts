@@ -1,9 +1,23 @@
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+
 import { TEST_DATA } from '@/TEST_DATA';
-import { Balance } from '@/types/api';
 
 export default function useAccount() {
-  // @ts-ignore
-  const balances: Balance[] = TEST_DATA.balances;
+  const store = useStore();
 
-  return { balances };
+  const balances = computed(() => {
+    // TODO: Remove after cloud is fully deployed
+    if (process.env.NODE_ENV === 'production') {
+      return TEST_DATA.balances;
+    }
+
+    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] });
+  });
+
+  const balancesByDenom = (denom: string) => {
+    return balances.value.filter((item) => item.base_denom === denom);
+  };
+
+  return { balances, balancesByDenom };
 }
