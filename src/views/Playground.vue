@@ -96,6 +96,7 @@
 </template>
 
 <script lang="ts">
+import Long from 'long';
 import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
@@ -187,17 +188,25 @@ export default defineComponent({
       },
     ];
     const sendMessage = async () => {
-      let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+      let res = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
         value: {
+          sourcePort: 'transfer',
+          sourceChannel: 'channel-0',
+          sender: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          receiver: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
+          token: { denom: 'uatom', amount: '20' },
+        },
+        /*{
           amount: [{ denom: 'uatom', amount: '20' }],
           toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
           fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-        },
+        },*/
       });
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res],
         chain_name: 'cosmos-hub',
-        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
+        registry: stores.getters['ibc.applications.transfer.v1/getRegistry'],
         memo: 'a memo',
       });
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);

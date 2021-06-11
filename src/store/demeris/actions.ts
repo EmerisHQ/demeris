@@ -299,7 +299,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         getters['getBaseFee']({ chain_name }) ??
         (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
       const fee = {
-        amount: [],
+        amount: [{ amount: '100000', denom: 'uatom' }],
         gas: '200000',
       };
       console.log(fee);
@@ -503,7 +503,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, tx);
       return response;
     } catch (e) {
-      throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
+      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
     }
   },
   // Internal module actions
