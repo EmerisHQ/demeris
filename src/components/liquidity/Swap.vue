@@ -78,9 +78,14 @@
       @modalToggle="setChildModalOpenStatus"
     />
 
+    <!-- price alert -->
+    <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
+      <Alert status="warning" message="Prices have changed" />
+    </div>
+
     <!-- swap button -->
     <div class="button-wrapper">
-      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" />
+      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
     </div>
 
     <div class="fees s-minus">
@@ -93,6 +98,7 @@
 import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
@@ -107,16 +113,42 @@ export default defineComponent({
     IconButton,
     Button,
     Icon,
+    Alert,
   },
 
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const data = reactive({
       buttonName: computed(() => {
-        return data.isOver ? 'Insufficent funds' : 'Swap';
+        if (data.isBothSelected) {
+          if (data.isNotEnoughLiquidity) {
+            return 'Insufficient liquidity';
+          } else if (data.isOver) {
+            return 'Insufficent funds';
+          } else {
+            if (data.isPriceChanged) {
+              return 'Update prices';
+            } else {
+              return 'Swap';
+            }
+          }
+        } else {
+          return 'Swap';
+        }
+      }),
+      buttonTooltipText: computed(() => {
+        if (data.buttonName === 'Insufficient liquidity') {
+          return 'Insufficient liquidity available for this swap. Try swapping a smaller amount.';
+        } else {
+          return '';
+        }
       }),
       buttonStatus: computed(() => {
-        return data.isOver ? 'inactive' : 'normal';
+        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity) {
+          return 'inactive';
+        } else {
+          return 'normal';
+        }
       }),
       payCoinData: null,
       payCoinAmount: null,
@@ -129,8 +161,14 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      isOver: computed(() => (data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      //TODO: test
+      isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
+      isBothSelected: computed(() => {
+        return data.payCoinData && data.receiveCoinData;
+      }),
       isChildModalOpen: false,
+      isPriceChanged: true,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
@@ -156,8 +194,12 @@ export default defineComponent({
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
         data.receiveCoinData = payload;
+        data.payCoinAmount = null;
+        data.receiveCoinAmount = null;
       } else {
         data.payCoinData = payload;
+        data.payCoinAmount = null;
+        data.receiveCoinAmount = null;
       }
     }
 
@@ -170,10 +212,12 @@ export default defineComponent({
     }
 
     function setConterPairCoinAmount(e) {
-      if (e.includes('Pay')) {
-        data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
-      } else {
-        data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+      if (data.isBothSelected) {
+        if (e.includes('Pay')) {
+          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+        } else {
+          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+        }
       }
     }
 
@@ -218,8 +262,7 @@ export default defineComponent({
   position: relative;
 
   width: 32rem;
-  height: 42.6rem;
-
+  padding-bottom: 2.4rem;
   background-color: var(--surface);
 
   &-header {
@@ -256,6 +299,10 @@ export default defineComponent({
       width: 100%;
       padding: 0 18px;
     }
+  }
+
+  .price-alert-wrapper {
+    padding: 0.8rem 2.4rem;
   }
 
   .button-wrapper {
