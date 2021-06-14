@@ -1,9 +1,12 @@
+import Long from 'long';
+
 import * as Actions from '@/types/actions';
 import { Amount, ChainAmount } from '@/types/base';
 
-import { store } from '../store/index';
+import { store, useAllStores } from '../store/index';
 import { generateDenomHash, getChannel, getDenomHash, isNative } from './basic';
 
+const stores = useAllStores();
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
   const result = {
@@ -981,6 +984,103 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
   }
 
   return steps;
+}
+export async function msgFromStepTransaction(stepTx: Actions.StepTransaction) {
+  if (stepTx.name == 'transfer') {
+    const data = stepTx.data as Actions.TransferData;
+    const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+      value: {
+        amount: [data.amount],
+        toAddress: data.to_address,
+        fromAddress: store.getters['demeris/getOwnAddress']({ chain_name: data.chain_name }),
+      },
+    });
+    return msg;
+  }
+
+  if (stepTx.name == 'ibc_forward') {
+    const data = stepTx.data as Actions.IBCForwardsData;
+    let receiver;
+    if (data.to_address) {
+      receiver = data.to_address;
+    } else {
+      receiver = store.getters['demeris/getOwnAddress']({ chain_name: data.to_chain });
+    }
+    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+      value: {
+        sourcePort: 'transfer',
+        sourceChannel: data.through,
+        sender: store.getters['demeris/getOwnAddress']({ chain_name: data.from_chain }),
+        receiver,
+        timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
+        token: data.amount,
+      },
+    });
+    return msg;
+  }
+
+  if (stepTx.name == 'ibc_backward') {
+    const data = stepTx.data as Actions.IBCBackwardsData;
+    let receiver;
+    if (data.to_address) {
+      receiver = data.to_address;
+    } else {
+      receiver = store.getters['demeris/getOwnAddress']({ chain_name: data.to_chain });
+    }
+    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+      value: {
+        sourcePort: 'transfer',
+        sourceChannel: data.through,
+        sender: store.getters['demeris/getOwnAddress']({ chain_name: data.from_chain }),
+        receiver,
+        timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
+        token: data.amount,
+      },
+    });
+    return msg;
+  }
+  if (stepTx.name == 'addliquidity') {
+    const data = stepTx.data as Actions.AddLiquidityData;
+    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
+      value: {
+        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        poolId: data.pool.id,
+        depositCoins: [data.coinA, data.coinB],
+      },
+    });
+    return msg;
+  }
+  if (stepTx.name == 'withdrawliquidity') {
+    const data = stepTx.data as Actions.WithdrawLiquidityData;
+    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
+      value: {
+        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        poolId: data.pool.id,
+        depositCoins: [data.poolCoin],
+      },
+    });
+    return msg;
+  }
+  if (stepTx.name == 'swap') {
+    const data = stepTx.data as Actions.SwapData;
+    const price = [data.from, data.to].sort((a, b) => {
+      if (a.denom < b.denom) return -1;
+      if (a.denom > b.denom) return 1;
+      return 0;
+    });
+    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
+      value: {
+        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        poolId: data.pool.id,
+        swapTypeId: data.pool.typeId,
+        offerCoin: data.from.denom,
+        demandCoinDenom: data.to.denom,
+        offerCoinFee: 0,
+        orderPrice: '' + price[0].amount / price[1].amount,
+      },
+    });
+    return msg;
+  }
 }
 export async function getFeeForChain(chain_name: string): Promise<number> {
   const fee =

@@ -16,6 +16,9 @@ export function keyHashfromAddress(address: string): string {
     throw new Error('Could not decode address');
   }
 }
+export function chainAddressfromAddress(prefix: string, address: string) {
+  return bech32.encode(prefix, bech32.decode(address).words);
+}
 export function isNative(denom: string) {
   return denom.indexOf('ibc/') != 0 ? true : false;
 }

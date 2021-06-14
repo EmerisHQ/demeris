@@ -1,5 +1,4 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { Tx } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -26,7 +25,7 @@ export type DemerisConfig = {
   refreshTime?: number;
 };
 export type DemerisTxParams = {
-  tx: Tx;
+  tx: string;
   chain_name: string;
 };
 export type DemerisSignParams = {
@@ -34,6 +33,9 @@ export type DemerisSignParams = {
   chain_name: string;
   registry: Registry;
   memo?: string;
+};
+export type TicketResponse = {
+  ticket: string;
 };
 export interface Actions {
   // Cross-chain endpoint actions
@@ -107,7 +109,7 @@ export interface Actions {
   [DemerisActionTypes.BROADCAST_TX](
     { commit, getters }: ActionContext<State, RootState>,
     { tx, chain_name }: DemerisTxParams,
-  ): Promise<any>;
+  ): Promise<TicketResponse>;
   [DemerisActionTypes.SIGN_WITH_KEPLR](
     { commit, getters }: ActionContext<State, RootState>,
     { msgs, chain_name }: DemerisSignParams,
@@ -314,7 +316,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const signerData = numbers.find((x) => x.chain_name == chain_name);
       signerData.chainId = 'cosmoshub-4'; // TODO: HACK! See above
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, signerData);
-      return { tx, chain_name };
+      const tx_data = Buffer.from(tx).toString('base64');
+      return { tx: tx_data, chain_name };
     } catch (e) {
       console.log(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
@@ -500,8 +503,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name }: DemerisTxParams) {
     try {
-      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, tx);
-      return response;
+      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx });
+      return response.data;
     } catch (e) {
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
     }

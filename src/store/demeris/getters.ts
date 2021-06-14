@@ -2,7 +2,7 @@ import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
-import { keyHashfromAddress } from '@/utils/basic';
+import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 
 import { ChainData, State } from './state';
 
@@ -17,6 +17,7 @@ export type Getters = {
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getKeplrAccountName(state: State): string | null;
+  getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config | null };
@@ -69,6 +70,14 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getKeplrAccountName: (state) => {
     return state.keplr?.name ?? null;
+  },
+  getOwnAddress: (state) => (params) => {
+    return (
+      chainAddressfromAddress(
+        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
+        state.keplr.bech32Address,
+      ) ?? null
+    );
   },
   getKeplrAddress: (state) => {
     if (state.keplr) {
