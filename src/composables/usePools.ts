@@ -16,12 +16,19 @@ export default function usePools() {
   });
 
   const formatPoolName = (pool: Pool) => {
-    return pool.reserveCoinDenoms.join('/').toUpperCase();
+    return pool.reserveCoinDenoms
+      .map((item) => item.substr(1))
+      .join('/')
+      .toUpperCase();
   };
 
   const poolsByDenom = (denom: string) => {
     return pools.value.filter((item) => item.reserveCoinDenoms.includes(denom));
   };
 
-  return { pools, poolsByDenom, formatPoolName };
+  const poolById = (id: number) => {
+    return pools.value.find((item) => item.id === id);
+  };
+
+  return { pools, poolsByDenom, poolById, formatPoolName };
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="denom-select">
+  <div class="denom-select" :class="{ 'denom-select--readonly': readonly }">
     <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
@@ -12,17 +12,12 @@
 					vuex getter to get  chain name from chain id
 		-->
 
-    <img
-      class="denom-select__coin-image"
-      :src="require(`@/assets/coins/${isSelected ? selectedDenom?.base_denom?.substr(1) : 'stake'}.png`)"
-      :alt="`selected coin`"
-      @click="toggleDenomSelectModal"
-    />
+    <img class="denom-select__coin-image" :src="coinImage" :alt="`selected coin`" @click="toggleDenomSelectModal" />
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         {{ $filters.getCoinName(selectedDenom?.base_denom) }}
-        <Icon name="SmallDownIcon" :icon-size="1.6" />
+        <Icon v-if="!readonly" name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
@@ -69,6 +64,7 @@ export default defineComponent({
     assets: { type: Object, required: true },
     amount: { type: Number, required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
+    readonly: { type: Boolean, default: false },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {
@@ -81,9 +77,25 @@ export default defineComponent({
       return props?.selectedDenom === null ? false : true;
     });
 
+    const coinImage = computed(() => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const image = require(`@/assets/coins/${
+          isSelected.value ? props.selectedDenom.base_denom?.substr(1) : 'stake'
+        }.png`);
+        return image;
+      } catch {
+        return require(`@/assets/coins/stake.png`);
+      }
+    });
+
     const isOpen = ref(false);
 
     function toggleDenomSelectModal() {
+      if (props.readonly) {
+        return;
+      }
+
       isOpen.value = !isOpen.value;
       emit('modalToggle', isOpen.value);
     }
@@ -94,7 +106,7 @@ export default defineComponent({
     }
 
     console.log(props.assets);
-    return { inputAmount, isSelected, isOpen, toggleDenomSelectModal, denomSelectHandler };
+    return { inputAmount, isSelected, isOpen, coinImage, toggleDenomSelectModal, denomSelectHandler };
   },
 });
 </script>
@@ -104,6 +116,14 @@ export default defineComponent({
   align-items: center;
 
   padding: 1.6rem 2.4rem;
+
+  &--readonly &__coin {
+    cursor: default;
+  }
+
+  &--readonly &__coin-image {
+    cursor: default;
+  }
 
   &__coin {
     flex-shrink: 0;
