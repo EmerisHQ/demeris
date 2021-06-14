@@ -35,9 +35,9 @@
         </div>
 
         <div class="withdraw-liquidity__content">
-          <div class="withdraw-liquidity__input supply-input elevation-card">
+          <div class="withdraw-liquidity__input amount-input elevation-card">
             <div class="withdraw-liquidity__input__main">
-              <label class="withdraw-liquidity__input__label s-minus">Supply</label>
+              <label class="withdraw-liquidity__input__label s-minus">Withdraw</label>
               <div>
                 <DenomSelect
                   v-model:amount="state.amount"
@@ -211,7 +211,7 @@ export default {
     padding: 0;
   }
 
-  &__input.supply-input {
+  &__input.amount-input {
     .denom-select__coin-from {
       display: none;
     }
@@ -328,7 +328,7 @@ export default {
     border-radius: 1rem;
     background: var(--bg);
 
-    &.supply-input {
+    &.amount-input {
       margin-top: 3.2rem;
     }
 
