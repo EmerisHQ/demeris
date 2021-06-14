@@ -181,6 +181,7 @@ export default defineComponent({
     function gobackFunc() {
       alert('goback');
     }
+    
     function setConterPairCoinAmount(e) {
       if (e.includes('Pay')) {
         data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);

@@ -121,6 +121,7 @@ export default defineComponent({
     position: absolute;
     top: 2rem;
     right: 2rem;
+    z-index: 40;
   }
 
   &__wrapper {
