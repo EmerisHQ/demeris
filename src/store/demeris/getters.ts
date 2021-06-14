@@ -72,6 +72,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.keplr?.name ?? null;
   },
   getOwnAddress: (state) => (params) => {
+    console.log(state);
     return (
       chainAddressfromAddress(
         state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,

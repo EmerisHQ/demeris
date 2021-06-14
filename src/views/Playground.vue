@@ -61,6 +61,9 @@
           <Button name="Send Message" @click="sendMessage" />
         </div>
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Send Transaction From Step" @click="sendStepTx" />
+        </div>
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Open Confirmation" @click="modalIsOpen = 'confirmation'" />
           <Confirmation
             :open="modalIsOpen === 'confirmation'"
@@ -126,6 +129,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
+import { msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -203,10 +207,29 @@ export default defineComponent({
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       console.log(result);
     };
+    const sendStepTx = async () => {
+      let res = await msgFromStepTransaction({
+        name: 'transfer',
+        status: 'pending',
+        data: {
+          amount: { denom: 'uatom', amount: 20 },
+          chain_name: 'cosmos-hub',
+          to_address: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+        },
+      });
+      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+        msgs: [res],
+        chain_name: 'cosmos-hub',
+        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
+        memo: 'a memo',
+      });
+      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+      console.log(result);
+    };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
 
-    return { balances, pools, address, modalIsOpen, sendMessage };
+    return { balances, pools, address, modalIsOpen, sendMessage, sendStepTx };
   },
 });
 </script>

@@ -1,3 +1,4 @@
+import { EncodeObject } from '@cosmjs/proto-signing';
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
@@ -985,7 +986,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
   return steps;
 }
-export async function msgFromStepTransaction(stepTx: Actions.StepTransaction) {
+export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<EncodeObject> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
     const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {

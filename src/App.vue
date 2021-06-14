@@ -34,9 +34,17 @@ export default defineComponent({
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
     });
-    await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
-      subscribe: true,
+    let chains = await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
+      subscribe: false,
     });
+    for (let chain in chains) {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+    }
     await this.$store.dispatch('common/env/config', {
       apiNode: 'https://dev.demeris.io/v1/liquidity',
       rpcNode: null,
