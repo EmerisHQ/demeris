@@ -12,7 +12,7 @@ export default function useAccount() {
       return TEST_DATA.balances;
     }
 
-    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] });
+    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
   });
 
   const balancesByDenom = (denom: string) => {
