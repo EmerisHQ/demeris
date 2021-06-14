@@ -179,6 +179,8 @@ export default defineComponent({
       height: 2.4rem;
       
       margin: 0.4rem;
+
+      border-radius: 50%;
     }
 
     .circle-border {
