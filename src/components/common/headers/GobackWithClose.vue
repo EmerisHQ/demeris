@@ -5,7 +5,7 @@
     </div>
     <div class="space"></div>
     <div class="icon-wrapper" @click="clickIcon('close')">
-      <Icon :name="'CloseIcon'" class="icon" :icon-size="1.4" />
+      <Icon :name="'CloseIcon'" class="icon" :icon-size="1.6" />
     </div>
   </div>
 </template>
