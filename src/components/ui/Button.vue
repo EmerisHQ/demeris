@@ -52,6 +52,11 @@ export default defineComponent({
   background-color: var(--text);
 }
 
+.secondary {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
 .muted {
   background-color: var(--muted);
 }

@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/pools',
-    name: 'Pool',
+    name: 'Pools',
     component: () => import('@/views/Pools.vue'),
   },
   {
