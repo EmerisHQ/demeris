@@ -10,14 +10,48 @@
           <ErrorIcon />
         </div>
       </div>
-      <div class="status__title-sub s-0 w-normal">{{ displayData.subTitle }}</div>
+      <div class="status__title-sub w-normal" :class="status === 'keplr-error' ? 's-minus' : 's-0'">
+        {{ displayData.subTitle }}
+      </div>
       <div class="status__title s-2 w-bold">{{ displayData.title }}</div>
 
       <div class="status__detail">
-        <div class="spacer" />
+        <div v-if="status === 'tx-wait' || status === 'keplr-sign'" class="spacer" />
+        <div v-else-if="status === 'keplr-open'" class="status__detail-text s-0 w-medium l-solid">
+          {{ displayData.detail1 }}
+        </div>
+        <a
+          v-else-if="status === 'keplr-launch-error' || status === 'keplr-sign-error'"
+          href="https://faq.keplr.app/"
+          target="_blank"
+          class="status__detail-link s-0 w-medium l-solid"
+        >{{ displayData.detail }}</a>
+        <div v-else class="status__detail-text-weak">{{ displayData.detail1 }}</div>
       </div>
 
-      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
+      <Button
+        v-if="displayData.blackButton"
+        :name="displayData.blackButton"
+        :status="'normal'"
+        :click-function="setStep"
+        :style="{ marginBottom: `${displayData.blackButton && displayData.whiteButton ? '2.4rem' : ''}` }"
+      />
+      <Button
+        v-if="displayData.whiteButton"
+        :name="displayData.whiteButton"
+        :status="'normal'"
+        :click-function="setStep"
+        :is-outline="true"
+      />
+
+      <div v-if="displayData.detail2">
+        <a
+          href="https://faq.keplr.app/"
+          target="_blank"
+          class="s-0 w-medium l-solid"
+          style="padding: 4rem 0 1.6rem; display: block"
+        >{{ displayData.detail2 }}</a>
+      </div>
     </div>
   </Modal>
 </template>
@@ -53,7 +87,7 @@ export default defineComponent({
     const displayData = reactive({
       iconType: {
         pending: 'pending',
-        warn: 'warning',
+        warning: 'warning',
         error: 'error',
       },
       displayData: computed(() => {
@@ -61,7 +95,10 @@ export default defineComponent({
           iconType: '',
           title: '',
           subTitle: '',
-          detail: '',
+          detail1: '',
+          detail2: '',
+          blackButton: '',
+          whiteButton: '',
         };
 
         switch (props.status) {
@@ -69,29 +106,36 @@ export default defineComponent({
             displayInfo.iconType = displayData.iconType.pending;
             displayInfo.title = 'Sign transaction';
             displayInfo.subTitle = 'Opening Keplr';
+            displayInfo.whiteButton = 'Cancel';
             break;
           case 'keplr-open':
             displayInfo.iconType = displayData.iconType.pending;
             displayInfo.title = 'Sign transaction';
             displayInfo.subTitle = 'Opening Keplr';
-            displayInfo.detail = 'Having trouble opening Keplr?';
+            displayInfo.detail1 = 'Having trouble opening Keplr?';
+            displayInfo.blackButton = 'Open Keplr';
+            displayInfo.whiteButton = 'Cancel';
             break;
           case 'keplr-launch-error':
-            displayInfo.iconType = displayData.iconType.warn;
+            displayInfo.iconType = displayData.iconType.warning;
             displayInfo.title = 'Keplr cannot launch';
-            displayInfo.detail = 'Keplr troubleshooting ↗️';
+            displayInfo.detail1 = 'Keplr troubleshooting ↗️';
+            displayInfo.blackButton = 'Try again';
             break;
           case 'keplr-sign-error':
-            displayInfo.iconType = displayData.iconType.warn;
+            displayInfo.iconType = displayData.iconType.warning;
             displayInfo.title = 'Transaction not signed';
-            displayInfo.detail = 'Keplr troubleshooting ↗️';
+            displayInfo.detail1 = 'Keplr troubleshooting ↗️';
+            displayInfo.blackButton = 'Open keplr';
             break;
           case 'keplr-error':
             //TODO: error code
             displayInfo.iconType = displayData.iconType.error;
             displayInfo.title = 'There was an error with Keplr';
             displayInfo.subTitle = 'Transaction failed';
-            displayInfo.detail = 'Error code XXXX';
+            displayInfo.detail1 = 'Error code XXXX';
+            displayInfo.blackButton = 'Try again';
+            displayInfo.detail2 = 'Get support ↗️';
             break;
           case 'tx-wait':
             displayInfo.iconType = displayData.iconType.pending;
@@ -102,7 +146,7 @@ export default defineComponent({
             displayInfo.iconType = displayData.iconType.error;
             displayInfo.title = 'Transaction failed';
             displayInfo.subTitle = 'ATOM -> LUNA on Cosmos Hub';
-            displayInfo.detail = 'Your 551.56 ATOM could not be swapped to LUNA.';
+            displayInfo.detail1 = 'Your 551.56 ATOM could not be swapped to LUNA.';
             break;
         }
 
@@ -117,6 +161,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .status {
   text-align: center;
+
+  &__title-sub {
+    color: var(--muted);
+  }
 
   &__icon {
     display: flex;
@@ -138,6 +186,24 @@ export default defineComponent({
   &__detail {
     .spacer {
       height: 8.8rem;
+    }
+
+    &-text,
+    &-link {
+      padding: 4rem 0 3.2rem;
+    }
+
+    &-text {
+      color: var(--text);
+    }
+
+    &-text-weak {
+      color: var(--muted);
+      padding: 1.6rem 0 3.2rem;
+    }
+
+    &-link {
+      display: block;
     }
   }
 }

@@ -1,7 +1,11 @@
 <template>
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
-    <button :class="status" class="button s-0 w-medium elevation-button" @click="clickFunction">
+    <button
+      :class="[status, isOutline ? 'outline-theme' : '']"
+      class="button s-0 w-medium elevation-button"
+      @click="clickFunction"
+    >
       {{ name }}
     </button>
     <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
@@ -19,6 +23,7 @@ export default defineComponent({
     status: { type: String, required: false, default: 'normal' },
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
+    isOutline: { type: Boolean, required: false, default: false },
   },
   setup(props) {
     const buttonTooltipRef = ref(null);
@@ -64,5 +69,11 @@ export default defineComponent({
 .button-tooltip {
   display: block;
   height: 0;
+}
+
+.outline-theme {
+  color: var(--text);
+  border: 1px solid var(--border-trans);
+  background-color: transparent;
 }
 </style>
