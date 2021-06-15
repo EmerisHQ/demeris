@@ -2,7 +2,13 @@
   <Modal :variant="'bottom'" :show-close-button="false" @close="emit('close')">
     <div class="status">
       <div class="status__icon">
-        <Spinner :size="3.2" />
+        <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
+        <div v-else-if="displayData.iconType === iconType.warning" class="status__icon-warning">
+          <WarningIcon />
+        </div>
+        <div v-else class="status__icon-error">
+          <ErrorIcon />
+        </div>
       </div>
       <div class="status__title-sub s-0 w-normal">{{ displayData.subTitle }}</div>
       <div class="status__title s-2 w-bold">{{ displayData.title }}</div>
@@ -19,9 +25,11 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
 
+import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
+import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
-import Spinner from '@/components/ui/Spinner.vue';
+import SpinnerIcon from '@/components/ui/Spinner.vue';
 
 type Status =
   | 'keplr-sign'
@@ -34,7 +42,7 @@ type Status =
 
 export default defineComponent({
   name: 'SigningModal',
-  components: { Modal, Spinner, Button },
+  components: { Modal, SpinnerIcon, WarningIcon, ErrorIcon, Button },
   props: {
     status: {
       type: String as PropType<Status>,
@@ -45,53 +53,53 @@ export default defineComponent({
     const displayData = reactive({
       iconType: {
         pending: 'pending',
-        warn: 'warn',
+        warn: 'warning',
         error: 'error',
       },
       displayData: computed(() => {
         let displayInfo = {
+          iconType: '',
           title: '',
-          icon: '',
           subTitle: '',
           detail: '',
         };
 
         switch (props.status) {
           case 'keplr-sign':
-            displayInfo.icon = displayData.iconType.pending;
+            displayInfo.iconType = displayData.iconType.pending;
             displayInfo.title = 'Sign transaction';
             displayInfo.subTitle = 'Opening Keplr';
             break;
           case 'keplr-open':
-            displayInfo.icon = displayData.iconType.pending;
+            displayInfo.iconType = displayData.iconType.pending;
             displayInfo.title = 'Sign transaction';
             displayInfo.subTitle = 'Opening Keplr';
             displayInfo.detail = 'Having trouble opening Keplr?';
             break;
           case 'keplr-launch-error':
-            displayInfo.icon = displayData.iconType.warn;
+            displayInfo.iconType = displayData.iconType.warn;
             displayInfo.title = 'Keplr cannot launch';
             displayInfo.detail = 'Keplr troubleshooting ↗️';
             break;
           case 'keplr-sign-error':
-            displayInfo.icon = displayData.iconType.warn;
+            displayInfo.iconType = displayData.iconType.warn;
             displayInfo.title = 'Transaction not signed';
             displayInfo.detail = 'Keplr troubleshooting ↗️';
             break;
           case 'keplr-error':
             //TODO: error code
-            displayInfo.icon = displayData.iconType.error;
+            displayInfo.iconType = displayData.iconType.error;
             displayInfo.title = 'There was an error with Keplr';
             displayInfo.subTitle = 'Transaction failed';
             displayInfo.detail = 'Error code XXXX';
             break;
           case 'tx-wait':
-            displayInfo.icon = displayData.iconType.pending;
+            displayInfo.iconType = displayData.iconType.pending;
             displayInfo.title = 'Please wait';
             displayInfo.subTitle = 'Transaction in progress';
             break;
           case 'tx-fail':
-            displayInfo.icon = displayData.iconType.error;
+            displayInfo.iconType = displayData.iconType.error;
             displayInfo.title = 'Transaction failed';
             displayInfo.subTitle = 'ATOM -> LUNA on Cosmos Hub';
             displayInfo.detail = 'Your 551.56 ATOM could not be swapped to LUNA.';
@@ -113,8 +121,18 @@ export default defineComponent({
   &__icon {
     display: flex;
     justify-content: center;
-
+    align-items: center;
     padding: 2.4rem 0;
+
+    &-warning {
+      font-size: 4.2rem;
+      color: var(--warning);
+    }
+
+    &-error {
+      font-size: 3.2rem;
+      color: var(--negative-text);
+    }
   }
 
   &__detail {
