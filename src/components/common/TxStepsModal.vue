@@ -69,7 +69,7 @@
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
     </div>
-    <SigningModal></SigningModal>
+    <SigningModal v-if="isSigningModalOpen" @close="toggleSigningModal" />
   </div>
 </template>
 <script lang="ts">
@@ -121,6 +121,11 @@ export default defineComponent({
       },
       setStep: () => {
         processData.currentStep += 1;
+      },
+      isSigningModalOpen: true,
+
+      toggleSigningModal: () => {
+        processData.isSigningModalOpen = !processData.isSigningModalOpen;
       },
     });
 
