@@ -1097,8 +1097,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     return { msg, chain_name, registry };
   }
 }
-export async function getFeeForChain(chain_name: string): Promise<number> {
-  const fee =
+export async function getFeeForChain(chain_name: string): Promise<Actions.FeeWDenom> {
+  const amount =
     store.getters['demeris/getFee']({
       chain_name,
     }) ??
@@ -1112,16 +1112,79 @@ export async function getFeeForChain(chain_name: string): Promise<number> {
       },
       { root: true },
     ));
-  return fee;
+  const denoms =
+    store.getters['demeris/getFeeTokens']({
+      chain_name,
+    }) ??
+    (await store.dispatch(
+      'demeris/GET_FEE_TOKENS',
+      {
+        subscribe: false,
+        params: {
+          chain_name,
+        },
+      },
+      { root: true },
+    ));
+  return { amount, denom: denoms[0] };
+}
+export async function isLive(chain_name) {
+  const status =
+    store.getters['demeris/getChainStatus']({
+      chain_name,
+    }) ??
+    (await store.dispatch(
+      'demeris/GET_CHAIN_STATUS',
+      {
+        subscribe: false,
+        params: {
+          chain_name,
+        },
+      },
+      { root: true },
+    ));
+  return status;
 }
 
-export async function feeForStep(step: Actions.StepTransaction): Promise<number> {
-  switch (step.name) {
-    case 'ibc_backward':
-      return await getFeeForChain((step.data as Actions.IBCBackwardsData).from_chain);
-    case 'ibc_forward':
-      return await getFeeForChain((step.data as Actions.IBCForwardsData).from_chain);
-    case 'swap':
-      return await getFeeForChain(store.getters['demeris/getDexChain']);
+export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.FeeWDenom> {
+  if (stepTx.name == 'transfer') {
+    const chain_name = (stepTx.data as Actions.TransferData).chain_name;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
   }
+  if (stepTx.name == 'ibc_backward') {
+    const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'ibc_forward') {
+    const chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'addliquidity') {
+    const chain_name = store.getters['demeris/getDexChain'];
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'withdrawliquidity') {
+    const chain_name = store.getters['demeris/getDexChain'];
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'swap') {
+    const chain_name = store.getters['demeris/getDexChain'];
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+}
+export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel): Promise<Actions.FeeTotals> {
+  let feeTotals;
+  for (const stepTx of step.transactions) {
+    const fee = await feeForStepTransaction(stepTx);
+    feeTotals[fee.denom]
+      ? (feeTotals[fee.denom] = feeTotals[fee.denom] + BigInt(fee.amount[feeLevel]))
+      : (feeTotals[fee.denom] = BigInt(fee.amount[feeLevel]));
+  }
+  return feeTotals;
 }

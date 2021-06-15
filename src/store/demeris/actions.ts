@@ -498,7 +498,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
     }
-    return getters['getChainStatus'](JSON.stringify(params));
+    return getters['getChainStatus'](params);
   },
 
   async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name }: DemerisTxParams) {
