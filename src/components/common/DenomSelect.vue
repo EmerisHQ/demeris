@@ -1,5 +1,5 @@
 <template>
-  <div class="denom-select" :class="{ 'denom-select--readonly': readonly }">
+  <div class="denom-select" :class="{ 'denom-select--readonly': readonly, 'denom-select--empty': !hasOptions }">
     <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
@@ -17,7 +17,7 @@
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         {{ $filters.getCoinName(selectedDenom?.base_denom) }}
-        <Icon v-if="!readonly" name="SmallDownIcon" :icon-size="1.6" />
+        <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
     </div>
@@ -33,6 +33,7 @@
       <input
         :value="amount"
         :class="isOver ? 'over' : ''"
+        :readonly="readonly"
         class="denom-select__coin-amount-input s-1"
         type="number"
         placeholder="0"
@@ -77,6 +78,10 @@ export default defineComponent({
       return props?.selectedDenom === null ? false : true;
     });
 
+    const hasOptions = computed(() => {
+      return props.assets.length > 0;
+    });
+
     const coinImage = computed(() => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -92,10 +97,9 @@ export default defineComponent({
     const isOpen = ref(false);
 
     function toggleDenomSelectModal() {
-      if (props.readonly) {
+      if (!hasOptions.value || props.readonly) {
         return;
       }
-
       isOpen.value = !isOpen.value;
       emit('modalToggle', isOpen.value);
     }
@@ -106,7 +110,7 @@ export default defineComponent({
     }
 
     console.log(props.assets);
-    return { inputAmount, isSelected, isOpen, coinImage, toggleDenomSelectModal, denomSelectHandler };
+    return { inputAmount, isSelected, isOpen, coinImage, hasOptions, toggleDenomSelectModal, denomSelectHandler };
   },
 });
 </script>
@@ -117,11 +121,11 @@ export default defineComponent({
 
   padding: 1.6rem 2.4rem;
 
-  &--readonly &__coin {
+  &--empty &__coin {
     cursor: default;
   }
 
-  &--readonly &__coin-image {
+  &--empty &__coin-image {
     cursor: default;
   }
 

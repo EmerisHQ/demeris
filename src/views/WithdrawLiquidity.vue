@@ -44,7 +44,6 @@
                   :input-header="``"
                   :selected-denom="tokenAsset"
                   :assets="[]"
-                  :readonly="true"
                   @select="() => void 0"
                 />
               </div>
