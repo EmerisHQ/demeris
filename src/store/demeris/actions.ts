@@ -5,6 +5,7 @@ import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
+import { Amount } from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
 
 import {
@@ -28,9 +29,14 @@ export type DemerisTxParams = {
   tx: string;
   chain_name: string;
 };
+export type GasFee = {
+  amount: Array<Amount>;
+  gas: string;
+};
 export type DemerisSignParams = {
   msgs: Array<EncodeObject>;
   chain_name: string;
+  fee: GasFee;
   registry: Registry;
   memo?: string;
 };
@@ -270,7 +276,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, registry, memo }) {
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
     try {
       let chain = getters['getChain']({
         chain_name,
@@ -293,18 +299,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
-      const feeToken =
-        getters['getFeeTokens']({ chain_name }) ??
-        (await dispatch(DemerisActionTypes.GET_FEE_TOKENS, { subscribe: false, params: { chain_name } }));
-
-      const feeUSD =
-        getters['getBaseFee']({ chain_name }) ??
-        (await dispatch(DemerisActionTypes.GET_FEE, { subscribe: false, params: { chain_name } }));
-      const fee = {
-        amount: [{ amount: '100000', denom: 'uatom' }],
-        gas: '200000',
-      };
-      console.log(fee);
       const numbers =
         getters['getNumbers']({ address: keyHashfromAddress(account.address) }) ??
         (await dispatch(DemerisActionTypes.GET_NUMBERS, {

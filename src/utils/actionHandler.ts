@@ -14,7 +14,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
     output: {
       amount: {
         denom: '',
-        amount: 0,
+        amount: '0',
       },
       chain_name: '',
     },
@@ -89,7 +89,7 @@ export async function transfer({
     output: {
       amount: {
         denom: '',
-        amount: 0,
+        amount: '0',
       },
       chain_name: '',
     },
@@ -266,7 +266,7 @@ export async function move({
     output: {
       amount: {
         denom: '',
-        amount: 0,
+        amount: '0',
       },
       chain_name: '',
     },
@@ -440,7 +440,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
     output: {
       amount: {
         denom: '',
-        amount: 0,
+        amount: '0',
       },
       chain_name: '',
     },
@@ -621,7 +621,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
     output: {
       amount: {
         denom: '',
-        amount: 0,
+        amount: '0',
       },
       chain_name: '',
     },
@@ -1090,7 +1090,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         offerCoin: data.from.denom,
         demandCoinDenom: data.to.denom,
         offerCoinFee: 0,
-        orderPrice: '' + price[0].amount / price[1].amount,
+        orderPrice: (BigInt(price[0].amount) / BigInt(price[1].amount)).toString(),
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];

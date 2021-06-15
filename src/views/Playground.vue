@@ -128,8 +128,8 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { Pool } from '@/types/actions';
-import { msgFromStepTransaction } from '@/utils/actionHandler';
+import { FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { feeForStepTransaction,msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -198,9 +198,14 @@ export default defineComponent({
           fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
         },
       });
+      const fee = {
+        amount: [{ amount: '20', denom: 'uatom' }],
+        gas: '20000',
+      };
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res],
         chain_name: 'cosmos-hub',
+        fee,
         registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
         memo: 'a memo',
       });
@@ -208,18 +213,25 @@ export default defineComponent({
       console.log(result);
     };
     const sendStepTx = async () => {
-      let res = await msgFromStepTransaction({
+      const stepTx = {
         name: 'transfer',
         status: 'pending',
         data: {
-          amount: { denom: 'uatom', amount: 20 },
+          amount: { denom: 'uatom', amount: '20' },
           chain_name: 'cosmos-hub',
           to_address: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
         },
-      });
+      };
+      let res = await msgFromStepTransaction(stepTx as StepTransaction);
+      const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
+      const fee = {
+        amount: [{ amount: feeOptions.amount[FeeLevel.AVERAGE], denom: feeOptions.denom }],
+        gas: '20000',
+      };
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res.msg],
         chain_name: res.chain_name,
+        fee,
         registry: res.registry,
         memo: 'a memo',
       });
