@@ -5,6 +5,9 @@
 
     <div class="space"></div>
     <div class="header__wallet">
+      <div class="header__wallet-button__icon">
+        <RedeemButton />
+      </div>
       <router-link class="header__wallet-button" to="/receive">
         <div class="header__wallet-button__icon">
           <ReceiveIcon />
@@ -31,6 +34,7 @@
 import { defineComponent } from 'vue';
 
 import Wallet from '@/components/account/Wallet.vue';
+import RedeemButton from '@/components/common/headers/RedeemButton.vue';
 import Logo from '@/components/layout/Logo.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 
@@ -44,6 +48,7 @@ export default defineComponent({
     Navbar,
     Wallet,
     ReceiveIcon,
+    RedeemButton,
     SendIcon,
     MenuIcon,
   },
