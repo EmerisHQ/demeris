@@ -177,14 +177,14 @@ export default defineComponent({
         from: {
           amount: {
             denom: 'uatom',
-            amount: 2000000,
+            amount: '2000000',
           },
           chain_name: 'cosmos',
         },
         to: {
           amount: {
             denom: 'uluna',
-            amount: 2000000,
+            amount: '2000000',
           },
           chain_name: 'terra',
         },
