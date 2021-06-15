@@ -218,9 +218,9 @@ export default defineComponent({
         },
       });
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-        msgs: [res],
-        chain_name: 'cosmos-hub',
-        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
+        msgs: [res.msg],
+        chain_name: res.chain_name,
+        registry: res.registry,
         memo: 'a memo',
       });
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);

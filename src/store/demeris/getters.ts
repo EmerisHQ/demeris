@@ -16,6 +16,7 @@ export type Getters = {
   getPrices(state: State): any; //TODO prices
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
+  getDexChain(state: State): string;
   getKeplrAccountName(state: State): string | null;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
@@ -70,6 +71,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getKeplrAccountName: (state) => {
     return state.keplr?.name ?? null;
+  },
+  getDexChain: (state) => {
+    return 'cosmos-hub'; //TODO
   },
   getOwnAddress: (state) => (params) => {
     console.log(state);

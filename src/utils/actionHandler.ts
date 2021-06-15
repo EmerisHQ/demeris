@@ -1,4 +1,3 @@
-import { EncodeObject } from '@cosmjs/proto-signing';
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
@@ -449,7 +448,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
 
   if (isNative(amount.denom)) {
     // If NOT an IBC denom
-    if (chain_name == 'gaia') {
+    if (chain_name == store.getters['demeris/getDexChain']) {
       // If already native to the hub, do nothing
       result.output = { amount, chain_name };
       return result;
@@ -459,13 +458,13 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
         const primaryChannel =
           store.getters['demeris/getPrimaryChannel']({
             chain_name: chain_name,
-            destination_chain_name: 'gaia',
+            destination_chain_name: store.getters['demeris/getDexChain'],
           }) ??
           (await store.dispatch(
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: chain_name, destination_chain_name: 'gaia' },
+              params: { chain_name: chain_name, destination_chain_name: store.getters['demeris/getDexChain'] },
             },
             { root: true },
           ));
@@ -475,7 +474,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
           data: {
             amount: amount,
             from_chain: chain_name,
-            to_chain: 'gaia',
+            to_chain: store.getters['demeris/getDexChain'],
             through: primaryChannel.channel_name,
           },
         });
@@ -485,7 +484,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
             amount: amount.amount,
             denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
           },
-          chain_name: 'gaia',
+          chain_name: store.getters['demeris/getDexChain'],
         };
         return result;
       } else {
@@ -507,18 +506,21 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
     //  If we cannot verify the trace, throw error
     throw new Error('Trace not verified');
   }
-  if (verifyTrace.trace.length == 1 && chain_name == 'gaia') {
+  if (verifyTrace.trace.length == 1 && chain_name == store.getters['demeris/getDexChain']) {
     // if we can verify the trace and denom is 1-hop on the hub, check what the primary channel is for the source-chain to the hub
     const primaryChannel =
       store.getters['demeris/getPrimaryChannel']({
         chain_name: verifyTrace.trace[0].counterparty_name,
-        destination_chain_name: 'gaia',
+        destination_chain_name: store.getters['demeris/getDexChain'],
       }) ??
       (await store.dispatch(
         'demeris/GET_PRIMARY_CHANNEL',
         {
           subscribe: true,
-          params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: 'gaia' },
+          params: {
+            chain_name: verifyTrace.trace[0].counterparty_name,
+            destination_chain_name: store.getters['demeris/getDexChain'],
+          },
         },
         { root: true },
       ));
@@ -545,7 +547,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: 'gaia',
+          to_chain: store.getters['demeris/getDexChain'],
           through: primaryChannel.channel_name,
         },
       });
@@ -554,7 +556,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
           amount: amount.amount,
           denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
         },
-        chain_name: 'gaia',
+        chain_name: store.getters['demeris/getDexChain'],
       };
       return result;
     }
@@ -568,13 +570,16 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
       const primaryChannel =
         store.getters['demeris/getPrimaryChannel']({
           chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: 'gaia',
+          destination_chain_name: store.getters['demeris/getDexChain'],
         }) ??
         (await store.dispatch(
           'demeris/GET_PRIMARY_CHANNEL',
           {
             subscribe: true,
-            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: 'gaia' },
+            params: {
+              chain_name: verifyTrace.trace[0].counterparty_name,
+              destination_chain_name: store.getters['demeris/getDexChain'],
+            },
           },
           { root: true },
         ));
@@ -594,7 +599,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: 'gaia',
+          to_chain: store.getters['demeris/getDexChain'],
           through: primaryChannel.channel_name,
         },
       });
@@ -604,7 +609,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
           amount: amount.amount,
           denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
         },
-        chain_name: 'gaia',
+        chain_name: store.getters['demeris/getDexChain'],
       };
       return result;
     }
@@ -624,7 +629,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
 
   if (isNative(amount.denom)) {
     // If NOT an IBC denom
-    if (chain_name == 'gaia') {
+    if (chain_name == store.getters['demeris/getDexChain']) {
       // We're already on the hub, do nothing
       result.output = {
         amount,
@@ -634,14 +639,14 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
     } else {
       const primaryChannel =
         store.getters['demeris/getPrimaryChannel']({
-          chain_name: 'gaia',
+          chain_name: store.getters['demeris/getDexChain'],
           destination_chain_name: chain_name,
         }) ??
         (await store.dispatch(
           'demeris/GET_PRIMARY_CHANNEL',
           {
             subscribe: true,
-            params: { chain_name: 'gaia', destination_chain_name: chain_name },
+            params: { chain_name: store.getters['demeris/getDexChain'], destination_chain_name: chain_name },
           },
           { root: true },
         ));
@@ -650,7 +655,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
         status: 'pending',
         data: {
           amount: amount,
-          from_chain: 'gaia',
+          from_chain: store.getters['demeris/getDexChain'],
           to_chain: chain_name,
           through: primaryChannel.channel_name,
         },
@@ -687,7 +692,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
         status: 'pending',
         data: {
           amount: amount,
-          from_chain: 'gaia',
+          from_chain: store.getters['demeris/getDexChain'],
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -720,7 +725,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
         status: 'pending',
         data: {
           amount: amount,
-          from_chain: 'gaia',
+          from_chain: store.getters['demeris/getDexChain'],
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -789,7 +794,7 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
         amount: 0,
         denom: to.denom,
       },
-      chain_name: 'gaia',
+      chain_name: store.getters['demeris/getDexChain'],
     };
     return result;
   } else {
@@ -919,7 +924,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.from.amount.denom,
           },
           chain_name: params.from.chain_name,
-          destination_chain_name: 'gaia',
+          destination_chain_name: store.getters['demeris/getDexChain'],
         });
 
         steps.push({ name: 'transfer', transactions: [...transferToHubStep.steps] });
@@ -943,7 +948,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: 'gaia',
+          destination_chain_name: store.getters['demeris/getDexChain'],
         });
         steps.push({ name: 'transfer', transactions: [...transferCoinAtoHub.steps] });
         const transferCoinBtoHub = await move({
@@ -952,7 +957,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: 'gaia',
+          destination_chain_name: store.getters['demeris/getDexChain'],
         });
         steps.push({ name: 'transfer', transactions: [...transferCoinBtoHub.steps] });
         const addLiquidityStep = await addLiquidity({
@@ -970,7 +975,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.poolCoin.amount.denom,
           },
           chain_name: params.poolCoin.chain_name,
-          destination_chain_name: 'gaia',
+          destination_chain_name: store.getters['demeris/getDexChain'],
         });
         steps.push({ name: 'transfer', transactions: [...transferPoolCointoHub.steps] });
         const withdrawLiquidityStep = await withdrawLiquidity({
@@ -986,7 +991,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
   return steps;
 }
-export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<EncodeObject> {
+export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
     const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
@@ -996,7 +1001,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         fromAddress: store.getters['demeris/getOwnAddress']({ chain_name: data.chain_name }),
       },
     });
-    return msg;
+    const registry = stores.getters['cosmos.bank.v1beta1/getRegistry'];
+    return { msg, chain_name: data.chain_name, registry };
   }
 
   if (stepTx.name == 'ibc_forward') {
@@ -1017,7 +1023,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         token: data.amount,
       },
     });
-    return msg;
+    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    return { msg, chain_name: data.from_chain, registry };
   }
 
   if (stepTx.name == 'ibc_backward') {
@@ -1038,31 +1045,37 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         token: data.amount,
       },
     });
-    return msg;
+    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
+    const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.AddLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
-        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins: [data.coinA, data.coinB],
       },
     });
-    return msg;
+    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
+    const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
-        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins: [data.poolCoin],
       },
     });
-    return msg;
+    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
+    const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.SwapData;
     const price = [data.from, data.to].sort((a, b) => {
       if (a.denom < b.denom) return -1;
@@ -1071,7 +1084,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: {
-        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }), // TODO: change to liq module chain
+        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         swapTypeId: data.pool.typeId,
         offerCoin: data.from.denom,
@@ -1080,7 +1093,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         orderPrice: '' + price[0].amount / price[1].amount,
       },
     });
-    return msg;
+    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    return { msg, chain_name, registry };
   }
 }
 export async function getFeeForChain(chain_name: string): Promise<number> {
@@ -1108,6 +1122,6 @@ export async function feeForStep(step: Actions.StepTransaction): Promise<number>
     case 'ibc_forward':
       return await getFeeForChain((step.data as Actions.IBCForwardsData).from_chain);
     case 'swap':
-      return await getFeeForChain('gaia');
+      return await getFeeForChain(store.getters['demeris/getDexChain']);
   }
 }

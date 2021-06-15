@@ -1,3 +1,4 @@
+import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { Pool } from '@starport/tendermint-liquidity-js/tendermint/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/liquidity';
 
 import * as Base from './base';
@@ -97,3 +98,8 @@ export type MoveAssetsForm = {
 };
 
 export type { Pool };
+export type MsgMeta = {
+  msg: EncodeObject;
+  chain_name: string;
+  registry: Registry;
+};
