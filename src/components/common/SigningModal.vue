@@ -1,5 +1,5 @@
 <template>
-  <Modal :variant="'bottom'" :show-close-button="false" @close="emit('close')">
+  <Modal :variant="'bottom'" :show-close-button="false" @close="emitClose">
     <div class="status">
       <div class="status__icon">
         <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
@@ -170,11 +170,16 @@ export default defineComponent({
         return displayInfo;
       }),
     });
-    function cancel() {
-      alert('cancel');
+
+    function emitClose() {
       emit('close');
     }
-    return { ...toRefs(displayData), cancel };
+
+    function cancel() {
+      alert('cancel');
+      emitClose();
+    }
+    return { ...toRefs(displayData), cancel, emitClose };
   },
 });
 </script>
