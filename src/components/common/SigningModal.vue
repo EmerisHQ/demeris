@@ -25,7 +25,9 @@
           href="https://faq.keplr.app/"
           target="_blank"
           class="status__detail-link s-0 w-medium l-solid"
-        >{{ displayData.detail }}</a>
+        >
+          {{ displayData.detail }}
+        </a>
         <div v-else class="status__detail-text-weak">{{ displayData.detail1 }}</div>
       </div>
 
@@ -33,14 +35,14 @@
         v-if="displayData.blackButton"
         :name="displayData.blackButton"
         :status="'normal'"
-        :click-function="setStep"
+        :click-function="blackButtonFunc"
         :style="{ marginBottom: `${displayData.blackButton && displayData.whiteButton ? '2.4rem' : ''}` }"
       />
       <Button
         v-if="displayData.whiteButton"
         :name="displayData.whiteButton"
         :status="'normal'"
-        :click-function="setStep"
+        :click-function="cancel"
         :is-outline="true"
       />
 
@@ -50,7 +52,9 @@
           target="_blank"
           class="s-0 w-medium l-solid"
           style="padding: 4rem 0 1.6rem; display: block"
-        >{{ displayData.detail2 }}</a>
+        >
+          {{ displayData.detail2 }}
+        </a>
       </div>
     </div>
   </Modal>
@@ -82,8 +86,21 @@ export default defineComponent({
       type: String as PropType<Status>,
       default: 'keplr-sign',
     },
+    blackButtonFunc: {
+      type: Function,
+      default: () => {
+        return;
+      },
+    },
+    whiteButtonFunc: {
+      type: Function,
+      default: () => {
+        return;
+      },
+    },
   },
-  setup(props) {
+  emits: ['close'],
+  setup(props, { emit }) {
     const displayData = reactive({
       iconType: {
         pending: 'pending',
@@ -153,7 +170,11 @@ export default defineComponent({
         return displayInfo;
       }),
     });
-    return { ...toRefs(displayData) };
+    function cancel() {
+      alert('cancel');
+      emit('close');
+    }
+    return { ...toRefs(displayData), cancel };
   },
 });
 </script>
