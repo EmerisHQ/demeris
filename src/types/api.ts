@@ -27,6 +27,10 @@ export type Denom = {
   precision: string;
   name: string;
   verified: boolean;
+  stakable: boolean;
+  fee_token: boolean;
+  ticker: string;
+  fetch_price: boolean;
 };
 
 // Helper type to hold Bech32 config information
@@ -38,6 +42,12 @@ export type Bech32Config = {
   prefix_consensus: string;
   prefix_public: string;
   prefix_operator: string;
+  acc_addr: string;
+  acc_pub: string;
+  val_addr: string;
+  val_pub: string;
+  cons_addr: string;
+  cons_pub: string;
 };
 
 //Helper type to hold primary channel information for a chain
@@ -118,16 +128,18 @@ export type NodeInfo = {
 };
 export type Chain = {
   chain_name: string;
+  enabled?: boolean;
   display_name: string;
   logo?: string;
-  native_denoms?: Array<Denom>;
-  fee_tokens?: Array<Denom>;
-  fee_address?: string;
+  denoms?: Array<Denom>;
+  counterparty_names?: Record<string, string>;
+  primary_channel?: Record<string, string>;
+  demeris_addresses?: Array<string>;
   price_modifier?: number;
-  base_ibc_fee?: Fee;
-  base_fee?: Fee;
+  base_tx_fee?: Fee;
   genesis_hash?: string;
   node_info?: NodeInfo;
+  derivation_path?: string;
 };
 export type ChainResponse = {
   chain: Chain;

@@ -14,7 +14,8 @@
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
     "@babel/plugin-proposal-optional-chaining": "^7.13.12",
-    "@starport/client-js": "^0.1.47",
+    "@cosmjs/launchpad": "^0.25.4",
+    "@starport/client-js": "^0.1.51",
     "@starport/tendermint-liquidity-js": "^0.1.1",
     "@starport/vue": "^0.1.51",
     "@starport/vuex": "^0.1.51",

@@ -45,7 +45,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getFeeAddresses: (state) => {
     const feeAddresses = [];
     for (const chain of Object.values(state.chains)) {
-      feeAddresses.push({ chain_name: chain.base_fee, fee_address: chain.fee_address });
+      feeAddresses.push({ chain_name: chain.base_tx_fee, demeris_address: chain.demeris_addresses[0] });
     }
     return feeAddresses.length != 0 ? feeAddresses : null;
   },
@@ -98,22 +98,22 @@ export const getters: GetterTree<State, RootState> & Getters = {
     );
   },
   getFeeAddress: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.fee_address ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.demeris_addresses[0] ?? null;
   },
   getBech32Config: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
   getFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.base_fee ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.base_tx_fee ?? null;
   },
   getBaseFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.base_fee ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.base_tx_fee ?? null;
   },
   getIBCFee: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.base_ibc_fee ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.base_tx_fee ?? null;
   },
   getFeeTokens: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.fee_tokens ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.denoms.filter((x) => x.fee_token) ?? null;
   },
   getChain: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;

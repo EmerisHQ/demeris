@@ -129,7 +129,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeLevel, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction,msgFromStepTransaction } from '@/utils/actionHandler';
+import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -195,12 +195,12 @@ export default defineComponent({
         value: {
           amount: [{ denom: 'uatom', amount: '20' }],
           toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-          fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          fromAddress: 'cosmos16q25r9zk83vuvcrw6vw0jtezuya22p7dkrvqjy',
         },
       });
       const fee = {
         amount: [{ amount: '20', denom: 'uatom' }],
-        gas: '20000',
+        gas: '100000',
       };
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res],

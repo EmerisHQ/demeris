@@ -1,4 +1,5 @@
-import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { stringToPath } from '@cosmjs/crypto';
+import { DirectSecp256k1HdWallet, EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -7,6 +8,7 @@ import { RootState } from '@/store';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
+import { addChain } from '@/utils/keplr';
 
 import {
   DemerisActionParams,
@@ -91,10 +93,6 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.Bech32Config>;
-  [DemerisActionTypes.GET_FEE_TOKENS](
-    { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionsByChainParams,
-  ): Promise<API.FeeTokens>;
   [DemerisActionTypes.GET_CHAIN](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionsByChainParams,
@@ -169,9 +167,6 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_FEE](
     ...args: Parameters<Actions[DemerisActionTypes.GET_FEE]>
   ): ReturnType<Actions[DemerisActionTypes.GET_FEE]>;
-  [GlobalDemerisActionTypes.GET_FEE_TOKENS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_TOKENS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_TOKENS]>;
   [GlobalDemerisActionTypes.GET_CHAIN](
     ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN]>
   ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN]>;
@@ -280,7 +275,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       let chain = getters['getChain']({
         chain_name,
-      });
+      }) as ChainData;
       if (!chain || !chain.node_info) {
         chain = await dispatch(DemerisActionTypes.GET_CHAIN, {
           subscribe: true,
@@ -289,12 +284,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
           },
         });
       }
-      let offlineSigner;
-      if (chain.node_info.chain_id == 'chainid') {
-        await window.keplr.enable('cosmoshub-4');
-        offlineSigner = await window.getOfflineSigner('cosmoshub-4');
-        // TODO: HACK for testing...replace with calls to experimentalSuggestChain()
-      }
+      await addChain(chain_name);
+
+      await window.keplr.enable(chain.node_info.chain_id);
+      //const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(
+        'lawn spot surge will isolate buddy need doctor spread space cat else maple civil gentle web cup common intact level engage steel nature lawn',
+        {
+          hdPaths: [stringToPath("m/44'/118'/0'/0/0")],
+          prefix: 'cosmos',
+        },
+      );
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
@@ -308,8 +308,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
           },
         }));
       const signerData = numbers.find((x) => x.chain_name == chain_name);
-      signerData.chainId = 'cosmoshub-4'; // TODO: HACK! See above
-      const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, signerData);
+      const cosmjsSignerData = {
+        chainId: chain.node_info.chain_id,
+        accountNumber: parseInt(signerData.account_number),
+        sequence: parseInt(signerData.sequence_number),
+      };
+
+      console.log(cosmjsSignerData);
+      const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
+      console.log(tx);
       const tx_data = Buffer.from(tx).toString('base64');
       return { tx: tx_data, chain_name };
     } catch (e) {
@@ -422,26 +429,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFee'](params);
   },
-  async [DemerisActionTypes.GET_FEE_TOKENS]({ commit, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(
-        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/token',
-      );
-      commit(DemerisMutationTypes.SET_FEE_TOKENS, { params, value: response.data.fee_tokens });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE_TOKENS, payload: { params } });
-      }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetFeeToken', 'Could not perform API query.');
-    }
-    return getters['getFeeTokens'](params);
-  },
   async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
       commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
       if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
