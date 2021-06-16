@@ -69,26 +69,26 @@
         </div>
       </div>
 
-    <!-- receive coin selector -->
-    <DenomSelect
-      v-model:amount="receiveCoinAmount"
-      :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
-      :selected-denom="receiveCoinData"
-      :assets="receiveAvailableDenom"
-      @change="setConterPairCoinAmount"
-      @select="denomSelectHandler"
-      @modalToggle="setChildModalOpenStatus"
-    />
+      <!-- receive coin selector -->
+      <DenomSelect
+        v-model:amount="receiveCoinAmount"
+        :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
+        :selected-denom="receiveCoinData"
+        :assets="receiveAvailableDenom"
+        @change="setConterPairCoinAmount"
+        @select="denomSelectHandler"
+        @modalToggle="setChildModalOpenStatus"
+      />
 
-    <!-- price alert -->
-    <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
-      <Alert status="warning" message="Prices have changed" />
-    </div>
+      <!-- price alert -->
+      <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
+        <Alert status="warning" message="Prices have changed" />
+      </div>
 
-    <!-- swap button -->
-    <div class="button-wrapper">
-      <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
-    </div>
+      <!-- swap button -->
+      <div class="button-wrapper">
+        <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
+      </div>
 
       <div class="fees s-minus">
         <div>Fees (included)</div>
@@ -223,7 +223,7 @@ export default defineComponent({
     function gobackFunc() {
       alert('goback');
     }
-    
+
     function setConterPairCoinAmount(e) {
       if (data.isBothSelected) {
         if (e.includes('Pay')) {
