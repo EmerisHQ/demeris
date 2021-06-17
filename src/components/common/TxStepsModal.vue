@@ -12,8 +12,25 @@
           <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
           <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
         </div>
-        <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
+        <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
       </div>
+    </div>
+    <div v-if="!currentData.isSwap">
+      <div class="divider" />
+
+      <div v-if="!currentData.isSwap" class="detail">
+        <div class="detail__title s-minus w-bold">Fees</div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Transaction fee</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Swap fee</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-bottom: 1.6rem" />
     </div>
     <div class="amount-info">
       <div class="amount-info__type s-minus w-bold">
@@ -30,9 +47,9 @@
       </div>
     </div>
 
-    <div class="divider" />
+    <div v-if="currentData.isSwap" class="divider" />
 
-    <div class="detail">
+    <div v-if="currentData.isSwap" class="detail">
       <div class="detail__title s-minus w-bold">Price</div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">
@@ -50,9 +67,9 @@
       </div>
     </div>
 
-    <div class="divider" />
+    <div v-if="currentData.isSwap" class="divider" />
 
-    <div class="detail">
+    <div v-if="currentData.isSwap" class="detail">
       <div class="detail__title s-minus w-bold">Fees</div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">Transaction fee</div>
@@ -64,7 +81,9 @@
       </div>
     </div>
 
-    <div class="warn s-minus w-normal">Non-revertable transactions. Prices not guaranteed etc.</div>
+    <div class="warn s-minus w-normal" :style="{ border: `${currentData.isSwap ? '' : 'none'}` }">
+      Non-revertable transactions. Prices not guaranteed etc.
+    </div>
 
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
