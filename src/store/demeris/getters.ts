@@ -2,7 +2,7 @@ import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
-import { keyHashfromAddress } from '@/utils/basic';
+import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 
 import { ChainData, State } from './state';
 
@@ -16,7 +16,9 @@ export type Getters = {
   getPrices(state: State): any; //TODO prices
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
+  getDexChain(state: State): string;
   getKeplrAccountName(state: State): string | null;
+  getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config | null };
@@ -50,6 +52,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getVerifiedDenoms: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
+  getDisplayDenom:
+    (state) =>
+    ({ name, chain_name }) => {
+      return state.verifiedDenoms.find((x) => x.name == name && x.chain_name == chain_name)?.display_name ?? null;
+    },
   getChains: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
   },
@@ -64,6 +71,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getKeplrAccountName: (state) => {
     return state.keplr?.name ?? null;
+  },
+  getDexChain: (state) => {
+    return 'cosmos-hub'; //TODO
+  },
+  getOwnAddress: (state) => (params) => {
+    console.log(state);
+    return (
+      chainAddressfromAddress(
+        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
+        state.keplr.bech32Address,
+      ) ?? null
+    );
   },
   getKeplrAddress: (state) => {
     if (state.keplr) {

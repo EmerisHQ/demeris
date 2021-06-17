@@ -4,7 +4,7 @@ import { bech32 } from 'bech32';
 
 export function toHexString(byteArray) {
   return Array.prototype.map
-    .call(byteArray, function(byte) {
+    .call(byteArray, function (byte) {
       return ('0' + (byte & 0xff).toString(16)).slice(-2);
     })
     .join('');
@@ -15,6 +15,9 @@ export function keyHashfromAddress(address: string): string {
   } catch (e) {
     throw new Error('Could not decode address');
   }
+}
+export function chainAddressfromAddress(prefix: string, address: string) {
+  return bech32.encode(prefix, bech32.decode(address).words);
 }
 export function isNative(denom: string) {
   return denom.indexOf('ibc/') != 0 ? true : false;
