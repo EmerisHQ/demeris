@@ -5,7 +5,7 @@
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
-      <nav class="redeem__steps">
+      <nav v-if="!state.showInstruction" class="redeem__steps">
         <span
           v-for="label of steps"
           :key="label"
@@ -22,7 +22,33 @@
     </header>
 
     <main class="redeem__wrapper">
-      <template v-if="state.step === 'assets'">
+      <div v-if="state.showInstruction" class="redeem__instruction">
+        <h2 class="redeem__title s-2">Redeeming assets</h2>
+
+        <div class="redeem__content">
+          <div class="redeem__instruction__placeholder" />
+
+          <p class="redeem__instruction__description">
+            You hold assets with a transfer history that is not supported by Demeris. If you wish to use these assets
+            with Demeris, you must first redeem them.
+          </p>
+
+          <a
+            class="redeem__instruction__link"
+            href="https://docs.starport.network/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Learn more about redeeming ↗️
+          </a>
+
+          <div class="redeem__controls">
+            <Button name="Continue" @click="closeInstruction" />
+          </div>
+        </div>
+      </div>
+
+      <template v-else-if="state.step === 'assets'">
         <h2 class="redeem__title s-2">Select an asset to redeem</h2>
 
         <div class="redeem__content assets-content">
@@ -50,7 +76,7 @@
         </div>
       </template>
 
-      <template v-if="state.step === 'review'">
+      <template v-else-if="state.step === 'review'">
         <h2 class="redeem__title s-2">Review your redeem details</h2>
 
         <div class="redeem__content">
@@ -60,7 +86,7 @@
         </div>
       </template>
 
-      <template v-if="state.step === 'transfer'">
+      <template v-else-if="state.step === 'transfer'">
         <h2 class="redeem__title s-2">Transfer</h2>
       </template>
     </main>
@@ -87,7 +113,7 @@ export default defineComponent({
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
-      showConfirmation: false,
+      showInstruction: true,
     });
 
     const assets = computed(() => {
@@ -131,10 +157,15 @@ export default defineComponent({
       goToStep('review');
     };
 
+    const closeInstruction = () => {
+      state.showInstruction = false;
+    };
+
     return {
       assets,
       steps,
       state,
+      closeInstruction,
       selectAsset,
       onClose,
       goBack,
@@ -212,6 +243,30 @@ export default defineComponent({
 
     &.assets-content {
       max-width: 64rem;
+    }
+  }
+
+  &__instruction {
+    margin-top: -3rem;
+    text-align: center;
+
+    &__placeholder {
+      background: var(--fg-trans);
+      width: 36rem;
+      height: 15rem;
+      margin-top: 3.4rem;
+      border-radius: 1rem;
+    }
+
+    &__link {
+      margin-top: 3.2rem;
+      font-weight: 600;
+    }
+
+    &__description {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 3.4rem;
     }
   }
 
