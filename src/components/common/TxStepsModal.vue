@@ -61,14 +61,22 @@
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">
           <div>Min. received<br />(if 100% swapped)</div>
-          <HintIcon />
+          <tippy :max-width="192">
+            <HintIcon />
+
+            <template #content> Minimum total received if your entire swap is fulfilled. </template>
+          </tippy>
         </div>
         <div class="detail__row-value">995.54 LUNA</div>
       </div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">
           <div>Limit price</div>
-          <HintIcon />
+          <tippy :max-width="192">
+            <HintIcon />
+
+            <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
+          </tippy>
         </div>
         <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
       </div>
