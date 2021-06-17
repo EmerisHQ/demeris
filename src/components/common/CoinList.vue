@@ -20,13 +20,13 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-      <div :class="type === 'chain' ? 'circle-border' : ''" :style="{borderColor: stringToColor(coin.on_chain)}">
-        <img
-          class="coin-list__info-image"
-          :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-          :alt="`${coin.base_denom} coin`"
-        />
-      </div>
+        <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
+          <img
+            class="coin-list__info-image"
+            :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
+            :alt="`${coin.base_denom} coin`"
+          />
+        </div>
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
@@ -139,20 +139,20 @@ export default defineComponent({
     }
 
     //TEST
-   function stringToColor (str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  var colour = '#';
-  for (var i = 0; i < 3; i++) {
-    var value = (hash >> (i * 8)) & 0xFF;
-    colour += ('00' + value.toString(16)).substr(-2);
-  }
-  return colour;
-}
+    function stringToColor(str) {
+      var hash = 0;
+      for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      var colour = '#';
+      for (var i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xff;
+        colour += ('00' + value.toString(16)).substr(-2);
+      }
+      return colour;
+    }
 
-    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip,  stringToColor };
+    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip, stringToColor };
   },
 });
 </script>
@@ -177,7 +177,7 @@ export default defineComponent({
     &-image {
       width: 2.4rem;
       height: 2.4rem;
-      
+
       margin: 0.4rem;
 
       border-radius: 50%;
