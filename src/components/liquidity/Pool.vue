@@ -1,5 +1,5 @@
 <template>
-  <div class="pool">
+  <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="pool">
     <div class="pool__main">
       <div class="pool__main__token-pair">
         <span class="pool__main__token-pair__token token-a" />
@@ -10,9 +10,7 @@
         <span class="pool__main__trending__icon">
           <TrendingUpIcon />
         </span>
-        <span class="pool__main__trending__value">
-          18%
-        </span>
+        <span class="pool__main__trending__value"> 18% </span>
       </div>
     </div>
 
@@ -20,12 +18,13 @@
       <p class="pool__footer__pair">{{ pairName }}</p>
       <span class="pool__footer__price">$1,544.05</span>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 
 import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
@@ -43,8 +42,10 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { formatPoolName } = usePools();
+
     const pairName = computed(() => {
-      return (props.pool as Pool).reserveCoinDenoms.join(' / ');
+      return formatPoolName(props.pool as Pool);
     });
 
     return { pairName };
