@@ -35,7 +35,12 @@
                 <span class="pools-table__row__pair__pool__avatar token-a" />
                 <span class="pools-table__row__pair__pool__avatar token-b" />
               </div>
-              <span class="pools-table__row__pair__name w-bold">{{ formatPoolName(pool) }}</span>
+              <router-link
+                :to="{ name: 'Pool', params: { id: pool.id } }"
+                class="pools-table__row__pair__name w-bold"
+              >
+                {{ formatPoolName(pool) }}
+              </router-link>
             </td>
             <td class="text-right">$1,000.50 (0,1%)</td>
             <td class="text-right">$100,000.50 (0,1%)</td>
@@ -182,6 +187,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
         text-align: left;
+        text-decoration: underline;
       }
     }
 

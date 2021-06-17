@@ -33,13 +33,18 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/pools',
-    name: 'Pool',
+    name: 'Pools',
     component: () => import('@/views/Pools.vue'),
   },
   {
     path: '/asset/:denom',
     name: 'Asset',
     component: () => import('@/views/Asset.vue'),
+  },
+  {
+    path: '/pool/:id?',
+    name: 'Pool',
+    component: () => import('@/views/Pool.vue'),
   },
   {
     path: '/pools/add/:id?',
