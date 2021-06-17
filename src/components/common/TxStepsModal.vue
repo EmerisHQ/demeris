@@ -1,9 +1,11 @@
 <template>
   <div class="denom-select-modal-wrapper elevation-panel">
     <GobackWithClose @goback="emitHandler('goback')" @close="emitHandler('close')" />
+
     <div class="title s-2 w-bold">
       {{ currentData.title }}
     </div>
+
     <div class="amount-info">
       <div class="amount-info__type s-minus w-bold">{{ currentData.isSwap ? 'Pay' : 'Send' }}</div>
       <div class="amount-info__detail">
@@ -15,23 +17,28 @@
         <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
       </div>
     </div>
+
     <div v-if="!currentData.isSwap">
       <div class="divider" />
 
-      <div v-if="!currentData.isSwap" class="detail">
-        <div class="detail__title s-minus w-bold">Fees</div>
+      <div v-if="!currentData.isSwap" class="detail-transfer">
+        <div class="detail__title s-minus w-bold">
+          <div>2 transfers to sign</div>
+          <div class="icon"><HintIcon /></div>
+        </div>
         <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Transaction fee</div>
+          <div class="detail__row-key">Fee (Terra -> Kava chain)</div>
           <div class="detail__row-value">0.02 ATOM</div>
         </div>
         <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Swap fee</div>
+          <div class="detail__row-key">Fee (Kava chain -> Cosmos Hub)</div>
           <div class="detail__row-value">0.02 ATOM</div>
         </div>
       </div>
 
       <div class="divider" style="margin-bottom: 1.6rem" />
     </div>
+
     <div class="amount-info">
       <div class="amount-info__type s-minus w-bold">
         Receive
@@ -81,7 +88,7 @@
       </div>
     </div>
 
-    <div class="warn s-minus w-normal" :style="{ border: `${currentData.isSwap ? '' : 'none'}` }">
+    <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
       Non-revertable transactions. Prices not guaranteed etc.
     </div>
 
@@ -119,6 +126,7 @@ export default defineComponent({
           isSwap: false,
           title: '',
         };
+        console.log('currentStepData', currentStepData);
         switch (currentStepData.name) {
           case 'swap':
             modifiedData.isSwap = true;
@@ -224,9 +232,21 @@ export default defineComponent({
           margin-right: 0.4rem;
         }
       }
+    }
+  }
 
-      &-value {
-      }
+  .detail-transfer {
+    @extend .detail;
+
+    .detail__title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .icon {
+      font-size: 1.6rem;
+      color: var(--muted);
     }
   }
 
@@ -236,6 +256,11 @@ export default defineComponent({
     border: 1px solid var(--border-trans);
     color: var(--muted);
     border-radius: 8px;
+  }
+
+  .warn-transfer {
+    border: none;
+    padding: 0 1.2rem;
   }
 
   .button-wrapper {
