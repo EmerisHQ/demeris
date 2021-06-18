@@ -57,6 +57,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/WithdrawLiquidity.vue'),
   },
   {
+    path: '/redeem',
+    name: 'Redeem',
+    component: () => import('@/views/Redeem.vue'),
+  },
+  {
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },
