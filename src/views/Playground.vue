@@ -35,6 +35,31 @@
           </Input>
 
           <Input placeholder="Example 3" hint="My hint message" />
+          <div class="flex items-center space-x-3">
+            <CircleSymbol :denoms="['uatom', 'ucro']" />
+            <span>ATOM/CRO Pool</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <CircleSymbol :denoms="['uatom', 'uakt']" />
+            <span>ATOM/AKT Pool</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <CircleSymbol denoms="uatom" chain="akash" />
+            <span>ATOM on Akash Chain</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <CircleSymbol denoms="uakt" chain="cosmos-hub" />
+            <span>AKT on Cosmos Hub</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <CircleSymbol :chain="'cosmos-hub'" variant="chain" />
+            <span>Cosmos Hub Chain</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <CircleSymbol :denoms="'btc'" />
+            <span>Unverified</span>
+          </div>
+          <!-- <CircleSymbol :chain="'cosmos-hub'" variant="chain" /> -->
         </div>
 
         <div class="p-10 flex flex-row w-1/3 mx-auto icons">
@@ -95,6 +120,7 @@
 import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
 import ArrowDownIcon from '@/components/common/Icons/ArrowDownIcon.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
@@ -149,6 +175,7 @@ export default defineComponent({
     Modal,
     Button,
     Confirmation,
+    CircleSymbol,
   },
   setup() {
     const store = useStore();
