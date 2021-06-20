@@ -80,7 +80,7 @@
         @modalToggle="setChildModalOpenStatus"
       />
 
-      <!-- price alert -->
+      <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
       </div>
