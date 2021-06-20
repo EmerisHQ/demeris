@@ -12,6 +12,11 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
+    path: '/welcome',
+    name: 'Welcome',
+    component: () => import('@/views/Welcome.vue'),
+  },
+  {
     path: '/assets',
     name: 'Assets',
     component: () => import('@/views/Assets.vue'),
@@ -55,6 +60,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/pools/withdraw/:id',
     name: 'WithdrawLiquidity',
     component: () => import('@/views/WithdrawLiquidity.vue'),
+  },
+  {
+    path: '/redeem',
+    name: 'Redeem',
+    component: () => import('@/views/Redeem.vue'),
   },
   {
     path: '/playground',
