@@ -16,11 +16,29 @@
         <button class="setting__sections-block">1%</button>
         <input class="setting__sections-block" type="number" placeholder="Custom" />
       </div>
-      <tippy :max-width="192">
-        <HintIcon />
+    </div>
 
-        <template #content> Minimum total received if your entire swap is fulfilled. </template>
-      </tippy>
+    <div class="details">
+      <div class="details__row">
+        <div class="details__row-left s-minus w-medium">
+          Limit price
+          <tippy :max-width="192">
+            <HintIcon />
+            <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
+          </tippy>
+        </div>
+        <div class="details__row-right s-minus w-normal">1 ATOM = 3.13 RUNE</div>
+      </div>
+      <div class="details__row">
+        <div class="details__row-left s-minus w-medium">
+          <div>Min. received<br />(if 100% swapped)</div>
+          <tippy :max-width="192">
+            <HintIcon />
+            <template #content> Minimum total received if your entire swap is fulfilled. </template>
+          </tippy>
+        </div>
+        <div class="details__row-right s-minus w-normal">13.21 RUNE</div>
+      </div>
     </div>
   </div>
 </template>
@@ -31,10 +49,9 @@ import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 
 export default defineComponent({
-  name: 'TxStepsModal',
+  name: 'SlippageSettingModal',
   components: {
     TitleWithGoback,
-
     HintIcon,
   },
 
@@ -111,98 +128,24 @@ export default defineComponent({
     }
   }
 
-  .amount-info {
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--text);
-
-    padding: 0 2.4rem;
-    margin-bottom: 1.6rem;
-    &__type {
-      &-subtitle {
-        color: var(--muted);
-      }
-    }
-    &__detail {
-      color: var(--text);
-      &__coin {
-        display: flex;
-        align-items: center;
-        &-image {
-          width: 2rem;
-          height: 2rem;
-        }
-        &-amount {
-          padding: 0 0.8rem;
-        }
-      }
-      &-chain {
-        text-align: right;
-      }
-    }
-  }
-
-  .divider {
-    margin: 0 2.4rem;
-    height: 1px;
-    background-color: var(--border-trans);
-  }
-
-  .detail {
-    padding: 0 2.4rem;
-    &__title {
-      color: var(--text);
-      padding: 1.6rem 0;
-    }
-
+  .details {
+    padding: 0 2.4rem 2.4rem;
     &__row {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      padding-bottom: 1.6rem;
 
-      &-key {
+      margin-bottom: 1.6rem;
+
+      &-left {
         display: flex;
         align-items: center;
-        color: var(--muted);
 
-        div {
-          margin-right: 0.4rem;
+        span {
+          margin-left: 0.45rem;
         }
       }
     }
-  }
-
-  .detail-transfer {
-    @extend .detail;
-
-    .detail__title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .icon {
-      font-size: 1.6rem;
-      color: var(--muted);
-    }
-  }
-
-  .warn {
-    margin: 0 2.4rem;
-    padding: 1.2rem;
-    border: 1px solid var(--border-trans);
-    color: var(--muted);
-    border-radius: 8px;
-  }
-
-  .warn-transfer {
-    border: none;
-    padding: 0 1.2rem;
-  }
-
-  .button-wrapper {
-    padding: 2.8rem 2.4rem 2.4rem;
   }
 }
 </style>
