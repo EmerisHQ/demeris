@@ -1,7 +1,7 @@
 <template>
   <Modal :variant="'bottom'" :show-close-button="false" @close="emitClose">
     <div class="status">
-      <div class="status__icon">
+      <div v-if="displayData.iconType" class="status__icon">
         <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
         <div v-else-if="displayData.iconType === iconType.warning" class="status__icon-warning">
           <WarningIcon />
@@ -10,12 +10,26 @@
           <ErrorIcon />
         </div>
       </div>
+      <div v-else class="status__icon-none" />
       <div class="status__title-sub w-normal" :class="status === 'keplr-error' ? 's-minus' : 's-0'">
         {{ displayData.subTitle }}
       </div>
       <div class="status__title s-2 w-bold">{{ displayData.title }}</div>
 
-      <div class="status__detail">
+      <div v-if="status.startsWith('transfer')" class="status__detail">
+        <div class="status__detail-transferring">
+          <CoinImageWithRing :coin-data="{ denom: 'uaotm', on_chain: 'cosmos' }" />
+          <div class="arrow">-></div>
+          <CoinImageWithRing :coin-data="{ denom: 'uaotm', on_chain: 'terra' }" />
+        </div>
+        <div class="status__detail-amount s-0 w-medium">
+          {{ displayData.detail1 }}
+        </div>
+        <div class="status__detail-path s-0 w-normal">
+          {{ displayData.detail2 }}
+        </div>
+      </div>
+      <div v-else class="status__detail">
         <div v-if="status === 'tx-wait' || status === 'keplr-sign'" class="spacer" />
         <div v-else-if="status === 'keplr-open'" class="status__detail-text s-0 w-medium l-solid">
           {{ displayData.detail1 }}
@@ -46,7 +60,7 @@
         :is-outline="true"
       />
 
-      <div v-if="displayData.detail2">
+      <div v-if="!status.startsWith('transfer') && displayData.detail2">
         <a
           href="https://faq.keplr.app/"
           target="_blank"
@@ -63,6 +77,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
 
+import CoinImageWithRing from '@/components/common/CoinImageWithRing.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
@@ -81,7 +96,7 @@ type Status =
 
 export default defineComponent({
   name: 'TxHandlingModal',
-  components: { Modal, SpinnerIcon, WarningIcon, ErrorIcon, Button },
+  components: { Modal, SpinnerIcon, WarningIcon, ErrorIcon, Button, CoinImageWithRing },
   props: {
     status: {
       type: String as PropType<Status>,
@@ -107,7 +122,7 @@ export default defineComponent({
         pending: 'pending',
         warning: 'warning',
         error: 'error',
-        none: 'none',
+        none: null,
       },
       displayData: computed(() => {
         let displayInfo = {
@@ -171,7 +186,8 @@ export default defineComponent({
             displayInfo.iconType = displayData.iconType.none;
             displayInfo.title = 'Transferring';
             displayInfo.subTitle = 'Please wait';
-            displayInfo.detail1 = 'Your 551.56 ATOM could not be swapped to LUNA.';
+            displayInfo.detail1 = '374,222.20 KAVA';
+            displayInfo.detail2 = 'Terra -> Kava chain';
             break;
         }
 
@@ -215,11 +231,28 @@ export default defineComponent({
       font-size: 3.2rem;
       color: var(--negative-text);
     }
+
+    &-none {
+      height: 2.4rem;
+    }
   }
 
   &__detail {
     .spacer {
       height: 8.8rem;
+    }
+
+    &-transferring {
+      width: 9.6rem;
+      margin: 3.2rem auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .arrow {
+        color: var(--inactive);
+      }
     }
 
     &-text,
@@ -238,6 +271,15 @@ export default defineComponent({
 
     &-link {
       display: block;
+    }
+
+    &-amount {
+      margin-top: 0.8rem;
+    }
+
+    &-path {
+      margin-bottom: 2.4rem;
+      color: var(--muted);
     }
   }
 }
