@@ -1,18 +1,27 @@
 <template>
-  <div class="denom-select-modal-wrapper elevation-panel">
+  <div class="slippage-modal elevation-panel">
     <TitleWithGoback
+      :title="'Price'"
       :func="
         () => {
           emitHandler('goback');
         }
       "
     />
+    <div class="setting">
+      <div class="s-minus w-medium">Slippage tolerance</div>
+      <div class="setting__sections">
+        <button class="setting__sections-block">0.1%</button>
+        <button class="setting__sections-block">0.5%</button>
+        <button class="setting__sections-block">1%</button>
+        <input class="setting__sections-block" type="number" placeholder="Custom" />
+      </div>
+      <tippy :max-width="192">
+        <HintIcon />
 
-    <tippy :max-width="192">
-      <HintIcon />
-
-      <template #content> Minimum total received if your entire swap is fulfilled. </template>
-    </tippy>
+        <template #content> Minimum total received if your entire swap is fulfilled. </template>
+      </tippy>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -43,7 +52,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.denom-select-modal-wrapper {
+.slippage-modal {
   position: relative;
   width: 100%;
   /* height: 55.8rem; */
@@ -57,9 +66,49 @@ export default defineComponent({
   background-color: var(--surface);
   z-index: 10;
 
-  .title {
-    padding: 0 2.4rem 2.4rem;
-    text-align: left;
+  .setting {
+    padding: 0 2.4rem;
+
+    &__sections {
+      display: flex;
+      justify-content: space-between;
+
+      margin: 1.6rem 0;
+
+      /* Chrome, Safari, Edge, Opera */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Firefox */
+      input[type='number'] {
+        -moz-appearance: textfield;
+      }
+      &-block {
+        width: 5.2rem;
+        height: 4rem;
+        background-color: var(--fg-trans);
+
+        border-radius: 8px;
+
+        &:last-child {
+          width: 9.2rem;
+          padding: 0.6rem 1.2rem;
+          text-align: center;
+
+          &:focus {
+            background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%),
+              linear-gradient(0deg, #9ff9ff, #9ff9ff);
+            outline: none;
+            &::placeholder {
+              color: transparent;
+            }
+          }
+        }
+      }
+    }
   }
 
   .amount-info {
