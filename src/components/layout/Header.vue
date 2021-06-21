@@ -5,9 +5,10 @@
 
     <div class="space"></div>
     <div class="header__wallet">
-      <div class="header__wallet-button__icon">
-        <RedeemButton />
-      </div>
+      <router-link :to="{ name: 'Redeem' }">
+        <IconButton v-tippy content="You have 4 assets to redeem" name="RedeemIcon" status="circle" show-badge />
+      </router-link>
+
       <router-link class="header__wallet-button" to="/receive">
         <div class="header__wallet-button__icon">
           <ReceiveIcon />
@@ -34,13 +35,13 @@
 import { defineComponent } from 'vue';
 
 import Wallet from '@/components/account/Wallet.vue';
-import RedeemButton from '@/components/common/headers/RedeemButton.vue';
 import Logo from '@/components/layout/Logo.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 
 import MenuIcon from '../common/Icons/MenuIcon.vue';
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
+import IconButton from '../ui/IconButton.vue';
 export default defineComponent({
   name: 'Header',
   components: {
@@ -48,9 +49,9 @@ export default defineComponent({
     Navbar,
     Wallet,
     ReceiveIcon,
-    RedeemButton,
     SendIcon,
     MenuIcon,
+    IconButton,
   },
 });
 </script>
@@ -61,7 +62,7 @@ export default defineComponent({
 }
 
 .header {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   left: 0;
   width: 100%;

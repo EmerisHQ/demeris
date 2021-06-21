@@ -294,3 +294,47 @@ export const TEST_DATA = {
     // },
   ],
 };
+
+export const SWAP_TEST_DATA = {
+  steps: [
+    {
+      name: 'transfer',
+      transactions: [
+        {
+          name: 'transfer',
+          status: 'pending',
+          data: {
+            amount: {
+              denom: 'uluna',
+              amount: 24000,
+            },
+            chain_name: 'terra',
+            to_address: 'testAddress',
+          },
+        },
+      ],
+    },
+    {
+      name: 'swap',
+      status: 'pending',
+      data: {
+        from: {
+          denom: 'uatom',
+          amount: 20000000,
+        },
+        from: {
+          denom: 'uluna',
+          amount: 30000000,
+        },
+        pool: { test: 'test' }, // todo
+      },
+    },
+  ],
+  output: {
+    amount: {
+      denom: 'uatom',
+      amount: 20000000,
+    },
+    chain_name: 'gaia',
+  },
+};

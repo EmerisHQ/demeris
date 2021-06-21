@@ -13,9 +13,7 @@
       </div>
     </div>
     <Button v-else name="Connect my wallet" @click="toggleModal" />
-    <teleport to="body">
-      <ConnectKeplr :open="isModalOpen" @close="toggleModal" />
-    </teleport>
+    <ConnectWalletModal :open="isModalOpen" @close="toggleModal" />
   </div>
 </template>
 
@@ -24,7 +22,7 @@ import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
 import { computed, defineComponent, ref } from 'vue';
 
-import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import Button from '@/components/ui/Button.vue';
 import { useStore } from '@/store';
 
@@ -33,7 +31,7 @@ export default defineComponent({
 
   components: {
     Button,
-    ConnectKeplr,
+    ConnectWalletModal,
   },
 
   setup() {

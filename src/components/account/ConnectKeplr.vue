@@ -1,13 +1,17 @@
 <template>
-  <Modal :open="open" class="connect-keplr" body-class="elevation-panel" width="72rem" @close="emitClose">
+  <div class="connect-keplr" :class="{ 'connect-keplr--banner': showBanner }">
     <div class="connect-keplr__wrapper">
       <div class="connect-keplr__content">
         <div v-if="!isConnecting">
-          <h2 class="connect-keplr__title">Connect to Keplr</h2>
+          <slot name="title">
+            <h2 class="connect-keplr__title">Connect to Keplr</h2>
+          </slot>
 
           <div class="connect-keplr__description">
-            <p>Install Keplr in your browser and connect your wallet to start using Demeris.</p>
-            <p>Demeris will support other wallets in the near future.</p>
+            <slot name="description">
+              <p>Install Keplr in your browser and connect your wallet to start using Demeris.</p>
+              <p>Demeris will support other wallets in the near future.</p>
+            </slot>
           </div>
 
           <div class="connect-keplr__controls">
@@ -35,7 +39,7 @@
         </div>
       </div>
 
-      <div class="connect-keplr__banner">
+      <div v-if="showBanner" class="connect-keplr__banner">
         <img
           class="connect-keplr__banner__logo"
           :src="require('@/assets/images/keplr-wallet-logo.png')"
@@ -44,7 +48,7 @@
         <div class="connect-keplr__banner__surfer" />
       </div>
     </div>
-  </Modal>
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,7 +56,6 @@ import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import Modal from '@/components/ui/Modal.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
@@ -61,27 +64,26 @@ export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
-    Modal,
     Button,
     Spinner,
   },
 
   props: {
-    open: {
+    showBanner: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
 
-  emits: ['close'],
+  emits: ['cancel', 'connect'],
 
   setup(_, { emit }) {
     const store = useStore();
     const isConnecting = ref(false);
 
-    const emitClose = () => {
+    const emitCancel = () => {
       cancel();
-      emit('close');
+      emit('cancel');
     };
 
     const cancel = () => {
@@ -99,37 +101,30 @@ export default defineComponent({
 
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
-        emitClose();
+        emit('connect');
       }
     });
 
-    return { isConnecting, emitClose, cancel, signIn };
+    return { isConnecting, emitCancel, cancel, signIn };
   },
 });
 </script>
 
 <style lang="scss">
 .connect-keplr {
-  .modal__body {
-    position: relative;
-    overflow: hidden;
-    padding: 0;
-    min-height: 48rem;
-  }
-
-  .modal__close {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-  }
+  min-height: inherit;
 
   &__wrapper {
     display: flex;
     min-height: inherit;
   }
 
-  &__content {
+  &--banner &__content {
     width: 50%;
+  }
+
+  &__content {
+    width: 100%;
     min-height: inherit;
     padding: 4.8rem;
   }
@@ -180,7 +175,7 @@ export default defineComponent({
 
   &__banner {
     position: absolute;
-    background-image: url('~@/assets/images/gradient-light-1.png');
+    background-image: url('~@/assets/images/gradient-light-2.png');
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: cover;

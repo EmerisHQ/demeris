@@ -58,7 +58,7 @@ import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
-import { Balance, Balances } from '@/types/api';
+import { Balances } from '@/types/api';
 
 export default defineComponent({
   name: 'AssetsTable',
@@ -93,7 +93,7 @@ export default defineComponent({
       });
     });
 
-    const handleClick = (asset: Balance) => {
+    const handleClick = (asset: Record<string, string>) => {
       emit('row-click', asset);
     };
 

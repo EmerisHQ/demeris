@@ -7,10 +7,11 @@
   >
     <Icon v-if="isIcon" :name="name" :icon-size="iconSize" />
     <div v-else class="s-minus">{{ buttonName }}</div>
+    <div v-if="showBadge" class="icon-button__badge" />
   </button>
 </template>
 <script lang="ts">
-import { computed,defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 import useButton from '@/composables/useButton.vue';
@@ -22,7 +23,7 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
     iconSize: { type: Number, required: false, default: 2.4 },
-    data: { type: Object as PropType<ButtonFunctionData>, required: true },
+    data: { type: Object as PropType<ButtonFunctionData>, default: undefined },
     type: {
       type: String,
       default: () => {
@@ -30,9 +31,11 @@ export default defineComponent({
       },
     },
     status: { type: String, required: true },
+    showBadge: { type: Boolean, default: false },
   },
+  emits: ['click'],
   // eslint-disable-next-line
-  setup(props: any) {
+  setup(props: any, { emit }) {
     const { buttonFunction } = useButton();
     const buttonName = computed(() => {
       return props.name;
@@ -45,10 +48,14 @@ export default defineComponent({
     }
 
     function clickFunction() {
-      buttonFunction({
-        type: props.data.type,
-        function: props.data.function,
-      });
+      if (props.data) {
+        buttonFunction({
+          type: props.data.type,
+          function: props.data.function,
+        });
+      }
+
+      emit('click');
     }
 
     return { isIcon, buttonName, clickFunction };
@@ -57,6 +64,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .icon-button {
+  position: relative;
   outline: none;
   border: none;
   background-color: var(--surface);
@@ -67,6 +75,17 @@ export default defineComponent({
     svg {
       display: inline-block;
     }
+  }
+
+  &__badge {
+    position: absolute;
+    width: 1.2rem;
+    height: 1.2rem;
+    top: -0.3rem;
+    right: 0;
+    content: '';
+    background: #ff7d05;
+    border-radius: 2.6rem;
   }
 }
 

@@ -170,21 +170,21 @@ export default defineComponent({
     const pools: Pool[] = [
       {
         id: 1,
-        reserveCoinDenoms: ['atom', 'kava'],
+        reserveCoinDenoms: ['uatom', 'ukava'],
         reserveAccountAddress: '',
         poolCoinDenom: 'atom',
         typeId: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['atom', 'rune'],
+        reserveCoinDenoms: ['uatom', 'urune'],
         reserveAccountAddress: '',
         poolCoinDenom: 'atom',
         typeId: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['luna', 'rune'],
+        reserveCoinDenoms: ['uluna', 'urune'],
         reserveAccountAddress: '',
         poolCoinDenom: 'luna',
         typeId: 1,

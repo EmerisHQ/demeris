@@ -1,11 +1,33 @@
 <template>
-  <div v-for="coin in modifiedData" :key="coin.base_denom" class="coin-list" @click="$emit('select', coin)">
+  <div v-if="modifiedData.length === 0" class="no-result">
+    <div class="no-result__board">
+      <div class="title s-1 w-bold">No results for '{{ keyword }}'</div>
+      <div class="sub-title s-0">Try again with another search</div>
+    </div>
+  </div>
+  <div
+    v-for="coin in modifiedData"
+    :key="coin.base_denom"
+    class="coin-list"
+    @mouseenter="
+      showTooltip(
+        `${type}/${coin.on_chain}/${coin.base_denom}`,
+        `${$filters.getCoinName(coin.base_denom)} on ${coin.on_chain}`,
+      )
+    "
+    @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
+    @click="$emit('select', coin)"
+  >
     <div class="coin-list__info">
-      <img
-        class="coin-list__info-image"
-        :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-        :alt="`${coin.base_denom} coin`"
-      />
+      <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
+        <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
+          <img
+            class="coin-list__info-image"
+            :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
+            :alt="`${coin.base_denom} coin`"
+          />
+        </div>
+      </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
           <span
@@ -52,7 +74,8 @@
   </div>
 </template>
 <script lang="ts">
-import { computed,defineComponent } from 'vue';
+import tippy from 'tippy.js';
+import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -71,9 +94,24 @@ export default defineComponent({
   setup(props) {
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     const modifiedData = computed(() => getUniqueCoinList(props.data));
+    const tooltipInstance = ref(null);
 
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
+    }
+
+    function showTooltip(eleId, text) {
+      if (props.type === 'chain') {
+        tooltipInstance.value = tippy(document.getElementById(eleId));
+        tooltipInstance.value.setContent(text);
+        tooltipInstance.value.show();
+      }
+    }
+
+    function hideTooltip() {
+      if (props.type === 'chain') {
+        tooltipInstance.value.hide();
+      }
     }
 
     function getUniqueCoinList(data) {
@@ -100,7 +138,21 @@ export default defineComponent({
       return modifiedData;
     }
 
-    return { iconColor, setWordColorByKeyword, modifiedData };
+    //TEST
+    function stringToColor(str) {
+      var hash = 0;
+      for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      var colour = '#';
+      for (var i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xff;
+        colour += ('00' + value.toString(16)).substr(-2);
+      }
+      return colour;
+    }
+
+    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip, stringToColor };
   },
 });
 </script>
@@ -114,6 +166,10 @@ export default defineComponent({
 
   cursor: pointer;
 
+  .tippy-info {
+    margin-right: 1.2rem;
+  }
+
   &__info {
     display: flex;
     align-items: center;
@@ -121,7 +177,15 @@ export default defineComponent({
     &-image {
       width: 2.4rem;
       height: 2.4rem;
-      margin-right: 1.2rem;
+
+      margin: 0.4rem;
+
+      border-radius: 50%;
+    }
+
+    .circle-border {
+      border: 1px solid transparent;
+      border-radius: 50%;
     }
 
     &-details {
@@ -150,6 +214,28 @@ export default defineComponent({
 
   .search-included {
     color: var(--text);
+  }
+}
+
+.no-result {
+  position: relative;
+  height: 100%;
+
+  text-align: center;
+
+  &__board {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+
+    transform: translateY(-50%);
+    .title {
+      color: var(--text);
+    }
+
+    .sub-title {
+      color: var(--muted);
+    }
   }
 }
 </style>
