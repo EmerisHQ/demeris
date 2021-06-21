@@ -15,7 +15,9 @@
 
       <table class="pools-table">
         <colgroup>
-          <col width="30%" />
+          <col width="25%" />
+          <col width="25%" />
+          <col width="25%" />
         </colgroup>
 
         <thead>
@@ -29,35 +31,23 @@
         </thead>
 
         <tbody>
-          <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row">
+          <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row" @click="rowClickHandler(pool)">
             <td class="pools-table__row__pair">
               <div class="pools-table__row__pair__pool">
                 <span class="pools-table__row__pair__pool__avatar token-a" />
                 <span class="pools-table__row__pair__pool__avatar token-b" />
               </div>
-              <router-link
-                :to="{ name: 'Pool', params: { id: pool.id } }"
-                class="pools-table__row__pair__name w-bold"
-              >
+              <span class="pools-table__row__pair__name w-bold">
                 {{ formatPoolName(pool) }}
-              </router-link>
+              </span>
             </td>
             <td class="text-right">$1,000.50 (0,1%)</td>
             <td class="text-right">$100,000.50 (0,1%)</td>
             <td class="text-right">10%</td>
             <td class="pools-table__row__controls text-right">
-              <router-link
-                :to="{ name: 'WithdrawLiquidity', params: { id: pool.id } }"
-                class="pools-table__row__controls__button elevation-button"
-              >
-                -
-              </router-link>
-              <router-link
-                :to="{ name: 'AddLiquidity', params: { id: pool.id } }"
-                class="pools-table__row__controls__button elevation-button"
-              >
-                +
-              </router-link>
+              <button class="pools-table__row__controls__button" @click="rowClickHandler(pool)">
+                <Icon name="ChevronRightIcon" class="pools-table__row__controls__button__icon" />
+              </button>
             </td>
           </tr>
         </tbody>
@@ -73,12 +63,14 @@ import { useRouter } from 'vue-router';
 
 import Search from '@/components/common/Search.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { Pool } from '@/types/actions';
 
 export default {
   name: 'Pools',
-  components: { AppLayout, Search, Button },
+  components: { AppLayout, Search, Button, Icon },
 
   setup() {
     const router = useRouter();
@@ -94,9 +86,14 @@ export default {
       router.push({ name: 'AddLiquidity' });
     };
 
+    const rowClickHandler = (pool: Pool) => {
+      router.push({ name: 'Pool', params: { id: pool.id } });
+    };
+
     return {
       filteredPools,
       keyword,
+      rowClickHandler,
       openAddLiqudityPage,
       formatPoolName,
     };
@@ -134,8 +131,8 @@ export default {
 }
 
 .pools-table {
-  margin-top: 2.4rem;
-  width: 100%;
+  margin: 2.4rem -2rem 0 -2rem;
+  width: calc(100% + 4rem);
   table-layout: fixed;
 
   .text-right {
@@ -154,7 +151,38 @@ export default {
     padding-bottom: 1.2rem;
   }
 
+  td,
+  th {
+    transition: all 100ms ease-in;
+
+    &:first-child {
+      padding-left: 2rem;
+    }
+
+    &:last-child {
+      padding-right: 2rem;
+    }
+  }
+
   &__row {
+    cursor: pointer;
+
+    &:hover {
+      td {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      td:first-child {
+        border-top-left-radius: 0.8rem;
+        border-bottom-left-radius: 0.8rem;
+      }
+
+      td:last-child {
+        border-top-right-radius: 0.8rem;
+        border-bottom-right-radius: 0.8rem;
+      }
+    }
+
     &__pair {
       padding: 2rem 0;
       display: flex;
@@ -187,22 +215,18 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
         text-align: left;
-        text-decoration: underline;
       }
     }
 
     &__controls {
       &__button {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 2.6rem;
-        font-size: 2rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        padding: 0.2rem;
+        color: var(--inactive);
+        margin-left: 1rem;
 
-        & + & {
-          margin-left: 1.6rem;
+        &__icon {
+          width: 1.6rem;
+          height: 1.6rem;
         }
       }
     }
