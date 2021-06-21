@@ -76,7 +76,8 @@ type Status =
   | 'keplr-sign-error'
   | 'keplr-error'
   | 'tx-wait'
-  | 'tx-fail';
+  | 'tx-fail'
+  | 'transferring';
 
 export default defineComponent({
   name: 'TxHandlingModal',
@@ -84,7 +85,7 @@ export default defineComponent({
   props: {
     status: {
       type: String as PropType<Status>,
-      default: 'keplr-sign',
+      default: 'transferring',
     },
     blackButtonFunc: {
       type: Function,
@@ -106,6 +107,7 @@ export default defineComponent({
         pending: 'pending',
         warning: 'warning',
         error: 'error',
+        none: 'none',
       },
       displayData: computed(() => {
         let displayInfo = {
@@ -163,6 +165,12 @@ export default defineComponent({
             displayInfo.iconType = displayData.iconType.error;
             displayInfo.title = 'Transaction failed';
             displayInfo.subTitle = 'ATOM -> LUNA on Cosmos Hub';
+            displayInfo.detail1 = 'Your 551.56 ATOM could not be swapped to LUNA.';
+            break;
+          case 'transferring':
+            displayInfo.iconType = displayData.iconType.none;
+            displayInfo.title = 'Transferring';
+            displayInfo.subTitle = 'Please wait';
             displayInfo.detail1 = 'Your 551.56 ATOM could not be swapped to LUNA.';
             break;
         }
