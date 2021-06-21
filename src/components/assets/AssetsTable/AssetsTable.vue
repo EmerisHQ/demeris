@@ -14,7 +14,7 @@
     </thead>
 
     <tbody>
-      <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
+      <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
         <td class="assets-table__row__asset">
           <div class="assets-table__row__asset__avatar" />
           <span class="assets-table__row__asset__denom"><Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
@@ -82,7 +82,10 @@ export default defineComponent({
       const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
+        const totalAmount = balances.reduce(
+          (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
+          0,
+        );
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {
@@ -104,7 +107,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .assets-table {
-  width: 100%;
+  width: calc(100% + 4rem);
+  margin-inline: -2rem;
   table-layout: fixed;
 
   &--u-text-right {
@@ -123,10 +127,41 @@ export default defineComponent({
     padding-bottom: 2rem;
   }
 
+  td,
+  th {
+    transition: all 100ms ease-in;
+
+    &:first-child {
+      padding-left: 2rem;
+    }
+
+    &:last-child {
+      padding-right: 2rem;
+    }
+  }
+
   &__row {
+    cursor: pointer;
+
+    &:hover {
+      td {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      td:first-child {
+        border-top-left-radius: 0.8rem;
+        border-bottom-left-radius: 0.8rem;
+      }
+
+      td:last-child {
+        border-top-right-radius: 0.8rem;
+        border-bottom-right-radius: 0.8rem;
+      }
+    }
+
     &__asset {
       padding: 2rem 0;
-      min-width: 4rem;
+      min-width: 1rem;
       font-weight: 600;
       text-transform: uppercase;
       display: flex;
