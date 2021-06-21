@@ -6,6 +6,9 @@ export type ChainAmount = {
   amount: Amount;
   chain_name: string;
 };
-export type Denom = {
-  denom: string;
+
+export type AmountWithMeta = Amount & {
+  coinDenom: string;
+  coinMinimalDenom: string;
+  coinDecimals: number;
 };

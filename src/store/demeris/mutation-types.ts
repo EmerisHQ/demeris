@@ -8,12 +8,11 @@ export enum DemerisMutationTypes {
   SET_FEE_ADDRESS = 'SET_FEE_ADDRESS',
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
   SET_FEE_ADDRESSES = 'SET_FEE_ADDRESSES',
-  SET_FEE = 'SET_FEE',
-  SET_FEE_TOKENS = 'SET_FEE_TOKENS',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
   SET_KEPLR = 'SET_KEPLR',
   SET_NUMBERS = 'SET_NUMBERS',
   SET_PRICES = 'SET_PRICES',
+  SET_TX_STATUS = 'SET_TX_STATUS',
   SET_CHAINS = 'SET_CHAINS',
   SET_CHAIN = 'SET_CHAIN',
   SET_VERIFIED_DENOMS = 'SET_VERIFIED_DENOMS',
@@ -29,11 +28,9 @@ export type DemerisMutationArgs =
   | API.Balances
   | boolean // TODO: prices
   | any
-  | API.Fee
   | API.FeeAddress
   | API.FeeAddresses
   | API.Bech32Config
-  | API.FeeTokens
   | API.PrimaryChannels
   | API.PrimaryChannel
   | API.StakingBalances
@@ -41,6 +38,7 @@ export type DemerisMutationArgs =
   | API.VerifyTrace
   | API.Chains
   | API.Chain
+  | API.Ticket
   | API.VerifiedDenoms
   | DemerisConfig
   | KeplrKeyData;
