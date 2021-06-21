@@ -95,7 +95,7 @@ export const mutations: MutationTree<State> & Mutations = {
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
         );
-      } else if (ticket.status != 'pending') {
+      } else if (ticket.status != 'pending' && ticket.status != 'transit') {
         txPromise.reject();
         state.transactions.delete(JSON.stringify(payload.params));
         state._Subscriptions.delete(
