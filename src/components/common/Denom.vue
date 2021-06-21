@@ -16,7 +16,7 @@ export default defineComponent({
 
     const displayDenom = computed(() => {
       const displayName = store.getters['demeris/getDisplayDenom']({ name: props.name, chain_name: props.chainName });
-      return displayName || (props.name as string).toUpperCase();
+      return displayName || (props.name as string).substr(1).toUpperCase();
     });
     return { displayDenom };
   },
