@@ -2,8 +2,16 @@
   <AppLayout>
     <section class="assets">
       <nav class="assets__nav">
-        <router-link to="/assets" class="assets__nav__item">Assets</router-link>
-        <router-link to="/assets/chains" class="assets__nav__item"> Chains </router-link>
+        <router-link to="/assets" class="assets__nav__item" :class="{ 'assets__nav__item--inactive': isChainsTab }">
+          Assets
+        </router-link>
+        <router-link
+          to="/assets/chains"
+          class="assets__nav__item"
+          :class="{ 'assets__nav__item--inactive': !isChainsTab }"
+        >
+          Chains
+        </router-link>
       </nav>
       <div
         v-for="(balances, chain) in aggregatedBalances"
@@ -52,7 +60,7 @@ export default {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    return { aggregatedBalances, openAssetPage };
+    return { aggregatedBalances, isChainsTab, openAssetPage };
   },
 };
 </script>
@@ -63,10 +71,6 @@ export default {
   flex-direction: column;
   font-size: 1.6rem;
 
-  .router-link-exact-active {
-    color: var(--text);
-  }
-
   &__nav {
     display: flex;
 
@@ -74,7 +78,10 @@ export default {
       font-size: 2.8rem;
       font-weight: 700;
       margin-right: 2.4rem;
-      color: var(--inactive);
+
+      &--inactive {
+        color: var(--inactive);
+      }
     }
   }
 
