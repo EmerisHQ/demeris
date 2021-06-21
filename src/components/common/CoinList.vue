@@ -71,6 +71,9 @@
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
+    <div v-else-if="showBalance" class="coin-list__balance">
+      {{ `${coin.amount} ${$filters.getCoinName(coin.base_denom)}` }}
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -89,6 +92,7 @@ export default defineComponent({
     data: { type: Object, required: true },
     type: { type: String, required: false, default: 'chain' },
     keyword: { type: String, required: false, default: '' },
+    showBalance: { type: Boolean, default: false },
   },
   emits: ['select'],
   setup(props) {
@@ -170,9 +174,15 @@ export default defineComponent({
     margin-right: 1.2rem;
   }
 
+  &__balance {
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
   &__info {
     display: flex;
     align-items: center;
+    width: 100%;
 
     &-image {
       width: 2.4rem;
@@ -189,6 +199,8 @@ export default defineComponent({
     }
 
     &-details {
+      flex: 1 1 0%;
+
       &-denom {
         color: var(--text);
       }
