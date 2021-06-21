@@ -1,6 +1,12 @@
 <template>
   <div class="denom-select-modal-wrapper elevation-panel">
-    <GobackWithClose @goback="emitHandler('goback')" @close="emitHandler('close')" />
+    <TitleWithGoback
+      :func="
+        () => {
+          emitHandler('goback');
+        }
+      "
+    />
 
     <tippy :max-width="192">
       <HintIcon />
@@ -12,18 +18,18 @@
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue';
 
-import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
-    GobackWithClose,
+    TitleWithGoback,
 
     HintIcon,
   },
 
-  emits: ['goback', 'close'],
+  emits: ['goback'],
   setup(props, { emit }) {
     const processData = reactive({
       emitHandler: (event) => {

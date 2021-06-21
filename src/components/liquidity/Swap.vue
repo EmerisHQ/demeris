@@ -13,7 +13,7 @@
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
   <div class="wrapper">
-    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @close="slippageSettingModalToggle" @goback="gobackFunc" />
+    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
     <ReviewModal v-else-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
