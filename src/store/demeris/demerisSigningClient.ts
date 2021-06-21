@@ -29,6 +29,7 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     const txRaw: TxRaw = await super.sign(signerAddress, messages, fee, memo, signerData);
     const enc = TxRaw.encode(txRaw);
     const dec = TxRaw.encode(TxRaw.decode(enc.finish())).finish();
+    console.log(Buffer.from(dec).toString('hex'));
     return dec;
   }
 }

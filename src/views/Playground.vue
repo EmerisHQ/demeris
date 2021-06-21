@@ -128,8 +128,8 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeLevel, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction,msgFromStepTransaction } from '@/utils/actionHandler';
+import { FeeLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
+import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -195,12 +195,12 @@ export default defineComponent({
         value: {
           amount: [{ denom: 'uatom', amount: '20' }],
           toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-          fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          fromAddress: 'cosmos1xl6svk9hkdhdk9228w46hs05djh49v5u6a48nt',
         },
       });
       const fee = {
         amount: [{ amount: '20', denom: 'uatom' }],
-        gas: '20000',
+        gas: '100000',
       };
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res],
@@ -213,21 +213,40 @@ export default defineComponent({
       console.log(result);
     };
     const sendStepTx = async () => {
+      const channel = store.getters['demeris/getPrimaryChannel']({
+        chain_name: 'cosmos-hub',
+        destination_chain_name: 'akash',
+      });
+      console.log(channel);
+      const stepTx = {
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: '20', denom: 'uatom' },
+          from_chain: 'cosmos-hub',
+          to_chain: 'akash',
+          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'akash' }),
+          through: channel,
+        } as IBCForwardsData,
+      } as StepTransaction;
+      /*
       const stepTx = {
         name: 'transfer',
         status: 'pending',
         data: {
-          amount: { denom: 'uatom', amount: '20' },
+          amount: { amount: '20', denom: 'uatom' },
           chain_name: 'cosmos-hub',
           to_address: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-        },
-      };
+        } as TransferData,
+      } as StepTransaction;
+      */
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
-        amount: [{ amount: feeOptions.amount[FeeLevel.AVERAGE], denom: feeOptions.denom }],
-        gas: '20000',
+        amount: [{ amount: '' + feeOptions[0].amount[FeeLevel.AVERAGE], denom: feeOptions[0].denom }],
+        gas: '100000',
       };
+      console.log(fee);
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res.msg],
         chain_name: res.chain_name,
@@ -236,7 +255,12 @@ export default defineComponent({
         memo: 'a memo',
       });
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
-      console.log(result);
+      const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+        subscribe: true,
+        params: { chain_name: res.chain_name, ticket: result.ticket },
+      });
+      console.log(txPromise);
+      return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);

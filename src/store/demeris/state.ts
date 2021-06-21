@@ -1,6 +1,5 @@
 import * as API from '@/types/api';
 
-import { DemerisSubscriptions } from './action-types';
 import { KeplrKeyData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
@@ -8,7 +7,12 @@ export type ChainMeta = {
   status?: boolean;
 };
 export type ChainData = API.Chain & ChainMeta;
-
+export type TransactionItem = {
+  date: number;
+  resolve: (value?: unknown | PromiseLike<unknown>) => void;
+  reject: (reason?: Error) => void;
+  promise: Promise<void>;
+};
 export type State = {
   endpoint: string;
   balances: Record<string, API.Balances>;
@@ -18,7 +22,8 @@ export type State = {
   keplr: KeplrKeyData;
   prices: Array<any>; //TODO: prices
   chains: Record<string, ChainData>;
-  _Subscriptions: Set<DemerisSubscriptions>;
+  transactions: Map<string, TransactionItem>;
+  _Subscriptions: Set<string>;
 };
 export function getDefaultState(): State {
   return {
@@ -30,6 +35,7 @@ export function getDefaultState(): State {
     keplr: null,
     prices: [],
     chains: {},
+    transactions: new Map(),
     _Subscriptions: new Set(),
   };
 }

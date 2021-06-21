@@ -8,12 +8,11 @@ export enum DemerisActionTypes {
   GET_VERIFIED_DENOMS = 'GET_VERIFIED_DENOMS',
   GET_CHAINS = 'GET_CHAINS',
   GET_PRICES = 'GET_PRICES', //TODO prices
+  GET_TX_STATUS = 'GET_TX_STATUS',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'GET_VERIFY_TRACE',
   GET_FEE_ADDRESS = 'GET_FEE_ADDRESS',
   GET_BECH32_CONFIG = 'GET_BECH32_CONFIG',
-  GET_FEE = 'GET_FEE',
-  GET_FEE_TOKENS = 'GET_FEE_TOKENS',
   GET_CHAIN = 'GET_CHAIN',
   GET_PRIMARY_CHANNEL = 'GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'GET_PRIMARY_CHANNELS',
@@ -36,12 +35,11 @@ export enum GlobalDemerisActionTypes {
   GET_VERIFIED_DENOMS = 'demeris/GET_VERIFIED_DENOMS',
   GET_CHAINS = 'demeris/GET_CHAINS',
   GET_PRICES = 'demeris/GET_PRICES', //TODO prices
+  GET_TX_STATUS = 'demeris/GET_TX_STATUS',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'demeris/GET_VERIFY_TRACE',
   GET_FEE_ADDRESS = 'demeris/GET_FEE_ADDRESS',
   GET_BECH32_CONFIG = 'demeris/GET_BECH32_CONFIG',
-  GET_FEE = 'demeris/GET_FEE',
-  GET_FEE_TOKENS = 'demeris/GET_FEE_TOKENS',
   GET_CHAIN = 'demeris/GET_CHAIN',
   GET_PRIMARY_CHANNEL = 'demeris/GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'demeris/GET_PRIMARY_CHANNELS',
@@ -66,6 +64,10 @@ export type DemerisActionsByAddressParams = {
 export type DemerisActionsByChainParams = {
   subscribe: boolean;
   params?: API.ChainReq;
+};
+export type DemerisActionsByTicketParams = {
+  subscribe: boolean;
+  params?: API.TicketReq;
 };
 export type DemerisActionsTraceParams = {
   subscribe: boolean;
