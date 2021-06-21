@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 
-import { DemerisStore, State as DemerisState,store as demeris } from '@/store/demeris';
+import { DemerisStore, State as DemerisState, store as demeris } from '@/store/demeris';
 
 import init from './config';
 
@@ -19,4 +19,7 @@ export const store = initstore;
 
 export function useStore(): Store {
   return store as Store;
+}
+export function useAllStores() {
+  return store;
 }

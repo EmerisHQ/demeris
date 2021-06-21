@@ -17,7 +17,7 @@
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
         <td class="assets-table__row__asset">
           <div class="assets-table__row__asset__avatar" />
-          <span class="assets-table__row__asset__denom">{{ asset.denom }}</span>
+          <span class="assets-table__row__asset__denom"><Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
         </td>
 
         <td class="assets-table__row__price assets-table--u-text-right">$20.50</td>
@@ -30,7 +30,7 @@
         </td>
 
         <td v-if="!isCompact" class="assets-table__row__balance assets-table--u-text-right">
-          <span>{{ asset.totalAmount }} {{ asset.denom }}</span>
+          <span>{{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
         </td>
 
         <td class="assets-table__row__equivalent-balance assets-table--u-text-right">$6,150.20</td>
@@ -50,10 +50,12 @@
 </template>
 
 <script lang="ts">
+import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
 import { Balances } from '@/types/api';
@@ -61,7 +63,7 @@ import { Balances } from '@/types/api';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon },
+  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom },
 
   props: {
     isCompact: {
@@ -80,7 +82,7 @@ export default defineComponent({
       const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);
+        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {

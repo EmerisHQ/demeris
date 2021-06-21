@@ -1,6 +1,6 @@
 export type Amount = {
   denom: string;
-  amount: number;
+  amount: string;
 };
 export type ChainAmount = {
   amount: Amount;

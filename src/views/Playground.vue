@@ -3,7 +3,8 @@
     <div class="home">
       <div>
         <div class="p-10 flex flex-col space-y-8 w-1/2 mx-auto">
-          <AssetChainsIndicator :balances="balances" denom="stake" :max-chains-count="4" />
+          <AssetChainsIndicator :balances="balances" denom="uatom" :max-chains-count="4" />
+          <AssetChainsIndicator :balances="balances" denom="uakt" :max-chains-count="4" />
         </div>
 
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
@@ -56,6 +57,12 @@
           <MenuIcon />
         </div>
 
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Send Message" @click="sendMessage" />
+        </div>
+        <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
+          <Button name="Send Transaction From Step" @click="sendStepTx" />
+        </div>
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Open Confirmation" @click="modalIsOpen = 'confirmation'" />
           <Confirmation
@@ -119,8 +126,10 @@ import Confirmation from '@/components/ui/Confirmation.vue';
 import Input from '@/components/ui/Input.vue';
 import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useStore } from '@/store';
-import { Pool } from '@/types/actions';
+import { useAllStores, useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { feeForStepTransaction,msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -153,6 +162,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
+    const stores = useAllStores();
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
@@ -180,11 +190,58 @@ export default defineComponent({
         typeId: 1,
       },
     ];
-
+    const sendMessage = async () => {
+      let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+        value: {
+          amount: [{ denom: 'uatom', amount: '20' }],
+          toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+          fromAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+        },
+      });
+      const fee = {
+        amount: [{ amount: '20', denom: 'uatom' }],
+        gas: '20000',
+      };
+      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+        msgs: [res],
+        chain_name: 'cosmos-hub',
+        fee,
+        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
+        memo: 'a memo',
+      });
+      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+      console.log(result);
+    };
+    const sendStepTx = async () => {
+      const stepTx = {
+        name: 'transfer',
+        status: 'pending',
+        data: {
+          amount: { denom: 'uatom', amount: '20' },
+          chain_name: 'cosmos-hub',
+          to_address: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
+        },
+      };
+      let res = await msgFromStepTransaction(stepTx as StepTransaction);
+      const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
+      const fee = {
+        amount: [{ amount: feeOptions.amount[FeeLevel.AVERAGE], denom: feeOptions.denom }],
+        gas: '20000',
+      };
+      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+        msgs: [res.msg],
+        chain_name: res.chain_name,
+        fee,
+        registry: res.registry,
+        memo: 'a memo',
+      });
+      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+      console.log(result);
+    };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
 
-    return { balances, pools, address, modalIsOpen };
+    return { balances, pools, address, modalIsOpen, sendMessage, sendStepTx };
   },
 });
 </script>

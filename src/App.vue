@@ -14,11 +14,6 @@ export default defineComponent({
       initialized: false,
     };
   },
-  computed: {
-    hasWallet() {
-      return this.$store.hasModule(['common', 'wallet']);
-    },
-  },
   async created() {
     /*
         set dark/light mode according to user Preference
@@ -33,8 +28,32 @@ export default defineComponent({
     document.documentElement.setAttribute('color-theme', 'light');
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
-      endpoint: 'http://localhost:8000/v1',
+      endpoint: 'https://dev.demeris.io/v1',
       refreshTime: 5000,
+    });
+    await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
+      subscribe: true,
+    });
+    let chains = await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
+      subscribe: false,
+    });
+    for (let chain in chains) {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+    }
+    await this.$store.dispatch('common/env/config', {
+      apiNode: 'https://dev.demeris.io/v1/liquidity',
+      rpcNode: null,
+      wsNode: null,
+      chainId: 'cosmos-hub',
+      addrPrefix: 'cosmos',
+      sdkVersion: 'Stargate',
+      getTXApi: null,
+      offline: true,
     });
     this.initialized = true;
   },

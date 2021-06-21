@@ -80,7 +80,7 @@
         @modalToggle="setChildModalOpenStatus"
       />
 
-      <!-- price alert -->
+      <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
       </div>
@@ -239,14 +239,14 @@ export default defineComponent({
         from: {
           amount: {
             denom: 'uatom',
-            amount: 2000000,
+            amount: '2000000',
           },
           chain_name: 'gaia',
         },
         to: {
           amount: {
             denom: 'uluna',
-            amount: 2000000,
+            amount: '2000000',
           },
           chain_name: 'gaia',
         },

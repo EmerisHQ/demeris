@@ -1,9 +1,11 @@
 <template>
   <div class="denom-select-modal-wrapper elevation-panel">
     <GobackWithClose @goback="emitHandler('goback')" @close="emitHandler('close')" />
+
     <div class="title s-2 w-bold">
       {{ currentData.title }}
     </div>
+
     <div class="amount-info">
       <div class="amount-info__type s-minus w-bold">{{ currentData.isSwap ? 'Pay' : 'Send' }}</div>
       <div class="amount-info__detail">
@@ -12,9 +14,31 @@
           <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
           <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
         </div>
-        <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
+        <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
       </div>
     </div>
+
+    <div v-if="!currentData.isSwap">
+      <div class="divider" />
+
+      <div v-if="!currentData.isSwap" class="detail-transfer">
+        <div class="detail__title s-minus w-bold">
+          <div>2 transfers to sign</div>
+          <div class="icon"><HintIcon /></div>
+        </div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Fee (Terra -> Kava chain)</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Fee (Kava chain -> Cosmos Hub)</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
+      </div>
+
+      <div class="divider" style="margin-bottom: 1.6rem" />
+    </div>
+
     <div class="amount-info">
       <div class="amount-info__type s-minus w-bold">
         Receive
@@ -30,29 +54,37 @@
       </div>
     </div>
 
-    <div class="divider" />
+    <div v-if="currentData.isSwap" class="divider" />
 
-    <div class="detail">
+    <div v-if="currentData.isSwap" class="detail">
       <div class="detail__title s-minus w-bold">Price</div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">
           <div>Min. received<br />(if 100% swapped)</div>
-          <HintIcon />
+          <tippy :max-width="192">
+            <HintIcon />
+
+            <template #content> Minimum total received if your entire swap is fulfilled. </template>
+          </tippy>
         </div>
         <div class="detail__row-value">995.54 LUNA</div>
       </div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">
           <div>Limit price</div>
-          <HintIcon />
+          <tippy :max-width="192">
+            <HintIcon />
+
+            <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
+          </tippy>
         </div>
         <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
       </div>
     </div>
 
-    <div class="divider" />
+    <div v-if="currentData.isSwap" class="divider" />
 
-    <div class="detail">
+    <div v-if="currentData.isSwap" class="detail">
       <div class="detail__title s-minus w-bold">Fees</div>
       <div class="detail__row s-minus w-normal">
         <div class="detail__row-key">Transaction fee</div>
@@ -64,7 +96,9 @@
       </div>
     </div>
 
-    <div class="warn s-minus w-normal">Non-revertable transactions. Prices not guaranteed etc.</div>
+    <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+      Non-revertable transactions. Prices not guaranteed etc.
+    </div>
 
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
@@ -103,6 +137,7 @@ export default defineComponent({
           isSwap: false,
           title: '',
         };
+        console.log('currentStepData', currentStepData);
         switch (currentStepData.name) {
           case 'swap':
             modifiedData.isSwap = true;
@@ -213,9 +248,21 @@ export default defineComponent({
           margin-right: 0.4rem;
         }
       }
+    }
+  }
 
-      &-value {
-      }
+  .detail-transfer {
+    @extend .detail;
+
+    .detail__title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .icon {
+      font-size: 1.6rem;
+      color: var(--muted);
     }
   }
 
@@ -225,6 +272,11 @@ export default defineComponent({
     border: 1px solid var(--border-trans);
     color: var(--muted);
     border-radius: 8px;
+  }
+
+  .warn-transfer {
+    border: none;
+    padding: 0 1.2rem;
   }
 
   .button-wrapper {
