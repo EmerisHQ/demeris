@@ -79,7 +79,7 @@ type Status =
   | 'tx-fail';
 
 export default defineComponent({
-  name: 'SigningModal',
+  name: 'TxHandlingModal',
   components: { Modal, SpinnerIcon, WarningIcon, ErrorIcon, Button },
   props: {
     status: {
