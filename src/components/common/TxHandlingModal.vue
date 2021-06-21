@@ -1,5 +1,10 @@
 <template>
-  <Modal :variant="'bottom'" :show-close-button="false" @close="emitClose">
+  <Modal
+    :variant="'bottom'"
+    :show-close-button="false"
+    :body-class="status === 'transferred' ? 'transferred-bg' : ''"
+    @close="emitClose"
+  >
     <div class="status">
       <div v-if="displayData.iconType" class="status__icon">
         <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
@@ -14,18 +19,19 @@
       <div class="status__title-sub w-normal" :class="status === 'keplr-error' ? 's-minus' : 's-0'">
         {{ displayData.subTitle }}
       </div>
+      <div class="transferred-image"></div>
       <div class="status__title s-2 w-bold">{{ displayData.title }}</div>
 
       <div v-if="status.startsWith('transfer')" class="status__detail">
-        <div class="status__detail-transferring">
-          <CoinImageWithRing :coin-data="{ denom: 'uaotm', on_chain: 'cosmos' }" />
+        <div v-if="status === 'transferring'" class="status__detail-transferring">
+          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'cosmos' }" />
           <div class="arrow">-></div>
-          <CoinImageWithRing :coin-data="{ denom: 'uaotm', on_chain: 'terra' }" />
+          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'terra' }" />
         </div>
         <div class="status__detail-amount s-0 w-medium">
           {{ displayData.detail1 }}
         </div>
-        <div class="status__detail-path s-0 w-normal">
+        <div class="status__detail-path s-0 w-normal" :style="status === 'transferred' ? 'margin-bottom: 4.8rem' : ''">
           {{ displayData.detail2 }}
         </div>
       </div>
@@ -92,7 +98,8 @@ type Status =
   | 'keplr-error'
   | 'tx-wait'
   | 'tx-fail'
-  | 'transferring';
+  | 'transferring'
+  | 'transferred';
 
 export default defineComponent({
   name: 'TxHandlingModal',
@@ -100,7 +107,7 @@ export default defineComponent({
   props: {
     status: {
       type: String as PropType<Status>,
-      default: 'transferring',
+      default: 'transferred',
     },
     blackButtonFunc: {
       type: Function,
@@ -189,6 +196,14 @@ export default defineComponent({
             displayInfo.detail1 = '374,222.20 KAVA';
             displayInfo.detail2 = 'Terra -> Kava chain';
             break;
+          case 'transferred':
+            displayInfo.iconType = displayData.iconType.none;
+            displayInfo.title = 'Transferred';
+            displayInfo.subTitle = '';
+            displayInfo.detail1 = '374,222.20 KAVA';
+            displayInfo.detail2 = 'Terra -> Kava chain';
+            displayInfo.blackButton = 'Next transfer';
+            break;
         }
 
         return displayInfo;
@@ -252,6 +267,7 @@ export default defineComponent({
 
       .arrow {
         color: var(--inactive);
+        font-weight: bold;
       }
     }
 
@@ -282,5 +298,15 @@ export default defineComponent({
       color: var(--muted);
     }
   }
+}
+
+.transferred-image {
+  background-image: url('~@/assets/images/blue-surfer-1.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 18.8rem;
+  height: 17.7rem;
+  display: block;
+  margin: 0 auto;
 }
 </style>
