@@ -103,6 +103,7 @@
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
     </div>
+    <SigningModal v-if="isSigningModalOpen" @close="toggleSigningModal" />
   </div>
 </template>
 <script lang="ts">
@@ -110,14 +111,16 @@ import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
+import SigningModal from '@/components/common/SigningModal.vue';
 import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
-  name: 'DenomSelectModal',
+  name: 'TxStepsModal',
   components: {
     GobackWithClose,
     Button,
     HintIcon,
+    SigningModal,
   },
   props: {
     data: { type: Object, required: true },
@@ -153,6 +156,11 @@ export default defineComponent({
       },
       setStep: () => {
         processData.currentStep += 1;
+      },
+      isSigningModalOpen: true,
+
+      toggleSigningModal: () => {
+        processData.isSigningModalOpen = !processData.isSigningModalOpen;
       },
     });
 
