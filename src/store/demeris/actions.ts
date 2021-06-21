@@ -1,5 +1,4 @@
-import { stringToPath } from '@cosmjs/crypto';
-import { DirectSecp256k1HdWallet, EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -14,6 +13,7 @@ import {
   DemerisActionParams,
   DemerisActionsByAddressParams,
   DemerisActionsByChainParams,
+  DemerisActionsByTicketParams,
   DemerisActionsTraceParams,
   DemerisActionTypes,
   DemerisSubscriptions,
@@ -63,6 +63,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionsByAddressParams,
   ): Promise<API.VerifiedDenoms>;
+  [DemerisActionTypes.GET_TX_STATUS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionsByTicketParams,
+  ): Promise<API.Ticket>;
   [DemerisActionTypes.GET_FEE_ADDRESSES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -85,10 +89,6 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.FeeAddress>;
-  [DemerisActionTypes.GET_FEE](
-    { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionsByChainParams,
-  ): Promise<API.Fee>;
   [DemerisActionTypes.GET_BECH32_CONFIG](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
@@ -155,6 +155,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_PRICES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_PRICES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_PRICES]>;
+  [GlobalDemerisActionTypes.GET_TX_STATUS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_TX_STATUS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_TX_STATUS]>;
   [GlobalDemerisActionTypes.GET_VERIFY_TRACE](
     ...args: Parameters<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>
   ): ReturnType<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>;
@@ -164,9 +167,6 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_BECH32_CONFIG](
     ...args: Parameters<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>
   ): ReturnType<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>;
-  [GlobalDemerisActionTypes.GET_FEE](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_FEE]>;
   [GlobalDemerisActionTypes.GET_CHAIN](
     ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN]>
   ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN]>;
@@ -287,14 +287,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await addChain(chain_name);
 
       await window.keplr.enable(chain.node_info.chain_id);
-      //const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-      const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(
-        'lawn spot surge will isolate buddy need doctor spread space cat else maple civil gentle web cup common intact level engage steel nature lawn',
-        {
-          hdPaths: [stringToPath("m/44'/118'/0'/0/0")],
-          prefix: 'cosmos',
-        },
-      );
+      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
@@ -314,9 +308,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
         sequence: parseInt(signerData.sequence_number),
       };
 
-      console.log(cosmjsSignerData);
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
-      console.log(tx);
+
       const tx_data = Buffer.from(tx).toString('base64');
       return { tx: tx_data, chain_name };
     } catch (e) {
@@ -353,6 +346,24 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
     }
     return getters['getPrices'];
+  },
+  async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(
+        getters['getEndpoint'] +
+          '/tx/ticket/' +
+          (params as API.TicketReq).chain_name +
+          '/' +
+          (params as API.TicketReq).ticket,
+      );
+      commit(DemerisMutationTypes.SET_TX_STATUS, { params, value: response.data });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TX_STATUS, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetTXStatus', 'Could not perform API query.');
+    }
+    return getters['getTxStatus'](params);
   },
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
     try {
@@ -414,20 +425,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetBech32Config', 'Could not perform API query.');
     }
     return getters['getBech32Config'](JSON.stringify(params));
-  },
-  async [DemerisActionTypes.GET_FEE]({ commit, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(
-        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee',
-      );
-      commit(DemerisMutationTypes.SET_FEE, { params, value: response.data.fee });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_FEE, payload: { params } });
-      }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetFee', 'Could not perform API query.');
-    }
-    return getters['getFee'](params);
   },
   async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
     try {
@@ -509,7 +506,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.RESET_STATE);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
-    state._Subscriptions.forEach((subscription) => {
+    state._Subscriptions.forEach((subscription_json) => {
+      const subscription = JSON.parse(subscription_json);
       dispatch(subscription.action, subscription.payload);
     });
   },

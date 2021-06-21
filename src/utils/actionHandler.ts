@@ -1,6 +1,7 @@
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
+import { Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
@@ -1097,36 +1098,15 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     return { msg, chain_name, registry };
   }
 }
-export async function getFeeForChain(chain_name: string): Promise<Actions.FeeWDenom> {
-  const amount =
-    store.getters['demeris/getFee']({
-      chain_name,
-    }) ??
-    (await store.dispatch(
-      'demeris/GET_FEE',
-      {
-        subscribe: false,
-        params: {
-          chain_name,
-        },
-      },
-      { root: true },
-    ));
-  const denoms =
-    store.getters['demeris/getFeeTokens']({
-      chain_name,
-    }) ??
-    (await store.dispatch(
-      'demeris/GET_FEE_TOKENS',
-      {
-        subscribe: false,
-        params: {
-          chain_name,
-        },
-      },
-      { root: true },
-    ));
-  return { amount, denom: denoms[0] };
+export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+  const denoms = store.getters['demeris/getFeeTokens']({
+    chain_name,
+  }) as Array<Denom>;
+  const fees = [];
+  for (const denom of denoms) {
+    fees.push({ amount: denom.fee_levels, denom: denom.name });
+  }
+  return fees;
 }
 export async function isLive(chain_name) {
   const status =
@@ -1146,7 +1126,7 @@ export async function isLive(chain_name) {
   return status;
 }
 
-export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.FeeWDenom> {
+export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
   if (stepTx.name == 'transfer') {
     const chain_name = (stepTx.data as Actions.TransferData).chain_name;
     const fee = await getFeeForChain(chain_name);
@@ -1178,10 +1158,15 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
 }
-export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel): Promise<Actions.FeeTotals> {
+export async function feeForStep(
+  step: Actions.Step,
+  feeLevel: Actions.FeeLevel,
+  feeDenom: string,
+): Promise<Actions.FeeTotals> {
   let feeTotals;
   for (const stepTx of step.transactions) {
-    const fee = await feeForStepTransaction(stepTx);
+    const fees = await feeForStepTransaction(stepTx);
+    const fee = fees.find((x) => x.denom == feeDenom);
     feeTotals[fee.denom]
       ? (feeTotals[fee.denom] = feeTotals[fee.denom] + BigInt(fee.amount[feeLevel]))
       : (feeTotals[fee.denom] = BigInt(fee.amount[feeLevel]));

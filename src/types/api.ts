@@ -7,6 +7,10 @@ export type ChainReq = {
   chain_name: string;
   destination_chain_name?: string;
 };
+export type TicketReq = {
+  chain_name: string;
+  ticket: string;
+};
 // Params object for verifying a specific trace hash on a specific chain
 export type VerifyTraceReq = {
   chain_name: string;
@@ -29,6 +33,7 @@ export type Denom = {
   verified: boolean;
   stakable: boolean;
   fee_token: boolean;
+  fee_levels: Fee;
   ticker: string;
   fetch_price: boolean;
 };
@@ -136,7 +141,6 @@ export type Chain = {
   primary_channel?: Record<string, string>;
   demeris_addresses?: Array<string>;
   price_modifier?: number;
-  base_tx_fee?: Fee;
   genesis_hash?: string;
   node_info?: NodeInfo;
   derivation_path?: string;
@@ -213,6 +217,10 @@ export type FeeTokens = Array<Denom>;
 export type FeeTokensResponse = {
   fee_tokens: FeeTokens;
 };
+export type Ticket = {
+  status: string;
+  newTicket: string;
+};
 export type SeqNumber = {
   chain_name: string;
   address: string;
@@ -223,4 +231,4 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests = AddrReq | VerifyTraceReq | ChainReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq;
