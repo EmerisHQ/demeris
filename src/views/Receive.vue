@@ -18,7 +18,7 @@
     <main class="receive__main">
       <template v-if="!state.selectedAsset">
         <div class="receive__main__select">
-          <DenomSelectModal :assets="balances" title="Select asset" @select="assetSelectHandler" />
+          <DenomSelectModal title="Receive" :assets="balances" :show-balance="true" @select="assetSelectHandler" />
         </div>
       </template>
 
@@ -42,6 +42,7 @@
 
 <script lang="ts">
 import { reactive } from '@vue/reactivity';
+import { computed } from '@vue/runtime-core';
 
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import QrCode from '@/components/common/QrCode.vue';
@@ -57,6 +58,17 @@ export default {
   setup() {
     const { balances } = useAccount();
 
+    const nativeBalances = computed(() => {
+      const result = [];
+      // TODO: Check if denom is native to its chain
+      for (const balance of balances.value) {
+        if (!result.some((item) => item.base_denom === balance.base_denom)) {
+          result.push(balance);
+        }
+      }
+      return result;
+    });
+
     const state = reactive({
       selectedAsset: undefined,
     });
@@ -69,7 +81,7 @@ export default {
       state.selectedAsset = asset;
     };
 
-    return { balances, state, goBack, assetSelectHandler };
+    return { balances: nativeBalances, state, goBack, assetSelectHandler };
   },
 };
 </script>
