@@ -430,8 +430,8 @@ export async function move({
 }
 export async function transferToHub({ amount, chain_name }: ChainAmount) {
   /*
-	This action creates the steps needed to get the chosen amount of chosen denom as a 1-hop token through the primary-channel on the hub
-	*/
+  This action creates the steps needed to get the chosen amount of chosen denom as a 1-hop token through the primary-channel on the hub
+  */
   const result = {
     steps: [],
     output: {
@@ -917,6 +917,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.from.chain_name,
           destination_chain_name: 'gaia',
         });
+        console.log(transferToHubStep);
 
         steps.push({ name: 'transfer', transactions: [...transferToHubStep.steps] });
         const swapStep = await swap({
