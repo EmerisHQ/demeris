@@ -94,8 +94,8 @@ export type SendAddressForm = {
 
 export type MoveAssetsForm = {
   balance: Base.Amount;
-  on_chain: '';
-  to_chain: '';
+  on_chain: string;
+  to_chain: string;
 };
 export type FeeWDenom = {
   amount: API.Fee;

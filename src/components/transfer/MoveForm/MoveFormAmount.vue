@@ -1,9 +1,27 @@
 <template>
   <div :class="{ 'move-form-amount--insufficient-funds': !hasSufficientFunds }">
+    <div class="move-form-amount__modal-wrapper">
+      <DenomSelectModal
+        v-if="state.isDenomModalOpen"
+        title="Select asset"
+        :assets="balances"
+        @select="toggleDenomModal"
+      />
+
+      <ChainSelectModal
+        v-if="state.isChainsModalOpen"
+        title="Select chain"
+        :assets="balances"
+        :selected-denom="state.currentAsset.base_denom"
+        :func="() => toggleChainsModal()"
+        @select="toggleChainsModal"
+      />
+    </div>
+
     <fieldset class="form__field move-form-amount">
       <div class="move-form-amount__input">
         <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-        <span class="move-form-amount__input__denom">{{ state.currentAsset?.denom }}</span>
+        <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" :chain-name="state.currentAsset?.on_chain" /></span>
       </div>
 
       <span class="move-form-amount__estimated"> $8,866.34 </span>
@@ -22,13 +40,13 @@
 
     <fieldset class="form__field">
       <div class="move-form-amount__assets elevation-card">
-        <button class="move-form-amount__assets__item denom-item" @click="openAssetsModal">
+        <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
           <span class="move-form-amount__assets__item__label s-minus">Move</span>
 
           <div class="move-form-amount__assets__item__asset">
             <span class="move-form-amount__assets__item__avatar" />
             <span class="move-form-amount__assets__item__name w-bold">
-              {{ form.balance.denom }}
+              <Denom :name="form.balance.denom || ''" :chain-name="form.on_chain" />
             </span>
           </div>
 
@@ -37,7 +55,7 @@
           </div>
         </button>
 
-        <button class="move-form-amount__assets__item from-item" @click="openChainsModal">
+        <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal()">
           <span class="move-form-amount__assets__item__label s-minus">From</span>
 
           <div class="move-form-amount__assets__item__asset">
@@ -50,7 +68,7 @@
           <div class="move-form-amount__assets__item__amount">
             <p class="move-form-amount__assets__item__amount__balance s-minus">$13,400</p>
             <p class="move-form-amount__assets__item__amount__available s-minus">
-              {{ `${state.currentAsset.chains[0].amount} ${form.balance.denom}` }}
+              {{ `${state.currentAsset?.amount} ${form.balance.denom}` }}
             </p>
           </div>
 
@@ -81,9 +99,11 @@
 </template>
 
 <script lang="ts">
-import groupBy from 'lodash.groupby';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import Denom from '@/components/common/Denom.vue';
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { MoveAssetsForm } from '@/types/actions';
@@ -94,6 +114,9 @@ export default defineComponent({
 
   components: {
     Button,
+    Denom,
+    DenomSelectModal,
+    ChainSelectModal,
     Icon,
   },
 
@@ -112,28 +135,15 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
-    });
-
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
-
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);
-        const chains = balances.map((item) => item);
-
-        return {
-          denom,
-          totalAmount,
-          chains,
-        };
-      });
+      isDenomModalOpen: false,
+      isChainsModalOpen: false,
     });
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
         return false;
       }
-      return state.currentAsset.chains[0].amount >= +form.balance.amount;
+      return state.currentAsset.amount >= +form.balance.amount;
     });
 
     const isValid = () => {
@@ -144,12 +154,18 @@ export default defineComponent({
       return true;
     };
 
-    const openAssetsModal = () => {
-      // TODO:
+    const toggleDenomModal = (asset?: Record<string, unknown>) => {
+      if (asset) {
+        setCurrentAsset(asset);
+      }
+      state.isDenomModalOpen = !state.isDenomModalOpen;
     };
 
-    const openChainsModal = () => {
-      // TODO:
+    const toggleChainsModal = (asset?: Record<string, unknown>) => {
+      if (asset) {
+        setCurrentAsset(asset);
+      }
+      state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
     const onSubmit = () => {
@@ -158,8 +174,8 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.denom as string;
-      form.on_chain = asset.chains[0].on_chain;
+      form.balance.denom = asset.base_denom as string;
+      form.on_chain = asset.on_chain as string;
     };
 
     // TODO: Select chain based in user option
@@ -167,26 +183,25 @@ export default defineComponent({
       () => [state.isMaximumAmountChecked, state.currentAsset],
       () => {
         if (state.isMaximumAmountChecked) {
-          form.balance.amount = state.currentAsset.chains[0].amount;
+          form.balance.amount = state.currentAsset.amount;
         }
       },
     );
 
     // TODO: Select defaut asset based in specific conditions
     if (!state.currentAsset) {
-      setCurrentAsset(balancesByAsset.value[0]);
+      setCurrentAsset(props.balances[0]);
     }
 
     return {
       form,
-      balancesByAsset,
       onSubmit,
       state,
       setCurrentAsset,
       hasSufficientFunds,
       isValid,
-      openAssetsModal,
-      openChainsModal,
+      toggleDenomModal,
+      toggleChainsModal,
     };
   },
 });
@@ -198,6 +213,18 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  &__modal-wrapper {
+    position: relative;
+    width: 100%;
+
+    .denom-select-modal-wrapper {
+      // Back icon
+      .title-with-goback > .icon:first-child {
+        visibility: hidden;
+      }
+    }
+  }
 
   &--insufficient-funds &__input {
     color: #ca0865;
@@ -267,6 +294,10 @@ export default defineComponent({
       display: flex;
       align-items: stretch;
       width: 100%;
+
+      &:focus {
+        outline: none;
+      }
 
       &.denom-item &__name {
         text-transform: uppercase;
