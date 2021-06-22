@@ -51,7 +51,6 @@ export default {
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
-
     return { balances, openAssetPage };
   },
 };

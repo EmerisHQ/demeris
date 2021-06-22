@@ -129,7 +129,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import { feeForStepTransaction, msgFromStepTransaction, toRedeem } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -166,7 +166,7 @@ export default defineComponent({
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
-
+    console.log(toRedeem(balances.value));
     const pools: Pool[] = [
       {
         id: 1,

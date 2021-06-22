@@ -118,10 +118,17 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
   },
   getVerifyTrace: (state) => (params) => {
-    return (
-      state.chains[(params as API.VerifyTraceReq).chain_name]?.verifiedTraces[(params as API.VerifyTraceReq).hash] ??
-      null
-    );
+    if (
+      state.chains[(params as API.VerifyTraceReq).chain_name] &&
+      state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces
+    ) {
+      return (
+        state.chains[(params as API.VerifyTraceReq).chain_name]?.verifiedTraces[(params as API.VerifyTraceReq).hash] ??
+        null
+      );
+    } else {
+      return null;
+    }
   },
   getFeeAddress: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.demeris_addresses[0] ?? null;

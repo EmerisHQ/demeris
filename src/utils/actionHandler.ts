@@ -1,7 +1,7 @@
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
-import { Denom } from '@/types/api';
+import { Balances, Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
@@ -1173,4 +1173,44 @@ export async function feeForStep(
       : (feeTotals[fee.denom] = BigInt(fee.amount[feeLevel]));
   }
   return feeTotals;
+}
+export async function toRedeem(balances: Balances): Promise<Balances> {
+  const allValidRedeemableBalances = balances.filter((x) => x.verified && Object.keys(x.ibc).length !== 0);
+  const redeemableBalances = [];
+  for (const balance of allValidRedeemableBalances) {
+    if (balance.ibc.path.split('/').length > 2) {
+      redeemableBalances.push(balance);
+    } else {
+      const verifyTrace =
+        store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
+        (await store.dispatch(
+          'demeris/GET_VERIFY_TRACE',
+          { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+          { root: true },
+        ));
+
+      if (!verifyTrace.verified) {
+        //  If we cannot verify the trace, throw error
+        continue;
+      }
+
+      const primaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: verifyTrace.trace[0].counterparty_name,
+          destination_chain_name: balance.on_chain,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: true,
+            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: balance.on_chain },
+          },
+          { root: true },
+        ));
+      if (primaryChannel.channel_name != getChannel(verifyTrace.path, 0)) {
+        redeemableBalances.push(balance);
+      }
+    }
+  }
+  return redeemableBalances;
 }
