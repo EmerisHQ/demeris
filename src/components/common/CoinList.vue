@@ -39,7 +39,7 @@
           </span>
         </div>
         <div v-else-if="type === 'chain'" class="coin-list__info-details-denom s-0 w-medium">
-          {{ coin.on_chain }}
+          <ChainName :name="coin.on_chain" />
         </div>
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
           {{ $filters.getCoinName(coin.base_denom) }}
@@ -81,11 +81,14 @@ import tippy from 'tippy.js';
 import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
+
 export default defineComponent({
   name: 'Button',
   components: {
     AssetChainsIndicator,
+    ChainName,
     Icon,
   },
   props: {

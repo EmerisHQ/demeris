@@ -21,7 +21,7 @@
     <fieldset class="form__field move-form-amount">
       <div class="move-form-amount__input">
         <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-        <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" :chain-name="state.currentAsset?.on_chain" /></span>
+        <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
       </div>
 
       <span class="move-form-amount__estimated"> $8,866.34 </span>
@@ -46,7 +46,7 @@
           <div class="move-form-amount__assets__item__asset">
             <span class="move-form-amount__assets__item__avatar" />
             <span class="move-form-amount__assets__item__name w-bold">
-              <Denom :name="form.balance.denom || ''" :chain-name="form.on_chain" />
+              <Denom :name="form.balance.denom || ''" />
             </span>
           </div>
 
@@ -86,7 +86,10 @@
 
           <div class="move-form-amount__assets__item__asset">
             <span class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold"> {{ form.to_chain || 'Select chain' }} </span>
+            <span class="move-form-amount__assets__item__name w-bold">
+              <ChainName v-if="form.to_chain" :name="form.to_chain" />
+              <span v-else>Select Chain</span>
+            </span>
           </div>
 
           <div class="move-form-amount__assets__item__button">
@@ -105,6 +108,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 
+import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
@@ -123,6 +127,7 @@ export default defineComponent({
     Denom,
     DenomSelectModal,
     ChainSelectModal,
+    ChainName,
     Icon,
   },
 
@@ -151,7 +156,7 @@ export default defineComponent({
       const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
 
       return Object.values(chains).map((item) => {
-        if (state.currentAsset.on_chain === item.chain_name) {
+        if (state.currentAsset?.on_chain === item.chain_name) {
           return;
         }
 
@@ -221,7 +226,7 @@ export default defineComponent({
     );
 
     // TODO: Select defaut asset based in specific conditions
-    if (!state.currentAsset) {
+    if (!state.currentAsset && (props.balances as Balances).length) {
       setCurrentAsset(props.balances[0]);
     }
 
