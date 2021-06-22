@@ -9,12 +9,24 @@
       "
     />
     <div class="setting">
-      <div class="s-minus w-medium">Slippage tolerance</div>
+      <div class="s-minus w-medium">Slippage tolerance {{ typeof slippage }}</div>
       <div class="setting__sections">
-        <button class="setting__sections-block">0.1%</button>
-        <button class="setting__sections-block">0.5%</button>
-        <button class="setting__sections-block">1%</button>
-        <input class="setting__sections-block" type="number" placeholder="Custom" />
+        <button class="setting__sections-block" :class="slippage === 0.1 ? 'selected' : ''" @click="setSlippage(0.1)">
+          0.1%
+        </button>
+        <button class="setting__sections-block" :class="slippage === 0.5 ? 'selected' : ''" @click="setSlippage(0.5)">
+          0.5%
+        </button>
+        <button class="setting__sections-block" :class="slippage === 1 ? 'selected' : ''" @click="setSlippage(1)">
+          1%
+        </button>
+        <input
+          :value="customSlippage"
+          class="setting__sections-block"
+          type="number"
+          placeholder="Custom"
+          @input="setCustomSlippage"
+        />
       </div>
     </div>
 
@@ -57,13 +69,24 @@ export default defineComponent({
 
   emits: ['goback'],
   setup(props, { emit }) {
-    const processData = reactive({
+    const state = reactive({
+      slippage: 0.5,
+      customSlippage: 0.1,
       emitHandler: (event) => {
         emit(event);
       },
+      setSlippage: (slippage) => {
+        localStorage.setItem('demeris-slippage', slippage);
+        state.slippage = slippage;
+        state.customSlippage = null;
+      },
+      setCustomSlippage: (e) => {
+        state.customSlippage = Number(e.target.value);
+        state.slippage = null;
+      },
     });
 
-    return toRefs(processData);
+    return { ...toRefs(state) };
   },
 });
 </script>
@@ -110,6 +133,8 @@ export default defineComponent({
 
         border-radius: 8px;
 
+        outline: none;
+
         &:last-child {
           width: 9.2rem;
           padding: 0.6rem 1.2rem;
@@ -130,6 +155,7 @@ export default defineComponent({
 
   .details {
     padding: 0 2.4rem 2.4rem;
+    margin-top: 3.2rem;
     &__row {
       display: flex;
       align-items: center;
@@ -146,6 +172,10 @@ export default defineComponent({
         }
       }
     }
+  }
+
+  .selected {
+    background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%), linear-gradient(0deg, #9ff9ff, #9ff9ff);
   }
 }
 </style>
