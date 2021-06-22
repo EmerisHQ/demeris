@@ -11,7 +11,7 @@
       <ChainSelectModal
         v-if="state.isChainsModalOpen"
         title="Select chain"
-        :assets="balances"
+        :assets="state.chainsModalSource === 'to' ? availableRecipientsChains : balances"
         :selected-denom="state.currentAsset.base_denom"
         :func="() => toggleChainsModal()"
         @select="toggleChainsModal"
@@ -55,7 +55,7 @@
           </div>
         </button>
 
-        <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal()">
+        <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
           <span class="move-form-amount__assets__item__label s-minus">From</span>
 
           <div class="move-form-amount__assets__item__asset">
@@ -77,12 +77,16 @@
           </div>
         </button>
 
-        <button class="move-form-amount__assets__item to-item" @click="openChainsModal">
+        <button
+          class="move-form-amount__assets__item to-item"
+          :class="{ 'chain-selected': !!form.to_chain }"
+          @click="toggleChainsModal(null, 'to')"
+        >
           <span class="move-form-amount__assets__item__label s-minus">To</span>
 
           <div class="move-form-amount__assets__item__asset">
             <span class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold"> Select chain </span>
+            <span class="move-form-amount__assets__item__name w-bold"> {{ form.to_chain || 'Select chain' }} </span>
           </div>
 
           <div class="move-form-amount__assets__item__button">
@@ -106,6 +110,8 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { useStore } from '@/store';
+import { ChainData } from '@/store/demeris/state';
 import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 
@@ -130,6 +136,7 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
+    const store = useStore();
     const form = inject<MoveAssetsForm>('moveForm');
 
     const state = reactive({
@@ -137,6 +144,25 @@ export default defineComponent({
       isMaximumAmountChecked: false,
       isDenomModalOpen: false,
       isChainsModalOpen: false,
+      chainsModalSource: 'from',
+    });
+
+    const availableRecipientsChains = computed(() => {
+      const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
+
+      return Object.values(chains).map((item) => {
+        if (state.currentAsset.on_chain === item.chain_name) {
+          return;
+        }
+
+        const balance = (props.balances as Balances).find((balance) => balance.on_chain === item.chain_name);
+
+        return {
+          amount: balance?.amount || 0,
+          base_denom: state.currentAsset.base_denom,
+          on_chain: item.chain_name,
+        };
+      });
     });
 
     const hasSufficientFunds = computed(() => {
@@ -161,10 +187,16 @@ export default defineComponent({
       state.isDenomModalOpen = !state.isDenomModalOpen;
     };
 
-    const toggleChainsModal = (asset?: Record<string, unknown>) => {
+    const toggleChainsModal = (asset?: Record<string, unknown>, source = 'from') => {
       if (asset) {
-        setCurrentAsset(asset);
+        if (state.chainsModalSource === 'to') {
+          form.to_chain = asset.on_chain as string;
+        } else {
+          setCurrentAsset(asset);
+        }
       }
+
+      state.chainsModalSource = source;
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
@@ -202,6 +234,7 @@ export default defineComponent({
       isValid,
       toggleDenomModal,
       toggleChainsModal,
+      availableRecipientsChains,
     };
   },
 });
@@ -306,6 +339,11 @@ export default defineComponent({
       &.from-item &__avatar {
         background: transparent;
         border: 2px solid #7782ff;
+      }
+
+      &.to-item.chain-selected &__avatar {
+        background: transparent;
+        border: 2px solid #9eb0f7;
       }
 
       &.to-item &__avatar {
