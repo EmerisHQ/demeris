@@ -9,7 +9,7 @@
       "
     />
     <div class="setting">
-      <div class="s-minus w-medium">Slippage tolerance {{ typeof slippage }}</div>
+      <div class="s-minus w-medium">Slippage tolerance</div>
       <div class="setting__sections">
         <button class="setting__sections-block" :class="slippage === 0.1 ? 'selected' : ''" @click="setSlippage(0.1)">
           0.1%
@@ -28,6 +28,10 @@
           @input="setCustomSlippage"
         />
       </div>
+    </div>
+
+    <div v-if="alertStatus" class="alert-wrapper">
+      <Alert :status="alertStatus" :message="alertText" />
     </div>
 
     <div class="details">
@@ -55,23 +59,59 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, reactive, toRefs } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
+import Alert from '@/components/ui/Alert.vue';
 
 export default defineComponent({
   name: 'SlippageSettingModal',
   components: {
     TitleWithGoback,
     HintIcon,
+    Alert,
   },
 
   emits: ['goback'],
   setup(props, { emit }) {
     const state = reactive({
-      slippage: 0.5,
-      customSlippage: 0.1,
+      slippage: null,
+      customSlippage: null,
+      alertStatus: computed(() => {
+        if (state.slippage) {
+          if (state.slippage === 0.1) {
+            return 'warning';
+          } else {
+            return null;
+          }
+        } else {
+          if (state.customSlippage <= 0.1) {
+            if (state.customSlippage < 0) {
+              return 'error';
+            } else {
+              return 'warning';
+            }
+          } else if (state.customSlippage >= 3) {
+            return 'error';
+          } else {
+            return null;
+          }
+        }
+      }),
+      alertText: computed(() => {
+        if (state.alertStatus === 'warning') {
+          return 'With a low slippage, only a very small part of your swap may be fulfilled';
+        } else if (state.alertStatus === 'error') {
+          if (state.customSlippage < 0) {
+            return 'Please enter a valid slippage rate.';
+          } else {
+            return 'Your swap price may be significantly above the market price. ';
+          }
+        } else {
+          return '';
+        }
+      }),
       emitHandler: (event) => {
         emit(event);
       },
@@ -81,10 +121,18 @@ export default defineComponent({
         state.customSlippage = null;
       },
       setCustomSlippage: (e) => {
+        localStorage.setItem('demeris-slippage', e.target.value);
         state.customSlippage = Number(e.target.value);
         state.slippage = null;
       },
     });
+
+    const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
+    if (slippage > 1 || slippage < 0.1) {
+      state.customSlippage = slippage;
+    } else {
+      state.slippage = slippage;
+    }
 
     return { ...toRefs(state) };
   },
@@ -176,6 +224,10 @@ export default defineComponent({
 
   .selected {
     background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%), linear-gradient(0deg, #9ff9ff, #9ff9ff);
+  }
+
+  .alert-wrapper {
+    padding: 0 2.4rem;
   }
 }
 </style>
