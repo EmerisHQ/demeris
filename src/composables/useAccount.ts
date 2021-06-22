@@ -1,17 +1,18 @@
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 
-import { TEST_DATA } from '@/TEST_DATA';
+//import { TEST_DATA } from '@/TEST_DATA';
 
 export default function useAccount() {
   const store = useStore();
 
   const balances = computed(() => {
     // TODO: Remove after cloud is fully deployed
+    /*
     if (process.env.NODE_ENV === 'production') {
       return TEST_DATA.balances;
     }
-
+    */
     return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
   });
 

@@ -16,7 +16,7 @@
           <div class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
-              style="summary"
+              display-style="summary"
               class="assets__table"
               :show-headers="false"
               @row-click="openAssetPage"
