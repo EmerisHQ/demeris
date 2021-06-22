@@ -51,6 +51,11 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Balances>;
+  [DemerisActionTypes.REDEEM_GET_HAS_SEEN]({ commit, getters }: ActionContext<State, RootState>): Promise<boolean>;
+  [DemerisActionTypes.REDEEM_SET_HAS_SEEN](
+    { commit, getters }: ActionContext<State, RootState>,
+    seen: boolean,
+  ): Promise<void>;
   [DemerisActionTypes.GET_STAKING_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
@@ -137,6 +142,12 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_BALANCES]>;
+  [GlobalDemerisActionTypes.REDEEM_GET_HAS_SEEN](
+    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>
+  ): ReturnType<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>;
+  [GlobalDemerisActionTypes.REDEEM_SET_HAS_SEEN](
+    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>
+  ): ReturnType<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>;
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
@@ -218,6 +229,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
     }
     return getters['getBalances'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
+    const redeem = window.localStorage.getItem('redeem');
+    return redeem === 'true' ? true : false;
+  },
+  async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
+    seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
     try {

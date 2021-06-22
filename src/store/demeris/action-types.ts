@@ -2,6 +2,8 @@ import * as API from '@/types/api';
 export enum DemerisActionTypes {
   // Cross-chain endpoint actions
   GET_BALANCES = 'GET_BALANCES',
+  REDEEM_GET_HAS_SEEN = 'REDEEM_GET_HAS_SEEN',
+  REDEEM_SET_HAS_SEEN = 'REDEEM_SET_HAS_SEEN',
   GET_STAKING_BALANCES = 'GET_STAKING_BALANCES',
   GET_NUMBERS = 'GET_NUMBERS',
   GET_FEE_ADDRESSES = 'GET_FEE_ADDRESSES',
@@ -29,6 +31,8 @@ export enum DemerisActionTypes {
 export enum GlobalDemerisActionTypes {
   // Cross-chain endpoint actions
   GET_BALANCES = 'demeris/GET_BALANCES',
+  REDEEM_GET_HAS_SEEN = 'demeris/REDEEM_GET_HAS_SEEN',
+  REDEEM_SET_HAS_SEEN = 'demeris/REDEEM_SET_HAS_SEEN',
   GET_STAKING_BALANCES = 'demeris/GET_STAKING_BALANCES',
   GET_NUMBERS = 'demeris/GET_NUMBERS',
   GET_FEE_ADDRESSES = 'demeris/GET_FEE_ADDRESSES',
