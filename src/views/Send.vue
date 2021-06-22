@@ -67,9 +67,7 @@ import { useRoute, useRouter } from 'vue-router';
 import MoveForm from '@/components/transfer/MoveForm';
 import SendForm from '@/components/transfer/SendForm';
 import Icon from '@/components/ui/Icon.vue';
-import { Balances } from '@/types/api';
-
-import balancesFixture from '../../tests/fixtures/balances.json';
+import useAccount from '@/composables/useAccount';
 
 type TransferType = 'address' | 'move';
 
@@ -83,7 +81,7 @@ export default {
     const transferType = computed(() => route.params.type as TransferType);
     const step = ref(undefined);
 
-    const balances: Balances = balancesFixture;
+    const { balances } = useAccount();
 
     const showBackButton = computed(() => {
       return !!transferType.value;
