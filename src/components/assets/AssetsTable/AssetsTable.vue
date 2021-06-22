@@ -1,6 +1,6 @@
 <template>
   <table class="assets-table">
-    <thead>
+    <thead v-if="showHeaders">
       <tr>
         <th class="text-left">Asset</th>
         <th v-if="style !== 'summary'" class="text-right">Price</th>
@@ -29,7 +29,7 @@
         </td>
 
         <td v-if="style !== 'summary'" class="assets-table__row__price text-right">
-          $20.50
+          <Price :amount="{ denom: asset.denom, amount: null }" />
           <div
             v-if="style !== 'full'"
             class="assets-table__row__price__trending assets-table__row__trending__wrapper s-minus"
@@ -47,19 +47,19 @@
         </td>
 
         <td v-if="style === 'full'" class="assets-table__row__amount text-right">
-          <span>{{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
+          <span><AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" chain-name="cosmos-hub" /></span>
         </td>
 
         <td class="assets-table__row__balance text-right">
-          $6,150.20
+          <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
           <div v-if="style !== 'full'" class="assets-table__row__balance__amount s-minus">
-            {{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" />
+            <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" chain-name="cosmos-hub" />
           </div>
         </td>
 
         <td v-if="style !== 'summary'" class="assets-table__row__chains">
           <div class="assets-table__row__chains__wrapper">
-            <AssetChainsIndicator :denom="asset.denom" :balances="balances" />
+            <AssetChainsIndicator :denom="asset.denom" :balances="balances.filter((x) => x.verified)" />
 
             <button class="assets-table__row__arrow-button" @click="handleClick(asset)">
               <ChevronRightIcon class="assets-table__row__arrow-button__icon" />
@@ -77,9 +77,11 @@ import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
+import Price from '@/components/common/Price.vue';
 import { Balances } from '@/types/api';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
@@ -87,12 +89,16 @@ type TableStyleType = 'full' | 'compact' | 'summary';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom },
+  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom, Price, AmountDisplay },
 
   props: {
     style: {
       type: String as PropType<TableStyleType>,
       default: 'full',
+    },
+    showHeaders: {
+      type: Boolean as PropType<boolean>,
+      default: true,
     },
     balances: {
       type: Array as PropType<Balances>,
@@ -120,7 +126,6 @@ export default defineComponent({
         };
       });
     });
-
     const handleClick = (asset: Record<string, string>) => {
       emit('row-click', asset);
     };

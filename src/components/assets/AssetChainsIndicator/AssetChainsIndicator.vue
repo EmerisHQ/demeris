@@ -12,7 +12,7 @@
 
       <template #content>
         <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{ `${balance.amount} on ${balance.on_chain}` }}
+          {{ `${formatPrecision(balance.amount)} on ${getChainName(balance.on_chain)}` }}
         </p>
       </template>
     </tippy>
@@ -20,8 +20,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { parseCoins } from '@cosmjs/launchpad';
+import { computed, defineComponent, onMounted, PropType } from 'vue';
 
+import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
@@ -50,12 +53,31 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const store = useStore();
+    onMounted(async () => {
+      await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
+    });
     const filteredBalances = computed(() => {
       return (props.balances as Balances)
         .filter((item) => item.base_denom === props.denom)
-        .sort((a, b) => (+b.amount > +a.amount ? 1 : -1));
+        .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1));
     });
-
+    const formatPrecision = (amount: string) => {
+      return (
+        parseInt(parseCoins(amount)[0].amount) /
+        Math.pow(
+          10,
+          store.getters['demeris/getDenomPrecision']({
+            name: props.denom,
+          }),
+        )
+      );
+    };
+    const getChainName = (chain_name) => {
+      return store.getters['demeris/getDisplayChain']({
+        name: chain_name,
+      });
+    };
     const chainsCount = computed(() => {
       return Math.min(props.maxChainsCount as number, filteredBalances.value.length);
     });
@@ -73,7 +95,15 @@ export default defineComponent({
       return filteredBalances.value.length > indicators.value.length;
     });
 
-    return { chainsCount, hasMoreChains, indicators, hasMoreIndicators, filteredBalances };
+    return {
+      chainsCount,
+      hasMoreChains,
+      indicators,
+      hasMoreIndicators,
+      filteredBalances,
+      formatPrecision,
+      getChainName,
+    };
   },
 });
 </script>

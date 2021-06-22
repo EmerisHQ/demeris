@@ -17,6 +17,15 @@ export type Getters = {
   getPrice(state: State): {
     (params: { denom: string }): number;
   }; //TODO prices
+  getDisplayDenom(state: State): {
+    (params: { name: string }): string;
+  };
+  getDisplayChain(state: State): {
+    (params: { name: string }): string;
+  };
+  getDenomPrecision(state: State): {
+    (params: { name: string }): string;
+  };
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
@@ -55,8 +64,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getDisplayDenom:
     (state) =>
-    ({ name, chain_name }) => {
-      return state.verifiedDenoms.find((x) => x.name == name && x.chain_name == chain_name)?.display_name ?? null;
+    ({ name }) => {
+      return state.verifiedDenoms.find((x) => x.name == name)?.display_name ?? null;
+    },
+  getDisplayChain:
+    (state) =>
+    ({ name }) => {
+      return state.chains[name]?.display_name ?? null;
+    },
+  getDenomPrecision:
+    (state) =>
+    ({ name }) => {
+      return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
     },
   getChains: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;

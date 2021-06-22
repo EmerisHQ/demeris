@@ -1,17 +1,23 @@
 <template>
-  <div>
-    <!--Displays an unstyled chain name<template>
-			  Props: 
-					chain_id
-				On hover: tooltip displays both Chain Name and chain_id
-				Dependencies: 
-					vuex getter to get chain name from chain_id
-		-->
-  </div>
+  {{ displayChain }}
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
+
+import { useStore } from '@/store';
 export default defineComponent({
   name: 'ChainName',
+  props: {
+    name: { type: String, required: true },
+  },
+  setup(props) {
+    const store = useStore();
+
+    const displayChain = computed(() => {
+      const displayName = store.getters['demeris/getDisplayChain']({ name: props.name });
+      return displayName || props.name;
+    });
+    return { displayChain };
+  },
 });
 </script>
