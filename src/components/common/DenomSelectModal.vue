@@ -33,9 +33,11 @@
         <CoinList
           :data="filterKeyword(assets, keyword)"
           :type="title === 'Receive' ? 'receive' : 'pay'"
+          :show-balance="showBalance"
           :keyword="keyword"
           @select="coinListselectHandler"
-        />
+        >
+        </CoinList>
       </div>
       <WhiteOverlay />
     </div>
@@ -62,6 +64,7 @@ export default defineComponent({
     assets: { type: Object, required: true },
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
+    showBalance: { type: Boolean, default: false },
   },
   emits: ['select'],
   setup(props, { emit }) {
