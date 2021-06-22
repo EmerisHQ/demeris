@@ -8,13 +8,12 @@ import { computed, defineComponent, onMounted, PropType } from 'vue';
 
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { Amount } from '@/types/base';
-
+import { Balances } from '@/types/api';
 export default defineComponent({
-  name: 'Price',
+  name: 'TotalPrice',
   props: {
-    amount: {
-      type: Object as PropType<Amount>,
+    balances: {
+      type: Array as PropType<Balances>,
       required: true,
     },
   },
@@ -23,19 +22,22 @@ export default defineComponent({
     onMounted(async () => {
       await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
     });
+
     const displayPrice = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: (props.amount as Amount).denom,
-      });
-      let value;
-      if ((props.amount as Amount).amount) {
-        value =
-          (store.getters['demeris/getPrice']({ denom: (props.amount as Amount).denom }) *
-            parseInt((props.amount as Amount).amount)) /
-          Math.pow(10, parseInt(precision));
-      } else {
-        value = store.getters['demeris/getPrice']({ denom: (props.amount as Amount).denom });
-      }
+      const value = (props.balances as Balances).reduce((total, balance) => {
+        return balance.verified
+          ? total +
+              (parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom })) /
+                Math.pow(
+                  10,
+                  parseInt(
+                    store.getters['demeris/getDenomPrecision']({
+                      name: balance.base_denom,
+                    }),
+                  ),
+                )
+          : total;
+      }, 0);
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -50,3 +52,8 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+span {
+  font-size: 0.42em;
+}
+</style>

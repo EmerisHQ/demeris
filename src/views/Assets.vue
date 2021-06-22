@@ -19,7 +19,7 @@
         class="assets__group"
         :class="{ 'assets__group--all': chain === 'all' }"
       >
-        <h2 v-if="chain !== 'all'" class="assets__group__title w-bold">{{ chain }} assets</h2>
+        <h2 v-if="chain !== 'all'" class="assets__group__title w-bold"><ChainName :name="chain"> assets</ChainName></h2>
         <AssetsTable :balances="balances" class="assets__table" @row-click="openAssetPage" />
       </div>
     </section>
@@ -32,12 +32,13 @@ import groupBy from 'lodash.groupby';
 import { useRoute, useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import ChainName from '@/components/common/ChainName.vue';
 import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default {
   name: 'Assets',
-  components: { AppLayout, AssetsTable },
+  components: { AppLayout, AssetsTable, ChainName },
 
   setup() {
     const router = useRouter();
