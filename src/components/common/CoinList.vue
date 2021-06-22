@@ -59,11 +59,10 @@
           <span v-else>{{ coin.on_chain }}</span>
         </div>
         <div v-else class="coin-list__info-details-data s-minus w-normal">
-          {{
-            type === 'pay' || type === 'chain'
-              ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available`
-              : coin.on_chain
-          }}
+          <span v-if="type === 'pay' || type === 'chain'">
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+          </span>
+          <ChainName v-else :name="coin.on_chain" />
         </div>
       </div>
     </div>
@@ -72,7 +71,7 @@
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
     <div v-else-if="showBalance" class="coin-list__balance">
-      {{ `${coin.amount} ${$filters.getCoinName(coin.base_denom)}` }}
+      <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
     </div>
   </div>
 </template>
@@ -81,6 +80,7 @@ import tippy from 'tippy.js';
 import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
 
@@ -89,6 +89,7 @@ export default defineComponent({
   components: {
     AssetChainsIndicator,
     ChainName,
+    AmountDisplay,
     Icon,
   },
   props: {
