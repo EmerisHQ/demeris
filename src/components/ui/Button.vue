@@ -3,6 +3,7 @@
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
       :class="[status, isOutline ? 'outline-theme' : '']"
+      :disabled="disabled"
       class="button s-0 w-medium elevation-button"
       @click="clickFunction"
     >
@@ -24,6 +25,7 @@ export default defineComponent({
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
+    disabled: { type: Boolean, default: false },
   },
   setup(props) {
     const buttonTooltipRef = ref(null);
@@ -51,6 +53,11 @@ export default defineComponent({
   border: none;
   outline: none;
   cursor: pointer;
+
+  &:disabled {
+    background-color: var(--inactive);
+    cursor: not-allowed;
+  }
 }
 
 .normal {
