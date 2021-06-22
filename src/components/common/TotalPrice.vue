@@ -1,18 +1,15 @@
-<template>
-  {{ displayPrice }}
-</template>
+<template>${{ displayPrice }}</template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType } from 'vue';
 
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { Amount } from '@/types/base';
-
+import { Balances } from '@/types/api';
 export default defineComponent({
-  name: 'Price',
+  name: 'TotalPrice',
   props: {
-    amount: {
-      type: Object as PropType<Amount>,
+    balances: {
+      type: Array as PropType<Balances>,
       required: true,
     },
   },
@@ -21,9 +18,14 @@ export default defineComponent({
     onMounted(async () => {
       await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
     });
-    const displayPrice = computed(
-      () => store.getters['demeris/getPrice']({ denom: props.amount.denom }) * parseInt(props.amount.amount),
-    );
+
+    const displayPrice = computed(() => {
+      return (props.balances as Balances).reduce((total, balance) => {
+        return balance.verified
+          ? total + parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom })
+          : total;
+      }, 0);
+    });
     return { displayPrice };
   },
 });

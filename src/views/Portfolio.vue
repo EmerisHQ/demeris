@@ -2,7 +2,7 @@
   <AppLayout>
     <div class="wrapper">
       <div class="portfolio">
-        <div>Portfolio</div>
+        <TotalPrice :balances="balances" />
       </div>
       <div>
         <LiquiditySwap />
@@ -12,12 +12,26 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from 'vue-router';
+
+import TotalPrice from '@/components/common/TotalPrice.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default {
   name: 'Portfolio',
-  components: { AppLayout, LiquiditySwap },
+  components: { AppLayout, LiquiditySwap, TotalPrice },
+  setup() {
+    const router = useRouter();
+    const { balances } = useAccount();
+
+    const openAssetPage = (asset: Record<string, string>) => {
+      router.push({ name: 'Asset', params: { denom: asset.denom } });
+    };
+
+    return { balances, openAssetPage };
+  },
 };
 </script>
 
@@ -31,10 +45,7 @@ export default {
     display: flex;
     flex: 1;
     width: 0;
-    align-items: center;
-    justify-content: space-evenly;
     margin-right: 2rem;
-    background-color: rgb(172, 206, 207);
   }
 }
 </style>

@@ -14,6 +14,9 @@ export type Getters = {
   getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
   getPrices(state: State): any; //TODO prices
+  getPrice(state: State): {
+    (params: { denom: string }): number;
+  }; //TODO prices
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
@@ -60,6 +63,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrices: (state) => {
     return state.prices; //TODO: Prices
+  },
+  getPrice: (state) => (params) => {
+    return 1;
   },
   getEndpoint: (state) => {
     return state.endpoint; //TODO: Prices
