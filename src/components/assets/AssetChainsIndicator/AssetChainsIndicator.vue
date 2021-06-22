@@ -1,7 +1,7 @@
 <template>
-  <div class="asset-chains-indicator">
+  <div v-if="chainsCount > 1" class="asset-chains-indicator">
     <tippy class="asset-chains-indicator__wrapper">
-      <div class="asset-chains-indicator__list">
+      <div v-if="showIndicators" class="asset-chains-indicator__list">
         <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
       </div>
 
@@ -34,6 +34,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    showIndicators: {
+      type: Boolean,
+      default: true,
+    },
     maxIndicators: {
       type: Number,
       required: false,
@@ -45,15 +49,15 @@ export default defineComponent({
       default: 9,
     },
   },
-  setup(props: { maxChainsCount: number; maxIndicators: number; balances: Balances; denom: string }) {
+  setup(props) {
     const filteredBalances = computed(() => {
-      return props.balances
+      return (props.balances as Balances)
         .filter((item) => item.base_denom === props.denom)
         .sort((a, b) => (+b.amount > +a.amount ? 1 : -1));
     });
 
     const chainsCount = computed(() => {
-      return Math.min(props.maxChainsCount, filteredBalances.value.length);
+      return Math.min(props.maxChainsCount as number, filteredBalances.value.length);
     });
 
     const hasMoreChains = computed(() => {
@@ -62,7 +66,7 @@ export default defineComponent({
 
     // TODO: Get indicator gradient color based in the chain name
     const indicators = computed(() => {
-      return filteredBalances.value.slice(0, props.maxIndicators);
+      return filteredBalances.value.slice(0, props.maxIndicators as number);
     });
 
     const hasMoreIndicators = computed(() => {
@@ -84,10 +88,10 @@ export default defineComponent({
   }
 
   &__list {
-    // flex w-1/2 justify-end -space-x-5
     display: flex;
     justify-content: flex-end;
     width: 50%;
+    margin-right: 0.8rem;
 
     &__item {
       width: 2.4rem;
@@ -96,8 +100,6 @@ export default defineComponent({
       border-radius: 2.4rem;
       border: 2px solid #9ffeed;
 
-      //  border-2 w-8 h-8 border-blue-300 bg-white
-
       &:not(:first-child) {
         margin-left: -1.6rem;
       }
@@ -105,7 +107,6 @@ export default defineComponent({
   }
 
   &__count {
-    margin-left: 0.8rem;
     white-space: nowrap;
   }
 }
