@@ -2,40 +2,62 @@
   <table class="assets-table">
     <thead>
       <tr>
-        <th class="assets-table--u-text-left">Asset</th>
-        <th class="assets-table--u-text-right">Price</th>
-        <th class="assets-table--u-text-right">24h %</th>
-        <th v-if="!isCompact" class="assets-table--u-text-right">Balance</th>
-        <th class="assets-table--u-text-right">Balance</th>
-        <th>
+        <th class="text-left">Asset</th>
+        <th v-if="style !== 'summary'" class="text-right">Price</th>
+        <th v-if="style === 'full'" class="text-right">24h %</th>
+        <th v-if="style === 'full'" class="text-right">Amount</th>
+        <th class="text-right">Balance</th>
+        <th v-if="style !== 'summary'">
           <!-- Chains -->
         </th>
       </tr>
     </thead>
 
     <tbody>
-      <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
+      <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
         <td class="assets-table__row__asset">
           <div class="assets-table__row__asset__avatar" />
-          <span class="assets-table__row__asset__denom"><Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
+          <div class="assets-table__row__asset__denom">
+            <Denom :name="asset.denom" chain-name="cosmos-hub" />
+            <div
+              v-if="style === 'summary' && asset.chainsNames.length > 1"
+              class="assets-table__row__asset__denom__chains s-minus"
+            >
+              <AssetChainsIndicator :denom="asset.denom" :balances="balances" :show-indicators="false" />
+            </div>
+          </div>
         </td>
 
-        <td class="assets-table__row__price assets-table--u-text-right">$20.50</td>
+        <td v-if="style !== 'summary'" class="assets-table__row__price text-right">
+          $20.50
+          <div
+            v-if="style !== 'full'"
+            class="assets-table__row__price__trending assets-table__row__trending__wrapper s-minus"
+          >
+            <TrendingUpIcon class="assets-table__row__trending__icon" />
+            <span class="assets-table__row__trending__value">52.21%</span>
+          </div>
+        </td>
 
-        <td class="assets-table__row__trending">
+        <td v-if="style === 'full'" class="assets-table__row__trending">
           <div class="assets-table__row__trending__wrapper">
             <TrendingUpIcon class="assets-table__row__trending__icon" />
             <span class="assets-table__row__trending__value">52.21%</span>
           </div>
         </td>
 
-        <td v-if="!isCompact" class="assets-table__row__balance assets-table--u-text-right">
+        <td v-if="style === 'full'" class="assets-table__row__amount text-right">
           <span>{{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
         </td>
 
-        <td class="assets-table__row__equivalent-balance assets-table--u-text-right">$6,150.20</td>
+        <td class="assets-table__row__balance text-right">
+          $6,150.20
+          <div v-if="style !== 'full'" class="assets-table__row__balance__amount s-minus">
+            {{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" />
+          </div>
+        </td>
 
-        <td class="assets-table__row__chains">
+        <td v-if="style !== 'summary'" class="assets-table__row__chains">
           <div class="assets-table__row__chains__wrapper">
             <AssetChainsIndicator :denom="asset.denom" :balances="balances" />
 
@@ -60,14 +82,17 @@ import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
 import { Balances } from '@/types/api';
 
+type TableStyleType = 'full' | 'compact' | 'summary';
+
 export default defineComponent({
   name: 'AssetsTable',
 
   components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom },
 
   props: {
-    isCompact: {
-      type: Boolean,
+    style: {
+      type: String as PropType<TableStyleType>,
+      default: 'full',
     },
     balances: {
       type: Array as PropType<Balances>,
@@ -82,7 +107,10 @@ export default defineComponent({
       const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
 
       return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
+        const totalAmount = balances.reduce(
+          (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
+          0,
+        );
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {
@@ -104,14 +132,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .assets-table {
-  width: 100%;
+  width: calc(100% + 4rem);
+  margin-inline: -2rem;
   table-layout: fixed;
 
-  &--u-text-right {
+  .text-right {
     text-align: right;
   }
 
-  &--u-text-left {
+  .text-left {
     text-align: left;
   }
 
@@ -123,10 +152,41 @@ export default defineComponent({
     padding-bottom: 2rem;
   }
 
+  td,
+  th {
+    transition: all 100ms ease-in;
+
+    &:first-child {
+      padding-left: 2rem;
+    }
+
+    &:last-child {
+      padding-right: 2rem;
+    }
+  }
+
   &__row {
+    cursor: pointer;
+
+    &:hover {
+      td {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      td:first-child {
+        border-top-left-radius: 0.8rem;
+        border-bottom-left-radius: 0.8rem;
+      }
+
+      td:last-child {
+        border-top-right-radius: 0.8rem;
+        border-bottom-right-radius: 0.8rem;
+      }
+    }
+
     &__asset {
       padding: 2rem 0;
-      min-width: 4rem;
+      min-width: 1rem;
       font-weight: 600;
       text-transform: uppercase;
       display: flex;
@@ -138,6 +198,12 @@ export default defineComponent({
         border-radius: 2.4rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 1.6rem;
+      }
+
+      &__denom {
+        &__chains {
+          margin-top: 0.8rem;
+        }
       }
     }
 
@@ -156,17 +222,29 @@ export default defineComponent({
       }
     }
 
-    &__balance {
+    &__price {
+      &__trending {
+        margin-top: 0.8rem;
+      }
+    }
+
+    &__amount {
       text-transform: uppercase;
       color: rgba(0, 0, 0, 0.66);
     }
 
-    &__equivalent-balance {
+    &__balance {
       font-weight: 600;
+
+      &__amount {
+        color: var(--muted);
+        margin-top: 0.8rem;
+      }
     }
 
     &__chains {
       &__wrapper {
+        margin-left: 1rem;
         width: 100%;
         display: flex;
         align-items: center;
