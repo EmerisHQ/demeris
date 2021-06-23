@@ -57,7 +57,7 @@
           />
           <IconButton
             v-if="payCoinData"
-            :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
+            :name="`${parseInt(payCoinData.amount)} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
             :type="'text'"
             :status="'normal'"
             :data="{
