@@ -17,14 +17,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Welcome.vue'),
   },
   {
-    path: '/assets',
+    path: '/assets/:tab?',
     name: 'Assets',
     component: () => import('@/views/Assets.vue'),
-  },
-  {
-    path: '/assets/chains',
-    name: 'Chains',
-    component: () => import('@/views/Chains.vue'),
   },
   {
     path: '/send/:type?',

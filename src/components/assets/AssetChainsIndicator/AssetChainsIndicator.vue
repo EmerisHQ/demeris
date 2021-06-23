@@ -1,7 +1,7 @@
 <template>
-  <div class="asset-chains-indicator">
+  <div v-if="chainsCount > 1" class="asset-chains-indicator">
     <tippy class="asset-chains-indicator__wrapper">
-      <div class="asset-chains-indicator__list">
+      <div v-if="showIndicators" class="asset-chains-indicator__list">
         <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
       </div>
 
@@ -12,7 +12,7 @@
 
       <template #content>
         <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{ `${balance.amount} on ${balance.on_chain}` }}
+          {{ `${formatPrecision(balance.amount)} on ${getChainName(balance.on_chain)}` }}
         </p>
       </template>
     </tippy>
@@ -20,8 +20,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { parseCoins } from '@cosmjs/launchpad';
+import { computed, defineComponent, onMounted, PropType } from 'vue';
 
+import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
@@ -34,6 +37,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    showIndicators: {
+      type: Boolean,
+      default: true,
+    },
     maxIndicators: {
       type: Number,
       required: false,
@@ -45,15 +52,34 @@ export default defineComponent({
       default: 9,
     },
   },
-  setup(props: { maxChainsCount: number; maxIndicators: number; balances: Balances; denom: string }) {
-    const filteredBalances = computed(() => {
-      return props.balances
-        .filter((item) => item.base_denom === props.denom)
-        .sort((a, b) => (+b.amount > +a.amount ? 1 : -1));
+  setup(props) {
+    const store = useStore();
+    onMounted(async () => {
+      await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
     });
-
+    const filteredBalances = computed(() => {
+      return (props.balances as Balances)
+        .filter((item) => item.base_denom === props.denom)
+        .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1));
+    });
+    const formatPrecision = (amount: string) => {
+      return (
+        parseInt(parseCoins(amount)[0].amount) /
+        Math.pow(
+          10,
+          store.getters['demeris/getDenomPrecision']({
+            name: props.denom,
+          }),
+        )
+      );
+    };
+    const getChainName = (chain_name) => {
+      return store.getters['demeris/getDisplayChain']({
+        name: chain_name,
+      });
+    };
     const chainsCount = computed(() => {
-      return Math.min(props.maxChainsCount, filteredBalances.value.length);
+      return Math.min(props.maxChainsCount as number, filteredBalances.value.length);
     });
 
     const hasMoreChains = computed(() => {
@@ -62,14 +88,22 @@ export default defineComponent({
 
     // TODO: Get indicator gradient color based in the chain name
     const indicators = computed(() => {
-      return filteredBalances.value.slice(0, props.maxIndicators);
+      return filteredBalances.value.slice(0, props.maxIndicators as number);
     });
 
     const hasMoreIndicators = computed(() => {
       return filteredBalances.value.length > indicators.value.length;
     });
 
-    return { chainsCount, hasMoreChains, indicators, hasMoreIndicators, filteredBalances };
+    return {
+      chainsCount,
+      hasMoreChains,
+      indicators,
+      hasMoreIndicators,
+      filteredBalances,
+      formatPrecision,
+      getChainName,
+    };
   },
 });
 </script>
@@ -84,10 +118,10 @@ export default defineComponent({
   }
 
   &__list {
-    // flex w-1/2 justify-end -space-x-5
     display: flex;
     justify-content: flex-end;
     width: 50%;
+    margin-right: 0.8rem;
 
     &__item {
       width: 2.4rem;
@@ -96,8 +130,6 @@ export default defineComponent({
       border-radius: 2.4rem;
       border: 2px solid #9ffeed;
 
-      //  border-2 w-8 h-8 border-blue-300 bg-white
-
       &:not(:first-child) {
         margin-left: -1.6rem;
       }
@@ -105,7 +137,6 @@ export default defineComponent({
   }
 
   &__count {
-    margin-left: 0.8rem;
     white-space: nowrap;
   }
 }

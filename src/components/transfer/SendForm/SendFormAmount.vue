@@ -1,9 +1,18 @@
 <template>
   <div :class="{ 'send-form-amount--insufficient-funds': !hasSufficientFunds }">
+    <div class="send-form-amount__select-wrapper">
+      <DenomSelectModal
+        v-if="state.isSelectModalOpen"
+        title="Select asset"
+        :assets="balances"
+        @select="toggleSelectModal"
+      />
+    </div>
+
     <fieldset class="form__field send-form-amount">
       <div class="send-form-amount__input">
         <input v-model="form.balance.amount" class="send-form-amount__input__control" min="0" placeholder="0" />
-        <span class="send-form-amount__input__denom">{{ state.currentAsset?.denom }}</span>
+        <span class="send-form-amount__input__denom">{{ $filters.getCoinName(state.currentAsset?.base_denom) }}</span>
       </div>
 
       <span class="send-form-amount__estimated"> $8,866.34 </span>
@@ -24,23 +33,19 @@
     <fieldset class="form__field">
       <div class="send-form-amount__assets">
         <button
-          v-for="asset of balancesByAsset"
-          :key="asset.denom"
-          :class="{
-            'send-form-amount__assets__item--active': state.currentAsset?.denom === asset.denom,
-          }"
+          v-if="state.currentAsset"
           class="send-form-amount__assets__item elevation-button"
-          @click="setCurrentAsset(asset)"
+          @click="toggleSelectModal()"
         >
           <div class="send-form-amount__assets__item__asset">
             <span class="send-form-amount__assets__item__avatar" />
 
             <div class="send-form-amount__assets__item__chain">
               <p class="send-form-amount__assets__item__denom w-bold">
-                {{ asset.denom }}
+                {{ $filters.getCoinName(state.currentAsset.base_denom) }}
               </p>
               <p class="send-form-amount__assets__item__name s-minus">
-                {{ asset.chains[0].on_chain }}
+                {{ state.currentAsset.on_chain }}
               </p>
             </div>
           </div>
@@ -48,7 +53,7 @@
           <div class="send-form-amount__assets__item__amount">
             <p class="send-form-amount__assets__item__amount__balance">$13,400</p>
             <p class="send-form-amount__assets__item__amount__available s-minus">
-              {{ `${asset.chains[0].amount} ${asset.denom.toUpperCase()} available` }}
+              {{ `${state.currentAsset.amount} ${$filters.getCoinName(state.currentAsset.base_denom)} available` }}
             </p>
           </div>
 
@@ -66,9 +71,9 @@
 </template>
 
 <script lang="ts">
-import groupBy from 'lodash.groupby';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
@@ -80,6 +85,7 @@ export default defineComponent({
   components: {
     Button,
     Icon,
+    DenomSelectModal,
   },
 
   props: {
@@ -97,45 +103,42 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
-    });
-
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
-
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);
-        const chains = balances.map((item) => item);
-
-        return {
-          denom,
-          totalAmount,
-          chains,
-        };
-      });
+      isSelectModalOpen: false,
     });
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
         return false;
       }
-      return state.currentAsset.chains[0].amount >= +form.balance.amount;
+      return state.currentAsset.amount >= +form.balance.amount;
     });
 
-    const isValid = () => {
+    const isValid = computed(() => {
       if (!hasSufficientFunds.value) {
         return false;
       }
 
       return true;
-    };
+    });
 
     const onSubmit = () => {
+      if (!isValid.value) {
+        return;
+      }
+
       emit('next');
     };
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.denom as string;
+      form.balance.denom = asset.base_denom as string;
+    };
+
+    const toggleSelectModal = (asset?: Record<string, unknown>) => {
+      if (asset) {
+        setCurrentAsset(asset);
+      }
+      state.isSelectModalOpen = !state.isSelectModalOpen;
     };
 
     // TODO: Select chain based in user option
@@ -143,22 +146,22 @@ export default defineComponent({
       () => [state.isMaximumAmountChecked, state.currentAsset],
       () => {
         if (state.isMaximumAmountChecked) {
-          form.balance.amount = state.currentAsset.chains[0].amount;
+          form.balance.amount = state.currentAsset.amount;
         }
       },
     );
 
     // TODO: Select defaut asset based in specific conditions
     if (!state.currentAsset) {
-      setCurrentAsset(balancesByAsset.value[0]);
+      setCurrentAsset(props.balances[0]);
     }
 
-    return { form, balancesByAsset, onSubmit, state, setCurrentAsset, hasSufficientFunds, isValid };
+    return { form, onSubmit, state, setCurrentAsset, hasSufficientFunds, isValid, toggleSelectModal };
   },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .send-form-amount {
   display: flex;
   flex-direction: column;
@@ -169,8 +172,16 @@ export default defineComponent({
     color: #ca0865;
   }
 
-  &--insufficient-funds &__assets__item--active &__assets__item__amount__available {
-    color: #ca0865;
+  &__select-wrapper {
+    position: relative;
+    width: 100%;
+
+    .denom-select-modal-wrapper {
+      // Back icon
+      .title-with-goback > .icon:first-child {
+        visibility: hidden;
+      }
+    }
   }
 
   &__input {
@@ -235,6 +246,10 @@ export default defineComponent({
       align-items: stretch;
       width: 100%;
 
+      &:focus {
+        outline: none;
+      }
+
       & + & {
         margin-top: 1.6rem;
       }
@@ -259,11 +274,6 @@ export default defineComponent({
         background-color: rgba(0, 0, 0, 0.3);
         margin-right: 1.6rem;
         transition: box-shadow linear 100ms;
-      }
-
-      &--active &__avatar {
-        border: 2px solid white;
-        box-shadow: 0 0 0 2px #7aafff;
       }
 
       &__denom {
