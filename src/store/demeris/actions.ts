@@ -414,7 +414,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
     }
-    return getters['getVerifyTrace'](JSON.stringify(params));
+    return getters['getVerifyTrace'](params);
   },
   async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
     try {

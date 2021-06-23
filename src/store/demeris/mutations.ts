@@ -110,9 +110,16 @@ export const mutations: MutationTree<State> & Mutations = {
 
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-      (payload.params as API.VerifyTraceReq).hash
-    ] = payload.value as API.VerifyTrace;
+    if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+        (payload.params as API.VerifyTraceReq).hash
+      ] = payload.value as API.VerifyTrace;
+    } else {
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+        (payload.params as API.VerifyTraceReq).hash
+      ] = payload.value as API.VerifyTrace;
+    }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].demeris_addresses = [payload.value as API.FeeAddress];
