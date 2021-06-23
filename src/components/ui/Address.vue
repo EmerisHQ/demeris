@@ -2,7 +2,7 @@
   <div class="address" :class="{ 'address--readonly': readonly, 'elevation-button': !readonly }">
     <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" />
     <div class="address__controls">
-      <span class="address__chain">{{ chainName }}</span>
+      <span class="address__chain"><ChainName :name="chainName" /></span>
       <Clipboard v-if="readonly" :text="address" />
     </div>
   </div>
@@ -11,12 +11,14 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
+import ChainName from '@/components/common/ChainName.vue';
 import Clipboard from '@/components/ui/Clipboard.vue';
 
 export default defineComponent({
   name: 'Address',
 
   components: {
+    ChainName,
     Clipboard,
   },
 
