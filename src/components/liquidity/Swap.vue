@@ -98,7 +98,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
@@ -198,11 +198,22 @@ export default defineComponent({
       }),
       isChildModalOpen: false,
       isPriceChanged: true,
+      isWallet: computed(() => {
+        return store.getters['demeris/getKeplrAddress'] ? true : false;
+      }),
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     data.payCoinData = data?.userAssetList[0];
-
+    watch(
+      () => [data.isWallet, data.userAssetList],
+      (watchValues) => {
+        if (watchValues[0]) {
+          data.payCoinData = watchValues[1][0];
+        }
+      },
+      { immediate: true },
+    );
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;
       const originReceiveCoinData = data.receiveCoinData;
