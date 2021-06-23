@@ -35,7 +35,7 @@
         v-model:amount="payCoinAmount"
         :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
         :selected-denom="payCoinData"
-        :assets="userBalances"
+        :assets="userAssetList"
         :is-over="isOver"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
@@ -57,7 +57,7 @@
           />
           <IconButton
             v-if="payCoinData"
-            :name="`${parseInt(payCoinData.amount)} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
+            :name="`${getMaxAmount(payCoinData)} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
             :type="'text'"
             :status="'normal'"
             :data="{
@@ -74,7 +74,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
-        :assets="receiveAvailableDenom"
+        :assets="receiveAssetList"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -109,7 +109,7 @@ import IconButton from '@/components/ui/IconButton.vue';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
 import { useAllStores, useStore } from '@/store';
-import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
+import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -126,15 +126,11 @@ export default defineComponent({
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
-    const store = useStore();
 
+    const store = useStore();
     const stores = useAllStores();
     console.log('store', stores);
 
-    console.log(
-      'user Balances',
-      store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-    );
     const data = reactive({
       buttonName: computed(() => {
         if (data.isBothSelected) {
@@ -171,14 +167,27 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      userBalances: computed(() => {
+      userAssetList: computed(() => {
+        console.log(
+          'demeris/getBalances',
+          store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
+        );
         return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
       }),
-      receiveAvailableDenom: computed(() => {
-        const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
-          return denomInfo?.base_denom !== data.payCoinData?.base_denom;
-        });
-        return payCoinRemovedDenoms;
+      receiveAssetList: computed(() => {
+        const chains = store.getters['demeris/getChains'];
+        let receiveAvailableAssets = [];
+
+        for (let chain in chains) {
+          if (chains[chain]?.denoms) {
+            receiveAvailableAssets.push({ base_denom: chains[chain]?.denoms[0].name, on_chain: 'cosmos-hub' });
+          }
+        }
+
+        console.log('demeris/getChains', store.getters['demeris/getChains']);
+        console.log('receiveAssetList', receiveAvailableAssets);
+
+        return receiveAvailableAssets;
       }),
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
@@ -192,7 +201,7 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    data.payCoinData = data?.userBalances[0];
+    data.payCoinData = data?.userAssetList[0];
 
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;
@@ -210,6 +219,15 @@ export default defineComponent({
       console.log(data.payCoinData);
       data.payCoinAmount = parseInt(data.payCoinData.amount);
       data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+    }
+
+    function getMaxAmount(payCoinData) {
+      const selectedCoinData = data.userAssetList.find((asset) => {
+        if (asset.base_denom === payCoinData.base_denom && asset.on_chain === payCoinData.on_chain) {
+          return true;
+        }
+      });
+      return parseInt(selectedCoinData?.amount) || 0;
     }
 
     function denomSelectHandler(payload) {
@@ -247,10 +265,8 @@ export default defineComponent({
     }
 
     function swap() {
-      const balances = computed(() =>
-        store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-      );
       console.log('getChains', store.getters['demeris/getChains']);
+
       console.log(
         'getBalances',
         store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
@@ -306,6 +322,7 @@ export default defineComponent({
       openSetting,
       changePayToReceive,
       denomSelectHandler,
+      getMaxAmount,
       setMax,
       swap,
       setChildModalOpenStatus,
