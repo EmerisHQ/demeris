@@ -108,6 +108,7 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
+import { useAllStores, useStore } from '@/store';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -125,7 +126,15 @@ export default defineComponent({
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
+    const store = useStore();
 
+    const stores = useAllStores();
+    console.log('store', stores);
+
+    console.log(
+      'user Balances',
+      store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
+    );
     const data = reactive({
       buttonName: computed(() => {
         if (data.isBothSelected) {
@@ -162,7 +171,9 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      userBalances: TEST_DATA.balances,
+      userBalances: computed(() => {
+        return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+      }),
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
           return denomInfo?.base_denom !== data.payCoinData?.base_denom;
@@ -196,7 +207,8 @@ export default defineComponent({
     }
 
     function setMax() {
-      data.payCoinAmount = data.payCoinData.amount;
+      console.log(data.payCoinData);
+      data.payCoinAmount = parseInt(data.payCoinData.amount);
       data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
@@ -235,6 +247,15 @@ export default defineComponent({
     }
 
     function swap() {
+      const balances = computed(() =>
+        store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
+      );
+      console.log('getChains', store.getters['demeris/getChains']);
+      console.log(
+        'getBalances',
+        store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
+      );
+      return;
       const swapParams = {
         from: {
           amount: {
