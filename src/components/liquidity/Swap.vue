@@ -204,12 +204,13 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    data.payCoinData = data?.userAssetList[0];
     watch(
-      () => [data.isWallet, data.userAssetList],
+      () => [data.isWallet, data.userAssetList, data.receiveAssetList],
       (watchValues) => {
         if (watchValues[0]) {
           data.payCoinData = watchValues[1][0];
+        } else {
+          data.payCoinData = watchValues[2][0];
         }
       },
       { immediate: true },
