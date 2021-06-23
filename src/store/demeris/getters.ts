@@ -31,6 +31,9 @@ export type Getters = {
   getDenomPrecision(state: State): {
     (params: { name: string }): string;
   };
+  isVerified(state: State): {
+    (params: { denom: string; chain_name: string }): boolean;
+  };
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
@@ -105,6 +108,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrices: (state) => {
     return state.prices; //TODO: Prices
+  },
+  isVerified: (state) => (params) => {
+    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
   getPrice: (state) => (params) => {
     return 1;

@@ -129,7 +129,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -191,26 +191,26 @@ export default defineComponent({
       },
     ];
     const sendMessage = async () => {
-      let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
-        value: {
-          amount: [{ denom: 'uatom', amount: '90000000' }],
-          toAddress: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
-          fromAddress: 'cosmos16q25r9zk83vuvcrw6vw0jtezuya22p7dkrvqjy',
+      const action = await actionHandler({
+        name: 'swap',
+        params: {
+          from: {
+            amount: {
+              amount: '1000000',
+              denom: 'uakt',
+            },
+            chain_name: 'akash',
+          },
+          to: {
+            amount: {
+              amount: '1000000',
+              denom: 'uatom',
+            },
+            chain_name: 'cosmos-hub',
+          },
         },
       });
-      const fee = {
-        amount: [{ amount: '20', denom: 'uatom' }],
-        gas: '300000',
-      };
-      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-        msgs: [res],
-        chain_name: 'cosmos-hub',
-        fee,
-        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
-        memo: 'a memo',
-      });
-      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
-      console.log(result);
+      console.log(action);
     };
     const sendStepTx = async () => {
       const channel = store.getters['demeris/getPrimaryChannel']({

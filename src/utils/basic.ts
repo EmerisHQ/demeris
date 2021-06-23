@@ -61,12 +61,12 @@ export function getDenomHash(path, base_denom, hopsToRemove = 0) {
   const parts = path.split('/');
   parts.push(base_denom);
   const newPath = parts.slice(hopsToRemove * 2).join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }
 
 export function generateDenomHash(channel, base_denom) {
   const parts = ['transfer', channel];
   parts.push(base_denom);
   const newPath = parts.join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }

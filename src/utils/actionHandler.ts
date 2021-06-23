@@ -132,7 +132,7 @@ export async function transfer({
             from_chain: chain_name,
             to_chain: destination_chain_name,
             to_address,
-            through: primaryChannel.channel_name,
+            through: primaryChannel,
           },
         });
         return result;
@@ -170,7 +170,7 @@ export async function transfer({
         },
         { root: true },
       ));
-    if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+    if (primaryChannel == getChannel(verifyTrace.path, 0)) {
       result.steps.push({
         name: 'transfer',
         status: 'pending',
@@ -200,7 +200,7 @@ export async function transfer({
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: destination_chain_name,
           to_address,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
       return result;
@@ -245,7 +245,7 @@ export async function transfer({
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: destination_chain_name,
           to_address,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
 
@@ -293,6 +293,7 @@ export async function move({
             },
             { root: true },
           ));
+        console.log(primaryChannel);
         result.steps.push({
           name: 'ibc_forward',
           status: 'pending',
@@ -300,14 +301,14 @@ export async function move({
             amount: amount,
             from_chain: chain_name,
             to_chain: destination_chain_name,
-            through: primaryChannel.channel_name,
+            through: primaryChannel,
           },
         });
 
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
+            denom: generateDenomHash(primaryChannel, amount.denom),
           },
           chain_name: destination_chain_name,
         };
@@ -345,7 +346,7 @@ export async function move({
         },
         { root: true },
       ));
-    if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+    if (primaryChannel == getChannel(verifyTrace.path, 0)) {
       result.output = { amount, chain_name };
       return result;
     } else {
@@ -366,13 +367,13 @@ export async function move({
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: destination_chain_name,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
         },
         chain_name: destination_chain_name,
       };
@@ -417,14 +418,14 @@ export async function move({
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: destination_chain_name,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
 
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
         },
         chain_name: destination_chain_name,
       };
@@ -476,14 +477,14 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
             amount: amount,
             from_chain: chain_name,
             to_chain: store.getters['demeris/getDexChain'],
-            through: primaryChannel.channel_name,
+            through: primaryChannel,
           },
         });
 
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
+            denom: generateDenomHash(primaryChannel, amount.denom),
           },
           chain_name: store.getters['demeris/getDexChain'],
         };
@@ -525,7 +526,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
         },
         { root: true },
       ));
-    if (primaryChannel.channel_name == getChannel(verifyTrace.path, 0)) {
+    if (primaryChannel == getChannel(verifyTrace.path, 0)) {
       // If channels match, denom is already a verified 1-hop token on the hub through the primary channel so no action needed
 
       result.output = { amount, chain_name };
@@ -549,13 +550,13 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: store.getters['demeris/getDexChain'],
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
         },
         chain_name: store.getters['demeris/getDexChain'],
       };
@@ -601,14 +602,14 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: store.getters['demeris/getDexChain'],
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
 
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
         },
         chain_name: store.getters['demeris/getDexChain'],
       };
@@ -658,13 +659,13 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
           amount: amount,
           from_chain: store.getters['demeris/getDexChain'],
           to_chain: chain_name,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, amount.denom),
+          denom: generateDenomHash(primaryChannel, amount.denom),
         },
         chain_name,
       };
@@ -738,14 +739,14 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
           to_chain: chain_name,
-          through: primaryChannel.channel_name,
+          through: primaryChannel,
         },
       });
 
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel.channel_name, verifyTrace.base_denom),
+          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
         },
         chain_name,
       };
@@ -774,11 +775,13 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
     ));
+  console.log(liquidityPools);
   // create our asset pair sorted alphabetically
   const assetPair = [from.denom, to.denom].sort();
+  console.log(assetPair);
   // Find the pool for that pair
   const pool =
-    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
+    liquidityPools.pools.find((x) => JSON.stringify(x.reserve_coin_denoms) == JSON.stringify(assetPair)) ?? null;
   if (pool) {
     //Pool exists, proceed with swap
     result.steps.push({
@@ -988,6 +991,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         break;
     }
   } catch (e) {
+    console.log(e);
     console.log('Unable to create action steps');
   }
 
@@ -1259,7 +1263,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
           },
           { root: true },
         ));
-      if (primaryChannel.channel_name != getChannel(verifyTrace.path, 0)) {
+      if (primaryChannel != getChannel(verifyTrace.path, 0)) {
         redeemableBalances.push(balance);
       }
     }
