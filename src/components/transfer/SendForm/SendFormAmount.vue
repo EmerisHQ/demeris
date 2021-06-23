@@ -42,18 +42,23 @@
 
             <div class="send-form-amount__assets__item__chain">
               <p class="send-form-amount__assets__item__denom w-bold">
-                {{ $filters.getCoinName(state.currentAsset.base_denom) }}
+                <Denom :name="state.currentAsset.base_denom" />
               </p>
               <p class="send-form-amount__assets__item__name s-minus">
-                {{ state.currentAsset.on_chain }}
+                <ChainName :name="state.currentAsset.on_chain" />
               </p>
             </div>
           </div>
 
           <div class="send-form-amount__assets__item__amount">
-            <p class="send-form-amount__assets__item__amount__balance">$13,400</p>
+            <p class="send-form-amount__assets__item__amount__balance">
+              <Price :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+            </p>
             <p class="send-form-amount__assets__item__amount__available s-minus">
-              {{ `${state.currentAsset.amount} ${$filters.getCoinName(state.currentAsset.base_denom)} available` }}
+              <span>
+                <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+                available
+              </span>
             </p>
           </div>
 
@@ -71,9 +76,15 @@
 </template>
 
 <script lang="ts">
+import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
+import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import Price from '@/components/common/Price.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
@@ -83,9 +94,13 @@ export default defineComponent({
   name: 'SendFormAmount',
 
   components: {
+    AmountDisplay,
+    ChainName,
+    Denom,
     Button,
     Icon,
     DenomSelectModal,
+    Price,
   },
 
   props: {
@@ -98,6 +113,7 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
+    const store = useStore();
     const form = inject<SendAddressForm>('transferForm');
 
     const state = reactive({
@@ -106,11 +122,22 @@ export default defineComponent({
       isSelectModalOpen: false,
     });
 
+    const denomDecimals = computed(() => {
+      const precision = store.getters['demeris/getDenomPrecision']({
+        name: state.currentAsset.base_denom,
+      });
+
+      return Math.pow(10, precision);
+    });
+
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
         return false;
       }
-      return state.currentAsset.amount >= +form.balance.amount;
+
+      const cryptoAmount = +form.balance.amount * denomDecimals.value;
+
+      return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
     });
 
     const isValid = computed(() => {
@@ -146,7 +173,8 @@ export default defineComponent({
       () => [state.isMaximumAmountChecked, state.currentAsset],
       () => {
         if (state.isMaximumAmountChecked) {
-          form.balance.amount = state.currentAsset.amount;
+          const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
+          form.balance.amount = (assetAmount / denomDecimals.value).toString();
         }
       },
     );
@@ -279,6 +307,7 @@ export default defineComponent({
       &__denom {
         margin-bottom: 0.2rem;
         text-transform: uppercase;
+        text-align: left;
       }
 
       &__name {

@@ -6,8 +6,8 @@
       </button>
 
       <div v-if="state.selectedAsset" class="receive__header__title">
-        <h2 class="s-2">Receive {{ $filters.getCoinName(state.selectedAsset.base_denom) }}</h2>
-        <p class="receive__header__title__label">on {{ state.selectedAsset.on_chain }}</p>
+        <h2 class="s-2">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
+        <p class="receive__header__title__label">on <ChainName :name="state.selectedAsset.on_chain" /></p>
       </div>
 
       <router-link to="/" class="receive__header__button close-button">
@@ -44,6 +44,8 @@
 import { reactive } from '@vue/reactivity';
 import { computed } from '@vue/runtime-core';
 
+import ChainName from '@/components/common/ChainName.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import QrCode from '@/components/common/QrCode.vue';
 import Address from '@/components/ui/Address.vue';
@@ -53,7 +55,7 @@ import { Balance } from '@/types/api';
 
 export default {
   name: 'Receive',
-  components: { Address, Icon, DenomSelectModal, QrCode },
+  components: { Address, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
     const { balances } = useAccount();
