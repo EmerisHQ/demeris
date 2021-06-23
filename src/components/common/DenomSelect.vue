@@ -86,11 +86,11 @@ export default defineComponent({
       try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const image = require(`@/assets/coins/${
-          isSelected.value ? props.selectedDenom.base_denom?.substr(1) : 'stake'
+          isSelected.value ? props.selectedDenom.base_denom?.substr(1) : 'empty'
         }.png`);
         return image;
       } catch {
-        return require(`@/assets/coins/stake.png`);
+        return require(`@/assets/coins/empty.png`);
       }
     });
 
