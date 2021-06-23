@@ -128,8 +128,8 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction, msgFromStepTransaction, toRedeem } from '@/utils/actionHandler';
+import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -166,41 +166,41 @@ export default defineComponent({
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
-    console.log(toRedeem(balances.value));
+
     const pools: Pool[] = [
       {
         id: 1,
-        reserveCoinDenoms: ['uatom', 'ukava'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'atom',
-        typeId: 1,
+        reserve_coin_denoms: ['uatom', 'ukava'],
+        reserve_account_address: '',
+        pool_coin_denom: 'atom',
+        type_id: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['uatom', 'urune'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'atom',
-        typeId: 1,
+        reserve_coin_denoms: ['uatom', 'urune'],
+        reserve_account_address: '',
+        pool_coin_denom: 'atom',
+        type_id: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['uluna', 'urune'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'luna',
-        typeId: 1,
+        reserve_coin_denoms: ['uluna', 'urune'],
+        reserve_account_address: '',
+        pool_coin_denom: 'luna',
+        type_id: 1,
       },
     ];
     const sendMessage = async () => {
       let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
         value: {
-          amount: [{ denom: 'uatom', amount: '20' }],
-          toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-          fromAddress: 'cosmos1xl6svk9hkdhdk9228w46hs05djh49v5u6a48nt',
+          amount: [{ denom: 'uatom', amount: '90000000' }],
+          toAddress: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
+          fromAddress: 'cosmos16q25r9zk83vuvcrw6vw0jtezuya22p7dkrvqjy',
         },
       });
       const fee = {
         amount: [{ amount: '20', denom: 'uatom' }],
-        gas: '100000',
+        gas: '300000',
       };
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res],
@@ -218,16 +218,14 @@ export default defineComponent({
         destination_chain_name: 'akash',
       });
       console.log(channel);
+
       const stepTx = {
-        name: 'ibc_forward',
+        name: 'createpool',
         status: 'pending',
         data: {
-          amount: { amount: '20', denom: 'uatom' },
-          from_chain: 'cosmos-hub',
-          to_chain: 'akash',
-          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'akash' }),
-          through: channel,
-        } as IBCForwardsData,
+          coinA: { amount: '10000000', denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5' },
+          coinB: { amount: '10000000', denom: 'uatom' },
+        } as CreatePoolData,
       } as StepTransaction;
       /*
       const stepTx = {
@@ -244,7 +242,7 @@ export default defineComponent({
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
         amount: [{ amount: '' + feeOptions[0].amount[FeeLevel.AVERAGE], denom: feeOptions[0].denom }],
-        gas: '100000',
+        gas: '300000',
       };
       console.log(fee);
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
@@ -260,6 +258,7 @@ export default defineComponent({
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
       console.log(txPromise);
+
       return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');

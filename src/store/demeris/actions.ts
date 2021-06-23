@@ -340,8 +340,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       await window.keplr.enable('cosmoshub-4');
       const key = await window.keplr.getKey('cosmoshub-4');
+      console.log(key);
       commit(DemerisMutationTypes.SET_KEPLR, key);
       dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
+      console.log(getters['getKeplrAddress']);
       dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: getters['getKeplrAddress'] } });
       dispatch(DemerisActionTypes.GET_STAKING_BALANCES, {
         subscribe: true,

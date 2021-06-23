@@ -1076,6 +1076,19 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
+  if (stepTx.name == 'createpool') {
+    const chain_name = store.getters['demeris/getDexChain'];
+    const data = stepTx.data as Actions.CreatePoolData;
+    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
+      value: {
+        poolCreatorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        poolTypeId: 1,
+        depositCoins: [data.coinA, data.coinB],
+      },
+    });
+    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    return { msg, chain_name, registry };
+  }
   if (stepTx.name == 'swap') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.SwapData;
@@ -1088,7 +1101,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       value: {
         swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
-        swapTypeId: data.pool.typeId,
+        swapTypeId: data.pool.type_id,
         offerCoin: data.from.denom,
         demandCoinDenom: data.to.denom,
         offerCoinFee: 0,
@@ -1108,6 +1121,40 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
     fees.push({ amount: denom.fee_levels, denom: denom.name });
   }
   return fees;
+}
+export async function getDisplayName(name, chain_name = null) {
+  if (isNative(name)) {
+    const displayName = store.getters['demeris/getVerifiedDenoms'].find((x) => x.name == name)?.display_name ?? null;
+    if (displayName) {
+      return displayName;
+    }
+    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+    if (pools && pools.pools) {
+      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
+      if (pool) {
+        return (
+          'GDEX ' +
+          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
+          '/' +
+          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
+          ' Pool'
+        );
+      } else {
+        return null;
+      }
+    }
+  } else {
+    const verifyTrace =
+      store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
+      (await store.dispatch(
+        'demeris/GET_VERIFY_TRACE',
+        { subscribe: true, params: { chain_name, hash: name.split('/')[1] } },
+        { root: true },
+      ));
+    if (verifyTrace.verified) {
+      return await getDisplayName(verifyTrace.base_denom);
+    }
+  }
 }
 export async function isLive(chain_name) {
   const status =
@@ -1149,6 +1196,11 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'withdrawliquidity') {
+    const chain_name = store.getters['demeris/getDexChain'];
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'createpool') {
     const chain_name = store.getters['demeris/getDexChain'];
     const fee = await getFeeForChain(chain_name);
     return fee;

@@ -79,7 +79,7 @@ export default {
     const { pools, formatPoolName } = usePools();
 
     const filteredPools = computed(() => {
-      return pools.value.filter((pool) => pool.reserveCoinDenoms.join().indexOf(keyword.value) !== -1);
+      return pools.value.filter((pool) => pool.reserve_coin_denoms.join().indexOf(keyword.value) !== -1);
     });
 
     const openAddLiqudityPage = () => {

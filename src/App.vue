@@ -55,6 +55,7 @@ export default defineComponent({
       getTXApi: null,
       offline: true,
     });
+    await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: false });
     this.initialized = true;
   },
   errorCaptured(err) {

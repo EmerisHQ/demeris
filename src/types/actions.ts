@@ -1,5 +1,4 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { Pool } from '@starport/tendermint-liquidity-js/tendermint/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/liquidity';
 
 import * as API from './api';
 import * as Base from './base';
@@ -28,14 +27,26 @@ export type WithdrawLiquidityParams = {
   pool_id: bigint;
   poolCoin: Base.ChainAmount;
 };
+export type CreatePoolParams = {
+  poolCreatorAddress: string;
+  poolTypeId: number;
+  coinA: Base.ChainAmount;
+  coinB: Base.ChainAmount;
+};
 export type RedeemParams = Array<Base.ChainAmount>;
 export type SwapAction = BaseAction & { params: SwapParams };
 export type RedeemAction = BaseAction & { params: RedeemParams };
 export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
 export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
 export type TransferAction = BaseAction & { params: TransferParams };
-
-export type Any = SwapAction | RedeemAction | TransferAction | AddLiquidityAction | WithdrawLiquidityAction;
+export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
+export type Any =
+  | SwapAction
+  | RedeemAction
+  | TransferAction
+  | AddLiquidityAction
+  | WithdrawLiquidityAction
+  | CreatePoolAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -71,17 +82,28 @@ export type AddLiquidityData = {
   coinB: Base.Amount;
   pool: Pool;
 };
+export type CreatePoolData = {
+  coinA: Base.Amount;
+  coinB: Base.Amount;
+};
 export type WithdrawLiquidityData = {
   poolCoin: Base.Amount;
   pool: Pool;
 };
 export type StepTransaction = {
-  name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity';
+  name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
   status: 'pending' | 'active' | 'completed';
-  data: IBCBackwardsData | IBCForwardsData | SwapData | TransferData | AddLiquidityData | WithdrawLiquidityData;
+  data:
+    | IBCBackwardsData
+    | IBCForwardsData
+    | SwapData
+    | TransferData
+    | AddLiquidityData
+    | WithdrawLiquidityData
+    | CreatePoolData;
 };
 export type Step = {
-  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity';
+  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
   transactions: Array<StepTransaction>;
 };
 
@@ -101,7 +123,19 @@ export type FeeWDenom = {
   amount: API.Fee;
   denom: string;
 };
-export type { Pool };
+// HACK! Below needs fixing in starport codegen
+export type Pool = {
+  /** id of the pool */
+  id: number;
+  /** id of the pool_type */
+  type_id: number;
+  /** denoms of reserve coin pair of the pool */
+  reserve_coin_denoms: string[];
+  /** reserve account address of the pool */
+  reserve_account_address: string;
+  /** denom of pool coin of the pool */
+  pool_coin_denom: string;
+};
 export type MsgMeta = {
   msg: EncodeObject;
   chain_name: string;

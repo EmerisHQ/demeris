@@ -17,7 +17,12 @@ export type Getters = {
   getPrice(state: State): {
     (params: { denom: string }): number;
   }; //TODO prices
-  getDisplayDenom(state: State): {
+  getDisplayDenom(
+    state: State,
+    getters,
+    rootState,
+    rootGetters,
+  ): {
     (params: { name: string }): string;
   };
   getDisplayChain(state: State): {
@@ -63,9 +68,27 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
   getDisplayDenom:
-    (state) =>
+    (state, getters, rootState, rootGetters) =>
     ({ name }) => {
-      return state.verifiedDenoms.find((x) => x.name == name)?.display_name ?? null;
+      const displayName = state.verifiedDenoms.find((x) => x.name == name)?.display_name ?? null;
+      if (displayName) {
+        return displayName;
+      }
+      const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+      if (pools && pools.pools) {
+        const pool = pools.pools.find((x) => x.pool_coin_denom == name);
+        if (pool) {
+          return (
+            'GDEX ' +
+            getters['getDisplayDenom']({ name: pool.reserve_coin_denoms[0] }) +
+            '/' +
+            getters['getDisplayDenom']({ name: pool.reserve_coin_denoms[1] }) +
+            ' Pool'
+          );
+        } else {
+          return null;
+        }
+      }
     },
   getDisplayChain:
     (state) =>

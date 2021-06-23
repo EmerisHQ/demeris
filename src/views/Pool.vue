@@ -136,11 +136,11 @@ export default defineComponent({
       // return store.getters['demeris/getBalances']({ address: pool.value.reserveAccountAddress });
       const balances = [
         {
-          base_denom: pool.value.reserveCoinDenoms[0],
+          base_denom: pool.value.reserve_coin_denoms[0],
           amount: 100,
         },
         {
-          base_denom: pool.value.reserveCoinDenoms[1],
+          base_denom: pool.value.reserve_coin_denoms[1],
           amount: 200,
         },
       ];
@@ -150,13 +150,15 @@ export default defineComponent({
 
     const relatedPools = computed(() => {
       return [
-        ...poolsByDenom(pool.value.reserveCoinDenoms[0]),
-        ...poolsByDenom(pool.value.reserveCoinDenoms[1]),
+        ...poolsByDenom(pool.value.reserve_coin_denoms[0]),
+        ...poolsByDenom(pool.value.reserve_coin_denoms[1]),
       ].filter((item) => item.id !== pool.value.id);
     });
 
     const updateReserveBalances = () => {
-      store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, { params: { address: pool.value.reserveAccountAddress } });
+      store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+        params: { address: pool.value.reserve_account_address },
+      });
     };
 
     const addLiquidityHandler = () => {
