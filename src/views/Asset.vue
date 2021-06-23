@@ -15,7 +15,7 @@
           <div class="asset__main__stats__container">
             <div class="asset__main__stats__container__left">
               <p class="asset__main__stats__container__left__token">
-                {{ `${totalAmount}${$filters.getCoinName(denom)}` }}
+                <AmountDisplay :amount="{ amount: totalAmount, denom }" />
               </p>
               <p class="asset__main__stats__container__left__balance">
                 <Price :amount="{ amount: totalAmount, denom: denom }" />
@@ -53,10 +53,9 @@
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
                 <span class="asset__main__chains__item__asset__avatar" />
-                <span class="asset__main__chains__item__asset__denom">{{ asset.on_chain }}</span>
+                <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
-              <span class="asset__main__chains__item__amount">
-                <AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
+              <span class="asset__main__chains__item__amount"><AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
               <div class="asset__main__chains__item__balance">
                 <span class="asset__main__chains__item__balance__value">
                   <Price :amount="{ amount: asset.amount, denom }" />
@@ -134,6 +133,7 @@ import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import Price from '@/components/common/Price.vue';
@@ -147,8 +147,9 @@ export default defineComponent({
   name: 'Asset',
 
   components: {
-    AppLayout,
     AmountDisplay,
+    ChainName,
+    AppLayout,
     Icon,
     Price,
     PlusIcon,
