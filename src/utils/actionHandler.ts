@@ -5,7 +5,7 @@ import { Balances, Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
-import { generateDenomHash, getChannel, getDenomHash, isNative } from './basic';
+import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative } from './basic';
 
 const stores = useAllStores();
 // Basic step-building blocks
@@ -1004,7 +1004,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
-        fromAddress: store.getters['demeris/getOwnAddress']({ chain_name: data.chain_name }),
+        fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
       },
     });
     const registry = stores.getters['cosmos.bank.v1beta1/getRegistry'];
@@ -1017,13 +1017,13 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     if (data.to_address) {
       receiver = data.to_address;
     } else {
-      receiver = store.getters['demeris/getOwnAddress']({ chain_name: data.to_chain });
+      receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
     const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
-        sender: store.getters['demeris/getOwnAddress']({ chain_name: data.from_chain }),
+        sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
         token: data.amount,
@@ -1039,13 +1039,13 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     if (data.to_address) {
       receiver = data.to_address;
     } else {
-      receiver = store.getters['demeris/getOwnAddress']({ chain_name: data.to_chain });
+      receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
     const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
-        sender: store.getters['demeris/getOwnAddress']({ chain_name: data.from_chain }),
+        sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
         token: data.amount,
@@ -1059,7 +1059,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.AddLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
-        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins: [data.coinA, data.coinB],
       },
@@ -1072,7 +1072,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.WithdrawLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
-        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins: [data.poolCoin],
       },
@@ -1085,7 +1085,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.CreatePoolData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
-        poolCreatorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
         depositCoins: [data.coinA, data.coinB],
       },
@@ -1103,7 +1103,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: {
-        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         swapTypeId: data.pool.type_id,
         offerCoin: data.from.denom,
