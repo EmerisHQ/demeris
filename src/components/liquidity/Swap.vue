@@ -213,26 +213,34 @@ export default defineComponent({
         return store.getters['demeris/getKeplrAddress'] ? true : false;
       }),
       isReceiveAssetList: computed(() => {
-        return data.receiveAssetList !== 0 ? true : false;
+        return data.receiveAssetList.length !== 0 ? true : false;
       }),
       isUserAssetList: computed(() => {
-        return data.userAssetList !== 0 ? true : false;
+        return data.userAssetList.length !== 0 ? true : false;
       }),
+      initStatus: 'none',
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     watch(
       () => {
-        return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList];
+        return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
       },
       (watchValues) => {
         if (watchValues[0]) {
           if (watchValues[2]) {
-            data.payCoinData = data.userAssetList[0];
+            if (watchValues[3] !== 'walletInit') {
+              data.payCoinData = data.userAssetList[0];
+              data.initStatus = 'walletInit';
+            }
           }
         } else {
           if (watchValues[1]) {
-            data.payCoinData = data.receiveAssetList[0];
+            if (watchValues[3] !== 'noWalletInit') {
+              console.log('here', data.receiveAssetList);
+              data.payCoinData = data.receiveAssetList[0];
+              data.initStatus = 'noWalletInit';
+            }
           }
         }
       },
