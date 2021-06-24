@@ -57,7 +57,9 @@
           />
           <IconButton
             v-if="payCoinData"
-            :name="`${getMaxAmount(payCoinData)} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
+            :name="`${getPrecisedAmount(payCoinData.base_denom, getMaxAmount(payCoinData))} ${$filters.getCoinName(
+              payCoinData.base_denom,
+            )} Max `"
             :type="'text'"
             :status="'normal'"
             :data="{
@@ -106,8 +108,8 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
-import usePrice from '@/composables/usePrice.vue';
 import { useAllStores, useStore } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
@@ -124,7 +126,7 @@ export default defineComponent({
   },
 
   setup() {
-    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
+    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
 
     const store = useStore();
@@ -356,6 +358,7 @@ export default defineComponent({
       changePayToReceive,
       denomSelectHandler,
       getMaxAmount,
+      getPrecisedAmount,
       setMax,
       swap,
       setChildModalOpenStatus,
