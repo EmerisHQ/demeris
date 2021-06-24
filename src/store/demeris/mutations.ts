@@ -14,6 +14,7 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
+  [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
@@ -46,6 +47,9 @@ export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+  },
+  [MutationTypes.ADD_KEPLR_KEYHASH](state: State, payload: string) {
+    if (state.keplr) state.keplr.keyHashes.push(payload);
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;

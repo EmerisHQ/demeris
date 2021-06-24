@@ -2,7 +2,7 @@
 import { ComponentCustomProperties } from 'vue';
 import { Store } from 'vuex';
 import { RootState } from './store/index';
-import { Window as KeplrWindow } from '@keplr-wallet/types';
+import { Window as KeplrWindow, Keplr } from '@keplr-wallet/types';
 
 declare module '*.vue' {
   import { defineComponent } from 'vue';
@@ -12,6 +12,7 @@ declare module '*.vue' {
 
 declare global {
   import { OfflineDirectSigner } from '@cosmjs/proto-signing';
+
   interface Window extends KeplrWindow {
     Vue: any;
   }

@@ -10,6 +10,9 @@ export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances | null };
   getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances | null };
   getNumbers(state: State): { (params: API.APIRequests): API.Numbers | null };
+  getAllBalances(state: State): API.Balances | null;
+  getAllStakingBalances(state: State): API.StakingBalances | null;
+  getAllNumbers(state: State): API.Numbers | null;
   getFeeAddresses(state: State): API.FeeAddresses | null;
   getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
@@ -37,6 +40,7 @@ export type Getters = {
   getEndpoint(state: State): string;
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
+  getKeyhashes(state: State): string[];
   getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
   getKeplrAccountName(state: State): string | null;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
@@ -57,8 +61,20 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getStakingBalances: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
+  getAllBalances: (state) => {
+    const balances = Object.values(state.balances).flat();
+    return balances.length > 0 ? balances : null;
+  },
+  getAllStakingBalances: (state) => {
+    const stakingBalances = Object.values(state.stakingBalances).flat();
+    return stakingBalances.length > 0 ? stakingBalances : null;
+  },
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
+  },
+  getAllNumbers: (state) => {
+    const numbers = Object.values(state.numbers).flat();
+    return numbers.length > 0 ? numbers : null;
   },
   getFeeAddresses: (state) => {
     const feeAddresses = [];
@@ -142,6 +158,13 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getKeplrAddress: (state) => {
     if (state.keplr) {
       return keyHashfromAddress(state.keplr.bech32Address);
+    } else {
+      return null;
+    }
+  },
+  getKeyhashes: (state) => {
+    if (state.keplr && state.keplr.keyHashes) {
+      return state.keplr.keyHashes;
     } else {
       return null;
     }

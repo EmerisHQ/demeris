@@ -60,10 +60,16 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Balances>;
+  [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({
+    dispatch,
+    getters,
+  }: ActionContext<State, RootState>): Promise<API.StakingBalances>;
   [DemerisActionTypes.GET_NUMBERS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Numbers>;
+  [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Numbers>;
   [DemerisActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionsByAddressParams,
@@ -151,9 +157,19 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
+
+  [GlobalDemerisActionTypes.GET_ALL_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_BALANCES]>;
+  [GlobalDemerisActionTypes.GET_ALL_STAKING_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_STAKING_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_STAKING_BALANCES]>;
   [GlobalDemerisActionTypes.GET_NUMBERS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS]>;
+  [GlobalDemerisActionTypes.GET_ALL_NUMBERS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>;
   [GlobalDemerisActionTypes.GET_FEE_ADDRESSES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>;
@@ -230,6 +246,28 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getBalances'](JSON.stringify(params));
   },
+  async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }) {
+    try {
+      const keyHashes = getters['getKeyhashes'];
+      for (const keyHash of keyHashes) {
+        await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
+    }
+    return getters['getAllBalances'];
+  },
+  async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters }) {
+    try {
+      const keyHashes = getters['getKeyhashes'];
+      for (const keyHash of keyHashes) {
+        await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
+    }
+    return getters['getAllStakingBalances'];
+  },
   async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
     const redeem = window.localStorage.getItem('redeem');
     return redeem === 'true' ? true : false;
@@ -264,6 +302,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetNumbers', 'Could not perform API query.');
     }
     return getters['getNumbers'](params);
+  },
+  async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }) {
+    try {
+      const keyHashes = getters['getKeyhashes'];
+      for (const keyHash of keyHashes) {
+        await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');
+    }
+    return getters['getAllNumbers'];
   },
   async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit, getters }, { subscribe = false }) {
     try {
@@ -338,16 +387,31 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
+      const chains = getters['getChains'];
+
+      await window.keplr['permitMultiple'](chains.map((x) => x.node_info.chain_id));
+      const paths = new Set();
+      const toQuery = [];
+      for (const chain of chains) {
+        if (paths.has(chain.derivation_path)) {
+          continue;
+        }
+        paths.add(chain.derivation_path);
+        toQuery.push(chain);
+      }
       await window.keplr.enable('cosmoshub-4');
       const key = await window.keplr.getKey('cosmoshub-4');
-      console.log(key);
       commit(DemerisMutationTypes.SET_KEPLR, key);
+      for (const chain of toQuery) {
+        await window.keplr.enable(chain.node_info.chain_id);
+        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+      }
       dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
-      console.log(getters['getKeplrAddress']);
-      dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: getters['getKeplrAddress'] } });
-      dispatch(DemerisActionTypes.GET_STAKING_BALANCES, {
+
+      dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
+      dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
         subscribe: true,
-        params: { address: getters['getKeplrAddress'] },
       });
       return true;
     } catch (e) {
