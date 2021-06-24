@@ -89,19 +89,23 @@ export default function () {
       return 0;
     }
   }
+  function getPrecision(denom) {
+    const chains = store.getters['demeris/getChains'];
+    const denomPrecisionIndexer = {};
+
+    for (let chain in chains) {
+      chains[chain].denoms.forEach((item) => {
+        denomPrecisionIndexer[item.name] = item;
+      });
+    }
+
+    return Number(denomPrecisionIndexer[denom].precision);
+  }
 
   function getPrecisedAmount(denom, amount) {
     try {
-      const chains = store.getters['demeris/getChains'];
-      const denomPrecisionIndexer = {};
-
-      for (let chain in chains) {
-        chains[chain].denoms.forEach((item) => {
-          denomPrecisionIndexer[item.name] = item;
-        });
-      }
-
-      return parseInt(amount) / 10 ** denomPrecisionIndexer[denom].precision;
+      const precision = getPrecision(denom);
+      return parseInt(amount) / 10 ** precision;
     } catch {
       return amount;
     }
@@ -114,6 +118,7 @@ export default function () {
     getSwapPrice,
     getPayCoinAmount,
     getReceiveCoinAmount,
+    getPrecision,
     getPrecisedAmount,
   };
 }
