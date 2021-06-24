@@ -35,7 +35,7 @@
         v-model:amount="payCoinAmount"
         :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
         :selected-denom="payCoinData"
-        :assets="userAssetList"
+        :assets="excludeSelectedAsset(receiveCoinData, userAssetList)"
         :is-over="isOver"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
@@ -76,7 +76,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
-        :assets="receiveAssetList"
+        :assets="excludeSelectedAsset(payCoinData, receiveAssetList)"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -303,6 +303,12 @@ export default defineComponent({
       }
     }
 
+    function excludeSelectedAsset(asset, list) {
+      return list?.filter((item) => {
+        return item?.base_denom !== asset?.base_denom && item?.on_chain !== asset?.on_chain;
+      });
+    }
+
     function swap() {
       console.log('getChains', store.getters['demeris/getChains']);
 
@@ -363,6 +369,7 @@ export default defineComponent({
       denomSelectHandler,
       getMaxAmount,
       getPrecisedAmount,
+      excludeSelectedAsset,
       setMax,
       swap,
       setChildModalOpenStatus,
