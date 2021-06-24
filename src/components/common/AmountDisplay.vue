@@ -1,4 +1,7 @@
-<template>{{ displayValue }} {{ displayDenom }}</template>
+<template>
+  <span>{{ displayValue }} {{ displayDenom }}</span>
+</template>
+
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
@@ -19,9 +22,10 @@ export default defineComponent({
       return displayName || ((props.amount as Amount).denom as string).substr(1).toUpperCase();
     });
     const displayValue = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: (props.amount as Amount).denom,
-      });
+      const precision =
+        store.getters['demeris/getDenomPrecision']({
+          name: (props.amount as Amount).denom,
+        }) || 0;
       return parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
     });
     return { displayDenom, displayValue };

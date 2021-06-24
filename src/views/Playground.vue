@@ -36,6 +36,8 @@
           </Input>
 
           <Input placeholder="Example 3" hint="My hint message" />
+
+          <PreviewSwap />
         </div>
 
         <div class="p-10 flex flex-row w-1/3 mx-auto icons">
@@ -125,6 +127,7 @@ import Button from '@/components/ui/Button.vue';
 import Confirmation from '@/components/ui/Confirmation.vue';
 import Input from '@/components/ui/Input.vue';
 import Modal from '@/components/ui/Modal.vue';
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -158,6 +161,7 @@ export default defineComponent({
     Modal,
     Button,
     Confirmation,
+    PreviewSwap,
   },
   setup() {
     const store = useStore();

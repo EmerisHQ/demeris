@@ -60,12 +60,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return feeAddresses.length != 0 ? feeAddresses : null;
   },
   getVerifiedDenoms: (state) => {
-    return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
+    return state.verifiedDenoms?.length != 0 ? state.verifiedDenoms : null;
   },
   getDisplayDenom:
     (state) =>
     ({ name }) => {
-      return state.verifiedDenoms.find((x) => x.name == name)?.display_name ?? null;
+      return state.verifiedDenoms?.find((x) => x.name == name)?.display_name ?? null;
     },
   getDisplayChain:
     (state) =>
@@ -75,7 +75,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getDenomPrecision:
     (state) =>
     ({ name }) => {
-      return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
+      return state.verifiedDenoms?.find((x) => x.name == name)?.precision ?? null;
     },
   getChains: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
