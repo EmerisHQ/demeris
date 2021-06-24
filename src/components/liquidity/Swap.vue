@@ -171,10 +171,6 @@ export default defineComponent({
       receiveCoinAmount: null,
       userAssetList: computed(() => {
         if (data.isWallet) {
-          console.log(
-            'demeris/getBalances',
-            store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-          );
           return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
         } else {
           return data.receiveAssetList;
@@ -187,16 +183,15 @@ export default defineComponent({
 
         for (let chain in chains) {
           if (chains[chain]?.denoms) {
-            receiveAvailableAssets.push({
-              base_denom: chains[chain]?.denoms[0].name,
-              on_chain: 'cosmos-hub',
-              amount: 0,
+            chains[chain].denoms.forEach((item) => {
+              receiveAvailableAssets.push({
+                base_denom: item.name,
+                on_chain: 'cosmos-hub',
+                amount: 0,
+              });
             });
           }
         }
-
-        console.log('demeris/getChains', store.getters['demeris/getChains']);
-        console.log('receiveAssetList', receiveAvailableAssets);
 
         return receiveAvailableAssets;
       }),
@@ -246,6 +241,7 @@ export default defineComponent({
       },
       { immediate: true },
     );
+
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;
       const originReceiveCoinData = data.receiveCoinData;
