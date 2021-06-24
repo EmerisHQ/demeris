@@ -305,7 +305,7 @@ export default defineComponent({
 
     function excludeSelectedAsset(asset, list) {
       return list?.filter((item) => {
-        return item?.base_denom !== asset?.base_denom && item?.on_chain !== asset?.on_chain;
+        return item?.base_denom !== asset?.base_denom || item?.on_chain !== asset?.on_chain;
       });
     }
 
