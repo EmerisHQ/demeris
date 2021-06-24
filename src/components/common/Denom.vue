@@ -4,23 +4,24 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
 
+import { useStore } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
-//import { useStore } from '@/store';
+
 export default defineComponent({
   name: 'Denom',
   props: {
     name: { type: String, required: true },
   },
   setup(props) {
-    //const store = useStore();
+    const store = useStore();
     const displayDenom = ref('-');
     onMounted(async () => {
-      displayDenom.value = await getDisplayName(props.name, 'cosmos-hub');
+      displayDenom.value = await getDisplayName(props.name, store.getters['demeris/getDexChain']);
     });
     watch(
       () => props.name,
       async (newName, oldName) => {
-        displayDenom.value = await getDisplayName(newName, 'cosmos-hub');
+        displayDenom.value = await getDisplayName(newName, store.getters['demeris/getDexChain']);
       },
     );
     /*

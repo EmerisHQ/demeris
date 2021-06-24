@@ -26,6 +26,7 @@ import { ChainData, State } from './state';
 export type DemerisConfig = {
   endpoint: string;
   refreshTime?: number;
+  hub_chain?: string;
 };
 export type DemerisTxParams = {
   tx: string;
@@ -89,7 +90,7 @@ export interface Actions {
   [DemerisActionTypes.GET_PRICES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
-  ): Promise<Array<any>>; //TODO prices
+  ): Promise<API.Prices>;
 
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
@@ -134,7 +135,7 @@ export interface Actions {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
-    { endpoint, refreshTime }: DemerisConfig,
+    { endpoint, refreshTime, hub_chain }: DemerisConfig,
   ): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
@@ -418,11 +419,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return false;
     }
   },
-  // TODO Prices query
+
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get(getters['getEndpoint'] + '/prices');
-      commit(DemerisMutationTypes.SET_PRICES, { value: response.data.prices });
+      const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
+      commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
       }
@@ -579,9 +580,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   // Internal module actions
 
-  [DemerisActionTypes.INIT]({ commit, dispatch }, { endpoint, refreshTime }) {
+  [DemerisActionTypes.INIT]({ commit, dispatch }, { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000 }) {
     console.log('Vuex nodule: demeris initialized!');
-    commit('INIT', { endpoint });
+    commit('INIT', { endpoint, hub_chain });
     setInterval(() => {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);

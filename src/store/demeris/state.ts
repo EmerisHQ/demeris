@@ -15,12 +15,13 @@ export type TransactionItem = {
 };
 export type State = {
   endpoint: string;
+  hub_chain: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
   numbers: Record<string, API.Numbers>;
   verifiedDenoms: API.VerifiedDenoms;
   keplr: KeplrKeyData;
-  prices: Array<any>; //TODO: prices
+  prices: API.Prices;
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   _Subscriptions: Set<string>;
@@ -28,6 +29,7 @@ export type State = {
 export function getDefaultState(): State {
   return {
     endpoint: '',
+    hub_chain: 'cosmoshub-4',
     balances: {},
     stakingBalances: {},
     numbers: {},

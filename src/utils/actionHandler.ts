@@ -1059,7 +1059,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.AddLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
-        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        depositorAddress: store.getters['demeris/getOwnAddress']({ chain_name }),
         poolId: data.pool.id,
         depositCoins: [data.coinA, data.coinB],
       },
@@ -1072,7 +1072,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.WithdrawLiquidityData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
-        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        withdrawerAddress: store.getters['demeris/getOwnAddress']({ chain_name }),
         poolId: data.pool.id,
         depositCoins: [data.poolCoin],
       },
@@ -1085,7 +1085,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     const data = stepTx.data as Actions.CreatePoolData;
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
-        poolCreatorAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        poolCreatorAddress: store.getters['demeris/getOwnAddress']({ chain_name }),
         poolTypeId: 1,
         depositCoins: [data.coinA, data.coinB],
       },
@@ -1103,7 +1103,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: {
-        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name }), // TODO: change to liq module chain
+        swapRequesterAddress: store.getters['demeris/getOwnAddress']({ chain_name }),
         poolId: data.pool.id,
         swapTypeId: data.pool.type_id,
         offerCoin: data.from.denom,
