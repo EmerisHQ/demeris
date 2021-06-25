@@ -39,7 +39,7 @@
         >
           <div class="custom-slippage">
             <input
-              ref="customSlippage"
+              ref="customSlippageInput"
               :value="customSlippage"
               type="number"
               placeholder="Custom"
@@ -96,7 +96,7 @@ export default defineComponent({
 
   emits: ['goback'],
   setup(props, { emit }) {
-    const customSlippage = ref(null);
+    const customSlippageInput = ref(null);
     const state = reactive({
       slippage: null,
       customSlippage: null,
@@ -164,19 +164,18 @@ export default defineComponent({
       // setTimeout(() => {
       //   customSlippage.value.focus();
       // }, 1000);
-      state.selectCustomSlippage();
-      customSlippage.value.focus();
+      const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
+      if (slippage > 1 || slippage < 0.1) {
+        state.customSlippage = slippage;
+        state.selectCustomSlippage();
+        customSlippageInput.value.focus();
+      } else {
+        state.slippage = slippage;
+      }
     });
     // customSlippage.value.focus();
 
-    const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
-    if (slippage > 1 || slippage < 0.1) {
-      state.customSlippage = slippage;
-    } else {
-      state.slippage = slippage;
-    }
-
-    return { ...toRefs(state), customSlippage };
+    return { ...toRefs(state), customSlippageInput };
   },
 });
 </script>
