@@ -110,7 +110,7 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
-import { useAllStores, useStore } from '@/store';
+import { store } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -129,9 +129,19 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
 
-    const store = useStore();
-    const stores = useAllStores();
-    console.log('store', stores);
+    // const store = useStore();
+    // const stores = useAllStores();
+    async function getPools() {
+      const pools =
+        store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+        (await store.dispatch(
+          'tendermint.liquidity.v1beta1/QueryLiquidityPools',
+          { options: { subscribe: false, all: true }, params: {} },
+          { root: true },
+        ));
+      console.log('pools', pools);
+    }
+    getPools();
 
     const data = reactive({
       buttonName: computed(() => {
@@ -197,7 +207,6 @@ export default defineComponent({
       }),
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
-      //TODO: test
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
@@ -316,21 +325,21 @@ export default defineComponent({
         'getBalances',
         store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
       );
-      return;
+      // return;
       const swapParams = {
         from: {
           amount: {
             denom: 'uatom',
             amount: '2000000',
           },
-          chain_name: 'gaia',
+          chain_name: 'cosmos-hub',
         },
         to: {
           amount: {
             denom: 'uluna',
             amount: '2000000',
           },
-          chain_name: 'gaia',
+          chain_name: 'cosmos-hub',
         },
       };
 
