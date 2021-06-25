@@ -1122,7 +1122,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   }) as Array<Denom>;
   const fees = [];
   for (const denom of denoms) {
-    fees.push({ amount: denom.fee_levels, denom: denom.name });
+    fees.push({ amount: denom.fee_levels, denom: denom.name, chain_name });
   }
   return fees;
 }
@@ -1221,15 +1221,29 @@ export async function feeForStep(
   feeDenom: string,
 ): Promise<Actions.FeeTotals> {
   let feeTotals;
+  const balances = store.getters['demeris/getAllBalances'];
+  let used;
   for (const stepTx of step.transactions) {
     const fees = await feeForStepTransaction(stepTx);
-    const fee = fees.find((x) => x.denom == feeDenom);
-    feeTotals[fee.denom]
-      ? (feeTotals[fee.denom] = feeTotals[fee.denom] + BigInt(fee.amount[feeLevel]))
-      : (feeTotals[fee.denom] = BigInt(fee.amount[feeLevel]));
+    if (!feeTotals[fees[0].chain_name]) {
+      feeTotals[fees[0].chain_name] = {};
+    }
+    /*
+    { used, balances } = getAvailableFee(fees,balances,feeLevel)
+    feeTotals[used.chain_name][used.denom]
+      ? (feeTotals[used.chain_name][used.denom] = feeTotals[used.chain_name][used.denom] + BigInt(used.amount[feeLevel]))
+      : (feeTotals[used.chain_name][used.denom] = BigInt(used.amount[feeLevel]));
+      */
   }
+
   return feeTotals;
 }
+/*
+export getAvailableFee(fees, balances, feeLevel): { used: Actions.FeeWDenom, balances: Balances, feeLevel: Actions.FeeLevel } {
+//TODO
+  
+}
+*/
 export async function toRedeem(balances: Balances): Promise<Balances> {
   const allValidRedeemableBalances = balances.filter((x) => x.verified && Object.keys(x.ibc).length !== 0);
   const redeemableBalances = [];
