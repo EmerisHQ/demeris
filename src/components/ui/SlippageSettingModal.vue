@@ -116,14 +116,21 @@ export default defineComponent({
         emit(event);
       },
       setSlippage: (slippage) => {
-        localStorage.setItem('demeris-slippage', slippage);
+        state.validSlippageUpdater(slippage);
         state.slippage = slippage;
         state.customSlippage = null;
       },
       setCustomSlippage: (e) => {
-        localStorage.setItem('demeris-slippage', e.target.value);
+        state.validSlippageUpdater(e.target.value);
         state.customSlippage = Number(e.target.value);
         state.slippage = null;
+      },
+      validSlippageUpdater(value) {
+        const slippage = Number(value);
+        console.log(slippage);
+        if (slippage > 0 && slippage <= 100) {
+          localStorage.setItem('demeris-slippage', String(slippage));
+        }
       },
     });
 
