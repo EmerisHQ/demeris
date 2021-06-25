@@ -11,22 +11,43 @@
     <div class="setting">
       <div class="s-minus w-medium">Slippage tolerance</div>
       <div class="setting__sections">
-        <button class="setting__sections-block" :class="slippage === 0.1 ? 'selected' : ''" @click="setSlippage(0.1)">
+        <button
+          class="setting__sections-block"
+          :class="slippage === 0.1 && !isCustomSelected ? 'selected' : ''"
+          @click="setSlippage(0.1)"
+        >
           0.1%
         </button>
-        <button class="setting__sections-block" :class="slippage === 0.5 ? 'selected' : ''" @click="setSlippage(0.5)">
+        <button
+          class="setting__sections-block"
+          :class="slippage === 0.5 && !isCustomSelected ? 'selected' : ''"
+          @click="setSlippage(0.5)"
+        >
           0.5%
         </button>
-        <button class="setting__sections-block" :class="slippage === 1 ? 'selected' : ''" @click="setSlippage(1)">
+        <button
+          class="setting__sections-block"
+          :class="slippage === 1 && !isCustomSelected ? 'selected' : ''"
+          @click="setSlippage(1)"
+        >
           1%
         </button>
-        <input
-          :value="customSlippage"
+        <button
           class="setting__sections-block"
-          type="number"
-          placeholder="Custom"
-          @input="setCustomSlippage"
-        />
+          :class="[isCustomSelected ? 'selected custom-selected' : '', alertStatus === 'error' ? 'custom-error' : '']"
+          @click="selectCustomSlippage"
+        >
+          <div class="custom-slippage">
+            <input
+              ref="customSlippage"
+              :value="customSlippage"
+              type="number"
+              placeholder="Custom"
+              @input="setCustomSlippage"
+            />
+            <span v-if="isCustomSelected" class="custom-slippage__percent">%</span>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -59,7 +80,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
@@ -75,6 +96,7 @@ export default defineComponent({
 
   emits: ['goback'],
   setup(props, { emit }) {
+    const customSlippage = ref(null);
     const state = reactive({
       slippage: null,
       customSlippage: null,
@@ -112,11 +134,13 @@ export default defineComponent({
           return '';
         }
       }),
+      isCustomSelected: false,
       emitHandler: (event) => {
         emit(event);
       },
       setSlippage: (slippage) => {
         state.validSlippageUpdater(slippage);
+        state.isCustomSelected = false;
         state.slippage = slippage;
         state.customSlippage = null;
       },
@@ -124,6 +148,9 @@ export default defineComponent({
         state.validSlippageUpdater(e.target.value);
         state.customSlippage = Number(e.target.value);
         state.slippage = null;
+      },
+      selectCustomSlippage: () => {
+        state.isCustomSelected = true;
       },
       validSlippageUpdater(value) {
         const slippage = Number(value);
@@ -133,6 +160,14 @@ export default defineComponent({
         }
       },
     });
+    onMounted(() => {
+      // setTimeout(() => {
+      //   customSlippage.value.focus();
+      // }, 1000);
+      state.selectCustomSlippage();
+      customSlippage.value.focus();
+    });
+    // customSlippage.value.focus();
 
     const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
     if (slippage > 1 || slippage < 0.1) {
@@ -141,7 +176,7 @@ export default defineComponent({
       state.slippage = slippage;
     }
 
-    return { ...toRefs(state) };
+    return { ...toRefs(state), customSlippage };
   },
 });
 </script>
@@ -195,13 +230,31 @@ export default defineComponent({
           padding: 0.6rem 1.2rem;
           text-align: center;
 
-          &:focus {
-            background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%),
-              linear-gradient(0deg, #9ff9ff, #9ff9ff);
-            outline: none;
-            &::placeholder {
-              color: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .custom-slippage {
+            display: flex;
+
+            input {
+              background-color: transparent;
+              width: 6rem;
             }
+
+            &__percent {
+              color: var(--text);
+            }
+          }
+        }
+      }
+      .custom-selected {
+        input {
+          width: 2.8rem !important;
+          text-align: right;
+          outline: none;
+          &::placeholder {
+            color: transparent;
           }
         }
       }
