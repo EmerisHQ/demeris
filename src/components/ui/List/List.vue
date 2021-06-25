@@ -1,7 +1,7 @@
 <template>
-  <ul class="list" :class="`list--${variant}`">
+  <div class="list" :class="`list--${variant}`">
     <slot />
-  </ul>
+  </div>
 </template>
 
 <script lang="ts">
@@ -21,7 +21,7 @@ export default defineComponent({
 <style lang="scss">
 .list {
   &--divided {
-    & > .list-item + .list-item {
+    & > .list-item:not(.list-item--inset) + .list-item {
       border-top: 1px solid var(--border-trans);
     }
   }

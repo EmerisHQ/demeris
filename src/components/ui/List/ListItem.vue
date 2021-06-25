@@ -1,7 +1,16 @@
 <template>
-  <div class="list-item" :class="[`list-item--${direction}`, { 'list-item--labeled': !!label }]">
+  <div
+    class="list-item"
+    :class="[
+      `list-item--${direction}`,
+      {
+        'list-item--inset': inset,
+        'list-item--collapsed': isCollapsed,
+      },
+    ]"
+  >
     <template v-if="label || description">
-      <div class="list-item__start">
+      <div class="list-item__info">
         <div v-if="label" class="list-item__label">
           <span class="list-item__label__text">{{ label }}</span>
           <span v-if="hint" class="list-item__label__hint">
@@ -14,19 +23,23 @@
             <p v-if="description" class="list-item__description__text">{{ description }}</p>
           </slot>
         </div>
+
+        <button v-if="collapsable" class="list-item__collapse-button" @click="toggleCollapse">
+          <Icon :name="'CaretDownIcon'" :icon-size="1.5" class="list-item__collapse-button__icon" />
+        </button>
       </div>
     </template>
 
-    <div class="list-item__content">
+    <div v-show="!isCollapsed" class="list-item__content">
       <slot>
-        <p v-if="value" class="list__item__value">{{ value }}</p>
+        <p v-if="value" class="list-item__content__value">{{ value }}</p>
       </slot>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 
@@ -39,6 +52,18 @@ export default defineComponent({
     direction: {
       type: String as PropType<'row' | 'column'>,
       default: 'row',
+    },
+    collapsable: {
+      type: Boolean,
+      default: false,
+    },
+    inset: {
+      type: Boolean,
+      default: false,
+    },
+    collapsed: {
+      type: Boolean,
+      default: false,
     },
     label: {
       type: String,
@@ -57,6 +82,15 @@ export default defineComponent({
       default: '',
     },
   },
+  setup(props) {
+    const isCollapsed = ref(props.collapsed);
+
+    const toggleCollapse = () => {
+      isCollapsed.value = !isCollapsed.value;
+    };
+
+    return { isCollapsed, toggleCollapse };
+  },
 });
 </script>
 
@@ -66,10 +100,10 @@ export default defineComponent({
   align-items: flex-start;
   justify-content: space-between;
   width: 100%;
-  padding: 0.6rem 0;
+  padding: 1.6rem 0;
 
-  &--labeled {
-    padding: 1.6rem 0;
+  &--inset {
+    padding: 0.6rem 0;
   }
 
   &--row {
@@ -98,17 +132,36 @@ export default defineComponent({
     color: var(--muted);
   }
 
-  &__start {
+  &--column > &__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__info {
     width: 100%;
-    text-align: left;
+
+    &__label {
+      text-align: left;
+    }
   }
 
   &__content {
     width: 100%;
+
+    &__value {
+      font-size: 1.2rem;
+    }
   }
 
-  &__value {
-    font-size: 1.2rem;
+  &--collapsed &__collapse-button {
+    &__icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__collapse-button {
+    padding: 0.4rem;
   }
 }
 </style>

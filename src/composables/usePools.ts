@@ -26,8 +26,8 @@ export default function usePools() {
     return pools.value.filter((item) => item.reserveCoinDenoms.includes(denom));
   };
 
-  const poolById = (id: number) => {
-    return pools.value.find((item) => item.id === id);
+  const poolById = (id: number | bigint) => {
+    return pools.value.find((item) => item.id === Number(id));
   };
 
   return { pools, poolsByDenom, poolById, formatPoolName };
