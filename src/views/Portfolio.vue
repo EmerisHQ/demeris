@@ -16,7 +16,7 @@
           <div class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
-              display-style="summary"
+              display-style="compact"
               class="assets__table"
               :show-headers="false"
               @row-click="openAssetPage"
@@ -68,7 +68,7 @@ export default {
     flex-direction: column;
     flex: 1;
     width: 0;
-    margin-right: 2rem;
+    margin-right: 6rem;
     &__total {
       &__text {
         opacity: 0.67;
