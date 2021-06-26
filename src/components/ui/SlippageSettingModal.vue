@@ -34,7 +34,10 @@
         </button>
         <button
           class="setting__sections-block"
-          :class="[isCustomSelected ? 'selected custom-selected' : '', alertStatus === 'error' ? 'custom-error' : '']"
+          :class="[
+            isCustomSelected ? 'selected custom-selected' : '',
+            Number(customSlippage) < 0 ? 'custom-error' : '',
+          ]"
           @click="selectCustomSlippage"
         >
           <div class="custom-slippage">
@@ -161,9 +164,6 @@ export default defineComponent({
       },
     });
     onMounted(() => {
-      // setTimeout(() => {
-      //   customSlippage.value.focus();
-      // }, 1000);
       const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
       if (slippage > 1 || slippage < 0.1) {
         state.customSlippage = slippage;
@@ -173,7 +173,6 @@ export default defineComponent({
         state.slippage = slippage;
       }
     });
-    // customSlippage.value.focus();
 
     return { ...toRefs(state), customSlippageInput };
   },
@@ -256,6 +255,11 @@ export default defineComponent({
             color: transparent;
           }
         }
+      }
+
+      .custom-error {
+        justify-content: flex-end;
+        background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
       }
     }
   }
