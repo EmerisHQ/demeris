@@ -90,9 +90,26 @@
         <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
       </div>
 
-      <div class="fees s-minus">
+      <div
+        class="fees s-minus"
+        @click="
+          () => {
+            isFeesOpen = !isFeesOpen;
+          }
+        "
+      >
         <div>Fees (included)</div>
         <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+      </div>
+      <div v-if="isFeesOpen" class="fees-detail">
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
+        <div>test</div>
       </div>
     </div>
   </div>
@@ -178,6 +195,7 @@ export default defineComponent({
       }),
       isChildModalOpen: false,
       isPriceChanged: true,
+      isFeesOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
