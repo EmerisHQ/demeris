@@ -34,7 +34,26 @@
           <span class="withdraw-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
         </div>
 
+        <div class="withdraw-liquidity__estimated">
+          <span class="withdraw-liquidity__estimated__price s-2 w-bold"><Price :amount="{ amount: state.amount, denom: pool.poolCoinDenom }" /></span>
+          <label class="withdraw-liquidity__estimated__max">
+            <input v-model="state.isMaximumAmountChecked" type="checkbox" name="withdraw-liquidity__max" />
+            <span class="elevation-button">Max</span>
+          </label>
+        </div>
+
         <div class="withdraw-liquidity__content">
+          <div class="withdraw-liquidity__modal-wrapper">
+            <ChainSelectModal
+              v-if="state.isChainsModalOpen"
+              title="Select chain"
+              :assets="balances"
+              :selected-denom="pool.poolCoinDenom"
+              :func="() => toggleChainsModal()"
+              @select="toggleChainsModal()"
+            />
+          </div>
+
           <div class="withdraw-liquidity__input amount-input elevation-card">
             <div class="withdraw-liquidity__input__main">
               <label class="withdraw-liquidity__input__label s-minus">Withdraw</label>
@@ -44,13 +63,15 @@
                   :input-header="``"
                   :selected-denom="tokenAsset"
                   :assets="[]"
-                  @select="() => void 0"
+                  @change="denomChangeHandler"
                 />
               </div>
             </div>
 
             <div class="withdraw-liquidity__input__details">
-              <div class="withdraw-liquidity__input__details__from">From <span class="w-bold">Terra</span></div>
+              <button class="withdraw-liquidity__input__details__from" @click="toggleChainsModal()">
+                From <span class="w-bold">Terra</span>
+              </button>
 
               <div class="withdraw-liquidity__input__details__available">
                 1210
@@ -121,24 +142,28 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive } from '@vue/runtime-core';
+import { computed, reactive, watch } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import Price from '@/components/common/Price.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 
 export default {
   name: 'WithdrawLiquidity',
-  components: { Alert, Button, Icon, DenomSelect },
+  components: { Alert, Button, Icon, DenomSelect, ChainSelectModal, Price },
 
   setup() {
     const route = useRoute();
     const router = useRouter();
     const poolId = computed(() => route.params.id);
     const { poolById, formatPoolName } = usePools();
+    const { balances } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
 
@@ -146,6 +171,8 @@ export default {
       step: 'amount',
       needsTransferToHub: true,
       amount: 0,
+      isChainsModalOpen: false,
+      isMaximumAmountChecked: false,
     });
 
     const pool = computed(() => {
@@ -160,6 +187,10 @@ export default {
         amount: 1210,
       };
     });
+
+    const toggleChainsModal = () => {
+      state.isChainsModalOpen = !state.isChainsModalOpen;
+    };
 
     const onClose = () => {
       router.push('/pools');
@@ -184,6 +215,21 @@ export default {
       state.step = step;
     };
 
+    const denomChangeHandler = () => {
+      if (state.isMaximumAmountChecked) {
+        state.isMaximumAmountChecked = false;
+      }
+    };
+
+    watch(
+      () => [state.isMaximumAmountChecked, state],
+      () => {
+        if (state.isMaximumAmountChecked) {
+          state.amount = tokenAsset.value.amount;
+        }
+      },
+    );
+
     return {
       route,
       router,
@@ -191,6 +237,9 @@ export default {
       state,
       steps,
       tokenAsset,
+      balances,
+      denomChangeHandler,
+      toggleChainsModal,
       goToReview,
       goToStep,
       formatPoolName,
@@ -224,6 +273,41 @@ export default {
   &__controls {
     width: 100%;
     margin-top: 3.2rem;
+  }
+
+  &__estimated {
+    margin-top: 3.2rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 38rem;
+    width: 100%;
+    text-align: center;
+    line-height: 1;
+
+    &__max {
+      margin-top: -0.6rem;
+      position: absolute;
+      right: 0;
+
+      input {
+        display: none;
+      }
+
+      span {
+        border-radius: 2.4rem;
+        padding: 1rem 1.6rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+
+      input:checked + span {
+        background: var(--text);
+        color: var(--bg);
+        font-weight: 500;
+      }
+    }
   }
 
   &__header {

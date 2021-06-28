@@ -24,9 +24,10 @@ export default defineComponent({
       await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
     });
     const displayPrice = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: (props.amount as Amount).denom,
-      });
+      const precision =
+        store.getters['demeris/getDenomPrecision']({
+          name: (props.amount as Amount).denom,
+        }) || 0;
       let value;
       if ((props.amount as Amount).amount) {
         value =
