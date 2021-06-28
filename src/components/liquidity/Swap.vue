@@ -92,6 +92,7 @@
 
       <div
         class="fees s-minus"
+        :class="isFeesOpen ? 'fees-detail-open' : ''"
         @click="
           () => {
             isFeesOpen = !isFeesOpen;
@@ -99,7 +100,11 @@
         "
       >
         <div>Fees (included)</div>
-        <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+        <div class="total-fee">
+          <span v-show="!isFeesOpen">~$12.3</span>
+          <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
+          <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
+        </div>
       </div>
       <div v-if="isFeesOpen" class="fees-detail">
         <div>test</div>
@@ -378,6 +383,16 @@ export default defineComponent({
 
     .total-fee {
       display: flex;
+      align-items: center;
+    }
+  }
+
+  .fees-detail-open {
+    font-weight: bold;
+    color: var(--text);
+
+    .icon {
+      color: var(--text) !important;
     }
   }
 }
