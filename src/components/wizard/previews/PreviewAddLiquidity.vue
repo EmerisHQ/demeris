@@ -75,7 +75,7 @@ export default defineComponent({
     const { poolById } = usePools();
 
     const pool = computed(() => {
-      return poolById(props.data.params.pool_id);
+      return poolById((props.data as AddLiquidityAction).params.pool_id);
     });
 
     return {

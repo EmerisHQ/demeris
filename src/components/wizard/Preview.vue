@@ -4,16 +4,15 @@
     <PreviewSwap v-else-if="action.name === 'swap'" :data="action" />
     <PreviewTransfer v-else-if="action.name === 'transfer'" :data="action" />
     <PreviewWithdrawLiquidity v-else-if="action.name === 'withdrawliquidity'" :data="action" />
-
-    <Button name="Confirm and continue" />
+    <PreviewAddLiquidity v-else-if="action.name === 'addliquidity'" :data="action" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
 import { Any } from '@/types/actions';
 
+import PreviewAddLiquidity from './previews/PreviewAddLiquidity.vue';
 import PreviewRedeem from './previews/PreviewRedeem.vue';
 import PreviewSwap from './previews/PreviewSwap.vue';
 import PreviewTransfer from './previews/PreviewTransfer.vue';
@@ -23,11 +22,11 @@ export default defineComponent({
   name: 'Preview',
 
   components: {
-    Button,
     PreviewRedeem,
     PreviewSwap,
     PreviewTransfer,
     PreviewWithdrawLiquidity,
+    PreviewAddLiquidity,
   },
 
   props: {

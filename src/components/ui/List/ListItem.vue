@@ -25,7 +25,7 @@
         </div>
 
         <button v-if="collapsable" class="list-item__collapse-button" @click="toggleCollapse">
-          <Icon :name="'CaretDownIcon'" :icon-size="1.5" class="list-item__collapse-button__icon" />
+          <Icon :name="'CaretUpIcon'" :icon-size="1.5" class="list-item__collapse-button__icon" />
         </button>
       </div>
     </template>

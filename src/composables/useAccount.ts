@@ -6,6 +6,10 @@ import { useStore } from 'vuex';
 export default function useAccount() {
   const store = useStore();
 
+  const signedAddress = computed(() => {
+    return store.getters['demeris/getKeplrAddress'];
+  });
+
   const balances = computed(() => {
     // TODO: Remove after cloud is fully deployed
     /*
@@ -13,12 +17,12 @@ export default function useAccount() {
       return TEST_DATA.balances;
     }
     */
-    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+    return store.getters['demeris/getBalances']({ address: signedAddress.value }) || [];
   });
 
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
   };
 
-  return { balances, balancesByDenom };
+  return { signedAddress, balances, balancesByDenom };
 }
