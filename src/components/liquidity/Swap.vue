@@ -13,7 +13,8 @@
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
   <div class="wrapper">
-    <ReviewModal v-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
+    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
+    <ReviewModal v-else-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -24,7 +25,7 @@
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: openSetting,
+              function: slippageSettingModalToggle,
             }"
           />
         </div>
@@ -106,6 +107,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
@@ -120,11 +122,13 @@ export default defineComponent({
     Icon,
     ReviewModal,
     Alert,
+    SlippageSettingModal,
   },
 
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
+    const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
 
     const data = reactive({
       buttonName: computed(() => {
@@ -292,6 +296,8 @@ export default defineComponent({
       reviewModalToggle,
       gobackFunc,
       setConterPairCoinAmount,
+      isSlippageSettingModalOpen,
+      slippageSettingModalToggle,
     };
   },
 });

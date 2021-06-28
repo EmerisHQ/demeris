@@ -28,16 +28,30 @@
             {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
           </h2>
 
-          <div v-if="hasPool" class="add-liquidity__pool">
+          <div v-if="hasPair" class="add-liquidity__pool">
             <div class="add-liquidity__pool__pair">
               <span class="add-liquidity__pool__pair__avatar token-a" />
               <span class="add-liquidity__pool__pair__avatar token-b" />
             </div>
 
-            <span class="add-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
+            <span class="add-liquidity__pool__name">
+              <Denom :name="hasPool ? pool.reserveCoinDenoms[0] : form.coinA.balance.base_denom" /> /
+              <Denom :name="hasPool ? pool.reserveCoinDenoms[1] : form.coinB.balance.base_denom" />
+            </span>
           </div>
 
           <div class="add-liquidity__content">
+            <div class="add-liquidity__modal-wrapper">
+              <ChainSelectModal
+                v-if="state.isChainsModalOpen"
+                title="Select chain"
+                :assets="balances"
+                :selected-denom="form[state.chainsModalSource].balance.base_denom"
+                :func="() => toggleChainsModal()"
+                @select="toggleChainsModal()"
+              />
+            </div>
+
             <div class="add-liquidity__input input-a elevation-card">
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
@@ -63,13 +77,15 @@
               </div>
 
               <div v-if="form.coinA.balance" class="add-liquidity__input__details">
-                <div class="add-liquidity__input__details__from">
-                  From <span class="w-bold">{{ form.coinA.balance.on_chain || '-' }}</span>
-                </div>
+                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinA')">
+                  From <span class="w-bold"><ChainName :name="form.coinA.balance.on_chain || '-'" /></span>
+                </button>
 
                 <div class="add-liquidity__input__details__available">
-                  {{ form.coinA.balance.amount || 0 }}
-                  <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> available
+                  <AmountDisplay
+                    :amount="{ amount: form.coinA.balance.amount || 0, denom: form.coinA.balance.base_denom }"
+                  />
+                  available
                 </div>
               </div>
             </div>
@@ -100,13 +116,15 @@
               </div>
 
               <div v-if="form.coinB.balance" class="add-liquidity__input__details">
-                <div class="add-liquidity__input__details__from">
-                  From <span class="w-bold">{{ form.coinB.balance.on_chain || '-' }}</span>
-                </div>
+                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinB')">
+                  From <span class="w-bold"><ChainName :name="form.coinB.balance.on_chain || '-'" /></span>
+                </button>
 
                 <div class="add-liquidity__input__details__available">
-                  {{ form.coinB.balance.amount || 0 }}
-                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span> available
+                  <AmountDisplay
+                    :amount="{ amount: form.coinB.balance.amount || 0, denom: form.coinB.balance.base_denom }"
+                  />
+                  available
                 </div>
               </div>
             </div>
@@ -123,7 +141,7 @@
                   <span class="w-bold">G-LK-LP</span>
                 </div>
 
-                <span class="add-liqudity__receive__amount w-bold"> 400 </span>
+                <span class="add-liqudity__receive__amount w-bold"> {{ receiveAmount }} </span>
               </div>
             </div>
 
@@ -172,6 +190,10 @@
 import { computed, onMounted, reactive } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
@@ -182,7 +204,7 @@ import { Balance } from '@/types/api';
 
 export default {
   name: 'AddLiquidity',
-  components: { Icon, Button, DenomSelect, Alert },
+  components: { AmountDisplay, Icon, Button, ChainName, Denom, DenomSelect, Alert, ChainSelectModal },
 
   setup() {
     const route = useRoute();
@@ -194,6 +216,8 @@ export default {
     const state = reactive({
       step: 'amount',
       isTransferConfirmationOpen: false,
+      isChainsModalOpen: false,
+      chainsModalSource: 'coinA',
     });
 
     const form = reactive<Record<string, { balance: Balance; amount: number }>>({
@@ -207,7 +231,7 @@ export default {
       },
     });
 
-    const { pools, formatPoolName } = usePools();
+    const { pools } = usePools();
     const { balances } = useAccount();
 
     const balancesForSecond = computed(() => {
@@ -229,6 +253,15 @@ export default {
 
     const hasPool = computed(() => {
       return !!pool.value;
+    });
+
+    const receiveAmount = computed(() => {
+      if (!hasPool.value) {
+        return 1;
+      }
+
+      // TODO: Estimate amount received
+      return 2;
     });
 
     const needsTransferToHub = computed(() => {
@@ -275,6 +308,14 @@ export default {
       goToStep('review');
     };
 
+    const toggleChainsModal = (asset?: Balance, source: 'coinA' | 'coinB' = 'coinA') => {
+      if (asset) {
+        coinSelectHandler(source, asset);
+      }
+      state.chainsModalSource = source;
+      state.isChainsModalOpen = !state.isChainsModalOpen;
+    };
+
     const goToStep = (step: 'amount' | 'review' | 'send') => {
       state.step = step;
     };
@@ -305,11 +346,12 @@ export default {
       state,
       steps,
       needsTransferToHub,
+      receiveAmount,
+      toggleChainsModal,
       goBack,
       goToReview,
       goToStep,
       coinSelectHandler,
-      formatPoolName,
       onClose,
     };
   },
