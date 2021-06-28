@@ -144,6 +144,12 @@
           </button>
         </div>
 
+        <Alert
+          v-if="feeLevel === 'slow'"
+          status="warning"
+          message="Your transaction may take longer to be processed."
+        />
+
         <div class="fees-detail__info s-minus">
           <div class="fees-detail__info-key">Swap fee</div>
           <div class="fees-detail__info-value">$0.21</div>
@@ -473,6 +479,10 @@ export default defineComponent({
         }
       }
     }
+  }
+
+  .alert--warning {
+    margin-top: 1.6rem;
   }
 
   .fees-detail-open {
