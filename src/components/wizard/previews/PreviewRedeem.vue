@@ -51,7 +51,7 @@ export default defineComponent({
 
   setup(props) {
     const totalAmount = computed(() => {
-      return props.data.params.reduce((acc, item) => acc + +item.amount, 0);
+      return (props.data as RedeemAction).params.reduce((acc, item) => acc + +item.amount, 0);
     });
 
     return {

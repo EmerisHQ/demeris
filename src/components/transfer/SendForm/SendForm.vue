@@ -13,16 +13,7 @@
     <template v-if="step === 'review'">
       <h2 class="send-form__title s-2">Review your transfer details</h2>
 
-      <dl>
-        <dt class="w-bold">Recipient</dt>
-        <dd>{{ form.recipient }}</dd>
-
-        <dt class="w-bold mt-10">Memo</dt>
-        <dd>{{ form.memo || '-' }}</dd>
-
-        <dt class="w-bold mt-10">Amount</dt>
-        <dd>{{ form.balance.amount }}{{ form.balance.denom }}</dd>
-      </dl>
+      <Preview :action="action" />
 
       <Button class="mt-10" name="Confirm and continue" @click="goToStep('send')" />
     </template>
@@ -35,7 +26,8 @@
 import { computed, defineComponent, PropType, provide, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-import { SendAddressForm } from '@/types/actions';
+import Preview from '@/components/wizard/Preview.vue';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 
 import SendFormAmount from './SendFormAmount.vue';
@@ -48,6 +40,7 @@ export default defineComponent({
 
   components: {
     Button,
+    Preview,
     SendFormAmount,
     SendFormRecipient,
   },
@@ -68,6 +61,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const form: SendAddressForm = reactive({
       recipient: '',
+      chain_name: '',
       memo: '',
       balance: {
         denom: '',
@@ -81,6 +75,25 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    const action = computed<TransferAction>(() => {
+      return {
+        name: 'transfer',
+        params: {
+          from: {
+            amount: {
+              amount: form.balance.amount,
+              denom: form.balance.denom,
+            },
+            chain_name: form.chain_name,
+          },
+          to: {
+            address: form.recipient,
+            chain_name: form.chain_name,
+          },
+        },
+      };
+    });
+
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -91,7 +104,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { form, goToStep };
+    return { form, action, goToStep };
   },
 });
 </script>

@@ -20,7 +20,7 @@ export type TransferParams = {
   };
 };
 export type AddLiquidityParams = {
-  pool_id: bigint;
+  pool_id?: bigint;
   coinA: Base.ChainAmount;
   coinB: Base.ChainAmount;
 };
@@ -86,6 +86,7 @@ export type Step = {
 };
 
 export type SendAddressForm = {
+  chain_name: string;
   recipient: string;
   memo: string;
   isTermChecked?: boolean;

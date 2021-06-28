@@ -159,6 +159,7 @@ export default defineComponent({
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
       form.balance.denom = asset.base_denom as string;
+      form.chain_name = asset.on_chain as string;
     };
 
     const toggleSelectModal = (asset?: Record<string, unknown>) => {
