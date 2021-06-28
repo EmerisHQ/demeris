@@ -35,8 +35,8 @@
             </div>
 
             <span class="add-liquidity__pool__name">
-              <Denom :name="hasPool ? pool.reserveCoinDenoms[0] : form.coinA.balance.base_denom" /> /
-              <Denom :name="hasPool ? pool.reserveCoinDenoms[1] : form.coinB.balance.base_denom" />
+              <Denom :name="hasPool ? pool.reserveCoinDenoms[0] : form.coinA.asset.base_denom" /> /
+              <Denom :name="hasPool ? pool.reserveCoinDenoms[1] : form.coinB.asset.base_denom" />
             </span>
           </div>
 
@@ -46,7 +46,7 @@
                 v-if="state.isChainsModalOpen"
                 title="Select chain"
                 :assets="balances"
-                :selected-denom="form[state.chainsModalSource].balance.base_denom"
+                :selected-denom="form[state.chainsModalSource].asset.base_denom"
                 :func="() => toggleChainsModal()"
                 @select="toggleChainsModal()"
               />
@@ -56,8 +56,8 @@
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
-                  As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.balance.base_denom) }}/{{
-                    $filters.getCoinName(form.coinB.balance.base_denom)
+                  As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.asset.base_denom) }}/{{
+                    $filters.getCoinName(form.coinB.asset.base_denom)
                   }}
                   pool, you will be creating the pool and setting the price. Proceed with caution.
                 </p>
@@ -69,21 +69,21 @@
                   <DenomSelect
                     v-model:amount="form.coinA.amount"
                     :input-header="``"
-                    :selected-denom="form.coinA.balance"
+                    :selected-denom="form.coinA.asset"
                     :assets="balances"
                     @select="coinSelectHandler('coinA', $event)"
                   />
                 </div>
               </div>
 
-              <div v-if="form.coinA.balance" class="add-liquidity__input__details">
+              <div v-if="form.coinA.asset" class="add-liquidity__input__details">
                 <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinA')">
-                  From <span class="w-bold"><ChainName :name="form.coinA.balance.on_chain || '-'" /></span>
+                  From <span class="w-bold"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
                 </button>
 
                 <div class="add-liquidity__input__details__available">
                   <AmountDisplay
-                    :amount="{ amount: form.coinA.balance.amount || 0, denom: form.coinA.balance.base_denom }"
+                    :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                   />
                   available
                 </div>
@@ -93,9 +93,9 @@
             <div class="add-liquidity__price">
               <span class="add-liquidity__price__divider" />
               <div class="add-liquidity__price__container">
-                <template v-if="form.coinA.balance && form.coinB.balance">
-                  1 <span class="uppercase">{{ $filters.getCoinName(form.coinA.balance.base_denom) }}</span> : 1.78
-                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.balance.base_denom) }}</span>
+                <template v-if="form.coinA.asset && form.coinB.asset">
+                  1 <span class="uppercase">{{ $filters.getCoinName(form.coinA.asset.base_denom) }}</span> : 1.78
+                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.asset.base_denom) }}</span>
                 </template>
                 <span v-else>Price</span>
               </div>
@@ -108,21 +108,21 @@
                   <DenomSelect
                     v-model:amount="form.coinB.amount"
                     :input-header="``"
-                    :selected-denom="form.coinB.balance"
+                    :selected-denom="form.coinB.asset"
                     :assets="balancesForSecond"
                     @select="coinSelectHandler('coinB', $event)"
                   />
                 </div>
               </div>
 
-              <div v-if="form.coinB.balance" class="add-liquidity__input__details">
+              <div v-if="form.coinB.asset" class="add-liquidity__input__details">
                 <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinB')">
-                  From <span class="w-bold"><ChainName :name="form.coinB.balance.on_chain || '-'" /></span>
+                  From <span class="w-bold"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
                 </button>
 
                 <div class="add-liquidity__input__details__available">
                   <AmountDisplay
-                    :amount="{ amount: form.coinB.balance.amount || 0, denom: form.coinB.balance.base_denom }"
+                    :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                   />
                   available
                 </div>
@@ -199,6 +199,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Balance } from '@/types/api';
 
@@ -209,7 +210,7 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const poolId = computed(() => route.params.id);
+    const poolId = computed(() => route.params.id as unknown as string);
 
     const steps = ['amount', 'review', 'send'];
 
@@ -220,31 +221,33 @@ export default {
       chainsModalSource: 'coinA',
     });
 
-    const form = reactive<Record<string, { balance: Balance; amount: number }>>({
+    const form = reactive<Record<string, { asset: Balance; amount: number }>>({
       coinA: {
-        balance: undefined,
+        asset: undefined,
         amount: 0,
       },
       coinB: {
-        balance: undefined,
+        asset: undefined,
         amount: 0,
       },
     });
 
     const { pools } = usePools();
+    const { calculateSupplyTokenAmount } = usePool(+poolId);
+
     const { balances } = useAccount();
 
     const balancesForSecond = computed(() => {
-      return balances.value.filter((item) => item.base_denom !== form.coinA.balance?.base_denom);
+      return balances.value.filter((item) => item.base_denom !== form.coinA.asset?.base_denom);
     });
 
     const hasPair = computed(() => {
-      return form.coinA.balance && form.coinB.balance;
+      return form.coinA.asset && form.coinB.asset;
     });
 
     const pool = computed(() => {
       if (hasPair.value) {
-        const denoms = [form.coinA.balance.base_denom, form.coinB.balance.base_denom].sort();
+        const denoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
         return pools.value.find((pool) => pool.reserveCoinDenoms.join() === denoms.join());
       }
 
@@ -256,18 +259,17 @@ export default {
     });
 
     const receiveAmount = computed(() => {
-      if (!hasPool.value) {
-        return 1;
+      if (!form.coinA.asset.amount || !form.coinB.asset.amount) {
+        return 0;
       }
 
-      // TODO: Estimate amount received
-      return 2;
+      return calculateSupplyTokenAmount(+form.coinA.asset.amount, +form.coinB.asset.amount);
     });
 
     const needsTransferToHub = computed(() => {
       const hubName = 'Cosmos';
 
-      if (form.coinA.balance.on_chain !== hubName || form.coinB.balance.on_chain !== hubName) {
+      if (form.coinA.asset.on_chain !== hubName || form.coinB.asset.on_chain !== hubName) {
         return true;
       }
 
@@ -279,7 +281,7 @@ export default {
     };
 
     const coinSelectHandler = (key: 'coinA' | 'coinB', balance: Balance) => {
-      form[key].balance = balance;
+      form[key].asset = balance;
     };
 
     const goBack = () => {
@@ -330,9 +332,9 @@ export default {
       if (poolFromRoute) {
         // TODO: Find chain by user balance
         // @ts-ignore
-        form.coinA.balance = { base_denom: poolFromRoute.reserveCoinDenoms[0] };
+        form.coinA.asset = { base_denom: poolFromRoute.reserveCoinDenoms[0] };
         // @ts-ignore
-        form.coinB.balance = { base_denom: poolFromRoute.reserveCoinDenoms[1] };
+        form.coinB.asset = { base_denom: poolFromRoute.reserveCoinDenoms[1] };
       }
     });
 
