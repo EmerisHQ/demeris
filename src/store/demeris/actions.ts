@@ -27,6 +27,7 @@ export type DemerisConfig = {
   endpoint: string;
   refreshTime?: number;
   hub_chain?: string;
+  gas_limit?: number;
 };
 export type DemerisTxParams = {
   tx: string;
@@ -135,7 +136,7 @@ export interface Actions {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
-    { endpoint, refreshTime, hub_chain }: DemerisConfig,
+    { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
@@ -352,7 +353,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           },
         });
       }
-      await addChain(chain_name);
+      // await addChain(chain_name);
 
       await window.keplr.enable(chain.node_info.chain_id);
       const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
@@ -389,11 +390,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       const chains = getters['getChains'];
-
-      await window.keplr['permitMultiple'](chains.map((x) => x.node_info.chain_id));
+      for (const chain in chains) {
+        await addChain(chain);
+      }
+      await window.keplr['permitMultiple'](
+        (Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id),
+      );
       const paths = new Set();
       const toQuery = [];
-      for (const chain of chains) {
+      for (const chain_name in chains) {
+        const chain = chains[chain_name];
         if (paths.has(chain.derivation_path)) {
           continue;
         }
@@ -416,6 +422,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
+      console.log(e);
       return false;
     }
   },
@@ -580,9 +587,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   // Internal module actions
 
-  [DemerisActionTypes.INIT]({ commit, dispatch }, { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000 }) {
+  [DemerisActionTypes.INIT](
+    { commit, dispatch },
+    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 300000 },
+  ) {
     console.log('Vuex nodule: demeris initialized!');
-    commit('INIT', { endpoint, hub_chain });
+    commit('INIT', { endpoint, hub_chain, gas_limit });
     setInterval(() => {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);

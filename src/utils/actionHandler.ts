@@ -1215,35 +1215,39 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
 }
-export async function feeForStep(
-  step: Actions.Step,
-  feeLevel: Actions.FeeLevel,
-  feeDenom: string,
-): Promise<Actions.FeeTotals> {
+export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel): Promise<Actions.FeeTotals> {
   let feeTotals;
-  const balances = store.getters['demeris/getAllBalances'];
+
   let used;
   for (const stepTx of step.transactions) {
     const fees = await feeForStepTransaction(stepTx);
     if (!feeTotals[fees[0].chain_name]) {
       feeTotals[fees[0].chain_name] = {};
     }
-    /*
-    { used, balances } = getAvailableFee(fees,balances,feeLevel)
-    feeTotals[used.chain_name][used.denom]
-      ? (feeTotals[used.chain_name][used.denom] = feeTotals[used.chain_name][used.denom] + BigInt(used.amount[feeLevel]))
-      : (feeTotals[used.chain_name][used.denom] = BigInt(used.amount[feeLevel]));
-      */
-  }
+    used = getUsedFee(fees, feeLevel);
 
+    feeTotals[used.chain_name][used.amount.denom]
+      ? (feeTotals[used.chain_name][used.amount.denom] =
+          feeTotals[used.chain_name][used.amount.denom] + BigInt(used.amount.amount))
+      : (feeTotals[used.chain_name][used.amount.denom] = BigInt(used.amount.amount));
+  }
   return feeTotals;
 }
-/*
-export getAvailableFee(fees, balances, feeLevel): { used: Actions.FeeWDenom, balances: Balances, feeLevel: Actions.FeeLevel } {
-//TODO
-  
+
+export function getUsedFee(fees: Array<Actions.FeeWDenom>, feeLevel: Actions.FeeLevel): { used: ChainAmount } {
+  const feeOption = fees[0];
+  const used = {
+    amount: {
+      amount: (parseInt(feeOption.amount[feeLevel]) * store.getters['demeris/getGasLimit']).toString(),
+      denom: feeOption.denom,
+    },
+    chain_name: feeOption.chain_name,
+  };
+  return {
+    used,
+  };
 }
-*/
+
 export async function toRedeem(balances: Balances): Promise<Balances> {
   const allValidRedeemableBalances = balances.filter((x) => x.verified && Object.keys(x.ibc).length !== 0);
   const redeemableBalances = [];

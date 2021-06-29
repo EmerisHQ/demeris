@@ -11,8 +11,8 @@ export async function addChain(chain_name: string): Promise<void> {
   console.log({
     chainId: chain.node_info.chain_id,
     chainName: chain.display_name,
-    rpc: 'http://localhost',
-    rest: 'http://localhost',
+    rpc: 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
+    rest: 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
     stakeCurrency: {
       coinDenom: chain.denoms.filter((x) => x.stakable)[0].display_name,
       coinMinimalDenom: chain.denoms.filter((x) => x.stakable)[0].name,
@@ -30,9 +30,7 @@ export async function addChain(chain_name: string): Promise<void> {
       bech32PrefixConsPub: chain.node_info.bech32_config.cons_pub,
     },
     currencies: chain.denoms.map((x: Denom) => {
-      const y: AmountWithMeta = {
-        amount: '0',
-        denom: '',
+      const y = {
         coinDenom: '',
         coinMinimalDenom: '',
         coinDecimals: 0,
@@ -45,9 +43,7 @@ export async function addChain(chain_name: string): Promise<void> {
     feeCurrencies: chain.denoms
       .filter((x) => x.fee_token)
       .map((x: Denom) => {
-        const y: AmountWithMeta = {
-          amount: '0',
-          denom: '',
+        const y = {
           coinDenom: '',
           coinMinimalDenom: '',
           coinDecimals: 0,
@@ -67,8 +63,8 @@ export async function addChain(chain_name: string): Promise<void> {
   await window.keplr.experimentalSuggestChain({
     chainId: chain.node_info.chain_id,
     chainName: chain.display_name,
-    rpc: 'http://localhost',
-    rest: 'http://localhost',
+    rpc: 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
+    rest: 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
     stakeCurrency: {
       coinDenom: chain.denoms.filter((x) => x.stakable)[0].display_name,
       coinMinimalDenom: chain.denoms.filter((x) => x.stakable)[0].name,

@@ -31,6 +31,7 @@ export default defineComponent({
       endpoint: 'https://dev.demeris.io/v1',
       hub_chain: 'cosmos-hub',
       refreshTime: 5000,
+      gas_limit: 300000,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
@@ -56,7 +57,11 @@ export default defineComponent({
       getTXApi: null,
       offline: true,
     });
-    await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: false });
+    try {
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: false });
+    } catch (e) {
+      console.log(e);
+    }
     this.initialized = true;
   },
   errorCaptured(err) {

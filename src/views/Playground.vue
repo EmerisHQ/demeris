@@ -128,7 +128,7 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores, useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { FeeLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -220,6 +220,17 @@ export default defineComponent({
       console.log(channel);
 
       const stepTx = {
+        name: 'ibc_forward',
+        status: 'pending',
+        data: {
+          amount: { amount: '1000000', denom: 'uakt' },
+          from_chain: 'akash',
+          to_chain: 'cosmos-hub',
+          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+          through: 'channel-0',
+        } as IBCForwardsData,
+      } as StepTransaction;
+      /*{
         name: 'createpool',
         status: 'pending',
         data: {
@@ -227,7 +238,7 @@ export default defineComponent({
           coinB: { amount: '10000000', denom: 'uatom' },
         } as CreatePoolData,
       } as StepTransaction;
-      /*
+      
       const stepTx = {
         name: 'transfer',
         status: 'pending',
@@ -238,6 +249,7 @@ export default defineComponent({
         } as TransferData,
       } as StepTransaction;
       */
+      console.log('here');
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {

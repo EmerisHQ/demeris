@@ -16,6 +16,7 @@ export type Getters = {
   getFeeAddresses(state: State): API.FeeAddresses | null;
   getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
+  getGasLimit(state: State): number;
   getPrices(state: State): API.Prices;
   getPrice(state: State): {
     (params: { denom: string }): number;
@@ -148,6 +149,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getOwnAddress: (state) => (params) => {
     console.log(state);
+    console.log(
+      chainAddressfromAddress(
+        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
+        state.keplr.bech32Address,
+      ),
+    );
     return (
       chainAddressfromAddress(
         state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
@@ -193,6 +200,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getChain: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;
+  },
+  getGasLimit: (state) => {
+    return state.gas_limit;
   },
   getPrimaryChannel: (state) => (params) => {
     return (

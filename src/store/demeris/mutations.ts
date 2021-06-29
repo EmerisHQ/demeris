@@ -110,6 +110,7 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
     state.keplr = payload;
+    state.keplr.keyHashes = [];
   },
 
   // Chain-specific endpoint mutations
@@ -154,6 +155,7 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
     state.hub_chain = payload.hub_chain;
+    state.gas_limit = payload.gas_limit;
   },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());

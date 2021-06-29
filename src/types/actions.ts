@@ -148,4 +148,4 @@ export enum FeeLevel {
   AVERAGE = 'average',
   HIGH = 'high',
 }
-export type FeeTotals = Record<string, number>;
+export type FeeTotals = Record<string, Record<string, number>>;
