@@ -19,7 +19,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
-  [MutationTypes.SET_PRICES](state: S, payload: { value: any }): void; // TODO: prices
+  [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
 
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
@@ -72,7 +72,7 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
-    state.prices = payload.value as any; // TODO: prices
+    state.prices = payload.value as API.Prices;
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
@@ -153,6 +153,7 @@ export const mutations: MutationTree<State> & Mutations = {
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
+    state.hub_chain = payload.hub_chain;
   },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());

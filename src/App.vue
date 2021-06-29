@@ -29,6 +29,7 @@ export default defineComponent({
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://dev.demeris.io/v1',
+      hub_chain: 'cosmos-hub',
       refreshTime: 5000,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {

@@ -16,10 +16,10 @@ export type Getters = {
   getFeeAddresses(state: State): API.FeeAddresses | null;
   getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
-  getPrices(state: State): any; //TODO prices
+  getPrices(state: State): API.Prices;
   getPrice(state: State): {
     (params: { denom: string }): number;
-  }; //TODO prices
+  };
   getDisplayDenom(
     state: State,
     getters,
@@ -123,16 +123,16 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
   },
   getPrices: (state) => {
-    return state.prices; //TODO: Prices
+    return state.prices;
   },
   isVerified: (state) => (params) => {
     return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
   getPrice: (state) => (params) => {
-    return 1;
+    return 1; // TODO
   },
   getEndpoint: (state) => {
-    return state.endpoint; //TODO: Prices
+    return state.endpoint;
   },
   isSignedIn: (state) => {
     return state.keplr ? true : false;
@@ -141,7 +141,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.keplr?.name ?? null;
   },
   getDexChain: (state) => {
-    return 'cosmos-hub'; //TODO
+    return state.hub_chain;
   },
   getTxStatus: (state) => (params) => {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;

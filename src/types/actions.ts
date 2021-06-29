@@ -122,6 +122,7 @@ export type MoveAssetsForm = {
 export type FeeWDenom = {
   amount: API.Fee;
   denom: string;
+  chain_name: string;
 };
 // HACK! Below needs fixing in starport codegen
 export type Pool = {

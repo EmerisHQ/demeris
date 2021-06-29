@@ -12,7 +12,7 @@ export enum DemerisActionTypes {
   GET_FEE_ADDRESSES = 'GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'GET_VERIFIED_DENOMS',
   GET_CHAINS = 'GET_CHAINS',
-  GET_PRICES = 'GET_PRICES', //TODO prices
+  GET_PRICES = 'GET_PRICES',
   GET_TX_STATUS = 'GET_TX_STATUS',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'GET_VERIFY_TRACE',
@@ -44,7 +44,7 @@ export enum GlobalDemerisActionTypes {
   GET_FEE_ADDRESSES = 'demeris/GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'demeris/GET_VERIFIED_DENOMS',
   GET_CHAINS = 'demeris/GET_CHAINS',
-  GET_PRICES = 'demeris/GET_PRICES', //TODO prices
+  GET_PRICES = 'demeris/GET_PRICES',
   GET_TX_STATUS = 'demeris/GET_TX_STATUS',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'demeris/GET_VERIFY_TRACE',

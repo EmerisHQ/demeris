@@ -27,8 +27,8 @@ export enum DemerisMutationTypes {
 }
 export type DemerisMutationArgs =
   | API.Balances
-  | boolean // TODO: prices
-  | any
+  | boolean
+  | API.Prices
   | API.FeeAddress
   | API.FeeAddresses
   | API.Bech32Config
