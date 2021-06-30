@@ -245,7 +245,7 @@ export default {
     const pool = computed(() => {
       if (hasPair.value) {
         const denoms = [form.coinA.balance.base_denom, form.coinB.balance.base_denom].sort();
-        return pools.value.find((pool) => pool.reserveCoinDenoms.join() === denoms.join());
+        return pools.value.find((pool) => pool.reserve_coin_denoms.join() === denoms.join());
       }
 
       return undefined;
@@ -330,9 +330,9 @@ export default {
       if (poolFromRoute) {
         // TODO: Find chain by user balance
         // @ts-ignore
-        form.coinA.balance = { base_denom: poolFromRoute.reserveCoinDenoms[0] };
+        form.coinA.balance = { base_denom: poolFromRoute.reserve_coin_denoms[0] };
         // @ts-ignore
-        form.coinB.balance = { base_denom: poolFromRoute.reserveCoinDenoms[1] };
+        form.coinB.balance = { base_denom: poolFromRoute.reserve_coin_denoms[1] };
       }
     });
 

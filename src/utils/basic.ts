@@ -2,6 +2,8 @@ import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 
+import { store } from '../store/index';
+
 export function toHexString(byteArray) {
   return Array.prototype.map
     .call(byteArray, function (byte) {
@@ -18,6 +20,11 @@ export function keyHashfromAddress(address: string): string {
 }
 export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
+}
+export async function getOwnAddress({ chain_name }) {
+  const chain = store.getters['demeris/getChain']({ chain_name });
+  const key = await window.keplr.getKey(chain.node_info.chain_id);
+  return key.bech32Address;
 }
 export function isNative(denom: string) {
   return denom.indexOf('ibc/') != 0 ? true : false;
@@ -61,12 +68,12 @@ export function getDenomHash(path, base_denom, hopsToRemove = 0) {
   const parts = path.split('/');
   parts.push(base_denom);
   const newPath = parts.slice(hopsToRemove * 2).join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }
 
 export function generateDenomHash(channel, base_denom) {
   const parts = ['transfer', channel];
   parts.push(base_denom);
   const newPath = parts.join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }

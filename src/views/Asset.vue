@@ -17,7 +17,9 @@
               <p class="asset__main__stats__container__left__token">
                 <AmountDisplay :amount="{ amount: totalAmount, denom }" />
               </p>
-              <p class="asset__main__stats__container__left__balance">$13,184.45</p>
+              <p class="asset__main__stats__container__left__balance">
+                <Price :amount="{ amount: totalAmount, denom: denom }" />
+              </p>
               <span class="asset__main__stats__container__left__trending">
                 <span>15% (+$1,719.71)</span>
               </span>
@@ -55,7 +57,9 @@
               </div>
               <span class="asset__main__chains__item__amount"><AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
               <div class="asset__main__chains__item__balance">
-                <span class="asset__main__chains__item__balance__value"> $3,690.50 </span>
+                <span class="asset__main__chains__item__balance__value">
+                  <Price :amount="{ amount: asset.amount, denom }" />
+                </span>
                 <button class="asset__main__chains__item__more">
                   <Icon name="SendIcon" :icon-size="1.2" />
                 </button>
@@ -124,6 +128,7 @@
 </template>
 
 <script lang="ts">
+import { parseCoins } from '@cosmjs/launchpad';
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -131,13 +136,13 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
+import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-
 export default defineComponent({
   name: 'Asset',
 
@@ -146,6 +151,7 @@ export default defineComponent({
     ChainName,
     AppLayout,
     Icon,
+    Price,
     PlusIcon,
     ArrowLeftIcon,
     LiquiditySwap,
@@ -163,7 +169,7 @@ export default defineComponent({
     const pools = computed(() => poolsByDenom(denom.value));
 
     const totalAmount = computed(() => {
-      return assets.value.reduce((acc, item) => acc + item.amount, 0);
+      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
     return { denom, assets, pools, totalAmount };

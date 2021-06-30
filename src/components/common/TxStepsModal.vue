@@ -107,12 +107,14 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import { FeeLevel, Step } from '@/types/actions';
+import { Amount } from '@/types/base';
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -123,7 +125,14 @@ export default defineComponent({
     TxHandlingModal,
   },
   props: {
-    data: { type: Object, required: true },
+    data: {
+      type: Array as PropType<Step[]>,
+      required: true,
+    },
+    feeLevel: {
+      type: String as PropType<FeeLevel>,
+      required: true,
+    },
   },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
@@ -132,23 +141,33 @@ export default defineComponent({
     const processData = reactive({
       currentStep: 0,
       currentData: computed(() => {
-        const currentStepData = props.data.steps[processData.currentStep];
+        const currentStepData = props.data[processData.currentStep];
         const modifiedData = {
           isSwap: false,
           title: '',
-        };
+          fees: [],
+        } as { isSwap: boolean; title: string; fees: Array<Amount> };
         console.log('currentStepData', currentStepData);
         switch (currentStepData.name) {
           case 'swap':
             modifiedData.isSwap = true;
             modifiedData.title = 'Review your swap details';
             break;
-          default:
+          case 'transfer':
             modifiedData.isSwap = false;
             modifiedData.title = `Transfer ${'denom'}`;
             break;
+          case 'redeem':
+            break;
+          case 'addliquidity':
+            break;
+          case 'withdrawliquidity':
+            break;
+          case 'createpool':
+            break;
         }
-
+        //const fee = feeForStep(currentStepData,props.feeLevel)
+        //modifiedData.fees=
         return modifiedData;
       }),
       emitHandler: (event) => {
