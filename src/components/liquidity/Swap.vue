@@ -13,7 +13,8 @@
 				vuex getter to obtain user's preferred UI lang (i18n texts)?
 	-->
   <div class="wrapper">
-    <ReviewModal v-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
+    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
+    <ReviewModal v-else-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -24,7 +25,7 @@
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: openSetting,
+              function: slippageSettingModalToggle,
             }"
           />
         </div>
@@ -89,12 +90,77 @@
 
       <!-- swap button -->
       <div class="button-wrapper">
-        <Button :name="buttonName" :status="buttonStatus" :click-function="swap" :tooltip-text="buttonTooltipText" />
+        <ActionButton
+          :name="buttonName"
+          :status="buttonStatus"
+          :click-function="swap"
+          :tooltip-text="buttonTooltipText"
+        />
       </div>
 
-      <div class="fees s-minus">
+      <div
+        class="fees s-minus"
+        :class="isFeesOpen ? 'fees-detail-open' : ''"
+        @click="
+          () => {
+            isFeesOpen = !isFeesOpen;
+          }
+        "
+      >
         <div>Fees (included)</div>
-        <div class="total-fee">123 <Icon name="SmallDownIcon" :icon-size="1.6" :color="feeIconColor" /></div>
+        <div class="fees-total">
+          <span v-show="!isFeesOpen">~$12.3</span>
+          <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
+          <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
+        </div>
+      </div>
+      <div v-if="isFeesOpen" class="fees-detail">
+        <div class="fees-detail__info s-minus">
+          <div class="fees-detail__info-key">Transaction fee(x3)</div>
+          <div class="fees-detail__info-value">$0.06</div>
+        </div>
+
+        <div class="fees-detail__selector s-minus">
+          <button
+            class="fees-detail__selector-block"
+            :class="feeLevel === 'slow' ? 'selected' : ''"
+            @click="setFeeLevel('slow')"
+          >
+            <div class="fees-detail__selector-block-level">Slow</div>
+            <div class="fees-detail__selector-block-value">$0.01</div>
+          </button>
+          <button
+            class="fees-detail__selector-block"
+            :class="feeLevel === 'normal' ? 'selected' : ''"
+            @click="setFeeLevel('normal')"
+          >
+            <div class="fees-detail__selector-block-level">Normal</div>
+            <div class="fees-detail__selector-block-value">$0.02</div>
+          </button>
+          <button
+            class="fees-detail__selector-block"
+            :class="feeLevel === 'fast' ? 'selected' : ''"
+            @click="setFeeLevel('fast')"
+          >
+            <div class="fees-detail__selector-block-level">Fast</div>
+            <div class="fees-detail__selector-block-value">$0.04</div>
+          </button>
+        </div>
+
+        <Alert
+          v-if="feeLevel === 'slow'"
+          status="warning"
+          message="Your transaction may take longer to be processed."
+        />
+
+        <div class="fees-detail__info s-minus">
+          <div class="fees-detail__info-key">Swap fee</div>
+          <div class="fees-detail__info-value">$0.21</div>
+        </div>
+        <div class="fees-detail__info s-minus">
+          <div class="fees-detail__info-key">Estimated total fees</div>
+          <div class="fees-detail__info-value">$0.27</div>
+        </div>
       </div>
     </div>
   </div>
@@ -105,9 +171,10 @@ import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
+import ActionButton from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
+import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
 import { store } from '@/store';
@@ -119,15 +186,17 @@ export default defineComponent({
   components: {
     DenomSelect,
     IconButton,
-    Button,
+    ActionButton,
     Icon,
     ReviewModal,
     Alert,
+    SlippageSettingModal,
   },
 
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
+    const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
 
     // const store = useStore();
     // const stores = useAllStores();
@@ -205,6 +274,11 @@ export default defineComponent({
 
         return receiveAvailableAssets;
       }),
+      feeLevel: localStorage.getItem('demeris-fee-level') || 'normal',
+      setFeeLevel: (level) => {
+        data.feeLevel = level;
+        localStorage.setItem('demeris-fee-level', level);
+      },
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
@@ -223,6 +297,7 @@ export default defineComponent({
         return data.userAssetList.length !== 0 ? true : false;
       }),
       initStatus: 'none',
+      isFeesOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
@@ -386,6 +461,8 @@ export default defineComponent({
       reviewModalToggle,
       gobackFunc,
       setConterPairCoinAmount,
+      isSlippageSettingModalOpen,
+      slippageSettingModalToggle,
     };
   },
 });
@@ -452,8 +529,68 @@ export default defineComponent({
     justify-content: space-between;
     color: var(--muted);
 
-    .total-fee {
+    &-total {
       display: flex;
+      align-items: center;
+    }
+
+    &-detail {
+      padding: 0 2.4rem;
+      color: var(--text);
+
+      &__info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin: 1.6rem 0;
+
+        &:last-child {
+          margin-bottom: 0;
+          .fees-detail__info-value {
+            font-weight: bold;
+          }
+        }
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+
+      &__selector {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &-block {
+          width: 8.3rem;
+          height: 4.9rem;
+          color: var(--text);
+
+          background-color: var(--fg-trans);
+
+          border-radius: 8px;
+
+          outline: none;
+        }
+
+        .selected {
+          background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%);
+        }
+      }
+    }
+  }
+
+  .alert--warning {
+    margin-top: 1.6rem;
+  }
+
+  .fees-detail-open {
+    font-weight: bold;
+    color: var(--text);
+
+    .icon {
+      color: var(--text) !important;
     }
   }
 }
