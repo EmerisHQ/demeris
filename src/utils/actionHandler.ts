@@ -293,7 +293,7 @@ export async function move({
             },
             { root: true },
           ));
-        console.log(primaryChannel);
+
         result.steps.push({
           name: 'ibc_forward',
           status: 'pending',
@@ -775,10 +775,10 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
     ));
-  console.log(liquidityPools);
+
   // create our asset pair sorted alphabetically
   const assetPair = [from.denom, to.denom].sort();
-  console.log(assetPair);
+
   // Find the pool for that pair
   const pool =
     liquidityPools.pools.find((x) => JSON.stringify(x.reserve_coin_denoms) == JSON.stringify(assetPair)) ?? null;
@@ -930,7 +930,6 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.from.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
-        console.log(transferToHubStep);
 
         steps.push({ name: 'transfer', transactions: [...transferToHubStep.steps] });
         const swapStep = await swap({
@@ -1155,7 +1154,7 @@ export async function getDisplayName(name, chain_name = null) {
         { subscribe: true, params: { chain_name, hash: name.split('/')[1] } },
         { root: true },
       ));
-    if (verifyTrace.verified) {
+    if (verifyTrace.trace.length > 0) {
       return await getDisplayName(verifyTrace.base_denom);
     }
   }

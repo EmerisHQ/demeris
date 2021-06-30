@@ -4,10 +4,9 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Balances } from '@/types/api';
 export default defineComponent({
   name: 'TotalPrice',
@@ -19,14 +18,13 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    onMounted(async () => {
-      await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
-    });
 
     const displayPrice = computed(() => {
       const value = (props.balances as Balances).reduce((total, balance) => {
-        return balance.verified
-          ? total +
+        if (balance.verified) {
+          if (store.getters['demeris/getPrice']({ denom: balance.base_denom })) {
+            return (
+              total +
               (parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom })) /
                 Math.pow(
                   10,
@@ -36,7 +34,13 @@ export default defineComponent({
                     }),
                   ),
                 )
-          : total;
+            );
+          } else {
+            return total;
+          }
+        } else {
+          return total;
+        }
       }, 0);
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',

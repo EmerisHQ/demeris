@@ -76,7 +76,7 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
-    console.log(ticket);
+
     const txPromise = state.transactions.get(JSON.stringify(payload.params));
     if (txPromise == null) {
       let responseResolve, responseReject;
@@ -95,7 +95,6 @@ export const mutations: MutationTree<State> & Mutations = {
       if (ticket.status == 'complete') {
         txPromise.resolve();
         state.transactions.delete(JSON.stringify(payload.params));
-        console.log({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } });
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
         );
@@ -162,7 +161,6 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SUBSCRIBE](state: State, subscription) {
     state._Subscriptions.add(JSON.stringify(subscription));
-    console.log(state._Subscriptions);
   },
   [MutationTypes.UNSUBSCRIBE](state: State, subscription) {
     state._Subscriptions.delete(JSON.stringify(subscription));

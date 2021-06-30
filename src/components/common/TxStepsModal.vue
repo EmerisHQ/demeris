@@ -131,6 +131,7 @@ export default defineComponent({
     },
     feeLevel: {
       type: String as PropType<FeeLevel>,
+      required: true,
     },
   },
   emits: ['goback', 'close'],

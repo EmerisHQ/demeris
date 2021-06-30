@@ -21,10 +21,9 @@
 
 <script lang="ts">
 import { parseCoins } from '@cosmjs/launchpad';
-import { computed, defineComponent, onMounted, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
@@ -54,9 +53,6 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    onMounted(async () => {
-      await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, { subscribe: true });
-    });
     const filteredBalances = computed(() => {
       return (props.balances as Balances)
         .filter((item) => item.base_denom === props.denom)

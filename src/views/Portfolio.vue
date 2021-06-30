@@ -124,6 +124,7 @@ export default {
           }
         }
       }
+      margin-bottom: 6rem;
     }
     &__pools {
       &__header {

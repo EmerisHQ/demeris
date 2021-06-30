@@ -18,7 +18,10 @@ export type Getters = {
   getChains(state: State): Record<string, ChainData>;
   getGasLimit(state: State): number;
   getPrices(state: State): API.Prices;
-  getPrice(state: State): {
+  getPrice(
+    state: State,
+    getters,
+  ): {
     (params: { denom: string }): number;
   };
   getDisplayDenom(
@@ -129,8 +132,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   isVerified: (state) => (params) => {
     return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
-  getPrice: (state) => (params) => {
-    return 1; // TODO
+  getPrice: (state, getters) => (params) => {
+    const ticker = (getters['getDisplayDenom']({ name: params.denom }) + 'USDT').toUpperCase();
+    return state.prices.find((x) => x.Symbol == ticker)?.Price ?? null;
   },
   getEndpoint: (state) => {
     return state.endpoint;
@@ -148,13 +152,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
   },
   getOwnAddress: (state) => (params) => {
-    console.log(state);
-    console.log(
-      chainAddressfromAddress(
-        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-        state.keplr.bech32Address,
-      ),
-    );
     return (
       chainAddressfromAddress(
         state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,

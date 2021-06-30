@@ -1,9 +1,10 @@
 <template>{{ displayValue }} {{ displayDenom }}</template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'AmountDisplay',
   props: {
@@ -12,16 +13,15 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const displayDenom = computed(() => {
-      const displayName = store.getters['demeris/getDisplayDenom']({
-        name: (props.amount as Amount).denom,
-      });
-      return displayName || ((props.amount as Amount).denom as string).substr(1).toUpperCase();
+    const displayDenom = ref('-');
+    onMounted(async () => {
+      displayDenom.value = await getDisplayName((props.amount as Amount).denom, store.getters['demeris/getDexChain']);
     });
     const displayValue = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: (props.amount as Amount).denom,
-      });
+      const precision =
+        store.getters['demeris/getDenomPrecision']({
+          name: (props.amount as Amount).denom,
+        }) ?? '6';
       return parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
     });
     return { displayDenom, displayValue };
