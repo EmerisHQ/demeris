@@ -1215,7 +1215,7 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
   }
 }
 export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel): Promise<Actions.FeeTotals> {
-  let feeTotals;
+  const feeTotals = {};
 
   let used;
   for (const stepTx of step.transactions) {
@@ -1233,7 +1233,7 @@ export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel)
   return feeTotals;
 }
 
-export function getUsedFee(fees: Array<Actions.FeeWDenom>, feeLevel: Actions.FeeLevel): { used: ChainAmount } {
+export function getUsedFee(fees: Array<Actions.FeeWDenom>, feeLevel: Actions.FeeLevel): ChainAmount {
   const feeOption = fees[0];
   const used = {
     amount: {
@@ -1242,9 +1242,7 @@ export function getUsedFee(fees: Array<Actions.FeeWDenom>, feeLevel: Actions.Fee
     },
     chain_name: feeOption.chain_name,
   };
-  return {
-    used,
-  };
+  return used;
 }
 
 export async function toRedeem(balances: Balances): Promise<Balances> {
