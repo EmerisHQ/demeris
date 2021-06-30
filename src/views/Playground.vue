@@ -132,7 +132,7 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -214,19 +214,18 @@ export default defineComponent({
       action.value = steps;
     };
     const sendStepTx = async () => {
-      const stepTx =
-        /* {
+      const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '100000', denom: 'uakt' },
+          amount: { amount: '1000000', denom: 'uakt' },
           from_chain: 'akash',
           to_chain: 'cosmos-hub',
           to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
-          through: channel,
+          through: 'channel-0',
         } as IBCForwardsData,
       } as StepTransaction;
-      */
+      /*
         {
           name: 'createpool',
           status: 'pending',
@@ -253,7 +252,7 @@ export default defineComponent({
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
-        amount: [{ amount: '' + feeOptions[0].amount[FeeLevel.AVERAGE], denom: feeOptions[0].denom }],
+        amount: [{ amount: '' + feeOptions[0].amount[GasPriceLevel.AVERAGE], denom: feeOptions[0].denom }],
         gas: '300000',
       };
 

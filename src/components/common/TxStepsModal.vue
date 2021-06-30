@@ -122,7 +122,7 @@ import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeLevel, Step } from '@/types/actions';
+import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
@@ -140,8 +140,8 @@ export default defineComponent({
       type: Array as PropType<Step[]>,
       required: true,
     },
-    feeLevel: {
-      type: String as PropType<FeeLevel>,
+    gasPriceLevel: {
+      type: String as PropType<GasPriceLevel>,
       required: true,
     },
   },
@@ -153,7 +153,7 @@ export default defineComponent({
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
-          return await feeForStep(step, props.feeLevel as FeeLevel);
+          return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
         }),
       );
     });
@@ -199,7 +199,9 @@ export default defineComponent({
           let res = await msgFromStepTransaction(stepTx);
           const feeOptions = await feeForStepTransaction(stepTx);
           const fee = {
-            amount: [{ amount: '' + feeOptions[0].amount[props.feeLevel as FeeLevel], denom: feeOptions[0].denom }],
+            amount: [
+              { amount: '' + feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel], denom: feeOptions[0].denom },
+            ],
             gas: '300000',
           };
           processData.currentData.txstatus = 'keplr-sign';
