@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    :variant="'bottom'"
-    :show-close-button="false"
-    :body-class="status === 'transferred' ? 'transferred-bg' : ''"
-    @close="emitClose"
-  >
+  <Modal :variant="'bottom'" :show-close-button="false" :body-class="`${status}-bg`" @close="emitClose">
     <div class="status">
       <div v-if="displayData.iconType" class="status__icon">
         <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
@@ -99,7 +94,10 @@ type Status =
   | 'tx-wait'
   | 'tx-fail'
   | 'transferring'
-  | 'transferred';
+  | 'transferred'
+  | 'swap-success'
+  | 'swap-success-partially'
+  | 'swap-fail';
 
 export default defineComponent({
   name: 'TxHandlingModal',
@@ -107,7 +105,7 @@ export default defineComponent({
   props: {
     status: {
       type: String as PropType<Status>,
-      default: 'transferred',
+      default: 'tx-fail',
     },
     blackButtonFunc: {
       type: Function,
