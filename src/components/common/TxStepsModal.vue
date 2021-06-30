@@ -23,17 +23,23 @@
 
       <div v-if="!currentData.isSwap" class="detail-transfer">
         <div class="detail__title s-minus w-bold">
-          <div>2 transfers to sign</div>
+          <div>
+            {{ currentData.data.transactions.length }}
+            {{ currentData.data.transactions.length == 1 ? 'transaction' : 'transactions' }} to sign
+          </div>
           <div class="icon"><HintIcon /></div>
         </div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Fee (Terra -> Kava chain)</div>
-          <div class="detail__row-value">0.02 ATOM</div>
-        </div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Fee (Kava chain -> Cosmos Hub)</div>
-          <div class="detail__row-value">0.02 ATOM</div>
-        </div>
+        {{ currentData.data.fees }}
+        <template v-for="(fee, chain) in currentData.fees" :key="'fee' + chain">
+          <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+            <div class="detail__row s-minus w-normal">
+              <div class="detail__row-key">Fee ({{ chain }})</div>
+              <div class="detail__row-value">
+                <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+              </div>
+            </div>
+          </template>
+        </template>
       </div>
 
       <div class="divider" style="margin-bottom: 1.6rem" />
@@ -103,18 +109,22 @@
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
     </div>
-    <TxHandlingModal v-if="isTxHandlingModalOpen" @close="toggleTxHandlingModal" />
+    <TxHandlingModal v-if="isTxHandlingModalOpen" :status="currentData.txstatus" @close="toggleTxHandlingModal" />
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs } from 'vue';
+import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
-import { FeeLevel, Step } from '@/types/actions';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
+import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -123,21 +133,30 @@ export default defineComponent({
     Button,
     HintIcon,
     TxHandlingModal,
+    AmountDisplay,
   },
   props: {
     data: {
       type: Array as PropType<Step[]>,
       required: true,
     },
-    feeLevel: {
-      type: String as PropType<FeeLevel>,
+    gasPriceLevel: {
+      type: String as PropType<GasPriceLevel>,
       required: true,
     },
   },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
     console.log('modalProps', props.data);
-
+    const fees = ref([]);
+    const store = useStore();
+    onMounted(async () => {
+      fees.value = await Promise.all(
+        (props.data as Step[]).map(async (step) => {
+          return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
+        }),
+      );
+    });
     const processData = reactive({
       currentStep: 0,
       currentData: computed(() => {
@@ -146,7 +165,9 @@ export default defineComponent({
           isSwap: false,
           title: '',
           fees: [],
-        } as { isSwap: boolean; title: string; fees: Array<Amount> };
+          data: currentStepData,
+          txstatus: 'keplr-sign',
+        } as { isSwap: boolean; title: string; fees: Array<Amount>; data: Step; txstatus: string };
         console.log('currentStepData', currentStepData);
         switch (currentStepData.name) {
           case 'swap':
@@ -155,7 +176,7 @@ export default defineComponent({
             break;
           case 'transfer':
             modifiedData.isSwap = false;
-            modifiedData.title = `Transfer ${'denom'}`;
+            modifiedData.title = 'Review your transfer details';
             break;
           case 'redeem':
             break;
@@ -166,17 +187,46 @@ export default defineComponent({
           case 'createpool':
             break;
         }
-        //const fee = feeForStep(currentStepData,props.feeLevel)
-        //modifiedData.fees=
+        modifiedData.fees = fees.value[processData.currentStep];
         return modifiedData;
       }),
       emitHandler: (event) => {
         emit(event);
       },
-      setStep: () => {
+      setStep: async () => {
+        processData.isTxHandlingModalOpen = true;
+        for (let stepTx of processData.currentData.data.transactions) {
+          let res = await msgFromStepTransaction(stepTx);
+          const feeOptions = await feeForStepTransaction(stepTx);
+          const fee = {
+            amount: [
+              { amount: '' + feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel], denom: feeOptions[0].denom },
+            ],
+            gas: '300000',
+          };
+          processData.currentData.txstatus = 'keplr-sign';
+          let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+            msgs: [res.msg],
+            chain_name: res.chain_name,
+            fee,
+            registry: res.registry,
+            memo: 'a memo',
+          });
+          console.log('Should change?');
+          processData.currentData.txstatus = 'transferring';
+          let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+
+          const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+            subscribe: true,
+            params: { chain_name: res.chain_name, ticket: result.ticket },
+          });
+          await txPromise;
+          processData.currentData.txstatus = 'transferred';
+        }
+        processData.isTxHandlingModalOpen = false;
         processData.currentStep += 1;
       },
-      isTxHandlingModalOpen: true,
+      isTxHandlingModalOpen: false,
 
       toggleTxHandlingModal: () => {
         processData.isTxHandlingModalOpen = !processData.isTxHandlingModalOpen;

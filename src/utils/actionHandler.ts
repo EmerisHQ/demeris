@@ -1121,7 +1121,7 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   }) as Array<Denom>;
   const fees = [];
   for (const denom of denoms) {
-    fees.push({ amount: denom.fee_levels, denom: denom.name, chain_name });
+    fees.push({ amount: denom.gas_price_levels, denom: denom.name, chain_name });
   }
   return fees;
 }
@@ -1214,8 +1214,8 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
 }
-export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel): Promise<Actions.FeeTotals> {
-  let feeTotals;
+export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasPriceLevel): Promise<Actions.FeeTotals> {
+  const feeTotals = {};
 
   let used;
   for (const stepTx of step.transactions) {
@@ -1223,7 +1223,7 @@ export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel)
     if (!feeTotals[fees[0].chain_name]) {
       feeTotals[fees[0].chain_name] = {};
     }
-    used = getUsedFee(fees, feeLevel);
+    used = getUsedFee(fees, gasPriceLevel);
 
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
@@ -1233,18 +1233,16 @@ export async function feeForStep(step: Actions.Step, feeLevel: Actions.FeeLevel)
   return feeTotals;
 }
 
-export function getUsedFee(fees: Array<Actions.FeeWDenom>, feeLevel: Actions.FeeLevel): { used: ChainAmount } {
+export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
   const feeOption = fees[0];
   const used = {
     amount: {
-      amount: (parseInt(feeOption.amount[feeLevel]) * store.getters['demeris/getGasLimit']).toString(),
+      amount: (parseInt(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
       denom: feeOption.denom,
     },
     chain_name: feeOption.chain_name,
   };
-  return {
-    used,
-  };
+  return used;
 }
 
 export async function toRedeem(balances: Balances): Promise<Balances> {

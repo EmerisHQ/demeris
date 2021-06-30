@@ -60,6 +60,9 @@
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Send Message" @click="sendMessage" />
         </div>
+        <template v-if="action">
+          <TxStepsModal :data="action" fee-level="average" />
+        </template>
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Send Transaction From Step" @click="sendStepTx" />
         </div>
@@ -118,6 +121,7 @@ import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import SwapLRIcon from '@/components/common/Icons/SwapLRIcon.vue';
 import SwapUDIcon from '@/components/common/Icons/SwapUDIcon.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
@@ -128,7 +132,7 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -138,6 +142,7 @@ export default defineComponent({
     AppLayout,
     Address,
     Alert,
+    TxStepsModal,
     AlertIcon,
     ArrowDownIcon,
     ArrowUpIcon,
@@ -165,7 +170,7 @@ export default defineComponent({
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
-
+    const action = ref(null);
     const pools: Pool[] = [
       {
         id: 1,
@@ -190,41 +195,37 @@ export default defineComponent({
       },
     ];
     const sendMessage = async () => {
-      const action = await actionHandler({
-        name: 'swap',
+      const steps = await actionHandler({
+        name: 'transfer',
         params: {
           from: {
             amount: {
-              amount: '1000000',
-              denom: 'uakt',
-            },
-            chain_name: 'akash',
-          },
-          to: {
-            amount: {
-              amount: '1000000',
+              amount: '10000000',
               denom: 'uatom',
             },
             chain_name: 'cosmos-hub',
           },
+          to: {
+            chain_name: 'akash',
+          },
         },
       });
-      console.log(action);
+      console.log(steps);
+      action.value = steps;
     };
     const sendStepTx = async () => {
-      const stepTx =
-        /* {
+      const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '100000', denom: 'uakt' },
+          amount: { amount: '1000000', denom: 'uakt' },
           from_chain: 'akash',
           to_chain: 'cosmos-hub',
           to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
-          through: channel,
+          through: 'channel-0',
         } as IBCForwardsData,
       } as StepTransaction;
-      */
+      /*
         {
           name: 'createpool',
           status: 'pending',
@@ -251,7 +252,7 @@ export default defineComponent({
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
-        amount: [{ amount: '' + feeOptions[0].amount[FeeLevel.AVERAGE], denom: feeOptions[0].denom }],
+        amount: [{ amount: '' + feeOptions[0].amount[GasPriceLevel.AVERAGE], denom: feeOptions[0].denom }],
         gas: '300000',
       };
 
@@ -274,7 +275,7 @@ export default defineComponent({
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
 
-    return { balances, pools, address, modalIsOpen, sendMessage, sendStepTx };
+    return { balances, pools, address, modalIsOpen, sendMessage, sendStepTx, action };
   },
 });
 </script>

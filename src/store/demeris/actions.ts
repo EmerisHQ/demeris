@@ -390,12 +390,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       const chains = getters['getChains'];
+      window.keplr.defaultOptions = { sign: { preferNoSetFee: true } };
       for (const chain in chains) {
         await addChain(chain);
       }
-      await window.keplr['permitMultiple'](
-        (Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id),
-      );
+      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
       const paths = new Set();
       const toQuery = [];
       for (const chain_name in chains) {
