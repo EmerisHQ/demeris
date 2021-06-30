@@ -61,7 +61,7 @@
           <Button name="Send Message" @click="sendMessage" />
         </div>
         <template v-if="action">
-          <TxStepsModal :data="action" fee-level="average" />
+          <TxStepsModal :data="action" gas-price-level="average" />
         </template>
         <div class="p-10 flex flex-col space-y-8 w-1/3 mx-auto">
           <Button name="Send Transaction From Step" @click="sendStepTx" />
@@ -132,7 +132,7 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
+import { CreatePoolData, GasPriceLevel, Pool, StepTransaction } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -214,29 +214,29 @@ export default defineComponent({
       action.value = steps;
     };
     const sendStepTx = async () => {
-      const stepTx = {
+      /*const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '1000000', denom: 'uakt' },
+          amount: { amount: '10000000', denom: 'uakt' },
           from_chain: 'akash',
           to_chain: 'cosmos-hub',
           to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
           through: 'channel-0',
         } as IBCForwardsData,
       } as StepTransaction;
-      /*
-        {
-          name: 'createpool',
-          status: 'pending',
-          data: {
-            coinA: {
-              amount: '10000000',
-              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
-            },
-            coinB: { amount: '10000000', denom: 'uatom' },
-          } as CreatePoolData,
-        } as StepTransaction;
+      */
+      const stepTx = {
+        name: 'createpool',
+        status: 'pending',
+        data: {
+          coinA: {
+            amount: '10000000',
+            denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
+          },
+          coinB: { amount: '10000000', denom: 'uatom' },
+        } as CreatePoolData,
+      } as StepTransaction;
       /*
       const stepTx = {
         name: 'transfer',
@@ -252,7 +252,9 @@ export default defineComponent({
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
-        amount: [{ amount: '' + feeOptions[0].amount[GasPriceLevel.AVERAGE], denom: feeOptions[0].denom }],
+        amount: [
+          { amount: '' + parseFloat(feeOptions[0].amount[GasPriceLevel.AVERAGE]) * 300000, denom: feeOptions[0].denom },
+        ],
         gas: '300000',
       };
 
