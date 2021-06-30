@@ -82,6 +82,7 @@ import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
 import Price from '@/components/common/Price.vue';
+import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
@@ -97,8 +98,16 @@ export default defineComponent({
       default: 'full',
     },
     showHeaders: {
-      type: Boolean as PropType<boolean>,
+      type: Boolean,
       default: true,
+    },
+    showAllAssets: {
+      type: Boolean,
+      default: true,
+    },
+    limitRows: {
+      type: Number,
+      default: undefined,
     },
     balances: {
       type: Array as PropType<Balances>,
@@ -109,10 +118,31 @@ export default defineComponent({
   emits: ['row-click'],
 
   setup(props, { emit }) {
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
+    const store = useStore();
 
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'];
+    });
+
+    const allBalances = computed<Balances>(() => {
+      if (props.showAllAssets) {
+        return [
+          ...(props.balances as Balances),
+          ...verifiedDenoms.value.map((denom) => ({
+            base_denom: denom.name,
+            on_chain: denom.chain_name,
+            amount: 0,
+          })),
+        ];
+      }
+
+      return props.balances as Balances;
+    });
+
+    const balancesByAsset = computed(() => {
+      const denomsAggregate = groupBy(allBalances.value, 'base_denom');
+
+      const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce(
           (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
           0,
@@ -125,7 +155,11 @@ export default defineComponent({
           chainsNames,
         };
       });
+
+      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? 1 : -1));
+      return sortedSummary.slice(0, props.limitRows as number);
     });
+
     const handleClick = (asset: Record<string, string>) => {
       emit('row-click', asset);
     };

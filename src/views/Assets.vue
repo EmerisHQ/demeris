@@ -20,7 +20,12 @@
         :class="{ 'assets__group--all': chain === 'all' }"
       >
         <h2 v-if="chain !== 'all'" class="assets__group__title w-bold"><ChainName :name="chain"> assets</ChainName></h2>
-        <AssetsTable :balances="balances" class="assets__table" @row-click="openAssetPage" />
+        <AssetsTable
+          :balances="balances"
+          class="assets__table"
+          :show-all-assets="!isChainsTab.value"
+          @row-click="openAssetPage"
+        />
       </div>
     </section>
   </AppLayout>
