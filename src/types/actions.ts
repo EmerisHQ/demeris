@@ -126,6 +126,7 @@ export type FeeWDenom = {
 };
 // HACK! Below needs fixing in starport codegen
 export type Pool = {
+  display_name?: string;
   /** id of the pool */
   id: number;
   /** id of the pool_type */

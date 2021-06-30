@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
@@ -42,10 +42,10 @@ export default defineComponent({
   },
 
   setup(props) {
+    const pairName = ref('-/-');
     const { formatPoolName } = usePools();
-
-    const pairName = computed(() => {
-      return formatPoolName(props.pool as Pool);
+    onMounted(async () => {
+      pairName.value = await formatPoolName(props.pool as Pool);
     });
 
     return { pairName };
