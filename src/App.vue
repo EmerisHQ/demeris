@@ -29,13 +29,18 @@ export default defineComponent({
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://dev.demeris.io/v1',
+      hub_chain: 'cosmos-hub',
       refreshTime: 5000,
+      gas_limit: 300000,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
     });
     let chains = await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
       subscribe: false,
+    });
+    await this.$store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
+      subscribe: true,
     });
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
@@ -55,6 +60,11 @@ export default defineComponent({
       getTXApi: null,
       offline: true,
     });
+    try {
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: true });
+    } catch (e) {
+      console.log(e);
+    }
     this.initialized = true;
   },
   errorCaptured(err) {

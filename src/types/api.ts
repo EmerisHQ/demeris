@@ -120,7 +120,17 @@ export type FeeAddressesResponse = {
 };
 
 // /prices endpoint data types
-// TODO: /prices
+
+export type Price = {
+  Symbol: string;
+  Price: number;
+};
+export type Prices = Array<Price>;
+export type PricesResponse = {
+  data: Prices;
+  message: string | null;
+  status: number;
+};
 
 // CHAIN-SPECIFIC APIs
 
@@ -148,7 +158,6 @@ export type Chain = {
 export type ChainResponse = {
   chain: Chain;
 };
-
 // /chain/:chain/status endpoint data types
 export type ChainStatusResponse = {
   online: boolean;

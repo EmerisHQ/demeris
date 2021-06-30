@@ -8,6 +8,7 @@ export enum DemerisMutationTypes {
   SET_FEE_ADDRESS = 'SET_FEE_ADDRESS',
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
   SET_FEE_ADDRESSES = 'SET_FEE_ADDRESSES',
+  ADD_KEPLR_KEYHASH = 'ADD_KEPLR_KEYHASH',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
   SET_KEPLR = 'SET_KEPLR',
   SET_NUMBERS = 'SET_NUMBERS',
@@ -26,8 +27,8 @@ export enum DemerisMutationTypes {
 }
 export type DemerisMutationArgs =
   | API.Balances
-  | boolean // TODO: prices
-  | any
+  | boolean
+  | API.Prices
   | API.FeeAddress
   | API.FeeAddresses
   | API.Bech32Config
@@ -41,7 +42,8 @@ export type DemerisMutationArgs =
   | API.Ticket
   | API.VerifiedDenoms
   | DemerisConfig
-  | KeplrKeyData;
+  | KeplrKeyData
+  | string;
 
 export type DemerisMutations = {
   params?: API.APIRequests;
@@ -53,4 +55,6 @@ export type KeplrKeyData = {
   pubKey: Uint8Array;
   address: Uint8Array;
   bech32Address: string;
+  uid?: string;
+  keyHashes?: string[];
 };

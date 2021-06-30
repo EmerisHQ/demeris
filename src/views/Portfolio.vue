@@ -23,6 +23,15 @@
             />
           </div>
         </div>
+        <div class="portfolio__pools">
+          <div class="portfolio__pools__header">
+            <div class="portfolio__pools__header__text">Pools</div>
+            <router-link class="portfolio__pools__header__link" to="/pools">See all <ArrowRightIcon /></router-link>
+          </div>
+          <div class="portfolio__pools__cards">
+            <Pools :pools="invested" />
+          </div>
+        </div>
       </div>
       <div>
         <LiquiditySwap />
@@ -32,18 +41,20 @@
 </template>
 
 <script lang="ts">
+import { computed } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
 import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
+import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
-
+import { useAllStores } from '@/store';
 export default {
   name: 'Portfolio',
-  components: { AppLayout, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon },
+  components: { AppLayout, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
   setup() {
     const router = useRouter();
     const { balances } = useAccount();
@@ -51,8 +62,21 @@ export default {
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
-
-    return { balances, openAssetPage };
+    const stores = useAllStores();
+    const pools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+    const invested = computed(() => {
+      const bals = [];
+      for (const balance of balances.value) {
+        if (pools && pools.pools) {
+          let poolBalance = pools.pools.find((x) => x.pool_coin_denom == balance.base_denom);
+          if (poolBalance) {
+            bals.push(poolBalance);
+          }
+        }
+      }
+      return bals;
+    });
+    return { balances, openAssetPage, pools, invested };
   },
 };
 </script>
@@ -83,6 +107,26 @@ export default {
       margin-bottom: 6rem;
     }
     &__assets {
+      &__header {
+        font-size: 2.8rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        &__link {
+          font-size: 1.6rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          svg {
+            margin-left: 1rem;
+          }
+        }
+      }
+      margin-bottom: 6rem;
+    }
+    &__pools {
       &__header {
         font-size: 2.8rem;
         font-weight: bold;

@@ -126,10 +126,10 @@ import Confirmation from '@/components/ui/Confirmation.vue';
 import Input from '@/components/ui/Input.vue';
 import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useAllStores, useStore } from '@/store';
+import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
-import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import { CreatePoolData, FeeLevel, Pool, StepTransaction } from '@/types/actions';
+import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
@@ -162,7 +162,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const stores = useAllStores();
     const balances = computed(() =>
       store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
     );
@@ -170,65 +169,73 @@ export default defineComponent({
     const pools: Pool[] = [
       {
         id: 1,
-        reserveCoinDenoms: ['uatom', 'ukava'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'atom',
-        typeId: 1,
+        reserve_coin_denoms: ['uatom', 'ukava'],
+        reserve_account_address: '',
+        pool_coin_denom: 'atom',
+        type_id: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['uatom', 'urune'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'atom',
-        typeId: 1,
+        reserve_coin_denoms: ['uatom', 'urune'],
+        reserve_account_address: '',
+        pool_coin_denom: 'atom',
+        type_id: 1,
       },
       {
         id: 1,
-        reserveCoinDenoms: ['uluna', 'urune'],
-        reserveAccountAddress: '',
-        poolCoinDenom: 'luna',
-        typeId: 1,
+        reserve_coin_denoms: ['uluna', 'urune'],
+        reserve_account_address: '',
+        pool_coin_denom: 'luna',
+        type_id: 1,
       },
     ];
     const sendMessage = async () => {
-      let res = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
-        value: {
-          amount: [{ denom: 'uatom', amount: '20' }],
-          toAddress: 'cosmos1y6pay0rku23fe6v249k5wy042p9tm3pzwxyveg',
-          fromAddress: 'cosmos1xl6svk9hkdhdk9228w46hs05djh49v5u6a48nt',
+      const action = await actionHandler({
+        name: 'swap',
+        params: {
+          from: {
+            amount: {
+              amount: '1000000',
+              denom: 'uakt',
+            },
+            chain_name: 'akash',
+          },
+          to: {
+            amount: {
+              amount: '1000000',
+              denom: 'uatom',
+            },
+            chain_name: 'cosmos-hub',
+          },
         },
       });
-      const fee = {
-        amount: [{ amount: '20', denom: 'uatom' }],
-        gas: '100000',
-      };
-      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-        msgs: [res],
-        chain_name: 'cosmos-hub',
-        fee,
-        registry: stores.getters['cosmos.bank.v1beta1/getRegistry'],
-        memo: 'a memo',
-      });
-      let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
-      console.log(result);
+      console.log(action);
     };
     const sendStepTx = async () => {
-      const channel = store.getters['demeris/getPrimaryChannel']({
-        chain_name: 'cosmos-hub',
-        destination_chain_name: 'akash',
-      });
-      console.log(channel);
-      const stepTx = {
+      const stepTx =
+        /* {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '20', denom: 'uatom' },
-          from_chain: 'cosmos-hub',
-          to_chain: 'akash',
-          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'akash' }),
+          amount: { amount: '100000', denom: 'uakt' },
+          from_chain: 'akash',
+          to_chain: 'cosmos-hub',
+          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
           through: channel,
         } as IBCForwardsData,
       } as StepTransaction;
+      */
+        {
+          name: 'createpool',
+          status: 'pending',
+          data: {
+            coinA: {
+              amount: '10000000',
+              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
+            },
+            coinB: { amount: '10000000', denom: 'uatom' },
+          } as CreatePoolData,
+        } as StepTransaction;
       /*
       const stepTx = {
         name: 'transfer',
@@ -240,13 +247,14 @@ export default defineComponent({
         } as TransferData,
       } as StepTransaction;
       */
+
       let res = await msgFromStepTransaction(stepTx as StepTransaction);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
         amount: [{ amount: '' + feeOptions[0].amount[FeeLevel.AVERAGE], denom: feeOptions[0].denom }],
-        gas: '100000',
+        gas: '300000',
       };
-      console.log(fee);
+
       let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
         msgs: [res.msg],
         chain_name: res.chain_name,
@@ -254,12 +262,13 @@ export default defineComponent({
         registry: res.registry,
         memo: 'a memo',
       });
+
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
         subscribe: true,
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
-      console.log(txPromise);
+
       return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
