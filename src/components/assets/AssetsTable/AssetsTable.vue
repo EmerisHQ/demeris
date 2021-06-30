@@ -4,7 +4,7 @@
       <tr>
         <th class="text-left">Asset</th>
         <th v-if="displayStyle !== 'summary'" class="text-right">Price</th>
-        <th v-if="displayStyle === 'full'" class="text-right">24h %</th>
+        <th v-if="displayStyle === 'full' && showPerfomanceIndicator" class="text-right">24h %</th>
         <th v-if="displayStyle === 'full'" class="text-right">Amount</th>
         <th class="text-right">Balance</th>
         <th v-if="displayStyle !== 'summary'">
@@ -31,7 +31,7 @@
         <td v-if="displayStyle !== 'summary'" class="assets-table__row__price text-right">
           <Price :amount="{ denom: asset.denom, amount: null }" />
           <div
-            v-if="displayStyle !== 'full'"
+            v-if="displayStyle !== 'full' && showPerfomanceIndicator"
             class="assets-table__row__price__trending assets-table__row__trending__wrapper s-minus"
           >
             <TrendingUpIcon class="assets-table__row__trending__icon" />
@@ -39,7 +39,7 @@
           </div>
         </td>
 
-        <td v-if="displayStyle === 'full'" class="assets-table__row__trending">
+        <td v-if="displayStyle === 'full' && showPerfomanceIndicator" class="assets-table__row__trending">
           <div class="assets-table__row__trending__wrapper">
             <TrendingUpIcon class="assets-table__row__trending__icon" />
             <span class="assets-table__row__trending__value">52.21%</span>
@@ -74,7 +74,7 @@
 <script lang="ts">
 import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -119,6 +119,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const showPerfomanceIndicator = ref(false);
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'];
@@ -164,7 +165,7 @@ export default defineComponent({
       emit('row-click', asset);
     };
 
-    return { balancesByAsset, handleClick };
+    return { showPerfomanceIndicator, balancesByAsset, handleClick };
   },
 });
 </script>
