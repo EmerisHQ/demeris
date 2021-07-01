@@ -155,7 +155,7 @@ export default defineComponent({
         };
       });
 
-      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? 1 : -1));
+      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
       return sortedSummary.slice(0, props.limitRows as number);
     });
 
@@ -163,7 +163,7 @@ export default defineComponent({
       emit('row-click', asset);
     };
 
-    return { balancesByAsset, handleClick };
+    return { allBalances, balancesByAsset, handleClick };
   },
 });
 </script>
