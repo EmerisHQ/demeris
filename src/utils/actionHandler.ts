@@ -1191,10 +1191,10 @@ export async function getDisplayName(name, chain_name = null) {
           { subscribe: true, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
-      if (verifyTrace.trace.length > 0 && verifyTrace.verified) {
+      if (verifyTrace.verified) {
         return await getDisplayName(verifyTrace.base_denom);
       } else {
-        return name + '(unverified)';
+        return verifyTrace.base_denom + ' (unverified)';
       }
     } catch (e) {
       return name + '(unverified)';
