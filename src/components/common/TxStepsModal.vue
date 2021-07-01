@@ -200,11 +200,21 @@ export default defineComponent({
           const feeOptions = await feeForStepTransaction(stepTx);
           const fee = {
             amount: [
-              { amount: '' + feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel], denom: feeOptions[0].denom },
+              {
+                amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
+                denom: feeOptions[0].denom,
+              },
             ],
             gas: '300000',
           };
           processData.currentData.txstatus = 'keplr-sign';
+          console.log({
+            msgs: [res.msg],
+            chain_name: res.chain_name,
+            fee,
+            registry: res.registry,
+            memo: 'a memo',
+          });
           let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
             msgs: [res.msg],
             chain_name: res.chain_name,

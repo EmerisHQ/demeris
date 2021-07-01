@@ -20,9 +20,9 @@
               <p class="asset__main__stats__container__left__balance">
                 <Price :amount="{ amount: totalAmount, denom: denom }" />
               </p>
-              <span class="asset__main__stats__container__left__trending">
+              <!--<span class="asset__main__stats__container__left__trending">
                 <span>15% (+$1,719.71)</span>
-              </span>
+              </span>//-->
             </div>
 
             <dl class="asset__main__stats__container__right">
@@ -33,7 +33,7 @@
 
               <div class="asset__main__stats__container__right__price">
                 <dt>Price</dt>
-                <dd>$20.50</dd>
+                <dd><Price :amount="{ denom: denom, amount: null }" /></dd>
               </div>
             </dl>
           </div>

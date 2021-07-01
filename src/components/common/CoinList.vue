@@ -42,11 +42,11 @@
           <ChainName :name="coin.on_chain" />
         </div>
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
-          {{ $filters.getCoinName(coin.base_denom) }}
+          <Denom :name="coin.base_denom" />
         </div>
         <div v-if="keyword" class="coin-list__info-details-data s-minus w-normal">
           <div v-if="type === 'pay'">
-            {{ coin.amount }}
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <span
               v-for="word in $filters.getCoinName(coin.base_denom)"
               :key="word + 'small'"
@@ -82,6 +82,7 @@ import { computed, defineComponent, ref } from 'vue';
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
@@ -91,6 +92,7 @@ export default defineComponent({
     ChainName,
     AmountDisplay,
     Icon,
+    Denom,
   },
   props: {
     data: { type: Object, required: true },
