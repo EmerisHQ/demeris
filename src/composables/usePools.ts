@@ -3,18 +3,12 @@ import { computed } from 'vue';
 import { Pool } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 
-import poolsFixture from '../../tests/fixtures/pools.json';
-import { store } from '../store/index';
+import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
-  const pools = computed<Pool[]>(() => {
-    return poolsFixture.pools.map((pool) => ({
-      id: +pool.id,
-      type_id: pool.type_id,
-      reserve_coin_denoms: pool.reserve_coin_denoms,
-      reserve_account_address: pool.reserve_account_address,
-      pool_coin_denom: pool.pool_coin_denom,
-    }));
+  const stores = useAllStores();
+  const pools = computed(() => {
+    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
   });
 
   const formatPoolName = async (pool: Pool) => {
@@ -31,7 +25,7 @@ export default function usePools() {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
   };
 
-  const poolById = (id: number) => {
+  const poolById = (id: string) => {
     return pools.value.find((item) => item.id === id);
   };
 

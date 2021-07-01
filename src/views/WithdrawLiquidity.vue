@@ -176,7 +176,7 @@ export default {
     });
 
     const pool = computed(() => {
-      return poolById(+poolId.value);
+      return poolById(poolId.value as string);
     });
 
     // TODO: Fetch from API the wallet available amount
