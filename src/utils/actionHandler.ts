@@ -973,6 +973,11 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.coinA.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
+        steps.push({
+          name: 'transfer',
+          description: 'AssetA must be transferred to hub', //TODO
+          transactions: [...transferCoinAtoHub.steps],
+        });
 
         const transferCoinBtoHub = await move({
           amount: {
@@ -984,8 +989,8 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         steps.push({
           name: 'transfer',
-          description: 'Assets must be transferred to hub', //TODO
-          transactions: [...transferCoinAtoHub.steps].concat([...transferCoinBtoHub.steps]),
+          description: 'AssetB must be transferred to hub', //TODO
+          transactions: [...transferCoinBtoHub.steps],
         });
         const addLiquidityStep = await addLiquidity({
           pool_id: params.pool_id,
