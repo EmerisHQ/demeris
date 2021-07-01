@@ -63,7 +63,7 @@ export default defineComponent({
       offline: true,
     });
     try {
-      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: true });
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
     }

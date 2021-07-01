@@ -132,8 +132,9 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { CreatePoolData, GasPriceLevel, Pool, StepTransaction } from '@/types/actions';
+import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import { getOwnAddress } from '@/utils/basic';
 
 export default defineComponent({
   components: {
@@ -167,9 +168,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = computed(() =>
-      store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-    );
+    const balances = computed(() => store.getters['demeris/getAllBalances']);
     const action = ref(null);
     const pools: Pool[] = [
       {
@@ -218,18 +217,23 @@ export default defineComponent({
       //action.value = steps;
     };
     const sendStepTx = async () => {
-      /*const stepTx = {
+      const channel = store.getters['demeris/getPrimaryChannel']({
+        chain_name: 'akash',
+        destination_chain_name: 'crypto-com',
+      });
+
+      const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '10000000', denom: 'uakt' },
+          amount: { amount: '100000', denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2' },
           from_chain: 'akash',
-          to_chain: 'cosmos-hub',
-          to_address: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
-          through: 'channel-0',
+          to_chain: 'crypto-com',
+          to_address: await getOwnAddress({ chain_name: 'crypto-com' }),
+          through: channel,
         } as IBCForwardsData,
       } as StepTransaction;
-      */
+      /*
       const stepTx = {
         name: 'createpool',
         status: 'pending',
@@ -241,6 +245,7 @@ export default defineComponent({
           coinB: { amount: '10000000', denom: 'uatom' },
         } as CreatePoolData,
       } as StepTransaction;
+      */
       /*
       const stepTx = {
         name: 'transfer',

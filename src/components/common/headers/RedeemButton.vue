@@ -16,7 +16,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] });
+    const balances = store.getters['demeris/getAllBalances'];
     const redeemable = [];
     for (let balance of balances) {
       // TODO: check for redeemable

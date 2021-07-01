@@ -20,7 +20,7 @@ export async function addChain(chain_name: string): Promise<void> {
       coinDecimals: 0,
     },
     bip44: {
-      coinType: 118,
+      coinType: parseInt(chain.derivation_path.split('/')[2].slice(0, -1)),
     },
     bech32Config: {
       bech32PrefixAccAddr: chain.node_info.bech32_config.acc_addr,
@@ -58,7 +58,7 @@ export async function addChain(chain_name: string): Promise<void> {
         y.coinDecimals = parseInt(x.precision);
         return y;
       }),
-    coinType: 118,
+    coinType: parseInt(chain.derivation_path.split('/')[2].slice(0, -1)),
     gasPriceStep: {
       low: 0.01,
       average: 0.025,
