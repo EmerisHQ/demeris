@@ -217,20 +217,20 @@ export default defineComponent({
       //action.value = steps;
     };
     const sendStepTx = async () => {
-      const channel = store.getters['demeris/getPrimaryChannel']({
-        chain_name: 'akash',
-        destination_chain_name: 'crypto-com',
+      /*const channel = store.getters['demeris/getPrimaryChannel']({
+        chain_name: 'cosmos-hub',
+        destination_chain_name: 'akash',
       });
-
+  */
       const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '100000', denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2' },
+          amount: { amount: '50000', denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2' },
           from_chain: 'akash',
           to_chain: 'crypto-com',
           to_address: await getOwnAddress({ chain_name: 'crypto-com' }),
-          through: channel,
+          through: 'channel-1',
         } as IBCForwardsData,
       } as StepTransaction;
       /*
@@ -274,14 +274,14 @@ export default defineComponent({
         registry: res.registry,
         memo: 'a memo',
       });
-
+      /*
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
         subscribe: true,
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
 
-      return txPromise;
+      return txPromise;*/
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
