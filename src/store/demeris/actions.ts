@@ -471,7 +471,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, dispatch, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
@@ -480,6 +480,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
           '/denom/verify_trace/' +
           (params as API.VerifyTraceReq).hash,
       );
+      const verified_denoms =
+        getters['getVerifiedDenoms'] ??
+        (await dispatch(DemerisActionTypes.GET_VERIFIED_DENOMS, {
+          subscribe: true,
+        }));
+      const verified = verified_denoms.find(
+        (x) =>
+          x.name == response.data.verify_trace.base_denom &&
+          x.chain_name ==
+            response.data.verify_trace.trace[response.data.verify_trace.trace.length - 1].counterparty_name,
+      );
+      if (verified) {
+        response.data.verify_trace.verified = true;
+      } else {
+        response.data.verify_trace.verified = false;
+      }
       commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });

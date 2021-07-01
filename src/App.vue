@@ -39,9 +39,11 @@ export default defineComponent({
     let chains = await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
       subscribe: false,
     });
+
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
       subscribe: true,
     });
+
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
         subscribe: true,
