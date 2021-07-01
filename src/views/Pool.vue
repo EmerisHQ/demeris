@@ -129,7 +129,7 @@ export default defineComponent({
     const { poolById, formatPoolName, poolsByDenom } = usePools();
 
     const pool = computed(() => {
-      return poolById(route.params.id as string);
+      return poolById(+route.params.id);
     });
 
     const reserveBalances = computed(() => {

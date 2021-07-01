@@ -4,7 +4,7 @@ import { useAllStores } from '@/store';
 
 import usePools from './usePools';
 
-export default function usePool(id?: string | ComputedRef<string>) {
+export default function usePool(id?: number | ComputedRef<number>) {
   const store = useAllStores();
   const { poolById } = usePools();
 
