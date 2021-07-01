@@ -59,9 +59,10 @@ export default defineComponent({
       sdkVersion: 'Stargate',
       getTXApi: null,
       offline: true,
+      refresh: 10000,
     });
     try {
-      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: true });
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
     }
