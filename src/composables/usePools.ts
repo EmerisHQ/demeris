@@ -7,7 +7,8 @@ import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
   const stores = useAllStores();
-  const pools = computed(() => {
+
+  const pools = computed<Pool[]>(() => {
     return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
   });
 
@@ -28,6 +29,16 @@ export default function usePools() {
   const poolById = (id: string) => {
     return pools.value.find((item) => item.id === id);
   };
-
-  return { pools, poolsByDenom, poolById, formatPoolName };
+  const poolPriceById = async (id: number) => {
+    const pool = pools.value.find((item) => item.id === id);
+    const balances = (
+      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
+        params: { address: pool.reserve_account_address },
+      })
+    ).balances;
+    const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
+    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
+    return parseInt(balanceA.amount) / parseInt(balanceB.amount);
+  };
+  return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById };
 }
