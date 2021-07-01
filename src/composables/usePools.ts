@@ -36,7 +36,7 @@ export default function usePools() {
       })
     ).balances;
     const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
-    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
+    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
   return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById };
