@@ -33,7 +33,7 @@ export type Denom = {
   verified: boolean;
   stakable: boolean;
   fee_token: boolean;
-  fee_levels: Fee;
+  gas_price_levels: Fee;
   ticker: string;
   fetch_price: boolean;
 };

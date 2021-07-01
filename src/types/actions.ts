@@ -144,7 +144,7 @@ export type MsgMeta = {
   registry: Registry;
 };
 
-export enum FeeLevel {
+export enum GasPriceLevel {
   LOW = 'low',
   AVERAGE = 'average',
   HIGH = 'high',

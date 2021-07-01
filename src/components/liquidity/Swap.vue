@@ -121,24 +121,24 @@
         <div class="fees-detail__selector s-minus">
           <button
             class="fees-detail__selector-block"
-            :class="feeLevel === 'slow' ? 'selected' : ''"
-            @click="setFeeLevel('slow')"
+            :class="gasPriceLevel === 'slow' ? 'selected' : ''"
+            @click="setGasPriceLevel('slow')"
           >
             <div class="fees-detail__selector-block-level">Slow</div>
             <div class="fees-detail__selector-block-value">$0.01</div>
           </button>
           <button
             class="fees-detail__selector-block"
-            :class="feeLevel === 'normal' ? 'selected' : ''"
-            @click="setFeeLevel('normal')"
+            :class="gasPriceLevel === 'normal' ? 'selected' : ''"
+            @click="setGasPriceLevel('normal')"
           >
             <div class="fees-detail__selector-block-level">Normal</div>
             <div class="fees-detail__selector-block-value">$0.02</div>
           </button>
           <button
             class="fees-detail__selector-block"
-            :class="feeLevel === 'fast' ? 'selected' : ''"
-            @click="setFeeLevel('fast')"
+            :class="gasPriceLevel === 'fast' ? 'selected' : ''"
+            @click="setGasPriceLevel('fast')"
           >
             <div class="fees-detail__selector-block-level">Fast</div>
             <div class="fees-detail__selector-block-value">$0.04</div>
@@ -146,7 +146,7 @@
         </div>
 
         <Alert
-          v-if="feeLevel === 'slow'"
+          v-if="gasPriceLevel === 'slow'"
           status="warning"
           message="Your transaction may take longer to be processed."
         />
@@ -238,9 +238,9 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      feeLevel: localStorage.getItem('demeris-fee-level') || 'normal',
-      setFeeLevel: (level) => {
-        data.feeLevel = level;
+      gasPriceLevel: localStorage.getItem('demeris-fee-level') || 'normal',
+      setGasPriceLevel: (level) => {
+        data.gasPriceLevel = level;
         localStorage.setItem('demeris-fee-level', level);
       },
       actionHandlerResult: null,
