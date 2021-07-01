@@ -3,18 +3,12 @@ import { computed } from 'vue';
 import { Pool } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 
-import poolsFixture from '../../tests/fixtures/pools.json';
-import { store } from '../store/index';
+import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
+  const stores = useAllStores();
   const pools = computed<Pool[]>(() => {
-    return poolsFixture.pools.map((pool) => ({
-      id: +pool.id,
-      type_id: pool.type_id,
-      reserve_coin_denoms: pool.reserve_coin_denoms,
-      reserve_account_address: pool.reserve_account_address,
-      pool_coin_denom: pool.pool_coin_denom,
-    }));
+    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
   });
 
   const formatPoolName = async (pool: Pool) => {
@@ -34,6 +28,16 @@ export default function usePools() {
   const poolById = (id: number) => {
     return pools.value.find((item) => item.id === id);
   };
-
-  return { pools, poolsByDenom, poolById, formatPoolName };
+  const poolPriceById = async (id: number) => {
+    const pool = pools.value.find((item) => item.id === id);
+    const balances = (
+      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
+        params: { address: pool.reserve_account_address },
+      })
+    ).balances;
+    const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
+    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
+    return parseInt(balanceA.amount) / parseInt(balanceB.amount);
+  };
+  return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById };
 }
