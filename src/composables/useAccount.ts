@@ -1,8 +1,6 @@
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 
-//import { TEST_DATA } from '@/TEST_DATA';
-
 export default function useAccount() {
   const store = useStore();
 
