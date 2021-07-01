@@ -108,6 +108,7 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
+import useSwapCalculation from '@/composables/useSwapCalculation';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -123,6 +124,11 @@ export default defineComponent({
   },
 
   setup() {
+    //TEST-CODE
+    const { test } = useSwapCalculation();
+    console.log('useSwapCalculation', test('20.1029410238102380'));
+    //TEST-CODE
+
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
 
