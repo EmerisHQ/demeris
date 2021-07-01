@@ -236,6 +236,7 @@ export default defineComponent({
         border-radius: 2.4rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 1.6rem;
+        flex-shrink: 0;
       }
 
       &__denom {
