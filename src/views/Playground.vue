@@ -196,22 +196,26 @@ export default defineComponent({
     ];
     const sendMessage = async () => {
       const steps = await actionHandler({
-        name: 'transfer',
+        name: 'swap',
         params: {
           from: {
             amount: {
-              amount: '10000000',
-              denom: 'uatom',
+              amount: '5000000',
+              denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
             },
-            chain_name: 'cosmos-hub',
+            chain_name: 'akash',
           },
           to: {
-            chain_name: 'akash',
+            amount: {
+              amount: '400000',
+              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
+            },
+            chain_name: 'cosmos-hub',
           },
         },
       });
       console.log(steps);
-      action.value = steps;
+      //action.value = steps;
     };
     const sendStepTx = async () => {
       /*const stepTx = {
