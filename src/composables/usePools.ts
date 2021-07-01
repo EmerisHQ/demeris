@@ -7,8 +7,9 @@ import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
   const stores = useAllStores();
+
   const pools = computed<Pool[]>(() => {
-    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
+    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
   });
 
   const formatPoolName = async (pool: Pool) => {
