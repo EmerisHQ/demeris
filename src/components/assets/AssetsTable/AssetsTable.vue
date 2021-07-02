@@ -4,7 +4,7 @@
       <tr>
         <th class="text-left">Asset</th>
         <th v-if="displayStyle !== 'summary'" class="text-right">Price</th>
-        <th v-if="displayStyle === 'full'" class="text-right">24h %</th>
+        <!--<th v-if="displayStyle === 'full'" class="text-right">24h %</th>//-->
         <th v-if="displayStyle === 'full'" class="text-right">Amount</th>
         <th class="text-right">Balance</th>
         <th v-if="displayStyle !== 'summary'">
@@ -30,21 +30,21 @@
 
         <td v-if="displayStyle !== 'summary'" class="assets-table__row__price text-right">
           <Price :amount="{ denom: asset.denom, amount: null }" />
-          <div
+          <!--<div
             v-if="displayStyle !== 'full'"
             class="assets-table__row__price__trending assets-table__row__trending__wrapper s-minus"
           >
             <TrendingUpIcon class="assets-table__row__trending__icon" />
             <span class="assets-table__row__trending__value">52.21%</span>
-          </div>
+          </div>//-->
         </td>
 
-        <td v-if="displayStyle === 'full'" class="assets-table__row__trending">
+        <!--<td v-if="displayStyle === 'full'" class="assets-table__row__trending">
           <div class="assets-table__row__trending__wrapper">
             <TrendingUpIcon class="assets-table__row__trending__icon" />
             <span class="assets-table__row__trending__value">52.21%</span>
           </div>
-        </td>
+        </td>//-->
 
         <td v-if="displayStyle === 'full'" class="assets-table__row__amount text-right">
           <span><AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" /></span>
@@ -80,8 +80,8 @@ import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
-import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
 import Price from '@/components/common/Price.vue';
+import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
@@ -89,7 +89,7 @@ type TableStyleType = 'full' | 'compact' | 'summary';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom, Price, AmountDisplay },
+  components: { AssetChainsIndicator, ChevronRightIcon, Denom, Price, AmountDisplay },
 
   props: {
     displayStyle: {
@@ -97,8 +97,16 @@ export default defineComponent({
       default: 'full',
     },
     showHeaders: {
-      type: Boolean as PropType<boolean>,
+      type: Boolean,
       default: true,
+    },
+    showAllAssets: {
+      type: Boolean,
+      default: true,
+    },
+    limitRows: {
+      type: Number,
+      default: undefined,
     },
     balances: {
       type: Array as PropType<Balances>,
@@ -109,10 +117,31 @@ export default defineComponent({
   emits: ['row-click'],
 
   setup(props, { emit }) {
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
+    const store = useStore();
 
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'];
+    });
+
+    const allBalances = computed<Balances>(() => {
+      if (props.showAllAssets) {
+        return [
+          ...(props.balances as Balances),
+          ...verifiedDenoms.value.map((denom) => ({
+            base_denom: denom.name,
+            on_chain: denom.chain_name,
+            amount: 0,
+          })),
+        ];
+      }
+
+      return props.balances as Balances;
+    });
+
+    const balancesByAsset = computed(() => {
+      const denomsAggregate = groupBy(allBalances.value, 'base_denom');
+
+      const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce(
           (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
           0,
@@ -125,12 +154,16 @@ export default defineComponent({
           chainsNames,
         };
       });
+
+      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
+      return sortedSummary.slice(0, props.limitRows as number);
     });
+
     const handleClick = (asset: Record<string, string>) => {
       emit('row-click', asset);
     };
 
-    return { balancesByAsset, handleClick };
+    return { allBalances, balancesByAsset, handleClick };
   },
 });
 </script>
@@ -203,6 +236,7 @@ export default defineComponent({
         border-radius: 2.4rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 1.6rem;
+        flex-shrink: 0;
       }
 
       &__denom {

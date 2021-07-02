@@ -39,9 +39,11 @@ export default defineComponent({
     let chains = await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
       subscribe: false,
     });
+
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
       subscribe: true,
     });
+
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
         subscribe: true,
@@ -59,9 +61,10 @@ export default defineComponent({
       sdkVersion: 'Stargate',
       getTXApi: null,
       offline: true,
+      refresh: 10000,
     });
     try {
-      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { subscribe: true });
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
     }

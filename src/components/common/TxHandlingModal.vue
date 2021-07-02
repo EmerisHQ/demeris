@@ -107,7 +107,7 @@ export default defineComponent({
   props: {
     status: {
       type: String as PropType<Status>,
-      default: 'transferred',
+      default: 'keplr-sign',
     },
     blackButtonFunc: {
       type: Function,

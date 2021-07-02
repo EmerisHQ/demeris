@@ -1,8 +1,6 @@
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 
-//import { TEST_DATA } from '@/TEST_DATA';
-
 export default function useAccount() {
   const store = useStore();
 
@@ -13,7 +11,7 @@ export default function useAccount() {
       return TEST_DATA.balances;
     }
     */
-    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+    return store.getters['demeris/getAllBalances'] || [];
   });
 
   const balancesByDenom = (denom: string) => {
