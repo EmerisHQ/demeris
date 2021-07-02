@@ -95,7 +95,12 @@
           :tooltip-text="buttonTooltipText"
         />
       </div>
-      <FeeLevelSelector v-model:gasPriceLevel="gasPriceLevel" :transaction-count="1" :base-dollar-fee="0.2" />
+      <FeeLevelSelector
+        v-model:gasPriceLevel="gasPriceLevel"
+        :transaction-count="1"
+        :base-dollar-fee="0.2"
+        :swap-dollar-fee="0.1"
+      />
     </div>
   </div>
 </template>

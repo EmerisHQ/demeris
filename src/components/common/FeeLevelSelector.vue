@@ -2,7 +2,9 @@
   <div class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
     <div>Fees (included)</div>
     <div class="fees-total">
-      <span v-show="!isFeesOpen">~$12.3</span>
+      <span v-show="!isFeesOpen">
+        ~{{ formatter.format(swapDollarFee + transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
+      </span>
       <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
       <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
     </div>
@@ -10,7 +12,9 @@
   <div v-if="isFeesOpen" class="fees-detail">
     <div class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">Transaction fee(x{{ transactionCount }})</div>
-      <div class="fees-detail__info-value">$0.06</div>
+      <div class="fees-detail__info-value">
+        {{ formatter.format(transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
+      </div>
     </div>
 
     <div class="fees-detail__selector s-minus">
@@ -52,13 +56,15 @@
       message="Your transaction may take longer to be processed."
     />
 
-    <div class="fees-detail__info s-minus">
+    <div v-if="swapDollarFee" class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">Swap fee</div>
-      <div class="fees-detail__info-value">$0.21</div>
+      <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
     </div>
     <div class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">Estimated total fees</div>
-      <div class="fees-detail__info-value">$0.27</div>
+      <div class="fees-detail__info-value">
+        {{ formatter.format(swapDollarFee + transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
+      </div>
     </div>
   </div>
 </template>
@@ -75,7 +81,7 @@ export default defineComponent({
     Icon,
   },
   props: {
-    gasPriceLevel: { type: String, required: false, default: null },
+    gasPriceLevel: { type: String, required: true, default: 'normal' },
     baseDollarFee: {
       type: Number,
       required: true,
@@ -84,7 +90,7 @@ export default defineComponent({
       type: Number,
       required: true,
     },
-    swapFee: { type: String, required: false, default: '' },
+    swapDollarFee: { type: Number, required: false, default: 0 },
   },
   emits: ['update:gasPriceLevel'],
   setup(props, { emit }) {
