@@ -4,7 +4,7 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer';
+  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move';
 };
 export type SwapParams = {
   from: Base.ChainAmount;
@@ -16,6 +16,12 @@ export type TransferParams = {
   to: {
     chain_name: string;
     address?: string;
+  };
+};
+export type MoveParams = {
+  from: Base.ChainAmount;
+  to: {
+    chain_name: string;
   };
 };
 export type AddLiquidityParams = {
@@ -35,6 +41,7 @@ export type CreatePoolParams = {
 };
 export type RedeemParams = Array<Base.ChainAmount>;
 export type SwapAction = BaseAction & { params: SwapParams };
+export type MoveAction = BaseAction & { params: MoveParams };
 export type RedeemAction = BaseAction & { params: RedeemParams };
 export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
 export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
@@ -46,7 +53,8 @@ export type Any =
   | TransferAction
   | AddLiquidityAction
   | WithdrawLiquidityAction
-  | CreatePoolAction;
+  | CreatePoolAction
+  | MoveAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -103,12 +111,14 @@ export type StepTransaction = {
     | CreatePoolData;
 };
 export type Step = {
-  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
   transactions: Array<StepTransaction>;
+  description: string;
 };
 
 export type SendAddressForm = {
   recipient: string;
+  chain_name: string;
   memo: string;
   isTermChecked?: boolean;
   balance: Base.Amount;

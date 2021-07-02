@@ -7,36 +7,23 @@
 
     <template v-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
-      <SendFormAmount :balances="balances" @next="goToStep('review')" />
+      <SendFormAmount :balances="balances" @next="generateSteps" />
     </template>
 
     <template v-if="step === 'review'">
-      <h2 class="send-form__title s-2">Review your transfer details</h2>
-
-      <dl>
-        <dt class="w-bold">Recipient</dt>
-        <dd>{{ form.recipient }}</dd>
-
-        <dt class="w-bold mt-10">Memo</dt>
-        <dd>{{ form.memo || '-' }}</dd>
-
-        <dt class="w-bold mt-10">Amount</dt>
-        <dd>{{ form.balance.amount }}{{ form.balance.denom }}</dd>
-      </dl>
-
-      <Button class="mt-10" name="Confirm and continue" @click="goToStep('send')" />
+      <TxStepsModal :data="steps" />
     </template>
-
-    <template v-if="step === 'send'"> TODO </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive } from 'vue';
+import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
-import { SendAddressForm } from '@/types/actions';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { useStore } from '@/store';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { actionHandler } from '@/utils/actionHandler';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
@@ -47,7 +34,7 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    Button,
+    TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
   },
@@ -66,8 +53,12 @@ export default defineComponent({
   emits: ['update:step'],
 
   setup(props, { emit }) {
+    const steps = ref([]);
+    const store = useStore();
+
     const form: SendAddressForm = reactive({
       recipient: '',
+      chain_name: '',
       memo: '',
       balance: {
         denom: '',
@@ -81,6 +72,33 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    const generateSteps = async () => {
+      const precision = store.getters['demeris/getDenomPrecision']({
+        name: form.balance.denom,
+      });
+
+      const action: TransferAction = {
+        name: 'transfer',
+        params: {
+          from: {
+            amount: {
+              amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+              denom: form.balance.denom,
+            },
+            chain_name: form.chain_name,
+          },
+          to: {
+            chain_name: form.chain_name,
+            address: form.recipient,
+          },
+        },
+      };
+
+      const result = await actionHandler(action);
+      steps.value = result;
+      goToStep('review');
+    };
+
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -91,7 +109,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { form, goToStep };
+    return { steps, form, goToStep, generateSteps };
   },
 });
 </script>

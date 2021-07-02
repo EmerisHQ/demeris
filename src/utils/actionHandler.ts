@@ -893,6 +893,20 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({ name: 'transfer', transactions: [...redeemStep.steps] });
         });
         break;
+      case 'move':
+        params = (action as Actions.MoveAction).params;
+        const moveStep = await move({
+          amount: {
+            amount: params.from.amount.amount,
+            denom: params.from.amount.denom,
+          },
+          chain_name: params.from.chain_name,
+          destination_chain_name: params.to.chain_name,
+        });
+
+        steps.push({ name: 'transfer', description: 'Assets Moved', transactions: [...moveStep.steps] }); //TODO
+
+        break;
       case 'transfer':
         params = (action as Actions.TransferAction).params;
         if (params.to.address) {

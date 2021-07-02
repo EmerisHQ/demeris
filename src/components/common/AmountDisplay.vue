@@ -1,4 +1,6 @@
-<template>{{ displayValue }} {{ displayDenom }}</template>
+<template>
+  <span>{{ displayValue }} {{ displayDenom }}</span>
+</template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 

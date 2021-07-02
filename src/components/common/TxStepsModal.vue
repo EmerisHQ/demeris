@@ -6,101 +6,110 @@
       {{ currentData.title }}
     </div>
 
-    <div class="amount-info">
-      <div class="amount-info__type s-minus w-bold">{{ currentData.isSwap ? 'Pay' : 'Send' }}</div>
-      <div class="amount-info__detail">
-        <div class="amount-info__detail__coin">
-          <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/atom.png`)" alt="pay coin" />
-          <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
-          <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
-        </div>
-        <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
+    <template v-if="['transfer', 'move'].includes(currentData.data.name)">
+      <div class="detail">
+        <PreviewTransfer :step="currentData.data" :fees="{}" />
       </div>
-    </div>
+    </template>
 
-    <div v-if="!currentData.isSwap">
-      <div class="divider" />
-
-      <div v-if="!currentData.isSwap" class="detail-transfer">
-        <div class="detail__title s-minus w-bold">
-          <div>
-            {{ currentData.data.transactions.length }}
-            {{ currentData.data.transactions.length == 1 ? 'transaction' : 'transactions' }} to sign
+    <!-- TODO: Refactor -->
+    <template v-else>
+      <div class="amount-info">
+        <div class="amount-info__type s-minus w-bold">{{ currentData.isSwap ? 'Pay' : 'Send' }}</div>
+        <div class="amount-info__detail">
+          <div class="amount-info__detail__coin">
+            <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/atom.png`)" alt="pay coin" />
+            <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
+            <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
           </div>
-          <div class="icon"><HintIcon /></div>
+          <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
         </div>
-        {{ currentData.data.fees }}
-        <template v-for="(fee, chain) in currentData.fees" :key="'fee' + chain">
-          <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-            <div class="detail__row s-minus w-normal">
-              <div class="detail__row-key">Fee ({{ chain }})</div>
-              <div class="detail__row-value">
-                <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
-              </div>
+      </div>
+
+      <div v-if="!currentData.isSwap">
+        <div class="divider" />
+
+        <div v-if="!currentData.isSwap" class="detail-transfer">
+          <div class="detail__title s-minus w-bold">
+            <div>
+              {{ currentData.data.transactions.length }}
+              {{ currentData.data.transactions.length == 1 ? 'transaction' : 'transactions' }} to sign
             </div>
+            <div class="icon"><HintIcon /></div>
+          </div>
+          {{ currentData.data.fees }}
+          <template v-for="(fee, chain) in currentData.fees" :key="'fee' + chain">
+            <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+              <div class="detail__row s-minus w-normal">
+                <div class="detail__row-key">Fee ({{ chain }})</div>
+                <div class="detail__row-value">
+                  <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+                </div>
+              </div>
+            </template>
           </template>
-        </template>
-      </div>
-
-      <div class="divider" style="margin-bottom: 1.6rem" />
-    </div>
-
-    <div class="amount-info">
-      <div class="amount-info__type s-minus w-bold">
-        Receive
-        <div v-show="currentData.isSwap" class="amount-info__type-subtitle w-normal">(estimated)</div>
-      </div>
-      <div class="amount-info__detail">
-        <div class="amount-info__detail__coin">
-          <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/luna.png`)" alt="receive coin" />
-          <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
-          <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
         </div>
-        <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
+
+        <div class="divider" style="margin-bottom: 1.6rem" />
       </div>
-    </div>
 
-    <div v-if="currentData.isSwap" class="divider" />
-
-    <div v-if="currentData.isSwap" class="detail">
-      <div class="detail__title s-minus w-bold">Price</div>
-      <div class="detail__row s-minus w-normal">
-        <div class="detail__row-key">
-          <div>Min. received<br />(if 100% swapped)</div>
-          <tippy :max-width="192">
-            <HintIcon />
-
-            <template #content> Minimum total received if your entire swap is fulfilled. </template>
-          </tippy>
+      <div class="amount-info">
+        <div class="amount-info__type s-minus w-bold">
+          Receive
+          <div v-show="currentData.isSwap" class="amount-info__type-subtitle w-normal">(estimated)</div>
         </div>
-        <div class="detail__row-value">995.54 LUNA</div>
-      </div>
-      <div class="detail__row s-minus w-normal">
-        <div class="detail__row-key">
-          <div>Limit price</div>
-          <tippy :max-width="192">
-            <HintIcon />
-
-            <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
-          </tippy>
+        <div class="amount-info__detail">
+          <div class="amount-info__detail__coin">
+            <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/luna.png`)" alt="receive coin" />
+            <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
+            <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
+          </div>
+          <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
         </div>
-        <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
       </div>
-    </div>
 
-    <div v-if="currentData.isSwap" class="divider" />
+      <div v-if="currentData.isSwap" class="divider" />
 
-    <div v-if="currentData.isSwap" class="detail">
-      <div class="detail__title s-minus w-bold">Fees</div>
-      <div class="detail__row s-minus w-normal">
-        <div class="detail__row-key">Transaction fee</div>
-        <div class="detail__row-value">0.02 ATOM</div>
+      <div v-if="currentData.isSwap" class="detail">
+        <div class="detail__title s-minus w-bold">Price</div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">
+            <div>Min. received<br />(if 100% swapped)</div>
+            <tippy :max-width="192">
+              <HintIcon />
+
+              <template #content> Minimum total received if your entire swap is fulfilled. </template>
+            </tippy>
+          </div>
+          <div class="detail__row-value">995.54 LUNA</div>
+        </div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">
+            <div>Limit price</div>
+            <tippy :max-width="192">
+              <HintIcon />
+
+              <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
+            </tippy>
+          </div>
+          <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
+        </div>
       </div>
-      <div class="detail__row s-minus w-normal">
-        <div class="detail__row-key">Swap fee</div>
-        <div class="detail__row-value">0.02 ATOM</div>
+
+      <div v-if="currentData.isSwap" class="divider" />
+
+      <div v-if="currentData.isSwap" class="detail">
+        <div class="detail__title s-minus w-bold">Fees</div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Transaction fee</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
+        <div class="detail__row s-minus w-normal">
+          <div class="detail__row-key">Swap fee</div>
+          <div class="detail__row-value">0.02 ATOM</div>
+        </div>
       </div>
-    </div>
+    </template>
 
     <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
       Non-revertable transactions. Prices not guaranteed etc.
@@ -121,6 +130,7 @@ import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
@@ -130,6 +140,7 @@ export default defineComponent({
   name: 'TxStepsModal',
   components: {
     GobackWithClose,
+    PreviewTransfer,
     Button,
     HintIcon,
     TxHandlingModal,
@@ -145,7 +156,6 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['goback', 'close'],
   setup(props, { emit }) {
     console.log('modalProps', props.data);
     const fees = ref([]);
@@ -355,7 +365,7 @@ export default defineComponent({
 
   .warn-transfer {
     border: none;
-    padding: 0 1.2rem;
+    padding: 0;
   }
 
   .button-wrapper {
