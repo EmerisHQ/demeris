@@ -32,12 +32,14 @@
         :description="formatMultipleChannel(transfer)"
         inset
       >
-        <AmountDisplay class="w-bold" :amount="fees[transfer.data.to_chain]" />
+        <AmountDisplay class="w-bold" :amount="fees[transfer.data.from_chain]" />
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultiple" description="Transaction Fee">
-      <AmountDisplay class="w-bold" :amount="fees[transactionInfo.to.chain]" />
+    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+      <template v-for="(amount, denom) in fees[transactionInfo.from.chain]" :key="'fee_' + denom">
+        <AmountDisplay class="w-bold" :amount="{ amount: amount, denom: denom }" />
+      </template>
     </ListItem>
 
     <ListItem label="Receive">
@@ -91,7 +93,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-
+    console.log(props.fees);
     const stepType = computed(() => {
       const description = (props.step as Actions.Step).description;
       const descriptionKeyMap = {
