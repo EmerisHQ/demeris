@@ -1,6 +1,6 @@
 <template>
   <div class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
-    <div>Fees (included){{ isFeesOpen }}</div>
+    <div>Fees (included)</div>
     <div class="fees-total">
       <span v-show="!isFeesOpen">~$12.3</span>
       <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
@@ -57,10 +57,14 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import { defineComponent, PropType, reactive, toRefs } from 'vue';
 
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
+
+type FeesByLevel = { slow: string; normal: string; fast: string };
+type TransactionFeeData = { count: number; fee: string };
+
 export default defineComponent({
   name: 'FeeLevelSelector',
   components: {
@@ -69,6 +73,20 @@ export default defineComponent({
   },
   props: {
     gasPriceLevel: { type: String, required: false, default: null },
+    feesByLevel: {
+      type: Object as PropType<FeesByLevel>,
+      default: () => {
+        return { slow: '$0.01', normal: '$0.02', fast: '$0.03' };
+      },
+    },
+    transactionFeeData: {
+      type: Object as PropType<TransactionFeeData>,
+      required: false,
+      default: () => {
+        return { count: 0, fee: '0' };
+      },
+    },
+    swapFee: { type: String, required: false, default: '' },
   },
   emits: ['update:gasPriceLevel'],
   setup(props, { emit }) {
@@ -91,7 +109,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .fees {
   display: flex;
-  padding: 0 2.4rem 2.4rem;
+  padding: 0 2.4rem 0;
   cursor: pointer;
   justify-content: space-between;
   color: var(--muted);
@@ -154,6 +172,7 @@ export default defineComponent({
 
 .fees-detail-open {
   font-weight: bold;
+  padding-bottom: 2.4rem;
   color: var(--text);
 
   .icon {
