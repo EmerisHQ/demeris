@@ -15,7 +15,7 @@ export type TransferParams = {
   from: Base.ChainAmount;
   to: {
     chain_name: string;
-    address?: string;
+    address: string;
   };
 };
 export type MoveParams = {
@@ -112,8 +112,8 @@ export type StepTransaction = {
 };
 export type Step = {
   name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
-  transactions: Array<StepTransaction>;
   description: string;
+  transactions: Array<StepTransaction>;
 };
 
 export type SendAddressForm = {

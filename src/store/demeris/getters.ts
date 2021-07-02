@@ -66,7 +66,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
   getAllBalances: (state) => {
-    const balances = Object.values(state.balances).flat();
+    const balances = Object.values(state.balances)
+      .filter((balance) => balance !== null)
+      .flat();
     return balances.length > 0 ? balances : null;
   },
   getAllStakingBalances: (state) => {

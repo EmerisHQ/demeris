@@ -5,7 +5,13 @@ export default function useAccount() {
   const store = useStore();
 
   const balances = computed(() => {
-    return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+    // TODO: Remove after cloud is fully deployed
+    /*
+    if (process.env.NODE_ENV === 'production') {
+      return TEST_DATA.balances;
+    }
+    */
+    return store.getters['demeris/getAllBalances'] || [];
   });
 
   const balancesByDenom = (denom: string) => {
