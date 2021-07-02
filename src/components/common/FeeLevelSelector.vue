@@ -9,7 +9,7 @@
   </div>
   <div v-if="isFeesOpen" class="fees-detail">
     <div class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">Transaction fee(x3)</div>
+      <div class="fees-detail__info-key">Transaction fee(x{{ transactionCount }})</div>
       <div class="fees-detail__info-value">$0.06</div>
     </div>
 
@@ -20,7 +20,9 @@
         @click="setGasPriceLevel('slow')"
       >
         <div class="fees-detail__selector-block-level">Slow</div>
-        <div class="fees-detail__selector-block-value">$0.01</div>
+        <div class="fees-detail__selector-block-value">
+          {{ formatter.format(baseDollarFee * getFeeWeight('slow')) }}
+        </div>
       </button>
       <button
         class="fees-detail__selector-block"
@@ -28,7 +30,9 @@
         @click="setGasPriceLevel('normal')"
       >
         <div class="fees-detail__selector-block-level">Normal</div>
-        <div class="fees-detail__selector-block-value">$0.02</div>
+        <div class="fees-detail__selector-block-value">
+          {{ formatter.format(baseDollarFee * getFeeWeight('normal')) }}
+        </div>
       </button>
       <button
         class="fees-detail__selector-block"
@@ -36,7 +40,9 @@
         @click="setGasPriceLevel('fast')"
       >
         <div class="fees-detail__selector-block-level">Fast</div>
-        <div class="fees-detail__selector-block-value">$0.04</div>
+        <div class="fees-detail__selector-block-value">
+          {{ formatter.format(baseDollarFee * getFeeWeight('fast')) }}
+        </div>
       </button>
     </div>
 
@@ -57,13 +63,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, reactive, toRefs } from 'vue';
+import { defineComponent, reactive, toRefs } from 'vue';
 
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
-
-type FeesByLevel = { slow: string; normal: string; fast: string };
-type TransactionFeeData = { count: number; fee: string };
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -73,18 +76,13 @@ export default defineComponent({
   },
   props: {
     gasPriceLevel: { type: String, required: false, default: null },
-    feesByLevel: {
-      type: Object as PropType<FeesByLevel>,
-      default: () => {
-        return { slow: '$0.01', normal: '$0.02', fast: '$0.03' };
-      },
+    baseDollarFee: {
+      type: Number,
+      required: true,
     },
-    transactionFeeData: {
-      type: Object as PropType<TransactionFeeData>,
-      required: false,
-      default: () => {
-        return { count: 0, fee: '0' };
-      },
+    transactionCount: {
+      type: Number,
+      required: true,
     },
     swapFee: { type: String, required: false, default: '' },
   },
@@ -99,6 +97,23 @@ export default defineComponent({
       toggle: () => {
         data.isFeesOpen = !data.isFeesOpen;
       },
+      getFeeWeight: (level) => {
+        if (level === 'slow') {
+          return 1;
+        } else if (level === 'normal') {
+          return 2;
+        } else {
+          return 3;
+        }
+      },
+      formatter: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+      }),
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
