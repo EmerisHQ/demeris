@@ -16,9 +16,9 @@ import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
-import { MoveAction, MoveAssetsForm } from '@/types/actions';
+import { GasPriceLevel, MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
+import { actionHandler, feeForSteps } from '@/utils/actionHandler';
 
 import MoveFormAmount from './MoveFormAmount.vue';
 
@@ -85,6 +85,7 @@ export default defineComponent({
       };
 
       const result = await actionHandler(action);
+      console.log(await feeForSteps(result, GasPriceLevel.AVERAGE));
       debugger;
       steps.value = result;
       goToStep('review');

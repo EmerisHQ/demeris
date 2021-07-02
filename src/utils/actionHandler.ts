@@ -1281,6 +1281,31 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
   return feeTotals;
 }
 
+export async function feeForSteps(
+  steps: Actions.Step[],
+  gasPriceLevel: Actions.GasPriceLevel,
+): Promise<Actions.FeeTotals> {
+  const feeTotals = {};
+
+  let used;
+  for (const step of steps) {
+    for (const stepTx of step.transactions) {
+      const fees = await feeForStepTransaction(stepTx);
+
+      if (!feeTotals[fees[0].chain_name]) {
+        feeTotals[fees[0].chain_name] = {};
+      }
+      used = getUsedFee(fees, gasPriceLevel);
+
+      feeTotals[used.chain_name][used.amount.denom]
+        ? (feeTotals[used.chain_name][used.amount.denom] =
+            feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
+        : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
+    }
+  }
+  return feeTotals;
+}
+
 export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
   const feeOption = fees[0];
   const used = {
