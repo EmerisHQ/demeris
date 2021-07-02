@@ -343,8 +343,15 @@ export default defineComponent({
     }
 
     function setMax() {
-      console.log(data.payCoinData);
-      data.payCoinAmount = parseInt(data.payCoinData.amount);
+      const precisionDecimal = Math.pow(
+        10,
+        parseInt(
+          store.getters['demeris/getDenomPrecision']({
+            name: data.payCoinData.base_denom,
+          }),
+        ),
+      );
+      data.payCoinAmount = parseInt(data.payCoinData.amount) / Number(precisionDecimal);
       data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
