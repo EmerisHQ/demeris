@@ -6,9 +6,10 @@
       {{ currentData.title }}
     </div>
 
-    <template v-if="['transfer', 'move'].includes(currentData.data.name)">
+    <template v-if="['transfer', 'move', 'redeem', 'swap'].includes(currentData.data.name)">
       <div class="detail">
-        <PreviewTransfer :step="currentData.data" :fees="{}" />
+        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="{}" />
+        <PreviewTransfer v-else :step="currentData.data" :fees="{}" />
       </div>
     </template>
 
