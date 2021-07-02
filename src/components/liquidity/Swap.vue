@@ -34,7 +34,7 @@
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
-        :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
+        :input-header="`Pay ${getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? ''}`"
         :selected-denom="payCoinData"
         :assets="excludeSelectedAsset(receiveCoinData, userAssetList)"
         :is-over="isOver"
@@ -177,6 +177,8 @@ import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
+import usePools from '@/composables/usePools';
+import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { actionHandler } from '@/utils/actionHandler';
@@ -197,20 +199,22 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-
+    const { pools } = usePools();
+    const { getDisplayPrice } = usePrice();
+    console.log(pools);
     // const store = useStore();
     // const stores = useAllStores();
-    async function getPools() {
-      const pools =
-        store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-        (await store.dispatch(
-          'tendermint.liquidity.v1beta1/QueryLiquidityPools',
-          { options: { subscribe: false, all: true }, params: {} },
-          { root: true },
-        ));
-      console.log('pools', pools);
-    }
-    getPools();
+    // async function getPools() {
+    //   const pools =
+    //     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    //     (await store.dispatch(
+    //       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
+    //       { options: { subscribe: false, all: true }, params: {} },
+    //       { root: true },
+    //     ));
+    //   console.log('pools', pools);
+    // }
+    // getPools();
 
     const data = reactive({
       buttonName: computed(() => {
@@ -463,6 +467,7 @@ export default defineComponent({
       setConterPairCoinAmount,
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
+      getDisplayPrice,
     };
   },
 });
