@@ -1267,6 +1267,7 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
   let used;
   for (const stepTx of step.transactions) {
     const fees = await feeForStepTransaction(stepTx);
+
     if (!feeTotals[fees[0].chain_name]) {
       feeTotals[fees[0].chain_name] = {};
     }
@@ -1274,8 +1275,8 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
 
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
-          feeTotals[used.chain_name][used.amount.denom] + BigInt(used.amount.amount))
-      : (feeTotals[used.chain_name][used.amount.denom] = BigInt(used.amount.amount));
+          feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
+      : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
   }
   return feeTotals;
 }
@@ -1284,7 +1285,7 @@ export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Action
   const feeOption = fees[0];
   const used = {
     amount: {
-      amount: (parseInt(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
+      amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
       denom: feeOption.denom,
     },
     chain_name: feeOption.chain_name,
