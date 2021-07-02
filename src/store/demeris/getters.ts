@@ -1,3 +1,4 @@
+import { parseCoins } from '@cosmjs/launchpad';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
@@ -68,7 +69,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getAllBalances: (state) => {
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
-      .flat();
+      .flat()
+      .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
   getAllStakingBalances: (state) => {
