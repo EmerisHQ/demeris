@@ -29,6 +29,7 @@ export default function usePools() {
   const poolById = (id: number) => {
     return pools.value.find((item) => item.id === id);
   };
+
   const poolPriceById = async (id: number) => {
     const pool = pools.value.find((item) => item.id === id);
     const balances = (
@@ -40,5 +41,13 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
-  return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById };
+
+  const denomListByPools = () => {
+    const list = [];
+    pools.value.forEach((pool) => {
+      list.push(pool.pool_coin_denom);
+    });
+    return list;
+  };
+  return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById, denomListByPools };
 }

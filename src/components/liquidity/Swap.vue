@@ -199,9 +199,9 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools } = usePools();
+    const { denomListByPools } = usePools();
     const { getDisplayPrice } = usePrice();
-    console.log(pools);
+    console.log('denomList', denomListByPools());
     // const store = useStore();
     // const stores = useAllStores();
     // async function getPools() {
@@ -333,7 +333,6 @@ export default defineComponent({
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;
       const originReceiveCoinData = data.receiveCoinData;
-
       const originReceiveCoinAmount = data.receiveCoinAmount;
 
       data.payCoinData = originReceiveCoinData;
@@ -374,10 +373,6 @@ export default defineComponent({
         data.payCoinAmount = null;
         data.receiveCoinAmount = null;
       }
-    }
-
-    function openSetting() {
-      alert('open setting');
     }
 
     function setChildModalOpenStatus(payload) {
@@ -459,7 +454,6 @@ export default defineComponent({
     return {
       ...toRefs(data),
       getCoinDollarValue,
-      openSetting,
       changePayToReceive,
       denomSelectHandler,
       getMaxAmount,
