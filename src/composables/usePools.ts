@@ -44,21 +44,22 @@ export default function usePools() {
 
   const denomListByPools = async () => {
     const list = [];
+    console.log('tetsettsts', pools.value);
     const denoms = await Promise.all(
       pools.value.map(async (pool) => {
-        const reserveCoinFirst = await getDisplayName(
-          pool.reserve_coin_denoms[0],
-          store.getters['demeris/getDexChain'],
-        );
-        const reserveCoinSecond = await getDisplayName(
-          pool.reserve_coin_denoms[1],
-          store.getters['demeris/getDexChain'],
-        );
-        const denoms = [
-          await getDisplayName(pool.pool_coin_denom, store.getters['demeris/getDexChain']),
-          reserveCoinFirst,
-          reserveCoinSecond,
-        ];
+        const poolCoin = {
+          displayName: await getDisplayName(pool.pool_coin_denom, store.getters['demeris/getDexChain']),
+          denom: pool.pool_coin_denom,
+        };
+        const reserveCoinFirst = {
+          displayName: await getDisplayName(pool.reserve_coin_denoms[0], store.getters['demeris/getDexChain']),
+          denom: pool.reserve_coin_denoms[0],
+        };
+        const reserveCoinSecond = {
+          displayName: await getDisplayName(pool.reserve_coin_denoms[1], store.getters['demeris/getDexChain']),
+          denom: pool.reserve_coin_denoms[1],
+        };
+        const denoms = [poolCoin, reserveCoinFirst, reserveCoinSecond];
         return denoms;
       }),
     );
@@ -66,7 +67,32 @@ export default function usePools() {
     denoms.forEach((denoms) => {
       list.push(...denoms);
     });
-    return list;
+
+    function dedupe(arr) {
+      return arr.reduce(
+        function (p, c) {
+          // create an identifying id from the object values
+          const id = c.denom;
+
+          // if the id is not found in the temp array
+          // add the object to the output array
+          // and add the key to the temp array
+          if (p.temp.indexOf(id) === -1) {
+            p.out.push(c);
+            p.temp.push(id);
+          }
+          return p;
+
+          // return the deduped array
+        },
+        {
+          temp: [],
+          out: [],
+        },
+      ).out;
+    }
+
+    return dedupe(list);
   };
   return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById, denomListByPools };
 }
