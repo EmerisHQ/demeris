@@ -201,7 +201,11 @@ export default defineComponent({
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { denomListByPools } = usePools();
     const { getDisplayPrice } = usePrice();
-    console.log('denomList', denomListByPools());
+    async function test() {
+      console.log('testtesttest', await denomListByPools());
+    }
+    test();
+
     // const store = useStore();
     // const stores = useAllStores();
     // async function getPools() {

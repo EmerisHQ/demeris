@@ -42,10 +42,29 @@ export default function usePools() {
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
 
-  const denomListByPools = () => {
+  const denomListByPools = async () => {
     const list = [];
-    pools.value.forEach((pool) => {
-      list.push(pool.pool_coin_denom);
+    const denoms = await Promise.all(
+      pools.value.map(async (pool) => {
+        const reserveCoinFirst = await getDisplayName(
+          pool.reserve_coin_denoms[0],
+          store.getters['demeris/getDexChain'],
+        );
+        const reserveCoinSecond = await getDisplayName(
+          pool.reserve_coin_denoms[1],
+          store.getters['demeris/getDexChain'],
+        );
+        const denoms = [
+          await getDisplayName(pool.pool_coin_denom, store.getters['demeris/getDexChain']),
+          reserveCoinFirst,
+          reserveCoinSecond,
+        ];
+        return denoms;
+      }),
+    );
+
+    denoms.forEach((denoms) => {
+      list.push(...denoms);
     });
     return list;
   };
