@@ -44,23 +44,26 @@ export default function usePools() {
 
   const denomListByPools = async () => {
     const list = [];
-    console.log('tetsettsts', pools.value);
     const denoms = await Promise.all(
       pools.value.map(async (pool) => {
+        const dexChain = store.getters['demeris/getDexChain'];
         const poolCoin = {
-          displayName: await getDisplayName(pool.pool_coin_denom, store.getters['demeris/getDexChain']),
-          denom: pool.pool_coin_denom,
+          denom: await getDisplayName(pool.pool_coin_denom, dexChain),
+          base_denom: pool.pool_coin_denom,
+          on_chain: dexChain,
         };
         const reserveCoinFirst = {
-          displayName: await getDisplayName(pool.reserve_coin_denoms[0], store.getters['demeris/getDexChain']),
-          denom: pool.reserve_coin_denoms[0],
+          denom: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
+          base_denom: pool.reserve_coin_denoms[0],
+          on_chain: dexChain,
         };
         const reserveCoinSecond = {
-          displayName: await getDisplayName(pool.reserve_coin_denoms[1], store.getters['demeris/getDexChain']),
-          denom: pool.reserve_coin_denoms[1],
+          denom: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
+          base_denom: pool.reserve_coin_denoms[1],
+          on_chain: dexChain,
         };
-        const denoms = [poolCoin, reserveCoinFirst, reserveCoinSecond];
-        return denoms;
+        const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
+        return denomsInfo;
       }),
     );
 

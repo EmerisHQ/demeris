@@ -77,7 +77,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
-        :assets="excludeSelectedAsset(payCoinData, receiveAssetList)"
+        :assets="basicAssetList"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -87,7 +87,7 @@
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
       </div>
-
+      {{ basicAssetList }}
       <!-- swap button -->
       <div class="button-wrapper">
         <ActionButton
@@ -201,10 +201,6 @@ export default defineComponent({
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { denomListByPools } = usePools();
     const { getDisplayPrice } = usePrice();
-    async function test() {
-      console.log('testtesttest', await denomListByPools());
-    }
-    test();
 
     // const store = useStore();
     // const stores = useAllStores();
@@ -219,6 +215,9 @@ export default defineComponent({
     //   console.log('pools', pools);
     // }
     // getPools();
+    setInterval(async () => {
+      data.basicAssetList = await denomListByPools();
+    }, 3000);
 
     const data = reactive({
       buttonName: computed(() => {
@@ -256,6 +255,7 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
+      basicAssetList: [],
       userAssetList: computed(() => {
         if (data.isWallet) {
           return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
