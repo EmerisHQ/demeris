@@ -118,6 +118,7 @@ import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
+import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'Swap',
@@ -180,7 +181,7 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      gasPriceLevel: localStorage.getItem('demeris-fee-level') || 'average',
+      gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       //TODO: test
