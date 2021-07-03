@@ -20,38 +20,38 @@
     <div class="fees-detail__selector s-minus">
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === 'slow' ? 'selected' : ''"
-        @click="setGasPriceLevel('slow')"
+        :class="gasPriceLevel === GasPriceLevel.LOW ? 'selected' : ''"
+        @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
         <div class="fees-detail__selector-block-level">Slow</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight('slow')) }}
+          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.LOW)) }}
         </div>
       </button>
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === 'normal' ? 'selected' : ''"
-        @click="setGasPriceLevel('normal')"
+        :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'selected' : ''"
+        @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
         <div class="fees-detail__selector-block-level">Normal</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight('normal')) }}
+          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.AVERAGE)) }}
         </div>
       </button>
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === 'fast' ? 'selected' : ''"
-        @click="setGasPriceLevel('fast')"
+        :class="gasPriceLevel === GasPriceLevel.HIGH ? 'selected' : ''"
+        @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
         <div class="fees-detail__selector-block-level">Fast</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight('fast')) }}
+          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.HIGH)) }}
         </div>
       </button>
     </div>
 
     <Alert
-      v-if="gasPriceLevel === 'slow'"
+      v-if="gasPriceLevel === GasPriceLevel.LOW"
       status="warning"
       message="Your transaction may take longer to be processed."
     />
@@ -69,10 +69,11 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import { defineComponent, PropType, reactive, toRefs } from 'vue';
 
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GasPriceLevel } from '@/types/actions';
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -81,7 +82,10 @@ export default defineComponent({
     Icon,
   },
   props: {
-    gasPriceLevel: { type: String, required: true, default: 'normal' },
+    gasPriceLevel: {
+      type: String as PropType<GasPriceLevel>,
+      required: true,
+    },
     baseDollarFee: {
       type: Number,
       required: true,
@@ -96,22 +100,23 @@ export default defineComponent({
   setup(props, { emit }) {
     const data = reactive({
       isFeesOpen: false,
-      setGasPriceLevel: (level) => {
+      setGasPriceLevel: (level: GasPriceLevel) => {
         emit('update:gasPriceLevel', level);
         localStorage.setItem('demeris-fee-level', level);
       },
       toggle: () => {
         data.isFeesOpen = !data.isFeesOpen;
       },
-      getFeeWeight: (level) => {
-        if (level === 'slow') {
+      getFeeWeight: (level: GasPriceLevel) => {
+        if (level === GasPriceLevel.LOW) {
           return 1;
-        } else if (level === 'normal') {
+        } else if (level === GasPriceLevel.AVERAGE) {
           return 2;
         } else {
           return 3;
         }
       },
+      GasPriceLevel,
       formatter: new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

@@ -180,11 +180,7 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      gasPriceLevel: localStorage.getItem('demeris-fee-level') || 'normal',
-      setGasPriceLevel: (level) => {
-        data.gasPriceLevel = level;
-        localStorage.setItem('demeris-fee-level', level);
-      },
+      gasPriceLevel: localStorage.getItem('demeris-fee-level') || 'average',
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       //TODO: test
