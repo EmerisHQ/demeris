@@ -81,7 +81,7 @@ export default defineComponent({
     });
 
     const data = computed(() => {
-      return props.step.transactions[0].data as Actions.SwapData;
+      return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
 
     const limitPrice = computed(() => {

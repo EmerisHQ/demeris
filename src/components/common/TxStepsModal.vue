@@ -1,7 +1,5 @@
 <template>
-  <div class="denom-select-modal-wrapper elevation-panel">
-    <GobackWithClose @goback="emitHandler('goback')" @close="emitHandler('close')" />
-
+  <div class="denom-select-modal-wrapper">
     <div class="title s-2 w-bold">
       {{ currentData.title }}
     </div>
@@ -127,10 +125,10 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs }
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
@@ -140,8 +138,8 @@ import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/uti
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
-    GobackWithClose,
     PreviewTransfer,
+    PreviewSwap,
     Button,
     HintIcon,
     TxHandlingModal,
@@ -157,7 +155,7 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, { emit }) {
+  setup(props) {
     console.log('modalProps', props.data);
     const fees = ref([]);
     const store = useStore();
@@ -201,9 +199,6 @@ export default defineComponent({
         modifiedData.fees = fees.value[processData.currentStep];
         return modifiedData;
       }),
-      emitHandler: (event) => {
-        emit(event);
-      },
       setStep: async () => {
         processData.isTxHandlingModalOpen = true;
         for (let stepTx of processData.currentData.data.transactions) {
@@ -276,7 +271,7 @@ export default defineComponent({
 
   .title {
     padding: 0 2.4rem 2.4rem;
-    text-align: left;
+    text-align: center;
   }
 
   .amount-info {

@@ -38,7 +38,7 @@
 
     <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
       <template v-for="(amount, denom) in fees[transactionInfo.from.chain]" :key="'fee_' + denom">
-        <AmountDisplay class="w-bold" :amount="{ amount: amount, denom: denom }" />
+        <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
       </template>
     </ListItem>
 
@@ -86,7 +86,7 @@ export default defineComponent({
       required: true,
     },
     fees: {
-      type: Object as PropType<Record<string, Base.Amount>>,
+      type: Object as PropType<Actions.FeeTotals>,
       required: true,
     },
   },
@@ -129,8 +129,16 @@ export default defineComponent({
         denom: (firstTransaction.data.amount as Base.Amount).denom,
       };
 
+      let totalFees = 0;
+
+      for (const denoms of Object.values(props.fees as Actions.FeeTotals)) {
+        for (const fee of Object.values(denoms)) {
+          totalFees += fee;
+        }
+      }
+
       const to = {
-        amount: from.amount, // minus fees
+        amount: from.amount,
         address: lastTransaction.data.to_address,
         chain:
           lastTransaction.data.to_chain ||
@@ -143,6 +151,8 @@ export default defineComponent({
 
       if (stepType.value === 'move') {
         to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
+      } else {
+        to.amount = to.amount - totalFees;
       }
 
       return {

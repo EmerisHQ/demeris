@@ -11,7 +11,7 @@
     </template>
 
     <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" />
+      <TxStepsModal :data="steps" gas-price-level="average" />
     </template>
   </div>
 </template>
@@ -95,6 +95,7 @@ export default defineComponent({
       };
 
       const result = await actionHandler(action);
+
       steps.value = result;
       goToStep('review');
     };
