@@ -94,8 +94,9 @@ export default defineComponent({
 
     function filterKeyword(assets, keyword) {
       const filteredAssets = assets.filter((asset) => {
-        return asset.base_denom.substr(1).indexOf(keyword.toLowerCase()) !== -1;
+        return asset.display_name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
       });
+      console.log(filteredAssets);
 
       return filteredAssets;
     }
