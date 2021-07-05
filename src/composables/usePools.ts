@@ -49,17 +49,17 @@ export default function usePools() {
         pools.value.map(async (pool) => {
           const dexChain = store.getters['demeris/getDexChain'];
           const poolCoin = {
-            denom: await getDisplayName(pool.pool_coin_denom, dexChain),
+            display_name: await getDisplayName(pool.pool_coin_denom, dexChain),
             base_denom: pool.pool_coin_denom,
             on_chain: dexChain,
           };
           const reserveCoinFirst = {
-            denom: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
+            display_name: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
             base_denom: pool.reserve_coin_denoms[0],
             on_chain: dexChain,
           };
           const reserveCoinSecond = {
-            denom: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
+            display_name: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
             base_denom: pool.reserve_coin_denoms[1],
             on_chain: dexChain,
           };
@@ -76,7 +76,7 @@ export default function usePools() {
         return arr.reduce(
           function (p, c) {
             // create an identifying id from the object values
-            const id = c.denom;
+            const id = c.display_name;
 
             // if the id is not found in the temp array
             // add the object to the output array

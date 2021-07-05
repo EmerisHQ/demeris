@@ -16,7 +16,7 @@
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
-        {{ $filters.getCoinName(selectedDenom?.base_denom) }}
+        {{ selectedDenom.display_name }}
         <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>

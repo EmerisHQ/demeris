@@ -64,9 +64,9 @@
           />
           <IconButton
             v-if="payCoinData"
-            :name="`${getPrecisedAmount(payCoinData.base_denom, getMaxAmount(payCoinData))} ${$filters.getCoinName(
-              payCoinData.base_denom,
-            )} Max `"
+            :name="`${getPrecisedAmount(payCoinData.base_denom, getMaxAmount(payCoinData))} ${
+              payCoinData.display_name
+            } Max `"
             :type="'text'"
             :status="'normal'"
             :data="{
