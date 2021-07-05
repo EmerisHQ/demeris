@@ -1188,7 +1188,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
   if (!trace) {
     trace = await store.dispatch(
       'demeris/GET_VERIFY_TRACE',
-      { subscribe: false, params: { chain_name, hash: denom.split('/')[1] } },
+      { subscribe: false, params: { chain_name, hash } },
       { root: true },
     );
   }

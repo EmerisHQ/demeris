@@ -212,6 +212,7 @@ export default defineComponent({
           case 'redeem':
             break;
           case 'addliquidity':
+            modifiedData.title = 'Review your pool liquidity details';
             break;
           case 'withdrawliquidity':
             break;
