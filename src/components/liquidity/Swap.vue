@@ -252,19 +252,19 @@ export default defineComponent({
 
           if (userWalletBalance.length) {
             //wallet with assets
-            // console.log('userWalletBalance', userWalletBalance)
+            console.log('userWalletBalance', userWalletBalance);
 
-            // let userAssetList =[]
-            // data.baseAssetList
+            let userAssetList = [];
+            data.baseAssetList;
             return data.receiveAssetList;
           } else {
             // wallet without assets
             // at here, we can set open modal for moonpay?
-            return data.receiveAssetList;
+            return data.baseAssetList;
           }
         } else {
           // wallet
-          return data.receiveAssetList;
+          return data.baseAssetList;
         }
       }),
 
@@ -272,8 +272,8 @@ export default defineComponent({
         let receiveAvailableAssets = [];
 
         for (let i in data.baseAssetList) {
+          // later, to filter some coins
           const coin = data.baseAssetList[i];
-          // user login => set amount else set amount => 0
           receiveAvailableAssets.push({ ...coin });
         }
 

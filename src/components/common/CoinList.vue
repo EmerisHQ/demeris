@@ -26,11 +26,7 @@
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
-          <span
-            v-for="word in $filters.getCoinName(coin.base_denom)"
-            :key="word"
-            :class="setWordColorByKeyword(keyword, word)"
-          >
+          <span v-for="word in coin.display_name" :key="word" :class="setWordColorByKeyword(keyword, word)">
             {{ word }}
           </span>
         </div>
@@ -40,23 +36,23 @@
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
           <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="keyword" class="coin-list__info-details-data s-minus w-normal">
+        <div v-if="type === 'pay'" class="coin-list__info-details-data s-minus w-normal">
           <div v-if="type === 'pay'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
-            <span
-              v-for="word in $filters.getCoinName(coin.base_denom)"
+            <!-- <span
+              v-for="word in coin.display_name"
               :key="word + 'small'"
               :class="setWordColorByKeyword(keyword, word)"
             >
               {{ word }}
-            </span>
+            </span> -->
             available
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
         <div v-else class="coin-list__info-details-data s-minus w-normal">
           <span v-if="type === 'pay' || type === 'chain'">
-            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" /> available
           </span>
           <ChainName v-else :name="coin.on_chain" />
         </div>
