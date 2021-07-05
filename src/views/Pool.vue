@@ -63,7 +63,9 @@
             <div class="pool-equity__stats">
               <div class="pool-equity__stats__avatar" />
               <div class="pool-equity__stats__wrapper">
-                <p class="pool-equity__stats__amount w-bold">1.56 G-AK-LP</p>
+                <p class="pool-equity__stats__amount w-bold">
+                  <AmountDisplay :amount="walletBalances.poolCoin" />
+                </p>
                 <p class="pool-equity__stats__balance s-2 w-bold">$1,420.50</p>
                 <span class="pool-equity__stats__share s-minus">0.01% of pool</span>
               </div>
@@ -78,12 +80,16 @@
               <ul class="pool-equity__assets__list">
                 <li class="pool-equity__assets__list__item">
                   <div class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">30 ATOM</span>
+                  <span class="pool-equity__assets__list__item__denom w-bold">
+                    <AmountDisplay :amount="walletBalances.coinA" />
+                  </span>
                   <span>$615.00</span>
                 </li>
                 <li class="pool-equity__assets__list__item">
                   <div class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">44 KAVA</span>
+                  <span class="pool-equity__assets__list__item__denom w-bold">
+                    <AmountDisplay :amount="walletBalances.coinB" />
+                  </span>
                   <span>$615.00</span>
                 </li>
               </ul>
@@ -108,6 +114,7 @@ import Denom from '@/components/common/Denom.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -128,9 +135,35 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
+    const { balancesByDenom } = useAccount();
     const { formatPoolName, poolsByDenom } = usePools();
 
     const { pool, reserveBalances, pairName } = usePool(computed(() => route.params.id as string));
+
+    const walletBalances = computed(() => {
+      if (!pool.value) {
+        return;
+      }
+
+      const getDenomAmount = (denom: string) => {
+        const balances = balancesByDenom(pool.value.reserve_coin_denoms[0]);
+
+        return {
+          denom: denom,
+          amount: balances.reduce((acc, item) => acc + +item.amount, 0),
+        };
+      };
+
+      const coinA = getDenomAmount(pool.value.reserve_coin_denoms[0]);
+      const coinB = getDenomAmount(pool.value.reserve_coin_denoms[1]);
+      const poolCoin = getDenomAmount(pool.value.pool_coin_denom);
+
+      return {
+        coinA,
+        coinB,
+        poolCoin,
+      };
+    });
 
     const relatedPools = computed(() => {
       return [
@@ -152,6 +185,7 @@ export default defineComponent({
       pairName,
       reserveBalances,
       relatedPools,
+      walletBalances,
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,
