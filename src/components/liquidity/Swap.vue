@@ -14,7 +14,13 @@
 	-->
   <div class="wrapper">
     <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
-    <ReviewModal v-else-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
+    <ReviewModal
+      v-else-if="isOpen"
+      :data="actionHandlerResult"
+      :gas-price-level="gasPriceLevel"
+      @close="reviewModalToggle"
+      @goback="gobackFunc"
+    />
     <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -77,7 +83,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
-        :assets="basicAssetList"
+        :assets="baseAssetList"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -87,7 +93,7 @@
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
       </div>
-      {{ basicAssetList }}
+      {{ baseAssetList }}
       <!-- swap button -->
       <div class="button-wrapper">
         <ActionButton
@@ -199,25 +205,8 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { denomListByPools } = usePools();
+    const { denomListByPools, pools } = usePools();
     const { getDisplayPrice } = usePrice();
-
-    // const store = useStore();
-    // const stores = useAllStores();
-    // async function getPools() {
-    //   const pools =
-    //     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    //     (await store.dispatch(
-    //       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
-    //       { options: { subscribe: false, all: true }, params: {} },
-    //       { root: true },
-    //     ));
-    //   console.log('pools', pools);
-    // }
-    // getPools();
-    setInterval(async () => {
-      data.basicAssetList = await denomListByPools();
-    }, 3000);
 
     const data = reactive({
       buttonName: computed(() => {
@@ -255,7 +244,7 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      basicAssetList: [],
+      baseAssetList: [],
       userAssetList: computed(() => {
         if (data.isWallet) {
           return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
@@ -324,7 +313,6 @@ export default defineComponent({
         } else {
           if (watchValues[1]) {
             if (watchValues[3] !== 'noWalletInit') {
-              console.log('here', data.receiveAssetList);
               data.payCoinData = data.receiveAssetList[0];
               data.initStatus = 'noWalletInit';
             }
@@ -333,6 +321,13 @@ export default defineComponent({
       },
       { immediate: true },
     );
+
+    watch(pools, () => {
+      (async () => {
+        data.baseAssetList = await denomListByPools();
+        console.log(data.baseAssetList);
+      })();
+    });
 
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;

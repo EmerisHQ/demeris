@@ -43,59 +43,63 @@ export default function usePools() {
   };
 
   const denomListByPools = async () => {
-    const list = [];
-    const denoms = await Promise.all(
-      pools.value.map(async (pool) => {
-        const dexChain = store.getters['demeris/getDexChain'];
-        const poolCoin = {
-          denom: await getDisplayName(pool.pool_coin_denom, dexChain),
-          base_denom: pool.pool_coin_denom,
-          on_chain: dexChain,
-        };
-        const reserveCoinFirst = {
-          denom: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
-          base_denom: pool.reserve_coin_denoms[0],
-          on_chain: dexChain,
-        };
-        const reserveCoinSecond = {
-          denom: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
-          base_denom: pool.reserve_coin_denoms[1],
-          on_chain: dexChain,
-        };
-        const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
-        return denomsInfo;
-      }),
-    );
+    if (pools.value.length) {
+      const list = [];
+      const denoms = await Promise.all(
+        pools.value.map(async (pool) => {
+          const dexChain = store.getters['demeris/getDexChain'];
+          const poolCoin = {
+            denom: await getDisplayName(pool.pool_coin_denom, dexChain),
+            base_denom: pool.pool_coin_denom,
+            on_chain: dexChain,
+          };
+          const reserveCoinFirst = {
+            denom: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
+            base_denom: pool.reserve_coin_denoms[0],
+            on_chain: dexChain,
+          };
+          const reserveCoinSecond = {
+            denom: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
+            base_denom: pool.reserve_coin_denoms[1],
+            on_chain: dexChain,
+          };
+          const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
+          return denomsInfo;
+        }),
+      );
 
-    denoms.forEach((denoms) => {
-      list.push(...denoms);
-    });
+      denoms.forEach((denoms) => {
+        list.push(...denoms);
+      });
 
-    function dedupe(arr) {
-      return arr.reduce(
-        function (p, c) {
-          // create an identifying id from the object values
-          const id = c.denom;
+      function dedupe(arr) {
+        return arr.reduce(
+          function (p, c) {
+            // create an identifying id from the object values
+            const id = c.denom;
 
-          // if the id is not found in the temp array
-          // add the object to the output array
-          // and add the key to the temp array
-          if (p.temp.indexOf(id) === -1) {
-            p.out.push(c);
-            p.temp.push(id);
-          }
-          return p;
+            // if the id is not found in the temp array
+            // add the object to the output array
+            // and add the key to the temp array
+            if (p.temp.indexOf(id) === -1) {
+              p.out.push(c);
+              p.temp.push(id);
+            }
+            return p;
 
-          // return the deduped array
-        },
-        {
-          temp: [],
-          out: [],
-        },
-      ).out;
+            // return the deduped array
+          },
+          {
+            temp: [],
+            out: [],
+          },
+        ).out;
+      }
+
+      return dedupe(list);
+    } else {
+      return [];
     }
-
-    return dedupe(list);
   };
   return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById, denomListByPools };
 }
