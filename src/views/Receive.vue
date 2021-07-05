@@ -43,6 +43,7 @@
 <script lang="ts">
 import { reactive } from '@vue/reactivity';
 import { computed } from '@vue/runtime-core';
+import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -51,7 +52,7 @@ import QrCode from '@/components/common/QrCode.vue';
 import Address from '@/components/ui/Address.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { Balance } from '@/types/api';
+import { Balance, Balances } from '@/types/api';
 
 export default {
   name: 'Receive',
@@ -60,17 +61,33 @@ export default {
   setup() {
     const { balances } = useAccount();
 
+    const store = useStore();
+
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'];
+    });
+
+    const allBalances = computed<Balances>(() => {
+      return [
+        ...(balances.value as Balances),
+        ...verifiedDenoms.value.map((denom) => ({
+          base_denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: 0,
+        })),
+      ];
+    });
+
     const nativeBalances = computed(() => {
       const result = [];
       // TODO: Check if denom is native to its chain
-      for (const balance of balances.value) {
+      for (const balance of allBalances.value) {
         if (!result.some((item) => item.base_denom === balance.base_denom)) {
           result.push(balance);
         }
       }
       return result;
     });
-
     const state = reactive({
       selectedAsset: undefined,
     });
