@@ -21,7 +21,7 @@
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
         <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
-          <img class="coin-list__info-image" :src="getCoinImage(coin.base_denom)" :alt="`${coin.base_denom} coin`" />
+          <img class="coin-list__info-image" :src="getCoinImage(coin.display_name)" :alt="`${coin.base_denom} coin`" />
         </div>
       </tippy>
       <div class="coin-list__info-details">
@@ -159,8 +159,15 @@ export default defineComponent({
 
     function getCoinImage(denom) {
       try {
+        let denomIconName = 'empty';
+        if (denom.includes('GDEX')) {
+          denomIconName = 'pool';
+        } else {
+          //TODO adjust url
+          denomIconName = denom.toLowerCase();
+        }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${true ? denom?.substr(1) : 'empty'}.png`);
+        const image = require(`@/assets/coins/${denomIconName}.png`);
         return image;
       } catch {
         return require(`@/assets/coins/empty.png`);

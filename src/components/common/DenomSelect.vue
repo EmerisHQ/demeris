@@ -92,10 +92,16 @@ export default defineComponent({
 
     const coinImage = computed(() => {
       try {
+        const denom = props.selectedDenom?.display_name;
+        let denomIconName = 'empty';
+        if (denom.includes('GDEX')) {
+          denomIconName = 'pool';
+        } else {
+          //TODO adjust url
+          denomIconName = denom.toLowerCase();
+        }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${
-          isSelected.value ? props.selectedDenom.base_denom?.substr(1) : 'empty'
-        }.png`);
+        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
         return image;
       } catch {
         return require(`@/assets/coins/empty.png`);
