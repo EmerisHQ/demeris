@@ -27,12 +27,12 @@
           <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
           <div class="receive__main__asset__qr">
             <div class="receive__main__asset__qr__code">
-              <QrCode :value="state.selectedAsset.address" width="160" />
+              <QrCode :value="recipientAddress" width="160" />
             </div>
           </div>
           <div>
             <p class="receive__main__asset__label s-minus w-bold">Your address</p>
-            <Address :address="state.selectedAsset.address" :chain-name="state.selectedAsset.on_chain" readonly />
+            <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
           </div>
         </div>
       </template>
@@ -88,8 +88,13 @@ export default {
       }
       return result;
     });
+
     const state = reactive({
       selectedAsset: undefined,
+    });
+
+    const recipientAddress = computed(() => {
+      return store.getters['demeris/getOwnAddress']({ chain_name: state.selectedAsset.on_chain });
     });
 
     const goBack = () => {
@@ -100,7 +105,7 @@ export default {
       state.selectedAsset = asset;
     };
 
-    return { balances: nativeBalances, state, goBack, assetSelectHandler };
+    return { balances: nativeBalances, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
 </script>
