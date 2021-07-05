@@ -1,5 +1,7 @@
 <template>
-  <div class="denom-select-modal-wrapper">
+  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidth, 'tx-steps--widget': asWidget }">
+    <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
+
     <div class="title s-2 w-bold">
       {{ currentData.title }}
     </div>
@@ -117,7 +119,13 @@
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
     </div>
-    <TxHandlingModal v-if="isTxHandlingModalOpen" :status="currentData.txstatus" @close="toggleTxHandlingModal" />
+
+    <TxHandlingModal
+      v-if="isTxHandlingModalOpen"
+      :modal-variant="asWidget ? 'bottom' : 'full'"
+      :status="currentData.txstatus"
+      @close="toggleTxHandlingModal"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -125,6 +133,7 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs }
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
@@ -138,6 +147,7 @@ import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/uti
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
+    GobackWithClose,
     PreviewTransfer,
     PreviewSwap,
     Button,
@@ -154,8 +164,13 @@ export default defineComponent({
       type: String as PropType<GasPriceLevel>,
       required: true,
     },
+    asWidget: {
+      type: Boolean,
+      default: false,
+    },
   },
-  setup(props) {
+  emits: ['goback', 'close'],
+  setup(props, { emit }) {
     console.log('modalProps', props.data);
     const fees = ref([]);
     const store = useStore();
@@ -199,6 +214,9 @@ export default defineComponent({
         modifiedData.fees = fees.value[processData.currentStep];
         return modifiedData;
       }),
+      emitHandler: (event) => {
+        emit(event);
+      },
       setStep: async () => {
         processData.isTxHandlingModalOpen = true;
         for (let stepTx of processData.currentData.data.transactions) {
@@ -268,6 +286,10 @@ export default defineComponent({
 
   background-color: var(--surface);
   z-index: 10;
+
+  &.tx-steps--widget > .title {
+    text-align: left;
+  }
 
   .title {
     padding: 0 2.4rem 2.4rem;

@@ -68,9 +68,9 @@
           </ul>
         </section>
 
-        <!-- Staking -->
+        <!-- TODO: Staking -->
 
-        <section class="asset__main__staking asset__list">
+        <section v-if="false" class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
             <button class="asset__list__header__button">

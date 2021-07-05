@@ -5,12 +5,12 @@
         <section class="pool__main__stats">
           <span class="pool__main__stats__subtitle">Gravity DEX Pool</span>
           <div class="pool__main__stats__header">
-            <h2 class="pool__main__stats__name s-2">{{ formatPoolName(pool) }}</h2>
+            <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
           <h1 class="pool__main__stats__supply">$130,040,429</h1>
         </section>
 
-        <section class="pool__main__assets">
+        <section v-if="reserveBalances" class="pool__main__assets">
           <h2 class="pool__main__assets__title s-2">Underlying assets</h2>
 
           <table class="pool__main__assets__table assets-table">
@@ -24,12 +24,12 @@
             </thead>
 
             <tbody>
-              <tr v-for="balance of reserveBalances" :key="balance.base_denom" class="assets-table__row">
+              <tr v-for="balance of reserveBalances" :key="balance.denom" class="assets-table__row">
                 <td class="assets-table__row__denom">
                   <div class="assets-table__row__denom__avatar" />
-                  <span class="w-bold">{{ $filters.getCoinName(balance.base_denom) }}</span>
+                  <span class="w-bold"><Denom :name="balance.denom" /></span>
                 </td>
-                <td class="text-right">{{ balance.amount }} {{ $filters.getCoinName(balance.base_denom) }}</td>
+                <td class="text-right"><AmountDisplay :amount="balance" /></td>
                 <td class="text-right">$20.50</td>
                 <td class="text-right w-bold">65,020.75</td>
               </tr>
@@ -100,22 +100,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import Denom from '@/components/common/Denom.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
   name: 'Pool',
 
   components: {
+    AmountDisplay,
     AppLayout,
+    Denom,
     Icon,
     Button,
     Pools,
@@ -124,29 +127,10 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
 
-    const { poolById, formatPoolName, poolsByDenom } = usePools();
+    const { formatPoolName, poolsByDenom } = usePools();
 
-    const pool = computed(() => {
-      return poolById(+route.params.id);
-    });
-
-    const reserveBalances = computed(() => {
-      // return store.getters['demeris/getBalances']({ address: pool.value.reserveAccountAddress });
-      const balances = [
-        {
-          base_denom: pool.value.reserve_coin_denoms[0],
-          amount: 100,
-        },
-        {
-          base_denom: pool.value.reserve_coin_denoms[1],
-          amount: 200,
-        },
-      ];
-
-      return balances;
-    });
+    const { pool, reserveBalances, pairName } = usePool(computed(() => route.params.id as string));
 
     const relatedPools = computed(() => {
       return [
@@ -154,12 +138,6 @@ export default defineComponent({
         ...poolsByDenom(pool.value.reserve_coin_denoms[1]),
       ].filter((item) => item.id !== pool.value.id);
     });
-
-    const updateReserveBalances = () => {
-      store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
-        params: { address: pool.value.reserve_account_address },
-      });
-    };
 
     const addLiquidityHandler = () => {
       router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
@@ -169,12 +147,9 @@ export default defineComponent({
       router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
     };
 
-    watch(pool, updateReserveBalances, { immediate: true });
-
     return {
-      router,
-      route,
       pool,
+      pairName,
       reserveBalances,
       relatedPools,
       addLiquidityHandler,
@@ -313,6 +288,7 @@ export default defineComponent({
         border-radius: 2.6rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 1.6rem;
+        flex-shrink: 0;
       }
     }
   }

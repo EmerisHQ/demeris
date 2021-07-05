@@ -1,6 +1,6 @@
 <template>
   <Modal
-    :variant="'bottom'"
+    :variant="'full'"
     :show-close-button="false"
     :body-class="status === 'transferred' ? 'transferred-bg' : ''"
     @close="emitClose"
@@ -108,6 +108,10 @@ export default defineComponent({
     status: {
       type: String as PropType<Status>,
       default: 'keplr-sign',
+    },
+    modalVariant: {
+      type: String,
+      default: 'full',
     },
     blackButtonFunc: {
       type: Function,

@@ -24,7 +24,7 @@ import { computed, CSSProperties, defineComponent, PropType } from 'vue';
 
 import Icon from './Icon.vue';
 
-type ModalVariant = 'dialog' | 'fullscreen' | 'bottom';
+type ModalVariant = 'dialog' | 'full' | 'fullscreen' | 'bottom';
 
 export default defineComponent({
   name: 'Modal',
@@ -106,11 +106,6 @@ export default defineComponent({
   font-size: 1.6rem;
   margin: 0 !important;
 
-  &--closed {
-    height: 0;
-    width: 0;
-  }
-
   &__overlay {
     position: fixed;
     inset: 0;
@@ -141,6 +136,19 @@ export default defineComponent({
     padding: 2.4rem;
     width: 100%;
     z-index: 40;
+  }
+
+  &--full {
+    position: absolute;
+  }
+
+  &--full &__overlay {
+    display: none;
+  }
+
+  &--full &__body {
+    width: 100%;
+    height: 100%;
   }
 
   &--bottom {

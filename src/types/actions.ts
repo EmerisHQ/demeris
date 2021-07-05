@@ -138,7 +138,7 @@ export type FeeWDenom = {
 export type Pool = {
   display_name?: string;
   /** id of the pool */
-  id: number;
+  id: string;
   /** id of the pool_type */
   type_id: number;
   /** denoms of reserve coin pair of the pool */

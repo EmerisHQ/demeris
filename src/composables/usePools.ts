@@ -26,10 +26,10 @@ export default function usePools() {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
   };
 
-  const poolById = (id: number) => {
+  const poolById = (id: string) => {
     return pools.value.find((item) => item.id === id);
   };
-  const poolPriceById = async (id: number) => {
+  const poolPriceById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
     const balances = (
       await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {

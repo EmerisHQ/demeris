@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
-import usePools from '@/composables/usePools';
+import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 
 import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
@@ -42,11 +42,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const pairName = ref('-/-');
-    const { formatPoolName } = usePools();
-    onMounted(async () => {
-      pairName.value = await formatPoolName(props.pool as Pool);
-    });
+    const { pairName } = usePool((props.pool as Pool).id);
 
     return { pairName };
   },

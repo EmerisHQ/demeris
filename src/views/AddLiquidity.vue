@@ -333,7 +333,7 @@ export default {
         return;
       }
 
-      const poolFromRoute = pools.value.find((item) => item.id === +poolId.value);
+      const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
 
       if (poolFromRoute) {
         // TODO: Find chain by user balance

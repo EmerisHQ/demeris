@@ -1,12 +1,12 @@
-import { computed, ComputedRef, unref, watch } from 'vue';
+import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
 
 import usePools from './usePools';
 
-export default function usePool(id?: number | ComputedRef<number>) {
+export default function usePool(id?: string | ComputedRef<string>) {
   const store = useAllStores();
-  const { poolById } = usePools();
+  const { poolById, formatPoolName } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -17,6 +17,16 @@ export default function usePool(id?: number | ComputedRef<number>) {
 
     return poolById(poolId);
   });
+
+  const pairName = ref('-/-');
+
+  const setPairName = async () => {
+    if (!pool.value) {
+      return;
+    }
+
+    pairName.value = await formatPoolName(pool.value);
+  };
 
   const totalSupply = computed(() => {
     if (!pool.value) {
@@ -82,10 +92,18 @@ export default function usePool(id?: number | ComputedRef<number>) {
     return withdrawCoins;
   };
 
-  watch(pool, updateReserveBalances, { immediate: true });
+  watch(
+    pool,
+    () => {
+      updateReserveBalances();
+      setPairName();
+    },
+    { immediate: true },
+  );
 
   return {
     pool,
+    pairName,
     totalSupply,
     reserveBalances,
     updateReserveBalances,
