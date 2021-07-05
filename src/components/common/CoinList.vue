@@ -21,11 +21,7 @@
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
         <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
-          <img
-            class="coin-list__info-image"
-            :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-            :alt="`${coin.base_denom} coin`"
-          />
+          <img class="coin-list__info-image" :src="getCoinImage(coin.base_denom)" :alt="`${coin.base_denom} coin`" />
         </div>
       </tippy>
       <div class="coin-list__info-details">
@@ -105,7 +101,6 @@ export default defineComponent({
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     const modifiedData = computed(() => getUniqueCoinList(props.data));
     const tooltipInstance = ref(null);
-
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
@@ -162,7 +157,17 @@ export default defineComponent({
       return colour;
     }
 
-    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip, stringToColor };
+    function getCoinImage(denom) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const image = require(`@/assets/coins/${true ? denom?.substr(1) : 'empty'}.png`);
+        return image;
+      } catch {
+        return require(`@/assets/coins/empty.png`);
+      }
+    }
+
+    return { iconColor, getCoinImage, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip, stringToColor };
   },
 });
 </script>
