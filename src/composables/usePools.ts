@@ -52,16 +52,19 @@ export default function usePools() {
             display_name: await getDisplayName(pool.pool_coin_denom, dexChain),
             base_denom: pool.pool_coin_denom,
             on_chain: dexChain,
+            amount: 0,
           };
           const reserveCoinFirst = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
             base_denom: pool.reserve_coin_denoms[0],
             on_chain: dexChain,
+            amount: 0,
           };
           const reserveCoinSecond = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
             base_denom: pool.reserve_coin_denoms[1],
             on_chain: dexChain,
+            amount: 0,
           };
           const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
           return denomsInfo;

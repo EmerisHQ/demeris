@@ -247,8 +247,23 @@ export default defineComponent({
       baseAssetList: [],
       userAssetList: computed(() => {
         if (data.isWallet) {
-          return store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+          const userWalletBalance =
+            store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }) || [];
+
+          if (userWalletBalance.length) {
+            //wallet with assets
+            // console.log('userWalletBalance', userWalletBalance)
+
+            // let userAssetList =[]
+            // data.baseAssetList
+            return data.receiveAssetList;
+          } else {
+            // wallet without assets
+            // at here, we can set open modal for moonpay?
+            return data.receiveAssetList;
+          }
         } else {
+          // wallet
           return data.receiveAssetList;
         }
       }),
@@ -259,7 +274,7 @@ export default defineComponent({
         for (let i in data.baseAssetList) {
           const coin = data.baseAssetList[i];
           // user login => set amount else set amount => 0
-          receiveAvailableAssets.push({ ...coin, amount: 0 });
+          receiveAvailableAssets.push({ ...coin });
         }
 
         return receiveAvailableAssets;
@@ -318,7 +333,6 @@ export default defineComponent({
     watch(pools, () => {
       (async () => {
         data.baseAssetList = await denomListByPools();
-        console.log(data.baseAssetList);
       })();
     });
 
