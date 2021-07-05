@@ -93,7 +93,7 @@
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
       </div>
-      {{ baseAssetList }}
+
       <!-- swap button -->
       <div class="button-wrapper">
         <ActionButton

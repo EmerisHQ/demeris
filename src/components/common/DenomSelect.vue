@@ -16,7 +16,15 @@
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
-        {{ selectedDenom.display_name }}
+        <tippy
+          v-if="selectedDenom.display_name.startsWith('GDEX')"
+          :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
+          class="tippy-info"
+        >
+          <div class="max-display-width">{{ selectedDenom.display_name }}</div>
+          <template #content> {{ selectedDenom.display_name }} </template>
+        </tippy>
+        <div v-else class="max-display-width">{{ selectedDenom.display_name }}</div>
         <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
@@ -139,6 +147,13 @@ export default defineComponent({
 
       .icon {
         margin-left: 0.4rem;
+      }
+
+      .max-display-width {
+        max-width: 15rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
