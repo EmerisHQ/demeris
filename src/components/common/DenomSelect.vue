@@ -109,7 +109,6 @@ export default defineComponent({
       toggleDenomSelectModal();
     }
 
-    console.log(props.assets);
     return { inputAmount, isSelected, isOpen, coinImage, hasOptions, toggleDenomSelectModal, denomSelectHandler };
   },
 });
