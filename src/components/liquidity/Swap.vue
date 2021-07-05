@@ -254,19 +254,12 @@ export default defineComponent({
       }),
 
       receiveAssetList: computed(() => {
-        const chains = store.getters['demeris/getChains'];
         let receiveAvailableAssets = [];
 
-        for (let chain in chains) {
-          if (chains[chain]?.denoms) {
-            chains[chain].denoms.forEach((item) => {
-              receiveAvailableAssets.push({
-                base_denom: item.name,
-                on_chain: 'cosmos-hub',
-                amount: 0,
-              });
-            });
-          }
+        for (let i in data.baseAssetList) {
+          const coin = data.baseAssetList[i];
+          // user login => set amount else set amount => 0
+          receiveAvailableAssets.push({ ...coin, amount: 0 });
         }
 
         return receiveAvailableAssets;
