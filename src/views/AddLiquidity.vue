@@ -310,7 +310,7 @@ export default {
         action = {
           name: 'addliquidity',
           params: {
-            pool_id: BigInt(1),
+            pool_id: BigInt(pool.value.id),
             ...baseParams,
           },
         } as AddLiquidityAction;
