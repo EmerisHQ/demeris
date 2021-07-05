@@ -145,7 +145,7 @@ export async function transfer({
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {
@@ -322,7 +322,7 @@ export async function move({
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {
@@ -503,7 +503,7 @@ export async function transferToHub({ amount, chain_name }: ChainAmount) {
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {
@@ -681,7 +681,7 @@ export async function transferFromHub({ amount, chain_name }: ChainAmount) {
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name, hash: amount.denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {
@@ -827,12 +827,9 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
     ));
-  // create our asset pair sorted alphabetically
-  const assetPair = [coinA.denom, coinB.denom].sort();
-  // Find the pool for that pair
-  const pool =
-    liquidityPools.pools.find((x) => JSON.stringify(x.reserveCoinDenoms) == JSON.stringify(assetPair)) ?? null;
-  if (pool && pool.id == pool_id) {
+  // Find the pool for that pair by base denoms
+  const pool = liquidityPools.pools.find((item) => item.id == pool_id);
+  if (pool) {
     result.steps.push({
       name: 'addliquidity',
       status: 'pending',
@@ -973,11 +970,14 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.coinA.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
-        steps.push({
-          name: 'transfer',
-          description: 'AssetA must be transferred to hub', //TODO
-          transactions: [...transferCoinAtoHub.steps],
-        });
+
+        if (transferCoinAtoHub.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'AssetA must be transferred to hub', //TODO
+            transactions: [...transferCoinAtoHub.steps],
+          });
+        }
 
         const transferCoinBtoHub = await move({
           amount: {
@@ -987,11 +987,15 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.coinB.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
-        steps.push({
-          name: 'transfer',
-          description: 'AssetB must be transferred to hub', //TODO
-          transactions: [...transferCoinBtoHub.steps],
-        });
+
+        if (transferCoinBtoHub.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'AssetB must be transferred to hub', //TODO
+            transactions: [...transferCoinBtoHub.steps],
+          });
+        }
+
         const addLiquidityStep = await addLiquidity({
           pool_id: params.pool_id,
           coinA: transferCoinAtoHub.output.amount,
@@ -1165,6 +1169,36 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   }
   return fees;
 }
+export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
+  const chain_name = chainName || store.getters['demeris/getDexChain'];
+  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+
+  if (verifiedDenoms.find((item) => item.name === denom)) {
+    return denom;
+  }
+
+  const hash = denom.split('/')[1];
+
+  if (!hash) {
+    return;
+  }
+
+  let trace = store.getters['demeris/getVerifyTrace']({ chain_name, hash });
+
+  if (!trace) {
+    trace = await store.dispatch(
+      'demeris/GET_VERIFY_TRACE',
+      { subscribe: false, params: { chain_name, hash: denom.split('/')[1] } },
+      { root: true },
+    );
+  }
+
+  if (trace) {
+    return trace.base_denom;
+  }
+
+  return denom;
+}
 export async function getDisplayName(name, chain_name = null) {
   if (isNative(name)) {
     const displayName = store.getters['demeris/getVerifiedDenoms'].find((x) => x.name == name)?.display_name ?? null;
@@ -1193,7 +1227,7 @@ export async function getDisplayName(name, chain_name = null) {
         store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
           'demeris/GET_VERIFY_TRACE',
-          { subscribe: true, params: { chain_name, hash: name.split('/')[1] } },
+          { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
       if (verifyTrace.verified) {

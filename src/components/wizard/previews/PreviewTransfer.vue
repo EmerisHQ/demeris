@@ -149,9 +149,11 @@ export default defineComponent({
 
       from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
 
-      if (stepType.value === 'move') {
+      if (to.chain) {
         to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
-      } else {
+      }
+
+      if (stepType.value === 'transfer') {
         to.amount = to.amount - totalFees;
       }
 

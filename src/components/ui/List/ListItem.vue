@@ -1,9 +1,11 @@
 <template>
   <div
+    :key="label || description"
     class="list-item"
     :class="[
       `list-item--${direction}`,
       {
+        'list-item--descripted': !label,
         'list-item--inset': inset,
         'list-item--collapsed': isCollapsed,
       },
@@ -101,6 +103,10 @@ export default defineComponent({
   justify-content: space-between;
   width: 100%;
   padding: 1.6rem 0;
+
+  &--descripted {
+    align-items: center;
+  }
 
   &--inset {
     padding: 0.6rem 0;

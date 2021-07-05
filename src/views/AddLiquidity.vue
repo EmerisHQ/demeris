@@ -48,7 +48,7 @@
                 :assets="balances"
                 :selected-denom="form[state.chainsModalSource].asset.base_denom"
                 :func="() => toggleChainsModal()"
-                @select="toggleChainsModal()"
+                @select="toggleChainsModal"
               />
             </div>
 
@@ -94,8 +94,8 @@
               <span class="add-liquidity__price__divider" />
               <div class="add-liquidity__price__container">
                 <template v-if="form.coinA.asset && form.coinB.asset">
-                  1 <span class="uppercase">{{ $filters.getCoinName(form.coinA.asset.base_denom) }}</span> : 1.78
-                  <span class="uppercase">{{ $filters.getCoinName(form.coinB.asset.base_denom) }}</span>
+                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> :
+                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinB.asset.base_denom }" />
                 </template>
                 <span v-else>Price</span>
               </div>
@@ -184,7 +184,11 @@
         </template>
       </template>
 
-      <template v-if="state.step === 'review'"> Review </template>
+      <template v-if="state.step === 'review'">
+        <section class="add-liquidity__content add-liquidity__review">
+          <TxStepsModal :data="actionSteps" gas-price-level="average" />
+        </section>
+      </template>
     </main>
   </div>
 </template>
@@ -198,24 +202,29 @@ import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import { useStore } from '@/store';
+import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
-import { getDisplayName } from '@/utils/actionHandler';
+import { actionHandler } from '@/utils/actionHandler';
 
 export default {
   name: 'AddLiquidity',
-  components: { AmountDisplay, Icon, Button, ChainName, Denom, DenomSelect, Alert, ChainSelectModal },
+  components: { AmountDisplay, Icon, Button, ChainName, Denom, DenomSelect, Alert, ChainSelectModal, TxStepsModal },
 
   setup() {
     const route = useRoute();
     const router = useRouter();
+    const store = useStore();
     const poolId = computed(() => route.params.id as unknown as string);
-    const displayDenoms = ref([]);
+    const pool = ref<Pool>();
+    const actionSteps = ref<Step[]>([]);
 
     const steps = ['amount', 'review', 'send'];
 
@@ -237,19 +246,10 @@ export default {
       },
     });
 
-    const { pools } = usePools();
+    const { pools, getReserveBaseDenoms } = usePools();
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
-    });
-
-    const pool = computed(() => {
-      if (hasPair.value) {
-        const denoms = displayDenoms.value.sort();
-        return pools.value.find((pool) => pool.display_name.toLowerCase() === denoms.join('/').toLowerCase());
-      }
-
-      return undefined;
     });
 
     const { calculateSupplyTokenAmount } = usePool(computed(() => pool.value?.id));
@@ -273,7 +273,7 @@ export default {
     });
 
     const needsTransferToHub = computed(() => {
-      const hubName = 'Cosmos';
+      const hubName = store.getters['demeris/getDexChain'];
 
       if (form.coinA.asset?.on_chain !== hubName || form.coinB.asset?.on_chain !== hubName) {
         return true;
@@ -281,6 +281,70 @@ export default {
 
       return false;
     });
+
+    const generateActionSteps = async () => {
+      let action: AddLiquidityAction | CreatePoolAction;
+      const precisions = [
+        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }),
+        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }),
+      ];
+
+      const baseParams = {
+        coinA: {
+          amount: {
+            amount: (+form.coinA.amount * Math.pow(10, precisions[0])).toString(),
+            denom: form.coinA.asset.base_denom,
+          },
+          chain_name: form.coinA.asset.on_chain,
+        },
+        coinB: {
+          amount: {
+            amount: (+form.coinB.amount * Math.pow(10, precisions[1])).toString(),
+            denom: form.coinB.asset.base_denom,
+          },
+          chain_name: form.coinB.asset.on_chain,
+        },
+      };
+
+      if (hasPool.value) {
+        action = {
+          name: 'addliquidity',
+          params: {
+            pool_id: BigInt(1),
+            ...baseParams,
+          },
+        } as AddLiquidityAction;
+      } else {
+        // TODO:
+        // action = {
+        // 	name: 'createliquidity',
+        // 	params: {
+        // 		poolCreatorAddress: ''
+        // 		poolTypeId: 1,
+        // 		...baseParams
+        // 	}
+        // } as CreatePoolAction
+      }
+      const result = await actionHandler(action);
+      actionSteps.value = result;
+    };
+
+    const findPoolByDenoms = async () => {
+      if (hasPair.value) {
+        const denoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
+
+        for (const poolIterator of pools.value) {
+          const reserveDenoms = await getReserveBaseDenoms(poolIterator);
+
+          if (reserveDenoms.join().toLowerCase() === denoms.join().toLowerCase()) {
+            pool.value = poolIterator;
+            return;
+          }
+        }
+      }
+
+      return undefined;
+    };
 
     const onClose = () => {
       router.push('/pools');
@@ -308,7 +372,7 @@ export default {
         return;
       }
 
-      if (needsTransferToHub.value) {
+      if (!hasPool.value) {
         state.isTransferConfirmationOpen = true;
         return;
       }
@@ -328,7 +392,7 @@ export default {
       state.step = step;
     };
 
-    onMounted(() => {
+    onMounted(async () => {
       if (!poolId.value) {
         return;
       }
@@ -336,25 +400,26 @@ export default {
       const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
 
       if (poolFromRoute) {
-        // TODO: Find chain by user balance
-        // @ts-ignore
-        form.coinA.asset = { base_denom: poolFromRoute.reserve_coin_denoms[0] };
-        // @ts-ignore
-        form.coinB.asset = { base_denom: poolFromRoute.reserve_coin_denoms[1] };
+        const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
+        form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
+        form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
       }
     });
 
-    watch([form.coinA, form.coinB], async () => {
-      if (form.coinA.asset?.base_denom) {
-        displayDenoms.value[0] = await getDisplayName(form.coinA.asset.base_denom, form.coinA.asset.on_chain);
+    watch(hasPair, async () => {
+      if (hasPair.value) {
+        await findPoolByDenoms();
       }
+    });
 
-      if (form.coinB.asset?.base_denom) {
-        displayDenoms.value[1] = await getDisplayName(form.coinB.asset.base_denom, form.coinB.asset.on_chain);
+    watch([form.coinA, form.coinB, pool], async () => {
+      if (pool.value) {
+        await generateActionSteps();
       }
     });
 
     return {
+      actionSteps,
       balances,
       balancesForSecond,
       pool,
@@ -466,6 +531,10 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  &__review {
+    max-width: 44rem;
   }
 
   &__pool {

@@ -1,14 +1,19 @@
 <template>
-  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidth, 'tx-steps--widget': asWidget }">
+  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
     <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
 
     <div class="title s-2 w-bold">
       {{ currentData.title }}
     </div>
 
-    <template v-if="['transfer', 'move', 'redeem', 'swap'].includes(currentData.data.name)">
+    <template v-if="['transfer', 'move', 'redeem', 'swap', 'addliquidity'].includes(currentData.data.name)">
       <div class="detail">
         <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+        <PreviewAddLiquidity
+          v-else-if="currentData.data.name === 'addliquidity'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
         <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
       </div>
     </template>
@@ -137,6 +142,7 @@ import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -149,6 +155,7 @@ export default defineComponent({
   components: {
     GobackWithClose,
     PreviewTransfer,
+    PreviewAddLiquidity,
     PreviewSwap,
     Button,
     HintIcon,

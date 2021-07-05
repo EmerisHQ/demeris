@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 
 import { Pool } from '@/types/actions';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 import { store, useAllStores } from '../store/index';
 
@@ -22,6 +22,10 @@ export default function usePools() {
       .toUpperCase();
   };
 
+  const getReserveBaseDenoms = async (pool: Pool) => {
+    return Promise.all([getBaseDenom(pool.reserve_coin_denoms[0]), getBaseDenom(pool.reserve_coin_denoms[1])]);
+  };
+
   const poolsByDenom = (denom: string) => {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
   };
@@ -29,6 +33,7 @@ export default function usePools() {
   const poolById = (id: string) => {
     return pools.value.find((item) => item.id === id);
   };
+
   const poolPriceById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
     const balances = (
@@ -40,5 +45,5 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
-  return { pools, poolsByDenom, poolById, formatPoolName, poolPriceById };
+  return { pools, getReserveBaseDenoms, poolsByDenom, poolById, formatPoolName, poolPriceById };
 }
