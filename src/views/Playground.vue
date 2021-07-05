@@ -274,14 +274,14 @@ export default defineComponent({
         registry: res.registry,
         memo: 'a memo',
       });
-      /*
+
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
         subscribe: true,
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
 
-      return txPromise;*/
+      return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);
