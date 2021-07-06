@@ -126,7 +126,8 @@ export default defineComponent({
 
       newData.forEach((denom) => {
         if (denomNameObejct[denom.base_denom]) {
-          denomNameObejct[denom.base_denom].amount += denom.amount;
+          denomNameObejct[denom.base_denom].amount =
+            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
         } else {
           denomNameObejct[denom.base_denom] = denom;
         }
