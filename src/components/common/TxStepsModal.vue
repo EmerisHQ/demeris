@@ -122,19 +122,20 @@
     </div>
 
     <div class="button-wrapper">
-      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="setStep" />
+      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
     </div>
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
-      :status="currentData.txstatus"
+      :status="txstatus"
+      :black-button-func="nextTx"
       @close="toggleTxHandlingModal"
     />
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -188,94 +189,103 @@ export default defineComponent({
         }),
       );
     });
-    const processData = reactive({
-      currentStep: 0,
-      currentData: computed(() => {
-        const currentStepData = props.data[processData.currentStep];
-        const modifiedData = {
-          isSwap: false,
-          title: '',
-          fees: [],
-          data: currentStepData,
-          txstatus: 'keplr-sign',
-        } as { isSwap: boolean; title: string; fees: Array<Amount>; data: Step; txstatus: string };
-        console.log('currentStepData', currentStepData);
-        switch (currentStepData.name) {
-          case 'swap':
-            modifiedData.isSwap = true;
-            modifiedData.title = 'Review your swap details';
-            break;
-          case 'transfer':
-            modifiedData.isSwap = false;
-            modifiedData.title = 'Review your transfer details';
-            break;
-          case 'redeem':
-            break;
-          case 'addliquidity':
-            modifiedData.title = 'Review your pool liquidity details';
-            break;
-          case 'withdrawliquidity':
-            break;
-          case 'createpool':
-            break;
-        }
-        modifiedData.fees = fees.value[processData.currentStep];
-        return modifiedData;
-      }),
-      emitHandler: (event) => {
-        emit(event);
+    watch(
+      () => props.data,
+      async (newData) => {
+        fees.value = await Promise.all(
+          (newData as Step[]).map(async (step) => {
+            return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
+          }),
+        );
       },
-      setStep: async () => {
-        processData.isTxHandlingModalOpen = true;
-        for (let stepTx of processData.currentData.data.transactions) {
-          let res = await msgFromStepTransaction(stepTx);
-          const feeOptions = await feeForStepTransaction(stepTx);
-          const fee = {
-            amount: [
-              {
-                amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
-                denom: feeOptions[0].denom,
-              },
-            ],
-            gas: '300000',
-          };
-          processData.currentData.txstatus = 'keplr-sign';
-          console.log({
-            msgs: [res.msg],
-            chain_name: res.chain_name,
-            fee,
-            registry: res.registry,
-            memo: 'a memo',
-          });
-          let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-            msgs: [res.msg],
-            chain_name: res.chain_name,
-            fee,
-            registry: res.registry,
-            memo: 'a memo',
-          });
-          console.log('Should change?');
-          processData.currentData.txstatus = 'transferring';
-          let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
-
-          const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
-            subscribe: true,
-            params: { chain_name: res.chain_name, ticket: result.ticket },
-          });
-          await txPromise;
-          processData.currentData.txstatus = 'transferred';
-        }
-        processData.isTxHandlingModalOpen = false;
-        processData.currentStep += 1;
-      },
-      isTxHandlingModalOpen: false,
-
-      toggleTxHandlingModal: () => {
-        processData.isTxHandlingModalOpen = !processData.isTxHandlingModalOpen;
-      },
+    );
+    const txToResolve = ref({});
+    const isTxHandlingModalOpen = ref(false);
+    const toggleTxHandlingModal = () => {
+      isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
+    };
+    const nextTx = () => {
+      txToResolve.value['resolver']();
+    };
+    const currentStep = ref(0);
+    const txstatus = ref('keplr-sign');
+    const currentData = computed(() => {
+      const currentStepData = props.data[currentStep.value];
+      const modifiedData = {
+        isSwap: false,
+        title: '',
+        fees: [],
+        data: currentStepData,
+      } as { isSwap: boolean; title: string; fees: Array<Amount>; data: Step };
+      switch (currentStepData.name) {
+        case 'swap':
+          modifiedData.isSwap = true;
+          modifiedData.title = 'Review your swap details';
+          break;
+        case 'transfer':
+          modifiedData.isSwap = false;
+          modifiedData.title = 'Review your transfer details';
+          break;
+        case 'redeem':
+          break;
+        case 'addliquidity':
+          modifiedData.title = 'Review your pool liquidity details';
+          break;
+        case 'withdrawliquidity':
+          break;
+        case 'createpool':
+          break;
+      }
+      modifiedData.fees = fees.value[currentStep.value];
+      return modifiedData;
     });
+    const confirm = async () => {
+      isTxHandlingModalOpen.value = true;
+      for (let stepTx of currentData.value.data.transactions) {
+        let txToResolveResolver;
+        const txToResolvePromise = {
+          promise: new Promise((resolve) => {
+            txToResolveResolver = resolve;
+          }),
+          resolver: txToResolveResolver,
+        };
 
-    return toRefs(processData);
+        txToResolve.value = txToResolvePromise;
+        let res = await msgFromStepTransaction(stepTx);
+        const feeOptions = await feeForStepTransaction(stepTx);
+        const fee = {
+          amount: [
+            {
+              amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
+              denom: feeOptions[0].denom,
+            },
+          ],
+          gas: '300000',
+        };
+        txstatus.value = 'keplr-sign';
+        let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+          msgs: [res.msg],
+          chain_name: res.chain_name,
+          fee,
+          registry: res.registry,
+          memo: 'a memo',
+        });
+        txstatus.value = 'transferring';
+        let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+
+        const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+          subscribe: true,
+          params: { chain_name: res.chain_name, ticket: result.ticket },
+        });
+        await txPromise;
+        txstatus.value = 'transferred';
+        await txToResolve.value['promise'];
+      }
+    };
+    const emitHandler = (event) => {
+      emit(event);
+    };
+    return { emitHandler, txstatus, confirm, toggleTxHandlingModal, currentData, isTxHandlingModalOpen, nextTx };
   },
 });
 </script>
