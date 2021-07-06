@@ -103,71 +103,12 @@
           :tooltip-text="buttonTooltipText"
         />
       </div>
-
-      <div
-        class="fees s-minus"
-        :class="isFeesOpen ? 'fees-detail-open' : ''"
-        @click="
-          () => {
-            isFeesOpen = !isFeesOpen;
-          }
-        "
-      >
-        <div>Fees (included)</div>
-        <div class="fees-total">
-          <span v-show="!isFeesOpen">~$12.3</span>
-          <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
-          <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
-        </div>
-      </div>
-      <div v-if="isFeesOpen" class="fees-detail">
-        <div class="fees-detail__info s-minus">
-          <div class="fees-detail__info-key">Transaction fee(x3)</div>
-          <div class="fees-detail__info-value">$0.06</div>
-        </div>
-
-        <div class="fees-detail__selector s-minus">
-          <button
-            class="fees-detail__selector-block"
-            :class="gasPriceLevel === 'slow' ? 'selected' : ''"
-            @click="setGasPriceLevel('slow')"
-          >
-            <div class="fees-detail__selector-block-level">Slow</div>
-            <div class="fees-detail__selector-block-value">$0.01</div>
-          </button>
-          <button
-            class="fees-detail__selector-block"
-            :class="gasPriceLevel === 'normal' ? 'selected' : ''"
-            @click="setGasPriceLevel('normal')"
-          >
-            <div class="fees-detail__selector-block-level">Normal</div>
-            <div class="fees-detail__selector-block-value">$0.02</div>
-          </button>
-          <button
-            class="fees-detail__selector-block"
-            :class="gasPriceLevel === 'fast' ? 'selected' : ''"
-            @click="setGasPriceLevel('fast')"
-          >
-            <div class="fees-detail__selector-block-level">Fast</div>
-            <div class="fees-detail__selector-block-value">$0.04</div>
-          </button>
-        </div>
-
-        <Alert
-          v-if="gasPriceLevel === 'slow'"
-          status="warning"
-          message="Your transaction may take longer to be processed."
-        />
-
-        <div class="fees-detail__info s-minus">
-          <div class="fees-detail__info-key">Swap fee</div>
-          <div class="fees-detail__info-value">$0.21</div>
-        </div>
-        <div class="fees-detail__info s-minus">
-          <div class="fees-detail__info-key">Estimated total fees</div>
-          <div class="fees-detail__info-value">$0.27</div>
-        </div>
-      </div>
+      <FeeLevelSelector
+        v-model:gasPriceLevel="gasPriceLevel"
+        :transaction-count="1"
+        :base-dollar-fee="0.2"
+        :swap-dollar-fee="0.1"
+      />
     </div>
   </div>
 </template>
@@ -175,10 +116,11 @@
 import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import ActionButton from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+// import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useCalculation from '@/composables/useCalculation.vue';
@@ -187,18 +129,19 @@ import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
+import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
-
 export default defineComponent({
   name: 'Swap',
   components: {
     DenomSelect,
     IconButton,
     ActionButton,
-    Icon,
+    // Icon,
     ReviewModal,
     Alert,
     SlippageSettingModal,
+    FeeLevelSelector,
   },
 
   setup() {
@@ -279,11 +222,7 @@ export default defineComponent({
 
         return receiveAvailableAssets;
       }),
-      gasPriceLevel: localStorage.getItem('demeris-fee-level') || 'normal',
-      setGasPriceLevel: (level) => {
-        data.gasPriceLevel = level;
-        localStorage.setItem('demeris-fee-level', level);
-      },
+      gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
