@@ -165,6 +165,9 @@
 
             <div class="add-liquidity__controls">
               <Button name="Continue" @click="goToReview" />
+              <div class="add-liquidity__controls__fees">
+                <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+              </div>
             </div>
           </div>
         </template>
@@ -197,7 +200,7 @@
 
       <template v-if="state.step === 'review'">
         <section class="add-liquidity__content add-liquidity__review">
-          <TxStepsModal :data="actionSteps" gas-price-level="average" />
+          <TxStepsModal :data="actionSteps" :gas-price-level="gasPrice" />
         </section>
       </template>
     </main>
@@ -214,6 +217,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
@@ -222,13 +226,24 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
-import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
+import { AddLiquidityAction, CreatePoolAction, GasPriceLevel, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
 export default {
   name: 'AddLiquidity',
-  components: { AmountDisplay, Icon, Button, ChainName, Denom, DenomSelect, Alert, ChainSelectModal, TxStepsModal },
+  components: {
+    AmountDisplay,
+    Icon,
+    Button,
+    ChainName,
+    Denom,
+    DenomSelect,
+    Alert,
+    ChainSelectModal,
+    TxStepsModal,
+    FeeLevelSelector,
+  },
 
   setup() {
     const route = useRoute();
@@ -237,6 +252,7 @@ export default {
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
 
     const steps = ['amount', 'review', 'send'];
 
@@ -482,6 +498,7 @@ export default {
     );
 
     return {
+      gasPrice,
       actionSteps,
       balances,
       balancesForSecond,
@@ -693,6 +710,12 @@ export default {
   &__controls {
     margin-top: 3.2rem;
     width: 100%;
+
+    &__fees {
+      margin-top: 2.4rem;
+      margin-left: -2.4rem;
+      margin-right: -2.4rem;
+    }
   }
 
   &__receive {
