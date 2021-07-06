@@ -45,27 +45,46 @@ export default function usePools() {
   const denomListByPools = async (isPoolCoin = false) => {
     if (pools.value.length) {
       const list = [];
+      const dexChain = store.getters['demeris/getDexChain'];
+      async function getBaseDenom(denom) {
+        if (denom.includes('ibc')) {
+          return (
+            store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
+            (await store.dispatch(
+              'demeris/GET_VERIFY_TRACE',
+              { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+              { root: true },
+            ))
+          ).base_denom;
+        } else {
+          return denom;
+        }
+      }
       const denoms = await Promise.all(
         pools.value.map(async (pool) => {
-          const dexChain = store.getters['demeris/getDexChain'];
           const poolCoin = {
             display_name: await getDisplayName(pool.pool_coin_denom, dexChain),
             base_denom: pool.pool_coin_denom,
             on_chain: dexChain,
-            amount: 0,
+            amount: 230000000,
           };
+
           const reserveCoinFirst = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
-            base_denom: pool.reserve_coin_denoms[0],
+            base_denom: await getBaseDenom(pool.reserve_coin_denoms[0]),
+            denom: pool.reserve_coin_denoms[0],
             on_chain: dexChain,
-            amount: 0,
+            amount: 230000000,
           };
+
           const reserveCoinSecond = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
-            base_denom: pool.reserve_coin_denoms[1],
+            base_denom: await getBaseDenom(pool.reserve_coin_denoms[1]),
+            denom: pool.reserve_coin_denoms[1],
             on_chain: dexChain,
-            amount: 0,
+            amount: 230000000,
           };
+
           const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
           if (isPoolCoin) {
             return denomsInfo;
