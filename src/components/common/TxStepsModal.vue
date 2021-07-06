@@ -129,6 +129,7 @@
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
       :status="txstatus"
+      :tx="transaction"
       :black-button-func="nextTx"
       @close="toggleTxHandlingModal"
     />
@@ -204,6 +205,7 @@ export default defineComponent({
     const toggleTxHandlingModal = () => {
       isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
     };
+    const transaction = ref({});
     const nextTx = () => {
       txToResolve.value['resolver']();
     };
@@ -241,6 +243,7 @@ export default defineComponent({
     });
     const confirm = async () => {
       for (let stepTx of currentData.value.data.transactions) {
+        transaction.value = stepTx;
         isTxHandlingModalOpen.value = true;
         txstatus.value = 'keplr-sign';
         let txToResolveResolver;
@@ -287,7 +290,16 @@ export default defineComponent({
     const emitHandler = (event) => {
       emit(event);
     };
-    return { emitHandler, txstatus, confirm, toggleTxHandlingModal, currentData, isTxHandlingModalOpen, nextTx };
+    return {
+      emitHandler,
+      txstatus,
+      confirm,
+      toggleTxHandlingModal,
+      currentData,
+      isTxHandlingModalOpen,
+      nextTx,
+      transaction,
+    };
   },
 });
 </script>

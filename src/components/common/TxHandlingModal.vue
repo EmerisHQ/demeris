@@ -24,9 +24,9 @@
 
       <div v-if="status.startsWith('transfer')" class="status__detail">
         <div v-if="status === 'transferring'" class="status__detail-transferring">
-          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'cosmos' }" />
+          <CoinImageWithRing :coin-data="{ denom: displayData.amount.denom, on_chain: displayData.from }" />
           <div class="arrow">-></div>
-          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'terra' }" />
+          <CoinImageWithRing :coin-data="{ denom: displayData.amount.denom, on_chain: displayData.to }" />
         </div>
         <div class="status__detail-amount s-0 w-medium">
           {{ displayData.detail1 }}
@@ -82,6 +82,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
+import { useStore } from 'vuex';
 
 import CoinImageWithRing from '@/components/common/CoinImageWithRing.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
@@ -89,6 +90,7 @@ import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import { IBCBackwardsData, IBCForwardsData, StepTransaction, TransferData } from '@/types/actions';
 
 type Status =
   | 'keplr-sign'
@@ -113,6 +115,10 @@ export default defineComponent({
       type: String,
       default: 'full',
     },
+    tx: {
+      type: Object as PropType<StepTransaction>,
+      required: true,
+    },
     blackButtonFunc: {
       type: Function,
       default: () => {
@@ -128,6 +134,7 @@ export default defineComponent({
   },
   emits: ['close'],
   setup(props, { emit }) {
+    const store = useStore();
     const displayData = reactive({
       iconType: {
         pending: 'pending',
@@ -144,8 +151,46 @@ export default defineComponent({
           detail2: '',
           blackButton: '',
           whiteButton: '',
+          amount: {
+            amount: '',
+            denom: '',
+          },
+          from: '',
+          to: '',
         };
 
+        switch ((props.tx as StepTransaction).name) {
+          //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+          case 'ibc_forward':
+            displayInfo.from = ((props.tx as StepTransaction).data as IBCForwardsData).from_chain;
+            displayInfo.to = ((props.tx as StepTransaction).data as IBCForwardsData).to_chain;
+            displayInfo.amount = ((props.tx as StepTransaction).data as IBCForwardsData).amount;
+            displayInfo.detail1 = '374,222.20 KAVA';
+            displayInfo.detail2 =
+              store.getters['demeris/getDisplayChain']({ name: displayInfo.from }) +
+              ' -> ' +
+              store.getters['demeris/getDisplayChain']({ name: displayInfo.to }) +
+              ' chain';
+            break;
+          case 'ibc_backward':
+            displayInfo.from = ((props.tx as StepTransaction).data as IBCBackwardsData).from_chain;
+            displayInfo.to = ((props.tx as StepTransaction).data as IBCBackwardsData).to_chain;
+            displayInfo.amount = ((props.tx as StepTransaction).data as IBCBackwardsData).amount;
+            break;
+          case 'transfer':
+            displayInfo.from = ((props.tx as StepTransaction).data as TransferData).chain_name;
+            displayInfo.to = ((props.tx as StepTransaction).data as TransferData).chain_name;
+            displayInfo.amount = ((props.tx as StepTransaction).data as TransferData).amount;
+            break;
+          case 'swap':
+            break;
+          case 'addliquidity':
+            break;
+          case 'withdrawliquidity':
+            break;
+          case 'createpool':
+            break;
+        }
         switch (props.status) {
           case 'keplr-sign':
             displayInfo.iconType = displayData.iconType.pending;
