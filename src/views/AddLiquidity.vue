@@ -40,6 +40,16 @@
             </span>
           </div>
 
+          <div class="add-liquidity__estimated">
+            <span class="add-liquidity__estimated__price s-2 w-bold">
+              {{ totalEstimatedPrice }}
+            </span>
+            <label class="add-liquidity__estimated__max">
+              <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
+              <span class="elevation-button">Max</span>
+            </label>
+          </div>
+
           <div class="add-liquidity__content">
             <div class="add-liquidity__modal-wrapper">
               <ChainSelectModal
@@ -68,10 +78,11 @@
                 <div>
                   <DenomSelect
                     v-model:amount="form.coinA.amount"
-                    :input-header="``"
+                    :input-header="`Pay`"
                     :selected-denom="form.coinA.asset"
                     :assets="balances"
                     @select="coinSelectHandler('coinA', $event)"
+                    @change="inputChangeHandler"
                   />
                 </div>
               </div>
@@ -107,7 +118,7 @@
                 <div>
                   <DenomSelect
                     v-model:amount="form.coinB.amount"
-                    :input-header="``"
+                    :input-header="`Pay`"
                     :selected-denom="form.coinB.asset"
                     :assets="balancesForSecond"
                     @select="coinSelectHandler('coinB', $event)"
@@ -194,6 +205,7 @@
 </template>
 
 <script lang="ts">
+import { parseCoins } from '@cosmjs/amino';
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -233,6 +245,7 @@ export default {
       isTransferConfirmationOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
+      isMaximumAmountChecked: false,
     });
 
     const form = reactive<Record<string, { asset: Balance; amount: number }>>({
@@ -280,6 +293,27 @@ export default {
       }
 
       return false;
+    });
+
+    const totalEstimatedPrice = computed(() => {
+      let total = 0;
+
+      if (form.coinA.asset) {
+        const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+        total += priceA * form.coinA.amount;
+      }
+
+      if (form.coinB.asset) {
+        const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+        total += priceB * form.coinB.amount;
+      }
+
+      const displayTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(total);
+
+      return displayTotal;
     });
 
     const generateActionSteps = async () => {
@@ -344,6 +378,10 @@ export default {
       }
 
       return undefined;
+    };
+
+    const inputChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
     };
 
     const onClose = () => {
@@ -418,6 +456,24 @@ export default {
       }
     });
 
+    watch(
+      () => [state.isMaximumAmountChecked, form.coinA, form.coinB],
+      () => {
+        if (state.isMaximumAmountChecked) {
+          if (form.coinA.asset) {
+            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom });
+            form.coinA.amount = +parseCoins(form.coinA.asset.amount)[0].amount / Math.pow(10, precision);
+          }
+
+          if (form.coinB.asset) {
+            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom });
+            form.coinB.amount = +parseCoins(form.coinB.asset.amount)[0].amount / Math.pow(10, precision);
+          }
+        }
+      },
+      { deep: true },
+    );
+
     return {
       actionSteps,
       balances,
@@ -430,6 +486,8 @@ export default {
       steps,
       needsTransferToHub,
       receiveAmount,
+      totalEstimatedPrice,
+      inputChangeHandler,
       toggleChainsModal,
       goBack,
       goToReview,
@@ -452,6 +510,41 @@ export default {
 
   .denom-select__coin-from {
     display: none;
+  }
+
+  &__estimated {
+    margin-top: 3.2rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 38rem;
+    width: 100%;
+    text-align: center;
+    line-height: 1;
+
+    &__max {
+      margin-top: -0.6rem;
+      position: absolute;
+      right: 0;
+
+      input {
+        display: none;
+      }
+
+      span {
+        border-radius: 2.4rem;
+        padding: 1rem 1.6rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+
+      input:checked + span {
+        background: var(--text);
+        color: var(--bg);
+        font-weight: 500;
+      }
+    }
   }
 
   &__create-warning {

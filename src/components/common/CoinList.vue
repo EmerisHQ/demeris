@@ -86,7 +86,7 @@ import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
-  name: 'Button',
+  name: 'CoinList',
   components: {
     AssetChainsIndicator,
     ChainName,
