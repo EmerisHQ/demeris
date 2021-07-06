@@ -18,5 +18,22 @@ export default function useAccount() {
     return balances.value.filter((item) => item.base_denom === denom);
   };
 
-  return { balances, balancesByDenom };
+  const userAccountBalances = computed(() => {
+    const sortedBalances = {
+      verified: [],
+      unverified: [],
+    };
+
+    balances?.value?.forEach((coin) => {
+      if (coin.verified) {
+        sortedBalances.verified.push(coin);
+      } else {
+        sortedBalances.unverified.push(coin);
+      }
+    });
+
+    return sortedBalances;
+  });
+
+  return { balances, balancesByDenom, userAccountBalances };
 }

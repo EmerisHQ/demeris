@@ -123,6 +123,7 @@ import ActionButton from '@/components/ui/Button.vue';
 // import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
+import useAccount from '@/composables/useAccount';
 import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
@@ -150,6 +151,7 @@ export default defineComponent({
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { denomListByPools, pools } = usePools();
     const { getDisplayPrice } = usePrice();
+    const { userAccountBalances } = useAccount();
 
     const data = reactive({
       buttonName: computed(() => {
@@ -196,6 +198,7 @@ export default defineComponent({
           if (userWalletBalance.length) {
             //wallet with assets
             console.log('userWalletBalance', userWalletBalance);
+            console.log('userAccountBalances', userAccountBalances.value);
 
             let userAssetList = [];
             data.baseAssetList;
