@@ -62,27 +62,30 @@ export default function usePools() {
       }
       const denoms = await Promise.all(
         pools.value.map(async (pool) => {
+          const firstCoinBaseDenom = await getBaseDenom(pool.reserve_coin_denoms[0]);
+          const secondCoinBaseDenom = await getBaseDenom(pool.reserve_coin_denoms[1]);
+
           const poolCoin = {
             display_name: await getDisplayName(pool.pool_coin_denom, dexChain),
             base_denom: pool.pool_coin_denom,
             on_chain: dexChain,
-            amount: 230000000,
+            amount: 0,
           };
 
           const reserveCoinFirst = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
-            base_denom: await getBaseDenom(pool.reserve_coin_denoms[0]),
+            base_denom: firstCoinBaseDenom,
             denom: pool.reserve_coin_denoms[0],
             on_chain: dexChain,
-            amount: 230000000,
+            amount: '0' + firstCoinBaseDenom,
           };
 
           const reserveCoinSecond = {
             display_name: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
-            base_denom: await getBaseDenom(pool.reserve_coin_denoms[1]),
+            base_denom: secondCoinBaseDenom,
             denom: pool.reserve_coin_denoms[1],
             on_chain: dexChain,
-            amount: 230000000,
+            amount: '0' + secondCoinBaseDenom,
           };
 
           const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
