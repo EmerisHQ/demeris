@@ -21,8 +21,7 @@ export default defineComponent({
 
   &-link {
     padding: 1rem;
-    margin-right: 2.4rem;
-    color: #000;
+    margin-right: 1rem;
     text-decoration: none;
     text-align: left;
 
