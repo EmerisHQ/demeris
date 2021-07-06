@@ -1,5 +1,5 @@
 <template>
-  <div class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
+  <div v-if="steps" class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
     <div>Fees (included)</div>
     <div class="fees-total">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
@@ -94,7 +94,6 @@ export default defineComponent({
   },
   emits: ['update:gasPriceLevel'],
   setup(props, { emit }) {
-    console.log(props.steps);
     const lowFee = ref({});
     const avgFee = ref({});
     const highFee = ref({});

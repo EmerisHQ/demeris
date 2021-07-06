@@ -1322,19 +1322,21 @@ export async function feeForSteps(
   const feeTotals = {};
 
   let used;
-  for (const step of steps) {
-    for (const stepTx of step.transactions) {
-      const fees = await feeForStepTransaction(stepTx);
+  if (steps) {
+    for (const step of steps) {
+      for (const stepTx of step.transactions) {
+        const fees = await feeForStepTransaction(stepTx);
 
-      if (!feeTotals[fees[0].chain_name]) {
-        feeTotals[fees[0].chain_name] = {};
+        if (!feeTotals[fees[0].chain_name]) {
+          feeTotals[fees[0].chain_name] = {};
+        }
+        used = getUsedFee(fees, gasPriceLevel);
+
+        feeTotals[used.chain_name][used.amount.denom]
+          ? (feeTotals[used.chain_name][used.amount.denom] =
+              feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
+          : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
       }
-      used = getUsedFee(fees, gasPriceLevel);
-
-      feeTotals[used.chain_name][used.amount.denom]
-        ? (feeTotals[used.chain_name][used.amount.denom] =
-            feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
-        : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
     }
   }
   return feeTotals;

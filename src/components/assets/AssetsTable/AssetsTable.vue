@@ -130,7 +130,7 @@ export default defineComponent({
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
             on_chain: denom.chain_name,
-            amount: 0,
+            amount: '0' + denom.name,
           })),
         ];
       }
