@@ -7,7 +7,7 @@
           <div class="pool__main__stats__header">
             <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
-          <h1 class="pool__main__stats__supply">$130,040,429</h1>
+          <h1 class="pool__main__stats__supply">{{ totalLiquidityPrice }}</h1>
         </section>
 
         <section v-if="reserveBalances" class="pool__main__assets">
@@ -30,8 +30,8 @@
                   <span class="w-bold"><Denom :name="balance.denom" /></span>
                 </td>
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
-                <td class="text-right">$20.50</td>
-                <td class="text-right w-bold">65,020.75</td>
+                <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
+                <td class="text-right w-bold"><Price :amount="balance" /></td>
               </tr>
             </tbody>
           </table>
@@ -83,14 +83,14 @@
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinA" />
                   </span>
-                  <span>$615.00</span>
+                  <span><Price :amount="walletBalances.coinA" /></span>
                 </li>
                 <li class="pool-equity__assets__list__item">
                   <div class="pool-equity__assets__list__item__avatar" />
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinB" />
                   </span>
-                  <span>$615.00</span>
+                  <span><Price :amount="walletBalances.coinB" /></span>
                 </li>
               </ul>
             </div>
@@ -106,11 +106,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Denom from '@/components/common/Denom.vue';
+import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -129,38 +131,37 @@ export default defineComponent({
     Icon,
     Button,
     Pools,
+    Price,
   },
 
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const store = useStore();
 
     const { balancesByDenom } = useAccount();
-    const { formatPoolName, poolsByDenom } = usePools();
+    const { formatPoolName, poolsByDenom, getReserveBaseDenoms } = usePools();
 
-    const { pool, reserveBalances, pairName } = usePool(computed(() => route.params.id as string));
+    const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool(
+      computed(() => route.params.id as string),
+    );
+    const totalLiquidityPrice = ref();
 
     const walletBalances = computed(() => {
-      if (!pool.value) {
+      if (!pool.value || !reserveBalances.value?.length) {
         return;
       }
 
-      const getDenomAmount = (denom: string) => {
-        const balances = balancesByDenom(pool.value.reserve_coin_denoms[0]);
-
-        return {
-          denom: denom,
-          amount: balances.reduce((acc, item) => acc + +item.amount, 0),
-        };
+      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
+      const poolCoin = {
+        denom: pool.value.pool_coin_denom,
+        amount: poolCoinBalances.reduce((acc, item) => acc + +item.amount, 0),
       };
-
-      const coinA = getDenomAmount(pool.value.reserve_coin_denoms[0]);
-      const coinB = getDenomAmount(pool.value.reserve_coin_denoms[1]);
-      const poolCoin = getDenomAmount(pool.value.pool_coin_denom);
+      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
 
       return {
-        coinA,
-        coinB,
+        coinA: withdrawBalances[0],
+        coinB: withdrawBalances[1],
         poolCoin,
       };
     });
@@ -180,12 +181,39 @@ export default defineComponent({
       router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
     };
 
+    const updateTotalLiquidityPrice = async () => {
+      if (!pool.value) {
+        return;
+      }
+
+      const reserveDenoms = await getReserveBaseDenoms(pool.value);
+
+      let total = 0;
+
+      for (const [index, denom] of reserveDenoms.entries()) {
+        const price = store.getters['demeris/getPrice']({ denom });
+        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+
+        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+      }
+
+      const displayTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(total);
+
+      totalLiquidityPrice.value = displayTotal;
+    };
+
+    watch(reserveBalances, updateTotalLiquidityPrice);
+
     return {
       pool,
       pairName,
       reserveBalances,
       relatedPools,
       walletBalances,
+      totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,

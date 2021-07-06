@@ -48,7 +48,7 @@
                 :assets="balances"
                 :selected-denom="form[state.chainsModalSource].asset.base_denom"
                 :func="() => toggleChainsModal()"
-                @select="toggleChainsModal"
+                @select="toggleChainsModal($event, state.chainsModalSource)"
               />
             </div>
 

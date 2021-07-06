@@ -81,11 +81,11 @@ export default function usePool(id?: string | ComputedRef<string>) {
     const withdrawCoins = [
       {
         amount: (reserveBalances.value[0].amount * poolCoinAmount) / totalSupply.value,
-        denom: reserveBalances.value[0],
+        denom: reserveBalances.value[0].denom,
       },
       {
         amount: (reserveBalances.value[1].amount * poolCoinAmount) / totalSupply.value,
-        denom: reserveBalances.value[1],
+        denom: reserveBalances.value[1].denom,
       },
     ];
 

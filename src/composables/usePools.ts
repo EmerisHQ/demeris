@@ -23,7 +23,7 @@ export default function usePools() {
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
-    return Promise.all([getBaseDenom(pool.reserve_coin_denoms[0]), getBaseDenom(pool.reserve_coin_denoms[1])]);
+    return Promise.all(pool.reserve_coin_denoms.map((denom) => getBaseDenom(denom)));
   };
 
   const poolsByDenom = (denom: string) => {
