@@ -42,7 +42,7 @@ export default function usePools() {
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
 
-  const denomListByPools = async () => {
+  const denomListByPools = async (isPoolCoin = false) => {
     if (pools.value.length) {
       const list = [];
       const denoms = await Promise.all(
@@ -67,7 +67,13 @@ export default function usePools() {
             amount: 0,
           };
           const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
-          return denomsInfo;
+          if (isPoolCoin) {
+            return denomsInfo;
+          } else {
+            return denomsInfo.filter((coin) => {
+              return !coin.display_name.includes('GDEX');
+            });
+          }
         }),
       );
 
