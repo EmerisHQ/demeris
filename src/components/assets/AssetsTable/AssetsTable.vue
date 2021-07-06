@@ -120,7 +120,7 @@ export default defineComponent({
     const store = useStore();
 
     const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'];
+      return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
     const allBalances = computed<Balances>(() => {

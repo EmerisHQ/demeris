@@ -7,7 +7,7 @@
     </div>
 
     <template v-if="['transfer', 'move', 'redeem', 'swap', 'addliquidity'].includes(currentData.data.name)">
-      <div class="detail">
+      <div v-if="currentData && currentData.fees" class="detail">
         <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
         <PreviewAddLiquidity
           v-else-if="currentData.data.name === 'addliquidity'"
@@ -240,8 +240,9 @@ export default defineComponent({
       return modifiedData;
     });
     const confirm = async () => {
-      isTxHandlingModalOpen.value = true;
       for (let stepTx of currentData.value.data.transactions) {
+        isTxHandlingModalOpen.value = true;
+        txstatus.value = 'keplr-sign';
         let txToResolveResolver;
         const txToResolvePromise = {
           promise: new Promise((resolve) => {
@@ -262,7 +263,6 @@ export default defineComponent({
           ],
           gas: '300000',
         };
-        txstatus.value = 'keplr-sign';
         let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
           msgs: [res.msg],
           chain_name: res.chain_name,
@@ -279,7 +279,9 @@ export default defineComponent({
         });
         await txPromise;
         txstatus.value = 'transferred';
+        console.log(txToResolve);
         await txToResolve.value['promise'];
+        isTxHandlingModalOpen.value = false;
       }
     };
     const emitHandler = (event) => {
