@@ -96,8 +96,6 @@ export default defineComponent({
       const filteredAssets = assets.filter((asset) => {
         return asset.display_name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
       });
-      console.log(filteredAssets);
-
       return filteredAssets;
     }
 

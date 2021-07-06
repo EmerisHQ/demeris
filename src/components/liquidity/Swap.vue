@@ -288,8 +288,7 @@ export default defineComponent({
 
     watch(pools, () => {
       (async () => {
-        data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included?
-        console.log('base', data.baseAssetList);
+        data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
       })();
     });
 
