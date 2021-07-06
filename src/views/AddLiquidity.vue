@@ -288,19 +288,26 @@ export default {
         store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }),
         store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }),
       ];
-
+      let coinAdenom = form.coinA.asset.base_denom;
+      if (form.coinA.asset.ibc.hash) {
+        coinAdenom = 'ibc/' + form.coinA.asset.ibc.hash;
+      }
+      let coinBdenom = form.coinB.asset.base_denom;
+      if (form.coinB.asset.ibc.hash) {
+        coinBdenom = 'ibc/' + form.coinB.asset.ibc.hash;
+      }
       const baseParams = {
         coinA: {
           amount: {
             amount: (+form.coinA.amount * Math.pow(10, precisions[0])).toString(),
-            denom: form.coinA.asset.base_denom,
+            denom: coinAdenom,
           },
           chain_name: form.coinA.asset.on_chain,
         },
         coinB: {
           amount: {
             amount: (+form.coinB.amount * Math.pow(10, precisions[1])).toString(),
-            denom: form.coinB.asset.base_denom,
+            denom: coinBdenom,
           },
           chain_name: form.coinB.asset.on_chain,
         },

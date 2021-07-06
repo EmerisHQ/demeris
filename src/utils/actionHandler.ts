@@ -37,7 +37,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
         (await store.dispatch(
           'demeris/GET_VERIFY_TRACE',
           {
-            subscribe: true,
+            subscribe: false,
             params: {
               chain_name,
               hash: amount.denom.split('/')[1],
