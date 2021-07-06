@@ -1,16 +1,10 @@
-@font-face {
-  font-family: 'Inter var';
-  font-weight: normal;
-  font-display: swap;
-  src: local('Inter var'), url('/fonts/Inter.var.woff2') format('woff2');
-}
+@import url('https://rsms.me/inter/inter.css');
 
-html,
 input,
 textarea,
 button {
   font-family: 'Inter', sans-serif;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @supports (font-variation-settings: normal) {
@@ -18,13 +12,13 @@ button {
   input,
   textarea,
   button {
-    font-family: 'Inter var', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-variant: slashed-zero;
   }
 }
 
 .font-basic {
-  font-family: 'Inter var';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
 }

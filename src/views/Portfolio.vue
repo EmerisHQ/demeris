@@ -3,7 +3,7 @@
     <div class="wrapper">
       <div class="portfolio">
         <div class="portfolio__total">
-          <div class="portfolio__total__text">Total balance:</div>
+          <div class="portfolio__total__text">Total balance</div>
           <div class="portfolio__total__value">
             <TotalPrice :balances="balances" />
           </div>
@@ -85,7 +85,6 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
-  max-width: 1136px;
   margin: 0 auto;
 
   .portfolio {
