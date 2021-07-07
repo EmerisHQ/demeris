@@ -1,17 +1,4 @@
 <template>
-  <!-- 
-		Displays a swap building component:
-		title, chose denom balance
-		Max Icon button (using ../ui/Icon.vue)
-		Reset Icon Button (using ../ui/Icon.vue)
-		from Denom selector (using ../common/DenomSelect.vue)
-		to Denom selector (using ../common/DenomSelect.vue)
-		switch Icon Button (using ../ui/Icon.vue)
-		price compoonent (using ../common/Price.vue)
-
-		dependencies:
-				vuex getter to obtain user's preferred UI lang (i18n texts)?
-	-->
   <div class="wrapper">
     <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
     <ReviewModal
@@ -83,7 +70,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
-        :assets="baseAssetList"
+        :assets="receiveAssetList"
         @change="setConterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -132,6 +119,7 @@ import { store } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -194,37 +182,45 @@ export default defineComponent({
         return store.getters['demeris/getVerifiedDenoms'];
       }),
       userAssetList: computed(() => {
+        let filteredBaseAssetList = null;
+        if (data.receiveCoinData) {
+          filteredBaseAssetList = data.baseAssetList.filter((coin) => {
+            return coin.base_denom !== data.receiveCoinData.base_denom;
+          });
+        } else {
+          filteredBaseAssetList = [...data.baseAssetList];
+        }
+
         if (data.isWallet) {
           if (userAccountBalances?.value?.verified.length + userAccountBalances?.value?.unverified.length > 0) {
             //wallet with assets
             const userVerifiedBalances = userAccountBalances.value.verified;
-            // console.log('userAccountBalances', userAccountBalances.value.verified);
-            // console.log('data.baseAssetList', data.baseAssetList)
             const tempIndexer = {};
-            const tempArray = [...data.baseAssetList];
+
             data.baseAssetList.forEach((coin, index) => {
               tempIndexer[coin.base_denom] = index;
             });
-            // console.log('indexer',tempIndexer)
 
-            userVerifiedBalances.forEach((coin) => {
+            userVerifiedBalances.forEach(async (coin) => {
               if (tempIndexer[coin.base_denom]) {
-                tempArray[tempIndexer[coin.base_denom]].amount = coin.amount;
+                if (filteredBaseAssetList[tempIndexer[coin.base_denom]]?.amount) {
+                  filteredBaseAssetList[tempIndexer[coin.base_denom]].amount = coin.amount;
+                }
               } else {
-                coin.display_name = 'AKT';
-                tempArray.push(coin);
+                coin.display_name = await getDisplayName(coin.base_denom, store.getters['demeris/getDexChain']);
+                filteredBaseAssetList.push(coin);
               }
             });
 
-            return tempArray;
+            return filteredBaseAssetList;
           } else {
             // wallet without assets
             // at here, we can set open modal for moonpay?
-            return data.baseAssetList;
+            return filteredBaseAssetList;
           }
         } else {
           // wallet
-          return data.baseAssetList;
+          return filteredBaseAssetList;
         }
       }),
 
@@ -232,9 +228,10 @@ export default defineComponent({
         let receiveAvailableAssets = [];
 
         for (let i in data.baseAssetList) {
-          // later, to filter some coins
           const coin = data.baseAssetList[i];
-          receiveAvailableAssets.push({ ...coin });
+          if (coin.base_denom !== data.payCoinData?.base_denom) {
+            receiveAvailableAssets.push({ ...coin });
+          }
         }
 
         return receiveAvailableAssets;
@@ -258,6 +255,7 @@ export default defineComponent({
         return data.userAssetList.length !== 0 ? true : false;
       }),
       initStatus: 'none',
+      isAssetList: false,
       isFeesOpen: false,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
@@ -288,7 +286,11 @@ export default defineComponent({
 
     watch(pools, () => {
       (async () => {
-        data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
+        if (!data.isAssetList && pools.value.length > 0) {
+          console.log('pool');
+          data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
+          data.isAssetList = true;
+        }
       })();
     });
 
