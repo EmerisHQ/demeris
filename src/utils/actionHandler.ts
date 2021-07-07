@@ -459,331 +459,6 @@ export async function move({
     }
   }
 }
-export async function transferToHub({ amount, chain_name }: ChainAmount) {
-  /*
-  This action creates the steps needed to get the chosen amount of chosen denom as a 1-hop token through the primary-channel on the hub
-  */
-  const result = {
-    steps: [],
-    output: {
-      amount: {
-        denom: '',
-        amount: '0',
-      },
-      chain_name: '',
-    },
-  };
-
-  if (isNative(amount.denom)) {
-    // If NOT an IBC denom
-    if (chain_name == store.getters['demeris/getDexChain']) {
-      // If already native to the hub, do nothing
-      result.output = { amount, chain_name };
-      return result;
-    } else {
-      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
-        // If verified denom on a different chain, ibc_forward through primary channel to the hub
-        const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
-            chain_name: chain_name,
-            destination_chain_name: store.getters['demeris/getDexChain'],
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
-            {
-              subscribe: true,
-              params: { chain_name: chain_name, destination_chain_name: store.getters['demeris/getDexChain'] },
-            },
-            { root: true },
-          ));
-        result.steps.push({
-          name: 'ibc_forward',
-          status: 'pending',
-          data: {
-            amount: amount,
-            from_chain: chain_name,
-            to_chain: store.getters['demeris/getDexChain'],
-            through: primaryChannel,
-          },
-        });
-
-        result.output = {
-          amount: {
-            amount: amount.amount,
-            denom: generateDenomHash(primaryChannel, amount.denom),
-          },
-          chain_name: store.getters['demeris/getDexChain'],
-        };
-        return result;
-      } else {
-        // If not verified denom, throw error
-        throw new Error('Denom not verified');
-      }
-    }
-  }
-  // If IBC denom, first we get the trace
-  let verifyTrace;
-  try {
-    verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
-      (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
-        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
-        { root: true },
-      ));
-  } catch (e) {
-    //  If we cannot verify the trace, throw error
-    throw new Error('Trace not verified');
-  }
-  if (verifyTrace.trace.length == 1 && chain_name == store.getters['demeris/getDexChain']) {
-    // if we can verify the trace and denom is 1-hop on the hub, check what the primary channel is for the source-chain to the hub
-    const primaryChannel =
-      store.getters['demeris/getPrimaryChannel']({
-        chain_name: verifyTrace.trace[0].counterparty_name,
-        destination_chain_name: store.getters['demeris/getDexChain'],
-      }) ??
-      (await store.dispatch(
-        'demeris/GET_PRIMARY_CHANNEL',
-        {
-          subscribe: true,
-          params: {
-            chain_name: verifyTrace.trace[0].counterparty_name,
-            destination_chain_name: store.getters['demeris/getDexChain'],
-          },
-        },
-        { root: true },
-      ));
-    if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-      // If channels match, denom is already a verified 1-hop token on the hub through the primary channel so no action needed
-
-      result.output = { amount, chain_name };
-      return result;
-    } else {
-      // If channels don't match we have to send the denom back through the trace channel and then forward again through the primary channel
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: chain_name,
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: store.getters['demeris/getDexChain'],
-          through: primaryChannel,
-        },
-      });
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
-        },
-        chain_name: store.getters['demeris/getDexChain'],
-      };
-      return result;
-    }
-  } else {
-    if (verifyTrace.trace.length > 1) {
-      // If trace is longer than 1-hop, throw error because user must redeem the denom first (should never reach this part of the code
-      // as the UI should not allow selection of such a token but leaving it here for consistency)
-      throw new Error('Denom must be redeemed first');
-    } else {
-      // If trace is 1 hop but NOT on the hub. Send back to native chain through the channel in the trace, then forward to the hub
-      const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
-        }) ??
-        (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
-          {
-            subscribe: true,
-            params: {
-              chain_name: verifyTrace.trace[0].counterparty_name,
-              destination_chain_name: store.getters['demeris/getDexChain'],
-            },
-          },
-          { root: true },
-        ));
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: chain_name,
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: store.getters['demeris/getDexChain'],
-          through: primaryChannel,
-        },
-      });
-
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
-        },
-        chain_name: store.getters['demeris/getDexChain'],
-      };
-      return result;
-    }
-  }
-}
-export async function transferFromHub({ amount, chain_name }: ChainAmount) {
-  const result = {
-    steps: [],
-    output: {
-      amount: {
-        denom: '',
-        amount: '0',
-      },
-      chain_name: '',
-    },
-  };
-
-  if (isNative(amount.denom)) {
-    // If NOT an IBC denom
-    if (chain_name == store.getters['demeris/getDexChain']) {
-      // We're already on the hub, do nothing
-      result.output = {
-        amount,
-        chain_name,
-      };
-      return result;
-    } else {
-      const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
-          chain_name: store.getters['demeris/getDexChain'],
-          destination_chain_name: chain_name,
-        }) ??
-        (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
-          {
-            subscribe: true,
-            params: { chain_name: store.getters['demeris/getDexChain'], destination_chain_name: chain_name },
-          },
-          { root: true },
-        ));
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: store.getters['demeris/getDexChain'],
-          to_chain: chain_name,
-          through: primaryChannel,
-        },
-      });
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, amount.denom),
-        },
-        chain_name,
-      };
-      return result;
-    }
-  }
-  // If IBC get the trace
-  let verifyTrace;
-  try {
-    verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
-      (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
-        { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
-        { root: true },
-      ));
-  } catch (e) {
-    //  If we cannot verify the trace, throw error. Should not happen here as transferFromHub is an action to move the tokens after an on-hub operation which has already included these tests
-    throw new Error('Trace not verified');
-  }
-  if (verifyTrace.trace.length == 1) {
-    if (verifyTrace.trace[0].counterparty_name == chain_name) {
-      //if we want to transfer back to the origin chain
-
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: store.getters['demeris/getDexChain'],
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: verifyTrace.base_denom,
-        },
-        chain_name: verifyTrace.trace[0].counterparty_name,
-      };
-      return result;
-    } else {
-      //If we want to transfer to some other chain, need to go back to the origin chain then forwards to the target one
-      const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: chain_name,
-        }) ??
-        (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
-          {
-            subscribe: true,
-            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: chain_name },
-          },
-          { root: true },
-        ));
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: store.getters['demeris/getDexChain'],
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: chain_name,
-          through: primaryChannel,
-        },
-      });
-
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
-        },
-        chain_name,
-      };
-      return result;
-    }
-  } else {
-    throw new Error('Denom must be redeemed first');
-  }
-}
 export async function swap({ from, to }: { from: Amount; to: Amount }) {
   // Get the list of available pools
   const result = {
@@ -905,6 +580,27 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
   }
 }
 
+export async function createPool({ coinA, coinB }: { coinA: Amount; coinB: Amount }) {
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+  result.steps.push({
+    name: 'createpool',
+    status: 'pending',
+    data: {
+      coinA,
+      coinB,
+    },
+  });
+  return result;
+}
 // Action-handler / action composing using the blocks above
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
   const steps = [];
@@ -984,6 +680,52 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           },
         });
         steps.push({ name: 'swap', description: 'Assets Swapped', transactions: [...swapStep.steps] }); //TODO
+        break;
+      case 'createpool':
+        params = (action as Actions.CreatePoolAction).params;
+        const transferCoinAtoHubCreate = await move({
+          amount: {
+            amount: params.coinA.amount.amount,
+            denom: params.coinA.amount.denom,
+          },
+          chain_name: params.coinA.chain_name,
+          destination_chain_name: store.getters['demeris/getDexChain'],
+        });
+
+        if (transferCoinAtoHubCreate.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'AssetA must be transferred to hub', //TODO
+            transactions: [...transferCoinAtoHubCreate.steps],
+          });
+        }
+
+        const transferCoinBtoHubCreate = await move({
+          amount: {
+            amount: params.coinB.amount.amount,
+            denom: params.coinB.amount.denom,
+          },
+          chain_name: params.coinB.chain_name,
+          destination_chain_name: store.getters['demeris/getDexChain'],
+        });
+
+        if (transferCoinBtoHubCreate.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'AssetB must be transferred to hub', //TODO
+            transactions: [...transferCoinBtoHubCreate.steps],
+          });
+        }
+
+        const createPoolStep = await createPool({
+          coinA: transferCoinAtoHubCreate.output.amount,
+          coinB: transferCoinBtoHubCreate.output.amount,
+        });
+        steps.push({
+          name: 'createpool',
+          description: 'Creating Pool', //TODO
+          transactions: [...createPoolStep.steps],
+        });
         break;
       case 'addliquidity':
         params = (action as Actions.AddLiquidityAction).params;

@@ -4,7 +4,7 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move';
+  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool';
 };
 export type SwapParams = {
   from: Base.ChainAmount;
@@ -34,8 +34,6 @@ export type WithdrawLiquidityParams = {
   poolCoin: Base.ChainAmount;
 };
 export type CreatePoolParams = {
-  poolCreatorAddress: string;
-  poolTypeId: number;
   coinA: Base.ChainAmount;
   coinB: Base.ChainAmount;
 };
