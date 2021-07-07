@@ -181,15 +181,18 @@ export default defineComponent({
         return store.getters['demeris/getVerifiedDenoms'];
       }),
       userAssetList: computed(() => {
-        // let filteredBaseAssetList = null;
-        const filteredBaseAssetList = [...data.baseAssetList];
-        // if (data.receiveCoinData) {
-        //   filteredBaseAssetList = data.baseAssetList.filter((coin) => {
-        //     return coin.base_denom !== data.receiveCoinData.base_denom;
-        //   });
-        // } else {
-        //   filteredBaseAssetList = [...data.baseAssetList];
-        // }
+        function filterSelectedReceiveCoin(array) {
+          if (data.receiveCoinData) {
+            return array.filter((coin) => {
+              return coin.base_denom !== data.receiveCoinData.base_denom;
+            });
+          } else {
+            return array;
+          }
+        }
+
+        let filteredBaseAssetList = filterSelectedReceiveCoin(data.baseAssetList);
+
         console.log('userAccountBalances', userAccountBalances.value);
         if (data.isWallet) {
           if (userAccountBalances?.value?.verified.length + userAccountBalances?.value?.unverified.length > 0) {
@@ -204,7 +207,6 @@ export default defineComponent({
             data.baseAssetList.forEach((coin, index) => {
               tempIndexer[coin.base_denom] = index;
             });
-            console.log('tempIndexer', tempIndexer);
 
             userVerifiedBalances.forEach(async (coin) => {
               if (tempIndexer[coin.base_denom]) {
@@ -212,22 +214,21 @@ export default defineComponent({
                   filteredBaseAssetList[tempIndexer[coin.base_denom]].amount = coin.amount;
                 }
               } else {
-                console.log('getVerifiedDenoms', data.verifiedDenoms);
                 coin.display_name = verifiedDenomsIndexer[coin.base_denom];
                 filteredBaseAssetList.push(coin);
               }
             });
-            console.log('filteredBaseAssetList1', filteredBaseAssetList);
-            return filteredBaseAssetList;
+            console.log('filteredBaseAssetList wallet/assets', filteredBaseAssetList);
+            return filterSelectedReceiveCoin(filteredBaseAssetList);
           } else {
             // wallet without assets
             // at here, we can set open modal for moonpay?
-            console.log('filteredBaseAssetList2', filteredBaseAssetList);
+            console.log('filteredBaseAssetList wallet/no-assets', filteredBaseAssetList);
             return filteredBaseAssetList;
           }
         } else {
           // wallet
-          console.log('filteredBaseAssetList3', filteredBaseAssetList);
+          console.log('filteredBaseAssetList no-wallet', filteredBaseAssetList);
           return filteredBaseAssetList;
         }
       }),
