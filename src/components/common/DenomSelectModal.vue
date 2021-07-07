@@ -28,7 +28,6 @@
       <div class="search-bar">
         <Search v-model:keyword="keyword" />
       </div>
-
       <div class="coin-list">
         <CoinList
           :data="filterKeyword(assets, keyword)"

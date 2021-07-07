@@ -119,7 +119,6 @@ import { store } from '@/store';
 import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
-import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -182,24 +181,30 @@ export default defineComponent({
         return store.getters['demeris/getVerifiedDenoms'];
       }),
       userAssetList: computed(() => {
-        let filteredBaseAssetList = null;
-        if (data.receiveCoinData) {
-          filteredBaseAssetList = data.baseAssetList.filter((coin) => {
-            return coin.base_denom !== data.receiveCoinData.base_denom;
-          });
-        } else {
-          filteredBaseAssetList = [...data.baseAssetList];
-        }
-
+        // let filteredBaseAssetList = null;
+        const filteredBaseAssetList = [...data.baseAssetList];
+        // if (data.receiveCoinData) {
+        //   filteredBaseAssetList = data.baseAssetList.filter((coin) => {
+        //     return coin.base_denom !== data.receiveCoinData.base_denom;
+        //   });
+        // } else {
+        //   filteredBaseAssetList = [...data.baseAssetList];
+        // }
+        console.log('userAccountBalances', userAccountBalances.value);
         if (data.isWallet) {
           if (userAccountBalances?.value?.verified.length + userAccountBalances?.value?.unverified.length > 0) {
             //wallet with assets
             const userVerifiedBalances = userAccountBalances.value.verified;
             const tempIndexer = {};
+            const verifiedDenomsIndexer = {};
+            data.verifiedDenoms.forEach((denom) => {
+              verifiedDenomsIndexer[denom.name] = denom.display_name;
+            });
 
             data.baseAssetList.forEach((coin, index) => {
               tempIndexer[coin.base_denom] = index;
             });
+            console.log('tempIndexer', tempIndexer);
 
             userVerifiedBalances.forEach(async (coin) => {
               if (tempIndexer[coin.base_denom]) {
@@ -207,19 +212,22 @@ export default defineComponent({
                   filteredBaseAssetList[tempIndexer[coin.base_denom]].amount = coin.amount;
                 }
               } else {
-                coin.display_name = await getDisplayName(coin.base_denom, store.getters['demeris/getDexChain']);
+                console.log('getVerifiedDenoms', data.verifiedDenoms);
+                coin.display_name = verifiedDenomsIndexer[coin.base_denom];
                 filteredBaseAssetList.push(coin);
               }
             });
-
+            console.log('filteredBaseAssetList1', filteredBaseAssetList);
             return filteredBaseAssetList;
           } else {
             // wallet without assets
             // at here, we can set open modal for moonpay?
+            console.log('filteredBaseAssetList2', filteredBaseAssetList);
             return filteredBaseAssetList;
           }
         } else {
           // wallet
+          console.log('filteredBaseAssetList3', filteredBaseAssetList);
           return filteredBaseAssetList;
         }
       }),
@@ -233,7 +241,7 @@ export default defineComponent({
             receiveAvailableAssets.push({ ...coin });
           }
         }
-
+        console.log('receiveAssetList', receiveAvailableAssets);
         return receiveAvailableAssets;
       }),
       gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
@@ -270,6 +278,8 @@ export default defineComponent({
             if (watchValues[3] !== 'walletInit') {
               data.payCoinData = data.userAssetList[0];
               data.initStatus = 'walletInit';
+              data.isWallet = true;
+              console.log('isWallet', data.isWallet);
             }
           }
         } else {
@@ -277,6 +287,8 @@ export default defineComponent({
             if (watchValues[3] !== 'noWalletInit') {
               data.payCoinData = data.receiveAssetList[0];
               data.initStatus = 'noWalletInit';
+              data.isWallet = false;
+              console.log('isWallet', data.isWallet);
             }
           }
         }
@@ -287,8 +299,8 @@ export default defineComponent({
     watch(pools, () => {
       (async () => {
         if (!data.isAssetList && pools.value.length > 0) {
-          console.log('pool');
           data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
+          console.log('baseAssetList init', data.baseAssetList);
           data.isAssetList = true;
         }
       })();
