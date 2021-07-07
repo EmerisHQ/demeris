@@ -76,7 +76,9 @@
         @modalToggle="setChildModalOpenStatus"
       />
 
-      {{ availablePoolDenoms }}
+      {{ availablePoolDenoms.payDenoms }}
+      <div>availablePoolDenoms.payDenoms</div>
+      {{ userAssetList }}
 
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
@@ -203,7 +205,6 @@ export default defineComponent({
           const denomToBaseDenomIndex = {};
           const baseDenomToDisplayNameIndex = {};
 
-          console.log(data.baseAssetList);
           data.baseAssetList?.forEach((denom) => {
             baseDenomToDenomIndex[denom.base_denom] = denom.denom;
             denomToBaseDenomIndex[denom.denom] = denom.base_denom;
@@ -278,7 +279,7 @@ export default defineComponent({
           if (userAccountBalances?.value?.verified.length + userAccountBalances?.value?.unverified.length > 0) {
             //wallet with assets
             const userVerifiedBalances = userAccountBalances.value.verified;
-            const tempIndexer = {};
+            const baseAssetIndexer = {};
             const verifiedDenomsIndexer = {};
 
             data.verifiedDenoms.forEach((denom) => {
@@ -286,21 +287,24 @@ export default defineComponent({
             });
 
             data.baseAssetList.forEach((coin, index) => {
-              tempIndexer[coin.base_denom] = index;
+              baseAssetIndexer[coin.base_denom] = index;
             });
 
             userVerifiedBalances.forEach(async (coin) => {
-              if (tempIndexer[coin.base_denom]) {
-                if (filteredBaseAssetList[tempIndexer[coin.base_denom]]?.amount) {
-                  filteredBaseAssetList[tempIndexer[coin.base_denom]].amount = coin.amount;
+              if (baseAssetIndexer[coin.base_denom] !== undefined) {
+                if (filteredBaseAssetList[baseAssetIndexer[coin.base_denom]]?.amount) {
+                  if (parseInt(filteredBaseAssetList[baseAssetIndexer[coin.base_denom]].amount) === 0) {
+                    filteredBaseAssetList[baseAssetIndexer[coin.base_denom]].amount = coin.amount;
+                  } else {
+                  }
                 }
               } else {
                 coin.display_name = verifiedDenomsIndexer[coin.base_denom];
                 filteredBaseAssetList.push(coin);
               }
             });
-            // console.log('filteredBaseAssetList wallet/assets', filteredBaseAssetList);
-            return filteredBaseAssetList;
+
+            return listFilter(filteredBaseAssetList);
           } else {
             // wallet without assets
             // at here, we can set open modal for moonpay?
@@ -311,6 +315,13 @@ export default defineComponent({
           // wallet
           // console.log('filteredBaseAssetList no-wallet', filteredBaseAssetList);
           return filteredBaseAssetList;
+        }
+
+        //helpers
+        function listFilter(list) {
+          return list.filter((coin) => {
+            return parseInt(coin.amount) > 0 && coin.base_denom !== data.receiveCoinData?.base_denom;
+          });
         }
       }),
 
@@ -398,12 +409,14 @@ export default defineComponent({
     });
 
     function changePayToReceive() {
-      const originPayCoinData = data.payCoinData;
-      originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
-
-      const originReceiveCoinData = data.receiveCoinData;
-      const originReceiveCoinAmount = data.receiveCoinAmount;
-
+      const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
+      if (originPayCoinData) {
+        originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
+      }
+      const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+      const originReceiveCoinAmount = JSON.parse(JSON.stringify(data.receiveCoinAmount));
+      console.log('originReceiveCoinData', originReceiveCoinData);
+      console.log('originPayCoinData', originPayCoinData);
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = originPayCoinData;
       data.payCoinAmount = originReceiveCoinAmount;
