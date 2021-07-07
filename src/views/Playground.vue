@@ -172,21 +172,21 @@ export default defineComponent({
     const action = ref(null);
     const pools: Pool[] = [
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uatom', 'ukava'],
         reserve_account_address: '',
         pool_coin_denom: 'atom',
         type_id: 1,
       },
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uatom', 'urune'],
         reserve_account_address: '',
         pool_coin_denom: 'atom',
         type_id: 1,
       },
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uluna', 'urune'],
         reserve_account_address: '',
         pool_coin_denom: 'luna',
@@ -195,7 +195,7 @@ export default defineComponent({
     ];
     const sendMessage = async () => {
       const steps = await actionHandler({
-        name: 'swap',
+        name: 'transfer',
         params: {
           from: {
             amount: {
@@ -205,11 +205,8 @@ export default defineComponent({
             chain_name: 'akash',
           },
           to: {
-            amount: {
-              amount: '400000',
-              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
-            },
             chain_name: 'cosmos-hub',
+            address: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
           },
         },
       });
@@ -274,14 +271,14 @@ export default defineComponent({
         registry: res.registry,
         memo: 'a memo',
       });
-      /*
+
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
         subscribe: true,
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
 
-      return txPromise;*/
+      return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);

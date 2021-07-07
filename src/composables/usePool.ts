@@ -1,12 +1,12 @@
-import { computed, ComputedRef, unref, watch } from 'vue';
+import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
 
 import usePools from './usePools';
 
-export default function usePool(id?: number | ComputedRef<number>) {
+export default function usePool(id?: string | ComputedRef<string>) {
   const store = useAllStores();
-  const { poolById } = usePools();
+  const { poolById, formatPoolName, poolPriceById } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -17,6 +17,18 @@ export default function usePool(id?: number | ComputedRef<number>) {
 
     return poolById(poolId);
   });
+  const poolPrice = async () => {
+    return await poolPriceById(unref(id));
+  };
+  const pairName = ref('-/-');
+
+  const setPairName = async () => {
+    if (!pool.value) {
+      return;
+    }
+
+    pairName.value = await formatPoolName(pool.value);
+  };
 
   const totalSupply = computed(() => {
     if (!pool.value) {
@@ -71,23 +83,32 @@ export default function usePool(id?: number | ComputedRef<number>) {
     const withdrawCoins = [
       {
         amount: (reserveBalances.value[0].amount * poolCoinAmount) / totalSupply.value,
-        denom: reserveBalances.value[0],
+        denom: reserveBalances.value[0].denom,
       },
       {
         amount: (reserveBalances.value[1].amount * poolCoinAmount) / totalSupply.value,
-        denom: reserveBalances.value[1],
+        denom: reserveBalances.value[1].denom,
       },
     ];
 
     return withdrawCoins;
   };
 
-  watch(pool, updateReserveBalances, { immediate: true });
+  watch(
+    pool,
+    () => {
+      updateReserveBalances();
+      setPairName();
+    },
+    { immediate: true },
+  );
 
   return {
     pool,
+    pairName,
     totalSupply,
     reserveBalances,
+    poolPrice,
     updateReserveBalances,
     calculateSupplyTokenAmount,
     calculateWithdrawBalances,

@@ -2,25 +2,27 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">Move assets</h2>
-      <MoveFormAmount :balances="balances" @next="goToStep('review')" />
+      <MoveFormAmount :balances="balances" @next="generateSteps" />
+
+      <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
     </template>
 
     <template v-if="step === 'review'">
-      <h2 class="move-form__title s-2">Review your transfer details</h2>
-
-      <Button class="mt-10" name="Confirm and continue" @click="goToStep('move')" />
+      <TxStepsModal :data="steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
     </template>
-
-    <template v-if="step === 'move'"> TODO </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive } from 'vue';
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
-import { MoveAssetsForm } from '@/types/actions';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { useStore } from '@/store';
+import { MoveAction, MoveAssetsForm } from '@/types/actions';
+import { GasPriceLevel } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { actionHandler } from '@/utils/actionHandler';
 
 import MoveFormAmount from './MoveFormAmount.vue';
 
@@ -30,8 +32,9 @@ export default defineComponent({
   name: 'MoveForm',
 
   components: {
-    Button,
     MoveFormAmount,
+    TxStepsModal,
+    FeeLevelSelector,
   },
 
   props: {
@@ -48,6 +51,9 @@ export default defineComponent({
   emits: ['update:step'],
 
   setup(props, { emit }) {
+    const steps = ref([]);
+    const store = useStore();
+    const gasPrice = GasPriceLevel.AVERAGE;
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',
@@ -62,6 +68,36 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    watch(
+      () => [form.balance.amount, form.balance.denom, form.on_chain, form.to_chain],
+      async () => {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
+          const precision = store.getters['demeris/getDenomPrecision']({
+            name: form.balance.denom,
+          });
+          const action: MoveAction = {
+            name: 'move',
+            params: {
+              from: {
+                amount: {
+                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                  denom: form.balance.denom,
+                },
+                chain_name: form.on_chain,
+              },
+              to: {
+                chain_name: form.to_chain,
+              },
+            },
+          };
+          steps.value = await actionHandler(action);
+        }
+      },
+    );
+    const generateSteps = async () => {
+      goToStep('review');
+    };
+
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -72,7 +108,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { form, goToStep };
+    return { steps, generateSteps, form, goToStep, GasPriceLevel, gasPrice };
   },
 });
 </script>

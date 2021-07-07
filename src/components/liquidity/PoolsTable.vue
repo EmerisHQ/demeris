@@ -24,7 +24,7 @@
           <th class="text-left">Token Pair</th>
           <th class="text-right">Your share</th>
           <th class="text-right">Liquidity</th>
-          <th class="text-right">APY</th>
+          <!--<th class="text-right">APY</th>//-->
           <th></th>
         </tr>
       </thead>
@@ -40,9 +40,9 @@
               {{ pool.display_name }}
             </span>
           </td>
-          <td class="text-right">$1,000.50 (0,1%)</td>
-          <td class="text-right">$100,000.50 (0,1%)</td>
-          <td class="text-right">10%</td>
+          <td class="text-right"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
+          <td class="text-right"><TotalLiquidityPrice :pool="pool" /></td>
+          <!--<td class="text-right">10%</td>//-->
           <td class="pools-table__row__controls text-right">
             <button class="pools-table__row__controls__button" @click="rowClickHandler(pool)">
               <Icon name="ChevronRightIcon" class="pools-table__row__controls__button__icon" />
@@ -59,7 +59,9 @@ import { ref } from '@vue/reactivity';
 import { computed, onMounted, PropType } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
+import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import Search from '@/components/common/Search.vue';
+import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
@@ -67,7 +69,7 @@ import { Pool } from '@/types/actions';
 
 export default {
   name: 'PoolsTable',
-  components: { Search, Button, Icon },
+  components: { Search, Button, Icon, TotalLiquidityPrice, OwnLiquidityPrice },
 
   props: {
     pools: {

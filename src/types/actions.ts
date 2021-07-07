@@ -4,7 +4,7 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move';
+  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool';
 };
 export type SwapParams = {
   from: Base.ChainAmount;
@@ -34,8 +34,6 @@ export type WithdrawLiquidityParams = {
   poolCoin: Base.ChainAmount;
 };
 export type CreatePoolParams = {
-  poolCreatorAddress: string;
-  poolTypeId: number;
   coinA: Base.ChainAmount;
   coinB: Base.ChainAmount;
 };
@@ -118,6 +116,7 @@ export type Step = {
 
 export type SendAddressForm = {
   recipient: string;
+  chain_name: string;
   memo: string;
   isTermChecked?: boolean;
   balance: Base.Amount;
@@ -137,7 +136,7 @@ export type FeeWDenom = {
 export type Pool = {
   display_name?: string;
   /** id of the pool */
-  id: number;
+  id: string;
   /** id of the pool_type */
   type_id: number;
   /** denoms of reserve coin pair of the pool */

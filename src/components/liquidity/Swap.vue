@@ -115,6 +115,7 @@ import ActionButton from '@/components/ui/Button.vue';
 // import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
+import useAccount from '@/composables/useAccount';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
@@ -137,7 +138,7 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-
+    const { balances } = useAccount();
     const data = reactive({
       buttonName: computed(() => {
         if (data.isBothSelected) {
@@ -174,7 +175,7 @@ export default defineComponent({
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      userBalances: TEST_DATA.balances,
+      userBalances: balances,
       receiveAvailableDenom: computed(() => {
         const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
           return denomInfo?.base_denom !== data.payCoinData?.base_denom;
