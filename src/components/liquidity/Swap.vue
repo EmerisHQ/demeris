@@ -191,7 +191,8 @@ export default defineComponent({
       }),
       availablePoolDenoms: computed(() => {
         //to get counter denoms
-        console.log('pools.value.length', pools.value.length);
+        //TODO: pool coin include/exclude
+
         if (pools.value.length) {
           const availableDenoms = {
             payDenoms: [],
@@ -200,29 +201,29 @@ export default defineComponent({
 
           const baseDenomToDenomIndex = {};
           const denomToBaseDenomIndex = {};
+          const baseDenomToDisplayNameIndex = {};
 
+          console.log(data.baseAssetList);
           data.baseAssetList?.forEach((denom) => {
             baseDenomToDenomIndex[denom.base_denom] = denom.denom;
             denomToBaseDenomIndex[denom.denom] = denom.base_denom;
+            baseDenomToDisplayNameIndex[denom.base_denom] = denom.display_name;
           });
-          console.log(
-            'index',
-            baseDenomToDenomIndex[data.payCoinData?.base_denom],
-            poolsByDenom(baseDenomToDenomIndex[data.payCoinData?.base_denom]),
-          );
+
           if (data.payCoinData?.base_denom) {
             availableDenoms.receiveDenoms = poolsByDenom(baseDenomToDenomIndex[data.payCoinData?.base_denom]).map(
               (denom) => {
                 const counterDenom = denom.reserve_coin_denoms.filter((denom) => {
-                  console.log('check', denomToBaseDenomIndex[denom], data.payCoinData.base_denom);
                   return denomToBaseDenomIndex[denom] !== data.payCoinData.base_denom;
                 });
+
                 if (!counterDenom[0].includes('pool')) {
                   return {
                     pool_id: denom.id,
                     pool_type: denom.type_id,
                     denom: counterDenom[0],
                     base_denom: denomToBaseDenomIndex[counterDenom[0]],
+                    display_name: baseDenomToDisplayNameIndex[denomToBaseDenomIndex[counterDenom[0]]],
                   };
                 }
               },
@@ -236,7 +237,7 @@ export default defineComponent({
             availableDenoms.payDenoms = poolsByDenom(baseDenomToDenomIndex[data.receiveCoinData?.base_denom]).map(
               (denom) => {
                 const counterDenom = denom.reserve_coin_denoms.filter((denom) => {
-                  return denom !== data.receiveCoinData?.denom;
+                  return denomToBaseDenomIndex[denom] !== data.receiveCoinData.base_denom;
                 });
 
                 if (!counterDenom[0].includes('pool')) {
@@ -245,17 +246,21 @@ export default defineComponent({
                     pool_type: denom.type_id,
                     denom: counterDenom[0],
                     base_denom: denomToBaseDenomIndex[counterDenom[0]],
+                    display_name: baseDenomToDisplayNameIndex[denomToBaseDenomIndex[counterDenom[0]]],
                   };
                 }
               },
             );
+            availableDenoms.payDenoms = availableDenoms.payDenoms.filter(function (el) {
+              return el != null;
+            });
           }
-
           return availableDenoms;
         } else {
           return [];
         }
       }),
+
       userAssetList: computed(() => {
         //pay-asset-list for a connected wallet
 
@@ -313,15 +318,19 @@ export default defineComponent({
         // console.log('receiveAssetList', receiveAvailableAssets);
         return receiveAvailableAssets;
       }),
+      //asset-list-data-end
+
+      // permanent fee-level-setting
       gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
+      // for swap action
       actionHandlerResult: null,
 
+      // booleans-start(for various status check)
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
-
       isWallet: computed(() => {
         return store.getters['demeris/getKeplrAddress'] ? true : false;
       }),
@@ -331,14 +340,17 @@ export default defineComponent({
       isUserAssetList: computed(() => {
         return data.userAssetList.length !== 0 ? true : false;
       }),
-
       isChildModalOpen: false,
       isPriceChanged: true,
       isAssetList: false,
       isFeesOpen: false,
+      // booleans-end
+
+      //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
+    //for default payCoin set
     watch(
       () => {
         return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
@@ -367,11 +379,11 @@ export default defineComponent({
       { immediate: true },
     );
 
+    //get baseAssetList only once
     watch(pools, () => {
       (async () => {
         if (!data.isAssetList && pools.value.length > 0) {
           data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
-          // console.log('baseAssetList init', data.baseAssetList);
           data.isAssetList = true;
         }
       })();
