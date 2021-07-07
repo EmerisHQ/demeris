@@ -104,16 +104,16 @@
         :status="'normal'"
         :click-function="
           () => {
-            status == 'keplr-reject' ? emitRetry() : status == 'failed' ? emitCancel() : emitNext();
+            status == 'keplr-reject' ? emitRetry() : status == 'failed' ? emitClose() : emitNext();
           }
         "
-        :style="{ marginBottom: `${displayData.blackButton && displayData.whiteButton ? '2.4rem' : ''}` }"
+        :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
       />
       <Button
         v-if="whiteButton"
         :name="whiteButton"
         :status="'normal'"
-        :click-function="emitCancel"
+        :click-function="emitClose"
         :is-outline="true"
       />
     </div>

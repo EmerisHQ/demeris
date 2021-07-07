@@ -257,6 +257,7 @@ export default defineComponent({
     });
     const confirm = async () => {
       let abort = false;
+      console.log(currentData.value.data.transactions);
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
           do {
@@ -334,6 +335,7 @@ export default defineComponent({
         }
         isTxHandlingModalOpen.value = false;
       }
+      currentStep.value = currentStep.value + 1;
     };
     const emitHandler = (event) => {
       emit(event);

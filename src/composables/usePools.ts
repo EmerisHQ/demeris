@@ -45,5 +45,16 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
-  return { pools, getReserveBaseDenoms, poolsByDenom, poolById, formatPoolName, poolPriceById };
+  const reserveBalancesById = async (id: string) => {
+    const pool = pools.value.find((item) => item.id === id);
+    const balances = (
+      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
+        params: { address: pool.reserve_account_address },
+      })
+    ).balances;
+    const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
+    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
+    return { balanceA: balanceA.amount, balanceB: balanceB.amount };
+  };
+  return { pools, getReserveBaseDenoms, poolsByDenom, poolById, formatPoolName, poolPriceById, reserveBalancesById };
 }
