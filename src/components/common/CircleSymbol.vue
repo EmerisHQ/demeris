@@ -32,6 +32,7 @@ type CircleSymbolSize = 'sm' | 'md' | 'lg';
 import { useStore } from 'vuex';
 
 import symbolsData from '@/data/symbols';
+import { hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -41,14 +42,6 @@ const defaultColors = {
 
 const findSymbolColors = (symbol: string) => {
   return symbolsData[symbol]?.colors || defaultColors;
-};
-
-const hexToRGB = (hex: string) => {
-  return hex
-    .replace('#', '')
-    .match(/[A-Za-z0-9]{2}/g)
-    .map((v) => parseInt(v, 16))
-    .join(',');
 };
 
 export default defineComponent({
@@ -243,6 +236,8 @@ export default defineComponent({
   }
 
   &__badge {
+    // display: block;
+    display: none;
     position: absolute;
     width: 1.2rem;
     height: 1.2rem;

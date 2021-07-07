@@ -16,7 +16,9 @@
 
         <!-- Balance -->
 
-        <section class="asset__main__balance">
+        <MoonpayBanner v-if="!assets.length" class="asset__main__buy-banner" variant="banner" />
+
+        <section v-else class="asset__main__balance">
           <p class="asset__main__balance__label">Balance</p>
           <h2 class="asset__main__balance__value">
             <AmountDisplay :amount="{ amount: totalAmount, denom }" />
@@ -47,7 +49,7 @@
 
         <!-- Chains -->
 
-        <section class="asset__main__chains asset__list">
+        <section v-if="assets.length" class="asset__main__chains asset__list">
           <ul class="asset__list__wrapper">
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
@@ -132,6 +134,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
+import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -151,6 +154,7 @@ export default defineComponent({
     PlusIcon,
     LiquiditySwap,
     Pools,
+    MoonpayBanner,
   },
 
   setup() {
@@ -206,6 +210,9 @@ export default defineComponent({
       }
     }
 
+    &__buy-banner {
+      margin-top: 6.4rem;
+    }
     &__balance {
       margin-top: 6.4rem;
       margin-bottom: -6rem;
@@ -397,7 +404,7 @@ export default defineComponent({
   }
 
   &__list {
-    margin-top: 7rem;
+    margin-top: 6.4rem;
     display: flex;
     flex-direction: column;
 

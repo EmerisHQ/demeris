@@ -102,20 +102,6 @@ export default defineComponent({
           height: 100%;
         }
       }
-
-      &__glow {
-        position: absolute;
-        content: '';
-        width: 100%;
-        height: 100%;
-        top: 0.6rem;
-        right: -0.2rem;
-        border-radius: 1.6rem;
-        background: radial-gradient(144.8% 78% at 90.48% 100%, #fffd38 25.95%, rgba(158, 255, 185, 0) 100%),
-          linear-gradient(153.31deg, #64dafb 5.41%, #30ffdf 30.23%, #b0ff94 54.73%);
-        opacity: 0.5;
-        filter: blur(12.8px);
-      }
     }
     &__details {
       margin-left: 1.2rem;
