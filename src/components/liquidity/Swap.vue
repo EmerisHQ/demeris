@@ -224,6 +224,8 @@ export default defineComponent({
                     denom: counterDenom[0],
                     base_denom: denomToBaseDenomIndex[counterDenom[0]],
                     display_name: baseDenomToDisplayNameIndex[denomToBaseDenomIndex[counterDenom[0]]],
+                    amount: 0 + denomToBaseDenomIndex[counterDenom[0]],
+                    on_chain: store.getters['demeris/getDexChain'],
                   };
                 }
               },
@@ -247,6 +249,8 @@ export default defineComponent({
                     denom: counterDenom[0],
                     base_denom: denomToBaseDenomIndex[counterDenom[0]],
                     display_name: baseDenomToDisplayNameIndex[denomToBaseDenomIndex[counterDenom[0]]],
+                    amount: 0 + denomToBaseDenomIndex[counterDenom[0]],
+                    on_chain: store.getters['demeris/getDexChain'],
                   };
                 }
               },
@@ -263,16 +267,20 @@ export default defineComponent({
 
       userAssetList: computed(() => {
         //pay-asset-list for a connected wallet
+        let filteredBaseAssetList = null;
+        if (data.receiveCoinData) {
+          filteredBaseAssetList = JSON.parse(JSON.stringify(data.availablePoolDenoms.payDenoms));
+        } else {
+          filteredBaseAssetList = JSON.parse(JSON.stringify(data.baseAssetList));
+        }
 
-        let filteredBaseAssetList = JSON.parse(JSON.stringify(data.baseAssetList));
-
-        // console.log('userAccountBalances', userAccountBalances.value);
         if (data.isWallet) {
           if (userAccountBalances?.value?.verified.length + userAccountBalances?.value?.unverified.length > 0) {
             //wallet with assets
             const userVerifiedBalances = userAccountBalances.value.verified;
             const tempIndexer = {};
             const verifiedDenomsIndexer = {};
+
             data.verifiedDenoms.forEach((denom) => {
               verifiedDenomsIndexer[denom.name] = denom.display_name;
             });
