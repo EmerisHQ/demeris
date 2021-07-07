@@ -211,43 +211,59 @@ export async function transfer({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
-      const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: destination_chain_name,
-        }) ??
-        (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
-          {
-            subscribe: true,
-            params: {
-              chain_name: verifyTrace.trace[0].counterparty_name,
-              destination_chain_name: destination_chain_name,
-            },
+      if (verifyTrace.trace[0].counterparty_name == destination_chain_name) {
+        result.steps.push({
+          name: 'ibc_backward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: verifyTrace.trace[0].counterparty_name,
+            to_address,
+            through: verifyTrace.trace[0].channel,
           },
-          { root: true },
-        ));
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        data: {
-          amount: amount,
-          from_chain: chain_name,
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: destination_chain_name,
-          to_address,
-          through: primaryChannel,
-        },
-      });
+        });
+      } else {
+        result.steps.push({
+          name: 'ibc_backward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: verifyTrace.trace[0].counterparty_name,
+            through: verifyTrace.trace[0].channel,
+          },
+        });
+      }
+      if (verifyTrace.trace[0].counterparty_name != destination_chain_name) {
+        const primaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: verifyTrace.trace[0].counterparty_name,
+            destination_chain_name: destination_chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: {
+                chain_name: verifyTrace.trace[0].counterparty_name,
+                destination_chain_name: destination_chain_name,
+              },
+            },
+            { root: true },
+          ));
+        result.steps.push({
+          name: 'ibc_forward',
+          status: 'pending',
+          data: {
+            amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+            from_chain: verifyTrace.trace[0].counterparty_name,
+            to_chain: destination_chain_name,
+            to_address,
+            through: primaryChannel,
+          },
+        });
+      }
 
       return result;
     }
@@ -385,23 +401,6 @@ export async function move({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
-      console.log(verifyTrace);
-      const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: destination_chain_name,
-        }) ??
-        (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
-          {
-            subscribe: true,
-            params: {
-              chain_name: verifyTrace.trace[0].counterparty_name,
-              destination_chain_name: destination_chain_name,
-            },
-          },
-          { root: true },
-        ));
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
@@ -412,24 +411,50 @@ export async function move({
           through: verifyTrace.trace[0].channel,
         },
       });
-      result.steps.push({
-        name: 'ibc_forward',
-        status: 'pending',
-        data: {
-          amount: { amount: amount.amount, denom: verifyTrace.base_denom },
-          from_chain: verifyTrace.trace[0].counterparty_name,
-          to_chain: destination_chain_name,
-          through: primaryChannel,
-        },
-      });
 
-      result.output = {
-        amount: {
-          amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
-        },
-        chain_name: destination_chain_name,
-      };
+      if (verifyTrace.trace[0].counterparty_name !== destination_chain_name) {
+        const primaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: verifyTrace.trace[0].counterparty_name,
+            destination_chain_name: destination_chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: {
+                chain_name: verifyTrace.trace[0].counterparty_name,
+                destination_chain_name: destination_chain_name,
+              },
+            },
+            { root: true },
+          ));
+        result.steps.push({
+          name: 'ibc_forward',
+          status: 'pending',
+          data: {
+            amount: { amount: amount.amount, denom: verifyTrace.base_denom },
+            from_chain: verifyTrace.trace[0].counterparty_name,
+            to_chain: destination_chain_name,
+            through: primaryChannel,
+          },
+        });
+        result.output = {
+          amount: {
+            amount: amount.amount,
+            denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
+          },
+          chain_name: destination_chain_name,
+        };
+      } else {
+        result.output = {
+          amount: {
+            amount: amount.amount,
+            denom: verifyTrace.base_denom,
+          },
+          chain_name: destination_chain_name,
+        };
+      }
       return result;
     }
   }

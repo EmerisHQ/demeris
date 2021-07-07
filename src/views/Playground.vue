@@ -195,7 +195,7 @@ export default defineComponent({
     ];
     const sendMessage = async () => {
       const steps = await actionHandler({
-        name: 'swap',
+        name: 'transfer',
         params: {
           from: {
             amount: {
@@ -205,11 +205,8 @@ export default defineComponent({
             chain_name: 'akash',
           },
           to: {
-            amount: {
-              amount: '400000',
-              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
-            },
             chain_name: 'cosmos-hub',
+            address: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
           },
         },
       });
