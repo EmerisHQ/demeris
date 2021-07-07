@@ -33,8 +33,14 @@
         <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row" @click="rowClickHandler(pool)">
           <td class="pools-table__row__pair">
             <div class="pools-table__row__pair__pool">
-              <span class="pools-table__row__pair__pool__avatar token-a" />
-              <span class="pools-table__row__pair__pool__avatar token-b" />
+              <CircleSymbol
+                :denoms="pool.reserve_coin_denoms[0]"
+                class="pools-table__row__pair__pool__avatar token-a"
+              />
+              <CircleSymbol
+                :denoms="pool.reserve_coin_denoms[1]"
+                class="pools-table__row__pair__pool__avatar token-b"
+              />
             </div>
             <span class="pools-table__row__pair__name w-bold">
               {{ pool.display_name }}
@@ -59,6 +65,7 @@ import { ref } from '@vue/reactivity';
 import { computed, onMounted, PropType } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Search from '@/components/common/Search.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -67,7 +74,7 @@ import { Pool } from '@/types/actions';
 
 export default {
   name: 'PoolsTable',
-  components: { Search, Button, Icon },
+  components: { Search, Button, Icon, CircleSymbol },
 
   props: {
     pools: {

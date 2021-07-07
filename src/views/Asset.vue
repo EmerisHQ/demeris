@@ -2,57 +2,60 @@
   <AppLayout>
     <div class="asset">
       <div class="asset__main">
-        <div class="asset__main__back">
-          <router-link :to="{ name: 'Assets' }" class="asset__main__back__button">
-            <span class="asset__main__back__button__icon"><ArrowLeftIcon /></span>
-            <span>All assets</span>
-          </router-link>
-        </div>
+        <!-- Info -->
 
-        <!-- Stats -->
+        <section class="asset__main__info">
+          <p class="asset__main__info__denom">
+            <CircleSymbol :denoms="denom" class="asset__main__info__denom__symbol" />
+            <span class="asset__main__info__denom__name"><Denom :name="denom" /></span>
+          </p>
+          <h1 class="asset__main__info__price">
+            <Price :amount="{ amount: 0, denom }" />
+          </h1>
+        </section>
 
-        <section class="asset__main__stats">
-          <div class="asset__main__stats__container">
-            <div class="asset__main__stats__container__left">
-              <p class="asset__main__stats__container__left__token">
+        <!-- Balance -->
+
+        <section class="asset__main__balance">
+          <p class="asset__main__balance__label">Balance</p>
+          <h2 class="asset__main__balance__value">
+            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+          </h2>
+          <span class="asset__main__balance__price">
+            <Price :amount="{ amount: totalAmount, denom }" />
+          </span>
+
+          <dl class="asset__main__balance__card">
+            <div class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label">Available</dt>
+              <dd class="asset__main__balance__card__value">
                 <AmountDisplay :amount="{ amount: totalAmount, denom }" />
-              </p>
-              <p class="asset__main__stats__container__left__balance">
-                <Price :amount="{ amount: totalAmount, denom: denom }" />
-              </p>
-              <!--<span class="asset__main__stats__container__left__trending">
-                <span>15% (+$1,719.71)</span>
-              </span>//-->
+              </dd>
             </div>
 
-            <dl class="asset__main__stats__container__right">
-              <div class="asset__main__stats__container__right__available">
-                <dt>Available</dt>
-                <dd>$1,310.36</dd>
-              </div>
+            <div class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label">Staked</dt>
+              <dd class="asset__main__balance__card__value">-</dd>
+            </div>
 
-              <div class="asset__main__stats__container__right__price">
-                <dt>Price</dt>
-                <dd><Price :amount="{ denom: denom, amount: null }" /></dd>
-              </div>
-            </dl>
-          </div>
+            <div class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label">Pooled</dt>
+              <dd class="asset__main__balance__card__value">-</dd>
+            </div>
+          </dl>
         </section>
 
         <!-- Chains -->
 
         <section class="asset__main__chains asset__list">
-          <div class="asset__list__header">
-            <h2 class="asset__list__header__title">Chains</h2>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
-          </div>
-
           <ul class="asset__list__wrapper">
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
-                <span class="asset__main__chains__item__asset__avatar" />
+                <CircleSymbol
+                  :denoms="denom"
+                  :chain-name="asset.on_chain"
+                  class="asset__main__chains__item__asset__avatar"
+                />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
               <span class="asset__main__chains__item__amount"><AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
@@ -60,9 +63,6 @@
                 <span class="asset__main__chains__item__balance__value">
                   <Price :amount="{ amount: asset.amount, denom }" />
                 </span>
-                <button class="asset__main__chains__item__more">
-                  <Icon name="SendIcon" :icon-size="1.2" />
-                </button>
               </div>
             </li>
           </ul>
@@ -73,16 +73,12 @@
         <section class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
           </div>
 
           <div class="asset__main__staking__rewards">
             <span class="asset__main__staking__rewards__label">Rewards</span>
             <span class="asset__main__staking__rewards__amount">0.495 ATOM</span>
             <span class="asset__main__staking__rewards__balance">+$10.15</span>
-            <button class="asset__main__staking__rewards__button">Claim</button>
           </div>
 
           <ul class="asset__list__wrapper">
@@ -96,7 +92,6 @@
 
               <div class="asset__main__staking__item__balance">
                 <span class="asset__main__staking__item__balance__value">$1,690.50</span>
-                <button class="asset__main__staking__item__more"><Icon name="CaretDownIcon" :icon-size="1.6" /></button>
               </div>
             </li>
           </ul>
@@ -134,12 +129,12 @@ import { useRoute } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
-import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -149,11 +144,11 @@ export default defineComponent({
   components: {
     AmountDisplay,
     ChainName,
+    Denom,
+    CircleSymbol,
     AppLayout,
-    Icon,
     Price,
     PlusIcon,
-    ArrowLeftIcon,
     LiquiditySwap,
     Pools,
   },
@@ -189,74 +184,59 @@ export default defineComponent({
     flex-direction: column;
     width: 60%;
 
-    &__back {
-      &__button {
-        display: flex;
+    &__info {
+      &__denom {
+        display: inline-flex;
         align-items: center;
-        font-weight: 600;
-        padding: 0.8rem 0;
 
-        &__icon {
-          margin-right: 0.4rem;
-
-          svg {
-            width: 2rem;
-            height: 2rem;
-          }
+        &__symbol {
+          margin-right: 1.2rem;
         }
+        &__name {
+          font-size: 2.8rem;
+          font-weight: 700;
+          margin-right: 1.2rem;
+        }
+      }
+      &__price {
+        line-height: 1.2;
+        font-weight: 700;
+        font-size: 5.1rem;
+        margin-top: 1.2rem;
       }
     }
 
-    &__stats {
-      margin-top: 3.2rem;
-      display: flex;
-      flex-direction: column;
-
-      &__container {
+    &__balance {
+      margin-top: 6.4rem;
+      margin-bottom: -6rem;
+      &__label {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      &__value {
+        font-size: 2.8rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+      &__price {
+        color: var(--muted);
+      }
+      &__card {
+        margin-top: 2.6rem;
+        border: 1px solid var(--border-trans);
+        border-radius: 1.2rem;
+        padding: 1.6rem;
         display: flex;
+        align-items: center;
+        justify-content: space-between;
 
-        &__left {
-          display: flex;
-          flex-direction: column;
-
-          &__token {
-            font-weight: 700;
-            font-size: 2.8rem;
-            line-height: 1;
-          }
-
-          &__balance {
-            margin-top: 0.8rem;
-            font-weight: 700;
-            font-size: 6.7rem;
-            line-height: 1.3;
-          }
-
-          &__trending {
-            margin-top: 0.8rem;
-            font-weight: 500;
-            color: rgb(6, 126, 62);
-          }
+        &__label {
+          margin-bottom: 0.3rem;
+          color: var(--muted);
         }
 
-        &__right {
-          margin-left: 6rem;
-          display: flex;
-          flex-direction: column;
-
-          dt {
-            color: var(--muted);
-          }
-
-          dd {
-            margin-top: 0.3rem;
-            font-weight: 600;
-            font-size: 2.1rem;
-          }
-
-          &__price {
-            margin-top: 3.2rem;
-          }
+        &__value {
+          font-weight: 600;
         }
       }
     }
@@ -267,13 +247,6 @@ export default defineComponent({
           flex: 1 1 0%;
           display: flex;
           align-items: center;
-
-          &__avatar {
-            width: 3.2rem;
-            height: 3.2rem;
-            border-radius: 2.4rem;
-            background-color: rgba(0, 0, 0, 0.1);
-          }
 
           &__denom {
             margin-left: 1.6rem;
@@ -437,15 +410,6 @@ export default defineComponent({
         font-size: 2.8rem;
         font-weight: 700;
       }
-
-      &__button {
-        padding: 1rem;
-
-        &__icon {
-          width: 2.2rem;
-          height: 2.2rem;
-        }
-      }
     }
 
     &__wrapper {
@@ -464,10 +428,6 @@ export default defineComponent({
     &__item + &__item {
       margin-top: 3.2rem;
     }
-  }
-
-  &__list + &__list {
-    margin-top: 7rem;
   }
 }
 </style>
