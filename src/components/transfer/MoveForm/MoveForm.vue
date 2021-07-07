@@ -8,7 +8,7 @@
     </template>
 
     <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" :gas-price-level="gasPrice" />
+      <TxStepsModal :data="steps" :gas-price-level="gasPrice" @compplete="goToStep(complete)" />
     </template>
   </div>
 </template>

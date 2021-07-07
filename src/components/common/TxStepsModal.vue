@@ -190,7 +190,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['goback', 'close'],
+  emits: ['goback', 'close', 'complete'],
   setup(props, { emit }) {
     console.log('modalProps', props.data);
     const fees = ref([]);
@@ -335,7 +335,12 @@ export default defineComponent({
         }
         isTxHandlingModalOpen.value = false;
       }
-      currentStep.value = currentStep.value + 1;
+      if (currentStep.value == (props.data as Step[]).length - 1) {
+        // At the end, emit completion
+        emit('complete');
+      } else {
+        currentStep.value = currentStep.value + 1;
+      }
     };
     const emitHandler = (event) => {
       emit(event);
