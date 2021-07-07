@@ -6,7 +6,7 @@ import usePools from './usePools';
 
 export default function usePool(id?: string | ComputedRef<string>) {
   const store = useAllStores();
-  const { poolById, formatPoolName } = usePools();
+  const { poolById, formatPoolName, poolPriceById } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -17,7 +17,9 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     return poolById(poolId);
   });
-
+  const poolPrice = async () => {
+    return await poolPriceById(unref(id));
+  };
   const pairName = ref('-/-');
 
   const setPairName = async () => {
@@ -106,6 +108,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
     pairName,
     totalSupply,
     reserveBalances,
+    poolPrice,
     updateReserveBalances,
     calculateSupplyTokenAmount,
     calculateWithdrawBalances,

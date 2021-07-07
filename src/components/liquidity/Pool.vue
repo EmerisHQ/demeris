@@ -7,32 +7,33 @@
       </div>
 
       <div class="pool__main__trending">
-        <span class="pool__main__trending__icon">
+        <!--<span class="pool__main__trending__icon">
           <TrendingUpIcon />
         </span>
         <span class="pool__main__trending__value"> 18% </span>
+        //-->
       </div>
     </div>
 
     <div class="pool__footer">
       <p class="pool__footer__pair">{{ pairName }}</p>
-      <span class="pool__footer__price">$1,544.05</span>
+      <span class="pool__footer__price">{{ price }}</span>
     </div>
   </router-link>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 
 import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 
-import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
+//import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
 export default defineComponent({
   name: 'Pool',
 
-  components: { TrendingUpIcon },
+  //components: { TrendingUpIcon },
 
   props: {
     pool: {
@@ -42,9 +43,12 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pairName } = usePool((props.pool as Pool).id);
-
-    return { pairName };
+    const { pairName, poolPrice } = usePool((props.pool as Pool).id);
+    const price = ref(0);
+    onMounted(async () => {
+      price.value = await poolPrice();
+    });
+    return { pairName, price };
   },
 });
 </script>

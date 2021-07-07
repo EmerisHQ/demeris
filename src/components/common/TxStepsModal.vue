@@ -129,9 +129,21 @@
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
       :status="txstatus"
+      :has-more="hasMore"
       :tx="transaction"
-      :black-button-func="nextTx"
-      @close="toggleTxHandlingModal"
+      @next="nextTx"
+      @retry="
+        () => {
+          retry = true;
+          nextTx();
+        }
+      "
+      @close="
+        () => {
+          nextTx();
+          toggleTxHandlingModal();
+        }
+      "
     />
   </div>
 </template>
@@ -182,7 +194,9 @@ export default defineComponent({
   setup(props, { emit }) {
     console.log('modalProps', props.data);
     const fees = ref([]);
+    const retry = ref(false);
     const store = useStore();
+    const hasMore = ref(false);
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -242,48 +256,82 @@ export default defineComponent({
       return modifiedData;
     });
     const confirm = async () => {
-      for (let stepTx of currentData.value.data.transactions) {
-        transaction.value = stepTx;
-        isTxHandlingModalOpen.value = true;
-        txstatus.value = 'keplr-sign';
-        let txToResolveResolver;
-        const txToResolvePromise = {
-          promise: new Promise((resolve) => {
-            txToResolveResolver = resolve;
-          }),
-          resolver: txToResolveResolver,
-        };
+      let abort = false;
+      for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
+        if (!abort) {
+          do {
+            retry.value = false;
+            transaction.value = stepTx;
+            if (currentData.value.data.transactions.length > i + 1) {
+              hasMore.value = true;
+            } else {
+              hasMore.value = false;
+            }
+            isTxHandlingModalOpen.value = true;
+            txstatus.value = 'keplr-sign';
+            let txToResolveResolver;
+            const txToResolvePromise = {
+              promise: new Promise((resolve) => {
+                txToResolveResolver = resolve;
+              }),
+              resolver: txToResolveResolver,
+            };
 
-        txToResolve.value = txToResolvePromise;
-        let res = await msgFromStepTransaction(stepTx);
-        const feeOptions = await feeForStepTransaction(stepTx);
-        const fee = {
-          amount: [
-            {
-              amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
-              denom: feeOptions[0].denom,
-            },
-          ],
-          gas: '300000',
-        };
-        let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-          msgs: [res.msg],
-          chain_name: res.chain_name,
-          fee,
-          registry: res.registry,
-          memo: 'a memo',
-        });
-        txstatus.value = 'transferring';
-        let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
-
-        const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
-          subscribe: true,
-          params: { chain_name: res.chain_name, ticket: result.ticket },
-        });
-        await txPromise;
-        txstatus.value = 'transferred';
-        console.log(txToResolve);
-        await txToResolve.value['promise'];
+            txToResolve.value = txToResolvePromise;
+            let res = await msgFromStepTransaction(stepTx);
+            const feeOptions = await feeForStepTransaction(stepTx);
+            const fee = {
+              amount: [
+                {
+                  amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
+                  denom: feeOptions[0].denom,
+                },
+              ],
+              gas: '300000',
+            };
+            let tx;
+            try {
+              tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+                msgs: [res.msg],
+                chain_name: res.chain_name,
+                fee,
+                registry: res.registry,
+                memo: 'a memo',
+              });
+            } catch (e) {
+              txstatus.value = 'keplr-reject';
+              await txToResolve.value['promise'];
+              continue;
+            }
+            if (tx) {
+              txstatus.value = 'transacting';
+              let result;
+              try {
+                result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+              } catch (e) {
+                txstatus.value = 'failed';
+                await txToResolve.value['promise'];
+                abort = true;
+                continue;
+              }
+              try {
+                const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                  subscribe: true,
+                  params: { chain_name: res.chain_name, ticket: result.ticket },
+                });
+                await txPromise;
+                txstatus.value = 'complete';
+                console.log(txToResolve);
+                await txToResolve.value['promise'];
+              } catch (e) {
+                txstatus.value = 'failed';
+                await txToResolve.value['promise'];
+                abort = true;
+                continue;
+              }
+            }
+          } while (retry.value);
+        }
         isTxHandlingModalOpen.value = false;
       }
     };
@@ -299,6 +347,8 @@ export default defineComponent({
       isTxHandlingModalOpen,
       nextTx,
       transaction,
+      retry,
+      hasMore,
     };
   },
 });
