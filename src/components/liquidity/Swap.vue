@@ -294,6 +294,8 @@ export default defineComponent({
 
     function changePayToReceive() {
       const originPayCoinData = data.payCoinData;
+      originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
+
       const originReceiveCoinData = data.receiveCoinData;
       const originReceiveCoinAmount = data.receiveCoinAmount;
 
