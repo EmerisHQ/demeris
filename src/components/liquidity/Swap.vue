@@ -49,10 +49,7 @@
             }"
           />
           <IconButton
-            v-if="parseInt(payCoinData?.amount) > 0"
-            :name="`${getPrecisedAmount(payCoinData.base_denom, getMaxAmount(payCoinData))} ${
-              payCoinData.display_name
-            } Max `"
+            :name="maxButtonText"
             :type="'text'"
             :status="'normal'"
             :data="{
@@ -173,10 +170,22 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity || !data.isAmount) {
+        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity || !data.isAmount || !data.isWallet) {
           return 'inactive';
         } else {
           return 'normal';
+        }
+      }),
+      maxButtonText: computed(() => {
+        if (data.payCoinData) {
+          const amount = getPrecisedAmount(data.payCoinData?.base_denom, getMaxAmount(data.payCoinData));
+          if (amount > 0) {
+            return `${amount} ${data.payCoinData.display_name} Max`;
+          } else {
+            return 'Max';
+          }
+        } else {
+          return 'Max';
         }
       }),
       //conditional-text-end
