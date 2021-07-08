@@ -380,9 +380,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
       const tx_data = Buffer.from(tx).toString('base64');
+
       return { tx: tx_data, chain_name };
     } catch (e) {
-      console.log(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
     }
   },
@@ -421,7 +421,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
-      console.log(e);
       return false;
     }
   },

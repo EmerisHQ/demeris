@@ -64,7 +64,6 @@ export default defineComponent({
       emit('select', payload);
     }
 
-    console.log('assets', props);
     return { coinListselectHandler, filterAsset, chainsNumber, selectedDenomDisplay };
   },
 });

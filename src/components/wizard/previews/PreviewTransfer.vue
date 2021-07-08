@@ -93,7 +93,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    console.log(props.fees);
+
     const stepType = computed(() => {
       const description = (props.step as Actions.Step).description;
       const descriptionKeyMap = {

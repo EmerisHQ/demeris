@@ -69,8 +69,9 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
         amount: amount.amount,
         denom: verifyTrace.base_denom,
       },
-      chain_name: verifyTrace.trace[verifyTrace.length - 1].counterparty,
+      chain_name: verifyTrace.trace[verifyTrace.trace.length - 1].counterparty_name,
     };
+
     return result;
   }
 }
@@ -644,16 +645,6 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({ name: 'transfer', description: 'Assets Transferred', transactions: [...transferStep.steps] }); //TODO
         break;
       case 'swap':
-        params = (action as Actions.SwapAction).params;
-        console.log(params);
-        console.log({
-          amount: {
-            amount: params.from.amount.amount,
-            denom: params.from.amount.denom,
-          },
-          chain_name: params.from.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
-        });
         const transferToHubStep = await move({
           amount: {
             amount: params.from.amount.amount,
@@ -668,7 +659,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           description: 'Assets Must be transferred to hub first', //TODO
           transactions: [...transferToHubStep.steps],
         });
-        console.log(transferToHubStep);
+
         const swapStep = await swap({
           from: {
             amount: transferToHubStep.output.amount.amount,
@@ -801,8 +792,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         break;
     }
   } catch (e) {
-    console.log(e);
-    console.log('Unable to create action steps');
+    throw new Error('Unable to create action steps: ' + e);
   }
 
   return steps;
