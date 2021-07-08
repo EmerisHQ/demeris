@@ -1151,3 +1151,46 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
   }
   return redeemableBalances;
 }
+
+export async function validBalances(balances: Balances): Promise<Balances> {
+  const validBalances = [];
+  for (const balance of balances) {
+    if (Object.keys(balance.ibc).length == 0) {
+      validBalances.push(balance);
+    } else {
+      if (balance.ibc.path.split('/').length > 2) {
+        continue;
+      }
+      let verifyTrace;
+      try {
+        verifyTrace =
+          store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
+          (await store.dispatch(
+            'demeris/GET_VERIFY_TRACE',
+            { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+            { root: true },
+          ));
+      } catch (e) {
+        continue;
+      }
+
+      const primaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: verifyTrace.trace[0].counterparty_name,
+          destination_chain_name: balance.on_chain,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: false,
+            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: balance.on_chain },
+          },
+          { root: true },
+        ));
+      if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+        validBalances.push(balance);
+      }
+    }
+  }
+  return validBalances;
+}
