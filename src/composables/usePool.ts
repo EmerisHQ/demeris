@@ -62,7 +62,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
   const calculateSupplyTokenAmount = (amountA: number, amountB: number) => {
     if (!totalSupply.value || !reserveBalances.value) {
-      return 1e6;
+      return 1;
     }
 
     const poolCoinAmount = Math.min(

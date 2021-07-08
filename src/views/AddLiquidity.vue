@@ -372,15 +372,12 @@ export default {
           },
         } as AddLiquidityAction;
       } else {
-        // TODO:
-        // action = {
-        // 	name: 'createliquidity',
-        // 	params: {
-        // 		poolCreatorAddress: ''
-        // 		poolTypeId: 1,
-        // 		...baseParams
-        // 	}
-        // } as CreatePoolAction
+        action = {
+          name: 'createpool',
+          params: {
+            ...baseParams,
+          },
+        } as CreatePoolAction;
       }
       const result = await actionHandler(action);
       actionSteps.value = result;
@@ -473,8 +470,8 @@ export default {
       }
     });
 
-    watch([form.coinA, form.coinB, pool], async () => {
-      if (pool.value) {
+    watch([form.coinA, form.coinB, pool, hasPair], async () => {
+      if (hasPair.value) {
         await generateActionSteps();
       }
     });
