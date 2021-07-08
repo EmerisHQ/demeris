@@ -143,6 +143,7 @@ export default defineComponent({
     const { denomListByPools, pools, poolsByDenom } = usePools();
     const { getDisplayPrice } = usePrice();
     const { userAccountBalances } = useAccount();
+    const { balances } = useAccount();
 
     const data = reactive({
       //conditional-text-start

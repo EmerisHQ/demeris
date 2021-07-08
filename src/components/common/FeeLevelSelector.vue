@@ -1,19 +1,17 @@
 <template>
-  <div class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
+  <div v-if="steps" class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
     <div>Fees (included)</div>
     <div class="fees-total">
-      <span v-show="!isFeesOpen">
-        ~{{ formatter.format(swapDollarFee + transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
-      </span>
+      <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
       <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
       <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
     </div>
   </div>
   <div v-if="isFeesOpen" class="fees-detail">
     <div class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">Transaction fee(x{{ transactionCount }})</div>
+      <div class="fees-detail__info-key">Transaction fee(x{{ txCount }})</div>
       <div class="fees-detail__info-value">
-        {{ formatter.format(transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
+        {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
     </div>
 
@@ -25,7 +23,7 @@
       >
         <div class="fees-detail__selector-block-level">Slow</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.LOW)) }}
+          {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
@@ -35,7 +33,7 @@
       >
         <div class="fees-detail__selector-block-level">Normal</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.AVERAGE)) }}
+          {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
@@ -45,7 +43,7 @@
       >
         <div class="fees-detail__selector-block-level">Fast</div>
         <div class="fees-detail__selector-block-value">
-          {{ formatter.format(baseDollarFee * getFeeWeight(GasPriceLevel.HIGH)) }}
+          {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>
     </div>
@@ -63,17 +61,19 @@
     <div class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">Estimated total fees</div>
       <div class="fees-detail__info-value">
-        {{ formatter.format(swapDollarFee + transactionCount * baseDollarFee * getFeeWeight(gasPriceLevel)) }}
+        {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, reactive, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GasPriceLevel } from '@/types/actions';
+import { GasPriceLevel, Step } from '@/types/actions';
+import { feeForSteps } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -82,22 +82,93 @@ export default defineComponent({
     Icon,
   },
   props: {
+    steps: {
+      type: Array as PropType<Step[]>,
+      required: true,
+    },
     gasPriceLevel: {
       type: String as PropType<GasPriceLevel>,
-      required: true,
-    },
-    baseDollarFee: {
-      type: Number,
-      required: true,
-    },
-    transactionCount: {
-      type: Number,
       required: true,
     },
     swapDollarFee: { type: Number, required: false, default: 0 },
   },
   emits: ['update:gasPriceLevel'],
   setup(props, { emit }) {
+    const lowFee = ref({});
+    const avgFee = ref({});
+    const highFee = ref({});
+    onMounted(async () => {
+      lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
+      avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
+      highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
+    });
+    watch(
+      () => props.steps,
+      async () => {
+        lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
+        avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
+        highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
+      },
+    );
+    const store = useStore();
+    const txCount = computed(() => {
+      let count = 0;
+      for (let step of props.steps as Step[]) {
+        count = count + step.transactions.length;
+      }
+      return count;
+    });
+    const lowFeeUSD = computed(() => {
+      let value = 0;
+      for (const chain_name in lowFee.value) {
+        for (const denom in lowFee.value[chain_name]) {
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: denom,
+            }) ?? '6';
+          const price = store.getters['demeris/getPrice']({ denom });
+          value = value + (price * parseInt(lowFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+        }
+      }
+      return value;
+    });
+
+    const avgFeeUSD = computed(() => {
+      let value = 0;
+      for (const chain_name in avgFee.value) {
+        for (const denom in avgFee.value[chain_name]) {
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: denom,
+            }) ?? '6';
+          const price = store.getters['demeris/getPrice']({ denom });
+          value = value + (price * parseInt(avgFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+        }
+      }
+      return value;
+    });
+    const highFeeUSD = computed(() => {
+      let value = 0;
+      for (const chain_name in highFee.value) {
+        for (const denom in highFee.value[chain_name]) {
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: denom,
+            }) ?? '6';
+          const price = store.getters['demeris/getPrice']({ denom });
+          value = value + (price * parseInt(highFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+        }
+      }
+      return value;
+    });
+    const fees = computed(() => {
+      const fees = {};
+      fees[GasPriceLevel.LOW] = lowFeeUSD.value;
+      fees[GasPriceLevel.AVERAGE] = avgFeeUSD.value;
+      fees[GasPriceLevel.HIGH] = highFeeUSD.value;
+
+      return fees;
+    });
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
@@ -106,15 +177,6 @@ export default defineComponent({
       },
       toggle: () => {
         data.isFeesOpen = !data.isFeesOpen;
-      },
-      getFeeWeight: (level: GasPriceLevel) => {
-        if (level === GasPriceLevel.LOW) {
-          return 1;
-        } else if (level === GasPriceLevel.AVERAGE) {
-          return 2;
-        } else {
-          return 3;
-        }
       },
       GasPriceLevel,
       formatter: new Intl.NumberFormat('en-US', {
@@ -128,7 +190,7 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    return { ...toRefs(data) };
+    return { ...toRefs(data), txCount, fees };
   },
 });
 </script>

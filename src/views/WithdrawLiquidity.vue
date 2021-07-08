@@ -31,7 +31,7 @@
             <span class="withdraw-liquidity__pool__pair__avatar token-b" />
           </div>
 
-          <span class="withdraw-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
+          <span class="withdraw-liquidity__pool__name">{{ pairName }}</span>
         </div>
 
         <div class="withdraw-liquidity__estimated">
@@ -152,6 +152,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 
 export default {
@@ -162,7 +163,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const poolId = computed(() => route.params.id);
-    const { poolById, formatPoolName } = usePools();
+    const { formatPoolName } = usePools();
     const { balances } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
@@ -175,9 +176,7 @@ export default {
       isMaximumAmountChecked: false,
     });
 
-    const pool = computed(() => {
-      return poolById(+poolId.value);
-    });
+    const { pool, pairName } = usePool(computed(() => poolId.value as string));
 
     // TODO: Fetch from API the wallet available amount
     const tokenAsset = computed(() => {
@@ -231,9 +230,8 @@ export default {
     );
 
     return {
-      route,
-      router,
       pool,
+      pairName,
       state,
       steps,
       tokenAsset,
