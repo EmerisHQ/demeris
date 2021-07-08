@@ -6,7 +6,9 @@
       {{ currentData.title }}
     </div>
 
-    <template v-if="['transfer', 'move', 'redeem', 'swap', 'addliquidity'].includes(currentData.data.name)">
+    <template
+      v-if="['transfer', 'move', 'redeem', 'swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.data.name)"
+    >
       <div v-if="currentData && currentData.fees" class="detail">
         <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
         <PreviewAddLiquidity
@@ -248,6 +250,7 @@ export default defineComponent({
           modifiedData.title = 'Review your pool liquidity details';
           break;
         case 'withdrawliquidity':
+          modifiedData.title = 'Review your withdraw liquidity details';
           break;
         case 'createpool':
           break;
