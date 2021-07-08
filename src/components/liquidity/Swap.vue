@@ -301,6 +301,8 @@ export default defineComponent({
               const uniqueId = `${coin.base_denom}/${coin.on_chain}`;
               if (baseAssetIndexer[uniqueId] !== undefined) {
                 if (filteredBaseAssetList[baseAssetIndexer[uniqueId]]?.amount) {
+                  filteredBaseAssetList[baseAssetIndexer[uniqueId]].pool_id =
+                    data.baseAssetList[baseAssetIndexer[uniqueId]].pool_id;
                   if (parseInt(filteredBaseAssetList[baseAssetIndexer[uniqueId]].amount) === 0) {
                     filteredBaseAssetList[baseAssetIndexer[uniqueId]].amount = coin.amount;
                   }
@@ -311,7 +313,6 @@ export default defineComponent({
               }
             });
 
-            console.log('afterFilter', listFilter(filteredBaseAssetList));
             return listFilter(filteredBaseAssetList);
           } else {
             // wallet without assets
@@ -368,7 +369,7 @@ export default defineComponent({
         return data.userAssetList.length !== 0 ? true : false;
       }),
       isChildModalOpen: false,
-      isPriceChanged: true,
+      isPriceChanged: false,
       isAssetList: false,
       isFeesOpen: false,
       // booleans-end
@@ -411,6 +412,7 @@ export default defineComponent({
       (async () => {
         if (!data.isAssetList && pools.value.length > 0) {
           data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
+          console.log('INIT BASEASSETLIST', data.baseAssetList);
           data.isAssetList = true;
         }
       })();
@@ -424,6 +426,9 @@ export default defineComponent({
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
+          console.log('data.userAssetList', data.userAssetList);
+          console.log('data.userAssetList[0].pool_id', data.userAssetList[0].pool_id);
+          console.log('data.baseAssetList', data.baseAssetList);
           const id = data.userAssetList[0].pool_id;
           const pool = poolById(id);
           const poolPrice = await poolPriceById(id);
@@ -436,7 +441,7 @@ export default defineComponent({
             reserves,
             reserveBalances,
           };
-          console.table(data.selectedPoolData);
+          console.table('selectedPoolData', data.selectedPoolData);
         }
       },
     );
@@ -451,8 +456,11 @@ export default defineComponent({
 
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = originPayCoinData;
-      data.payCoinAmount = originReceiveCoinAmount;
-      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      // data.payCoinAmount = originReceiveCoinAmount;
+      // data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      // TEST
+      data.payCoinAmount = 0;
+      data.receiveCoinAmount = 0;
     }
 
     function setMax() {
