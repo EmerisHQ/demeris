@@ -168,7 +168,9 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = computed(() => store.getters['demeris/getAllBalances']);
+    const balances = computed(() => {
+      return store.getters['demeris/getAllBalances'] ?? [];
+    });
     const action = ref(null);
     const pools: Pool[] = [
       {
@@ -195,38 +197,35 @@ export default defineComponent({
     ];
     const sendMessage = async () => {
       const steps = await actionHandler({
-        name: 'transfer',
-        params: {
-          from: {
-            amount: {
-              amount: '5000000',
-              denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
-            },
-            chain_name: 'akash',
-          },
-          to: {
+        name: 'redeem',
+        params: [
+          {
             chain_name: 'cosmos-hub',
-            address: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
+            amount: { amount: '25000', denom: 'ibc/8371C119AD9ABB70F056791FFCBB02065CD06536B62E79E164324899CA37CD3D' },
           },
-        },
+        ],
       });
       console.log(steps);
       //action.value = steps;
     };
     const sendStepTx = async () => {
-      /*const channel = store.getters['demeris/getPrimaryChannel']({
-        chain_name: 'cosmos-hub',
-        destination_chain_name: 'akash',
+      /*  const channel = store.getters['demeris/getPrimaryChannel']({
+        chain_name: 'akash',
+        destination_chain_name: 'cosmos-hub',
       });
-  */
+      */
+
       const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '50000', denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2' },
+          amount: {
+            amount: '50000',
+            denom: 'ibc/3D543643452D8637B10EB31FBFCED62E154F9CF2CB71D50208C60D2A6718EA93',
+          },
           from_chain: 'akash',
-          to_chain: 'crypto-com',
-          to_address: await getOwnAddress({ chain_name: 'crypto-com' }),
+          to_chain: 'cosmos-hub',
+          to_address: await getOwnAddress({ chain_name: 'cosmos-hub' }),
           through: 'channel-1',
         } as IBCForwardsData,
       } as StepTransaction;
