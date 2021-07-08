@@ -201,7 +201,6 @@ export default defineComponent({
   },
   emits: ['goback', 'close', 'complete'],
   setup(props, { emit }) {
-    console.log('modalProps', props.data);
     const fees = ref([]);
     const retry = ref(false);
     const store = useStore();
@@ -267,7 +266,7 @@ export default defineComponent({
     });
     const confirm = async () => {
       let abort = false;
-      console.log(currentData.value.data.transactions);
+
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
           do {
@@ -332,7 +331,7 @@ export default defineComponent({
                 });
                 await txPromise;
                 txstatus.value = 'complete';
-                console.log(txToResolve);
+
                 await txToResolve.value['promise'];
               } catch (e) {
                 txstatus.value = 'failed';
