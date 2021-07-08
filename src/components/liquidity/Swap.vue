@@ -412,7 +412,10 @@ export default defineComponent({
         } else {
           if (watchValues[1]) {
             if (watchValues[3] !== 'noWalletInit') {
-              data.payCoinData = data.receiveAssetList[0];
+              data.payCoinData =
+                data.userAssetList.filter((coin) => {
+                  return coin.base_denom === 'uatom';
+                })[0] ?? data.userAssetList[0];
               data.initStatus = 'noWalletInit';
               data.isWallet = false;
               // console.log('isWallet', data.isWallet);
