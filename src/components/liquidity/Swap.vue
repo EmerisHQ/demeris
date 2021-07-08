@@ -92,11 +92,12 @@
         :steps="actionHandlerResult"
       />
     </div>
+    {{ assetsToPay }}{{ assetsToReceive }}
   </div>
 </template>
 <script lang="ts">
 import { parseCoins } from '@cosmjs/amino';
-import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -114,6 +115,7 @@ import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -141,8 +143,113 @@ export default defineComponent({
       getReserveBaseDenoms,
     } = usePools();
     const { getDisplayPrice } = usePrice();
-    const { userAccountBalances } = useAccount();
+    const { balances, userAccountBalances } = useAccount();
 
+    // REFACTOR STARTS HERE
+    const availablePairs = ref([]);
+    watch(
+      () => pools.value,
+      async (newPools) => {
+        const pairs = [];
+        for (let pool of newPools) {
+          let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+          let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+
+          if (isNative(pool.reserve_coin_denoms[0])) {
+            reserveCoinA.base_denom = reserveCoinA.denom;
+            reserveCoinA.chain_name = store.getters['demeris/getDexChain'];
+          } else {
+            const verifyTraceA =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: pool.reserve_coin_denoms[0].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: pool.reserve_coin_denoms[0].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            reserveCoinA.base_denom = verifyTraceA.base_denom;
+            reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
+          }
+
+          if (isNative(pool.reserve_coin_denoms[1])) {
+            reserveCoinB.base_denom = reserveCoinB.denom;
+            reserveCoinB.chain_name = store.getters['demeris/getDexChain'];
+          } else {
+            const verifyTraceB =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: pool.reserve_coin_denoms[1].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: pool.reserve_coin_denoms[1].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            reserveCoinB.base_denom = verifyTraceB.base_denom;
+            reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
+          }
+          const pairAB = {
+            pool_id: pool.id,
+            pay: reserveCoinA,
+            receive: { denom: reserveCoinB.denom },
+          };
+          const pairBA = {
+            pool_id: pool.id,
+            pay: reserveCoinB,
+            receive: { denom: reserveCoinA.denom },
+          };
+          pairs.push(pairAB);
+          pairs.push(pairBA);
+        }
+        console.log('Available Pairs:');
+        console.log(pairs);
+        availablePairs.value = pairs;
+      },
+    );
+
+    const availablePaySide = computed(() => {
+      let paySide = availablePairs.value.filter(
+        (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
+      );
+      console.log('Calculated PayPair List ');
+      console.log(paySide);
+      return paySide;
+    });
+    const availableReceiveSide = computed(() => {
+      let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
+      console.log('Calculated ReceivePair List ');
+      console.log(receiveSide);
+      return receiveSide;
+    });
+    const assetsToPay = computed(() => {
+      let payAssets = balances.value.filter((x) => {
+        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
+      });
+      console.log('Calculated Pay Asset List ');
+      console.log(payAssets);
+      return payAssets;
+    });
+    const assetsToReceive = computed(() => {
+      let assets = availableReceiveSide.value.map((x) => x.receive.denom);
+      console.log('Calculated Receive Asset List ');
+      console.log(assets);
+      return assets;
+    });
+    // REFACTOR ENDS HERE
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
@@ -205,6 +312,7 @@ export default defineComponent({
       verifiedDenoms: computed(() => {
         return store.getters['demeris/getVerifiedDenoms'];
       }),
+
       availablePoolDenoms: computed(() => {
         //to get counter denoms
         //TODO: pool coin include/exclude
@@ -605,6 +713,8 @@ export default defineComponent({
       getPrecisedAmount,
       setMax,
       swap,
+      assetsToPay,
+      assetsToReceive,
       setChildModalOpenStatus,
       isOpen,
       reviewModalToggle,
