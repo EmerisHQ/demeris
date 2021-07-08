@@ -115,7 +115,6 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
-import { SWAP_TEST_DATA } from '@/TEST_DATA';
 import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 export default defineComponent({
@@ -295,6 +294,7 @@ export default defineComponent({
             data.baseAssetList.forEach((coin, index) => {
               const uniqueId = `${coin.base_denom}/${coin.on_chain}`;
               baseAssetIndexer[uniqueId] = index;
+              // console.log('coin', coin);
             });
 
             userVerifiedBalances.forEach(async (coin) => {
@@ -526,28 +526,30 @@ export default defineComponent({
       }
     }
 
-    function swap() {
-      console.log('getChains', store.getters['demeris/getChains']);
+    async function swap() {
+      console.log(data.payCoinData, data.payCoinAmount);
+      console.log(data.receiveCoinData, data.receiveCoinAmount);
 
-      console.log(
-        'getBalances',
-        store.getters['demeris/getBalances']({ address: store.getters['demeris/getKeplrAddress'] }),
-      );
       // return;
+
+      const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.denom });
+      const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.denom });
+
       const swapParams = {
+        name: 'swap',
         from: {
           amount: {
-            denom: 'uatom',
-            amount: '2000000',
+            amount: String(data.payCoinAmount * Math.pow(10, parseInt(fromPrecision))),
+            denom: data.payCoinData.denom,
           },
-          chain_name: 'cosmos-hub',
+          chain_name: data.payCoinData.on_chain,
         },
         to: {
           amount: {
-            denom: 'uluna',
-            amount: '2000000',
+            amount: String(data.receiveCoinAmount * Math.pow(10, parseInt(toPrecision))),
+            denom: data.receiveCoinData.denom,
           },
-          chain_name: 'cosmos-hub',
+          chain_name: store.getters['demeris/getDexChain'],
         },
       };
 
@@ -567,15 +569,10 @@ export default defineComponent({
       //     chain_name: 'gaia',
       //   },
       // };
-
-      console.log(SWAP_TEST_DATA);
-      data.actionHandlerResult = SWAP_TEST_DATA;
+      console.log(swapParams);
+      data.actionHandlerResult = await actionHandler({ name: 'swap', params: swapParams });
+      console.log('SWAP Button Result', data.actionHandlerResult);
       reviewModalToggle();
-
-      console.log('PAY', data.payCoinData, data.payCoinAmount);
-      console.log('RECEIVE', data.receiveCoinData, data.receiveCoinAmount);
-      console.log('SWAP', swapParams);
-      actionHandler({ name: 'swap', params: swapParams });
     }
 
     return {
