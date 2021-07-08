@@ -1,5 +1,5 @@
 <template>
-  <div class="withdraw-liquidity">
+  <div class="withdraw-liquidity" :class="{ 'withdraw-liquidity--insufficient-funds': !hasSufficientFunds }">
     <header class="withdraw-liquidity__header">
       <button class="withdraw-liquidity__header__button" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
@@ -35,7 +35,7 @@
         </div>
 
         <div class="withdraw-liquidity__estimated">
-          <span class="withdraw-liquidity__estimated__price s-2 w-bold"><Price :amount="{ amount: state.amount, denom: pool.pool_coin_denom }" /></span>
+          <span class="withdraw-liquidity__estimated__price s-2 w-bold">{{ totalEstimatedPrice }}</span>
           <label class="withdraw-liquidity__estimated__max">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="withdraw-liquidity__max" />
             <span class="elevation-button">Max</span>
@@ -89,7 +89,7 @@
                 <DenomSelect
                   :amount="receiveAmounts.coinA.amount"
                   :input-header="``"
-                  :selected-denom="{ base_denom: pool.reserve_coin_denoms[0], on_chain: state.selectedAsset.on_chain }"
+                  :selected-denom="{ base_denom: reserveBaseDenoms[0], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
                   :readonly="true"
                   @select="() => void 0"
@@ -102,7 +102,7 @@
                 <DenomSelect
                   :amount="receiveAmounts.coinB.amount"
                   :input-header="``"
-                  :selected-denom="{ base_denom: pool.reserve_coin_denoms[1], on_chain: state.selectedAsset.on_chain }"
+                  :selected-denom="{ base_denom: reserveBaseDenoms[1], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
                   :readonly="true"
                   @select="() => void 0"
@@ -119,12 +119,16 @@
             </span>
           </div>
 
-          <Alert v-if="state.needsTransferToHub" status="info" class="withdraw-liquidity__transfer-info">
+          <Alert v-if="needsTransferToHub" status="info" class="withdraw-liquidity__transfer-info">
             Your assets will be transferred to Cosmos Hub
           </Alert>
 
           <div class="withdraw-liquidity__controls">
-            <Button name="Continue" @click="goToReview" />
+            <Button
+              :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'"
+              :disabled="!isValid"
+              @click="goToReview"
+            />
 
             <div class="withdraw-liquidity__controls__fees">
               <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
@@ -154,7 +158,6 @@ import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import Price from '@/components/common/Price.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
@@ -176,7 +179,6 @@ export default {
     Icon,
     DenomSelect,
     ChainSelectModal,
-    Price,
     FeeLevelSelector,
     TxStepsModal,
   },
@@ -185,6 +187,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
+
     const actionSteps = ref([]);
     const gasPrice = ref(GasPriceLevel.AVERAGE);
 
@@ -197,14 +200,15 @@ export default {
 
     const state = reactive({
       step: 'amount',
-      needsTransferToHub: true,
       amount: 0,
       isChainsModalOpen: false,
       isMaximumAmountChecked: false,
       selectedAsset: undefined,
     });
 
-    const { pool, pairName, calculateWithdrawBalances } = usePool(computed(() => poolId.value as string));
+    const { pool, pairName, calculateWithdrawBalances, reserveBaseDenoms } = usePool(
+      computed(() => poolId.value as string),
+    );
 
     const dexChain = computed(() => {
       return store.getters['demeris/getDexChain'];
@@ -213,6 +217,36 @@ export default {
     // TODO: Fetch from API the wallet available amount
     const balances = computed(() => {
       return balancesByDenom(pool.value.pool_coin_denom);
+    });
+
+    const needsTransferToHub = computed(() => {
+      if (state.selectedAsset.on_chain !== dexChain.value) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const hasSufficientFunds = computed(() => {
+      if (!state.selectedAsset) {
+        return false;
+      }
+
+      const cryptoAmount = state.amount * 1e6;
+
+      return +parseCoins(state.selectedAsset.amount)[0].amount >= cryptoAmount;
+    });
+
+    const isValid = computed(() => {
+      if (state.amount <= 0) {
+        return false;
+      }
+
+      if (!hasSufficientFunds.value) {
+        return false;
+      }
+
+      return true;
     });
 
     const receiveAmounts = computed(() => {
@@ -226,6 +260,27 @@ export default {
         coinA: result[0],
         coinB: result[1],
       };
+    });
+
+    const totalEstimatedPrice = computed(() => {
+      let total = 0;
+
+      if (!reserveBaseDenoms.value.length || !receiveAmounts.value) {
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
+      total += priceA * receiveAmounts.value.coinA.amount;
+
+      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+      total += priceB * receiveAmounts.value.coinB.amount;
+
+      const displayTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(total);
+
+      return displayTotal;
     });
 
     const toggleChainsModal = () => {
@@ -311,6 +366,11 @@ export default {
       receiveAmounts,
       gasPrice,
       actionSteps,
+      totalEstimatedPrice,
+      needsTransferToHub,
+      reserveBaseDenoms,
+      isValid,
+      hasSufficientFunds,
       denomChangeHandler,
       toggleChainsModal,
       goToReview,
@@ -327,6 +387,10 @@ export default {
 .withdraw-liquidity {
   position: relative;
   padding-bottom: 2rem;
+
+  &--insufficient-funds &__input__details__available {
+    color: var(--negative-text);
+  }
 
   .denom-select {
     padding: 0;
@@ -360,7 +424,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 38rem;
+    max-width: 42rem;
     width: 100%;
     text-align: center;
     line-height: 1;
@@ -439,7 +503,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 38rem;
+    max-width: 42rem;
     position: relative;
     display: flex;
     flex-direction: column;

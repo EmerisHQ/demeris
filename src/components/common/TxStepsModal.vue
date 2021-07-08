@@ -16,6 +16,11 @@
           :step="currentData.data"
           :fees="currentData.fees"
         />
+        <PreviewWithdrawLiquidity
+          v-else-if="currentData.data.name === 'withdrawliquidity'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
         <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
       </div>
     </template>
@@ -161,6 +166,7 @@ import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
@@ -172,6 +178,7 @@ export default defineComponent({
     GobackWithClose,
     PreviewTransfer,
     PreviewAddLiquidity,
+    PreviewWithdrawLiquidity,
     PreviewSwap,
     Button,
     HintIcon,
