@@ -49,7 +49,7 @@
             }"
           />
           <IconButton
-            v-if="payCoinData"
+            v-if="parseInt(payCoinData?.amount) > 0"
             :name="`${getPrecisedAmount(payCoinData.base_denom, getMaxAmount(payCoinData))} ${
               payCoinData.display_name
             } Max `"
@@ -173,7 +173,7 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity) {
+        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity || !data.isAmount) {
           return 'inactive';
         } else {
           return 'normal';
@@ -367,6 +367,13 @@ export default defineComponent({
       }),
       isUserAssetList: computed(() => {
         return data.userAssetList.length !== 0 ? true : false;
+      }),
+      isAmount: computed(() => {
+        if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
+          return true;
+        } else {
+          return false;
+        }
       }),
       isChildModalOpen: false,
       isPriceChanged: false,
