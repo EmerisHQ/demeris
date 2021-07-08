@@ -168,7 +168,9 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = computed(() => store.getters['demeris/getAllBalances']);
+    const balances = computed(() => {
+      return store.getters['demeris/getAllBalances'] ?? [];
+    });
     const action = ref(null);
     const pools: Pool[] = [
       {
