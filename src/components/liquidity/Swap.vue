@@ -87,15 +87,15 @@
         />
       </div>
       <FeeLevelSelector
+        v-if="actionHandlerResult && actionHandlerResult.length > 0"
         v-model:gasPriceLevel="gasPriceLevel"
-        :transaction-count="1"
-        :base-dollar-fee="0.2"
-        :swap-dollar-fee="0.1"
+        :steps="actionHandlerResult"
       />
     </div>
   </div>
 </template>
 <script lang="ts">
+import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
@@ -112,7 +112,7 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
-import { GasPriceLevel } from '@/types/actions';
+import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'Swap',
@@ -551,24 +551,26 @@ export default defineComponent({
 
       // return;
 
-      const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.denom });
-      const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.denom });
+      const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+      const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
 
       const swapParams = {
         name: 'swap',
-        from: {
-          amount: {
-            amount: String(data.payCoinAmount * Math.pow(10, parseInt(fromPrecision))),
-            denom: data.payCoinData.denom,
+        params: {
+          from: {
+            amount: {
+              amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+              denom: parseCoins(data.payCoinData.amount)[0].denom,
+            },
+            chain_name: data.payCoinData.on_chain,
           },
-          chain_name: data.payCoinData.on_chain,
-        },
-        to: {
-          amount: {
-            amount: String(data.receiveCoinAmount * Math.pow(10, parseInt(toPrecision))),
-            denom: data.receiveCoinData.denom,
+          to: {
+            amount: {
+              amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+              denom: data.receiveCoinData.denom,
+            },
+            chain_name: store.getters['demeris/getDexChain'],
           },
-          chain_name: store.getters['demeris/getDexChain'],
         },
       };
 
@@ -589,7 +591,7 @@ export default defineComponent({
       //   },
       // };
       console.log(swapParams);
-      data.actionHandlerResult = await actionHandler({ name: 'swap', params: swapParams });
+      data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
       console.log('SWAP Button Result', data.actionHandlerResult);
       reviewModalToggle();
     }

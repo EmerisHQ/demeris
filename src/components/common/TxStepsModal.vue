@@ -226,6 +226,7 @@ export default defineComponent({
     const txstatus = ref('keplr-sign');
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
+
       const modifiedData = {
         isSwap: false,
         title: '',

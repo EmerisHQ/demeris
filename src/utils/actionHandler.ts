@@ -645,6 +645,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({ name: 'transfer', description: 'Assets Transferred', transactions: [...transferStep.steps] }); //TODO
         break;
       case 'swap':
+        params = (action as Actions.SwapAction).params;
         const transferToHubStep = await move({
           amount: {
             amount: params.from.amount.amount,
@@ -653,13 +654,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.from.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
-
-        steps.push({
-          name: 'transfer',
-          description: 'Assets Must be transferred to hub first', //TODO
-          transactions: [...transferToHubStep.steps],
-        });
-
+        if (transferToHubStep.steps.length > 0) {
+          steps.push({
+            name: 'transfer',
+            description: 'Assets Must be transferred to hub first', //TODO
+            transactions: [...transferToHubStep.steps],
+          });
+        }
         const swapStep = await swap({
           from: {
             amount: transferToHubStep.output.amount.amount,
