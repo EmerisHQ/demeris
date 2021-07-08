@@ -509,8 +509,8 @@ export default defineComponent({
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         //TEST
-        data.selectedPoolData.reserveBalances.balanceA = 318000000;
-        data.selectedPoolData.reserveBalances.balanceB = 159000000;
+        // data.selectedPoolData.reserveBalances.balanceA = 318000000;
+        // data.selectedPoolData.reserveBalances.balanceB = 159000000;
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
