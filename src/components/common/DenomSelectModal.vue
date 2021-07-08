@@ -100,7 +100,6 @@ export default defineComponent({
       return filteredAssets;
     }
 
-    console.log('assets', props);
     return {
       isModalOpen,
       toggleChainSelectModal,
