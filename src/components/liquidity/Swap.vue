@@ -497,21 +497,21 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
-        if (e.includes('Pay')) {
-          const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
 
-          data.selectedPoolData.reserveBalances.balanceA = 318000000;
-          data.selectedPoolData.reserveBalances.balanceB = 159000000;
-          const balanceA = isReverse
-            ? data.selectedPoolData.reserveBalances.balanceA
-            : data.selectedPoolData.reserveBalances.balanceB;
-          const balanceB = isReverse
-            ? data.selectedPoolData.reserveBalances.balanceB
-            : data.selectedPoolData.reserveBalances.balanceA;
-          console.log(balanceA, balanceB);
+        data.selectedPoolData.reserveBalances.balanceA = 318000000;
+        data.selectedPoolData.reserveBalances.balanceB = 159000000;
+        const balanceA = isReverse
+          ? data.selectedPoolData.reserveBalances.balanceA
+          : data.selectedPoolData.reserveBalances.balanceB;
+        const balanceB = isReverse
+          ? data.selectedPoolData.reserveBalances.balanceB
+          : data.selectedPoolData.reserveBalances.balanceA;
+        console.log(balanceA, balanceB);
+        if (e.includes('Pay')) {
           data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
         } else {
-          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
         }
       }
     }
