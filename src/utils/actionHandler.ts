@@ -69,8 +69,9 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
         amount: amount.amount,
         denom: verifyTrace.base_denom,
       },
-      chain_name: verifyTrace.trace[verifyTrace.length - 1].counterparty,
+      chain_name: verifyTrace.trace[verifyTrace.trace.length - 1].counterparty_name,
     };
+    console.log(result);
     return result;
   }
 }
