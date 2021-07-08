@@ -293,15 +293,16 @@ export default defineComponent({
             });
 
             data.baseAssetList.forEach((coin, index) => {
-              baseAssetIndexer[coin.base_denom] = index;
+              const uniqueId = `${coin.base_denom}/${coin.on_chain}`;
+              baseAssetIndexer[uniqueId] = index;
             });
 
             userVerifiedBalances.forEach(async (coin) => {
-              if (baseAssetIndexer[coin.base_denom] !== undefined) {
-                if (filteredBaseAssetList[baseAssetIndexer[coin.base_denom]]?.amount) {
-                  if (parseInt(filteredBaseAssetList[baseAssetIndexer[coin.base_denom]].amount) === 0) {
-                    filteredBaseAssetList[baseAssetIndexer[coin.base_denom]].amount = coin.amount;
-                  } else {
+              const uniqueId = `${coin.base_denom}/${coin.on_chain}`;
+              if (baseAssetIndexer[uniqueId] !== undefined) {
+                if (filteredBaseAssetList[baseAssetIndexer[uniqueId]]?.amount) {
+                  if (parseInt(filteredBaseAssetList[baseAssetIndexer[uniqueId]].amount) === 0) {
+                    filteredBaseAssetList[baseAssetIndexer[uniqueId]].amount = coin.amount;
                   }
                 }
               } else {
@@ -310,6 +311,7 @@ export default defineComponent({
               }
             });
 
+            console.log('afterFilter', listFilter(filteredBaseAssetList));
             return listFilter(filteredBaseAssetList);
           } else {
             // wallet without assets
@@ -463,7 +465,7 @@ export default defineComponent({
         ),
       );
       data.payCoinAmount = parseInt(data.payCoinData.amount) / Number(precisionDecimal);
-      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      setCounterPairCoinAmount('Pay');
     }
 
     function getMaxAmount(payCoinData) {
@@ -498,7 +500,7 @@ export default defineComponent({
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
-
+        //TEST
         data.selectedPoolData.reserveBalances.balanceA = 318000000;
         data.selectedPoolData.reserveBalances.balanceB = 159000000;
         const balanceA = isReverse
@@ -514,12 +516,6 @@ export default defineComponent({
           data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
         }
       }
-    }
-
-    function excludeSelectedAsset(asset, list) {
-      return list?.filter((item) => {
-        return item?.base_denom !== asset?.base_denom || item?.on_chain !== asset?.on_chain;
-      });
     }
 
     function swap() {
@@ -581,7 +577,6 @@ export default defineComponent({
       denomSelectHandler,
       getMaxAmount,
       getPrecisedAmount,
-      excludeSelectedAsset,
       setMax,
       swap,
       setChildModalOpenStatus,
