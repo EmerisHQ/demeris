@@ -23,7 +23,6 @@
           />
         </div>
       </div>
-
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
@@ -31,7 +30,7 @@
         :selected-denom="payCoinData"
         :assets="userAssetList"
         :is-over="isOver"
-        @change="setConterPairCoinAmount"
+        @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -71,7 +70,7 @@
         :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
         :selected-denom="receiveCoinData"
         :assets="receiveAssetList"
-        @change="setConterPairCoinAmount"
+        @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -429,10 +428,13 @@ export default defineComponent({
           const reserves = await getReserveBaseDenoms(pool);
           const reserveBalances = await reserveBalancesById(id);
 
-          console.log('pool', pool);
-          console.log('poolPrice', poolPrice);
-          console.log('reserves', reserves);
-          console.log('reserveBalances', reserveBalances);
+          data.selectedPoolData = {
+            pool,
+            poolPrice,
+            reserves,
+            reserveBalances,
+          };
+          console.table(data.selectedPoolData);
         }
       },
     );
@@ -493,10 +495,21 @@ export default defineComponent({
       alert('goback');
     }
 
-    function setConterPairCoinAmount(e) {
+    function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+          const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+
+          data.selectedPoolData.reserveBalances.balanceA = 318000000;
+          data.selectedPoolData.reserveBalances.balanceB = 159000000;
+          const balanceA = isReverse
+            ? data.selectedPoolData.reserveBalances.balanceA
+            : data.selectedPoolData.reserveBalances.balanceB;
+          const balanceB = isReverse
+            ? data.selectedPoolData.reserveBalances.balanceB
+            : data.selectedPoolData.reserveBalances.balanceA;
+          console.log(balanceA, balanceB);
+          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
         } else {
           data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
         }
@@ -575,7 +588,7 @@ export default defineComponent({
       isOpen,
       reviewModalToggle,
       gobackFunc,
-      setConterPairCoinAmount,
+      setCounterPairCoinAmount,
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
       getDisplayPrice,
