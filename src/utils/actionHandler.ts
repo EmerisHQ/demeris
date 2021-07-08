@@ -876,7 +876,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
-        depositCoins: [data.poolCoin],
+        poolCoin: { ...data.poolCoin },
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];

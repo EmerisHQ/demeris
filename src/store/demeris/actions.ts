@@ -357,7 +357,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       await window.keplr.enable(chain.node_info.chain_id);
       const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-
+      console.log(msgs);
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
@@ -380,7 +380,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
       const tx_data = Buffer.from(tx).toString('base64');
-
+      console.log(Buffer.from(tx).toString('hex'));
       return { tx: tx_data, chain_name };
     } catch (e) {
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
