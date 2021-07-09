@@ -76,6 +76,7 @@
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
+      {{ receiveCoinData }}
 
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
@@ -261,8 +262,8 @@ export default defineComponent({
     const initialPairList = ref([]); // for default asset list
     watch(
       () => availablePairs.value,
-      (newPairs) => {
-        const uniquePairList = newPairs
+      (pairs) => {
+        const uniquePairList = JSON.parse(JSON.stringify(pairs))
           .map((pair) => {
             return pair.pay;
           })
@@ -276,50 +277,38 @@ export default defineComponent({
       },
     );
 
-    //for default payCoin set
-    // watch(
-    //   () => {
-    //     return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
-    //   },
-    //   (watchValues) => {
-    //     if (watchValues[0]) {
-    //       if (watchValues[2]) {
-    //         if (watchValues[3] !== 'walletInit') {
-    //           data.payCoinData = data.userAssetList[0];
-    //           data.initStatus = 'walletInit';
-    //           data.isWallet = true;
-    //           // console.log('isWallet', data.isWallet);
-    //         }
-    //       }
-    //     } else {
-    //       if (watchValues[1]) {
-    //         if (watchValues[3] !== 'noWalletInit') {
-    //           data.payCoinData =
-    //             data.userAssetList.filter((coin) => {
-    //               return coin.base_denom === 'uatom';
-    //             })[0] ?? data.userAssetList[0];
-    //           data.initStatus = 'noWalletInit';
-    //           data.isWallet = false;
-    //           // console.log('isWallet', data.isWallet);
-    //         }
-    //       }
-    //     }
-    //   },
-    //   { immediate: true },
-    // );
-
     // TODO: Advanced option only advanced user can see pool token
     const payAssetList = ref([]);
     watch(
       () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
       async (watchValues) => {
+        // console.log('assetsToPay', assetsToPay.value);
+        console.log('initialPairList.value', initialPairList.value);
+        const assetIndexer = {};
+        const filteredList = [];
+        if (isSignedIn.value && assetsToPay.value.length) {
+          assetsToPay.value.forEach((asset) => {
+            assetIndexer[`${asset.base_denom}/${asset.on_chain}`] = 'exist';
+          });
+
+          console.log('assetIndexer', assetIndexer);
+
+          initialPairList.value.forEach((pair) => {
+            console.log('pair', `${pair.base_denom}/${pair.on_chain}`);
+            if (assetIndexer[`${pair.base_denom}/${pair.chain_name}`]) {
+              filteredList.push(pair);
+            }
+          });
+        }
+
         //default list with needed properties (no-wallet)
+        const assetList = filteredList.length > 0 ? filteredList : initialPairList.value;
+        console.log('assetList', assetList);
         payAssetList.value = await Promise.all(
-          JSON.parse(JSON.stringify(initialPairList.value)).map(async (pair) => {
+          assetList.map(async (pair) => {
             pair.amount = `0${pair.base_denom}`;
             pair.on_chain = pair.chain_name;
             pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']); // need this as a string value for search function()
-            delete pair.chain_name;
             return pair;
           }),
         );
@@ -328,7 +317,7 @@ export default defineComponent({
           //with wallet
           const walletVerifiedBalances = userAccountBalances.value.verified;
           // const walletUnverifiedBalances = userAccountBalances.value.unverified //future use
-
+          console.log('payAssetListpayAssetList', payAssetList.value);
           const payAssetListWithBalance = [];
           payAssetList.value.forEach((pair) => {
             const assetWithBalance = walletVerifiedBalances.filter((asset) => {
@@ -346,7 +335,7 @@ export default defineComponent({
           payAssetList.value = JSON.parse(JSON.stringify(payAssetListWithBalance));
         }
 
-        console.log('***payAssetList***', payAssetList.value);
+        console.log('[PAY ASSET LIST] : ', payAssetList.value);
       },
     );
 
@@ -354,34 +343,37 @@ export default defineComponent({
     watch(
       () => assetsToReceive.value,
       (newAssets) => {
-        if (data.isWallet) {
-          console.log('wallet / assetsToreceive', newAssets);
+        if (isSignedIn.value) {
+          // console.log('wallet / assetsToreceive', newAssets);
         } else {
-          console.log('no wallet / assetsToreceive', newAssets);
+          // console.log('no wallet / assetsToreceive', newAssets);
         }
       },
     );
 
     // for default payCoin set
-    const isInit = ref(false);
-    watch(
-      () => {
-        return [payAssetList.value, isSignedIn.value];
-      },
-      (watchValues, oldWatchValues) => {
-        if (watchValues[1] !== oldWatchValues[1]) {
-          isInit.value = false;
-        }
+    // const isInit = ref(false);
+    // watch(
+    //   () => {
+    //     return [payAssetList.value, isSignedIn.value];
+    //   },
+    //   (watchValues, oldWatchValues) => {
+    //     //when wallet connected/disconnected set again
+    //     if (watchValues[1] !== oldWatchValues[1]) {
+    //       isInit.value = false;
+    //       data.payCoinAmount = null;
+    //       data.receiveCoinAmount = null;
+    //     }
 
-        if (!isInit.value && watchValues[0].length) {
-          data.payCoinData =
-            payAssetList.value.filter((coin) => {
-              return coin.base_denom === 'uatom';
-            })[0] ?? payAssetList.value[0];
-          isInit.value = true;
-        }
-      },
-    );
+    //     if (!isInit.value && watchValues[0].length) {
+    //       data.payCoinData =
+    //         payAssetList.value.filter((coin) => {
+    //           return coin.base_denom === 'uatom';
+    //         })[0] ?? payAssetList.value[0];
+    //       isInit.value = true;
+    //     }
+    //   },
+    // );
     // REFACTOR ENDS HERE
 
     //test
