@@ -385,6 +385,8 @@ export default defineComponent({
         }
       },
     );
+
+    const slippage = ref(0);
     // REFACTOR ENDS HERE
 
     const data = reactive({
@@ -475,7 +477,7 @@ export default defineComponent({
           return false;
         }
       }),
-      isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
+      isNotEnoughLiquidity: computed(() => (slippage.value >= 0.2 ? true : false)),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
@@ -496,7 +498,6 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    const slippage = ref(0);
     watch(
       () => data.payCoinAmount,
       () => {
