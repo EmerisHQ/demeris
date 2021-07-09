@@ -62,7 +62,10 @@
               />
             </div>
 
-            <div class="add-liquidity__input input-a elevation-card">
+            <div
+              class="add-liquidity__input input-a elevation-card"
+              :class="{ 'input-invalid': !hasSufficientFunds.coinA }"
+            >
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
@@ -111,7 +114,10 @@
               </div>
             </div>
 
-            <div class="add-liquidity__input input-b elevation-card">
+            <div
+              class="add-liquidity__input input-b elevation-card"
+              :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
+            >
               <div class="add-liquidity__input__main">
                 <label class="add-liquidity__input__label s-minus">Supply</label>
                 <div>
@@ -163,7 +169,11 @@
             </Alert>
 
             <div class="add-liquidity__controls">
-              <Button name="Continue" @click="goToReview" />
+              <Button
+                :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
+                :disabled="!isValid"
+                @click="goToReview"
+              />
               <div class="add-liquidity__controls__fees">
                 <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
               </div>
@@ -298,6 +308,41 @@ export default {
       }
 
       return calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+    });
+
+    const hasSufficientFunds = computed(() => {
+      let coinA = false;
+      let coinB = false;
+
+      if (form.coinA.asset) {
+        const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+        const amountA = form.coinA.amount * Math.pow(10, precisionA);
+        coinA = +parseCoins(form.coinA.asset.amount)[0].amount >= amountA;
+      }
+
+      if (form.coinB.asset) {
+        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+        const amountB = form.coinB.amount * Math.pow(10, precisionB);
+        coinB = +parseCoins(form.coinB.asset.amount)[0].amount >= amountB;
+      }
+      debugger;
+      return {
+        coinA,
+        coinB,
+        total: coinA && coinB,
+      };
+    });
+
+    const isValid = computed(() => {
+      if (form.coinA.amount <= 0 || form.coinB.amount <= 0) {
+        return false;
+      }
+
+      if (!hasSufficientFunds.value.total) {
+        return false;
+      }
+
+      return true;
     });
 
     const needsTransferToHub = computed(() => {
@@ -507,6 +552,8 @@ export default {
       needsTransferToHub,
       receiveAmount,
       totalEstimatedPrice,
+      hasSufficientFunds,
+      isValid,
       inputChangeHandler,
       toggleChainsModal,
       goBack,
@@ -801,6 +848,10 @@ export default {
     width: 100%;
     border-radius: 1rem;
     background: var(--bg);
+
+    &.input-invalid &__details__available {
+      color: var(--negative-text);
+    }
 
     &.input-a {
       margin-top: 3.2rem;
