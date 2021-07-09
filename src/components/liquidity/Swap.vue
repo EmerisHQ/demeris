@@ -265,7 +265,6 @@ export default defineComponent({
       (newPairs) => {
         const uniquePairList = newPairs
           .map((pair) => {
-            pair.pay.pool_id = pair.pool_id;
             return pair.pay;
           })
           .reduce(function (acc, current) {
@@ -327,22 +326,40 @@ export default defineComponent({
     watch(
       () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
       async (watchValues) => {
-        //isSignedIn
+        //default list with needed properties (no-wallet)
+        payAssetList.value = await Promise.all(
+          JSON.parse(JSON.stringify(initialPairList.value)).map(async (pair) => {
+            pair.amount = `0${pair.base_denom}`;
+            pair.on_chain = pair.chain_name;
+            pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']); // need this as a string value for search function()
+            delete pair.chain_name;
+            return pair;
+          }),
+        );
+
         if (watchValues[1]) {
           //with wallet
-        } else {
-          //no wallet
-          payAssetList.value = await Promise.all(
-            JSON.parse(JSON.stringify(initialPairList.value)).map(async (pair) => {
-              pair.amount = `0${pair.base_denom}`;
-              pair.on_chain = pair.chain_name;
-              pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']);
-              delete pair.chain_name;
-              return pair;
-            }),
-          );
-          console.log('P/Ay', payAssetList.value);
+          const walletVerifiedBalances = userAccountBalances.value.verified;
+          // const walletUnverifiedBalances = userAccountBalances.value.unverified //future use
+
+          const payAssetListWithBalance = [];
+          payAssetList.value.forEach((pair) => {
+            const assetWithBalance = walletVerifiedBalances.filter((asset) => {
+              if (asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain) {
+                asset.display_name = pair.display_name;
+              }
+              return asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain;
+            });
+
+            if (assetWithBalance.length) {
+              payAssetListWithBalance.push(assetWithBalance[0]);
+            }
+          });
+
+          payAssetList.value = JSON.parse(JSON.stringify(payAssetListWithBalance));
         }
+
+        console.log('***payAssetList***', payAssetList.value);
       },
     );
 
