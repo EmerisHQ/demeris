@@ -53,7 +53,7 @@
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
-            <li v-for="asset in redeemableBalances" :key="asset.ibc.hash" class="redeem__list__item">
+            <li v-for="asset in augmentedBalances" :key="asset.ibc.hash" class="redeem__list__item">
               <div class="redeem__list__item__icon" />
 
               <div class="redeem__list__item__asset">
@@ -61,7 +61,7 @@
                   <AmountDisplay :amount="parseCoins(asset.amount)[0]" />
                 </p>
                 <span class="redeem__list__item__asset__route s-minus">
-                  <template v-for="(hop, index) in asset.hops" :key="hash + '_' + index">
+                  <template v-for="(hop, index) in asset.hops" :key="asset.ibc.hash + '_' + index">
                     <template v-if="index != 0"> -> </template>
                     <ChainName :name="hop" />
                   </template>
@@ -69,12 +69,13 @@
               </div>
 
               <div class="redeem__list__item__fees">
-                <p class="redeem__list__item__fees__label s-minus">Fees</p>
-                <span class="redeem__list__item__fees__amount">0.08 ATOM</span>
+                <FeeLevelSelector v-if="asset.steps" v-model:gasPriceLevel="gasPrice" :steps="asset.steps" />
+                <!--<p class="redeem__list__item__fees__label s-minus">Fees</p>
+                <span class="redeem__list__item__fees__amount">0.08 ATOM</span>//-->
               </div>
 
               <div class="redeem__list__item__controls">
-                <Button name="Redeem" @click="selectAsset" />
+                <Button name="Redeem" @click="selectAsset(asset)" />
               </div>
             </li>
           </ul>
@@ -82,13 +83,7 @@
       </template>
 
       <template v-else-if="state.step === 'review'">
-        <h2 class="redeem__title s-2">Review your redeem details</h2>
-
-        <div class="redeem__content">
-          <div class="redeem__controls">
-            <Button name="Confirm and continue" @click="goToStep('transfer')" />
-          </div>
-        </div>
+        <TxStepsModal :data="state.selectedAsset.steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
       </template>
 
       <template v-else-if="state.step === 'transfer'">
@@ -99,38 +94,43 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, watch } from 'vue';
+import { computed, defineComponent, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { GasPriceLevel } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Redeem',
 
-  components: { Button, Icon, AmountDisplay, ChainName },
+  components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector, TxStepsModal },
 
   setup() {
     const router = useRouter();
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
       showInstruction: true,
     });
-
+    const augmentedBalances = ref([]);
     watch(
       () => redeemableBalances.value,
-      async (bals) => {
-        await Promise.all(
-          bals.map(async (balance) => {
+      async (newBalances) => {
+        augmentedBalances.value = await Promise.all(
+          newBalances.map(async (newBalance) => {
+            let balance = { ...newBalance };
             balance.hops = [];
             const verifyTrace =
               store.getters['demeris/getVerifyTrace']({
@@ -151,6 +151,16 @@ export default defineComponent({
             for (let hop of verifyTrace.trace) {
               balance.hops.unshift(hop.counterparty_name);
             }
+            balance.steps = await actionHandler({
+              name: 'redeem',
+              params: [
+                {
+                  amount: parseCoins(balance.amount)[0],
+                  chain_name: balance.on_chain,
+                },
+              ],
+            });
+
             return balance;
           }),
         );
@@ -216,7 +226,7 @@ export default defineComponent({
 
     return {
       assets,
-      redeemableBalances,
+      augmentedBalances,
       steps,
       state,
       closeInstruction,
@@ -225,7 +235,9 @@ export default defineComponent({
       goBack,
       goToStep,
       parseCoins,
+      gasPrice,
       getRoute,
+      GasPriceLevel,
     };
   },
 });

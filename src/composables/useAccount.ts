@@ -21,8 +21,10 @@ export default function useAccount() {
   const balances = ref(allbalances.value);
   watch(
     () => allbalances.value,
-    async (newBalances) => {
-      redeemableBalances.value = await toRedeem(newBalances);
+    async (newBalances, oldBalances) => {
+      if (JSON.stringify(newBalances) != JSON.stringify(oldBalances)) {
+        redeemableBalances.value = await toRedeem(newBalances);
+      }
     },
     { immediate: true },
   );

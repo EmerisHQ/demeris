@@ -142,10 +142,7 @@ export default defineComponent({
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
 
       const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce(
-          (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
-          0,
-        );
+        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {
