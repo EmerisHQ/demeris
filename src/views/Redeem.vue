@@ -53,14 +53,19 @@
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
-            <li v-for="asset of redeemableBalances" :key="asset.ibc.hash" class="redeem__list__item">
+            <li v-for="asset in redeemableBalances" :key="asset.ibc.hash" class="redeem__list__item">
               <div class="redeem__list__item__icon" />
 
               <div class="redeem__list__item__asset">
                 <p class="redeem__list__item__asset__amount w-bold">
                   <AmountDisplay :amount="parseCoins(asset.amount)[0]" />
                 </p>
-                <span class="redeem__list__item__asset__route s-minus">{{ asset.route }}</span>
+                <span class="redeem__list__item__asset__route s-minus">
+                  <template v-for="(hop, index) in asset.hops" :key="hash + '_' + index">
+                    <template v-if="index != 0"> -> </template>
+                    <ChainName :name="hop" />
+                  </template>
+                </span>
               </div>
 
               <div class="redeem__list__item__fees">
@@ -94,10 +99,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive } from 'vue';
+import { computed, defineComponent, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -106,7 +113,7 @@ import { parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Redeem',
 
-  components: { Button, Icon, AmountDisplay },
+  components: { Button, Icon, AmountDisplay, ChainName },
 
   setup() {
     const router = useRouter();
@@ -119,6 +126,37 @@ export default defineComponent({
       showInstruction: true,
     });
 
+    watch(
+      () => redeemableBalances.value,
+      async (bals) => {
+        await Promise.all(
+          bals.map(async (balance) => {
+            balance.hops = [];
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: balance.on_chain,
+                    hash: balance.ibc.hash,
+                  },
+                },
+                { root: true },
+              ));
+            for (let hop of verifyTrace.trace) {
+              balance.hops.unshift(hop.counterparty_name);
+            }
+            return balance;
+          }),
+        );
+      },
+      { immediate: true },
+    );
     const assets = computed(() => {
       return [
         {
@@ -139,7 +177,19 @@ export default defineComponent({
     const onClose = () => {
       router.push('/pools');
     };
-
+    const store = useStore();
+    const getRoute = (hash, chain_name) => {
+      const verifyTrace = store.getters['demeris/getVerifyTrace']({
+        chain_name,
+        hash,
+      });
+      console.log(verifyTrace);
+      const hops = [];
+      for (let hop of verifyTrace.trace) {
+        hops.unshift(hop.counterparty_name);
+      }
+      return hops;
+    };
     const goBack = () => {
       const currentStepIndex = steps.findIndex((item) => item === state.step);
 
@@ -175,6 +225,7 @@ export default defineComponent({
       goBack,
       goToStep,
       parseCoins,
+      getRoute,
     };
   },
 });
