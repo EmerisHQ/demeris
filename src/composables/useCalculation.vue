@@ -111,7 +111,18 @@ export default function () {
     }
   }
 
+  function calculateSlippage(swapAmount, poolReserve) {
+    let slippage = (2 * swapAmount) / poolReserve;
+
+    if (slippage > 0.997) {
+      slippage = 0.997;
+    }
+
+    return slippage;
+  }
+
   return {
+    calculateSlippage,
     getCoinPrice,
     getCoinDollarValue,
     getPoolPrice,

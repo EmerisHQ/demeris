@@ -131,7 +131,8 @@ export default defineComponent({
   },
 
   setup() {
-    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
+    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } =
+      useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
@@ -140,7 +141,8 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-
+    //TEST
+    const isConsole = false;
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
     watch(
@@ -260,8 +262,12 @@ export default defineComponent({
             }
             return acc;
           }, []);
-        initialPairList.value = uniquePairList;
-        console.log('[INITIAL PAIR LIST]', initialPairList.value);
+
+        initialPairList.value =
+          //TODO: advanced user
+          // localStorage.getItem('isAdvanced') === 'true'
+          true ? uniquePairList : uniquePairList.filter((pair) => !pair.denom.includes('pool'));
+        isConsole ? console.log('[INITIAL PAIR LIST]', initialPairList.value) : '';
       },
     );
 
@@ -319,7 +325,7 @@ export default defineComponent({
           payAssetList.value = JSON.parse(JSON.stringify(payAssetListWithBalance));
         }
 
-        console.log('[PAY ASSET LIST]:', payAssetList.value);
+        isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
       },
     );
 
@@ -329,7 +335,7 @@ export default defineComponent({
       () => assetsToReceive.value,
       async () => {
         // console.log('assetsToReceive.value', assetsToReceive.value);
-        if (assetsToReceive.value.length && isSignedIn.value) {
+        if (assetsToReceive.value.length || isSignedIn.value) {
           const filteredList = initialPairList.value.filter((pair) => {
             return assetsToReceive.value.includes(pair.denom);
           });
@@ -350,7 +356,7 @@ export default defineComponent({
           });
         }
 
-        console.log('[RECEIVE ASSET LIST]', receiveAssetList.value);
+        isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
       },
     );
 
@@ -490,6 +496,25 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
+    const slippage = ref(0);
+    watch(
+      () => data.payCoinAmount,
+      () => {
+        if (data.selectedPoolData) {
+          const reserveCoin =
+            data.selectedPoolData.reserves.findIndex((coin) => coin === data.payCoinData.denom) === 0
+              ? 'balanceA'
+              : 'balanceB';
+
+          slippage.value = calculateSlippage(
+            data.payCoinAmount *
+              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }))),
+            data.selectedPoolData.reserveBalances[reserveCoin],
+          );
+        }
+      },
+    );
+
     //get pool price
     watch(
       () => {
@@ -497,26 +522,30 @@ export default defineComponent({
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
-          // console.log('?????', data.payCoinData);
-          const id = poolsByDenom(data.payCoinData.denom).find((pool) => {
-            return (
-              pool.reserve_coin_denoms.find((denom) => {
-                return denom === data.receiveCoinData.denom;
-              })?.length > 0
-            );
-          })?.id;
-          const pool = poolById(id);
-          const poolPrice = await poolPriceById(id);
-          const reserves = await getReserveBaseDenoms(pool);
-          const reserveBalances = await reserveBalancesById(id);
+          try {
+            const id = poolsByDenom(data.payCoinData.denom).find((pool) => {
+              return (
+                pool.reserve_coin_denoms.find((denom) => {
+                  return denom === data.receiveCoinData.denom;
+                })?.length > 0
+              );
+            })?.id;
 
-          data.selectedPoolData = {
-            pool,
-            poolPrice,
-            reserves,
-            reserveBalances,
-          };
-          console.table('selectedPoolData', data.selectedPoolData);
+            const pool = poolById(id);
+            const poolPrice = await poolPriceById(id);
+            const reserves = await getReserveBaseDenoms(pool);
+            const reserveBalances = await reserveBalancesById(id);
+
+            data.selectedPoolData = {
+              pool,
+              poolPrice,
+              reserves,
+              reserveBalances,
+            };
+            console.table('selectedPoolData', data.selectedPoolData);
+          } catch (e) {
+            data.selectedPoolData = null;
+          }
         }
       },
     );
