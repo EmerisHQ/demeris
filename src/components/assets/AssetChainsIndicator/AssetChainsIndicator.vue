@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import { computed, defineComponent, PropType } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'AssetChainsIndicator',
@@ -66,9 +66,11 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const filteredBalances = computed(() => {
-      return (props.balances as Balances)
-        .filter((item) => item.base_denom === props.denom)
-        .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1));
+      return (
+        (props.balances as Balances)
+          ?.filter((item) => item.base_denom === props.denom)
+          .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1)) ?? []
+      );
     });
     const formatPrecision = (amount: string) => {
       return (

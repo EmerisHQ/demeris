@@ -70,9 +70,9 @@
           </ul>
         </section>
 
-        <!-- Staking -->
+        <!-- TODO: Staking -->
 
-        <section class="asset__main__staking asset__list">
+        <section v-if="false" class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
           </div>
@@ -125,7 +125,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -141,6 +140,7 @@ import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Asset',
 

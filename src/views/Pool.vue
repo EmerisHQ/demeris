@@ -5,12 +5,12 @@
         <section class="pool__main__stats">
           <span class="pool__main__stats__subtitle">Gravity DEX Pool</span>
           <div class="pool__main__stats__header">
-            <h2 class="pool__main__stats__name s-2">{{ formatPoolName(pool) }}</h2>
+            <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
-          <h1 class="pool__main__stats__supply">$130,040,429</h1>
+          <h1 class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
         </section>
 
-        <section class="pool__main__assets">
+        <section v-if="reserveBalances" class="pool__main__assets">
           <h2 class="pool__main__assets__title s-2">Underlying assets</h2>
 
           <table class="pool__main__assets__table assets-table">
@@ -24,14 +24,14 @@
             </thead>
 
             <tbody>
-              <tr v-for="balance of reserveBalances" :key="balance.base_denom" class="assets-table__row">
+              <tr v-for="balance of reserveBalances" :key="balance.denom" class="assets-table__row">
                 <td class="assets-table__row__denom">
                   <div class="assets-table__row__denom__avatar" />
-                  <span class="w-bold">{{ $filters.getCoinName(balance.base_denom) }}</span>
+                  <span class="w-bold"><Denom :name="balance.denom" /></span>
                 </td>
-                <td class="text-right">{{ balance.amount }} {{ $filters.getCoinName(balance.base_denom) }}</td>
-                <td class="text-right">$20.50</td>
-                <td class="text-right w-bold">65,020.75</td>
+                <td class="text-right"><AmountDisplay :amount="balance" /></td>
+                <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
+                <td class="text-right w-bold"><Price :amount="balance" /></td>
               </tr>
             </tbody>
           </table>
@@ -63,9 +63,11 @@
             <div class="pool-equity__stats">
               <div class="pool-equity__stats__avatar" />
               <div class="pool-equity__stats__wrapper">
-                <p class="pool-equity__stats__amount w-bold">1.56 G-AK-LP</p>
-                <p class="pool-equity__stats__balance s-2 w-bold">$1,420.50</p>
-                <span class="pool-equity__stats__share s-minus">0.01% of pool</span>
+                <p class="pool-equity__stats__amount w-bold">
+                  <AmountDisplay :amount="walletBalances.poolCoin" />
+                </p>
+                <p class="pool-equity__stats__balance s-2 w-bold">{{ toUSD(ownLiquidityPrice) }}</p>
+                <span class="pool-equity__stats__share s-minus">{{ parseFloat((100 * ownLiquidityPrice) / totalLiquidityPrice).toFixed(2) }}% of pool</span>
               </div>
             </div>
 
@@ -78,13 +80,17 @@
               <ul class="pool-equity__assets__list">
                 <li class="pool-equity__assets__list__item">
                   <div class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">30 ATOM</span>
-                  <span>$615.00</span>
+                  <span class="pool-equity__assets__list__item__denom w-bold">
+                    <AmountDisplay :amount="walletBalances.coinA" />
+                  </span>
+                  <span><Price :amount="walletBalances.coinA" /></span>
                 </li>
                 <li class="pool-equity__assets__list__item">
                   <div class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">44 KAVA</span>
-                  <span>$615.00</span>
+                  <span class="pool-equity__assets__list__item__denom w-bold">
+                    <AmountDisplay :amount="walletBalances.coinB" />
+                  </span>
+                  <span><Price :amount="walletBalances.coinB" /></span>
                 </li>
               </ul>
             </div>
@@ -100,52 +106,79 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import Denom from '@/components/common/Denom.vue';
+import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { VerifyTrace } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
+import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',
 
   components: {
+    AmountDisplay,
     AppLayout,
+    Denom,
     Icon,
     Button,
     Pools,
+    Price,
   },
 
   setup() {
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const toUSD = (value) => {
+      var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
 
-    const { poolById, formatPoolName, poolsByDenom } = usePools();
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+      });
+      return formatter.format(value);
+    };
+    const { balancesByDenom } = useAccount();
+    const { formatPoolName, poolsByDenom, getReserveBaseDenoms } = usePools();
 
-    const pool = computed(() => {
-      return poolById(+route.params.id);
-    });
+    const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool(
+      computed(() => route.params.id as string),
+    );
+    const totalLiquidityPrice = ref();
 
-    const reserveBalances = computed(() => {
-      // return store.getters['demeris/getBalances']({ address: pool.value.reserveAccountAddress });
-      const balances = [
-        {
-          base_denom: pool.value.reserve_coin_denoms[0],
-          amount: 100,
-        },
-        {
-          base_denom: pool.value.reserve_coin_denoms[1],
-          amount: 200,
-        },
-      ];
+    const ownLiquidityPrice = ref();
+    const walletBalances = computed(() => {
+      if (!pool.value || !reserveBalances.value?.length) {
+        return;
+      }
 
-      return balances;
+      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
+
+      const poolCoin = {
+        denom: pool.value.pool_coin_denom,
+        amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
+      };
+      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
+
+      return {
+        coinA: withdrawBalances[0],
+        coinB: withdrawBalances[1],
+        poolCoin,
+      };
     });
 
     const relatedPools = computed(() => {
@@ -155,12 +188,6 @@ export default defineComponent({
       ].filter((item) => item.id !== pool.value.id);
     });
 
-    const updateReserveBalances = () => {
-      store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
-        params: { address: pool.value.reserve_account_address },
-      });
-    };
-
     const addLiquidityHandler = () => {
       router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
     };
@@ -169,17 +196,122 @@ export default defineComponent({
       router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
     };
 
-    watch(pool, updateReserveBalances, { immediate: true });
+    const updateTotalLiquidityPrice = async () => {
+      if (!pool.value) {
+        return;
+      }
+
+      const reserveDenoms = await getReserveBaseDenoms(pool.value);
+
+      let total = 0;
+
+      for (const [index, denom] of reserveDenoms.entries()) {
+        const price = store.getters['demeris/getPrice']({ denom });
+        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+
+        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+      }
+
+      totalLiquidityPrice.value = total;
+    };
+
+    const updateOwnLiquidityPrice = async () => {
+      if (!pool.value) {
+        return;
+      }
+
+      let total = 0;
+
+      let denom;
+
+      if (isNative(walletBalances.value.coinA.denom)) {
+        denom = walletBalances.value.coinA.denom;
+      } else {
+        const verifyTrace =
+          store.getters['demeris/getVerifyTrace']({
+            chain_name: store.getters['demeris/getDexChain'],
+            hash: walletBalances.value.coinA.denom.split('/')[1],
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_VERIFY_TRACE',
+            {
+              subscribe: false,
+              params: {
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: walletBalances.value.coinA.denom.split('/')[1],
+              },
+            },
+            { root: true },
+          ));
+        denom = (verifyTrace as VerifyTrace).base_denom;
+      }
+      if (store.getters['demeris/getPrice']({ denom: denom })) {
+        total =
+          total +
+          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
+            Math.pow(
+              10,
+              parseInt(
+                store.getters['demeris/getDenomPrecision']({
+                  name: denom,
+                }),
+              ),
+            );
+      }
+
+      if (isNative(walletBalances.value.coinB.denom)) {
+        denom = walletBalances.value.coinB.denom;
+      } else {
+        const verifyTrace =
+          store.getters['demeris/getVerifyTrace']({
+            chain_name: store.getters['demeris/getDexChain'],
+            hash: walletBalances.value.coinB.denom.split('/')[1],
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_VERIFY_TRACE',
+            {
+              subscribe: false,
+              params: {
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: walletBalances.value.coinB.denom.split('/')[1],
+              },
+            },
+            { root: true },
+          ));
+        denom = (verifyTrace as VerifyTrace).base_denom;
+      }
+      if (store.getters['demeris/getPrice']({ denom: denom })) {
+        total =
+          total +
+          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
+            Math.pow(
+              10,
+              parseInt(
+                store.getters['demeris/getDenomPrecision']({
+                  name: denom,
+                }),
+              ),
+            );
+      }
+
+      ownLiquidityPrice.value = total;
+    };
+    watch(reserveBalances, updateTotalLiquidityPrice);
+
+    watch(walletBalances, updateOwnLiquidityPrice);
 
     return {
-      router,
-      route,
       pool,
+      pairName,
       reserveBalances,
       relatedPools,
+      walletBalances,
+      totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,
+      ownLiquidityPrice,
+      toUSD,
     };
   },
 });
@@ -313,6 +445,7 @@ export default defineComponent({
         border-radius: 2.6rem;
         background: rgba(0, 0, 0, 0.1);
         margin-right: 1.6rem;
+        flex-shrink: 0;
       }
     }
   }

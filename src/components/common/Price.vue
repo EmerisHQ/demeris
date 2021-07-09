@@ -9,10 +9,11 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
+import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'Price',
@@ -24,18 +25,19 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const denom = ref((props.amount as Amount).denom);
 
     const displayPrice = computed(() => {
       const precision =
         store.getters['demeris/getDenomPrecision']({
-          name: (props.amount as Amount).denom,
+          name: denom.value,
         }) ?? '6';
       let value;
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
       });
-      const price = store.getters['demeris/getPrice']({ denom: (props.amount as Amount).denom });
+      const price = store.getters['demeris/getPrice']({ denom: denom.value });
       if ((props.amount as Amount).amount) {
         value = price
           ? formatter
@@ -48,6 +50,15 @@ export default defineComponent({
 
       return value;
     });
+
+    watch(
+      () => props.amount as Amount,
+      async (value) => {
+        denom.value = await getBaseDenom((value as Amount).denom);
+      },
+      { immediate: true },
+    );
+
     return { displayPrice };
   },
 });

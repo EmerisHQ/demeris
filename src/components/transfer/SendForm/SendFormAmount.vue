@@ -80,7 +80,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -94,6 +93,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'SendFormAmount',
@@ -165,6 +165,7 @@ export default defineComponent({
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
       form.balance.denom = asset.base_denom as string;
+      form.chain_name = asset.on_chain as string;
     };
 
     const toggleSelectModal = (asset?: Record<string, unknown>) => {

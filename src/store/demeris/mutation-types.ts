@@ -21,10 +21,16 @@ export enum DemerisMutationTypes {
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
   INIT = 'INIT',
+  SET_IN_PROGRESS = 'SET_IN_PROGRESS',
+  DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
   RESET_STATE = 'RESET_STATE',
   SUBSCRIBE = 'SUBSCRIBE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
 }
+export type APIPromise = {
+  hash: string;
+  promise: Promise<void>;
+};
 export type DemerisMutationArgs =
   | API.Balances
   | boolean

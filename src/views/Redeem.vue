@@ -53,23 +53,29 @@
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
-            <li v-for="asset of assets" :key="asset.address" class="redeem__list__item">
+            <li v-for="asset in augmentedBalances" :key="asset.ibc.hash" class="redeem__list__item">
               <div class="redeem__list__item__icon" />
 
               <div class="redeem__list__item__asset">
                 <p class="redeem__list__item__asset__amount w-bold">
-                  {{ asset.amount }} {{ $filters.getCoinName(asset.base_denom) }}
+                  <AmountDisplay :amount="parseCoins(asset.amount)[0]" />
                 </p>
-                <span class="redeem__list__item__asset__route s-minus">{{ asset.route }}</span>
+                <span class="redeem__list__item__asset__route s-minus">
+                  <template v-for="(hop, index) in asset.hops" :key="asset.ibc.hash + '_' + index">
+                    <template v-if="index != 0"> -> </template>
+                    <ChainName :name="hop" />
+                  </template>
+                </span>
               </div>
 
               <div class="redeem__list__item__fees">
-                <p class="redeem__list__item__fees__label s-minus">Fees</p>
-                <span class="redeem__list__item__fees__amount">0.08 ATOM</span>
+                <FeeLevelSelector v-if="asset.steps" v-model:gasPriceLevel="gasPrice" :steps="asset.steps" />
+                <!--<p class="redeem__list__item__fees__label s-minus">Fees</p>
+                <span class="redeem__list__item__fees__amount">0.08 ATOM</span>//-->
               </div>
 
               <div class="redeem__list__item__controls">
-                <Button name="Redeem" @click="selectAsset" />
+                <Button name="Redeem" @click="selectAsset(asset)" />
               </div>
             </li>
           </ul>
@@ -77,12 +83,8 @@
       </template>
 
       <template v-else-if="state.step === 'review'">
-        <h2 class="redeem__title s-2">Review your redeem details</h2>
-
         <div class="redeem__content">
-          <div class="redeem__controls">
-            <Button name="Confirm and continue" @click="goToStep('transfer')" />
-          </div>
+          <TxStepsModal :data="state.selectedAsset.steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
         </div>
       </template>
 
@@ -94,28 +96,79 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive } from 'vue';
+import { computed, defineComponent, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import { GasPriceLevel } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Redeem',
 
-  components: { Button, Icon },
+  components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector, TxStepsModal },
 
   setup() {
     const router = useRouter();
-
+    const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
       showInstruction: true,
     });
+    const augmentedBalances = ref([]);
+    watch(
+      () => redeemableBalances.value,
+      async (newBalances) => {
+        augmentedBalances.value = await Promise.all(
+          newBalances.map(async (newBalance) => {
+            let balance = { ...newBalance };
+            balance.hops = [];
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: balance.on_chain,
+                    hash: balance.ibc.hash,
+                  },
+                },
+                { root: true },
+              ));
+            for (let hop of verifyTrace.trace) {
+              balance.hops.unshift(hop.counterparty_name);
+            }
+            balance.steps = await actionHandler({
+              name: 'redeem',
+              params: [
+                {
+                  amount: parseCoins(balance.amount)[0],
+                  chain_name: balance.on_chain,
+                },
+              ],
+            });
 
+            return balance;
+          }),
+        );
+      },
+      { immediate: true },
+    );
     const assets = computed(() => {
       return [
         {
@@ -136,7 +189,19 @@ export default defineComponent({
     const onClose = () => {
       router.push('/pools');
     };
-
+    const store = useStore();
+    const getRoute = (hash, chain_name) => {
+      const verifyTrace = store.getters['demeris/getVerifyTrace']({
+        chain_name,
+        hash,
+      });
+      console.log(verifyTrace);
+      const hops = [];
+      for (let hop of verifyTrace.trace) {
+        hops.unshift(hop.counterparty_name);
+      }
+      return hops;
+    };
     const goBack = () => {
       const currentStepIndex = steps.findIndex((item) => item === state.step);
 
@@ -163,6 +228,7 @@ export default defineComponent({
 
     return {
       assets,
+      augmentedBalances,
       steps,
       state,
       closeInstruction,
@@ -170,6 +236,10 @@ export default defineComponent({
       onClose,
       goBack,
       goToStep,
+      parseCoins,
+      gasPrice,
+      getRoute,
+      GasPriceLevel,
     };
   },
 });

@@ -51,7 +51,6 @@ export default defineComponent({
     const keplrAccountName = computed(() => {
       return store.getters['demeris/getKeplrAccountName'];
     });
-
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });

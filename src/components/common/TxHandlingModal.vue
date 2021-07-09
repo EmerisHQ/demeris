@@ -1,14 +1,14 @@
 <template>
   <Modal
-    :variant="'bottom'"
+    :variant="'full'"
     :show-close-button="false"
-    :body-class="status === 'transferred' ? 'transferred-bg' : ''"
+    :body-class="status === 'complete' ? 'transferred-bg' : ''"
     @close="emitClose"
   >
     <div class="status">
-      <div v-if="displayData.iconType" class="status__icon">
-        <SpinnerIcon v-if="displayData.iconType === iconType.pending" :size="3.2" />
-        <div v-else-if="displayData.iconType === iconType.warning" class="status__icon-warning">
+      <div v-if="iconType" class="status__icon">
+        <SpinnerIcon v-if="iconType === 'pending'" :size="3.2" />
+        <div v-else-if="iconType === 'warning'" class="status__icon-warning">
           <WarningIcon />
         </div>
         <div v-else class="status__icon-error">
@@ -16,209 +16,292 @@
         </div>
       </div>
       <div v-else class="status__icon-none" />
-      <div class="status__title-sub w-normal" :class="status === 'keplr-error' ? 's-minus' : 's-0'">
-        {{ displayData.subTitle }}
+      <div class="status__title-sub w-normal s-0">
+        <template v-if="status == 'failed'">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+            <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" />
+          </template>
+          <template v-if="tx.name == 'transfer'">
+            <Denom :name="tx.data.amount.denom" /> (<ChainName :name="tx.data.chain_name" />)
+          </template>
+          <template v-if="tx.name == 'swap'">
+            <Denom :name="tx.data.from.denom" /> -> <Denom :name="tx.data.to.denom" />
+          </template>
+          <template v-if="tx.name == 'addliquidity'">
+            <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> Pool
+          </template>
+          <template v-if="tx.name == 'createpool'">
+            <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> Pool
+          </template>
+          <template v-if="tx.name == 'withdrawliquidity'">
+            <Denom :name="tx.data.poolCoin.denom" />
+          </template>
+        </template>
+        <template v-else>
+          {{ subTitle }}
+        </template>
       </div>
       <div class="transferred-image"></div>
-      <div class="status__title s-2 w-bold">{{ displayData.title }}</div>
-
-      <div v-if="status.startsWith('transfer')" class="status__detail">
-        <div v-if="status === 'transferring'" class="status__detail-transferring">
-          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'cosmos' }" />
-          <div class="arrow">-></div>
-          <CoinImageWithRing :coin-data="{ denom: 'uatom', on_chain: 'terra' }" />
-        </div>
-        <div class="status__detail-amount s-0 w-medium">
-          {{ displayData.detail1 }}
-        </div>
-        <div class="status__detail-path s-0 w-normal" :style="status === 'transferred' ? 'margin-bottom: 4.8rem' : ''">
-          {{ displayData.detail2 }}
-        </div>
+      <div class="status__title s-2 w-bold">{{ title }}</div>
+      <div class="status__detail">
+        <template v-if="status == 'transacting' || status == 'complete'">
+          <div v-if="status === 'transacting'" class="status__detail-transferring">
+            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.from_chain }" />
+              <div class="arrow">-></div>
+              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.to_chain }" />
+            </template>
+            <template v-if="tx.name == 'transfer'">
+              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.chain_name }" />
+              <div class="arrow">-></div>
+              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.chain_name }" />
+            </template>
+          </div>
+          <div class="status__detail-amount s-0 w-medium">
+            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
+              <AmountDisplay :amount="tx.data.amount" />
+            </template>
+          </div>
+          <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
+            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+              <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" /> chain
+            </template>
+            <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
+          </div>
+        </template>
+        <template v-else>
+          <div v-if="status === 'keplr-sign'" class="spacer" />
+          <div v-else-if="status === 'failed'" class="status__detail-text-weak">
+            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+              Your <AmountDisplay :amount="tx.data.amount" /> on <ChainName :name="tx.data.from_chain" /> could not be
+              transferred to <ChainName :name="tx.data.to_chain" />
+            </template>
+            <template v-if="tx.name == 'transfer'">
+              Your <AmountDisplay :amount="tx.data.amount" /> on <ChainName :name="tx.data.chain_name" /> could not be
+              transferred.
+            </template>
+            <template v-if="tx.name == 'swap'">
+              Your <AmountDisplay :amount="tx.data.from" /> could not be swapped to
+              <Denom :name="tx.data.to.denom" /> on the Cosmos Hub.
+            </template>
+            <template v-if="tx.name == 'addliquidity'">
+              Could not add liquidity to the <Denom :name="tx.data.coinA.denom" /> /
+              <Denom :name="tx.data.coinB.denom" /> pool on the Cosmos Hub.
+            </template>
+            <template v-if="tx.name == 'createpool'">
+              Could not create a <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> pool on
+              the Cosmos Hub.
+            </template>
+            <template v-if="tx.name == 'withdrawliquidity'">
+              Could not withdraw liquidity from the <Denom :name="tx.data.poolCoin.denom" /> on the Cosmos Hub.
+            </template>
+          </div>
+        </template>
       </div>
-      <div v-else class="status__detail">
-        <div v-if="status === 'tx-wait' || status === 'keplr-sign'" class="spacer" />
-        <div v-else-if="status === 'keplr-open'" class="status__detail-text s-0 w-medium l-solid">
-          {{ displayData.detail1 }}
-        </div>
-        <a
-          v-else-if="status === 'keplr-launch-error' || status === 'keplr-sign-error'"
-          href="https://faq.keplr.app/"
-          target="_blank"
-          class="status__detail-link s-0 w-medium l-solid"
-        >
-          {{ displayData.detail }}
-        </a>
-        <div v-else class="status__detail-text-weak">{{ displayData.detail1 }}</div>
-      </div>
-
       <Button
-        v-if="displayData.blackButton"
-        :name="displayData.blackButton"
+        v-if="blackButton"
+        :name="blackButton"
         :status="'normal'"
-        :click-function="blackButtonFunc"
-        :style="{ marginBottom: `${displayData.blackButton && displayData.whiteButton ? '2.4rem' : ''}` }"
+        :click-function="
+          () => {
+            status == 'keplr-reject' ? emitRetry() : status == 'failed' ? emitClose() : emitNext();
+          }
+        "
+        :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
       />
       <Button
-        v-if="displayData.whiteButton"
-        :name="displayData.whiteButton"
+        v-if="whiteButton"
+        :name="whiteButton"
         :status="'normal'"
-        :click-function="cancel"
+        :click-function="emitClose"
         :is-outline="true"
       />
-
-      <div v-if="!status.startsWith('transfer') && displayData.detail2">
-        <a
-          href="https://faq.keplr.app/"
-          target="_blank"
-          class="s-0 w-medium l-solid"
-          style="padding: 4rem 0 1.6rem; display: block"
-        >
-          {{ displayData.detail2 }}
-        </a>
-      </div>
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, toRefs } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import CoinImageWithRing from '@/components/common/CoinImageWithRing.vue';
+import Denom from '@/components/common/Denom.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import { StepTransaction } from '@/types/actions';
 
-type Status =
-  | 'keplr-sign'
-  | 'keplr-open'
-  | 'keplr-launch-error'
-  | 'keplr-sign-error'
-  | 'keplr-error'
-  | 'tx-wait'
-  | 'tx-fail'
-  | 'transferring'
-  | 'transferred';
+type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
 
 export default defineComponent({
   name: 'TxHandlingModal',
-  components: { Modal, SpinnerIcon, WarningIcon, ErrorIcon, Button, CoinImageWithRing },
+  components: {
+    Modal,
+    SpinnerIcon,
+    WarningIcon,
+    ErrorIcon,
+    Button,
+    CoinImageWithRing,
+    AmountDisplay,
+    ChainName,
+    Denom,
+  },
   props: {
     status: {
       type: String as PropType<Status>,
       default: 'keplr-sign',
     },
-    blackButtonFunc: {
-      type: Function,
-      default: () => {
-        return;
-      },
+    modalVariant: {
+      type: String,
+      default: 'full',
     },
-    whiteButtonFunc: {
-      type: Function,
-      default: () => {
-        return;
-      },
+    tx: {
+      type: Object as PropType<StepTransaction>,
+      required: true,
+    },
+    hasMore: {
+      type: Boolean as PropType<boolean>,
+      default: false,
     },
   },
-  emits: ['close'],
+  emits: ['close', 'next', 'retry'],
   setup(props, { emit }) {
-    const displayData = reactive({
-      iconType: {
-        pending: 'pending',
-        warning: 'warning',
-        error: 'error',
-        none: null,
-      },
-      displayData: computed(() => {
-        let displayInfo = {
-          iconType: '',
-          title: '',
-          subTitle: '',
-          detail1: '',
-          detail2: '',
-          blackButton: '',
-          whiteButton: '',
-        };
+    // Set Icon from status
+    const iconType = computed(() => {
+      if (props.status == 'keplr-sign') {
+        return 'pending';
+      }
+      if (props.status == 'keplr-reject') {
+        return 'warning';
+      }
+      if (props.status == 'failed') {
+        return 'error';
+      }
+      return null;
+    });
 
-        switch (props.status) {
+    //Set default texts
+    const subTitle = ref('Opening Keplr');
+    const title = ref('Sign transaction');
+    const whiteButton = ref('Cancel');
+    const blackButton = ref('');
+
+    // Watch for status changes
+    watch(
+      () => props.status,
+      (newStatus) => {
+        switch (newStatus) {
           case 'keplr-sign':
-            displayInfo.iconType = displayData.iconType.pending;
-            displayInfo.title = 'Sign transaction';
-            displayInfo.subTitle = 'Opening Keplr';
-            displayInfo.whiteButton = 'Cancel';
+            subTitle.value = 'Opening Keplr';
+            title.value = 'Sign transaction';
+            whiteButton.value = 'Cancel';
+            blackButton.value = '';
             break;
-          case 'keplr-open':
-            displayInfo.iconType = displayData.iconType.pending;
-            displayInfo.title = 'Sign transaction';
-            displayInfo.subTitle = 'Opening Keplr';
-            displayInfo.detail1 = 'Having trouble opening Keplr?';
-            displayInfo.blackButton = 'Open Keplr';
-            displayInfo.whiteButton = 'Cancel';
+          case 'keplr-reject':
+            subTitle.value = '';
+            title.value = 'Transaction not signed!';
+            whiteButton.value = 'Cancel';
+            blackButton.value = 'Try again';
             break;
-          case 'keplr-launch-error':
-            displayInfo.iconType = displayData.iconType.warning;
-            displayInfo.title = 'Keplr cannot launch';
-            displayInfo.detail1 = 'Keplr troubleshooting ↗️';
-            displayInfo.blackButton = 'Try again';
+          case 'transacting':
+            subTitle.value = 'Please wait';
+            switch ((props.tx as StepTransaction).name) {
+              //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+              case 'ibc_forward':
+                title.value = 'Transferring';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'ibc_backward':
+                title.value = 'Transferring';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'transfer':
+                title.value = 'Transferring';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'swap':
+                title.value = 'Swapping';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'addliquidity':
+                title.value = 'Adding liquidity';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'withdrawliquidity':
+                title.value = 'Withdrawing';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+              case 'createpool':
+                title.value = 'Creating pool';
+                whiteButton.value = '';
+                blackButton.value = '';
+                break;
+            }
             break;
-          case 'keplr-sign-error':
-            displayInfo.iconType = displayData.iconType.warning;
-            displayInfo.title = 'Transaction not signed';
-            displayInfo.detail1 = 'Keplr troubleshooting ↗️';
-            displayInfo.blackButton = 'Open keplr';
+          case 'complete':
+            subTitle.value = '';
+            props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
+            switch ((props.tx as StepTransaction).name) {
+              //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+              case 'ibc_forward':
+                title.value = 'Transferred';
+                break;
+              case 'ibc_backward':
+                title.value = 'Transferred';
+                whiteButton.value = '';
+                break;
+              case 'transfer':
+                title.value = 'Transferred';
+                whiteButton.value = '';
+                break;
+              case 'swap':
+                title.value = 'Swapped';
+                whiteButton.value = '';
+                break;
+              case 'addliquidity':
+                title.value = 'Liquidity added';
+                whiteButton.value = '';
+                break;
+              case 'withdrawliquidity':
+                title.value = 'Liquidity withdrawn';
+                whiteButton.value = '';
+                break;
+              case 'createpool':
+                title.value = 'Pool created';
+                whiteButton.value = '';
+                break;
+            }
             break;
-          case 'keplr-error':
-            //TODO: error code
-            displayInfo.iconType = displayData.iconType.error;
-            displayInfo.title = 'There was an error with Keplr';
-            displayInfo.subTitle = 'Transaction failed';
-            displayInfo.detail1 = 'Error code XXXX';
-            displayInfo.blackButton = 'Try again';
-            displayInfo.detail2 = 'Get support ↗️';
-            break;
-          case 'tx-wait':
-            displayInfo.iconType = displayData.iconType.pending;
-            displayInfo.title = 'Please wait';
-            displayInfo.subTitle = 'Transaction in progress';
-            break;
-          case 'tx-fail':
-            displayInfo.iconType = displayData.iconType.error;
-            displayInfo.title = 'Transaction failed';
-            displayInfo.subTitle = 'ATOM -> LUNA on Cosmos Hub';
-            displayInfo.detail1 = 'Your 551.56 ATOM could not be swapped to LUNA.';
-            break;
-          case 'transferring':
-            displayInfo.iconType = displayData.iconType.none;
-            displayInfo.title = 'Transferring';
-            displayInfo.subTitle = 'Please wait';
-            displayInfo.detail1 = '374,222.20 KAVA';
-            displayInfo.detail2 = 'Terra -> Kava chain';
-            break;
-          case 'transferred':
-            displayInfo.iconType = displayData.iconType.none;
-            displayInfo.title = 'Transferred';
-            displayInfo.subTitle = '';
-            displayInfo.detail1 = '374,222.20 KAVA';
-            displayInfo.detail2 = 'Terra -> Kava chain';
-            displayInfo.blackButton = 'Next transfer';
+          case 'failed':
+            title.value = 'Transaction failed';
+            whiteButton.value = '';
+            subTitle.value = '';
+            blackButton.value = 'Cancel';
             break;
         }
-
-        return displayInfo;
-      }),
-    });
+      },
+    );
 
     function emitClose() {
       emit('close');
     }
 
-    function cancel() {
-      alert('cancel');
-      emitClose();
+    function emitRetry() {
+      emit('retry');
     }
-    return { ...toRefs(displayData), cancel, emitClose };
+    function emitNext() {
+      emit('next');
+    }
+    return { emitNext, emitRetry, emitClose, iconType, subTitle, title, whiteButton, blackButton };
   },
 });
 </script>

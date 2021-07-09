@@ -168,25 +168,27 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = computed(() => store.getters['demeris/getAllBalances']);
+    const balances = computed(() => {
+      return store.getters['demeris/getAllBalances'] ?? [];
+    });
     const action = ref(null);
     const pools: Pool[] = [
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uatom', 'ukava'],
         reserve_account_address: '',
         pool_coin_denom: 'atom',
         type_id: 1,
       },
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uatom', 'urune'],
         reserve_account_address: '',
         pool_coin_denom: 'atom',
         type_id: 1,
       },
       {
-        id: 1,
+        id: '1',
         reserve_coin_denoms: ['uluna', 'urune'],
         reserve_account_address: '',
         pool_coin_denom: 'luna',
@@ -195,41 +197,35 @@ export default defineComponent({
     ];
     const sendMessage = async () => {
       const steps = await actionHandler({
-        name: 'swap',
-        params: {
-          from: {
-            amount: {
-              amount: '5000000',
-              denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
-            },
-            chain_name: 'akash',
-          },
-          to: {
-            amount: {
-              amount: '400000',
-              denom: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5',
-            },
+        name: 'redeem',
+        params: [
+          {
             chain_name: 'cosmos-hub',
+            amount: { amount: '25000', denom: 'ibc/8371C119AD9ABB70F056791FFCBB02065CD06536B62E79E164324899CA37CD3D' },
           },
-        },
+        ],
       });
       console.log(steps);
       //action.value = steps;
     };
     const sendStepTx = async () => {
-      /*const channel = store.getters['demeris/getPrimaryChannel']({
-        chain_name: 'cosmos-hub',
-        destination_chain_name: 'akash',
+      /*  const channel = store.getters['demeris/getPrimaryChannel']({
+        chain_name: 'akash',
+        destination_chain_name: 'cosmos-hub',
       });
-  */
+      */
+
       const stepTx = {
         name: 'ibc_forward',
         status: 'pending',
         data: {
-          amount: { amount: '50000', denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2' },
+          amount: {
+            amount: '50000',
+            denom: 'ibc/3D543643452D8637B10EB31FBFCED62E154F9CF2CB71D50208C60D2A6718EA93',
+          },
           from_chain: 'akash',
-          to_chain: 'crypto-com',
-          to_address: await getOwnAddress({ chain_name: 'crypto-com' }),
+          to_chain: 'cosmos-hub',
+          to_address: await getOwnAddress({ chain_name: 'cosmos-hub' }),
           through: 'channel-1',
         } as IBCForwardsData,
       } as StepTransaction;
@@ -274,14 +270,14 @@ export default defineComponent({
         registry: res.registry,
         memo: 'a memo',
       });
-      /*
+
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
       const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
         subscribe: true,
         params: { chain_name: res.chain_name, ticket: result.ticket },
       });
 
-      return txPromise;*/
+      return txPromise;
     };
     const address = ref('terra1c9x3ymwqwegu3fzdlvn5pgk7cqglze0zzn9xkg');
     const modalIsOpen = ref(false);

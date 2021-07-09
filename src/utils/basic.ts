@@ -1,5 +1,7 @@
+import { Coin } from '@cosmjs/amino';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
 import { store } from '../store/index';
@@ -10,6 +12,9 @@ export function toHexString(byteArray) {
       return ('0' + (byte & 0xff).toString(16)).slice(-2);
     })
     .join('');
+}
+export function hashObject(str: unknown): string {
+  return toHex(sha256(encodeUTF8(JSON.stringify(str)))).toUpperCase();
 }
 export function keyHashfromAddress(address: string): string {
   try {
@@ -85,3 +90,17 @@ export const hexToRGB = (hex: string) => {
     .map((v) => parseInt(v, 16))
     .join(',');
 };
+export function parseCoins(input: string): Coin[] {
+  return input
+    .replace(/\s/g, '')
+    .split(',')
+    .filter(Boolean)
+    .map((part) => {
+      const match = part.match(/^([0-9]+)([a-zA-Z][a-zA-Z0-9/-]{2,127})$/);
+      if (!match) throw new Error('Got an invalid coin string');
+      return {
+        amount: Uint64.fromString(match[1]).toString(),
+        denom: match[2],
+      };
+    });
+}

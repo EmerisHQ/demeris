@@ -1,5 +1,5 @@
 <template>
-  <div class="withdraw-liquidity">
+  <div class="withdraw-liquidity" :class="{ 'withdraw-liquidity--insufficient-funds': !hasSufficientFunds }">
     <header class="withdraw-liquidity__header">
       <button class="withdraw-liquidity__header__button" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
@@ -31,11 +31,11 @@
             <span class="withdraw-liquidity__pool__pair__avatar token-b" />
           </div>
 
-          <span class="withdraw-liquidity__pool__name">{{ formatPoolName(pool) }} Pool</span>
+          <span class="withdraw-liquidity__pool__name">{{ pairName }}</span>
         </div>
 
         <div class="withdraw-liquidity__estimated">
-          <span class="withdraw-liquidity__estimated__price s-2 w-bold"><Price :amount="{ amount: state.amount, denom: pool.poolCoinDenom }" /></span>
+          <span class="withdraw-liquidity__estimated__price s-2 w-bold">{{ totalEstimatedPrice }}</span>
           <label class="withdraw-liquidity__estimated__max">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="withdraw-liquidity__max" />
             <span class="elevation-button">Max</span>
@@ -61,7 +61,7 @@
                 <DenomSelect
                   v-model:amount="state.amount"
                   :input-header="``"
-                  :selected-denom="tokenAsset"
+                  :selected-denom="state.selectedAsset"
                   :assets="[]"
                   @change="denomChangeHandler"
                 />
@@ -70,12 +70,14 @@
 
             <div class="withdraw-liquidity__input__details">
               <button class="withdraw-liquidity__input__details__from" @click="toggleChainsModal()">
-                From <span class="w-bold">Terra</span>
+                From <span class="w-bold"><ChainName :name="state.selectedAsset.on_chain" /></span>
               </button>
 
               <div class="withdraw-liquidity__input__details__available">
-                1210
-                <span class="uppercase">G-LK-LP</span> available
+                <AmountDisplay
+                  :amount="{ amount: state.selectedAsset.amount, denom: state.selectedAsset.base_denom }"
+                />
+                available
               </div>
             </div>
           </div>
@@ -85,9 +87,9 @@
               <label class="withdraw-liquidity__input__label s-minus">Receive</label>
               <div class="withdraw-liquidity__input__select-wrapper token-a">
                 <DenomSelect
-                  :amount="200"
+                  :amount="receiveAmounts.coinA.amount"
                   :input-header="``"
-                  :selected-denom="{ base_denom: pool.reserveCoinDenoms[0], on_chain: 'Cosmos Hub' }"
+                  :selected-denom="{ base_denom: reserveBaseDenoms[0], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
                   :readonly="true"
                   @select="() => void 0"
@@ -98,9 +100,9 @@
 
               <div class="withdraw-liquidity__input__select-wrapper token-b">
                 <DenomSelect
-                  :amount="300"
+                  :amount="receiveAmounts.coinB.amount"
                   :input-header="``"
-                  :selected-denom="{ base_denom: pool.reserveCoinDenoms[1], on_chain: 'Cosmos Hub' }"
+                  :selected-denom="{ base_denom: reserveBaseDenoms[1], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
                   :readonly="true"
                   @select="() => void 0"
@@ -112,27 +114,32 @@
           <div class="withdraw-liquidity__price">
             <span class="withdraw-liquidity__price__label">Pool price</span>
             <span class="withdraw-liquidity__price__label">
-              1 <span class="uppercase">{{ $filters.getCoinName(pool.reserveCoinDenoms[0]) }}</span> = 1.78
-              <span class="uppercase">{{ $filters.getCoinName(pool.reserveCoinDenoms[1]) }}</span>
+              <AmountDisplay :amount="{ amount: 1e6, denom: receiveAmounts.coinB.denom }" /> =
+              <AmountDisplay :amount="{ amount: 1e6, denom: receiveAmounts.coinA.denom }" />
             </span>
           </div>
 
-          <Alert v-if="state.needsTransferToHub" status="info" class="withdraw-liquidity__transfer-info">
+          <Alert v-if="needsTransferToHub" status="info" class="withdraw-liquidity__transfer-info">
             Your assets will be transferred to Cosmos Hub
           </Alert>
 
           <div class="withdraw-liquidity__controls">
-            <Button name="Continue" @click="goToReview" />
+            <Button
+              :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'"
+              :disabled="!isValid"
+              @click="goToReview"
+            />
+
+            <div class="withdraw-liquidity__controls__fees">
+              <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+            </div>
           </div>
         </div>
       </template>
 
       <template v-if="state.step === 'review'">
         <div class="withdraw-liquidity__content">
-          Review
-          <div class="withdraw-liquidity__controls">
-            <Button name="Continue" @click="goToStep('send')" />
-          </div>
+          <TxStepsModal :data="actionSteps" :gas-price-level="gasPrice" />
         </div>
       </template>
 
@@ -142,50 +149,138 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, watch } from '@vue/runtime-core';
+import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
-import Price from '@/components/common/Price.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import { useStore } from '@/store';
+import { GasPriceLevel, WithdrawLiquidityAction } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default {
   name: 'WithdrawLiquidity',
-  components: { Alert, Button, Icon, DenomSelect, ChainSelectModal, Price },
+  components: {
+    Alert,
+    AmountDisplay,
+    Button,
+    ChainName,
+    Icon,
+    DenomSelect,
+    ChainSelectModal,
+    FeeLevelSelector,
+    TxStepsModal,
+  },
 
   setup() {
     const route = useRoute();
     const router = useRouter();
+    const store = useStore();
+
+    const actionSteps = ref([]);
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
+
     const poolId = computed(() => route.params.id);
-    const { poolById, formatPoolName } = usePools();
-    const { balances } = useAccount();
+
+    const { formatPoolName } = usePools();
+    const { balancesByDenom } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
 
     const state = reactive({
       step: 'amount',
-      needsTransferToHub: true,
       amount: 0,
       isChainsModalOpen: false,
       isMaximumAmountChecked: false,
+      selectedAsset: undefined,
     });
 
-    const pool = computed(() => {
-      return poolById(+poolId.value);
+    const { pool, pairName, calculateWithdrawBalances, reserveBaseDenoms } = usePool(
+      computed(() => poolId.value as string),
+    );
+
+    const dexChain = computed(() => {
+      return store.getters['demeris/getDexChain'];
     });
 
     // TODO: Fetch from API the wallet available amount
-    const tokenAsset = computed(() => {
+    const balances = computed(() => {
+      return balancesByDenom(pool.value.pool_coin_denom);
+    });
+
+    const needsTransferToHub = computed(() => {
+      if (state.selectedAsset.on_chain !== dexChain.value) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const hasSufficientFunds = computed(() => {
+      if (!state.selectedAsset) {
+        return false;
+      }
+
+      const cryptoAmount = state.amount * 1e6;
+
+      return +parseCoins(state.selectedAsset.amount)[0].amount >= cryptoAmount;
+    });
+
+    const isValid = computed(() => {
+      if (state.amount <= 0) {
+        return false;
+      }
+
+      if (!hasSufficientFunds.value) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const receiveAmounts = computed(() => {
+      if (!pool.value) {
+        return;
+      }
+
+      const result = calculateWithdrawBalances(state.amount);
+
       return {
-        base_denom: 'uG-LK-LP',
-        on_chain: 'Terra',
-        amount: 1210,
+        coinA: result[0],
+        coinB: result[1],
       };
+    });
+
+    const totalEstimatedPrice = computed(() => {
+      let total = 0;
+
+      if (!reserveBaseDenoms.value.length || !receiveAmounts.value) {
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
+      total += priceA * receiveAmounts.value.coinA.amount;
+
+      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+      total += priceB * receiveAmounts.value.coinB.amount;
+
+      const displayTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(total);
+
+      return displayTotal;
     });
 
     const toggleChainsModal = () => {
@@ -221,23 +316,61 @@ export default {
       }
     };
 
+    const generateActionsSteps = async () => {
+      const action: WithdrawLiquidityAction = {
+        name: 'withdrawliquidity',
+        params: {
+          pool_id: BigInt(pool.value.id),
+          poolCoin: {
+            amount: {
+              denom: state.selectedAsset.base_denom,
+              amount: (+state.amount * 1e6).toString(),
+            },
+            chain_name: state.selectedAsset.on_chain,
+          },
+        },
+      };
+      actionSteps.value = await actionHandler(action);
+    };
+
+    onMounted(() => {
+      state.selectedAsset = balances.value[0];
+    });
+
     watch(
-      () => [state.isMaximumAmountChecked, state],
+      () => [state.amount, state.selectedAsset, pool],
       () => {
-        if (state.isMaximumAmountChecked) {
-          state.amount = tokenAsset.value.amount;
+        if (pool.value) {
+          generateActionsSteps();
+        }
+      },
+    );
+
+    watch(
+      () => [state.isMaximumAmountChecked, state.selectedAsset],
+      () => {
+        if (state.isMaximumAmountChecked && state.selectedAsset) {
+          const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
+          state.amount = +parseCoins(state.selectedAsset.amount)[0].amount / Math.pow(10, precision);
         }
       },
     );
 
     return {
-      route,
-      router,
+      dexChain,
       pool,
+      pairName,
       state,
       steps,
-      tokenAsset,
       balances,
+      receiveAmounts,
+      gasPrice,
+      actionSteps,
+      totalEstimatedPrice,
+      needsTransferToHub,
+      reserveBaseDenoms,
+      isValid,
+      hasSufficientFunds,
       denomChangeHandler,
       toggleChainsModal,
       goToReview,
@@ -254,6 +387,10 @@ export default {
 .withdraw-liquidity {
   position: relative;
   padding-bottom: 2rem;
+
+  &--insufficient-funds &__input__details__available {
+    color: var(--negative-text);
+  }
 
   .denom-select {
     padding: 0;
@@ -273,6 +410,12 @@ export default {
   &__controls {
     width: 100%;
     margin-top: 3.2rem;
+
+    &__fees {
+      margin-top: 2.4rem;
+      margin-left: -2.4rem;
+      margin-right: -2.4rem;
+    }
   }
 
   &__estimated {
@@ -281,7 +424,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 38rem;
+    max-width: 42rem;
     width: 100%;
     text-align: center;
     line-height: 1;
@@ -360,7 +503,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 38rem;
+    max-width: 42rem;
     position: relative;
     display: flex;
     flex-direction: column;
