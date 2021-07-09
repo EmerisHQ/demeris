@@ -3,7 +3,7 @@
     <div class="wrapper">
       <div class="portfolio">
         <div class="portfolio__total">
-          <div class="portfolio__total__text">Total balance:</div>
+          <div class="portfolio__total__text">Total balance</div>
           <div class="portfolio__total__value">
             <TotalPrice :balances="balances" />
           </div>
@@ -13,7 +13,13 @@
             <div class="portfolio__assets__header__text">Assets</div>
             <router-link class="portfolio__assets__header__link" to="/assets">See all <ArrowRightIcon /></router-link>
           </div>
-          <div class="portfolio__assets__table>">
+
+          <MoonpayBanner
+            v-if="!balances.length"
+            title="Add crypto to your account"
+            class="portfolio__assets__buy-banner"
+          />
+          <div v-else class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
               display-style="compact"
@@ -30,7 +36,7 @@
             <router-link class="portfolio__pools__header__link" to="/pools">See all <ArrowRightIcon /></router-link>
           </div>
           <div class="portfolio__pools__cards">
-            <Pools :pools="invested.length > 0 ? invested : toppools" />
+            <Pools :pools="invested.length > 0 ? invested : toppools" :limit="3" />
           </div>
         </div>
       </div>
@@ -47,6 +53,7 @@ import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
 import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
+import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -55,7 +62,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 export default {
   name: 'Portfolio',
-  components: { AppLayout, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
+  components: { AppLayout, MoonpayBanner, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
   setup() {
     const router = useRouter();
     const { balances } = useAccount();
@@ -86,7 +93,6 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
-  max-width: 1136px;
   margin: 0 auto;
 
   .portfolio {
@@ -109,6 +115,10 @@ export default {
       margin-bottom: 6rem;
     }
     &__assets {
+      &__buy-banner {
+        margin-top: 2.6rem;
+        margin-bottom: 2.6rem;
+      }
       &__header {
         font-size: 2.8rem;
         font-weight: bold;

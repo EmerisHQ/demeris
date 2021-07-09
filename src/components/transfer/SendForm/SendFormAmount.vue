@@ -38,7 +38,11 @@
           @click="toggleSelectModal()"
         >
           <div class="send-form-amount__assets__item__asset">
-            <span class="send-form-amount__assets__item__avatar" />
+            <CircleSymbol
+              :chain-name="state.currentAsset.on_chain"
+              :denoms="state.currentAsset.base_denom"
+              class="send-form-amount__assets__item__avatar"
+            />
 
             <div class="send-form-amount__assets__item__chain">
               <p class="send-form-amount__assets__item__denom w-bold">
@@ -81,6 +85,7 @@ import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
@@ -96,6 +101,7 @@ export default defineComponent({
   components: {
     AmountDisplay,
     ChainName,
+    CircleSymbol,
     Denom,
     Button,
     Icon,
@@ -297,12 +303,7 @@ export default defineComponent({
 
       &__avatar {
         position: relative;
-        width: 2.4rem;
-        height: 2.4rem;
-        border-radius: 2.4rem;
-        background-color: rgba(0, 0, 0, 0.3);
         margin-right: 1.6rem;
-        transition: box-shadow linear 100ms;
       }
 
       &__denom {

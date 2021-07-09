@@ -1,6 +1,6 @@
 <template>
-  <div>
-    {{ displayPrice[0] }}<span :class="styled ? 'decimals' : ''">.{{ displayPrice[1] }}</span>
+  <div class="total-price" :class="`total-price--${variant}`">
+    {{ displayPrice[0] }}<span>.{{ displayPrice[1] }}</span>
   </div>
 </template>
 <script lang="ts">
@@ -15,9 +15,9 @@ export default defineComponent({
       type: Array as PropType<Balances>,
       required: true,
     },
-    styled: {
-      type: Boolean as PropType<boolean>,
-      default: true,
+    variant: {
+      type: String as PropType<'styled' | 'none'>,
+      default: 'styled',
     },
   },
   setup(props) {
@@ -61,7 +61,13 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.decimals {
-  font-size: 0.42em;
+.total-price {
+  &--styled {
+    letter-spacing: -0.15rem;
+  }
+
+  &--styled span {
+    font-size: 0.42em;
+  }
 }
 </style>

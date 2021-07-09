@@ -47,7 +47,11 @@
           <span class="move-form-amount__assets__item__label s-minus">Move</span>
 
           <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
+            <CircleSymbol
+              :chain-name="form.on_chain"
+              :denoms="form.balance.denom"
+              class="move-form-amount__assets__item__avatar"
+            />
             <span class="move-form-amount__assets__item__name w-bold">
               <Denom :name="form.balance.denom || ''" />
             </span>
@@ -62,7 +66,7 @@
           <span class="move-form-amount__assets__item__label s-minus">From</span>
 
           <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
+            <CircleSymbol variant="chain" :chain-name="form.on_chain" class="move-form-amount__assets__item__avatar" />
             <span class="move-form-amount__assets__item__name w-bold">
               <ChainName :name="form.on_chain" />
             </span>
@@ -92,7 +96,7 @@
           <span class="move-form-amount__assets__item__label s-minus">To</span>
 
           <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
+            <CircleSymbol variant="chain" :chain-name="form.to_chain" class="move-form-amount__assets__item__avatar" />
             <span class="move-form-amount__assets__item__name w-bold">
               <ChainName v-if="form.to_chain" :name="form.to_chain" />
               <span v-else>Select Chain</span>
@@ -119,6 +123,7 @@ import { computed, defineComponent, inject, PropType, reactive, watch } from 'vu
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
@@ -130,7 +135,7 @@ import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 
 export default defineComponent({
-  name: 'SendFormAmount',
+  name: 'MoveFormAmount',
 
   components: {
     AmountDisplay,
@@ -139,6 +144,7 @@ export default defineComponent({
     DenomSelectModal,
     ChainSelectModal,
     ChainName,
+    CircleSymbol,
     Icon,
     Price,
   },
@@ -364,21 +370,6 @@ export default defineComponent({
         text-transform: uppercase;
       }
 
-      &.from-item &__avatar {
-        background: transparent;
-        border: 2px solid #7782ff;
-      }
-
-      &.to-item.chain-selected &__avatar {
-        background: transparent;
-        border: 2px solid #9eb0f7;
-      }
-
-      &.to-item &__avatar {
-        background: transparent;
-        border: 2px solid var(--border-trans);
-      }
-
       & + & {
         border-top: 1px solid var(--border-trans);
       }
@@ -396,13 +387,7 @@ export default defineComponent({
       }
 
       &__avatar {
-        position: relative;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 2.4rem;
-        background-color: rgba(0, 0, 0, 0.3);
         margin-right: 1.2rem;
-        border: 2px solid transparent;
       }
 
       &__label {

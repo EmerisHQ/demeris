@@ -1,6 +1,9 @@
 <template>
   <header class="header">
-    <Logo />
+    <router-link to="/" class="header__logo">
+      <Logo width="1em" height="1em" />
+    </router-link>
+
     <Navbar />
 
     <div class="space"></div>
@@ -22,12 +25,14 @@
         </div>
         Send
       </router-link>
-      <Wallet />
-      <div class="header__menu-button">
+
+      <button class="header__menu-button">
         <div class="header__menu-button__icon">
           <MenuIcon />
         </div>
-      </div>
+      </button>
+
+      <Wallet />
     </div>
   </header>
 </template>
@@ -35,7 +40,7 @@
 import { computed, defineComponent } from 'vue';
 
 import Wallet from '@/components/account/Wallet.vue';
-import Logo from '@/components/layout/Logo.vue';
+import Logo from '@/components/common/Logo.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
 
@@ -72,72 +77,34 @@ export default defineComponent({
 }
 
 .header {
-  /* position: fixed; */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 10rem;
-  padding: 2rem;
-
+  padding: 0 3.2rem;
   display: flex;
+  height: 8rem;
   align-items: center;
-
-  /* padding: 20px; */
+  justify-content: space-between;
 
   &__logo {
-    display: flex;
-
-    &_icon {
-      display: flex;
-      align-items: center;
-      margin-right: 12px;
-    }
-
-    &_text {
-      display: flex;
-      align-items: center;
-
-      &-title {
-        margin-right: 8px;
-
-        font-size: 2.4rem;
-        font-weight: bold;
-      }
-
-      &-status {
-        padding: 0.5rem 1.8rem;
-        font-size: 1.6rem;
-
-        color: #fff;
-        background-color: lightgrey;
-        border-radius: 20px;
-      }
+    svg {
+      font-size: 1.6rem;
     }
   }
 
   &__wallet {
     display: flex;
     align-items: center;
+
     &-button {
-      display: flex;
       font-size: 1.6rem;
+      font-weight: 600;
+      display: flex;
       justify-content: center;
       align-items: center;
       padding: 0rem 1.5rem;
+
       &__icon {
         margin-right: 1rem;
       }
     }
-
-    /* &-image {
-      width: 26px;
-      height: 26px;
-
-      margin-right: 8px;
-
-      background-color: lightgray;
-      border-radius: 50%;
-    } */
 
     &__account {
       &-name {
@@ -152,8 +119,21 @@ export default defineComponent({
       }
     }
   }
+
   &__menu-button {
-    margin-left: 2.5rem;
+    margin: 0 2rem 0 1.6rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 2.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 100ms linear;
+
+    &:hover {
+      background: var(--fg-trans);
+    }
+
     &__icon {
       font-size: 2.2rem;
       color: black;

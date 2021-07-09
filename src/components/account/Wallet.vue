@@ -2,14 +2,15 @@
   <div>
     <div v-if="isSignedIn" class="header__wallet-badge">
       <div class="header__wallet-badge__avatar">
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div class="header__wallet-badge__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
-        <div class="header__wallet-badge__avatar__glow">
-          <!-- TODO: Glow SVG //-->
-        </div>
+        <div class="header__wallet-badge__avatar__glow" />
       </div>
       <div class="header__wallet-badge__details">
         <div class="header__wallet-badge__details__account-name">{{ keplrAccountName }}</div>
-        <div class="header__wallet-badge__details__value"><TotalPrice :balances="balances" :styled="false" /></div>
+        <div class="header__wallet-badge__details__value">
+          <TotalPrice :balances="balances" variant="none" />
+        </div>
       </div>
     </div>
     <Button v-else name="Connect my wallet" @click="toggleModal" />
@@ -40,25 +41,30 @@ export default defineComponent({
   setup() {
     const isModalOpen = ref(false);
     const store = useStore();
+
+    const { balances } = useAccount();
+
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
+
     const keplrAccountName = computed(() => {
       return store.getters['demeris/getKeplrAccountName'];
     });
-    const { balances } = useAccount();
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });
+
     const toggleModal = () => {
       isModalOpen.value = !isModalOpen.value;
     };
+
     return {
+      balances,
       isModalOpen,
       toggleModal,
       isSignedIn,
       keplrAccountName,
-      balances,
       keplrAddress,
     };
   },
@@ -75,32 +81,29 @@ export default defineComponent({
   &__wallet-badge {
     display: flex;
     align-items: center;
+
     &__avatar {
       width: 3.2rem;
       height: 3.2rem;
       border-radius: 1.6rem;
       position: relative;
+
       &__gradient {
         width: 3.2rem;
         height: 3.2rem;
         border-radius: 1.6rem;
         overflow: hidden;
+        z-index: 1;
+        position: relative;
+
         svg {
           width: 100%;
           height: 100%;
         }
       }
-      &__glow {
-        position: absolute;
-        svg {
-          width: 4.2rem;
-          height: 3.4rem;
-        }
-        top: 0;
-      }
     }
     &__details {
-      margin-left: 0.5rem;
+      margin-left: 1.2rem;
       display: flex;
       flex-direction: column;
       &__account-name {
@@ -109,6 +112,7 @@ export default defineComponent({
         font-feature-settings: 'zero' on;
       }
       &__value {
+        margin-top: 0.2rem;
         font-size: 1.6rem;
         line-height: 2rem;
         font-weight: bold;
