@@ -152,7 +152,6 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-    //TODO: Advanced option only advanced user can see pool token
 
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
@@ -259,7 +258,7 @@ export default defineComponent({
       return assets;
     });
 
-    const initialPairList = ref([]); // for default coin setting
+    const initialPairList = ref([]); // for default asset list
     watch(
       () => availablePairs.value,
       (newPairs) => {
@@ -276,19 +275,6 @@ export default defineComponent({
         initialPairList.value = uniquePairList;
       },
     );
-
-    //for default payCoin set
-    // watch(
-    //   () => {
-    //     return [isInit.value];
-    //   },
-    //   (watchValues) => {
-    //     // isInit for initialAssetList
-    //     if (watchValues[0]) {
-    //     }
-    //   },
-    //   { immediate: true },
-    // );
 
     //for default payCoin set
     // watch(
@@ -322,6 +308,7 @@ export default defineComponent({
     //   { immediate: true },
     // );
 
+    // TODO: Advanced option only advanced user can see pool token
     const payAssetList = ref([]);
     watch(
       () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
@@ -371,6 +358,27 @@ export default defineComponent({
           console.log('wallet / assetsToreceive', newAssets);
         } else {
           console.log('no wallet / assetsToreceive', newAssets);
+        }
+      },
+    );
+
+    // for default payCoin set
+    const isInit = ref(false);
+    watch(
+      () => {
+        return [payAssetList.value, isSignedIn.value];
+      },
+      (watchValues, oldWatchValues) => {
+        if (watchValues[1] !== oldWatchValues[1]) {
+          isInit.value = false;
+        }
+
+        if (!isInit.value && watchValues[0].length) {
+          data.payCoinData =
+            payAssetList.value.filter((coin) => {
+              return coin.base_denom === 'uatom';
+            })[0] ?? payAssetList.value[0];
+          isInit.value = true;
         }
       },
     );
