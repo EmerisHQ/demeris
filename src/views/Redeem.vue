@@ -83,7 +83,9 @@
       </template>
 
       <template v-else-if="state.step === 'review'">
-        <TxStepsModal :data="state.selectedAsset.steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
+        <div class="redeem__content">
+          <TxStepsModal :data="state.selectedAsset.steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
+        </div>
       </template>
 
       <template v-else-if="state.step === 'transfer'">
