@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="total-price" :class="`total-price--${variant}`">
     {{ displayPrice[0] }}<span>.{{ displayPrice[1] }}</span>
   </div>
 </template>
@@ -14,6 +14,10 @@ export default defineComponent({
     balances: {
       type: Array as PropType<Balances>,
       required: true,
+    },
+    variant: {
+      type: String as PropType<'styled' | 'none'>,
+      default: 'styled',
     },
   },
   setup(props) {
@@ -57,7 +61,13 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-span {
-  font-size: 0.42em;
+.total-price {
+  &--styled {
+    letter-spacing: -0.15rem;
+  }
+
+  &--styled span {
+    font-size: 0.42em;
+  }
 }
 </style>

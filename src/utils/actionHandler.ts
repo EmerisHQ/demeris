@@ -990,12 +990,9 @@ export async function getDisplayName(name, chain_name = null) {
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
-      if (verifyTrace.verified) {
-        return await getDisplayName(verifyTrace.base_denom);
-      } else {
-        return verifyTrace.base_denom + ' (unverified)';
-      }
+      return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
+      console.log(e);
       return name + '(unverified)';
     }
   }

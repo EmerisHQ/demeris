@@ -1,46 +1,51 @@
 <template>
-  <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="pool">
+  <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="pool" :style="cardStyle">
     <div class="pool__main">
-      <div class="pool__main__total-equity">{{ toUSD(totalLiquidityPrice) }}</div>
       <div class="pool__main__token-pair">
-        <span class="pool__main__token-pair__token token-a" />
-        <span class="pool__main__token-pair__token token-b" />
+        <CircleSymbol :denoms="denoms[0]" class="pool__main__token-pair__token token-a" />
+        <CircleSymbol :denoms="denoms[1]" class="pool__main__token-pair__token token-b" />
       </div>
-
-      <div class="pool__main__trending">
-        <!--<span class="pool__main__trending__icon">
-          <TrendingUpIcon />
-        </span>
-        <span class="pool__main__trending__value"> 18% </span>
-        //-->
+      <div class="pool__main__info">
+        <p class="pool__main__info__name">{{ pairName }}</p>
+        <span class="pool__main__info__total">{{ toUSD(totalLiquidityPrice) }}</span>
       </div>
     </div>
 
     <div class="pool__footer">
-      <p class="pool__footer__pair">{{ pairName }}</p>
-      <span class="pool__footer__price">{{ toUSD(ownLiquidityPrice) }}</span>
+      <p class="pool__footer__label">Equity</p>
+      <span class="pool__footer__value">{{ toUSD(ownLiquidityPrice) }}</span>
     </div>
   </router-link>
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import symbolsData from '@/data/symbols';
 import { Pool } from '@/types/actions';
 import { VerifyTrace } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
 
-//import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
+const defaultColors = {
+  primary: '#E1E1E1',
+  secondary: '#F4F4F4',
+  tertiary: '#F9F9F9',
+};
+
+const findSymbolColors = (symbol: string) => {
+  return symbolsData[symbol]?.colors || defaultColors;
+};
 
 export default defineComponent({
   name: 'Pool',
 
-  //components: { TrendingUpIcon },
+  components: { CircleSymbol },
 
   props: {
     pool: {
@@ -50,9 +55,89 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool((props.pool as Pool).id);
-
     const store = useStore();
+    const pairName = ref('-/-');
+    const truedenoms = ref((props.pool as Pool).reserve_coin_denoms);
+    const denoms = ref((props.pool as Pool).reserve_coin_denoms);
+    watch(
+      () => truedenoms.value,
+      async (newDenoms) => {
+        if (isNative(newDenoms[0])) {
+          denoms.value[0] = newDenoms[0];
+        } else {
+          try {
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: newDenoms[0].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: newDenoms[0].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            denoms.value[0] = verifyTrace.base_denom;
+          } catch (e) {
+            console.log(e);
+            denoms.value[0] = newDenoms[0];
+          }
+        }
+        if (isNative(newDenoms[1])) {
+          denoms.value[1] = newDenoms[1];
+        } else {
+          try {
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: newDenoms[1].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: newDenoms[1].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            denoms.value[1] = verifyTrace.base_denom;
+          } catch (e) {
+            console.log(e);
+            denoms.value[1] = newDenoms[1];
+          }
+        }
+      },
+      { immediate: true },
+    );
+    const { formatPoolName } = usePools();
+
+    onMounted(async () => {
+      pairName.value = await formatPoolName(props.pool as Pool);
+    });
+
+    const cardStyle = computed(() => {
+      const colorA = findSymbolColors(denoms.value[0]).primary;
+      const colorB = findSymbolColors(denoms.value[1]).primary;
+
+      const background = `
+				linear-gradient(165.72deg, rgba(247, 248, 248, 0.9) 0%, #F8F8F7 39.71%),
+      	linear-gradient(67.04deg, ${colorA} 44.06%, ${colorB} 74.33%)`;
+
+      return {
+        background,
+      };
+    });
+
+    const { pool, reserveBalances, calculateWithdrawBalances } = usePool((props.pool as Pool).id);
+
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -88,13 +173,6 @@ export default defineComponent({
         coinB: withdrawBalances[1],
         poolCoin,
       };
-    });
-
-    const relatedPools = computed(() => {
-      return [
-        ...poolsByDenom(pool.value.reserve_coin_denoms[0]),
-        ...poolsByDenom(pool.value.reserve_coin_denoms[1]),
-      ].filter((item) => item.id !== pool.value.id);
     });
 
     const updateTotalLiquidityPrice = async () => {
@@ -200,7 +278,7 @@ export default defineComponent({
     watch(reserveBalances, updateTotalLiquidityPrice);
 
     watch(walletBalances, updateOwnLiquidityPrice);
-    return { pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { cardStyle, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
   },
 });
 </script>
@@ -211,14 +289,13 @@ export default defineComponent({
   flex-direction: column;
   border-radius: 1.6rem;
   padding: 2.4rem;
-  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
   font-size: 1.6rem;
 
   &__main {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
 
     &__token-pair {
       display: inline-flex;
@@ -231,6 +308,8 @@ export default defineComponent({
 
         &.token-a {
           background-color: #f7f7f7;
+          z-index: 1;
+          box-shadow: inset 0px 0px 4px rgba(255, 255, 255, 0.62);
         }
 
         &.token-b {
@@ -240,18 +319,14 @@ export default defineComponent({
       }
     }
 
-    &__trending {
-      display: inline-flex;
-      font-weight: 600;
-      color: rgb(6, 126, 61);
-
-      &__icon {
-        width: 1.6rem;
-        height: 1.6rem;
+    &__info {
+      margin-top: 1.6rem;
+      &__name {
+        font-weight: 600;
       }
-
-      &__value {
-        margin-left: 0.2rem;
+      &__total {
+        color: var(--muted);
+        font-size: 1.2rem;
       }
     }
   }
@@ -260,10 +335,14 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
 
-    &__pair {
+    &__label {
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+      font-weight: 400;
+    }
+    &__value {
       font-weight: 600;
       text-transform: uppercase;
-      margin-bottom: 0.2rem;
     }
   }
 }

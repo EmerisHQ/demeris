@@ -16,7 +16,7 @@
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
         <td class="assets-table__row__asset">
-          <div class="assets-table__row__asset__avatar" />
+          <CircleSymbol :denoms="asset.denom" :chain-name="asset.chainsNames[0]" />
           <div class="assets-table__row__asset__denom">
             <Denom :name="asset.denom" />
             <div
@@ -72,24 +72,25 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import Price from '@/components/common/Price.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
 
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, Denom, Price, AmountDisplay },
+  components: { AssetChainsIndicator, ChevronRightIcon, CircleSymbol, Denom, Price, AmountDisplay },
 
   props: {
     displayStyle: {
@@ -142,10 +143,7 @@ export default defineComponent({
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
 
       const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce(
-          (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
-          0,
-        );
+        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {
@@ -230,16 +228,8 @@ export default defineComponent({
       display: flex;
       align-items: center;
 
-      &__avatar {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 2.4rem;
-        background: rgba(0, 0, 0, 0.1);
-        margin-right: 1.6rem;
-        flex-shrink: 0;
-      }
-
       &__denom {
+        margin-left: 1.6rem;
         &__chains {
           margin-top: 0.8rem;
         }

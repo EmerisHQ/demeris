@@ -263,6 +263,7 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
+      console.log(fees);
       return modifiedData;
     });
     const confirm = async () => {

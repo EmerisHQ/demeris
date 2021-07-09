@@ -2,7 +2,14 @@
   <div v-if="chainsCount > 1" class="asset-chains-indicator">
     <tippy class="asset-chains-indicator__wrapper">
       <div v-if="showIndicators" class="asset-chains-indicator__list">
-        <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
+        <CircleSymbol
+          v-for="indicator of indicators"
+          :key="indicator.on_chain"
+          variant="chain"
+          size="sm"
+          :chain-name="indicator.on_chain"
+          class="asset-chains-indicator__list__item"
+        />
       </div>
 
       <div class="asset-chains-indicator__count">
@@ -20,13 +27,18 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import { computed, defineComponent, PropType } from 'vue';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
+  name: 'AssetChainsIndicator',
+  components: {
+    CircleSymbol,
+  },
   props: {
     balances: {
       type: Object as PropType<Balances>,
@@ -122,12 +134,6 @@ export default defineComponent({
     margin-right: 0.8rem;
 
     &__item {
-      width: 2.4rem;
-      height: 2.4rem;
-      background: white;
-      border-radius: 2.4rem;
-      border: 2px solid #9ffeed;
-
       &:not(:first-child) {
         margin-left: -1.6rem;
       }

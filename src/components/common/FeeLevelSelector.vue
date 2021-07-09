@@ -172,6 +172,7 @@ export default defineComponent({
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
+        console.log(level);
         emit('update:gasPriceLevel', level);
         localStorage.setItem('demeris-fee-level', level);
       },

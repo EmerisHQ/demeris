@@ -21,15 +21,19 @@ export default function useAccount() {
   const balances = ref(allbalances.value);
   watch(
     () => allbalances.value,
-    async (newBalances) => {
-      redeemableBalances.value = await toRedeem(newBalances);
+    async (newBalances, oldBalances) => {
+      if (JSON.stringify(newBalances) != JSON.stringify(oldBalances)) {
+        redeemableBalances.value = await toRedeem(newBalances);
+      }
     },
+    { immediate: true },
   );
   watch(
     () => allbalances.value,
     async (newBalances) => {
       balances.value = await validBalances(newBalances);
     },
+    { immediate: true },
   );
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);

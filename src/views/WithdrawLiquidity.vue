@@ -149,7 +149,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -168,6 +167,7 @@ import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { GasPriceLevel, WithdrawLiquidityAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default {
   name: 'WithdrawLiquidity',

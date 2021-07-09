@@ -1,8 +1,8 @@
-import { parseCoins } from '@cosmjs/launchpad';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import * as API from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 
 import { ChainData, State } from './state';

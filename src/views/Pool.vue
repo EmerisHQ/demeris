@@ -106,7 +106,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -122,6 +121,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifyTrace } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
 
 export default defineComponent({
