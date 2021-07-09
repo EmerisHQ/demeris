@@ -24,12 +24,14 @@ export default function useAccount() {
     async (newBalances) => {
       redeemableBalances.value = await toRedeem(newBalances);
     },
+    { immediate: true },
   );
   watch(
     () => allbalances.value,
     async (newBalances) => {
       balances.value = await validBalances(newBalances);
     },
+    { immediate: true },
   );
   const balancesByDenom = (denom: string) => {
     return balances.value.filter((item) => item.base_denom === denom);
