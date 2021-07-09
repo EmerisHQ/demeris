@@ -34,12 +34,7 @@
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
-      <div>
-        {{ assetsToPay }}
-      </div>
-      <div>
-        {{ assetsToReceive }}
-      </div>
+
       <!-- button-divider -->
       <div class="swap-widget__controller">
         <div class="swap-widget__controller-divider" />
@@ -76,7 +71,6 @@
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
-      {{ receiveCoinData }}
 
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
