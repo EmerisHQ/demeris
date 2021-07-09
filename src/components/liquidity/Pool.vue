@@ -55,9 +55,68 @@ export default defineComponent({
   },
 
   setup(props) {
+    const store = useStore();
     const pairName = ref('-/-');
+    const truedenoms = ref((props.pool as Pool).reserve_coin_denoms);
     const denoms = ref((props.pool as Pool).reserve_coin_denoms);
-
+    watch(
+      () => truedenoms.value,
+      async (newDenoms) => {
+        if (isNative(newDenoms[0])) {
+          denoms.value[0] = newDenoms[0];
+        } else {
+          try {
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: newDenoms[0].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: newDenoms[0].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            denoms.value[0] = verifyTrace.base_denom;
+          } catch (e) {
+            console.log(e);
+            denoms.value[0] = newDenoms[0];
+          }
+        }
+        if (isNative(newDenoms[1])) {
+          denoms.value[1] = newDenoms[1];
+        } else {
+          try {
+            const verifyTrace =
+              store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: newDenoms[1].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters['demeris/getDexChain'],
+                    hash: newDenoms[1].split('/')[1],
+                  },
+                },
+                { root: true },
+              ));
+            denoms.value[1] = verifyTrace.base_denom;
+          } catch (e) {
+            console.log(e);
+            denoms.value[1] = newDenoms[1];
+          }
+        }
+      },
+      { immediate: true },
+    );
     const { formatPoolName } = usePools();
 
     onMounted(async () => {
@@ -79,7 +138,6 @@ export default defineComponent({
 
     const { pool, reserveBalances, calculateWithdrawBalances } = usePool((props.pool as Pool).id);
 
-    const store = useStore();
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -220,7 +278,7 @@ export default defineComponent({
     watch(reserveBalances, updateTotalLiquidityPrice);
 
     watch(walletBalances, updateOwnLiquidityPrice);
-    return { cardStyle, denoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { cardStyle, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
   },
 });
 </script>
