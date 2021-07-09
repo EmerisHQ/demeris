@@ -72,7 +72,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
@@ -83,6 +82,7 @@ import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import Price from '@/components/common/Price.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
 
@@ -142,10 +142,7 @@ export default defineComponent({
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
 
       const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce(
-          (acc, item) => +parseCoins(item.amount + item.base_denom)[0].amount + acc,
-          0,
-        );
+        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
 
         return {

@@ -26,6 +26,7 @@ export type State = {
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   _Subscriptions: Set<string>;
+  _InProgess: Map<string, Promise<void>>;
 };
 export function getDefaultState(): State {
   return {
@@ -41,5 +42,6 @@ export function getDefaultState(): State {
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
+    _InProgess: new Map(),
   };
 }

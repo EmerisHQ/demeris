@@ -53,7 +53,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = GasPriceLevel.AVERAGE;
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',

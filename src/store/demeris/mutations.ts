@@ -4,7 +4,7 @@ import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
+import { APIPromise, DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
 import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
@@ -38,6 +38,8 @@ export type Mutations<S = State> = {
   // Internal module mutations
 
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
+  [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
+  [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
   [MutationTypes.RESET_STATE](state: S): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -133,7 +135,16 @@ export const mutations: MutationTree<State> & Mutations = {
       payload.value as API.Bech32Config;
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name] = payload.value as API.Chain;
+    state.chains[(payload.params as API.ChainReq).chain_name] = {
+      ...state.chains[(payload.params as API.ChainReq).chain_name],
+      ...(payload.value as API.Chain),
+    };
+  },
+  [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
+    state._InProgess.set(payload.hash, payload.promise);
+  },
+  [MutationTypes.DELETE_IN_PROGRESS](state: State, payload: string) {
+    state._InProgess.delete(payload);
   },
   [MutationTypes.SET_PRIMARY_CHANNEL](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[

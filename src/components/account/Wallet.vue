@@ -9,7 +9,7 @@
       </div>
       <div class="header__wallet-badge__details">
         <div class="header__wallet-badge__details__account-name">{{ keplrAccountName }}</div>
-        <div class="header__wallet-badge__details__value">1111</div>
+        <div class="header__wallet-badge__details__value"><TotalPrice :balances="balances" :styled="false" /></div>
       </div>
     </div>
     <Button v-else name="Connect my wallet" @click="toggleModal" />
@@ -23,7 +23,9 @@ import avatar from 'gradient-avatar';
 import { computed, defineComponent, ref } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
+import TotalPrice from '@/components/common/TotalPrice.vue';
 import Button from '@/components/ui/Button.vue';
+import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 
 export default defineComponent({
@@ -32,6 +34,7 @@ export default defineComponent({
   components: {
     Button,
     ConnectWalletModal,
+    TotalPrice,
   },
 
   setup() {
@@ -43,6 +46,7 @@ export default defineComponent({
     const keplrAccountName = computed(() => {
       return store.getters['demeris/getKeplrAccountName'];
     });
+    const { balances } = useAccount();
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });
@@ -54,6 +58,7 @@ export default defineComponent({
       toggleModal,
       isSignedIn,
       keplrAccountName,
+      balances,
       keplrAddress,
     };
   },
