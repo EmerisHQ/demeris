@@ -53,12 +53,12 @@
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
-            <li v-for="asset of assets" :key="asset.address" class="redeem__list__item">
+            <li v-for="asset of redeemableBalances" :key="asset.ibc.hash" class="redeem__list__item">
               <div class="redeem__list__item__icon" />
 
               <div class="redeem__list__item__asset">
                 <p class="redeem__list__item__asset__amount w-bold">
-                  {{ asset.amount }} {{ $filters.getCoinName(asset.base_denom) }}
+                  <AmountDisplay :amount="parseCoins(asset.amount)[0]" />
                 </p>
                 <span class="redeem__list__item__asset__route s-minus">{{ asset.route }}</span>
               </div>
@@ -97,17 +97,20 @@
 import { computed, defineComponent, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Redeem',
 
-  components: { Button, Icon },
+  components: { Button, Icon, AmountDisplay },
 
   setup() {
     const router = useRouter();
-
+    const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
 
     const state = reactive({
@@ -163,6 +166,7 @@ export default defineComponent({
 
     return {
       assets,
+      redeemableBalances,
       steps,
       state,
       closeInstruction,
@@ -170,6 +174,7 @@ export default defineComponent({
       onClose,
       goBack,
       goToStep,
+      parseCoins,
     };
   },
 });

@@ -76,7 +76,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -89,6 +88,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'SendFormAmount',

@@ -128,7 +128,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -143,6 +142,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Asset',
 

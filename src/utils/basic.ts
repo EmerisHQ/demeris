@@ -1,5 +1,7 @@
+import { Coin } from '@cosmjs/amino';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
 import { store } from '../store/index';
@@ -79,4 +81,19 @@ export function generateDenomHash(channel, base_denom) {
   parts.push(base_denom);
   const newPath = parts.join('/');
   return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
+}
+
+export function parseCoins(input: string): Coin[] {
+  return input
+    .replace(/\s/g, '')
+    .split(',')
+    .filter(Boolean)
+    .map((part) => {
+      const match = part.match(/^([0-9]+)([a-zA-Z][a-zA-Z0-9/-]{2,127})$/);
+      if (!match) throw new Error('Got an invalid coin string');
+      return {
+        amount: Uint64.fromString(match[1]).toString(),
+        denom: match[2],
+      };
+    });
 }

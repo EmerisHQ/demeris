@@ -72,7 +72,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType } from 'vue';
 
@@ -83,6 +82,7 @@ import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import Price from '@/components/common/Price.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 type TableStyleType = 'full' | 'compact' | 'summary';
 
