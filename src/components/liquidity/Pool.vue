@@ -24,7 +24,6 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -33,6 +32,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 import { VerifyTrace } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';

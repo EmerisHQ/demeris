@@ -11,7 +11,7 @@
     </template>
 
     <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" gas-price-level="average" />
+      <TxStepsModal :data="steps" gas-price-level="gasPrice" />
     </template>
   </div>
 </template>
@@ -21,7 +21,7 @@ import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
-import { SendAddressForm, TransferAction } from '@/types/actions';
+import { GasPriceLevel, SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -55,7 +55,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-
+    const gasPrice = ref(GasPriceLevel.AVERAGE);
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -110,7 +110,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { steps, form, goToStep, generateSteps };
+    return { steps, form, goToStep, generateSteps, gasPrice };
   },
 });
 </script>

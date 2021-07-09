@@ -6,7 +6,7 @@ import { ActionContext, ActionTree } from 'vuex';
 import { RootState } from '@/store';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
-import { keyHashfromAddress } from '@/utils/basic';
+import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import {
@@ -95,7 +95,7 @@ export interface Actions {
 
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
-    { commit, getters }: ActionContext<State, RootState>,
+    { commit, getters, state }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsTraceParams,
   ): Promise<API.VerifyTrace>;
   [DemerisActionTypes.GET_FEE_ADDRESS](
@@ -470,39 +470,36 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, dispatch, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(
-        getters['getEndpoint'] +
-          '/chain/' +
-          (params as API.VerifyTraceReq).chain_name +
-          '/denom/verify_trace/' +
-          (params as API.VerifyTraceReq).hash,
-      );
-      const verified_denoms =
-        getters['getVerifiedDenoms'] ??
-        (await dispatch(DemerisActionTypes.GET_VERIFIED_DENOMS, {
-          subscribe: true,
-        }));
-      const verified = verified_denoms.find(
-        (x) =>
-          x.name == response.data.verify_trace.base_denom &&
-          x.chain_name ==
-            response.data.verify_trace.trace[response.data.verify_trace.trace.length - 1].counterparty_name,
-      );
-      if (verified) {
-        response.data.verify_trace.verified = true;
-      } else {
-        response.data.verify_trace.verified = false;
+  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+      return getters['getVerifyTrace'](params);
+    } else {
+      let resolver;
+      const promise = new Promise((resolve) => {
+        resolver = resolve;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] +
+            '/chain/' +
+            (params as API.VerifyTraceReq).chain_name +
+            '/denom/verify_trace/' +
+            (params as API.VerifyTraceReq).hash,
+        );
+        commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
+        }
+      } catch (e) {
+        throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
       }
-      commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
-      }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
+      resolver();
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, { hash: reqHash, promise });
+      return getters['getVerifyTrace'](params);
     }
-    return getters['getVerifyTrace'](params);
   },
   async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
     try {

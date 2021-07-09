@@ -26,19 +26,18 @@
       direction="column"
       hint="TODO"
     >
-      <ListItem
-        v-for="transfer of step.transactions"
-        :key="transfer.data.to_chain"
-        :description="formatMultipleChannel(transfer)"
-        inset
-      >
-        <AmountDisplay class="w-bold" :amount="fees[transfer.data.from_chain]" />
+      <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+        </template>
       </ListItem>
     </ListItem>
 
     <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
-      <template v-for="(amount, denom) in fees[transactionInfo.from.chain]" :key="'fee_' + denom">
-        <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
+      <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+        </template>
       </template>
     </ListItem>
 
@@ -168,9 +167,12 @@ export default defineComponent({
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
-
+    const formatChain = (name: string) => {
+      return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
+    };
     return {
       stepType,
+      formatChain,
       transactionInfo,
       hasMultipleTransactions,
       formatMultipleChannel,

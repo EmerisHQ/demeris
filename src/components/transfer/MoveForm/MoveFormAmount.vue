@@ -25,7 +25,9 @@
         <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
       </div>
 
-      <span class="move-form-amount__estimated"> $8,866.34 </span>
+      <span class="move-form-amount__estimated">
+        <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
+      </span>
 
       <div class="move-form-amount__controls">
         <label class="move-form-amount__controls__button">
@@ -257,6 +259,7 @@ export default defineComponent({
       setCurrentAsset,
       hasSufficientFunds,
       isValid,
+      denomDecimals,
       toggleDenomModal,
       toggleChainsModal,
       availableRecipientsChains,
