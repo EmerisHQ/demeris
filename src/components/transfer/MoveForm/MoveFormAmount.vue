@@ -49,7 +49,7 @@
           <div class="move-form-amount__assets__item__asset">
             <CircleSymbol
               :chain-name="form.on_chain"
-              :denoms="form.balance.denom"
+              :denom="form.balance.denom"
               class="move-form-amount__assets__item__avatar"
             />
             <span class="move-form-amount__assets__item__name w-bold">

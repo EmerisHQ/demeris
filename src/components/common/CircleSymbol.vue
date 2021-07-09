@@ -10,28 +10,30 @@
     <template v-else-if="isUnverified">
       <div class="circle-symbol__circle" :style="innerStyle">
         <div class="circle-symbol__badge" />
-        <p class="circle-symbol__letter">{{ denoms[0] }}</p>
+        <p class="circle-symbol__letter">{{ denoms[0]?.[0] || denom[0] }}</p>
       </div>
     </template>
 
     <template v-else>
       <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
       <div class="circle-symbol__circle" :style="innerStyle">
-        <img :src="symbolImage" />
+        <img v-if="symbolImage" :src="symbolImage" />
       </div>
     </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'sm' | 'md' | 'lg';
 
 import { useStore } from 'vuex';
 
+import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
+import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
@@ -48,8 +50,8 @@ export default defineComponent({
   name: 'CircleSymbol',
 
   props: {
-    denoms: {
-      type: [Array, String] as PropType<string[] | string>,
+    denom: {
+      type: String,
       default: undefined,
     },
     chainName: {
@@ -67,7 +69,11 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { pools, getReserveBaseDenoms } = usePools();
+
     const store = useStore();
+    const denoms = ref<string[]>([]);
+    const isLoaded = ref(false);
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'];
@@ -75,19 +81,23 @@ export default defineComponent({
 
     const isPoolCoin = computed(() => {
       if (props.variant === 'asset') {
-        return Array.isArray(props.denoms) && props.denoms.length > 1;
+        return (props.denom as string).startsWith('pool');
       }
 
       return false;
     });
 
     const isUnverified = computed(() => {
+      if (!isLoaded.value) {
+        return false;
+      }
+
       if (isPoolCoin.value) {
         return false;
       }
 
       if (props.variant === 'asset') {
-        const denomConfig = verifiedDenoms.value.find((item) => item.name === (props.denoms as string));
+        const denomConfig = verifiedDenoms.value.find((item) => item.name === denoms.value[0]);
         return !denomConfig?.verified;
       }
 
@@ -100,7 +110,7 @@ export default defineComponent({
       }
 
       if (props.variant === 'asset' && !isPoolCoin.value) {
-        const denomConfig = verifiedDenoms.value.find((item) => item.name === (props.denoms as string));
+        const denomConfig = verifiedDenoms.value.find((item) => item.name === denoms.value[0]);
         return denomConfig?.chain_name === props.chainName;
       }
 
@@ -126,10 +136,11 @@ export default defineComponent({
       let colors: Record<string, string> = {};
 
       if (isPoolCoin.value) {
-        colors.primary = findSymbolColors(props.denoms[0]).primary;
-        colors.secondary = findSymbolColors(props.denoms[1]).secondary;
+        colors.primary = findSymbolColors(denoms.value[0]).primary;
+        colors.secondary = findSymbolColors('gdex').primary;
+        colors.tertiary = findSymbolColors(denoms.value[1]).primary;
       } else {
-        colors = findSymbolColors(props.denoms as string);
+        colors = findSymbolColors(denoms.value[0]);
       }
 
       const background = generateBackground(colors);
@@ -156,10 +167,32 @@ export default defineComponent({
         return;
       }
 
-      return require(`@/assets/svg/symbols/${props.denoms as string}.svg`);
+      if (denoms.value.length) {
+        return require(`@/assets/svg/symbols/${denoms.value[0] as string}.svg`);
+      }
+
+      return undefined;
     });
 
+    watch(
+      () => props.denom,
+      async () => {
+        if (isPoolCoin.value) {
+          const pool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
+          if (pool) {
+            denoms.value = await getReserveBaseDenoms(pool);
+          }
+        } else {
+          denoms.value = [await getBaseDenom(props.denom as string, props.chainName)];
+        }
+        isLoaded.value = true;
+      },
+      { immediate: true },
+    );
+
     return {
+      denoms,
+      isLoaded,
       symbolImage,
       innerStyle,
       ringStyle,

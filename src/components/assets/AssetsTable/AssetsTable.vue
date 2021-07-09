@@ -16,7 +16,7 @@
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
         <td class="assets-table__row__asset">
-          <CircleSymbol :denoms="asset.denom" :chain-name="asset.chainsNames[0]" />
+          <CircleSymbol :denom="asset.denom" :chain-name="asset.chainsNames[0]" />
           <div class="assets-table__row__asset__denom">
             <Denom :name="asset.denom" />
             <div

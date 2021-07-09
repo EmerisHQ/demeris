@@ -6,7 +6,7 @@
 
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
-            <CircleSymbol :denoms="denom" class="asset__main__info__denom__symbol" />
+            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
             <span class="asset__main__info__denom__name"><Denom :name="denom" /></span>
           </p>
           <h1 class="asset__main__info__price">
@@ -54,7 +54,7 @@
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
                 <CircleSymbol
-                  :denoms="denom"
+                  :denom="denom"
                   :chain-name="asset.on_chain"
                   class="asset__main__chains__item__asset__avatar"
                 />

@@ -26,7 +26,7 @@
             <tbody>
               <tr v-for="balance of reserveBalances" :key="balance.denom" class="assets-table__row">
                 <td class="assets-table__row__denom">
-                  <div class="assets-table__row__denom__avatar" />
+                  <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
                   <span class="w-bold"><Denom :name="balance.denom" /></span>
                 </td>
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
@@ -61,7 +61,7 @@
             </div>
 
             <div class="pool-equity__stats">
-              <div class="pool-equity__stats__avatar" />
+              <CircleSymbol :denom="walletBalances.poolCoin.denom" class="pool-equity__stats__avatar" />
               <div class="pool-equity__stats__wrapper">
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
@@ -79,14 +79,18 @@
               <span class="pool-equity__assets__label s-minus">Assets provided</span>
               <ul class="pool-equity__assets__list">
                 <li class="pool-equity__assets__list__item">
-                  <div class="pool-equity__assets__list__item__avatar" />
+                  <CircleSymbol :denom="walletBalances.coinA.denom" class="pool-equity__assets__list__item__avatar" />
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinA" />
                   </span>
                   <span><Price :amount="walletBalances.coinA" /></span>
                 </li>
                 <li class="pool-equity__assets__list__item">
-                  <div class="pool-equity__assets__list__item__avatar" />
+                  <CircleSymbol
+                    :denom="walletBalances.coinB.denom"
+                    size="sm"
+                    class="pool-equity__assets__list__item__avatar"
+                  />
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinB" />
                   </span>
@@ -111,6 +115,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -130,6 +135,7 @@ export default defineComponent({
   components: {
     AmountDisplay,
     AppLayout,
+    CircleSymbol,
     Denom,
     Icon,
     Button,
@@ -470,12 +476,7 @@ export default defineComponent({
     margin-top: 3rem;
 
     &__avatar {
-      width: 3.2rem;
-      height: 3.2rem;
-      border-radius: 2.6rem;
       margin-right: 1.2rem;
-      background: linear-gradient(135deg, #c99aff 15.62%, #ff737b 85.42%);
-      box-shadow: 0px 4px 10.6667px rgba(255, 116, 124, 0.28);
     }
 
     &__wrapper {
