@@ -6,7 +6,9 @@ import usePools from './usePools';
 
 export default function usePool(id?: string | ComputedRef<string>) {
   const store = useAllStores();
-  const { poolById, formatPoolName, poolPriceById } = usePools();
+  const reserveBaseDenoms = ref([]);
+
+  const { poolById, formatPoolName, poolPriceById, getReserveBaseDenoms } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -54,6 +56,8 @@ export default function usePool(id?: string | ComputedRef<string>) {
     if (!pool.value) {
       return;
     }
+
+    reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 
     await store.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
       params: { address: pool.value.reserve_account_address },
@@ -108,6 +112,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
     pairName,
     totalSupply,
     reserveBalances,
+    reserveBaseDenoms,
     poolPrice,
     updateReserveBalances,
     calculateSupplyTokenAmount,
