@@ -416,7 +416,7 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity || !data.isAmount || !data.isWallet) {
+        if (!data.isSwapReady) {
           return 'inactive';
         } else {
           return 'normal';
@@ -454,15 +454,6 @@ export default defineComponent({
 
       // booleans-start(for various status check)
       isOver: computed(() => {
-        // console.group('isOver');
-        // console.log('data?.payCoinAmount', data?.payCoinAmount);
-        // console.log('parseInt(data?.payCoinData?.amount)', parseInt(data?.payCoinData?.amount));
-        // console.log('payAssetList.value[0]?.amount', payAssetList.value[0]?.amount);
-        // console.log(
-        //   `store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })`,
-        //   store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom }),
-        // );
-        // console.groupEnd();
         if (isSignedIn.value) {
           return data.isBothSelected &&
             data.payCoinAmount >
@@ -488,6 +479,15 @@ export default defineComponent({
           return false;
         }
       }),
+      isSwapReady: computed(() => {
+        return !(
+          data.isOver ||
+          !data.isBothSelected ||
+          data.isNotEnoughLiquidity ||
+          !data.isAmount ||
+          !isSignedIn.value
+        );
+      }),
       isChildModalOpen: false,
       isPriceChanged: false,
       isAssetList: false,
@@ -498,6 +498,7 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
+    //slippage check
     watch(
       () => data.payCoinAmount,
       () => {
@@ -551,13 +552,51 @@ export default defineComponent({
       },
     );
 
+    watch(
+      () => data.isSwapReady,
+      async () => {
+        if (data.isSwapReady) {
+          console.log('[SWAP READY]');
+          console.log(data.payCoinData, data.payCoinAmount);
+          console.log(data.receiveCoinData, data.receiveCoinAmount);
+
+          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
+
+          const swapParams = {
+            name: 'swap',
+            params: {
+              from: {
+                amount: {
+                  amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+                  denom: parseCoins(data.payCoinData.amount)[0].denom,
+                },
+                chain_name: data.payCoinData.on_chain,
+              },
+              to: {
+                amount: {
+                  amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+                  denom: data.receiveCoinData.denom,
+                },
+                chain_name: store.getters['demeris/getDexChain'],
+              },
+            },
+          };
+
+          data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+        } else {
+          data.actionHandlerResult = null;
+        }
+      },
+    );
+
     function changePayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
       }
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      const originReceiveCoinAmount = JSON.parse(JSON.stringify(data.receiveCoinAmount));
+      // const originReceiveCoinAmount = JSON.parse(JSON.stringify(data.receiveCoinAmount));
 
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = originPayCoinData;
@@ -632,52 +671,6 @@ export default defineComponent({
     }
 
     async function swap() {
-      console.log(data.payCoinData, data.payCoinAmount);
-      console.log(data.receiveCoinData, data.receiveCoinAmount);
-
-      // return;
-
-      const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-      const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
-
-      const swapParams = {
-        name: 'swap',
-        params: {
-          from: {
-            amount: {
-              amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
-              denom: parseCoins(data.payCoinData.amount)[0].denom,
-            },
-            chain_name: data.payCoinData.on_chain,
-          },
-          to: {
-            amount: {
-              amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
-              denom: data.receiveCoinData.denom,
-            },
-            chain_name: store.getters['demeris/getDexChain'],
-          },
-        },
-      };
-
-      // const swapParams = {
-      //   from: {
-      //     amount: {
-      //       denom: data.payCoinData.base_denom,
-      //       amount: data.payCoinAmount,
-      //     },
-      //     chain_name: data.payCoinData.on_chain,
-      //   },
-      //   to: {
-      //     amount: {
-      //       denom: data.receiveCoinData.base_denom,
-      //       amount: data.receiveCoinAmount,
-      //     },
-      //     chain_name: 'gaia',
-      //   },
-      // };
-      console.log(swapParams);
-      data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
       console.log('SWAP Button Result', data.actionHandlerResult);
       reviewModalToggle();
     }
