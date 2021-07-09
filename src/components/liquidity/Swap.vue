@@ -313,6 +313,7 @@ export default defineComponent({
             const assetWithBalance = walletVerifiedBalances.filter((asset) => {
               if (asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain) {
                 asset.display_name = pair.display_name;
+                asset.denom = pair.denom;
               }
               return asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain;
             });
@@ -533,6 +534,7 @@ export default defineComponent({
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
+          // console.log('?????', data.payCoinData);
           const id = poolsByDenom(data.payCoinData.denom).find((pool) => {
             return (
               pool.reserve_coin_denoms.find((denom) => {
