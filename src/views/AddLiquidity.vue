@@ -62,13 +62,15 @@
               />
             </div>
 
-            <div class="add-liquidity__input input-a elevation-card">
+            <div
+              class="add-liquidity__input input-a elevation-card"
+              :class="{ 'input-invalid': !hasSufficientFunds.coinA }"
+            >
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
-                  As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.asset.base_denom) }}/{{
-                    $filters.getCoinName(form.coinB.asset.base_denom)
-                  }}
+                  As the first liquidity provider to the <Denom :name="form.coinA.asset.base_denom" /> /
+                  <Denom :name="form.coinB.asset.base_denom" />
                   pool, you will be creating the pool and setting the price. Proceed with caution.
                 </p>
               </Alert>
@@ -112,7 +114,10 @@
               </div>
             </div>
 
-            <div class="add-liquidity__input input-b elevation-card">
+            <div
+              class="add-liquidity__input input-b elevation-card"
+              :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
+            >
               <div class="add-liquidity__input__main">
                 <label class="add-liquidity__input__label s-minus">Supply</label>
                 <div>
@@ -164,7 +169,11 @@
             </Alert>
 
             <div class="add-liquidity__controls">
-              <Button name="Continue" @click="goToReview" />
+              <Button
+                :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
+                :disabled="!isValid"
+                @click="goToReview"
+              />
               <div class="add-liquidity__controls__fees">
                 <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
               </div>
@@ -301,6 +310,41 @@ export default {
       return calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
     });
 
+    const hasSufficientFunds = computed(() => {
+      let coinA = false;
+      let coinB = false;
+
+      if (form.coinA.asset) {
+        const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+        const amountA = form.coinA.amount * Math.pow(10, precisionA);
+        coinA = +parseCoins(form.coinA.asset.amount)[0].amount >= amountA;
+      }
+
+      if (form.coinB.asset) {
+        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+        const amountB = form.coinB.amount * Math.pow(10, precisionB);
+        coinB = +parseCoins(form.coinB.asset.amount)[0].amount >= amountB;
+      }
+
+      return {
+        coinA,
+        coinB,
+        total: coinA && coinB,
+      };
+    });
+
+    const isValid = computed(() => {
+      if (form.coinA.amount <= 0 || form.coinB.amount <= 0) {
+        return false;
+      }
+
+      if (!hasSufficientFunds.value.total) {
+        return false;
+      }
+
+      return true;
+    });
+
     const needsTransferToHub = computed(() => {
       const hubName = store.getters['demeris/getDexChain'];
 
@@ -335,8 +379,8 @@ export default {
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
       const precisions = [
-        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }),
-        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }),
+        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6,
+        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6,
       ];
       let coinAdenom = form.coinA.asset.base_denom;
       if (form.coinA.asset.ibc.hash) {
@@ -372,15 +416,12 @@ export default {
           },
         } as AddLiquidityAction;
       } else {
-        // TODO:
-        // action = {
-        // 	name: 'createliquidity',
-        // 	params: {
-        // 		poolCreatorAddress: ''
-        // 		poolTypeId: 1,
-        // 		...baseParams
-        // 	}
-        // } as CreatePoolAction
+        action = {
+          name: 'createpool',
+          params: {
+            ...baseParams,
+          },
+        } as CreatePoolAction;
       }
       const result = await actionHandler(action);
       actionSteps.value = result;
@@ -400,7 +441,7 @@ export default {
         }
       }
 
-      return undefined;
+      pool.value = undefined;
     };
 
     const inputChangeHandler = () => {
@@ -467,14 +508,16 @@ export default {
       }
     });
 
-    watch(hasPair, async () => {
-      if (hasPair.value) {
+    watch(
+      [form.coinA.asset, form.coinB.asset, hasPair],
+      async () => {
         await findPoolByDenoms();
-      }
-    });
+      },
+      { deep: true },
+    );
 
-    watch([form.coinA, form.coinB, pool], async () => {
-      if (pool.value) {
+    watch([form.coinA, form.coinB, pool, hasPair], async () => {
+      if (hasPair.value) {
         await generateActionSteps();
       }
     });
@@ -511,6 +554,8 @@ export default {
       needsTransferToHub,
       receiveAmount,
       totalEstimatedPrice,
+      hasSufficientFunds,
+      isValid,
       inputChangeHandler,
       toggleChainsModal,
       goBack,
@@ -542,7 +587,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 38rem;
+    max-width: 42rem;
     width: 100%;
     text-align: center;
     line-height: 1;
@@ -643,7 +688,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 38rem;
+    max-width: 42rem;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -805,6 +850,10 @@ export default {
     width: 100%;
     border-radius: 1rem;
     background: var(--bg);
+
+    &.input-invalid &__details__available {
+      color: var(--negative-text);
+    }
 
     &.input-a {
       margin-top: 3.2rem;

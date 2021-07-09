@@ -6,123 +6,20 @@
       {{ currentData.title }}
     </div>
 
-    <template
-      v-if="['transfer', 'move', 'redeem', 'swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.data.name)"
-    >
-      <div v-if="currentData && currentData.fees" class="detail">
-        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
-        <PreviewAddLiquidity
-          v-else-if="currentData.data.name === 'addliquidity'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewWithdrawLiquidity
-          v-else-if="currentData.data.name === 'withdrawliquidity'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
-      </div>
-    </template>
-
-    <!-- TODO: Refactor -->
-    <template v-else>
-      <div class="amount-info">
-        <div class="amount-info__type s-minus w-bold">{{ currentData.isSwap ? 'Pay' : 'Send' }}</div>
-        <div class="amount-info__detail">
-          <div class="amount-info__detail__coin">
-            <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/atom.png`)" alt="pay coin" />
-            <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
-            <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
-          </div>
-          <div class="amount-info__detail-chain s-minus">{{ currentData.isSwap ? '' : 'on' }} Cosmos Hub</div>
-        </div>
-      </div>
-
-      <div v-if="!currentData.isSwap">
-        <div class="divider" />
-
-        <div v-if="!currentData.isSwap" class="detail-transfer">
-          <div class="detail__title s-minus w-bold">
-            <div>
-              {{ currentData.data.transactions.length }}
-              {{ currentData.data.transactions.length == 1 ? 'transaction' : 'transactions' }} to sign
-            </div>
-            <div class="icon"><HintIcon /></div>
-          </div>
-          {{ currentData.data.fees }}
-          <template v-for="(fee, chain) in currentData.fees" :key="'fee' + chain">
-            <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-              <div class="detail__row s-minus w-normal">
-                <div class="detail__row-key">Fee ({{ chain }})</div>
-                <div class="detail__row-value">
-                  <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
-                </div>
-              </div>
-            </template>
-          </template>
-        </div>
-
-        <div class="divider" style="margin-bottom: 1.6rem" />
-      </div>
-
-      <div class="amount-info">
-        <div class="amount-info__type s-minus w-bold">
-          Receive
-          <div v-show="currentData.isSwap" class="amount-info__type-subtitle w-normal">(estimated)</div>
-        </div>
-        <div class="amount-info__detail">
-          <div class="amount-info__detail__coin">
-            <img class="amount-info__detail__coin-image" :src="require(`@/assets/coins/luna.png`)" alt="receive coin" />
-            <div class="amount-info__detail__coin-amount s-0 w-medium">500.2</div>
-            <div class="amount-info__detail__coin-denom s-0 w-medium">ATOM</div>
-          </div>
-          <div class="amount-info__detail-chain s-minus">Cosmos Hub</div>
-        </div>
-      </div>
-
-      <div v-if="currentData.isSwap" class="divider" />
-
-      <div v-if="currentData.isSwap" class="detail">
-        <div class="detail__title s-minus w-bold">Price</div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">
-            <div>Min. received<br />(if 100% swapped)</div>
-            <tippy :max-width="192">
-              <HintIcon />
-
-              <template #content> Minimum total received if your entire swap is fulfilled. </template>
-            </tippy>
-          </div>
-          <div class="detail__row-value">995.54 LUNA</div>
-        </div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">
-            <div>Limit price</div>
-            <tippy :max-width="192">
-              <HintIcon />
-
-              <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
-            </tippy>
-          </div>
-          <div class="detail__row-value">1 ATOM = 1.91 LUNA</div>
-        </div>
-      </div>
-
-      <div v-if="currentData.isSwap" class="divider" />
-
-      <div v-if="currentData.isSwap" class="detail">
-        <div class="detail__title s-minus w-bold">Fees</div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Transaction fee</div>
-          <div class="detail__row-value">0.02 ATOM</div>
-        </div>
-        <div class="detail__row s-minus w-normal">
-          <div class="detail__row-key">Swap fee</div>
-          <div class="detail__row-value">0.02 ATOM</div>
-        </div>
-      </div>
-    </template>
+    <div v-if="currentData && currentData.fees" class="detail">
+      <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+      <PreviewAddLiquidity
+        v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
+        :step="currentData.data"
+        :fees="currentData.fees"
+      />
+      <PreviewWithdrawLiquidity
+        v-else-if="currentData.data.name === 'withdrawliquidity'"
+        :step="currentData.data"
+        :fees="currentData.fees"
+      />
+      <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+    </div>
 
     <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
       Non-revertable transactions. Prices not guaranteed etc.
@@ -158,9 +55,7 @@
 import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
@@ -181,9 +76,7 @@ export default defineComponent({
     PreviewWithdrawLiquidity,
     PreviewSwap,
     Button,
-    HintIcon,
     TxHandlingModal,
-    AmountDisplay,
   },
   props: {
     data: {
@@ -259,6 +152,7 @@ export default defineComponent({
           modifiedData.title = 'Review your withdraw liquidity details';
           break;
         case 'createpool':
+          modifiedData.title = 'Review your pool liquidity details';
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
