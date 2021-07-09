@@ -66,9 +66,8 @@
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
-                  As the first liquidity provider to the {{ $filters.getCoinName(form.coinA.asset.base_denom) }}/{{
-                    $filters.getCoinName(form.coinB.asset.base_denom)
-                  }}
+                  As the first liquidity provider to the <Denom :name="form.coinA.asset.base_denom" /> /
+                  <Denom :name="form.coinB.asset.base_denom" />
                   pool, you will be creating the pool and setting the price. Proceed with caution.
                 </p>
               </Alert>
@@ -397,7 +396,7 @@ export default {
         }
       }
 
-      return undefined;
+      pool.value = undefined;
     };
 
     const inputChangeHandler = () => {
@@ -539,7 +538,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 38rem;
+    max-width: 42rem;
     width: 100%;
     text-align: center;
     line-height: 1;
@@ -640,7 +639,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 38rem;
+    max-width: 42rem;
     position: relative;
     display: flex;
     flex-direction: column;
