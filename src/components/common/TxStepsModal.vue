@@ -18,6 +18,7 @@
         :step="currentData.data"
         :fees="currentData.fees"
       />
+      <PreviewRedeem v-else-if="currentData.data.name === 'redeem'" :step="currentData.data" :fees="currentData.fees" />
       <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
     </div>
 
@@ -59,6 +60,7 @@ import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
@@ -72,6 +74,7 @@ export default defineComponent({
   components: {
     GobackWithClose,
     PreviewTransfer,
+    PreviewRedeem,
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
     PreviewSwap,

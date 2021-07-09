@@ -111,6 +111,13 @@ export type StepTransaction = {
 export type Step = {
   name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
   description: string;
+  output?: {
+    amount: {
+      denom: string;
+      amount: string;
+    };
+    chain_name: string;
+  };
   transactions: Array<StepTransaction>;
 };
 
