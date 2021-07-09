@@ -564,7 +564,7 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
     ));
-  const pool = liquidityPools.pools.find((x) => x.poolCoinDenom == poolCoin.denom) ?? null;
+  const pool = liquidityPools.pools.find((x) => x.pool_coin_denom == poolCoin.denom) ?? null;
   if (pool && pool.id == pool_id) {
     result.steps.push({
       name: 'withdrawliquidity',
@@ -776,11 +776,13 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           chain_name: params.poolCoin.chain_name,
           destination_chain_name: store.getters['demeris/getDexChain'],
         });
-        steps.push({
-          name: 'transfer',
-          description: 'Pool token must be transferred to hub', //TODO
-          transactions: [...transferPoolCointoHub.steps],
-        });
+        if (transferPoolCointoHub.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'Pool token must be transferred to hub', //TODO
+            transactions: [...transferPoolCointoHub.steps],
+          });
+        }
         const withdrawLiquidityStep = await withdrawLiquidity({
           pool_id: params.pool_id,
           poolCoin: transferPoolCointoHub.output.amount,
@@ -875,7 +877,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
-        depositCoins: [data.poolCoin],
+        poolCoin: { ...data.poolCoin },
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
