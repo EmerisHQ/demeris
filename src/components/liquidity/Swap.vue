@@ -23,6 +23,7 @@
           />
         </div>
       </div>
+
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
@@ -133,15 +134,7 @@ export default defineComponent({
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const {
-      denomListByPools,
-      pools,
-      poolsByDenom,
-      poolById,
-      poolPriceById,
-      reserveBalancesById,
-      getReserveBaseDenoms,
-    } = usePools();
+    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, userAccountBalances } = useAccount();
     const isSignedIn = computed(() => {
@@ -218,8 +211,8 @@ export default defineComponent({
           pairs.push(pairAB);
           pairs.push(pairBA);
         }
-        console.log('Available Pairs:');
-        console.log(pairs);
+        // console.log('Available Pairs:');
+        // console.log(pairs);
         availablePairs.value = pairs;
       },
     );
@@ -228,28 +221,28 @@ export default defineComponent({
       let paySide = availablePairs.value.filter(
         (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
       );
-      console.log('Calculated PayPair List ');
-      console.log(paySide);
+      // console.log('Calculated PayPair List ');
+      // console.log(paySide);
       return paySide;
     });
     const availableReceiveSide = computed(() => {
       let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-      console.log('Calculated ReceivePair List ');
-      console.log(receiveSide);
+      // console.log('Calculated ReceivePair List ');
+      // console.log(receiveSide);
       return receiveSide;
     });
     const assetsToPay = computed(() => {
       let payAssets = balances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
-      console.log('Calculated Pay Asset List ');
-      console.log(payAssets);
+      // console.log('Calculated Pay Asset List ');
+      // console.log(payAssets);
       return payAssets;
     });
     const assetsToReceive = computed(() => {
       let assets = availableReceiveSide.value.map((x) => x.receive.denom);
-      console.log('Calculated Receive Asset List ');
-      console.log(assets);
+      // console.log('Calculated Receive Asset List ');
+      // console.log(assets);
       return assets;
     });
 
@@ -335,9 +328,7 @@ export default defineComponent({
     watch(
       () => assetsToReceive.value,
       async () => {
-        console.log('@@@@@@@@');
-        console.log('initialPairList.value', initialPairList.value);
-        console.log('assetsToReceive.value', assetsToReceive.value);
+        // console.log('assetsToReceive.value', assetsToReceive.value);
         if (assetsToReceive.value.length) {
           const filteredList = initialPairList.value.filter((pair) => {
             return assetsToReceive.value.includes(pair.denom);
@@ -353,7 +344,7 @@ export default defineComponent({
           receiveAssetList.value = initialPairList.value;
         }
 
-        console.log(' receiveAssetList.value', receiveAssetList.value);
+        console.log('[RECEIVE ASSET LIST]', receiveAssetList.value);
       },
     );
 
@@ -372,32 +363,18 @@ export default defineComponent({
         }
 
         if (!isInit.value && watchValues[0].length) {
+          data.receiveCoinData = null;
           data.payCoinData =
             payAssetList.value.filter((coin) => {
               return coin.base_denom === 'uatom';
             })[0] ?? payAssetList.value[0];
+          console.log(' payAssetList', payAssetList.value);
           isInit.value = true;
         }
       },
     );
     // REFACTOR ENDS HERE
 
-    //test
-    async function test() {
-      const test = await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
-        {
-          subscribe: false,
-          params: {
-            chain_name: store.getters['demeris/getDexChain'],
-            hash: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5'.split('/')[1],
-          },
-        },
-        { root: true },
-      );
-      console.log(test);
-    }
-    test();
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
@@ -462,7 +439,23 @@ export default defineComponent({
       actionHandlerResult: null,
 
       // booleans-start(for various status check)
-      isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
+      isOver: computed(() => {
+        console.group('isOver');
+        console.log('data?.payCoinAmount', data?.payCoinAmount);
+        console.log('parseInt(data?.payCoinData?.amount)', parseInt(data?.payCoinData?.amount));
+        console.log('payAssetList.value[0]?.amount', payAssetList.value[0]?.amount);
+        console.log(
+          `store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })`,
+          store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom }),
+        );
+        console.groupEnd();
+        return data.isBothSelected &&
+          data.payCoinAmount >
+            parseInt(payAssetList.value[0].amount) /
+              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
+          ? true
+          : false;
+      }),
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
@@ -482,49 +475,6 @@ export default defineComponent({
 
       //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
-    });
-
-    //for default payCoin set
-    // watch(
-    //   () => {
-    //     return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
-    //   },
-    //   (watchValues) => {
-    //     if (watchValues[0]) {
-    //       if (watchValues[2]) {
-    //         if (watchValues[3] !== 'walletInit') {
-    //           data.payCoinData = data.userAssetList[0];
-    //           data.initStatus = 'walletInit';
-    //           data.isWallet = true;
-    //           // console.log('isWallet', data.isWallet);
-    //         }
-    //       }
-    //     } else {
-    //       if (watchValues[1]) {
-    //         if (watchValues[3] !== 'noWalletInit') {
-    //           data.payCoinData =
-    //             data.userAssetList.filter((coin) => {
-    //               return coin.base_denom === 'uatom';
-    //             })[0] ?? data.userAssetList[0];
-    //           data.initStatus = 'noWalletInit';
-    //           data.isWallet = false;
-    //           // console.log('isWallet', data.isWallet);
-    //         }
-    //       }
-    //     }
-    //   },
-    //   { immediate: true },
-    // );
-
-    //get baseAssetList only once
-    watch(pools, () => {
-      (async () => {
-        if (!data.isAssetList && pools.value.length > 0) {
-          data.baseAssetList = await denomListByPools(false); // boolean param for isPoolCoin included
-          console.log('INIT BASEASSETLIST', data.baseAssetList);
-          data.isAssetList = true;
-        }
-      })();
     });
 
     //get pool price
