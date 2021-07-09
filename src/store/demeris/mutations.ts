@@ -133,7 +133,10 @@ export const mutations: MutationTree<State> & Mutations = {
       payload.value as API.Bech32Config;
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name] = payload.value as API.Chain;
+    state.chains[(payload.params as API.ChainReq).chain_name] = {
+      ...state.chains[(payload.params as API.ChainReq).chain_name],
+      ...(payload.value as API.Chain),
+    };
   },
   [MutationTypes.SET_PRIMARY_CHANNEL](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[
