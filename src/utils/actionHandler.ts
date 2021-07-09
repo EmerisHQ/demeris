@@ -940,7 +940,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
   const hash = denom.split('/')[1];
 
   if (!hash) {
-    return;
+    return denom;
   }
 
   let trace = store.getters['demeris/getVerifyTrace']({ chain_name, hash });
