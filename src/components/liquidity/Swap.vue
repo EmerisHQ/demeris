@@ -28,13 +28,18 @@
         v-model:amount="payCoinAmount"
         :input-header="`Pay ${getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? ''}`"
         :selected-denom="payCoinData"
-        :assets="userAssetList"
+        :assets="payAssetList"
         :is-over="isOver"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
-
+      <div>
+        {{ assetsToPay }}
+      </div>
+      <div>
+        {{ assetsToReceive }}
+      </div>
       <!-- button-divider -->
       <div class="swap-widget__controller">
         <div class="swap-widget__controller-divider" />
@@ -92,7 +97,6 @@
         :steps="actionHandlerResult"
       />
     </div>
-    {{ assetsToPay }}{{ assetsToReceive }}
   </div>
 </template>
 <script lang="ts">
@@ -115,6 +119,7 @@ import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { getDisplayName } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
@@ -144,6 +149,10 @@ export default defineComponent({
     } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, userAccountBalances } = useAccount();
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
+    //TODO: Advanced option only advanced user can see pool token
 
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
@@ -249,7 +258,123 @@ export default defineComponent({
       console.log(assets);
       return assets;
     });
+
+    const initialPairList = ref([]); // for default coin setting
+    watch(
+      () => availablePairs.value,
+      (newPairs) => {
+        const uniquePairList = newPairs
+          .map((pair) => {
+            pair.pay.pool_id = pair.pool_id;
+            return pair.pay;
+          })
+          .reduce(function (acc, current) {
+            if (acc.findIndex(({ denom }) => denom === current.denom) === -1) {
+              acc.push(current);
+            }
+            return acc;
+          }, []);
+        initialPairList.value = uniquePairList;
+      },
+    );
+
+    //for default payCoin set
+    // watch(
+    //   () => {
+    //     return [isInit.value];
+    //   },
+    //   (watchValues) => {
+    //     // isInit for initialAssetList
+    //     if (watchValues[0]) {
+    //     }
+    //   },
+    //   { immediate: true },
+    // );
+
+    //for default payCoin set
+    // watch(
+    //   () => {
+    //     return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
+    //   },
+    //   (watchValues) => {
+    //     if (watchValues[0]) {
+    //       if (watchValues[2]) {
+    //         if (watchValues[3] !== 'walletInit') {
+    //           data.payCoinData = data.userAssetList[0];
+    //           data.initStatus = 'walletInit';
+    //           data.isWallet = true;
+    //           // console.log('isWallet', data.isWallet);
+    //         }
+    //       }
+    //     } else {
+    //       if (watchValues[1]) {
+    //         if (watchValues[3] !== 'noWalletInit') {
+    //           data.payCoinData =
+    //             data.userAssetList.filter((coin) => {
+    //               return coin.base_denom === 'uatom';
+    //             })[0] ?? data.userAssetList[0];
+    //           data.initStatus = 'noWalletInit';
+    //           data.isWallet = false;
+    //           // console.log('isWallet', data.isWallet);
+    //         }
+    //       }
+    //     }
+    //   },
+    //   { immediate: true },
+    // );
+
+    const payAssetList = ref([]);
+    watch(
+      () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
+      async (watchValues) => {
+        //isSignedIn
+        if (watchValues[1]) {
+          //with wallet
+        } else {
+          //no wallet
+          payAssetList.value = await Promise.all(
+            JSON.parse(JSON.stringify(initialPairList.value)).map(async (pair) => {
+              pair.amount = `0${pair.base_denom}`;
+              pair.on_chain = pair.chain_name;
+              pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']);
+              delete pair.chain_name;
+              return pair;
+            }),
+          );
+          console.log('P/Ay', payAssetList.value);
+        }
+      },
+    );
+
+    const receiveAssetList = ref([]);
+    watch(
+      () => assetsToReceive.value,
+      (newAssets) => {
+        if (data.isWallet) {
+          console.log('wallet / assetsToreceive', newAssets);
+        } else {
+          console.log('no wallet / assetsToreceive', newAssets);
+        }
+      },
+    );
     // REFACTOR ENDS HERE
+
+    //test
+    async function test() {
+      const test = await store.dispatch(
+        'demeris/GET_VERIFY_TRACE',
+        {
+          subscribe: false,
+          params: {
+            chain_name: store.getters['demeris/getDexChain'],
+            hash: 'ibc/4129EB76C01ED14052054BB975DE0C6C5010E12FFD9253C20C58BCD828BEE9A5'.split('/')[1],
+          },
+        },
+        { root: true },
+      );
+      console.log(test);
+    }
+    test();
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
@@ -503,36 +628,36 @@ export default defineComponent({
     });
 
     //for default payCoin set
-    watch(
-      () => {
-        return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
-      },
-      (watchValues) => {
-        if (watchValues[0]) {
-          if (watchValues[2]) {
-            if (watchValues[3] !== 'walletInit') {
-              data.payCoinData = data.userAssetList[0];
-              data.initStatus = 'walletInit';
-              data.isWallet = true;
-              // console.log('isWallet', data.isWallet);
-            }
-          }
-        } else {
-          if (watchValues[1]) {
-            if (watchValues[3] !== 'noWalletInit') {
-              data.payCoinData =
-                data.userAssetList.filter((coin) => {
-                  return coin.base_denom === 'uatom';
-                })[0] ?? data.userAssetList[0];
-              data.initStatus = 'noWalletInit';
-              data.isWallet = false;
-              // console.log('isWallet', data.isWallet);
-            }
-          }
-        }
-      },
-      { immediate: true },
-    );
+    // watch(
+    //   () => {
+    //     return [data.isWallet, data.isReceiveAssetList, data.isUserAssetList, data.initStatus];
+    //   },
+    //   (watchValues) => {
+    //     if (watchValues[0]) {
+    //       if (watchValues[2]) {
+    //         if (watchValues[3] !== 'walletInit') {
+    //           data.payCoinData = data.userAssetList[0];
+    //           data.initStatus = 'walletInit';
+    //           data.isWallet = true;
+    //           // console.log('isWallet', data.isWallet);
+    //         }
+    //       }
+    //     } else {
+    //       if (watchValues[1]) {
+    //         if (watchValues[3] !== 'noWalletInit') {
+    //           data.payCoinData =
+    //             data.userAssetList.filter((coin) => {
+    //               return coin.base_denom === 'uatom';
+    //             })[0] ?? data.userAssetList[0];
+    //           data.initStatus = 'noWalletInit';
+    //           data.isWallet = false;
+    //           // console.log('isWallet', data.isWallet);
+    //         }
+    //       }
+    //     }
+    //   },
+    //   { immediate: true },
+    // );
 
     //get baseAssetList only once
     watch(pools, () => {
@@ -723,6 +848,8 @@ export default defineComponent({
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
       getDisplayPrice,
+      //new
+      payAssetList,
     };
   },
 });
