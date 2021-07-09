@@ -1,0 +1,96 @@
+<template>
+  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`">
+    <p class="moonpay-banner__title">{{ title }}</p>
+    <div class="moonpay-banner__info">
+      <div class="moonpay-banner__info__icon">
+        <Icon name="LockClosedIcon" :icon-size="1" />
+      </div>
+      <div class="moonpay-banner__info__wrapper">
+        <p class="moonpay-banner__info__label">Powered by Moonpay</p>
+        <span class="moonpay-banner__info__hint">100% secure</span>
+      </div>
+    </div>
+  </button>
+</template>
+
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+
+import Icon from '@/components/ui/Icon.vue';
+
+export default defineComponent({
+  name: 'MoonpayBanner',
+
+  components: {
+    Icon,
+  },
+
+  props: {
+    title: {
+      type: String,
+      default: 'Purchase ATOM',
+    },
+    variant: {
+      type: String as PropType<'banner' | 'widget'>,
+      default: 'banner',
+    },
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.moonpay-banner {
+  background: var(--bg);
+  border: 1px solid var(--border-trans);
+  border-radius: 1.6rem;
+  padding: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 13.5rem;
+  width: 100%;
+  background-image: url('~@/assets/images/buy-atom-card.png');
+  background-repeat: no-repeat;
+  background-position: center right;
+
+  &--widget {
+    width: 3.2rem;
+  }
+
+  &__title {
+    font-size: 2.1rem;
+    font-weight: 700;
+  }
+
+  &__info {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.2rem;
+
+    &__wrapper {
+      text-align: left;
+    }
+
+    &__icon {
+      width: 2.4rem;
+      height: 2.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      background: var(--text);
+      border-radius: 2.6rem;
+      margin-right: 0.8rem;
+    }
+
+    &__label {
+      font-weight: 600;
+    }
+
+    &__hint {
+      margin-top: 0rem;
+      color: var(--muted);
+    }
+  }
+}
+</style>

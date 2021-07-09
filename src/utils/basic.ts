@@ -83,6 +83,13 @@ export function generateDenomHash(channel, base_denom) {
   return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }
 
+export const hexToRGB = (hex: string) => {
+  return hex
+    .replace('#', '')
+    .match(/[A-Za-z0-9]{2}/g)
+    .map((v) => parseInt(v, 16))
+    .join(',');
+};
 export function parseCoins(input: string): Coin[] {
   return input
     .replace(/\s/g, '')
