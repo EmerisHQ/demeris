@@ -16,10 +16,10 @@
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
-        {{ $filters.getCoinName(selectedDenom?.base_denom) }}
+        <Denom :name="selectedDenom?.base_denom" />
         <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
       </div>
-      <div class="denom-select__coin-from s-minus">{{ selectedDenom.on_chain }}</div>
+      <div class="denom-select__coin-from s-minus"><ChainName :name="selectedDenom.on_chain" /></div>
     </div>
 
     <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
@@ -54,11 +54,13 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 
+import ChainName from '@/components/common/ChainName.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'DenomSelect',
-  components: { Icon, DenomSelectModal },
+  components: { ChainName, Denom, Icon, DenomSelectModal },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },

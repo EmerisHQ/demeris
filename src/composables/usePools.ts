@@ -56,18 +56,30 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return { balanceA: balanceA.amount, balanceB: balanceB.amount };
   };
-  const totalLiquidityPriceById = async (id) => {
+  const liquidityPriceById = async (id: string, amounts: number[]) => {
     const reserveDenoms = await getReserveBaseDenoms(await poolById(id));
-    const reserveBalances = await reserveBalancesById(id);
     let total = 0;
 
     for (const [index, denom] of reserveDenoms.entries()) {
       const price = store.getters['demeris/getPrice']({ denom });
       const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
 
-      total += (reserveBalances[index].amount / Math.pow(10, precision)) * price;
+      total += (amounts[index] / Math.pow(10, precision)) * price;
     }
     return total;
   };
-  return { pools, getReserveBaseDenoms, poolsByDenom, poolById, formatPoolName, poolPriceById, reserveBalancesById };
+  const totalLiquidityPriceById = async (id: string) => {
+    const reserveBalances = await reserveBalancesById(id);
+    return liquidityPriceById(id, [reserveBalances.balanceA.amount, reserveBalances.balanceB.amount]);
+  };
+  return {
+    pools,
+    getReserveBaseDenoms,
+    poolsByDenom,
+    poolById,
+    formatPoolName,
+    poolPriceById,
+    reserveBalancesById,
+    totalLiquidityPriceById,
+  };
 }
