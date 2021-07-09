@@ -268,6 +268,7 @@ export default defineComponent({
             return acc;
           }, []);
         initialPairList.value = uniquePairList;
+        console.log('[INITIAL PAIR LIST]', initialPairList.value);
       },
     );
 
@@ -276,16 +277,12 @@ export default defineComponent({
     watch(
       () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
       async (watchValues) => {
-        // console.log('assetsToPay', assetsToPay.value);
-        console.log('initialPairList.value', initialPairList.value);
         const assetIndexer = {};
         const filteredList = [];
         if (isSignedIn.value && assetsToPay.value.length) {
           assetsToPay.value.forEach((asset) => {
             assetIndexer[`${asset.base_denom}/${asset.on_chain}`] = 'exist';
           });
-
-          console.log('assetIndexer', assetIndexer);
 
           initialPairList.value.forEach((pair) => {
             console.log('pair', `${pair.base_denom}/${pair.on_chain}`);
@@ -297,7 +294,6 @@ export default defineComponent({
 
         //default list with needed properties (no-wallet)
         const assetList = filteredList.length > 0 ? filteredList : initialPairList.value;
-        console.log('assetList', assetList);
         payAssetList.value = await Promise.all(
           assetList.map(async (pair) => {
             pair.amount = `0${pair.base_denom}`;
@@ -311,7 +307,7 @@ export default defineComponent({
           //with wallet
           const walletVerifiedBalances = userAccountBalances.value.verified;
           // const walletUnverifiedBalances = userAccountBalances.value.unverified //future use
-          console.log('payAssetListpayAssetList', payAssetList.value);
+
           const payAssetListWithBalance = [];
           payAssetList.value.forEach((pair) => {
             const assetWithBalance = walletVerifiedBalances.filter((asset) => {
@@ -329,45 +325,54 @@ export default defineComponent({
           payAssetList.value = JSON.parse(JSON.stringify(payAssetListWithBalance));
         }
 
-        console.log('[PAY ASSET LIST] : ', payAssetList.value);
+        console.log('[PAY ASSET LIST]:', payAssetList.value);
       },
     );
 
     const receiveAssetList = ref([]);
+    //토글에서 바꾸자 수량은
     watch(
       () => assetsToReceive.value,
-      (newAssets) => {
-        if (isSignedIn.value) {
-          // console.log('wallet / assetsToreceive', newAssets);
+      () => {
+        console.log('@@@@@@@@');
+        console.log('initialPairList.value', initialPairList.value);
+        console.log('assetsToReceive.value', assetsToReceive.value);
+        if (assetsToReceive.value.length) {
+          const filteredList = initialPairList.value.filter((pair) => {
+            return assetsToReceive.value.includes(pair.denom);
+          });
+          receiveAssetList.value = filteredList;
         } else {
-          // console.log('no wallet / assetsToreceive', newAssets);
+          receiveAssetList.value = initialPairList.value;
         }
+
+        console.log(' receiveAssetList.value', receiveAssetList.value);
       },
     );
 
     // for default payCoin set
-    // const isInit = ref(false);
-    // watch(
-    //   () => {
-    //     return [payAssetList.value, isSignedIn.value];
-    //   },
-    //   (watchValues, oldWatchValues) => {
-    //     //when wallet connected/disconnected set again
-    //     if (watchValues[1] !== oldWatchValues[1]) {
-    //       isInit.value = false;
-    //       data.payCoinAmount = null;
-    //       data.receiveCoinAmount = null;
-    //     }
+    const isInit = ref(false);
+    watch(
+      () => {
+        return [payAssetList.value, isSignedIn.value];
+      },
+      (watchValues, oldWatchValues) => {
+        //when wallet connected/disconnected set again
+        if (watchValues[1] !== oldWatchValues[1]) {
+          isInit.value = false;
+          data.payCoinAmount = null;
+          data.receiveCoinAmount = null;
+        }
 
-    //     if (!isInit.value && watchValues[0].length) {
-    //       data.payCoinData =
-    //         payAssetList.value.filter((coin) => {
-    //           return coin.base_denom === 'uatom';
-    //         })[0] ?? payAssetList.value[0];
-    //       isInit.value = true;
-    //     }
-    //   },
-    // );
+        if (!isInit.value && watchValues[0].length) {
+          data.payCoinData =
+            payAssetList.value.filter((coin) => {
+              return coin.base_denom === 'uatom';
+            })[0] ?? payAssetList.value[0];
+          isInit.value = true;
+        }
+      },
+    );
     // REFACTOR ENDS HERE
 
     //test
@@ -587,18 +592,18 @@ export default defineComponent({
         }
       }),
 
-      receiveAssetList: computed(() => {
-        let receiveAvailableAssets = [];
+      // receiveAssetList: computed(() => {
+      //   let receiveAvailableAssets = [];
 
-        for (let i in data.baseAssetList) {
-          const coin = data.baseAssetList[i];
-          if (coin.base_denom !== data.payCoinData?.base_denom) {
-            receiveAvailableAssets.push({ ...coin });
-          }
-        }
-        // console.log('receiveAssetList', receiveAvailableAssets);
-        return receiveAvailableAssets;
-      }),
+      //   for (let i in data.baseAssetList) {
+      //     const coin = data.baseAssetList[i];
+      //     if (coin.base_denom !== data.payCoinData?.base_denom) {
+      //       receiveAvailableAssets.push({ ...coin });
+      //     }
+      //   }
+      //   // console.log('receiveAssetList', receiveAvailableAssets);
+      //   return receiveAvailableAssets;
+      // }),
       //asset-list-data-end
 
       // permanent fee-level-setting
@@ -615,9 +620,9 @@ export default defineComponent({
       isWallet: computed(() => {
         return store.getters['demeris/getKeplrAddress'] ? true : false;
       }),
-      isReceiveAssetList: computed(() => {
-        return data.receiveAssetList.length !== 0 ? true : false;
-      }),
+      // isReceiveAssetList: computed(() => {
+      //   return data.receiveAssetList.length !== 0 ? true : false;
+      // }),
       isUserAssetList: computed(() => {
         return data.userAssetList.length !== 0 ? true : false;
       }),
@@ -861,6 +866,7 @@ export default defineComponent({
       getDisplayPrice,
       //new
       payAssetList,
+      receiveAssetList,
     };
   },
 });
