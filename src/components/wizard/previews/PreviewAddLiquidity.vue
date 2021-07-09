@@ -33,7 +33,7 @@
 
     <ListItem label="Receive (estimated)" description="LP Asset">
       <div>
-        <AmountDisplay class="w-bold" :amount="{ amount: receiveAmount, denom: poolInfo.denom }" />
+        <AmountDisplay class="w-bold" :amount="{ amount: receiveAmount * 1e6, denom: poolInfo.denom }" />
       </div>
     </ListItem>
 

@@ -325,7 +325,7 @@ export default {
         const amountB = form.coinB.amount * Math.pow(10, precisionB);
         coinB = +parseCoins(form.coinB.asset.amount)[0].amount >= amountB;
       }
-      debugger;
+
       return {
         coinA,
         coinB,
@@ -379,8 +379,8 @@ export default {
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
       const precisions = [
-        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }),
-        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }),
+        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6,
+        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6,
       ];
       let coinAdenom = form.coinA.asset.base_denom;
       if (form.coinA.asset.ibc.hash) {
@@ -508,11 +508,13 @@ export default {
       }
     });
 
-    watch(hasPair, async () => {
-      if (hasPair.value) {
+    watch(
+      [form.coinA.asset, form.coinB.asset, hasPair],
+      async () => {
         await findPoolByDenoms();
-      }
-    });
+      },
+      { deep: true },
+    );
 
     watch([form.coinA, form.coinB, pool, hasPair], async () => {
       if (hasPair.value) {
