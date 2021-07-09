@@ -278,7 +278,7 @@ export default defineComponent({
           });
 
           initialPairList.value.forEach((pair) => {
-            console.log('pair', `${pair.base_denom}/${pair.on_chain}`);
+            // console.log('pair', `${pair.base_denom}/${pair.on_chain}`);
             if (assetIndexer[`${pair.base_denom}/${pair.chain_name}`]) {
               filteredList.push(pair);
             }
@@ -329,19 +329,25 @@ export default defineComponent({
       () => assetsToReceive.value,
       async () => {
         // console.log('assetsToReceive.value', assetsToReceive.value);
-        if (assetsToReceive.value.length) {
+        if (assetsToReceive.value.length && isSignedIn.value) {
           const filteredList = initialPairList.value.filter((pair) => {
             return assetsToReceive.value.includes(pair.denom);
           });
+
           receiveAssetList.value = await Promise.all(
             filteredList.map(async (pair) => {
-              pair.on_chain = store.getters['demeris/getDexChain'];
-              pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']); // need this as a string value for search function()
-              return pair;
+              return {
+                ...pair,
+                on_chain: store.getters['demeris/getDexChain'],
+                display_name: await getDisplayName(pair.denom, store.getters['demeris/getDexChain']),
+              };
             }),
           );
         } else {
-          receiveAssetList.value = initialPairList.value;
+          receiveAssetList.value = initialPairList.value.map((pair) => {
+            pair.on_chain = store.getters['demeris/getDexChain'];
+            return pair;
+          });
         }
 
         console.log('[RECEIVE ASSET LIST]', receiveAssetList.value);
@@ -368,7 +374,7 @@ export default defineComponent({
             payAssetList.value.filter((coin) => {
               return coin.base_denom === 'uatom';
             })[0] ?? payAssetList.value[0];
-          console.log(' payAssetList', payAssetList.value);
+
           isInit.value = true;
         }
       },
@@ -440,21 +446,28 @@ export default defineComponent({
 
       // booleans-start(for various status check)
       isOver: computed(() => {
-        console.group('isOver');
-        console.log('data?.payCoinAmount', data?.payCoinAmount);
-        console.log('parseInt(data?.payCoinData?.amount)', parseInt(data?.payCoinData?.amount));
-        console.log('payAssetList.value[0]?.amount', payAssetList.value[0]?.amount);
-        console.log(
-          `store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })`,
-          store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom }),
-        );
-        console.groupEnd();
-        return data.isBothSelected &&
-          data.payCoinAmount >
-            parseInt(payAssetList.value[0].amount) /
-              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
-          ? true
-          : false;
+        // console.group('isOver');
+        // console.log('data?.payCoinAmount', data?.payCoinAmount);
+        // console.log('parseInt(data?.payCoinData?.amount)', parseInt(data?.payCoinData?.amount));
+        // console.log('payAssetList.value[0]?.amount', payAssetList.value[0]?.amount);
+        // console.log(
+        //   `store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })`,
+        //   store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom }),
+        // );
+        // console.groupEnd();
+        if (isSignedIn.value) {
+          return data.isBothSelected &&
+            data.payCoinAmount >
+              parseInt(payAssetList.value[0].amount) /
+                Math.pow(
+                  10,
+                  parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
+                )
+            ? true
+            : false;
+        } else {
+          return false;
+        }
       }),
       isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
       isBothSelected: computed(() => {
