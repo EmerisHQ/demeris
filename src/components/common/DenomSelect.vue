@@ -24,7 +24,7 @@
           <div class="max-display-width">{{ selectedDenom.display_name }}</div>
           <template #content> {{ selectedDenom.display_name }} </template>
         </tippy>
-        <Denom :name="selectedDenom?.base_denom" />
+        <Denom v-else :name="selectedDenom?.base_denom" />
         <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
       </div>
       <div class="denom-select__coin-from s-minus"><ChainName :name="selectedDenom.on_chain" /></div>
