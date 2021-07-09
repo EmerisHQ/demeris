@@ -20,13 +20,7 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-        <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
-          <img
-            class="coin-list__info-image"
-            :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-            :alt="`${coin.base_denom} coin`"
-          />
-        </div>
+        <CircleSymbol :denom="coin.base_denom" :chain-name="coin.on_chain" />
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
@@ -82,6 +76,7 @@ import { computed, defineComponent, ref } from 'vue';
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 
@@ -90,6 +85,7 @@ export default defineComponent({
   components: {
     AssetChainsIndicator,
     ChainName,
+    CircleSymbol,
     AmountDisplay,
     Icon,
     Denom,

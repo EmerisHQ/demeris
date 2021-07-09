@@ -12,7 +12,12 @@
 					vuex getter to get  chain name from chain id
 		-->
 
-    <img class="denom-select__coin-image" :src="coinImage" :alt="`selected coin`" @click="toggleDenomSelectModal" />
+    <CircleSymbol
+      :denom="selectedDenom?.base_denom"
+      size="sm"
+      class="denom-select__coin-image"
+      @click="toggleDenomSelectModal"
+    />
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
@@ -55,12 +60,13 @@
 import { computed, defineComponent, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'DenomSelect',
-  components: { ChainName, Denom, Icon, DenomSelectModal },
+  components: { ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },

@@ -52,7 +52,7 @@ export default defineComponent({
   props: {
     denom: {
       type: String,
-      default: undefined,
+      default: '',
     },
     chainName: {
       type: String,
@@ -76,7 +76,7 @@ export default defineComponent({
     const isLoaded = ref(false);
 
     const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'];
+      return store.getters['demeris/getVerifiedDenoms'] || [];
     });
 
     const isPoolCoin = computed(() => {
