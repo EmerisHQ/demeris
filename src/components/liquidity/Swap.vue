@@ -333,7 +333,7 @@ export default defineComponent({
     //토글에서 바꾸자 수량은
     watch(
       () => assetsToReceive.value,
-      () => {
+      async () => {
         console.log('@@@@@@@@');
         console.log('initialPairList.value', initialPairList.value);
         console.log('assetsToReceive.value', assetsToReceive.value);
@@ -341,7 +341,13 @@ export default defineComponent({
           const filteredList = initialPairList.value.filter((pair) => {
             return assetsToReceive.value.includes(pair.denom);
           });
-          receiveAssetList.value = filteredList;
+          receiveAssetList.value = await Promise.all(
+            filteredList.map(async (pair) => {
+              pair.on_chain = store.getters['demeris/getDexChain'];
+              pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']); // need this as a string value for search function()
+              return pair;
+            }),
+          );
         } else {
           receiveAssetList.value = initialPairList.value;
         }
