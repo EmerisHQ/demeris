@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{ displayPrice[0] }}<span>.{{ displayPrice[1] }}</span>
+    {{ displayPrice[0] }}<span :class="styled ? 'decimals' : ''">.{{ displayPrice[1] }}</span>
   </div>
 </template>
 <script lang="ts">
@@ -14,6 +14,10 @@ export default defineComponent({
     balances: {
       type: Array as PropType<Balances>,
       required: true,
+    },
+    styled: {
+      type: Boolean as PropType<boolean>,
+      default: true,
     },
   },
   setup(props) {
@@ -57,7 +61,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-span {
+.decimals {
   font-size: 0.42em;
 }
 </style>
