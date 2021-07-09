@@ -11,6 +11,9 @@ export function toHexString(byteArray) {
     })
     .join('');
 }
+export function hashObject(str: unknown): string {
+  return toHex(sha256(encodeUTF8(JSON.stringify(str)))).toUpperCase();
+}
 export function keyHashfromAddress(address: string): string {
   try {
     return toHexString(bech32.fromWords(bech32.decode(address).words));
