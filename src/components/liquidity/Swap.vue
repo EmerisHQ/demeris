@@ -415,21 +415,16 @@ export default defineComponent({
             data.payCoinData = {
               amount: '0uatom',
               base_denom: 'uatom',
-              chain_name: 'cosmos-hub',
               denom: 'uatom',
               display_name: 'ATOM',
-              on_chain: 'cosmos-hub',
+              on_chain: store.getters['demeris/getDexChain'],
             };
           } else {
-            //TODO: get user balance and set
-            data.payCoinData = {
-              amount: '0uatom',
-              base_denom: 'uatom',
-              chain_name: 'cosmos-hub',
-              denom: 'uatom',
-              display_name: 'ATOM',
-              on_chain: 'cosmos-hub',
-            };
+            //with-wallet
+            data.payCoinData =
+              payAssetList.value.filter((coin) => {
+                return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
+              })[0] ?? payAssetList.value[0];
           }
 
           isInit.value = true;
@@ -475,7 +470,7 @@ export default defineComponent({
       }),
       maxButtonText: computed(() => {
         if (data.payCoinData) {
-          const amount = getPrecisedAmount(data.payCoinData?.base_denom, getMaxAmount(data.payCoinData));
+          const amount = getPrecisedAmount(data.payCoinData?.base_denom, data.maxAmount);
           if (amount > 0) {
             return `${amount} ${data.payCoinData.display_name} Max`;
           } else {
@@ -485,6 +480,16 @@ export default defineComponent({
           return 'Max';
         }
       }),
+      maxAmount: computed(() => {
+        return (
+          parseInt(
+            balances.value.filter((coin) => {
+              return coin.base_denom === data.payCoinData.base_denom && coin.on_chain === data.payCoinData.on_chain;
+            })[0]?.amount,
+          ) ?? 0
+        );
+      }),
+
       //conditional-text-end
 
       //pay-receive-data-start
@@ -698,15 +703,6 @@ export default defineComponent({
       setCounterPairCoinAmount('Pay');
     }
 
-    function getMaxAmount(payCoinData) {
-      const selectedCoinData = payAssetList?.value.find((asset) => {
-        if (asset.base_denom === payCoinData.base_denom && asset.on_chain === payCoinData.on_chain) {
-          return true;
-        }
-      });
-      return parseInt(selectedCoinData?.amount) || 0;
-    }
-
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
         console.log('payload', payload);
@@ -759,7 +755,6 @@ export default defineComponent({
       getCoinDollarValue,
       changePayToReceive,
       denomSelectHandler,
-      getMaxAmount,
       getPrecisedAmount,
       setMax,
       swap,
