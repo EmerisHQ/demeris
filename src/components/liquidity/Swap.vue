@@ -280,8 +280,9 @@ export default defineComponent({
       () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
       async () => {
         if (isSignedIn.value) {
+          //with wallet
           if (data.receiveCoinData) {
-            console.log('assetTopay', assetsToPay.value);
+            //when receive coin selected => show assetToPay
             payAssetList.value = await Promise.all(
               assetsToPay.value.map(async (asset) => {
                 return {
@@ -291,7 +292,7 @@ export default defineComponent({
               }),
             );
           } else {
-            console.log('balances.value', balances.value);
+            //with-wallet, recevie coin not selcted => show user balance
             payAssetList.value = await Promise.all(
               balances.value.map(async (coin) => {
                 return {
@@ -302,6 +303,7 @@ export default defineComponent({
             );
           }
         } else {
+          //no-wallet => show availablePairs
           const availablePayDenoms = availablePairs.value.map((pair) => {
             return pair.pay.denom;
           });
@@ -353,12 +355,13 @@ export default defineComponent({
       () => assetsToReceive.value,
 
       async () => {
+        // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and on_chain
         const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
           base_denom: denom.name,
           on_chain: denom.chain_name,
           display_name: denom.display_name,
         }));
-        console.log(assetsToReceive.value);
+
         receiveAssetList.value = await Promise.all(
           //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
           (assetsToReceive.value.length > 0
@@ -505,7 +508,7 @@ export default defineComponent({
         if (isSignedIn.value) {
           return data.isBothSelected &&
             data.payCoinAmount >
-              parseInt(payAssetList.value[0].amount) /
+              parseInt(payAssetList?.value[0]?.amount) /
                 Math.pow(
                   10,
                   parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
@@ -640,26 +643,46 @@ export default defineComponent({
       },
     );
 
-    function changePayToReceive() {
+    async function changePayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
       }
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+
       if (isSignedIn.value) {
-        const verifiedBalances = userAccountBalances.value.verified;
-        console.log('userAccount', verifiedBalances);
+        //with wallet
+        const newPayCoinUserBalance = balances.value.filter((coin) => {
+          return (
+            coin.base_denom === originReceiveCoinData?.base_denom &&
+            coin.on_chain === store.getters['demeris/getDexChain']
+          );
+        });
+        if (newPayCoinUserBalance.length) {
+          //with wallet, user has this asset on cosmos_hub
+          data.payCoinData = {
+            ...newPayCoinUserBalance[0],
+            display_name: await getDisplayName(
+              newPayCoinUserBalance[0].base_denom,
+              store.getters['demeris/getDexChain'],
+            ),
+          };
+          data.receiveCoinData = originPayCoinData;
+        } else {
+          //with wallet, user doesn't has this asset on cosmos_hub
+          data.payCoinData = null;
+          data.receiveCoinData = originPayCoinData;
+        }
+      } else {
+        data.payCoinData = originReceiveCoinData;
+        data.receiveCoinData = originPayCoinData;
       }
 
-      // const originReceiveCoinAmount = JSON.parse(JSON.stringify(data.receiveCoinAmount));
-
-      data.payCoinData = originReceiveCoinData;
-      data.receiveCoinData = originPayCoinData;
-      // data.payCoinAmount = originReceiveCoinAmount;
-      // data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
-      // TEST
       data.payCoinAmount = 0;
       data.receiveCoinAmount = 0;
+
+      // TEST
+      // data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function setMax() {
