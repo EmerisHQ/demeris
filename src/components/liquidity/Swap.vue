@@ -277,7 +277,7 @@ export default defineComponent({
 
     const payAssetList = ref([]);
     watch(
-      () => [availablePairs.value, isSignedIn.value, assetsToPay.value],
+      () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
       async () => {
         if (isSignedIn.value) {
           if (data.receiveCoinData) {
@@ -315,7 +315,13 @@ export default defineComponent({
           }));
 
           payAssetList.value = await Promise.all(
-            availablePayDenoms.map(async (asset) => {
+            //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+            (availablePaySide.value.length > 0
+              ? availablePaySide.value.map((pair) => {
+                  return pair.pay.denom;
+                })
+              : availablePayDenoms
+            ).map(async (asset) => {
               if (isNative(asset)) {
                 return formattedVerifiedDenoms.filter((coin) => {
                   return coin.base_denom === asset;
@@ -352,9 +358,15 @@ export default defineComponent({
           on_chain: denom.chain_name,
           display_name: denom.display_name,
         }));
-
+        console.log(assetsToReceive.value);
         receiveAssetList.value = await Promise.all(
-          assetsToReceive.value.map(async (asset) => {
+          //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+          (assetsToReceive.value.length > 0
+            ? assetsToReceive.value
+            : availablePairs.value.map((pair) => {
+                return pair.pay.denom;
+              })
+          ).map(async (asset) => {
             if (isNative(asset)) {
               return formattedVerifiedDenoms.filter((coin) => {
                 coin.denom = asset;
