@@ -65,13 +65,15 @@
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="receiveCoinAmount"
-        :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
+        :input-header="`Receive ${getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount, '~').value ?? ''}`"
         :selected-denom="receiveCoinData"
         :assets="receiveAssetList"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
+
+      {{ receiveCoinData?.denom }}
 
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
@@ -219,6 +221,8 @@ export default defineComponent({
 
           // TODO: get isAdvanced from local storage
           const isAdvanced = false;
+
+          //Pool coin include or exclude
           if (isAdvanced) {
             pairs.push(pairAB);
             pairs.push(pairBA);
@@ -247,8 +251,8 @@ export default defineComponent({
       let paySide = availablePairs.value.filter(
         (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
       );
-      console.log('Calculated PayPair List ');
-      console.log(paySide);
+      // console.log('Calculated PayPair List ');
+      // console.log(paySide);
       return paySide;
     });
     const availableReceiveSide = computed(() => {
@@ -318,6 +322,7 @@ export default defineComponent({
     const receiveAssetList = ref([]);
     watch(
       () => assetsToReceive.value,
+
       async () => {
         const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
           base_denom: denom.name,
@@ -329,6 +334,7 @@ export default defineComponent({
           assetsToReceive.value.map(async (asset) => {
             if (isNative(asset)) {
               return formattedVerifiedDenoms.filter((coin) => {
+                coin.denom = asset;
                 return coin.base_denom === asset;
               })[0];
             } else {
