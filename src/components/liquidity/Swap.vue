@@ -137,7 +137,8 @@ export default defineComponent({
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
     const { getDisplayPrice } = usePrice();
-    const { balances, userAccountBalances } = useAccount();
+    const { balances } = useAccount();
+    const slippage = ref(0);
 
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
@@ -221,7 +222,7 @@ export default defineComponent({
           // TODO: get isAdvanced from local storage
           const isAdvanced = false;
 
-          //Pool coin include or exclude
+          //Pool coin included or excluded
           if (isAdvanced) {
             pairs.push(pairAB);
             pairs.push(pairBA);
@@ -234,7 +235,7 @@ export default defineComponent({
             }
           }
 
-          //helpers
+          //helper
           function hasPoolCoin(pair) {
             const poolPrefix = 'pool';
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
@@ -280,7 +281,7 @@ export default defineComponent({
       () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
       async () => {
         if (isSignedIn.value) {
-          //with wallet
+          //with-wallet
           if (data.receiveCoinData) {
             //when receive coin selected => show assetToPay
             payAssetList.value = await Promise.all(
@@ -431,8 +432,6 @@ export default defineComponent({
         }
       },
     );
-
-    const slippage = ref(0);
     // REFACTOR ENDS HERE
 
     const data = reactive({
@@ -573,7 +572,7 @@ export default defineComponent({
       },
     );
 
-    // get pool price작업
+    //get selecte pair pool info
     watch(
       () => {
         return [data.payCoinData, data.receiveCoinData];
@@ -601,7 +600,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            console.table('selectedPoolData', data.selectedPoolData);
+            console.table('[SELECTED POOL DATA]', data.selectedPoolData);
           } catch (e) {
             console.log('error', e, data.payCoinData, data.receiveCoinData);
             data.selectedPoolData = null;
@@ -610,6 +609,7 @@ export default defineComponent({
       },
     );
 
+    //set actionHandlerResult when swapable
     watch(
       () => data.payCoinAmount,
       async () => {
@@ -642,6 +642,7 @@ export default defineComponent({
           };
 
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+          console.log('actionHandlerResult', data.actionHandlerResult);
         } else {
           data.actionHandlerResult = null;
         }
