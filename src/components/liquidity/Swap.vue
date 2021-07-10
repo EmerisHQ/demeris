@@ -364,15 +364,23 @@ export default defineComponent({
         console.log('assetsToReceive.value', assetsToReceive.value);
         console.log('balance', balances.value);
 
-        // const test = [
-        //   ...balances.value,
-        //   ...store.getters['demeris/getVerifiedDenoms'].map((denom) => ({
-        //     base_denom: denom.name,
-        //     on_chain: denom.chain_name,
-        //     amount: '0' + denom.name,
-        //   })),
-        // ];
-        // console.log(test);
+        //TODO, use isNative
+        const verifyTrace = store.getters['demeris/getVerifyTrace']({
+          chain_name: store.getters['demeris/getDexChain'],
+          hash: assetsToReceive.value[0].split('/')[1],
+        });
+
+        console.log('verifyTrace', verifyTrace);
+
+        const test = [
+          ...balances.value,
+          ...store.getters['demeris/getVerifiedDenoms'].map((denom) => ({
+            base_denom: denom.name,
+            on_chain: denom.chain_name,
+            amount: '0' + denom.name,
+          })),
+        ];
+        console.log(test);
 
         if (assetsToReceive.value.length || isSignedIn.value) {
           const filteredList = initialPairList.value.filter((pair) => {
