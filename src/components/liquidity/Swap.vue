@@ -280,8 +280,27 @@ export default defineComponent({
       () => [availablePairs.value, isSignedIn.value, assetsToPay.value],
       async () => {
         if (isSignedIn.value) {
-          console.log('assetsToPay', assetsToPay.value);
-          payAssetList.value = assetsToPay.value;
+          if (data.receiveCoinData) {
+            console.log('assetTopay', assetsToPay.value);
+            payAssetList.value = await Promise.all(
+              assetsToPay.value.map(async (asset) => {
+                return {
+                  ...asset,
+                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                };
+              }),
+            );
+          } else {
+            console.log('balances.value', balances.value);
+            payAssetList.value = await Promise.all(
+              balances.value.map(async (coin) => {
+                return {
+                  ...coin,
+                  display_name: await getDisplayName(coin.base_denom, store.getters['demeris/getDexChain']),
+                };
+              }),
+            );
+          }
         } else {
           const availablePayDenoms = availablePairs.value.map((pair) => {
             return pair.pay.denom;
@@ -542,9 +561,8 @@ export default defineComponent({
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
           console.log(data.payCoinData, data.receiveCoinData);
-          console.log('poolsByDenom(data.payCoinData.denom)', poolsByDenom(data.payCoinData.denom));
           try {
-            const id = poolsByDenom(data.payCoinData.denom).find((pool) => {
+            const id = poolsByDenom(data.payCoinData.denom || data.payCoinData.base_denom).find((pool) => {
               return (
                 pool.reserve_coin_denoms.find((denom) => {
                   return denom === data.receiveCoinData.denom;
