@@ -307,98 +307,80 @@ export default defineComponent({
     watch(
       () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
       async (watchValues) => {
-        const assetIndexer = {};
-        const filteredList = [];
-        if (isSignedIn.value && assetsToPay.value.length) {
-          assetsToPay.value.forEach((asset) => {
-            assetIndexer[`${asset.base_denom}/${asset.on_chain}`] = 'exist';
-          });
+        console.log(availablePairs.value);
 
-          initialPairList.value.forEach((pair) => {
-            // console.log('pair', `${pair.base_denom}/${pair.on_chain}`);
-            if (assetIndexer[`${pair.base_denom}/${pair.chain_name}`]) {
-              filteredList.push(pair);
-            }
-          });
-        }
+        const availablePayDenoms = availablePairs.value.map((pair) => {
+          return pair.pay.denom;
+        });
 
-        //default list with needed properties (no-wallet)
-        const assetList = filteredList.length > 0 ? filteredList : initialPairList.value;
+        const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
+          base_denom: denom.name,
+          denom: denom.name,
+          on_chain: denom.chain_name,
+          display_name: denom.display_name,
+          amount: `0${denom.name}`,
+        }));
+
+        console.log(verifiedDenoms.value);
+
         payAssetList.value = await Promise.all(
-          assetList.map(async (pair) => {
-            pair.amount = `0${pair.base_denom}`;
-            pair.on_chain = pair.chain_name;
-            pair.display_name = await getDisplayName(pair.denom, store.getters['demeris/getDexChain']); // need this as a string value for search function()
-            return pair;
+          availablePayDenoms.map(async (asset) => {
+            if (isNative(asset)) {
+              return formattedVerifiedDenoms.filter((coin) => {
+                return coin.base_denom === asset;
+              })[0];
+            } else {
+              const verifyTrace = store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: asset.split('/')[1],
+              });
+              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+              verifyTrace.display_name = await getDisplayName(
+                verifyTrace.base_denom,
+                store.getters['demeris/getDexChain'],
+              );
+              verifyTrace.denom = asset;
+              verifyTrace.amount = `0${verifyTrace.base_denom}`;
+              return verifyTrace;
+            }
           }),
         );
-
-        if (watchValues[1]) {
-          //with wallet
-          const walletVerifiedBalances = userAccountBalances.value.verified;
-          // const walletUnverifiedBalances = userAccountBalances.value.unverified //future use
-
-          const payAssetListWithBalance = [];
-          payAssetList.value.forEach((pair) => {
-            const assetWithBalance = walletVerifiedBalances.filter((asset) => {
-              if (asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain) {
-                asset.display_name = pair.display_name;
-                asset.denom = pair.denom;
-                asset.TEST = '123123123123';
-              }
-              return asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain;
-            });
-
-            if (assetWithBalance.length) {
-              payAssetListWithBalance.push(assetWithBalance[0]);
-            }
-          });
-
-          payAssetList.value = JSON.parse(JSON.stringify(payAssetListWithBalance));
-        }
-
+        console.log('[PAY ASSET LIST]:', payAssetList.value);
         isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
       },
     );
 
     const receiveAssetList = ref([]);
-    //작업
     watch(
       () => assetsToReceive.value,
       async () => {
-        console.log('assetsToReceive.value', assetsToReceive.value);
-        console.log('balance', balances.value);
         const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
           base_denom: denom.name,
           on_chain: denom.chain_name,
           display_name: denom.display_name,
-          amount: '0' + denom.name,
         }));
 
-        receiveAssetList.value = assetsToReceive.value.map((asset) => {
-          if (isNative(asset)) {
-            return formattedVerifiedDenoms.filter((coin) => {
-              return coin.base_denom === asset;
-            })[0];
-          } else {
-            const verifyTrace = store.getters['demeris/getVerifyTrace']({
-              chain_name: store.getters['demeris/getDexChain'],
-              hash: assetsToReceive.value[0].split('/')[1],
-            });
-            return verifyTrace;
-          }
-        });
+        receiveAssetList.value = await Promise.all(
+          assetsToReceive.value.map(async (asset) => {
+            if (isNative(asset)) {
+              return formattedVerifiedDenoms.filter((coin) => {
+                return coin.base_denom === asset;
+              })[0];
+            } else {
+              const verifyTrace = store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: asset.split('/')[1],
+              });
+              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+              verifyTrace.display_name = await getDisplayName(
+                verifyTrace.base_denom,
+                store.getters['demeris/getDexChain'],
+              );
+              return verifyTrace;
+            }
+          }),
+        );
 
-        // const test = [
-        //   ...balances.value,
-        //   ...store.getters['demeris/getVerifiedDenoms'].map((denom) => ({
-        //     base_denom: denom.name,
-        //     on_chain: denom.chain_name,
-        //     amount: '0' + denom.name,
-        //   })),
-        // ];
-        // console.log(test);
-        console.log('[RECEIVE ASSET LIST]', receiveAssetList.value);
         isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
       },
     );
@@ -577,13 +559,15 @@ export default defineComponent({
       },
     );
 
-    //get pool price
+    //get pool price작업
     watch(
       () => {
         return [data.payCoinData, data.receiveCoinData];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
+          console.log(data.payCoinData, data.receiveCoinData);
+          console.log('poolsByDenom(data.payCoinData.denom)', poolsByDenom(data.payCoinData.denom));
           try {
             const id = poolsByDenom(data.payCoinData.denom).find((pool) => {
               return (
@@ -606,6 +590,7 @@ export default defineComponent({
             };
             console.table('selectedPoolData', data.selectedPoolData);
           } catch (e) {
+            console.log('error', e, data.payCoinData, data.receiveCoinData);
             data.selectedPoolData = null;
           }
         }
