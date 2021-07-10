@@ -73,8 +73,6 @@
         @modalToggle="setChildModalOpenStatus"
       />
 
-      {{ receiveCoinData?.denom }}
-
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
         <Alert status="warning" message="Prices have changed" />
@@ -89,6 +87,7 @@
           :tooltip-text="buttonTooltipText"
         />
       </div>
+
       <FeeLevelSelector
         v-if="actionHandlerResult && actionHandlerResult.length > 0"
         v-model:gasPriceLevel="gasPriceLevel"
@@ -276,45 +275,50 @@ export default defineComponent({
       return assets;
     });
 
-    // TODO: Advanced option only advanced user can see pool token
     const payAssetList = ref([]);
     watch(
-      () => [availablePairs.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
+      () => [availablePairs.value, isSignedIn.value, assetsToPay.value],
       async () => {
-        const availablePayDenoms = availablePairs.value.map((pair) => {
-          return pair.pay.denom;
-        });
+        if (isSignedIn.value) {
+          console.log('assetsToPay', assetsToPay.value);
+          payAssetList.value = assetsToPay.value;
+        } else {
+          const availablePayDenoms = availablePairs.value.map((pair) => {
+            return pair.pay.denom;
+          });
 
-        const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
-          base_denom: denom.name,
-          denom: denom.name,
-          on_chain: denom.chain_name,
-          display_name: denom.display_name,
-          amount: `0${denom.name}`,
-        }));
+          const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
+            base_denom: denom.name,
+            denom: denom.name,
+            on_chain: denom.chain_name,
+            display_name: denom.display_name,
+            amount: `0${denom.name}`,
+          }));
 
-        payAssetList.value = await Promise.all(
-          availablePayDenoms.map(async (asset) => {
-            if (isNative(asset)) {
-              return formattedVerifiedDenoms.filter((coin) => {
-                return coin.base_denom === asset;
-              })[0];
-            } else {
-              const verifyTrace = store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: asset.split('/')[1],
-              });
-              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-              verifyTrace.display_name = await getDisplayName(
-                verifyTrace.base_denom,
-                store.getters['demeris/getDexChain'],
-              );
-              verifyTrace.denom = asset;
-              verifyTrace.amount = `0${verifyTrace.base_denom}`;
-              return verifyTrace;
-            }
-          }),
-        );
+          payAssetList.value = await Promise.all(
+            availablePayDenoms.map(async (asset) => {
+              if (isNative(asset)) {
+                return formattedVerifiedDenoms.filter((coin) => {
+                  return coin.base_denom === asset;
+                })[0];
+              } else {
+                const verifyTrace = store.getters['demeris/getVerifyTrace']({
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: asset.split('/')[1],
+                });
+                verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+                verifyTrace.display_name = await getDisplayName(
+                  verifyTrace.base_denom,
+                  store.getters['demeris/getDexChain'],
+                );
+                verifyTrace.denom = asset;
+                verifyTrace.amount = `0${verifyTrace.base_denom}`;
+                return verifyTrace;
+              }
+            }),
+          );
+        }
+
         isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
       },
     );
@@ -429,10 +433,10 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (!data.isSwapReady) {
-          return 'inactive';
-        } else {
+        if (data.isSwapReady) {
           return 'normal';
+        } else {
+          return 'inactive';
         }
       }),
       maxButtonText: computed(() => {
@@ -569,7 +573,7 @@ export default defineComponent({
     );
 
     watch(
-      () => data.isSwapReady,
+      () => data.payCoinAmount,
       async () => {
         if (data.isSwapReady) {
           console.log('[SWAP READY]');
@@ -652,6 +656,7 @@ export default defineComponent({
 
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
+        console.log('payload', payload);
         data.receiveCoinData = payload;
         data.payCoinAmount = null;
         data.receiveCoinAmount = null;
@@ -682,7 +687,7 @@ export default defineComponent({
         const balanceB = isReverse
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
-        console.log(balanceA, balanceB);
+
         if (e.includes('Pay')) {
           data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
         } else {
