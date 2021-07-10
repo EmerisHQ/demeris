@@ -141,6 +141,14 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
+
+    watch(
+      () => balances.value,
+      () => {
+        console.log('BALANCES', JSON.parse(JSON.stringify(balances.value)));
+      },
+    );
+
     //TEST
     const isConsole = false;
     // REFACTOR STARTS HERE
@@ -210,11 +218,29 @@ export default defineComponent({
             pay: reserveCoinB,
             receive: { denom: reserveCoinA.denom },
           };
-          pairs.push(pairAB);
-          pairs.push(pairBA);
+
+          // TODO: get isAdvanced from local storage
+          const isAdvanced = false;
+          if (isAdvanced) {
+            pairs.push(pairAB);
+            pairs.push(pairBA);
+          } else {
+            if (!hasPoolCoin(pairAB)) {
+              pairs.push(pairAB);
+            }
+            if (!hasPoolCoin(pairBA)) {
+              pairs.push(pairBA);
+            }
+          }
+
+          //helpers
+          function hasPoolCoin(pair) {
+            const poolPrefix = 'pool';
+            return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
+          }
         }
-        // console.log('Available Pairs:');
-        // console.log(pairs);
+        console.log('Available Pairs:');
+        console.log(pairs);
         availablePairs.value = pairs;
       },
     );
@@ -591,11 +617,17 @@ export default defineComponent({
     );
 
     function changePayToReceive() {
+      console.log(balances.value);
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
       }
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+      if (isSignedIn.value) {
+        const verifiedBalances = userAccountBalances.value.verified;
+        console.log('userAccount', verifiedBalances);
+      }
+
       // const originReceiveCoinAmount = JSON.parse(JSON.stringify(data.receiveCoinAmount));
 
       data.payCoinData = originReceiveCoinData;
