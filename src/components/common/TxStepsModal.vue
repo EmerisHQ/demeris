@@ -36,6 +36,7 @@
       :status="txstatus"
       :has-more="hasMore"
       :tx="transaction"
+      :is-final="isFinal"
       @next="nextTx"
       @retry="
         () => {
@@ -101,6 +102,7 @@ export default defineComponent({
     const retry = ref(false);
     const store = useStore();
     const hasMore = ref(false);
+    const isFinal = ref(false);
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -167,6 +169,9 @@ export default defineComponent({
 
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
+          if (currentStep.value == (props.data as Step[]).length - 1) {
+            isFinal.value = true;
+          }
           do {
             retry.value = false;
             transaction.value = stepTx;
@@ -263,6 +268,7 @@ export default defineComponent({
       transaction,
       retry,
       hasMore,
+      isFinal,
     };
   },
 });
