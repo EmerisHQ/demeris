@@ -239,8 +239,8 @@ export default defineComponent({
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-        console.log('Available Pairs:');
-        console.log(pairs);
+        // console.log('Available Pairs:');
+        // console.log(pairs);
         availablePairs.value = pairs;
       },
     );
@@ -249,8 +249,8 @@ export default defineComponent({
       let paySide = availablePairs.value.filter(
         (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
       );
-      // console.log('Calculated PayPair List ');
-      // console.log(paySide);
+      console.log('Calculated PayPair List ');
+      console.log(paySide);
       return paySide;
     });
     const availableReceiveSide = computed(() => {
@@ -339,6 +339,7 @@ export default defineComponent({
               if (asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain) {
                 asset.display_name = pair.display_name;
                 asset.denom = pair.denom;
+                asset.TEST = '123123123123';
               }
               return asset.base_denom === pair.base_denom && asset.on_chain === pair.on_chain;
             });
@@ -360,7 +361,19 @@ export default defineComponent({
     watch(
       () => assetsToReceive.value,
       async () => {
-        // console.log('assetsToReceive.value', assetsToReceive.value);
+        console.log('assetsToReceive.value', assetsToReceive.value);
+        console.log('balance', balances.value);
+
+        // const test = [
+        //   ...balances.value,
+        //   ...store.getters['demeris/getVerifiedDenoms'].map((denom) => ({
+        //     base_denom: denom.name,
+        //     on_chain: denom.chain_name,
+        //     amount: '0' + denom.name,
+        //   })),
+        // ];
+        // console.log(test);
+
         if (assetsToReceive.value.length || isSignedIn.value) {
           const filteredList = initialPairList.value.filter((pair) => {
             return assetsToReceive.value.includes(pair.denom);
@@ -402,10 +415,27 @@ export default defineComponent({
 
         if (!isInit.value && watchValues[0].length) {
           data.receiveCoinData = null;
-          data.payCoinData =
-            payAssetList.value.filter((coin) => {
-              return coin.base_denom === 'uatom';
-            })[0] ?? payAssetList.value[0];
+          if (!isSignedIn.value) {
+            //no-wallet
+            data.payCoinData = {
+              amount: '0uatom',
+              base_denom: 'uatom',
+              chain_name: 'cosmos-hub',
+              denom: 'uatom',
+              display_name: 'ATOM',
+              on_chain: 'cosmos-hub',
+            };
+          } else {
+            //TODO: get user balance and set
+            data.payCoinData = {
+              amount: '0uatom',
+              base_denom: 'uatom',
+              chain_name: 'cosmos-hub',
+              denom: 'uatom',
+              display_name: 'ATOM',
+              on_chain: 'cosmos-hub',
+            };
+          }
 
           isInit.value = true;
         }
@@ -617,7 +647,6 @@ export default defineComponent({
     );
 
     function changePayToReceive() {
-      console.log(balances.value);
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
