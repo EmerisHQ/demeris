@@ -123,7 +123,6 @@ export default defineComponent({
     DenomSelect,
     IconButton,
     ActionButton,
-    // Icon,
     ReviewModal,
     Alert,
     SlippageSettingModal,
@@ -147,15 +146,9 @@ export default defineComponent({
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
-    watch(
-      () => balances.value,
-      () => {
-        console.log('BALANCES', JSON.parse(JSON.stringify(balances.value)));
-      },
-    );
-
     //TEST
-    const isConsole = false;
+    const isConsole = true;
+
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
     watch(
@@ -279,36 +272,11 @@ export default defineComponent({
       return assets;
     });
 
-    const initialPairList = ref([]); // for default asset list
-    watch(
-      () => availablePairs.value,
-      (pairs) => {
-        const uniquePairList = JSON.parse(JSON.stringify(pairs))
-          .map((pair) => {
-            return pair.pay;
-          })
-          .reduce(function (acc, current) {
-            if (acc.findIndex(({ denom }) => denom === current.denom) === -1) {
-              acc.push(current);
-            }
-            return acc;
-          }, []);
-
-        initialPairList.value =
-          //TODO: advanced user
-          // localStorage.getItem('isAdvanced') === 'true'
-          true ? uniquePairList : uniquePairList.filter((pair) => !pair.denom.includes('pool'));
-        isConsole ? console.log('[INITIAL PAIR LIST]', initialPairList.value) : '';
-      },
-    );
-
     // TODO: Advanced option only advanced user can see pool token
     const payAssetList = ref([]);
     watch(
-      () => [initialPairList.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
-      async (watchValues) => {
-        console.log(availablePairs.value);
-
+      () => [availablePairs.value, isSignedIn.value, assetsToPay.value, userAccountBalances.value],
+      async () => {
         const availablePayDenoms = availablePairs.value.map((pair) => {
           return pair.pay.denom;
         });
@@ -320,8 +288,6 @@ export default defineComponent({
           display_name: denom.display_name,
           amount: `0${denom.name}`,
         }));
-
-        console.log(verifiedDenoms.value);
 
         payAssetList.value = await Promise.all(
           availablePayDenoms.map(async (asset) => {
@@ -345,7 +311,6 @@ export default defineComponent({
             }
           }),
         );
-        console.log('[PAY ASSET LIST]:', payAssetList.value);
         isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
       },
     );
@@ -559,7 +524,7 @@ export default defineComponent({
       },
     );
 
-    //get pool price작업
+    // get pool price작업
     watch(
       () => {
         return [data.payCoinData, data.receiveCoinData];
