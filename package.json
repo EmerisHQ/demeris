@@ -28,14 +28,14 @@
     "lodash.groupby": "^4.6.0",
     "long": "^4.0.0",
     "qrcode": "^1.4.4",
-    "vue": "^3.0.11",
-    "vue-router": "^4.0.3",
+    "vue": "^3.1.4",
+    "vue-router": "^4.0.10",
     "vue-tippy": "^6.0.0-alpha.29",
-    "vuex": "^4.0.0-0"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@keplr-wallet/types": "^0.9.0-alpha.3",
-    "@types/jest": "^24.0.19",
+    "@types/jest": "^24.9.1",
     "@types/lodash.groupby": "^4.6.6",
     "@typescript-eslint/eslint-plugin": "^4.24.0",
     "@typescript-eslint/parser": "^4.24.0",
@@ -55,8 +55,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "eslint-plugin-unused-imports": "^1.1.1",
-    "eslint-plugin-vue": "^7.0.0-0",
+    "eslint-plugin-vue": "^7.13.0",
     "lint-staged": "^11.0.0",
     "node-sass": "^5.0.0",
     "postcss": "^7.0.35",
@@ -64,9 +63,10 @@
     "sass-loader": "^10.0.5",
     "simple-git-hooks": "^2.4.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.2",
+    "ts-jest": "^27.0.0-next.12",
     "typescript": "~3.9.3",
     "vue-cli-plugin-tailwind": "^2.0.6",
-    "vue-jest": "^5.0.0-0"
+    "vue-jest": "^5.0.0-alpha.10"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
