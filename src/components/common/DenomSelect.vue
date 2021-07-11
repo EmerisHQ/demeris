@@ -12,7 +12,13 @@
 					vuex getter to get  chain name from chain id
 		-->
 
-    <img class="denom-select__coin-image" :src="coinImage" :alt="`selected coin`" @click="toggleDenomSelectModal" />
+    <CircleSymbol
+      :denoms="selectedDenom?.base_denom ?? ''"
+      :chain-name="selectedDenom?.on_chain ?? undefined"
+      :size="'sm'"
+      class="denom-select__symbol"
+      @click="toggleDenomSelectModal"
+    />
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
@@ -63,6 +69,7 @@
 import { computed, defineComponent, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -70,7 +77,7 @@ import { store } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelect',
-  components: { ChainName, Denom, Icon, DenomSelectModal },
+  components: { ChainName, Denom, Icon, DenomSelectModal, CircleSymbol },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
@@ -159,6 +166,11 @@ export default defineComponent({
   align-items: center;
 
   padding: 1.6rem 2.4rem;
+
+  &__symbol {
+    cursor: pointer;
+    margin-right: 1.2rem;
+  }
 
   &--empty &__coin {
     cursor: default;
