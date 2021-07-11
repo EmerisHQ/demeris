@@ -77,7 +77,6 @@ export default defineComponent({
     watch(
       () => props.assets,
       async () => {
-        console.log('TEST', props.assets);
         if (props.assets.length) {
           displayNameAddedList.value = [
             await Promise.all(
@@ -130,6 +129,7 @@ export default defineComponent({
       chainSelectHandler,
       keyword,
       keywordFilteredAssets,
+      displayNameAddedList,
       selectedDenom,
     };
   },

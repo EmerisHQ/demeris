@@ -115,7 +115,6 @@ import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
-import { getDisplayName } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
@@ -281,25 +280,11 @@ export default defineComponent({
         if (isSignedIn.value) {
           //with-wallet
           if (data.receiveCoinData) {
-            //when receive coin selected => show assetToPay
-            payAssetList.value = await Promise.all(
-              assetsToPay.value.map(async (asset) => {
-                return {
-                  ...asset,
-                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
-                };
-              }),
-            );
+            // when receive coin selected => show assetToPay
+            payAssetList.value = assetsToPay.value;
           } else {
-            //with-wallet, recevie coin not selcted => show user balance
-            payAssetList.value = await Promise.all(
-              balances.value.map(async (coin) => {
-                return {
-                  ...coin,
-                  display_name: await getDisplayName(coin.base_denom, store.getters['demeris/getDexChain']),
-                };
-              }),
-            );
+            //recevie coin not selcted => show user balance
+            payAssetList.value = balances.value;
           }
         } else {
           //no-wallet => show availablePairs
@@ -315,34 +300,29 @@ export default defineComponent({
             amount: `0${denom.name}`,
           }));
 
-          payAssetList.value = await Promise.all(
-            //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-            (availablePaySide.value.length > 0
+          //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+          payAssetList.value = (
+            availablePaySide.value.length > 0
               ? availablePaySide.value.map((pair) => {
                   return pair.pay.denom;
                 })
               : availablePayDenoms
-            ).map(async (asset) => {
-              if (isNative(asset)) {
-                return formattedVerifiedDenoms.filter((coin) => {
-                  return coin.base_denom === asset;
-                })[0];
-              } else {
-                const verifyTrace = store.getters['demeris/getVerifyTrace']({
-                  chain_name: store.getters['demeris/getDexChain'],
-                  hash: asset.split('/')[1],
-                });
-                verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-                verifyTrace.display_name = await getDisplayName(
-                  verifyTrace.base_denom,
-                  store.getters['demeris/getDexChain'],
-                );
-                verifyTrace.denom = asset;
-                verifyTrace.amount = `0${verifyTrace.base_denom}`;
-                return verifyTrace;
-              }
-            }),
-          );
+          ).map((asset) => {
+            if (isNative(asset)) {
+              return formattedVerifiedDenoms.filter((coin) => {
+                return coin.base_denom === asset;
+              })[0];
+            } else {
+              const verifyTrace = store.getters['demeris/getVerifyTrace']({
+                chain_name: store.getters['demeris/getDexChain'],
+                hash: asset.split('/')[1],
+              });
+              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+              verifyTrace.denom = asset;
+              verifyTrace.amount = `0${verifyTrace.base_denom}`;
+              return verifyTrace;
+            }
+          });
         }
 
         isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
@@ -361,33 +341,28 @@ export default defineComponent({
           display_name: denom.display_name,
         }));
 
-        receiveAssetList.value = await Promise.all(
-          //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-          (assetsToReceive.value.length > 0
+        //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+        receiveAssetList.value = (
+          assetsToReceive.value.length > 0
             ? assetsToReceive.value
             : availablePairs.value.map((pair) => {
                 return pair.pay.denom;
               })
-          ).map(async (asset) => {
-            if (isNative(asset)) {
-              return formattedVerifiedDenoms.filter((coin) => {
-                coin.denom = asset;
-                return coin.base_denom === asset;
-              })[0];
-            } else {
-              const verifyTrace = store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: asset.split('/')[1],
-              });
-              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-              verifyTrace.display_name = await getDisplayName(
-                verifyTrace.base_denom,
-                store.getters['demeris/getDexChain'],
-              );
-              return verifyTrace;
-            }
-          }),
-        );
+        ).map((asset) => {
+          if (isNative(asset)) {
+            return formattedVerifiedDenoms.filter((coin) => {
+              coin.denom = asset;
+              return coin.base_denom === asset;
+            })[0];
+          } else {
+            const verifyTrace = store.getters['demeris/getVerifyTrace']({
+              chain_name: store.getters['demeris/getDexChain'],
+              hash: asset.split('/')[1],
+            });
+            verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+            return verifyTrace;
+          }
+        });
 
         isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
       },
@@ -647,7 +622,7 @@ export default defineComponent({
       },
     );
 
-    async function changePayToReceive() {
+    function changePayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
@@ -664,13 +639,7 @@ export default defineComponent({
         });
         if (newPayCoinUserBalance.length) {
           //with wallet, user has this asset on cosmos_hub
-          data.payCoinData = {
-            ...newPayCoinUserBalance[0],
-            display_name: await getDisplayName(
-              newPayCoinUserBalance[0].base_denom,
-              store.getters['demeris/getDexChain'],
-            ),
-          };
+          data.payCoinData = newPayCoinUserBalance[0];
           data.receiveCoinData = originPayCoinData;
         } else {
           //with wallet, user doesn't has this asset on cosmos_hub
