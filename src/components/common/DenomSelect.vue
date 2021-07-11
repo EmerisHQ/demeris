@@ -98,7 +98,7 @@ export default defineComponent({
     watch(
       () => props.selectedDenom,
       async () => {
-        if (props.selectedDenom.base_denom) {
+        if (props.selectedDenom?.base_denom) {
           displayName.value = await getDisplayName(
             props.selectedDenom.base_denom,
             store.getters['demeris/getDexChain'],

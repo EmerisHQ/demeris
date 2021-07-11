@@ -30,7 +30,7 @@
       </div>
       <div class="coin-list">
         <CoinList
-          :data="filterKeyword"
+          :data="keywordFilteredAssets"
           :type="title === 'Receive' ? 'receive' : 'pay'"
           :show-balance="showBalance"
           :keyword="keyword"
@@ -73,20 +73,33 @@ export default defineComponent({
     const keyword = ref('');
     const selectedDenom = ref(null);
 
-    const displayName = ref('');
+    const displayNameAddedList = ref([]);
     watch(
       () => props.assets,
       async () => {
-        if (props.assets.base_denom) {
-          displayName.value = await getDisplayName(props.assets.base_denom, store.getters['demeris/getDexChain']);
+        console.log('TEST', props.assets);
+        if (props.assets.length) {
+          displayNameAddedList.value = [
+            await Promise.all(
+              props.assets.map(async (asset) => {
+                return {
+                  ...asset,
+                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                };
+              }),
+            ),
+          ];
+        } else {
+          return [];
         }
       },
     );
 
-    const filterKeyword = computed(() => {
-      const filteredAssets = props.assets.filter((asset) => {
+    const keywordFilteredAssets = computed(() => {
+      const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
         return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
       });
+
       return filteredAssets;
     });
 
@@ -116,7 +129,7 @@ export default defineComponent({
       coinListselectHandler,
       chainSelectHandler,
       keyword,
-      filterKeyword,
+      keywordFilteredAssets,
       selectedDenom,
     };
   },
