@@ -10,7 +10,7 @@
       <div style="display: flex" class="s-minus">
         <div
           v-if="buttonName.includes('Max')"
-          style="max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+          style="max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
         >
           {{ buttonName?.split('Max')[0] }}
         </div>

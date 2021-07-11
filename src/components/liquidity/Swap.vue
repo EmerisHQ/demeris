@@ -117,6 +117,7 @@ import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { getDisplayName } from '@/utils/actionHandler';
 import { actionHandler } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
@@ -443,18 +444,7 @@ export default defineComponent({
           return 'inactive';
         }
       }),
-      maxButtonText: computed(() => {
-        if (data.payCoinData) {
-          const amount = getPrecisedAmount(data.payCoinData?.base_denom, data.maxAmount);
-          if (amount > 0) {
-            return `${amount} ${data.payCoinData.display_name} Max`;
-          } else {
-            return 'Max';
-          }
-        } else {
-          return 'Max';
-        }
-      }),
+      maxButtonText: 'Max',
       maxAmount: computed(() => {
         return (
           parseInt(
@@ -526,6 +516,25 @@ export default defineComponent({
       //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
+
+    //max button text set
+    watch(
+      () => data.payCoinData,
+      async () => {
+        if (data.payCoinData) {
+          const amount = getPrecisedAmount(data.payCoinData.base_denom, data.maxAmount);
+          if (amount > 0) {
+            const displayName = await getDisplayName(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
+            const formattedAmount = Math.floor(amount * 100) / 100;
+            data.maxButtonText = `${formattedAmount} ${displayName} Max`;
+          } else {
+            data.maxButtonText = 'Max';
+          }
+        } else {
+          data.maxButtonText = 'Max';
+        }
+      },
+    );
 
     //calculate slippage and set
     watch(
