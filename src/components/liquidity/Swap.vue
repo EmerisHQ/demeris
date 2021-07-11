@@ -1,14 +1,18 @@
 <template>
   <div class="wrapper">
-    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
+    <SlippageSettingModal v-show="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
     <ReviewModal
-      v-else-if="isOpen"
+      v-if="isOpen && !isSlippageSettingModalOpen"
       :data="actionHandlerResult"
       :gas-price-level="gasPriceLevel"
       @close="reviewModalToggle"
       @goback="gobackFunc"
     />
-    <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
+    <div
+      v-show="!isOpen && !isSlippageSettingModalOpen"
+      class="swap-widget elevation-panel"
+      :style="isChildModalOpen ? 'box-shadow:none;' : ''"
+    >
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
         <div class="swap-widget-header__dot-button">
@@ -461,7 +465,6 @@ export default defineComponent({
           ) ?? 0
         );
       }),
-
       //conditional-text-end
 
       //pay-receive-data-start
@@ -470,10 +473,9 @@ export default defineComponent({
       receiveCoinData: null,
       receiveCoinAmount: null,
       //pay-receive-data-end
+
+      //selectedPoolData for various calculation(pool price, swap price ...etc)
       selectedPoolData: null,
-      verifiedDenoms: computed(() => {
-        return store.getters['demeris/getVerifiedDenoms'];
-      }),
 
       // permanent fee-level-setting
       gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
@@ -526,7 +528,7 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    //slippage check
+    //calculate slippage and set
     watch(
       () => data.payCoinAmount,
       () => {
@@ -545,7 +547,7 @@ export default defineComponent({
       },
     );
 
-    //get selecte pair pool info
+    //set selecte pair pool info
     watch(
       () => {
         return [data.payCoinData, data.receiveCoinData];
@@ -727,6 +729,8 @@ export default defineComponent({
       swap,
       assetsToPay,
       assetsToReceive,
+      payAssetList,
+      receiveAssetList,
       setChildModalOpenStatus,
       isOpen,
       reviewModalToggle,
@@ -735,9 +739,6 @@ export default defineComponent({
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
       getDisplayPrice,
-      //new
-      payAssetList,
-      receiveAssetList,
     };
   },
 });
