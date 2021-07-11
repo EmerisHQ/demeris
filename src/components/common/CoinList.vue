@@ -20,13 +20,7 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-        <CircleSymbol
-          :denoms="coin.base_denom"
-          :chain-name="coin.on_chain"
-          :size="'sm'"
-          class="denom-select__symbol"
-          @click="toggleDenomSelectModal"
-        />
+        <CircleSymbol :denoms="coin.base_denom" :chain-name="coin.on_chain" />
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
@@ -160,7 +154,7 @@ export default defineComponent({
   cursor: pointer;
 
   .tippy-info {
-    margin-right: 1.2rem;
+    margin-right: 1.6rem;
   }
 
   &__balance {
