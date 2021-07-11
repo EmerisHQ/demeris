@@ -17,12 +17,12 @@
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         <tippy
-          v-if="selectedDenom.display_name.startsWith('GDEX')"
+          v-if="displayName.startsWith('GDEX')"
           :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
           class="tippy-info"
         >
-          <div class="max-display-width">{{ selectedDenom.display_name }}</div>
-          <template #content> {{ selectedDenom.display_name }} </template>
+          <div class="max-display-width">{{ displayName }}</div>
+          <template #content> {{ displayName }} </template>
         </tippy>
         <Denom v-else :name="selectedDenom?.base_denom" />
         <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
@@ -60,12 +60,14 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { store } from '@/store';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelect',
   components: { ChainName, Denom, Icon, DenomSelectModal },
@@ -92,9 +94,22 @@ export default defineComponent({
       return props.assets.length > 0;
     });
 
+    const displayName = ref('');
+    watch(
+      () => props.selectedDenom,
+      async () => {
+        if (props.selectedDenom.base_denom) {
+          displayName.value = await getDisplayName(
+            props.selectedDenom.base_denom,
+            store.getters['demeris/getDexChain'],
+          );
+        }
+      },
+    );
+
     const coinImage = computed(() => {
       try {
-        const denom = props.selectedDenom?.display_name;
+        const denom = displayName.value;
         let denomIconName = 'empty';
         if (denom.includes('GDEX')) {
           denomIconName = 'pool';
@@ -125,7 +140,16 @@ export default defineComponent({
       toggleDenomSelectModal();
     }
 
-    return { inputAmount, isSelected, isOpen, coinImage, hasOptions, toggleDenomSelectModal, denomSelectHandler };
+    return {
+      inputAmount,
+      isSelected,
+      isOpen,
+      coinImage,
+      hasOptions,
+      toggleDenomSelectModal,
+      denomSelectHandler,
+      displayName,
+    };
   },
 });
 </script>

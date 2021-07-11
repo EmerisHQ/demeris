@@ -30,7 +30,7 @@
       </div>
       <div class="coin-list">
         <CoinList
-          :data="filterKeyword(assets, keyword)"
+          :data="filterKeyword"
           :type="title === 'Receive' ? 'receive' : 'pay'"
           :show-balance="showBalance"
           :keyword="keyword"
@@ -43,13 +43,15 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
+import { store } from '@/store';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -71,6 +73,23 @@ export default defineComponent({
     const keyword = ref('');
     const selectedDenom = ref(null);
 
+    const displayName = ref('');
+    watch(
+      () => props.assets,
+      async () => {
+        if (props.assets.base_denom) {
+          displayName.value = await getDisplayName(props.assets.base_denom, store.getters['demeris/getDexChain']);
+        }
+      },
+    );
+
+    const filterKeyword = computed(() => {
+      const filteredAssets = props.assets.filter((asset) => {
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+      });
+      return filteredAssets;
+    });
+
     function coinListselectHandler(payload) {
       if (props.title === 'Receive') {
         payload.type = props.title;
@@ -89,13 +108,6 @@ export default defineComponent({
     function toggleChainSelectModal() {
       isModalOpen.value = !isModalOpen.value;
       keyword.value = '';
-    }
-
-    function filterKeyword(assets, keyword) {
-      const filteredAssets = assets.filter((asset) => {
-        return asset.display_name?.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
-      });
-      return filteredAssets;
     }
 
     return {

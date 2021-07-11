@@ -105,7 +105,6 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import ActionButton from '@/components/ui/Button.vue';
-// import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
@@ -131,8 +130,7 @@ export default defineComponent({
   },
 
   setup() {
-    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } =
-      useCalculation();
+    const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
@@ -753,7 +751,6 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
-      getCoinDollarValue,
       changePayToReceive,
       denomSelectHandler,
       getPrecisedAmount,
