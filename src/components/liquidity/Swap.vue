@@ -9,9 +9,8 @@
       @goback="gobackFunc"
     />
     <div
-      v-show="!isOpen && !isSlippageSettingModalOpen"
       class="swap-widget elevation-panel"
-      :style="isChildModalOpen ? 'box-shadow:none;' : ''"
+      :style="[!isSlippageSettingModalOpen ? '' : 'display:none', isChildModalOpen ? 'box-shadow:none;' : '']"
     >
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
