@@ -55,10 +55,11 @@ export default defineComponent({
   },
 
   setup(props) {
+    const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
     const pairName = ref('-/-');
-    const truedenoms = ref((props.pool as Pool).reserve_coin_denoms);
-    const denoms = ref((props.pool as Pool).reserve_coin_denoms);
+    const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
+    const denoms = ref((newPool as Pool).reserve_coin_denoms);
     watch(
       () => truedenoms.value,
       async (newDenoms) => {
