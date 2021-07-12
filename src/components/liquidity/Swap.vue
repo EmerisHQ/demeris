@@ -613,35 +613,16 @@ export default defineComponent({
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
       }
+
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
 
-      if (isSignedIn.value) {
-        //with wallet
-        const newPayCoinUserBalance = assetsToPay.value.filter((coin) => {
-          return (
-            coin.denom === originReceiveCoinData?.base_denom && coin.on_chain === store.getters['demeris/getDexChain']
-          );
-        });
-        console.log();
-        if (newPayCoinUserBalance.length) {
-          //with wallet, user has this asset on cosmos_hub
-          data.payCoinData = newPayCoinUserBalance[0];
-          data.receiveCoinData = originPayCoinData;
-        } else {
-          //with wallet, user doesn't has this asset on cosmos_hub
-          data.payCoinData = null;
-          data.receiveCoinData = originPayCoinData;
-        }
-      } else {
-        data.payCoinData = originReceiveCoinData;
-        data.receiveCoinData = originPayCoinData;
-      }
+      data.payCoinData = originReceiveCoinData;
+      data.receiveCoinData = assetsToReceive.value.find((asset) => {
+        return asset.base_denom === originPayCoinData.base_denom;
+      });
 
       data.payCoinAmount = 0;
       data.receiveCoinAmount = 0;
-
-      // TEST
-      // data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
     }
 
     function setMax() {
