@@ -4,8 +4,12 @@ export const messages = {
       seeall: 'See all',
       done: 'Done',
       cancel: 'Cancel',
+      confirm: 'Confirm',
+      continue: 'Continue',
+      noFunds: 'Insufficient Funds',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try again with another search',
+      max: 'Max',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -48,6 +52,23 @@ export const messages = {
         swapFee: 'Swap fee',
         estimate: 'Estimated total fees',
       },
+      moveForm: {
+        title: 'Move assets',
+        action: 'Move',
+        from: 'From',
+        to: 'To',
+        selectChain: 'Select chain',
+      },
+      sendForm: {
+        title: 'Send to an address',
+        amountSelect: 'Enter an amount',
+        available: 'available',
+        to: 'To',
+        memo: 'Reference (memo)',
+        memoHint: 'Memo hint',
+        memoPlaceholder: 'Add reference/memo',
+        agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
+      },
     },
     context: {
       feeLevels: {
@@ -71,6 +92,11 @@ export const messages = {
       pools: {
         title: 'Pools',
         equity: 'Equity',
+        mine: 'My Pools',
+        all: 'All Pools',
+        pair: 'Token Pair',
+        share: 'Your share',
+        liquidity: 'Liquidity',
       },
     },
   },

@@ -3,7 +3,7 @@
     <thead v-if="showHeaders">
       <tr>
         <th class="text-left">{{ $t('context.assets.asset') }}</th>
-        <th v-if="displayStyle !== 'summary'" class="text-right">{{ $t('context.assets.asset.price') }}</th>
+        <th v-if="displayStyle !== 'summary'" class="text-right">{{ $t('context.assets.price') }}</th>
         <!--<th v-if="displayStyle === 'full'" class="text-right">24h %</th>//-->
         <th v-if="displayStyle === 'full'" class="text-right">{{ $t('context.assets.amount') }}</th>
         <th class="text-right">{{ $t('context.assets.balance') }}</th>
