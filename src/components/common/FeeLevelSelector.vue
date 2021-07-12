@@ -72,6 +72,7 @@ import { useStore } from 'vuex';
 
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { feeForSteps } from '@/utils/actionHandler';
 
@@ -174,7 +175,7 @@ export default defineComponent({
       setGasPriceLevel: (level: GasPriceLevel) => {
         console.log(level);
         emit('update:gasPriceLevel', level);
-        localStorage.setItem('demeris-fee-level', level);
+        store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },
       toggle: () => {
         data.isFeesOpen = !data.isFeesOpen;
