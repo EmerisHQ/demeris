@@ -13,7 +13,7 @@
         </div>
       </div>
     </div>
-    <Button v-else name="Connect my wallet" @click="toggleModal" />
+    <Button v-else :name="$t('wallet.connect.button')" @click="toggleModal" />
     <ConnectWalletModal :open="isModalOpen" @close="toggleModal" />
   </div>
 </template>

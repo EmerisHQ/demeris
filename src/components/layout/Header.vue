@@ -16,14 +16,14 @@
         <div class="header__wallet-button__icon">
           <ReceiveIcon />
         </div>
-        Receive
+        {{ $t('navbar.receive') }}
       </router-link>
 
       <router-link class="header__wallet-button" to="/send">
         <div class="header__wallet-button__icon">
           <SendIcon />
         </div>
-        Send
+        {{ $t('navbar.send') }}
       </router-link>
 
       <button class="header__menu-button">
