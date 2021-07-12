@@ -69,7 +69,7 @@ export default defineComponent({
         : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
     });
     const showBadge = computed(() => {
-      return store.getters['hasSeenReedem'];
+      return store.getters['demeris/hasSeenReedem'] ? false : true;
     });
     return { redeemableBalances, tip, showBadge };
   },

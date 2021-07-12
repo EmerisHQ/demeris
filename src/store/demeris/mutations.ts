@@ -80,8 +80,9 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
-    state._Session = { ...state._Session, ...(payload as UserData) };
-
+    for (const prop in payload) {
+      state._Session[prop] = payload[prop];
+    }
     window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {

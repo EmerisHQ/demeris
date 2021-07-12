@@ -84,6 +84,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.numbers[(params as API.AddrReq).address] ?? null;
   },
   hasSeenReedem: (state) => {
+    console.log(state._Session);
     return state._Session.hasSeenRedeem;
   },
   getPreferredGasPriceLevel: (state) => {
