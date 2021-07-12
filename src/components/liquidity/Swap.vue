@@ -300,7 +300,7 @@ export default defineComponent({
           });
 
           //if duplicated replace amount
-          if (duplicatedCoin.denom) {
+          if (duplicatedCoin?.denom) {
             duplicatedCoin.amount = coin.amount;
           } else {
             //if not, just add user coin to the balance
