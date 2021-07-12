@@ -269,10 +269,14 @@ export default defineComponent({
       }
     });
     const availableReceiveSide = computed(() => {
-      let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-      // console.log('Calculated ReceivePair List ');
-      // console.log(receiveSide);
-      return receiveSide;
+      if (data.payCoinData) {
+        let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
+        // console.log('Calculated ReceivePair List ');
+        // console.log(receiveSide);
+        return receiveSide;
+      } else {
+        return availablePairs.value;
+      }
     });
     const assetsToPay = computed(() => {
       let payAssets = balances.value.filter((x) => {
