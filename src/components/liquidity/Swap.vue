@@ -248,8 +248,7 @@ export default defineComponent({
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-        // console.log('Available Pairs:');
-        console.log(pairs);
+        console.log('Available Pairs:', pairs);
         availablePairs.value = pairs;
       },
     );
@@ -335,11 +334,11 @@ export default defineComponent({
     const isInit = ref(false);
     watch(
       () => {
-        return [assetsToPay.value, isSignedIn.value];
+        return [assetsToPay.value, balances.value];
       },
       (watchValues, oldWatchValues) => {
         //when wallet connected/disconnected set again
-        if (watchValues[1] !== oldWatchValues[1]) {
+        if (watchValues[1].length !== oldWatchValues[1].length) {
           isInit.value = false;
           data.payCoinAmount = null;
           data.receiveCoinAmount = null;
@@ -408,8 +407,8 @@ export default defineComponent({
       maxAmount: computed(() => {
         return (
           parseInt(
-            balances.value.filter((coin) => {
-              return coin.base_denom === data.payCoinData?.base_denom && coin.on_chain === data.payCoinData.on_chain;
+            allBalances.value.filter((coin) => {
+              return coin.denom === data.payCoinData?.denom;
             })[0]?.amount,
           ) ?? 0
         );
