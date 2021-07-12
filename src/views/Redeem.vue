@@ -120,7 +120,8 @@ export default defineComponent({
     const router = useRouter();
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
+    const store = useStore();
+    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
@@ -189,7 +190,6 @@ export default defineComponent({
     const onClose = () => {
       router.push('/pools');
     };
-    const store = useStore();
     const getRoute = (hash, chain_name) => {
       const verifyTrace = store.getters['demeris/getVerifyTrace']({
         chain_name,
