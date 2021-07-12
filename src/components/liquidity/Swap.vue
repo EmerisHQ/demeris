@@ -573,12 +573,20 @@ export default defineComponent({
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
-          console.log(data.payCoinData, data.receiveCoinData);
+          const payDenom =
+            (data.payCoinData.ibc?.ibc_denom || data.payCoinData.ibc_denom) ?? data.payCoinData.base_denom;
+          const receiveDenom =
+            (data.receiveCoinData.ibc?.ibc_denom || data.receiveCoinData.ibc_denom) ?? data.receiveCoinData.base_denom;
+          console.group('[SELECTD POOL DENOMS]');
+          console.log('PAY COIN DENOM: ', payDenom);
+          console.log('RECEIVE COIN DENOM: ', receiveDenom);
+          console.groupEnd();
           try {
-            const id = poolsByDenom(data.payCoinData.denom || data.payCoinData.base_denom).find((pool) => {
+            const id = poolsByDenom(payDenom).find((pool) => {
               return (
                 pool.reserve_coin_denoms.find((denom) => {
-                  return denom === data.receiveCoinData.denom;
+                  console.log(denom, receiveDenom);
+                  return denom.toLowerCase() === receiveDenom;
                 })?.length > 0
               );
             })?.id;
@@ -594,9 +602,9 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            console.table('[SELECTED POOL DATA]', data.selectedPoolData);
+            console.table('SELECTED POOL DATA : ', data.selectedPoolData);
           } catch (e) {
-            console.log('error', e, data.payCoinData, data.receiveCoinData);
+            console.log('error', e);
             data.selectedPoolData = null;
           }
         }
