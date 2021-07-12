@@ -7,11 +7,17 @@
       <div class="circle-symbol__ring" :style="ringStyle" />
     </template>
 
-    <template v-else-if="isUnverified">
+    <template v-else-if="!isVerified">
       <div class="circle-symbol__circle" :style="innerStyle">
         <div class="circle-symbol__badge" />
         <p class="circle-symbol__letter">{{ denoms[0]?.[0] || denom[0] }}</p>
       </div>
+    </template>
+
+    <template v-else-if="assetConfig">
+      <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
+      <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
+      <img v-if="isNativeChain" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
     </template>
 
     <template v-else>
@@ -33,6 +39,7 @@ import { useStore } from 'vuex';
 
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
+import { Chains, VerifiedDenoms } from '@/types/api';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
 
@@ -75,10 +82,6 @@ export default defineComponent({
     const denoms = ref<string[]>([]);
     const isLoaded = ref(false);
 
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'] || [];
-    });
-
     const isPoolCoin = computed(() => {
       if (props.variant === 'asset') {
         return (props.denom as string).startsWith('pool');
@@ -87,18 +90,39 @@ export default defineComponent({
       return false;
     });
 
-    const isUnverified = computed(() => {
+    const assetConfig = computed(() => {
+      if (isPoolCoin.value) {
+        return;
+      }
+
+      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
+      const chains: Chains = store.getters['demeris/getChains'] || [];
+
+      const denomConfig = verifiedDenoms.find((item) => item.name === denoms.value[0]);
+
+      if (!denomConfig) {
+        return;
+      }
+
+      const chainConfig = chains[denomConfig.chain_name];
+
+      return {
+        ...denomConfig,
+        logo: denomConfig.logo || chainConfig.logo,
+      };
+    });
+
+    const isVerified = computed(() => {
       if (!isLoaded.value) {
-        return false;
+        return true;
       }
 
       if (isPoolCoin.value) {
-        return false;
+        return true;
       }
 
-      if (props.variant === 'asset') {
-        const denomConfig = verifiedDenoms.value.find((item) => item.name === denoms.value[0]);
-        return !denomConfig?.verified;
+      if (assetConfig.value) {
+        return assetConfig.value.verified;
       }
 
       return true;
@@ -110,8 +134,7 @@ export default defineComponent({
       }
 
       if (props.variant === 'asset' && !isPoolCoin.value) {
-        const denomConfig = verifiedDenoms.value.find((item) => item.name === denoms.value[0]);
-        return denomConfig?.chain_name === props.chainName;
+        return assetConfig.value?.chain_name === props.chainName;
       }
 
       return false;
@@ -167,16 +190,15 @@ export default defineComponent({
         return require(`@/assets/svg/symbols/gdex.svg`);
       }
 
-      if (denoms.value.length) {
-        return require(`@/assets/svg/symbols/${denoms.value[0] as string}.svg`);
-      }
-
       return undefined;
     });
 
     watch(
       () => props.denom,
       async () => {
+        if (!props.denom) {
+          return;
+        }
         if (isPoolCoin.value) {
           const pool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
           if (pool) {
@@ -191,13 +213,14 @@ export default defineComponent({
     );
 
     return {
+      assetConfig,
       denoms,
-      isLoaded,
-      symbolImage,
       innerStyle,
-      ringStyle,
-      isUnverified,
+      isLoaded,
       isNativeChain,
+      isVerified,
+      ringStyle,
+      symbolImage,
     };
   },
 });
@@ -211,25 +234,23 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  width: var(--symbol-size);
+  height: var(--symbol-size);
 
   &--xs {
-    width: 2rem;
-    height: 2rem;
+    --symbol-size: 2rem;
   }
 
   &--sm {
-    width: 2.4rem;
-    height: 2.4rem;
+    --symbol-size: 2.4rem;
   }
 
   &--md {
-    width: 3.2rem;
-    height: 3.2rem;
+    --symbol-size: 3.2rem;
   }
 
   &--lg {
-    width: 4rem;
-    height: 4rem;
+    --symbol-size: 4rem;
   }
 
   &--ringed &__circle {
@@ -245,7 +266,19 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 0.6rem;
+    z-index: 1;
+    &:not(.logo) {
+      padding: 0.6rem;
+    }
+  }
+
+  &__logo-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    filter: blur(calc(0.4 * var(--symbol-size)));
+    top: 12.5%;
   }
 
   &__ring {
