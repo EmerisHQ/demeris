@@ -248,7 +248,7 @@ export default defineComponent({
           //helper
           function hasPoolCoin(pair) {
             const poolPrefix = 'pool';
-            return pair.pay.base_denom.startsWith(poolPrefix) || pair.receive.base_denom.startsWith(poolPrefix);
+            return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
         // console.log('Available Pairs:');
@@ -258,7 +258,7 @@ export default defineComponent({
     );
 
     const availablePaySide = computed(() => {
-      if (data.receiveCoinData) {
+      if (data?.receiveCoinData) {
         let paySide = availablePairs.value.filter(
           (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
         );
@@ -270,7 +270,7 @@ export default defineComponent({
       }
     });
     const availableReceiveSide = computed(() => {
-      if (data.payCoinData) {
+      if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
         // console.log('Calculated ReceivePair List ');
         // console.log(receiveSide);
@@ -471,7 +471,7 @@ export default defineComponent({
         return (
           parseInt(
             balances.value.filter((coin) => {
-              return coin.base_denom === data.payCoinData.base_denom && coin.on_chain === data.payCoinData.on_chain;
+              return coin.base_denom === data.payCoinData?.base_denom && coin.on_chain === data.payCoinData.on_chain;
             })[0]?.amount,
           ) ?? 0
         );
@@ -653,9 +653,7 @@ export default defineComponent({
               },
             },
           };
-
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
-          console.log('actionHandlerResult', data.actionHandlerResult);
         } else {
           data.actionHandlerResult = null;
         }
