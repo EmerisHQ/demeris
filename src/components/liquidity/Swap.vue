@@ -522,10 +522,19 @@ export default defineComponent({
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
-          const payDenom =
-            (data.payCoinData.ibc?.ibc_denom || data.payCoinData.ibc_denom) ?? data.payCoinData.base_denom;
-          const receiveDenom =
-            (data.receiveCoinData.ibc?.ibc_denom || data.receiveCoinData.ibc_denom) ?? data.receiveCoinData.base_denom;
+          let payDenom = data.payCoinData.denom;
+          const receiveDenom = data.receiveCoinData.denom;
+          console.log(':D', data.payCoinData);
+          //if payCoin denom is not uatom & ibc token
+          if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+            const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
+              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+            }).pay.denom;
+
+            console.log('NATIVE PAY COIN DENOM', data.payCoinData.denom);
+            payDenom = nativeDenomToIBCDenom;
+          }
+
           console.group('[SELECTD POOL DENOMS]');
           console.log('PAY COIN DENOM: ', payDenom);
           console.log('RECEIVE COIN DENOM: ', receiveDenom);
@@ -535,10 +544,11 @@ export default defineComponent({
               return (
                 pool.reserve_coin_denoms.find((denom) => {
                   console.log(denom, receiveDenom);
-                  return denom.toLowerCase() === receiveDenom;
+                  return denom === receiveDenom;
                 })?.length > 0
               );
             })?.id;
+            console.log('ID', id);
 
             const pool = poolById(id);
             const poolPrice = await poolPriceById(id);
@@ -607,12 +617,12 @@ export default defineComponent({
 
       if (isSignedIn.value) {
         //with wallet
-        const newPayCoinUserBalance = balances.value.filter((coin) => {
+        const newPayCoinUserBalance = assetsToPay.value.filter((coin) => {
           return (
-            coin.base_denom === originReceiveCoinData?.base_denom &&
-            coin.on_chain === store.getters['demeris/getDexChain']
+            coin.denom === originReceiveCoinData?.base_denom && coin.on_chain === store.getters['demeris/getDexChain']
           );
         });
+        console.log();
         if (newPayCoinUserBalance.length) {
           //with wallet, user has this asset on cosmos_hub
           data.payCoinData = newPayCoinUserBalance[0];
