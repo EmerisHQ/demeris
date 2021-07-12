@@ -216,10 +216,6 @@ export default defineComponent({
   &__select {
     display: flex;
     justify-content: space-between;
-
-    .icon {
-      margin-left: 1rem;
-    }
   }
 
   .search-not-included {

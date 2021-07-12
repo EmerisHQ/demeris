@@ -100,6 +100,7 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
+        <MoonpayBanner v-if="assets.length" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
   </AppLayout>
@@ -378,11 +379,16 @@ export default defineComponent({
 
   &__aside {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
     margin-left: 3.2rem;
 
     &__swap {
+      width: 80%;
+    }
+
+    &__buy {
+      margin-top: 2.6rem;
       width: 80%;
     }
   }

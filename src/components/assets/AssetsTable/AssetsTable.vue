@@ -23,7 +23,12 @@
               v-if="displayStyle === 'summary' && asset.chainsNames.length > 1"
               class="assets-table__row__asset__denom__chains s-minus"
             >
-              <AssetChainsIndicator :denom="asset.denom" :balances="balances" :show-indicators="false" />
+              <AssetChainsIndicator
+                :denom="asset.denom"
+                :balances="balances"
+                :show-indicators="false"
+                :show-description="true"
+              />
             </div>
           </div>
         </td>

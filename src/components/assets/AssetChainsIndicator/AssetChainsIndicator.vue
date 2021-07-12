@@ -13,8 +13,8 @@
       </div>
 
       <div class="asset-chains-indicator__count">
-        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
-        <span v-if="showDescription">chains</span>
+        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
+        <span v-if="showDescription"> chains</span>
       </div>
 
       <template #content>
