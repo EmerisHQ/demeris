@@ -36,6 +36,7 @@ export type APIPromise = {
 export type UserData = {
   advanced?: boolean;
   gasPriceLevel?: GasPriceLevel;
+  hasSeenRedeem?: boolean;
   updateDT: number;
 };
 export type UserSession = {
