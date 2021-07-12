@@ -8,10 +8,13 @@
     <template v-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
       <SendFormAmount :balances="balances" @next="generateSteps" />
+      <div class="send-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
     <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" gas-price-level="gasPrice" />
+      <TxStepsModal :data="steps" :gas-price-level="gasPrice" />
     </template>
   </div>
 </template>
@@ -19,6 +22,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue';
 
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { GasPriceLevel, SendAddressForm, TransferAction } from '@/types/actions';
@@ -37,6 +41,7 @@ export default defineComponent({
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
+    FeeLevelSelector,
   },
 
   props: {
@@ -95,7 +100,6 @@ export default defineComponent({
       };
 
       const result = await actionHandler(action);
-
       steps.value = result;
       goToStep('review');
     };
@@ -120,6 +124,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 

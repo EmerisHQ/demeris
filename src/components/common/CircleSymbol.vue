@@ -27,7 +27,7 @@
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
-type CircleSymbolSize = 'sm' | 'md' | 'lg';
+type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg';
 
 import { useStore } from 'vuex';
 
@@ -211,6 +211,11 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
+  &--xs {
+    width: 2rem;
+    height: 2rem;
+  }
 
   &--sm {
     width: 2.4rem;

@@ -1,21 +1,26 @@
-<script setup lang="tsx">
+<script lang="tsx">
 import type { PropType } from 'vue';
-import { defineComponent, defineProps } from 'vue';
+import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import type { StakingBalance } from '@/types/api';
 
-defineProps({
-  stakingBalances: {
-    type: Array as PropType<StakingBalance[]>,
-    default: () => [],
+export default defineComponent({
+  components: {
+    Button,
+  },
+  props: {
+    stakingBalances: {
+      type: Array as PropType<StakingBalance[]>,
+      default: () => [],
+    },
   },
 });
+</script>
 
-const StakeBanner = defineComponent({
-  name: 'StakeBanner',
-  setup() {
-    return () => (
+<template>
+  <div class="stake">
+    <template v-if="!stakingBalances.length">
       <div class="stake__banner">
         <div class="stake__banner__wrapper">
           <p class="stake__banner__title">Earn rewards by staking ATOM</p>
@@ -28,14 +33,7 @@ const StakeBanner = defineComponent({
           <Button status="secondary" name="Coming soon" class="stake__banner__controls__button" />
         </div>
       </div>
-    );
-  },
-});
-</script>
-
-<template>
-  <div class="stake">
-    <StakeBanner v-if="!stakingBalances.length" />
+    </template>
 
     <template v-else>
       <div class="stake__rewards">

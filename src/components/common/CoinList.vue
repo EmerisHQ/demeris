@@ -61,7 +61,7 @@
       </div>
     </div>
     <div v-if="type === 'pay'" class="coin-list__select">
-      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
+      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
     <div v-else-if="showBalance" class="coin-list__balance">

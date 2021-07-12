@@ -5,16 +5,16 @@
         <CircleSymbol
           v-for="indicator of indicators"
           :key="indicator.on_chain"
-          variant="chain"
-          size="sm"
+          :size="showDescription ? 'sm' : 'xs'"
           :chain-name="indicator.on_chain"
+          variant="chain"
           class="asset-chains-indicator__list__item"
         />
       </div>
 
       <div class="asset-chains-indicator__count">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
-        chains
+        <span v-if="showDescription">chains</span>
       </div>
 
       <template #content>
@@ -47,6 +47,10 @@ export default defineComponent({
     denom: {
       type: String,
       required: true,
+    },
+    showDescription: {
+      type: Boolean,
+      default: true,
     },
     showIndicators: {
       type: Boolean,
@@ -131,16 +135,17 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     width: 50%;
-    margin-right: 0.8rem;
+    margin-right: 0.6rem;
 
     &__item {
-      &:not(:first-child) {
-        margin-left: -1.6rem;
+      &:not(:last-child) {
+        margin-right: -1rem;
       }
     }
   }
 
   &__count {
+    font-weight: 400;
     white-space: nowrap;
   }
 }
