@@ -240,8 +240,6 @@ export default defineComponent({
           } else {
             if (!hasPoolCoin(pairAB)) {
               pairs.push(pairAB);
-            }
-            if (!hasPoolCoin(pairBA)) {
               pairs.push(pairBA);
             }
           }
@@ -249,7 +247,7 @@ export default defineComponent({
           //helper
           function hasPoolCoin(pair) {
             const poolPrefix = 'pool';
-            return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
+            return pair.pay.base_denom.startsWith(poolPrefix) || pair.receive.base_denom.startsWith(poolPrefix);
           }
         }
         // console.log('Available Pairs:');
