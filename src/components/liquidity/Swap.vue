@@ -42,7 +42,7 @@
         v-model:amount="payCoinAmount"
         :input-header="`Pay ${getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? ''}`"
         :selected-denom="payCoinData"
-        :assets="payAssetList"
+        :assets="assetsToPay"
         :is-over="isOver"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
@@ -80,7 +80,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="`Receive ${getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount, '~').value ?? ''}`"
         :selected-denom="receiveCoinData"
-        :assets="receiveAssetList"
+        :assets="assetsToReceive"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
@@ -160,7 +160,7 @@ export default defineComponent({
     });
 
     //TEST
-    const isConsole = true;
+    const isConsole = false;
 
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
@@ -251,8 +251,8 @@ export default defineComponent({
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-        // console.log('Available Pairs:');
-        // console.log(pairs);
+        console.log('Available Pairs:');
+        console.log(pairs);
         availablePairs.value = pairs;
       },
     );
@@ -273,7 +273,7 @@ export default defineComponent({
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
         // console.log('Calculated ReceivePair List ');
-        // console.log(receiveSide);
+        console.log('availableReceiveSide', receiveSide);
         return receiveSide;
       } else {
         return availablePairs.value;
@@ -281,123 +281,140 @@ export default defineComponent({
     });
     const allBalances = computed(() => {
       // TODO : augment balances array with 0amount entries from verifiedDenoms
-      return balances.value;
+      // return balances.value
+      return [
+        ...verifiedDenoms.value.map((denom) => ({
+          base_denom: denom.name,
+          denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: 0,
+        })),
+      ];
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
       // console.log('Calculated Pay Asset List ');
-      // console.log(payAssets);
+      console.log('assetsToPay', payAssets);
       return payAssets;
     });
     const assetsToReceive = computed(() => {
-      let assets = availableReceiveSide.value.map((x) => x.receive.denom);
-      // console.log('Calculated Receive Asset List ');
-      // console.log(assets);
+      let assets = availableReceiveSide.value.map((x) => {
+        const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
+        console.log('denomInfo', denomInfo);
+        return {
+          denom: x.receive.denom,
+          base_denom: denomInfo.pay.base_denom,
+          on_chain: store.getters['demeris/getDexChain'],
+        };
+      });
+      console.log('assetsToReceive', assets);
+      // const test = availablePairs.value.filter((pair) => pair.receive.denom === data.payCoinData?.denom);
+
+      // console.log('TEST', test);
+
       return assets;
     });
 
-    const payAssetList = ref([]);
-    watch(
-      () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
-      async () => {
-        if (isSignedIn.value) {
-          //with-wallet
-          if (data.receiveCoinData) {
-            // when receive coin selected => show assetToPay
-            payAssetList.value = assetsToPay.value;
-          } else {
-            //recevie coin not selcted => show user balance
-            payAssetList.value = balances.value;
-          }
-        } else {
-          //no-wallet => show availablePairs
-          const availablePayDenoms = availablePairs.value.map((pair) => {
-            return pair.pay.denom;
-          });
+    // const payAssetList = ref([]);
+    // watch(
+    //   () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
+    //   async () => {
+    //     if (isSignedIn.value) {
+    //       //with-wallet
+    //       if (data.receiveCoinData) {
+    //         // when receive coin selected => show assetToPay
+    //         payAssetList.value = assetsToPay.value;
+    //       } else {
+    //         //recevie coin not selcted => show user balance
+    //         payAssetList.value = balances.value;
+    //       }
+    //     } else {
+    //       //no-wallet => show availablePairs
+    //       const availablePayDenoms = availablePairs.value.map((pair) => {
+    //         return pair.pay.denom;
+    //       });
 
-          const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
-            base_denom: denom.name,
-            denom: denom.name,
-            on_chain: denom.chain_name,
-            display_name: denom.display_name,
-            amount: `0${denom.name}`,
-          }));
+    //       const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
+    //         base_denom: denom.name,
+    //         denom: denom.name,
+    //         on_chain: denom.chain_name,
+    //         display_name: denom.display_name,
+    //         amount: `0${denom.name}`,
+    //       }));
 
-          //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-          payAssetList.value = (
-            availablePaySide.value.length > 0
-              ? availablePaySide.value.map((pair) => {
-                  return pair.pay.denom;
-                })
-              : availablePayDenoms
-          ).map((asset) => {
-            if (isNative(asset)) {
-              return formattedVerifiedDenoms.filter((coin) => {
-                return coin.base_denom === asset;
-              })[0];
-            } else {
-              const verifyTrace = store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: asset.split('/')[1],
-              });
-              verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-              verifyTrace.denom = asset;
-              verifyTrace.amount = `0${verifyTrace.base_denom}`;
-              return verifyTrace;
-            }
-          });
-        }
+    //       //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+    //       payAssetList.value = (availablePaySide.value.length > 0
+    //         ? availablePaySide.value.map((pair) => {
+    //             return pair.pay.denom;
+    //           })
+    //         : availablePayDenoms
+    //       ).map((asset) => {
+    //         if (isNative(asset)) {
+    //           return formattedVerifiedDenoms.filter((coin) => {
+    //             return coin.base_denom === asset;
+    //           })[0];
+    //         } else {
+    //           const verifyTrace = store.getters['demeris/getVerifyTrace']({
+    //             chain_name: store.getters['demeris/getDexChain'],
+    //             hash: asset.split('/')[1],
+    //           });
+    //           verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+    //           verifyTrace.denom = asset;
+    //           verifyTrace.amount = `0${verifyTrace.base_denom}`;
+    //           return verifyTrace;
+    //         }
+    //       });
+    //     }
 
-        isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
-      },
-    );
+    //     isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
+    //   },
+    // );
 
-    const receiveAssetList = ref([]);
-    watch(
-      () => assetsToReceive.value,
+    // const receiveAssetList = ref([]);
+    // watch(
+    //   () => assetsToReceive.value,
 
-      async () => {
-        // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and different on_chain
-        const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
-          base_denom: denom.name,
-          on_chain: denom.chain_name,
-          display_name: denom.display_name,
-        }));
+    //   async () => {
+    //     // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and different on_chain
+    //     const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
+    //       base_denom: denom.name,
+    //       on_chain: denom.chain_name,
+    //       display_name: denom.display_name,
+    //     }));
 
-        //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-        receiveAssetList.value = (
-          assetsToReceive.value.length > 0
-            ? assetsToReceive.value
-            : availablePairs.value.map((pair) => {
-                return pair.pay.denom;
-              })
-        ).map((asset) => {
-          if (isNative(asset)) {
-            return formattedVerifiedDenoms.filter((coin) => {
-              coin.denom = asset;
-              return coin.base_denom === asset;
-            })[0];
-          } else {
-            const verifyTrace = store.getters['demeris/getVerifyTrace']({
-              chain_name: store.getters['demeris/getDexChain'],
-              hash: asset.split('/')[1],
-            });
-            verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-            return verifyTrace;
-          }
-        });
+    //     //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
+    //     receiveAssetList.value = (assetsToReceive.value.length > 0
+    //       ? assetsToReceive.value
+    //       : availablePairs.value.map((pair) => {
+    //           return pair.pay.denom;
+    //         })
+    //     ).map((asset) => {
+    //       if (isNative(asset)) {
+    //         return formattedVerifiedDenoms.filter((coin) => {
+    //           coin.denom = asset;
+    //           return coin.base_denom === asset;
+    //         })[0];
+    //       } else {
+    //         const verifyTrace = store.getters['demeris/getVerifyTrace']({
+    //           chain_name: store.getters['demeris/getDexChain'],
+    //           hash: asset.split('/')[1],
+    //         });
+    //         verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
+    //         return verifyTrace;
+    //       }
+    //     });
 
-        isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
-      },
-    );
+    //     isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
+    //   },
+    // );
 
     // default pay coin set
     const isInit = ref(false);
     watch(
       () => {
-        return [payAssetList.value, isSignedIn.value];
+        return [assetsToPay.value, isSignedIn.value];
       },
       (watchValues, oldWatchValues) => {
         //when wallet connected/disconnected set again
@@ -421,9 +438,9 @@ export default defineComponent({
           } else {
             //with-wallet
             data.payCoinData =
-              payAssetList.value.filter((coin) => {
+              assetsToPay.value.filter((coin) => {
                 return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
-              })[0] ?? payAssetList.value[0];
+              })[0] ?? assetsToPay.value[0];
           }
 
           isInit.value = true;
@@ -499,7 +516,7 @@ export default defineComponent({
         if (isSignedIn.value) {
           return data.isBothSelected &&
             data.payCoinAmount >
-              parseInt(payAssetList?.value[0]?.amount) /
+              parseInt(assetsToPay?.value[0]?.amount) /
                 Math.pow(
                   10,
                   parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
@@ -766,8 +783,6 @@ export default defineComponent({
       swap,
       assetsToPay,
       assetsToReceive,
-      payAssetList,
-      receiveAssetList,
       setChildModalOpenStatus,
       isOpen,
       reviewModalToggle,
