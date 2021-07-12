@@ -300,7 +300,7 @@ export default defineComponent({
           });
 
           //if duplicated replace amount
-          if (duplicatedCoin.denom) {
+          if (duplicatedCoin?.denom) {
             duplicatedCoin.amount = coin.amount;
           } else {
             //if not, just add user coin to the balance
@@ -428,7 +428,7 @@ export default defineComponent({
       selectedPoolData: null,
 
       //tx fee level
-      gasPriceLevel: store.getters['getPreferredGasPriceLevel'],
+      gasPriceLevel: store.getters['demeris/getPreferredGasPriceLevel'],
 
       // for swap action
       actionHandlerResult: null,
@@ -603,6 +603,7 @@ export default defineComponent({
               },
             },
           };
+          console.log(swapParams);
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
         } else {
           data.actionHandlerResult = null;

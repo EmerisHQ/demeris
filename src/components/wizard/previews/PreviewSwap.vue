@@ -3,13 +3,16 @@
     <ListItem>
       <ListItem label="Pay">
         <div>
-          <AmountDisplay class="w-bold" :amount="data.from.amount" />
+          <AmountDisplay class="w-bold" :amount="data.from" />
         </div>
         <sub><ChainName :name="chainName" /></sub>
       </ListItem>
       <ListItem label="Receive" description="(estimated)">
         <div>
-          <AmountDisplay class="w-bold" :amount="data.to.amount" />
+          <AmountDisplay
+            class="w-bold"
+            :amount="{ amount: '' + parseFloat(data.from.amount) * limitPrice, denom: data.to.denom }"
+          />
         </div>
         <sub><ChainName :name="chainName" /></sub>
       </ListItem>
@@ -18,7 +21,7 @@
     <ListItem label="Price" direction="column">
       <ListItem description="Min. received" hint="TODO" inset>
         <!-- TODO: Slippage -->
-        <AmountDisplay class="s-minus" :amount="{ amount: data.to.amount.amount, denom: data.to.amount.denom }" />
+        <AmountDisplay class="s-minus" :amount="data.to" />
       </ListItem>
 
       <ListItem description="Limit price" hint="TODO" inset>
@@ -41,7 +44,7 @@
   </List>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -75,19 +78,28 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { poolPriceById } = usePools();
+    const limitPrice = ref(1);
 
+    onMounted(async () => {
+      limitPrice.value = await poolPriceById(
+        ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id,
+      );
+    });
+    watch(
+      () => data.value.pool.id,
+      async (newId) => {
+        limitPrice.value = await poolPriceById(newId);
+      },
+    );
     const chainName = computed(() => {
       return store.getters['demeris/getDexChain'];
     });
-
+    console.log(props.step);
     const data = computed(() => {
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
 
-    const limitPrice = computed(() => {
-      return poolPriceById(data.value.pool.id);
-    });
-
+    console.log(limitPrice);
     return {
       chainName,
       data,
