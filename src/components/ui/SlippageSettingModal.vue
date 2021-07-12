@@ -79,7 +79,7 @@
             <template #content> Minimum total received if your entire swap is fulfilled. </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">13.21 RUNE</div>
+        <div class="details__row-right s-minus w-normal">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
@@ -90,10 +90,12 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
+import { store } from '@/store';
+import { getDisplayName } from '@/utils/actionHandler';
 
 type SwapData = {
-  pay: { denom: string; amount: string | number };
-  receive: { denom: string; amount: string | number };
+  pay: { denom: string; amount: number };
+  receive: { denom: string; amount: number };
 };
 
 export default defineComponent({
@@ -118,21 +120,6 @@ export default defineComponent({
   },
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
-    const customSlippageInput = ref(null);
-    const limitPriceText = ref('');
-    watch(
-      () => props.swapData,
-      () => {
-        const payData = props.swapData.pay;
-        const receiveData = props.swapData.receive;
-        if (props.swapData.pay.amount && props.swapData.receive.amount) {
-          const payDenom = payData.denom;
-          const receiveDenom = receiveData.denom;
-          const receiveAmount = receiveData.amount;
-          limitPriceText.value = `1 ${payDenom} = ${receiveAmount} ${receiveDenom}`;
-        }
-      },
-    );
     const state = reactive({
       slippage: null,
       customSlippage: null,
@@ -196,6 +183,38 @@ export default defineComponent({
         }
       },
     });
+    const customSlippageInput = ref(null);
+    const limitPriceText = ref('');
+    const minReceivedText = ref(null);
+
+    //TODO: dynamic digit float calculation
+    watch(
+      () => [props.swapData, state.slippage, state.customSlippage],
+      async () => {
+        if (props.swapData.pay.amount && props.swapData.receive.amount) {
+          const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
+          const receiveDisplayName = await getDisplayName(
+            props.swapData.receive.denom,
+            store.getters['demeris/getDexChain'],
+          );
+          const payAmount = props.swapData.pay.amount;
+          const receiveAmount = props.swapData.receive.amount;
+
+          let slippageTolerancePercent = 1 - state.slippage / 100;
+          if (state.customSlippage > 0) {
+            slippageTolerancePercent = 1 - state.customSlippage / 100;
+          }
+
+          limitPriceText.value = `1 ${payDisplayName} = ${
+            Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
+          } ${receiveDisplayName}`;
+          minReceivedText.value = `${
+            Math.floor(receiveAmount * slippageTolerancePercent * 10000) / 10000
+          } ${receiveDisplayName}`;
+        }
+      },
+    );
+
     onMounted(() => {
       const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
       if (slippage > 1 || slippage < 0.1) {
@@ -207,7 +226,7 @@ export default defineComponent({
       }
     });
 
-    return { ...toRefs(state), customSlippageInput, limitPriceText };
+    return { ...toRefs(state), customSlippageInput, limitPriceText, minReceivedText };
   },
 });
 </script>

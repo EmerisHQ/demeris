@@ -233,7 +233,7 @@ export default defineComponent({
           // TODO: get isAdvanced from local storage
           const isAdvanced = false;
 
-          //Pool coin included or excluded
+          //Pool coin included(advanced) or excluded
           if (isAdvanced) {
             pairs.push(pairAB);
             pairs.push(pairBA);
@@ -348,7 +348,7 @@ export default defineComponent({
       () => assetsToReceive.value,
 
       async () => {
-        // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and on_chain
+        // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and different on_chain
         const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
           base_denom: denom.name,
           on_chain: denom.chain_name,
@@ -382,7 +382,7 @@ export default defineComponent({
       },
     );
 
-    // for default payCoin set
+    // default pay coin set
     const isInit = ref(false);
     watch(
       () => {
@@ -416,6 +416,7 @@ export default defineComponent({
           }
 
           isInit.value = true;
+          console.log('[DEFAULT PAY COIN SET] : RECEIVE ASSET LIST will be recalculated');
         }
       },
     );
