@@ -129,7 +129,6 @@ export default defineComponent({
             return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
           }),
         );
-        console.log(fees);
       },
     );
     const txToResolve = ref({});
@@ -174,7 +173,6 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
-      console.log(fees);
       return modifiedData;
     });
     const confirm = async () => {

@@ -177,7 +177,6 @@ export default defineComponent({
       },
       validSlippageUpdater(value) {
         const slippage = Number(value);
-        console.log(slippage);
         if (slippage > 0 && slippage <= 100) {
           localStorage.setItem('demeris-slippage', String(slippage));
         }

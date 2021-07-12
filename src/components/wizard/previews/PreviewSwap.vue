@@ -94,12 +94,9 @@ export default defineComponent({
     const chainName = computed(() => {
       return store.getters['demeris/getDexChain'];
     });
-    console.log(props.step);
     const data = computed(() => {
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
-
-    console.log(limitPrice);
     return {
       chainName,
       data,

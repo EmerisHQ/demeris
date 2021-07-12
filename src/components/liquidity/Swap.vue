@@ -250,7 +250,6 @@ export default defineComponent({
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-        console.log('Available Pairs:', pairs);
         availablePairs.value = pairs;
       },
     );
@@ -260,8 +259,6 @@ export default defineComponent({
         let paySide = availablePairs.value.filter(
           (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
         );
-        // console.log('Calculated PayPair List ');
-        // console.log(paySide);
         return paySide;
       } else {
         return availablePairs.value;
@@ -270,8 +267,7 @@ export default defineComponent({
     const availableReceiveSide = computed(() => {
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-        // console.log('Calculated ReceivePair List ');
-        // console.log('availableReceiveSide', receiveSide);
+
         return receiveSide;
       } else {
         return availablePairs.value;
@@ -308,15 +304,13 @@ export default defineComponent({
           }
         });
       }
-      console.log('ALL BALANCES', verifiedBalances);
       return verifiedBalances;
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
-      // console.log('Calculated Pay Asset List ');
-      console.log('assetsToPay', payAssets);
+
       return payAssets;
     });
     const assetsToReceive = computed(() => {
@@ -328,7 +322,6 @@ export default defineComponent({
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
-      console.log('assetsToReceive', assets);
       return assets;
     });
 
@@ -366,7 +359,6 @@ export default defineComponent({
           }
 
           isInit.value = true;
-          console.log('[DEFAULT PAY COIN SET] : RECEIVE ASSET LIST will be recalculated');
         }
       },
     );
@@ -526,31 +518,23 @@ export default defineComponent({
         if (watchValues[0] && watchValues[1]) {
           let payDenom = data.payCoinData.denom;
           const receiveDenom = data.receiveCoinData.denom;
-          console.log(':D', data.payCoinData);
           //if payCoin denom is not uatom & ibc token
           if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
             const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
             }).pay.denom;
 
-            console.log('NATIVE PAY COIN DENOM', data.payCoinData.denom);
             payDenom = nativeDenomToIBCDenom;
           }
 
-          console.group('[SELECTD POOL DENOMS]');
-          console.log('PAY COIN DENOM: ', payDenom);
-          console.log('RECEIVE COIN DENOM: ', receiveDenom);
-          console.groupEnd();
           try {
             const id = poolsByDenom(payDenom).find((pool) => {
               return (
                 pool.reserve_coin_denoms.find((denom) => {
-                  console.log(denom, receiveDenom);
                   return denom === receiveDenom;
                 })?.length > 0
               );
             })?.id;
-            console.log('ID', id);
 
             const pool = poolById(id);
             const poolPrice = await poolPriceById(id);
@@ -563,9 +547,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            console.table('SELECTED POOL DATA : ', data.selectedPoolData);
           } catch (e) {
-            console.log('error', e);
             data.selectedPoolData = null;
           }
         }
@@ -577,10 +559,6 @@ export default defineComponent({
       () => data.payCoinAmount,
       async () => {
         if (data.isSwapReady) {
-          console.log('[SWAP READY]');
-          console.log(data.payCoinData, data.payCoinAmount);
-          console.log(data.receiveCoinData, data.receiveCoinAmount);
-
           const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
           const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
 
@@ -642,7 +620,6 @@ export default defineComponent({
 
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
-        console.log('payload', payload);
         data.receiveCoinData = payload;
         data.payCoinAmount = null;
         data.receiveCoinAmount = null;
@@ -683,7 +660,6 @@ export default defineComponent({
     }
 
     async function swap() {
-      console.log('SWAP Button Result', data.actionHandlerResult);
       reviewModalToggle();
     }
 
