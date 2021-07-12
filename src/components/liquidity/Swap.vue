@@ -159,9 +159,6 @@ export default defineComponent({
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
-    //TEST
-    const isConsole = false;
-
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
 
@@ -251,7 +248,7 @@ export default defineComponent({
             return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-        console.log('Available Pairs:');
+        // console.log('Available Pairs:');
         console.log(pairs);
         availablePairs.value = pairs;
       },
@@ -273,16 +270,19 @@ export default defineComponent({
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
         // console.log('Calculated ReceivePair List ');
-        console.log('availableReceiveSide', receiveSide);
+        // console.log('availableReceiveSide', receiveSide);
         return receiveSide;
       } else {
         return availablePairs.value;
       }
     });
     const allBalances = computed(() => {
-      // TODO : augment balances array with 0amount entries from verifiedDenoms
-      // return balances.value
-      return [
+      //add denom to use generally
+      const userBalance = balances.value.map((coin) => {
+        return { ...coin, denom: coin.ibc.hash ? `ibc/${coin.ibc.hash}` : coin.base_denom };
+      });
+
+      const verifiedBalances = [
         ...verifiedDenoms.value.map((denom) => ({
           base_denom: denom.name,
           denom: denom.name,
@@ -290,6 +290,25 @@ export default defineComponent({
           amount: 0,
         })),
       ];
+
+      //merge if userBalance exist
+      if (userBalance.length) {
+        userBalance.forEach((coin) => {
+          const duplicatedCoin = verifiedBalances.find((asset) => {
+            return asset.denom === coin.denom;
+          });
+
+          //if duplicated replace amount
+          if (duplicatedCoin.denom) {
+            duplicatedCoin.amount = coin.amount;
+          } else {
+            //if not, just add user coin to the balance
+            verifiedBalances.push(coin);
+          }
+        });
+      }
+      console.log('ALL BALANCES', verifiedBalances);
+      return verifiedBalances;
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
@@ -302,7 +321,6 @@ export default defineComponent({
     const assetsToReceive = computed(() => {
       let assets = availableReceiveSide.value.map((x) => {
         const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
-        console.log('denomInfo', denomInfo);
         return {
           denom: x.receive.denom,
           base_denom: denomInfo.pay.base_denom,
@@ -310,105 +328,8 @@ export default defineComponent({
         };
       });
       console.log('assetsToReceive', assets);
-      // const test = availablePairs.value.filter((pair) => pair.receive.denom === data.payCoinData?.denom);
-
-      // console.log('TEST', test);
-
       return assets;
     });
-
-    // const payAssetList = ref([]);
-    // watch(
-    //   () => [availablePairs.value, isSignedIn.value, assetsToPay.value, availablePaySide.value],
-    //   async () => {
-    //     if (isSignedIn.value) {
-    //       //with-wallet
-    //       if (data.receiveCoinData) {
-    //         // when receive coin selected => show assetToPay
-    //         payAssetList.value = assetsToPay.value;
-    //       } else {
-    //         //recevie coin not selcted => show user balance
-    //         payAssetList.value = balances.value;
-    //       }
-    //     } else {
-    //       //no-wallet => show availablePairs
-    //       const availablePayDenoms = availablePairs.value.map((pair) => {
-    //         return pair.pay.denom;
-    //       });
-
-    //       const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
-    //         base_denom: denom.name,
-    //         denom: denom.name,
-    //         on_chain: denom.chain_name,
-    //         display_name: denom.display_name,
-    //         amount: `0${denom.name}`,
-    //       }));
-
-    //       //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-    //       payAssetList.value = (availablePaySide.value.length > 0
-    //         ? availablePaySide.value.map((pair) => {
-    //             return pair.pay.denom;
-    //           })
-    //         : availablePayDenoms
-    //       ).map((asset) => {
-    //         if (isNative(asset)) {
-    //           return formattedVerifiedDenoms.filter((coin) => {
-    //             return coin.base_denom === asset;
-    //           })[0];
-    //         } else {
-    //           const verifyTrace = store.getters['demeris/getVerifyTrace']({
-    //             chain_name: store.getters['demeris/getDexChain'],
-    //             hash: asset.split('/')[1],
-    //           });
-    //           verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-    //           verifyTrace.denom = asset;
-    //           verifyTrace.amount = `0${verifyTrace.base_denom}`;
-    //           return verifyTrace;
-    //         }
-    //       });
-    //     }
-
-    //     isConsole ? console.log('[PAY ASSET LIST]:', payAssetList.value) : '?';
-    //   },
-    // );
-
-    // const receiveAssetList = ref([]);
-    // watch(
-    //   () => assetsToReceive.value,
-
-    //   async () => {
-    //     // no need to divide 2 cases(with-wallet / no-wallet) since there are no balance and different on_chain
-    //     const formattedVerifiedDenoms = verifiedDenoms.value.map((denom) => ({
-    //       base_denom: denom.name,
-    //       on_chain: denom.chain_name,
-    //       display_name: denom.display_name,
-    //     }));
-
-    //     //when payCoin: not selcted , receiveCoin: selceted by toggle initial status
-    //     receiveAssetList.value = (assetsToReceive.value.length > 0
-    //       ? assetsToReceive.value
-    //       : availablePairs.value.map((pair) => {
-    //           return pair.pay.denom;
-    //         })
-    //     ).map((asset) => {
-    //       if (isNative(asset)) {
-    //         return formattedVerifiedDenoms.filter((coin) => {
-    //           coin.denom = asset;
-    //           return coin.base_denom === asset;
-    //         })[0];
-    //       } else {
-    //         const verifyTrace = store.getters['demeris/getVerifyTrace']({
-    //           chain_name: store.getters['demeris/getDexChain'],
-    //           hash: asset.split('/')[1],
-    //         });
-    //         verifyTrace.on_chain = verifyTrace.trace[0].chain_name;
-    //         return verifyTrace;
-    //       }
-    //     });
-
-    //     isConsole ? console.log('[RECEIVE ASSET LIST]', receiveAssetList.value) : '';
-    //   },
-    // );
 
     // default pay coin set
     const isInit = ref(false);
