@@ -108,7 +108,7 @@ export default defineComponent({
 
       return {
         ...denomConfig,
-        logo: denomConfig.logo || chainConfig.logo,
+        logo: denomConfig.logo || chainConfig?.logo,
       };
     });
 
