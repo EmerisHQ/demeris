@@ -15,9 +15,9 @@
     </template>
 
     <template v-else-if="assetConfig">
-      <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
       <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
-      <img v-if="isNativeChain" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
+      <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
+      <img v-else alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
     </template>
 
     <template v-else>

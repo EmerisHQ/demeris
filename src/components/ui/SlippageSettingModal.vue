@@ -67,7 +67,9 @@
             <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">1 ATOM = 3.13 RUNE</div>
+        <div class="details__row-right s-minus w-normal">
+          {{ limitPriceText }}
+        </div>
       </div>
       <div class="details__row">
         <div class="details__row-left s-minus w-medium">
@@ -77,17 +79,24 @@
             <template #content> Minimum total received if your entire swap is fulfilled. </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">13.21 RUNE</div>
+        <div class="details__row-right s-minus w-normal">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
+import { store } from '@/store';
+import { getDisplayName } from '@/utils/actionHandler';
+
+type SwapData = {
+  pay: { denom: string; amount: number };
+  receive: { denom: string; amount: number };
+};
 
 export default defineComponent({
   name: 'SlippageSettingModal',
@@ -97,9 +106,20 @@ export default defineComponent({
     Alert,
   },
 
+  props: {
+    swapData: {
+      type: Object as PropType<SwapData>,
+      required: false,
+      default: () => {
+        return {
+          pay: { denom: '', amount: 0 },
+          receive: { denom: '', amount: 0 },
+        };
+      },
+    },
+  },
   emits: ['goback'],
-  setup(props, { emit }) {
-    const customSlippageInput = ref(null);
+  setup(props: { swapData: SwapData }, { emit }) {
     const state = reactive({
       slippage: null,
       customSlippage: null,
@@ -163,6 +183,38 @@ export default defineComponent({
         }
       },
     });
+    const customSlippageInput = ref(null);
+    const limitPriceText = ref('');
+    const minReceivedText = ref(null);
+
+    //TODO: dynamic digit float calculation
+    watch(
+      () => [props.swapData, state.slippage, state.customSlippage],
+      async () => {
+        if (props.swapData.pay.amount && props.swapData.receive.amount) {
+          const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
+          const receiveDisplayName = await getDisplayName(
+            props.swapData.receive.denom,
+            store.getters['demeris/getDexChain'],
+          );
+          const payAmount = props.swapData.pay.amount;
+          const receiveAmount = props.swapData.receive.amount;
+
+          let slippageTolerancePercent = 1 - state.slippage / 100;
+          if (state.customSlippage > 0) {
+            slippageTolerancePercent = 1 - state.customSlippage / 100;
+          }
+
+          limitPriceText.value = `1 ${payDisplayName} = ${
+            Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
+          } ${receiveDisplayName}`;
+          minReceivedText.value = `${
+            Math.floor(receiveAmount * slippageTolerancePercent * 10000) / 10000
+          } ${receiveDisplayName}`;
+        }
+      },
+    );
+
     onMounted(() => {
       const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
       if (slippage > 1 || slippage < 0.1) {
@@ -174,7 +226,7 @@ export default defineComponent({
       }
     });
 
-    return { ...toRefs(state), customSlippageInput };
+    return { ...toRefs(state), customSlippageInput, limitPriceText, minReceivedText };
   },
 });
 </script>
