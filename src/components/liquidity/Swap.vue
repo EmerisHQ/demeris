@@ -20,7 +20,10 @@
     />
     <div
       class="swap-widget elevation-panel"
-      :style="[!isSlippageSettingModalOpen ? '' : 'display:none', isChildModalOpen ? 'box-shadow:none;' : '']"
+      :style="[
+        !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
+        isChildModalOpen ? 'box-shadow:none;' : '',
+      ]"
     >
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
@@ -110,7 +113,6 @@
   </div>
 </template>
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
@@ -588,7 +590,7 @@ export default defineComponent({
               from: {
                 amount: {
                   amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
-                  denom: parseCoins(data.payCoinData.amount)[0].denom,
+                  denom: data.payCoinData.denom,
                 },
                 chain_name: data.payCoinData.on_chain,
               },
