@@ -1,5 +1,5 @@
 <template>
-  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`">
+  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`" @click="goMoon">
     <p class="moonpay-banner__title">{{ title }}</p>
     <div class="moonpay-banner__info">
       <div class="moonpay-banner__info__icon">
@@ -34,6 +34,15 @@ export default defineComponent({
       type: String as PropType<'banner' | 'widget'>,
       default: 'banner',
     },
+  },
+  setup() {
+    const goMoon = () => {
+      window.open(
+        'https://buy-staging.moonpay.com?apiKey=pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz&currencyCode=atom',
+        '_blank',
+      );
+    };
+    return { goMoon };
   },
 });
 </script>
