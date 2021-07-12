@@ -166,91 +166,93 @@ export default defineComponent({
 
     watch(
       () => pools.value,
-      async (newPools) => {
-        const pairs = [];
-        for (let pool of newPools) {
-          let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
-          let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+      async (newPools, oldPools) => {
+        if (JSON.stringify(newPools) != JSON.stringify(oldPools)) {
+          const pairs = [];
+          for (let pool of newPools) {
+            let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+            let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
 
-          if (isNative(pool.reserve_coin_denoms[0])) {
-            reserveCoinA.base_denom = reserveCoinA.denom;
-            reserveCoinA.chain_name = store.getters['demeris/getDexChain'];
-          } else {
-            const verifyTraceA =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: pool.reserve_coin_denoms[0].split('/')[1],
-              }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
-                {
-                  subscribe: false,
-                  params: {
-                    chain_name: store.getters['demeris/getDexChain'],
-                    hash: pool.reserve_coin_denoms[0].split('/')[1],
+            if (isNative(pool.reserve_coin_denoms[0])) {
+              reserveCoinA.base_denom = reserveCoinA.denom;
+              reserveCoinA.chain_name = store.getters['demeris/getDexChain'];
+            } else {
+              const verifyTraceA =
+                store.getters['demeris/getVerifyTrace']({
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[0].split('/')[1],
+                }) ??
+                (await store.dispatch(
+                  'demeris/GET_VERIFY_TRACE',
+                  {
+                    subscribe: false,
+                    params: {
+                      chain_name: store.getters['demeris/getDexChain'],
+                      hash: pool.reserve_coin_denoms[0].split('/')[1],
+                    },
                   },
-                },
-                { root: true },
-              ));
-            reserveCoinA.base_denom = verifyTraceA.base_denom;
-            reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
-          }
+                  { root: true },
+                ));
+              reserveCoinA.base_denom = verifyTraceA.base_denom;
+              reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
+            }
 
-          if (isNative(pool.reserve_coin_denoms[1])) {
-            reserveCoinB.base_denom = reserveCoinB.denom;
-            reserveCoinB.chain_name = store.getters['demeris/getDexChain'];
-          } else {
-            const verifyTraceB =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: pool.reserve_coin_denoms[1].split('/')[1],
-              }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
-                {
-                  subscribe: false,
-                  params: {
-                    chain_name: store.getters['demeris/getDexChain'],
-                    hash: pool.reserve_coin_denoms[1].split('/')[1],
+            if (isNative(pool.reserve_coin_denoms[1])) {
+              reserveCoinB.base_denom = reserveCoinB.denom;
+              reserveCoinB.chain_name = store.getters['demeris/getDexChain'];
+            } else {
+              const verifyTraceB =
+                store.getters['demeris/getVerifyTrace']({
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[1].split('/')[1],
+                }) ??
+                (await store.dispatch(
+                  'demeris/GET_VERIFY_TRACE',
+                  {
+                    subscribe: false,
+                    params: {
+                      chain_name: store.getters['demeris/getDexChain'],
+                      hash: pool.reserve_coin_denoms[1].split('/')[1],
+                    },
                   },
-                },
-                { root: true },
-              ));
-            reserveCoinB.base_denom = verifyTraceB.base_denom;
-            reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
-          }
-          const pairAB = {
-            pool_id: pool.id,
-            pay: reserveCoinA,
-            receive: { denom: reserveCoinB.denom },
-          };
-          const pairBA = {
-            pool_id: pool.id,
-            pay: reserveCoinB,
-            receive: { denom: reserveCoinA.denom },
-          };
+                  { root: true },
+                ));
+              reserveCoinB.base_denom = verifyTraceB.base_denom;
+              reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
+            }
+            const pairAB = {
+              pool_id: pool.id,
+              pay: reserveCoinA,
+              receive: { denom: reserveCoinB.denom },
+            };
+            const pairBA = {
+              pool_id: pool.id,
+              pay: reserveCoinB,
+              receive: { denom: reserveCoinA.denom },
+            };
 
-          // TODO: get isAdvanced from local storage
-          const isAdvanced = false;
+            // TODO: get isAdvanced from local storage
+            const isAdvanced = false;
 
-          //Pool coin included(advanced) or excluded
-          if (isAdvanced) {
-            pairs.push(pairAB);
-            pairs.push(pairBA);
-          } else {
-            if (!hasPoolCoin(pairAB)) {
+            //Pool coin included(advanced) or excluded
+            if (isAdvanced) {
               pairs.push(pairAB);
               pairs.push(pairBA);
+            } else {
+              if (!hasPoolCoin(pairAB)) {
+                pairs.push(pairAB);
+                pairs.push(pairBA);
+              }
+            }
+
+            //helper
+            function hasPoolCoin(pair) {
+              const poolPrefix = 'pool';
+              return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
             }
           }
-
-          //helper
-          function hasPoolCoin(pair) {
-            const poolPrefix = 'pool';
-            return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
-          }
+          availablePairs.value = pairs;
         }
-        availablePairs.value = pairs;
       },
     );
 
