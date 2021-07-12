@@ -164,6 +164,7 @@ export default defineComponent({
 
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
+
     watch(
       () => pools.value,
       async (newPools) => {
@@ -278,8 +279,12 @@ export default defineComponent({
         return availablePairs.value;
       }
     });
+    const allBalances = computed(() => {
+      // TODO : augment balances array with 0amount entries from verifiedDenoms
+      return balances.value;
+    });
     const assetsToPay = computed(() => {
-      let payAssets = balances.value.filter((x) => {
+      let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
       // console.log('Calculated Pay Asset List ');
