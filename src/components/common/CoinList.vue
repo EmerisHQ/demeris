@@ -1,8 +1,8 @@
 <template>
   <div v-if="modifiedData.length === 0" class="no-result">
     <div class="no-result__board">
-      <div class="title s-1 w-bold">No results for '{{ keyword }}'</div>
-      <div class="sub-title s-0">Try again with another search</div>
+      <div class="title s-1 w-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
+      <div class="sub-title s-0">{{ $t('generic_cta.filterRetry') }}</div>
     </div>
   </div>
   <div
@@ -12,7 +12,7 @@
     @mouseenter="
       showTooltip(
         `${type}/${coin.on_chain}/${coin.base_denom}`,
-        `${$filters.getCoinName(coin.base_denom)} on ${coin.on_chain}`,
+        $t('components.coinList.tooltip', { asset: $filters.getCoinName(coin.base_denom), chain: coin.on_chain }),
       )
     "
     @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
@@ -54,7 +54,7 @@
             >
               {{ word }}
             </span>
-            available
+            {{ $t('components.coinList.available') }}
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>

@@ -24,7 +24,7 @@
 
     <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
-        Select asset <Icon name="SmallDownIcon" :icon-size="1.6" />
+        {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1.6" />
       </div>
     </div>
 

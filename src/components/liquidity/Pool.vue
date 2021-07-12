@@ -12,7 +12,7 @@
     </div>
 
     <div class="pool__footer">
-      <p class="pool__footer__label">Equity</p>
+      <p class="pool__footer__label">{{ $t('context.pools.equity') }}</p>
       <span class="pool__footer__value">{{ toUSD(ownLiquidityPrice) }}</span>
     </div>
   </router-link>

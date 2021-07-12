@@ -4,6 +4,8 @@ export const messages = {
       seeall: 'See all',
       done: 'Done',
       cancel: 'Cancel',
+      filterNoResults: "No results for '{keyword}'",
+      filterRetry: 'Try again with another search',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -27,7 +29,32 @@ export const messages = {
         },
       },
     },
+    components: {
+      chainSelect: {
+        text1: 'You have {asset} on {chainNo} {chains}',
+        text2: 'Select the chain you wish to swap from.',
+      },
+      coinList: {
+        tooltip: '{asset} on {chain}',
+        available: 'available',
+      },
+      denomSelect: {
+        select: 'Select asset',
+      },
+      feeLevelSelector: {
+        feesIncl: 'Fees (included)',
+        transactionFee: 'Transaction fee (x{txCount})',
+        slowWarning: 'Your transaction may take longer to be processed.',
+        swapFee: 'Swap fee',
+        estimate: 'Estimated total fees',
+      },
+    },
     context: {
+      feeLevels: {
+        low: 'Slow',
+        average: 'Normal',
+        high: 'Fast',
+      },
       chains: {
         title: 'Chains',
       },
