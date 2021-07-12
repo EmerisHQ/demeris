@@ -129,6 +129,7 @@ export default defineComponent({
             return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
           }),
         );
+        console.log(fees);
       },
     );
     const txToResolve = ref({});

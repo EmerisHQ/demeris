@@ -603,7 +603,6 @@ export default defineComponent({
               },
             },
           };
-          console.log(swapParams);
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
         } else {
           data.actionHandlerResult = null;
