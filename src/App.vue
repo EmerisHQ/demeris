@@ -7,6 +7,7 @@
 import { defineComponent } from 'vue';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
+import { autoLogin } from './utils/basic';
 export default defineComponent({
   name: 'App',
   data() {
@@ -67,6 +68,9 @@ export default defineComponent({
       await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
+    }
+    if (autoLogin()) {
+      await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
     }
     this.initialized = true;
   },
