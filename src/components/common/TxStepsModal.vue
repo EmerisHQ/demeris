@@ -50,11 +50,18 @@
           toggleTxHandlingModal();
         }
       "
+      @done="
+        () => {
+          nextTx();
+          goBack();
+        }
+      "
     />
   </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
@@ -98,6 +105,10 @@ export default defineComponent({
   },
   emits: ['goback', 'close', 'complete'],
   setup(props, { emit }) {
+    const router = useRouter();
+    const goBack = () => {
+      router.go(-1);
+    };
     const fees = ref([]);
     const retry = ref(false);
     const store = useStore();
@@ -263,6 +274,7 @@ export default defineComponent({
       confirm,
       toggleTxHandlingModal,
       currentData,
+      goBack,
       isTxHandlingModalOpen,
       nextTx,
       transaction,
