@@ -257,12 +257,16 @@ export default defineComponent({
     );
 
     const availablePaySide = computed(() => {
-      let paySide = availablePairs.value.filter(
-        (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
-      );
-      // console.log('Calculated PayPair List ');
-      // console.log(paySide);
-      return paySide;
+      if (data.receiveCoinData) {
+        let paySide = availablePairs.value.filter(
+          (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
+        );
+        // console.log('Calculated PayPair List ');
+        // console.log(paySide);
+        return paySide;
+      } else {
+        return availablePairs.value;
+      }
     });
     const availableReceiveSide = computed(() => {
       let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
