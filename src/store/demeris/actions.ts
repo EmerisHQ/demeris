@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
+import { GasPriceLevel } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
@@ -20,7 +21,7 @@ import {
   GlobalDemerisActionTypes,
 } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
-import { DemerisMutationTypes } from './mutation-types';
+import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
 export type DemerisConfig = {
@@ -43,6 +44,9 @@ export type DemerisSignParams = {
   fee: GasFee;
   registry: Registry;
   memo?: string;
+};
+export type DemerisSessionParams = {
+  data: UserData;
 };
 export type TicketResponse = {
   ticket: string;
@@ -93,6 +97,14 @@ export interface Actions {
     { subscribe }: DemerisActionParams,
   ): Promise<API.Prices>;
 
+  [DemerisActionTypes.SET_SESSION_DATA](
+    { commit, getters, state }: ActionContext<State, RootState>,
+    { data: UserData }: DemerisSessionParams,
+  ): Promise<void>;
+  [DemerisActionTypes.LOAD_SESSION_DATA](
+    { commit, getters }: ActionContext<State, RootState>,
+    walletName: string,
+  ): Promise<void>;
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
     { commit, getters, state }: ActionContext<State, RootState>,
@@ -217,6 +229,12 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_IN](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
+  [GlobalDemerisActionTypes.SET_SESSION_DATA](
+    ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
+  ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
+  [GlobalDemerisActionTypes.LOAD_SESSION_DATA](
+    ...args: Parameters<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>
+  ): ReturnType<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>;
   [GlobalDemerisActionTypes.INIT](
     ...args: Parameters<Actions[DemerisActionTypes.INIT]>
   ): ReturnType<Actions[DemerisActionTypes.INIT]>;
@@ -340,6 +358,34 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
+  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, walletName) {
+    const data = window.localStorage.getItem(walletName);
+    if (data) {
+      const newData = { ...JSON.parse(data), updateDT: Date.now() };
+      window.localStorage.setItem(walletName, JSON.stringify(newData));
+      commit('SET_SESSION_DATA', newData);
+    } else {
+      const newData = { advanced: false, gasPriceLevel: GasPriceLevel.AVERAGE, updateDT: Date.now() };
+      window.localStorage.setItem(walletName, JSON.stringify(newData));
+      commit('SET_SESSION_DATA', newData);
+    }
+    commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
+  },
+  async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
+    if (data) {
+      window.localStorage.setItem(
+        getters['getKeplrAccountName'],
+        JSON.stringify({ ...state._Session, ...data, updateDT: Date.now() }),
+      );
+      commit('SET_SESSION_DATA', { ...data, updateDT: Date.now() });
+    } else {
+      window.localStorage.setItem(
+        getters['getKeplrAccountName'],
+        JSON.stringify({ ...state._Session, updateDT: Date.now() }),
+      );
+      commit('SET_SESSION_DATA', { updateDT: Date.now() });
+    }
+  },
   async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
     try {
       let chain = getters['getChain']({
@@ -405,9 +451,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
         paths.add(chain.derivation_path);
         toQuery.push(chain);
       }
-      await window.keplr.enable('cosmoshub-4');
-      const key = await window.keplr.getKey('cosmoshub-4');
+      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
+      await window.keplr.enable(dexchain.node_info.chain_id);
+      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
       commit(DemerisMutationTypes.SET_KEPLR, key);
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, key.name);
       for (const chain of toQuery) {
         await window.keplr.enable(chain.node_info.chain_id);
         const otherKey = await window.keplr.getKey(chain.node_info.chain_id);

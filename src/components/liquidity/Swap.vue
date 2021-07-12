@@ -126,7 +126,7 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { store } from '@/store';
-import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { SwapAction } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 import { actionHandler } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
@@ -488,8 +488,9 @@ export default defineComponent({
       //selectedPoolData for various calculation(pool price, swap price ...etc)
       selectedPoolData: null,
 
-      // permanent fee-level-setting
-      gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
+      //tx fee level
+      gasPriceLevel: store.getters['getPreferredGasPriceLevel'],
+
       // for swap action
       actionHandlerResult: null,
 

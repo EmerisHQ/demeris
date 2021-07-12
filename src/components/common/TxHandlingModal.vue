@@ -104,7 +104,13 @@
         :status="'normal'"
         :click-function="
           () => {
-            status == 'keplr-reject' ? emitRetry() : status == 'failed' ? emitClose() : emitNext();
+            status == 'keplr-reject'
+              ? emitRetry()
+              : status == 'failed'
+                ? emitClose()
+                : isFinal
+                  ? emitDone()
+                  : emitNext();
           }
         "
         :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
@@ -113,7 +119,7 @@
         v-if="whiteButton"
         :name="whiteButton"
         :status="'normal'"
-        :click-function="emitClose"
+        :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
         :is-outline="true"
       />
     </div>
@@ -171,7 +177,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['close', 'next', 'retry'],
+  emits: ['close', 'next', 'retry', 'reset', 'done'],
   setup(props, { emit }) {
     // Set Icon from status
     const iconType = computed(() => {
@@ -287,13 +293,31 @@ export default defineComponent({
       emit('close');
     }
 
+    function emitAnother() {
+      emit('reset');
+    }
     function emitRetry() {
       emit('retry');
     }
     function emitNext() {
       emit('next');
     }
-    return { emitNext, emitRetry, emitClose, iconType, subTitle, title, whiteButton, blackButton };
+    function emitDone() {
+      console.log('done');
+      emit('done');
+    }
+    return {
+      emitNext,
+      emitRetry,
+      emitClose,
+      emitAnother,
+      emitDone,
+      iconType,
+      subTitle,
+      title,
+      whiteButton,
+      blackButton,
+    };
   },
 });
 </script>

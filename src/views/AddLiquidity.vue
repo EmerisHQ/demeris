@@ -234,7 +234,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
-import { AddLiquidityAction, CreatePoolAction, GasPriceLevel, Pool, Step } from '@/types/actions';
+import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -261,7 +261,7 @@ export default {
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
+    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
 
     const steps = ['amount', 'review', 'send'];
 

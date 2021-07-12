@@ -1,3 +1,4 @@
+import { GasPriceLevel } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisConfig } from './actions';
@@ -15,6 +16,7 @@ export enum DemerisMutationTypes {
   SET_PRICES = 'SET_PRICES',
   SET_TX_STATUS = 'SET_TX_STATUS',
   SET_CHAINS = 'SET_CHAINS',
+  SET_SESSION_DATA = 'SET_SESSION_DATA',
   SET_CHAIN = 'SET_CHAIN',
   SET_VERIFIED_DENOMS = 'SET_VERIFIED_DENOMS',
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
@@ -30,6 +32,15 @@ export enum DemerisMutationTypes {
 export type APIPromise = {
   hash: string;
   promise: Promise<void>;
+};
+export type UserData = {
+  advanced?: boolean;
+  gasPriceLevel?: GasPriceLevel;
+  updateDT: number;
+};
+export type UserSession = {
+  walletName: string;
+  walletData: UserData;
 };
 export type DemerisMutationArgs =
   | API.Balances

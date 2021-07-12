@@ -4,7 +4,13 @@ import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import { APIPromise, DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
+import {
+  APIPromise,
+  DemerisMutations,
+  DemerisMutationTypes as MutationTypes,
+  KeplrKeyData,
+  UserData,
+} from './mutation-types';
 import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
@@ -21,7 +27,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
-
+  [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
@@ -72,6 +78,11 @@ export const mutations: MutationTree<State> & Mutations = {
     for (const chain of payload.value as API.Chains) {
       state.chains[chain.chain_name] = chain;
     }
+  },
+  [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
+    state._Session = { ...state._Session, ...(payload as UserData) };
+
+    window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
     state.prices = payload.value as API.Prices;
