@@ -13,7 +13,8 @@
 		-->
 
     <CircleSymbol
-      :denom="selectedDenom?.base_denom"
+      :denom="selectedDenom?.base_denom ?? ''"
+      :chain-name="selectedDenom?.on_chain ?? undefined"
       size="sm"
       class="denom-select__coin-image"
       @click="toggleDenomSelectModal"
