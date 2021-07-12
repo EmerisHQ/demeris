@@ -107,6 +107,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -120,7 +121,10 @@ export default defineComponent({
     const router = useRouter();
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
+    const store = useStore();
+
+    store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
@@ -189,7 +193,6 @@ export default defineComponent({
     const onClose = () => {
       router.push('/pools');
     };
-    const store = useStore();
     const getRoute = (hash, chain_name) => {
       const verifyTrace = store.getters['demeris/getVerifyTrace']({
         chain_name,

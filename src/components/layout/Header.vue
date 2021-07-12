@@ -9,7 +9,7 @@
     <div class="space"></div>
     <div class="header__wallet">
       <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }">
-        <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" show-badge />
+        <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" :show-badge="showBadge" />
       </router-link>
 
       <router-link class="header__wallet-button" to="/receive">
@@ -43,6 +43,7 @@ import Wallet from '@/components/account/Wallet.vue';
 import Logo from '@/components/common/Logo.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
+import { useStore } from '@/store';
 
 import MenuIcon from '../common/Icons/MenuIcon.vue';
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
@@ -61,12 +62,16 @@ export default defineComponent({
   },
   setup() {
     const { redeemableBalances } = useAccount();
+    const store = useStore();
     let tip = computed(() => {
       return redeemableBalances.value.length == 1
         ? (tip = 'You have 1 asset to redeem')
         : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
     });
-    return { redeemableBalances, tip };
+    const showBadge = computed(() => {
+      return store.getters['demeris/hasSeenReedem'] ? false : true;
+    });
+    return { redeemableBalances, tip, showBadge };
   },
 });
 </script>

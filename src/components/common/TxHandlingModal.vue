@@ -104,7 +104,13 @@
         :status="'normal'"
         :click-function="
           () => {
-            status == 'keplr-reject' ? emitRetry() : status == 'failed' ? emitClose() : emitNext();
+            status == 'keplr-reject'
+              ? emitRetry()
+              : status == 'failed'
+                ? emitClose()
+                : isFinal
+                  ? emitDone()
+                  : emitNext();
           }
         "
         :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
@@ -113,7 +119,7 @@
         v-if="whiteButton"
         :name="whiteButton"
         :status="'normal'"
-        :click-function="emitClose"
+        :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
         :is-outline="true"
       />
     </div>
@@ -166,8 +172,12 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
+    isFinal: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
   },
-  emits: ['close', 'next', 'retry'],
+  emits: ['close', 'next', 'retry', 'reset', 'done'],
   setup(props, { emit }) {
     // Set Icon from status
     const iconType = computed(() => {
@@ -208,48 +218,42 @@ export default defineComponent({
             break;
           case 'transacting':
             subTitle.value = 'Please wait';
+            whiteButton.value = '';
+            blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
                 title.value = 'Transferring';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'ibc_backward':
                 title.value = 'Transferring';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'transfer':
                 title.value = 'Transferring';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'swap':
                 title.value = 'Swapping';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'addliquidity':
                 title.value = 'Adding liquidity';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'withdrawliquidity':
                 title.value = 'Withdrawing';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
               case 'createpool':
                 title.value = 'Creating pool';
-                whiteButton.value = '';
-                blackButton.value = '';
                 break;
             }
             break;
           case 'complete':
             subTitle.value = '';
-            props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
+            if (props.isFinal) {
+              blackButton.value = 'Done';
+              whiteButton.value = 'Send another';
+            } else {
+              props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
+              whiteButton.value = '';
+            }
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
@@ -257,27 +261,21 @@ export default defineComponent({
                 break;
               case 'ibc_backward':
                 title.value = 'Transferred';
-                whiteButton.value = '';
                 break;
               case 'transfer':
                 title.value = 'Transferred';
-                whiteButton.value = '';
                 break;
               case 'swap':
                 title.value = 'Swapped';
-                whiteButton.value = '';
                 break;
               case 'addliquidity':
                 title.value = 'Liquidity added';
-                whiteButton.value = '';
                 break;
               case 'withdrawliquidity':
                 title.value = 'Liquidity withdrawn';
-                whiteButton.value = '';
                 break;
               case 'createpool':
                 title.value = 'Pool created';
-                whiteButton.value = '';
                 break;
             }
             break;
@@ -295,13 +293,31 @@ export default defineComponent({
       emit('close');
     }
 
+    function emitAnother() {
+      emit('reset');
+    }
     function emitRetry() {
       emit('retry');
     }
     function emitNext() {
       emit('next');
     }
-    return { emitNext, emitRetry, emitClose, iconType, subTitle, title, whiteButton, blackButton };
+    function emitDone() {
+      console.log('done');
+      emit('done');
+    }
+    return {
+      emitNext,
+      emitRetry,
+      emitClose,
+      emitAnother,
+      emitDone,
+      iconType,
+      subTitle,
+      title,
+      whiteButton,
+      blackButton,
+    };
   },
 });
 </script>

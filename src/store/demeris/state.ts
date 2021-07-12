@@ -1,6 +1,6 @@
 import * as API from '@/types/api';
 
-import { KeplrKeyData } from './mutation-types';
+import { KeplrKeyData, UserData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
@@ -27,6 +27,7 @@ export type State = {
   transactions: Map<string, TransactionItem>;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
+  _Session: UserData | Record<string, never>;
 };
 export function getDefaultState(): State {
   return {
@@ -43,5 +44,6 @@ export function getDefaultState(): State {
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),
+    _Session: {},
   };
 }

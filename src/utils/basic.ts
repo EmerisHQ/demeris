@@ -39,6 +39,14 @@ export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
 }
+export function autoLogin() {
+  const last = window.localStorage.getItem('lastEmerisSession');
+  if (last && Date.now() < parseInt(last) + 60000) {
+    return true;
+  } else {
+    return false;
+  }
+}
 export function encodeUTF8(s) {
   let i = 0;
   const bytes = new Uint8Array(s.length * 4);

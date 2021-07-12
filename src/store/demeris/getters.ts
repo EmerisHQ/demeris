@@ -1,6 +1,7 @@
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
+import { GasPriceLevel } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
@@ -48,6 +49,8 @@ export type Getters = {
   getKeyhashes(state: State): string[];
   getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
   getKeplrAccountName(state: State): string | null;
+  hasSeenReedem(state: State): boolean;
+  getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
@@ -79,6 +82,16 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
+  },
+  hasSeenReedem: (state) => {
+    console.log(state._Session);
+    return state._Session.hasSeenRedeem;
+  },
+  getPreferredGasPriceLevel: (state) => {
+    return state._Session.gasPriceLevel;
+  },
+  getAdvancedMode: (state) => {
+    return state._Session.advanced;
   },
   getAllNumbers: (state) => {
     const numbers = Object.values(state.numbers).flat();

@@ -118,8 +118,8 @@ import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
 import useModal from '@/composables/useModal';
 import usePrice from '@/composables/usePrice.vue';
+import { useStore } from '@/store';
 import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
-import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'Swap',
@@ -137,6 +137,7 @@ export default defineComponent({
   setup() {
     const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
+    const store = useStore();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
     const { balances } = useAccount();
     const data = reactive({
@@ -182,7 +183,7 @@ export default defineComponent({
         });
         return payCoinRemovedDenoms;
       }),
-      gasPriceLevel: localStorage.getItem('demeris-fee-level') || GasPriceLevel.AVERAGE,
+      gasPriceLevel: store.getters['getPreferredGasPriceLevel'],
       actionHandlerResult: null,
       isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
       //TODO: test

@@ -612,7 +612,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         params = (action as Actions.RedeemAction).params;
         params.forEach(async (denom) => {
           const redeemStep = await redeem(denom);
-          steps.push({ name: 'transfer', description: 'Redeeming Assets', transactions: [...redeemStep.steps] }); //TODO
+          steps.push({
+            name: 'redeem',
+            description: 'Redeeming Assets',
+            output: redeemStep.output,
+            transactions: [...redeemStep.steps],
+          }); //TODO
         });
         break;
       case 'move':
@@ -939,7 +944,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
   const hash = denom.split('/')[1];
 
   if (!hash) {
-    return;
+    return denom;
   }
 
   let trace = store.getters['demeris/getVerifyTrace']({ chain_name, hash });

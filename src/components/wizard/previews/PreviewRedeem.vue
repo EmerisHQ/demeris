@@ -1,16 +1,161 @@
 <template>
-  <div>
-    <!-- Displays info about an IBC redemption. to be used inside ../Preview.vue
-		
-		props:
-		 action: ActionObject (tbd)
-		
-		-->
-  </div>
+  <List>
+    <ListItem label="Send">
+      <div>
+        <AmountDisplay class="w-bold" :amount="step.transactions[0].data.amount" />
+      </div>
+      <sub><ChainName :name="step.transactions[0].data.from_chain" /></sub>
+    </ListItem>
+
+    <ListItem
+      v-if="hasMultipleTransactions"
+      :label="`${step.transactions.length} transfers to sign`"
+      direction="column"
+      hint="TODO"
+    >
+      <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+        </template>
+      </ListItem>
+    </ListItem>
+
+    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+      <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+        </template>
+      </template>
+    </ListItem>
+
+    <ListItem label="Receive">
+      <div>
+        <AmountDisplay class="w-bold" :amount="step.transactions[step.transactions.length - 1].data.amount" />
+      </div>
+      <sub><ChainName :name="step.transactions[step.transactions.length - 1].data.to_chain" /></sub>
+    </ListItem>
+  </List>
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
+
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import { List, ListItem } from '@/components/ui/List';
+import { useStore } from '@/store';
+import * as Actions from '@/types/actions';
+import * as Base from '@/types/base';
+
 export default defineComponent({
   name: 'PreviewRedeem',
+
+  components: {
+    AmountDisplay,
+
+    ChainName,
+    List,
+    ListItem,
+  },
+
+  props: {
+    step: {
+      type: Object as PropType<Actions.Step>,
+      required: true,
+    },
+    fees: {
+      type: Object as PropType<Actions.FeeTotals>,
+      required: true,
+    },
+  },
+
+  setup(props) {
+    const store = useStore();
+
+    const stepType = computed(() => {
+      const description = (props.step as Actions.Step).description;
+      const descriptionKeyMap = {
+        'Assets Must be transferred to hub first': 'transfer-to-hub',
+        'AssetA must be transferred to hub': 'transfer-to-hub',
+        'AssetB must be transferred to hub': 'transfer-to-hub',
+        'Assets Moved': 'move',
+        'Assets Transferred': 'transfer',
+      };
+
+      return descriptionKeyMap[description] || 'transfer';
+    });
+
+    const hasMultipleTransactions = computed(() => {
+      return (props.step as Actions.Step).transactions.length > 1;
+    });
+
+    const transactionInfo = computed(() => {
+      const transactions = (props.step as Actions.Step).transactions;
+      const firstTransaction = transactions[0] as Record<string, any>;
+      const [lastTransaction] = (transactions.length > 1 ? transactions.slice(-1) : transactions) as Record<
+        string,
+        any
+      >[];
+
+      const from = {
+        address: '',
+        amount: transactions.reduce((acc, item) => {
+          const amount = (item.data as Actions.TransferData).amount.amount;
+          return acc + +amount;
+        }, 0),
+        chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
+        denom: (firstTransaction.data.amount as Base.Amount).denom,
+      };
+
+      let totalFees = 0;
+
+      for (const denoms of Object.values(props.fees as Actions.FeeTotals)) {
+        for (const fee of Object.values(denoms)) {
+          totalFees += fee;
+        }
+      }
+
+      const to = {
+        amount: from.amount,
+        address: lastTransaction.data.to_address,
+        chain:
+          lastTransaction.data.to_chain ||
+          lastTransaction.data.destination_chain_name ||
+          lastTransaction.data.chain_name,
+        denom: (lastTransaction.data.amount as Base.Amount).denom,
+      };
+
+      from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
+
+      if (to.chain) {
+        to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
+      }
+
+      if (stepType.value === 'transfer') {
+        to.amount = to.amount - totalFees;
+      }
+
+      return {
+        from,
+        to,
+      };
+    });
+
+    const formatMultipleChannel = (transaction: Actions.TransferData) => {
+      const getName = (name: string) => store.getters['demeris/getDisplayChain']({ name });
+      // @ts-ignore
+      return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
+    };
+    const formatChain = (name: string) => {
+      return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
+    };
+    return {
+      stepType,
+      formatChain,
+      transactionInfo,
+      hasMultipleTransactions,
+      formatMultipleChannel,
+    };
+  },
 });
 </script>
