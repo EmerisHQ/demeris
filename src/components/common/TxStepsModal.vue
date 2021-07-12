@@ -56,6 +56,7 @@
           goBack();
         }
       "
+      @reset="emitHandler('reset')"
     />
   </div>
 </template>
@@ -103,7 +104,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['goback', 'close', 'complete'],
+  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const router = useRouter();
     const goBack = () => {
@@ -228,11 +229,13 @@ export default defineComponent({
               continue;
             }
             if (tx) {
+              emit('transacting');
               txstatus.value = 'transacting';
               let result;
               try {
                 result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
               } catch (e) {
+                emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
                 abort = true;
@@ -244,10 +247,12 @@ export default defineComponent({
                   params: { chain_name: res.chain_name, ticket: result.ticket },
                 });
                 await txPromise;
+                emit('complete');
                 txstatus.value = 'complete';
 
                 await txToResolve.value['promise'];
               } catch (e) {
+                emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
                 abort = true;
@@ -260,7 +265,7 @@ export default defineComponent({
       }
       if (currentStep.value == (props.data as Step[]).length - 1) {
         // At the end, emit completion
-        emit('complete');
+        emit('finish');
       } else {
         currentStep.value = currentStep.value + 1;
       }
