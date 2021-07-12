@@ -1,6 +1,16 @@
 <template>
   <div class="wrapper">
-    <SlippageSettingModal v-show="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
+    <SlippageSettingModal
+      v-show="isSlippageSettingModalOpen"
+      :swap-data="{
+        pay: {
+          denom: payCoinData?.base_denom,
+          amount: payCoinAmount,
+        },
+        receive: { denom: receiveCoinData?.base_denom, amount: receiveCoinAmount },
+      }"
+      @goback="slippageSettingModalToggle"
+    />
     <ReviewModal
       v-if="isOpen && !isSlippageSettingModalOpen"
       :data="actionHandlerResult"

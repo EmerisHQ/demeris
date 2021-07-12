@@ -67,7 +67,9 @@
             <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">1 ATOM = 3.13 RUNE</div>
+        <div class="details__row-right s-minus w-normal">
+          {{ limitPriceText }}
+        </div>
       </div>
       <div class="details__row">
         <div class="details__row-left s-minus w-medium">
@@ -83,11 +85,16 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
+
+type SwapData = {
+  pay: { denom: string; amount: string | number };
+  receive: { denom: string; amount: string | number };
+};
 
 export default defineComponent({
   name: 'SlippageSettingModal',
@@ -97,9 +104,35 @@ export default defineComponent({
     Alert,
   },
 
+  props: {
+    swapData: {
+      type: Object as PropType<SwapData>,
+      required: false,
+      default: () => {
+        return {
+          pay: { denom: '', amount: 0 },
+          receive: { denom: '', amount: 0 },
+        };
+      },
+    },
+  },
   emits: ['goback'],
-  setup(props, { emit }) {
+  setup(props: { swapData: SwapData }, { emit }) {
     const customSlippageInput = ref(null);
+    const limitPriceText = ref('');
+    watch(
+      () => props.swapData,
+      () => {
+        const payData = props.swapData.pay;
+        const receiveData = props.swapData.receive;
+        if (props.swapData.pay.amount && props.swapData.receive.amount) {
+          const payDenom = payData.denom;
+          const receiveDenom = receiveData.denom;
+          const receiveAmount = receiveData.amount;
+          limitPriceText.value = `1 ${payDenom} = ${receiveAmount} ${receiveDenom}`;
+        }
+      },
+    );
     const state = reactive({
       slippage: null,
       customSlippage: null,
@@ -174,7 +207,7 @@ export default defineComponent({
       }
     });
 
-    return { ...toRefs(state), customSlippageInput };
+    return { ...toRefs(state), customSlippageInput, limitPriceText };
   },
 });
 </script>
