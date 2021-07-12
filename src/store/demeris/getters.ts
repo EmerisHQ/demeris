@@ -49,6 +49,7 @@ export type Getters = {
   getKeyhashes(state: State): string[];
   getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
   getKeplrAccountName(state: State): string | null;
+  hasSeenReedem(state: State): boolean;
   getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
@@ -81,6 +82,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
+  },
+  hasSeenReedem: (state) => {
+    return state._Session.hasSeenRedeem;
   },
   getPreferredGasPriceLevel: (state) => {
     return state._Session.gasPriceLevel;
