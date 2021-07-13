@@ -113,7 +113,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted,reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -508,7 +508,7 @@ export default defineComponent({
       selectedPoolData: null,
 
       //tx fee level
-      gasPriceLevel: store.getters['demeris/getPreferredGasPriceLevel'],
+      gasPriceLevel: ref(store.getters['demeris/getPreferredGasPriceLevel']),
 
       // for swap action
       actionHandlerResult: null,

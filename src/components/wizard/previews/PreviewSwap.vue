@@ -86,7 +86,7 @@ export default defineComponent({
       );
     });
     watch(
-      () => data.value.pool.id,
+      () => ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id,
       async (newId) => {
         limitPrice.value = await poolPriceById(newId);
       },
