@@ -1,39 +1,50 @@
 <template>
   <div class="send-form">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title s-2">Send to an address</h2>
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
-    <template v-if="step === 'amount'">
-      <h2 class="send-form__title s-2">Enter an amount</h2>
-      <SendFormAmount :balances="balances" @next="generateSteps" />
+    <template v-else-if="step === 'amount'">
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
+      <SendFormAmount :balances="balances" @next="goToStep('review')" />
+      <div class="send-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
-    <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" gas-price-level="gasPrice" />
+    <template v-else>
+      <TxStepsModal
+        :data="steps"
+        :gas-price-level="gasPrice"
+        @transacting="goToStep('send')"
+        @failed="goToStep('review')"
+        @reset="resetHandler"
+      />
     </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue';
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
-import { GasPriceLevel, SendAddressForm, TransferAction } from '@/types/actions';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
 
-type Step = 'recipient' | 'amount' | 'review';
+type Step = 'recipient' | 'amount' | 'review' | 'send';
 
 export default defineComponent({
   name: 'SendForm',
 
   components: {
+    FeeLevelSelector,
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
@@ -55,7 +66,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -67,39 +77,59 @@ export default defineComponent({
       isTermChecked: false,
     });
 
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
     });
 
-    const generateSteps = async () => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: form.balance.denom,
-      });
-
-      const action: TransferAction = {
-        name: 'transfer',
-        params: {
-          from: {
-            amount: {
-              amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
-              denom: form.balance.denom,
+    watch(
+      () => [form.balance.amount, form.balance.denom, form.chain_name],
+      async () => {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
+          const precision = store.getters['demeris/getDenomPrecision']({
+            name: form.balance.denom,
+          });
+          const action: TransferAction = {
+            name: 'transfer',
+            params: {
+              from: {
+                amount: {
+                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                  denom: form.balance.denom,
+                },
+                chain_name: form.chain_name,
+              },
+              to: {
+                chain_name: form.chain_name,
+                address: form.recipient,
+              },
             },
-            chain_name: form.chain_name,
-          },
-          to: {
-            chain_name: form.chain_name,
-            address: form.recipient,
-          },
-        },
-      };
-
-      const result = await actionHandler(action);
-
-      steps.value = result;
+          };
+          steps.value = await actionHandler(action);
+        }
+      },
+    );
+    const generateSteps = async () => {
       goToStep('review');
     };
 
+    const resetHandler = () => {
+      form.recipient = '';
+      form.chain_name = '';
+      form.memo = '';
+      form.balance = {
+        denom: '',
+        amount: undefined,
+      };
+      form.isTermChecked = false;
+      steps.value = [];
+
+      goToStep('recipient');
+    };
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -109,8 +139,9 @@ export default defineComponent({
     }
 
     provide('transferForm', form);
+    watch(form, generateSteps, { deep: true });
 
-    return { steps, form, goToStep, generateSteps, gasPrice };
+    return { steps, form, goToStep, generateSteps, resetHandler, gasPrice };
   },
 });
 </script>
@@ -120,6 +151,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 

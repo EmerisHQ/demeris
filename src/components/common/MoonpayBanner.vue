@@ -1,13 +1,13 @@
 <template>
-  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`">
+  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`" @click="goMoon">
     <p class="moonpay-banner__title">{{ title }}</p>
     <div class="moonpay-banner__info">
-      <div class="moonpay-banner__info__icon">
+      <!-- <div class="moonpay-banner__info__icon">
         <Icon name="LockClosedIcon" :icon-size="1" />
-      </div>
+      </div> -->
       <div class="moonpay-banner__info__wrapper">
         <p class="moonpay-banner__info__label">Powered by Moonpay</p>
-        <span class="moonpay-banner__info__hint">100% secure</span>
+        <!-- <span class="moonpay-banner__info__hint">100% secure</span> -->
       </div>
     </div>
   </button>
@@ -16,14 +16,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import Icon from '@/components/ui/Icon.vue';
-
 export default defineComponent({
   name: 'MoonpayBanner',
-
-  components: {
-    Icon,
-  },
 
   props: {
     title: {
@@ -34,6 +28,15 @@ export default defineComponent({
       type: String as PropType<'banner' | 'widget'>,
       default: 'banner',
     },
+  },
+  setup() {
+    const goMoon = () => {
+      window.open(
+        'https://buy-staging.moonpay.com?apiKey=pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz&currencyCode=atom',
+        '_blank',
+      );
+    };
+    return { goMoon };
   },
 });
 </script>
@@ -49,12 +52,17 @@ export default defineComponent({
   justify-content: space-between;
   height: 13.5rem;
   width: 100%;
-  background-image: url('~@/assets/images/buy-atom-card.png');
+  background-color: var(--bg);
+  background-image: url('~@/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;
-  background-position: center right;
+  background-position: top 30% left 100%;
+  background-size: 70% auto;
 
   &--widget {
-    width: 3.2rem;
+    background-color: var(--fg-trans);
+    background-position: left 13rem top 0%;
+    background-size: 95% auto;
+    border: none;
   }
 
   &__title {
@@ -84,7 +92,7 @@ export default defineComponent({
     }
 
     &__label {
-      font-weight: 600;
+      color: var(--muted);
     }
 
     &__hint {

@@ -1,6 +1,6 @@
 <template>
   <div v-if="steps" class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
-    <div>Fees (included)</div>
+    <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
     <div class="fees-total">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
       <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
@@ -9,7 +9,7 @@
   </div>
   <div v-if="isFeesOpen" class="fees-detail">
     <div class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">Transaction fee(x{{ txCount }})</div>
+      <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
@@ -21,7 +21,7 @@
         :class="gasPriceLevel === GasPriceLevel.LOW ? 'selected' : ''"
         @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
-        <div class="fees-detail__selector-block-level">Slow</div>
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
         <div class="fees-detail__selector-block-value">
           {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
@@ -31,7 +31,7 @@
         :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'selected' : ''"
         @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
-        <div class="fees-detail__selector-block-level">Normal</div>
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
         <div class="fees-detail__selector-block-value">
           {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
@@ -41,7 +41,7 @@
         :class="gasPriceLevel === GasPriceLevel.HIGH ? 'selected' : ''"
         @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
-        <div class="fees-detail__selector-block-level">Fast</div>
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
         <div class="fees-detail__selector-block-value">
           {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
@@ -51,15 +51,15 @@
     <Alert
       v-if="gasPriceLevel === GasPriceLevel.LOW"
       status="warning"
-      message="Your transaction may take longer to be processed."
+      :message="$t('components.feeLevelSelector.slowWarning')"
     />
 
     <div v-if="swapDollarFee" class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">Swap fee</div>
+      <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
       <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
     </div>
     <div class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">Estimated total fees</div>
+      <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
       </div>
@@ -173,7 +173,6 @@ export default defineComponent({
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
-        console.log(level);
         emit('update:gasPriceLevel', level);
         store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },

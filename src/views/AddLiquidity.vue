@@ -1,7 +1,7 @@
 <template>
   <div class="add-liquidity">
     <header class="add-liquidity__header">
-      <button class="add-liquidity__header__button" @click="goBack">
+      <button class="add-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -30,8 +30,16 @@
 
           <div v-if="hasPair" class="add-liquidity__pool">
             <div class="add-liquidity__pool__pair">
-              <span class="add-liquidity__pool__pair__avatar token-a" />
-              <span class="add-liquidity__pool__pair__avatar token-b" />
+              <CircleSymbol
+                :denom="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom"
+                size="sm"
+                class="add-liquidity__pool__pair__avatar token-a"
+              />
+              <CircleSymbol
+                :denom="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom"
+                size="sm"
+                class="add-liquidity__pool__pair__avatar token-b"
+              />
             </div>
 
             <span class="add-liquidity__pool__name">
@@ -153,7 +161,7 @@
 
               <div class="add-liquidity__receive__wrapper">
                 <div class="add-liquidity__receive__token">
-                  <div class="add-liquidity__receive__token__avatar" />
+                  <CircleSymbol :denom="pool.pool_coin_denom" size="sm" class="add-liquidity__receive__token__avatar" />
                   <span class="w-bold">
                     <Denom v-if="hasPool" :name="pool.pool_coin_denom" />
                     <span v-else>G-LK-LP</span>
@@ -207,9 +215,15 @@
         </template>
       </template>
 
-      <template v-if="state.step === 'review'">
+      <template v-else>
         <section class="add-liquidity__content add-liquidity__review">
-          <TxStepsModal :data="actionSteps" :gas-price-level="gasPrice" />
+          <TxStepsModal
+            :data="actionSteps"
+            :gas-price-level="gasPrice"
+            @transacting="goToStep('send')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+          />
         </section>
       </template>
     </main>
@@ -223,6 +237,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -244,6 +259,7 @@ export default {
   components: {
     AmountDisplay,
     Icon,
+    CircleSymbol,
     Button,
     ChainName,
     Denom,
@@ -261,7 +277,6 @@ export default {
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
 
     const steps = ['amount', 'review', 'send'];
 
@@ -271,6 +286,10 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
+    });
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const form = reactive<Record<string, { asset: Balance; amount: number }>>({
@@ -494,6 +513,15 @@ export default {
       state.step = step;
     };
 
+    const resetHandler = () => {
+      form.coinA.amount = 0;
+      form.coinB.amount = 0;
+
+      actionSteps.value = [];
+
+      goToStep('amount');
+    };
+
     onMounted(async () => {
       if (!poolId.value) {
         return;
@@ -556,6 +584,7 @@ export default {
       totalEstimatedPrice,
       hasSufficientFunds,
       isValid,
+      resetHandler,
       inputChangeHandler,
       toggleChainsModal,
       goBack,
@@ -651,6 +680,11 @@ export default {
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {
@@ -708,14 +742,12 @@ export default {
       margin-right: 0.8rem;
 
       &__avatar {
-        width: 1.4rem;
-        height: 1.4rem;
-        border-radius: 2.4rem;
-        background: #ddd;
+        &.token-a {
+          z-index: 1;
+        }
 
         & + & {
-          margin-left: -0.4rem;
-          background: #aaa;
+          margin-left: -0.6rem;
         }
       }
     }
@@ -785,13 +817,10 @@ export default {
     }
 
     &__token {
+      display: flex;
+      align-items: center;
+
       &__avatar {
-        display: inline-block;
-        vertical-align: middle;
-        width: 2.4rem;
-        height: 2.4rem;
-        border-radius: 2.6rem;
-        background: var(--inactive);
         margin-right: 1.2rem;
       }
     }

@@ -3,9 +3,15 @@
     <TitleWithGoback :title="title" :func="func" />
 
     <div class="chain-info s-minus w-normal">
-      You have {{ selectedDenomDisplay }} on {{ chainsNumber }} {{ chainsNumber > 1 ? 'chains' : 'chain' }}.
+      {{
+        $t('components.chainSelect.text1', {
+          asset: selectedDenomDisplay,
+          chainNo: chainsNumber,
+          chains: chainsNumber > 1 ? 'chains' : 'chain',
+        })
+      }}
       <br />
-      Select the chain you wish to swap from.
+      {{ $t('components.chainSelect.text2') }}
     </div>
 
     <div class="coin-list">

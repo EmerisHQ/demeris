@@ -1,8 +1,8 @@
 <template>
   <nav class="nav">
-    <router-link class="nav-link" to="/">Portfolio</router-link>
-    <router-link class="nav-link" to="/assets">Assets</router-link>
-    <router-link class="nav-link" to="/pools">Pools</router-link>
+    <router-link class="nav-link" to="/">{{ $t('navbar.portfolio') }}</router-link>
+    <router-link class="nav-link" to="/assets">{{ $t('navbar.assets') }}</router-link>
+    <router-link class="nav-link" to="/pools">{{ $t('navbar.pools') }}</router-link>
     <div class="space"></div>
   </nav>
 </template>

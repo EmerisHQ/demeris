@@ -1,9 +1,9 @@
 <template>
   <section class="pools">
     <nav class="pools__nav">
-      <router-link to="/pools" class="pools__nav__item">My Pools</router-link>
+      <router-link to="/pools" class="pools__nav__item">{{ $t('context.pools.mine') }}</router-link>
       <router-link to="/pools" custom>
-        <span class="pools__nav__item pools__nav__item--inactive">All Pools</span>
+        <span class="pools__nav__item pools__nav__item--inactive">{{ $t('context.pools.all') }}</span>
       </router-link>
     </nav>
 
@@ -21,9 +21,9 @@
 
       <thead>
         <tr>
-          <th class="text-left">Token Pair</th>
-          <th class="text-right">Your share</th>
-          <th class="text-right">Liquidity</th>
+          <th class="text-left">{{ $t('context.pools.pair') }}</th>
+          <th class="text-right">{{ $t('context.pools.share') }}</th>
+          <th class="text-right">{{ $t('context.pools.liquidity') }}</th>
           <!--<th class="text-right">APY</th>//-->
           <th></th>
         </tr>
@@ -33,14 +33,8 @@
         <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row" @click="rowClickHandler(pool)">
           <td class="pools-table__row__pair">
             <div class="pools-table__row__pair__pool">
-              <CircleSymbol
-                :denoms="pool.reserve_coin_denoms[0]"
-                class="pools-table__row__pair__pool__avatar token-a"
-              />
-              <CircleSymbol
-                :denoms="pool.reserve_coin_denoms[1]"
-                class="pools-table__row__pair__pool__avatar token-b"
-              />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pools-table__row__pair__pool__avatar token-a" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pools-table__row__pair__pool__avatar token-b" />
             </div>
             <span class="pools-table__row__pair__name w-bold">
               {{ pool.display_name }}
@@ -82,6 +76,7 @@ export default {
     pools: {
       type: Array as PropType<Pool[]>,
       required: true,
+      default: () => [],
     },
   },
   setup(props) {

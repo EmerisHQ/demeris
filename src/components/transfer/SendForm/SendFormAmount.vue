@@ -25,7 +25,7 @@
 
         <label class="send-form-amount__controls__button">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
-          <span class="elevation-button">Max</span>
+          <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
         </label>
       </div>
     </fieldset>
@@ -40,7 +40,7 @@
           <div class="send-form-amount__assets__item__asset">
             <CircleSymbol
               :chain-name="state.currentAsset.on_chain"
-              :denoms="state.currentAsset.base_denom"
+              :denom="state.currentAsset.base_denom"
               class="send-form-amount__assets__item__avatar"
             />
 
@@ -61,7 +61,7 @@
             <p class="send-form-amount__assets__item__amount__available s-minus">
               <span>
                 <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
-                available
+                {{ $t('components.sendForm.available') }}
               </span>
             </p>
           </div>
@@ -74,7 +74,11 @@
     </fieldset>
 
     <fieldset class="form__field">
-      <Button :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'" :disabled="!isValid" @click="onSubmit" />
+      <Button
+        :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
+        :disabled="!isValid"
+        @click="onSubmit"
+      />
     </fieldset>
   </div>
 </template>

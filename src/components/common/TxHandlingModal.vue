@@ -128,6 +128,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -180,6 +181,7 @@ export default defineComponent({
   emits: ['close', 'next', 'retry', 'reset', 'done'],
   setup(props, { emit }) {
     // Set Icon from status
+    const { t } = useI18n({ useScope: 'global' });
     const iconType = computed(() => {
       if (props.status == 'keplr-sign') {
         return 'pending';
@@ -194,9 +196,9 @@ export default defineComponent({
     });
 
     //Set default texts
-    const subTitle = ref('Opening Keplr');
-    const title = ref('Sign transaction');
-    const whiteButton = ref('Cancel');
+    const subTitle = ref(t('components.txHandlingModal.openKeplr'));
+    const title = ref(t('components.txHandlingModal.signTx'));
+    const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
 
     // Watch for status changes
@@ -303,7 +305,6 @@ export default defineComponent({
       emit('next');
     }
     function emitDone() {
-      console.log('done');
       emit('done');
     }
     return {
