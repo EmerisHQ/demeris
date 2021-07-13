@@ -125,7 +125,6 @@ export default defineComponent({
     const store = useStore();
 
     store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
-
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
@@ -205,7 +204,6 @@ export default defineComponent({
         chain_name,
         hash,
       });
-      console.log(verifyTrace);
       const hops = [];
       for (let hop of verifyTrace.trace) {
         hops.unshift(hop.counterparty_name);

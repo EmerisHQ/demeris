@@ -45,7 +45,7 @@ export default function useAccount() {
       unverified: [],
     };
 
-    balances?.value?.forEach((coin) => {
+    JSON.parse(JSON.stringify(balances.value)).forEach((coin) => {
       if (coin.verified) {
         sortedBalances.verified.push(coin);
       } else {

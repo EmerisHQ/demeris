@@ -132,6 +132,7 @@ export default defineComponent({
         );
       },
     );
+    console.log(fees);
     const txToResolve = ref({});
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
@@ -145,6 +146,7 @@ export default defineComponent({
     const txstatus = ref('keplr-sign');
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
+
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -173,7 +175,6 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
-      console.log(fees);
       return modifiedData;
     });
     const confirm = async () => {

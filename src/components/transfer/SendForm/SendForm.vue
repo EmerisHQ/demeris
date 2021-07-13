@@ -66,7 +66,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -87,31 +86,35 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
-    const generateSteps = async () => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: form.balance.denom,
-      });
-
-      const action: TransferAction = {
-        name: 'transfer',
-        params: {
-          from: {
-            amount: {
-              amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
-              denom: form.balance.denom,
+    watch(
+      () => [form.balance.amount, form.balance.denom, form.chain_name],
+      async () => {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
+          const precision = store.getters['demeris/getDenomPrecision']({
+            name: form.balance.denom,
+          });
+          const action: TransferAction = {
+            name: 'transfer',
+            params: {
+              from: {
+                amount: {
+                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                  denom: form.balance.denom,
+                },
+                chain_name: form.chain_name,
+              },
+              to: {
+                chain_name: form.chain_name,
+                address: form.recipient,
+              },
             },
-            chain_name: form.chain_name,
-          },
-          to: {
-            chain_name: form.chain_name,
-            address: form.recipient,
-          },
-        },
-      };
-
-      const result = await actionHandler(action);
-
-      steps.value = result;
+          };
+          steps.value = await actionHandler(action);
+        }
+      },
+    );
+    const generateSteps = async () => {
+      goToStep('review');
     };
 
     const resetHandler = () => {
@@ -127,7 +130,6 @@ export default defineComponent({
 
       goToStep('recipient');
     };
-
     const goToStep = (value: Step) => {
       step.value = value;
     };

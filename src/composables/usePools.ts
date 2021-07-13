@@ -45,6 +45,102 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
+
+  const denomListByPools = async (isPoolCoin = false) => {
+    if (pools.value.length) {
+      const list = [];
+      const dexChain = store.getters['demeris/getDexChain'];
+      async function getBaseDenom(denom) {
+        if (denom.includes('ibc')) {
+          return (
+            store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
+            (await store.dispatch(
+              'demeris/GET_VERIFY_TRACE',
+              { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+              { root: true },
+            ))
+          ).base_denom;
+        } else {
+          return denom;
+        }
+      }
+      const denoms = await Promise.all(
+        pools.value.map(async (pool) => {
+          const firstCoinBaseDenom = await getBaseDenom(pool.reserve_coin_denoms[0]);
+          const secondCoinBaseDenom = await getBaseDenom(pool.reserve_coin_denoms[1]);
+          const poolId = pool.id;
+
+          const poolCoin = {
+            display_name: await getDisplayName(pool.pool_coin_denom, dexChain),
+            base_denom: pool.pool_coin_denom,
+            on_chain: dexChain,
+            pool_id: poolId,
+            amount: 0,
+          };
+
+          const reserveCoinFirst = {
+            display_name: await getDisplayName(pool.reserve_coin_denoms[0], dexChain),
+            base_denom: firstCoinBaseDenom,
+            denom: pool.reserve_coin_denoms[0],
+            on_chain: dexChain,
+            amount: '0' + firstCoinBaseDenom,
+            pool_id: poolId,
+          };
+
+          const reserveCoinSecond = {
+            display_name: await getDisplayName(pool.reserve_coin_denoms[1], dexChain),
+            base_denom: secondCoinBaseDenom,
+            denom: pool.reserve_coin_denoms[1],
+            on_chain: dexChain,
+            amount: '0' + secondCoinBaseDenom,
+            pool_id: poolId,
+          };
+
+          const denomsInfo = [poolCoin, reserveCoinFirst, reserveCoinSecond];
+          if (isPoolCoin) {
+            return denomsInfo;
+          } else {
+            return denomsInfo.filter((coin) => {
+              return !coin.display_name.includes('GDEX');
+            });
+          }
+        }),
+      );
+
+      denoms.forEach((denoms) => {
+        list.push(...denoms);
+      });
+
+      function dedupe(arr) {
+        return arr.reduce(
+          function (p, c) {
+            // create an identifying id from the object values
+            const id = c.display_name;
+
+            // if the id is not found in the temp array
+            // add the object to the output array
+            // and add the key to the temp array
+            if (p.temp.indexOf(id) === -1) {
+              p.out.push(c);
+              p.temp.push(id);
+            }
+            return p;
+
+            // return the deduped array
+          },
+          {
+            temp: [],
+            out: [],
+          },
+        ).out;
+      }
+
+      return dedupe(list);
+    } else {
+      return [];
+    }
+  };
+
   const reserveBalancesById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
     const balances = (
@@ -80,6 +176,7 @@ export default function usePools() {
     formatPoolName,
     poolPriceById,
     reserveBalancesById,
+    denomListByPools,
     totalLiquidityPriceById,
   };
 }

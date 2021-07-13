@@ -50,6 +50,10 @@ export type Getters = {
   getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
   getKeplrAccountName(state: State): string | null;
   hasSeenReedem(state: State): boolean;
+  viewUnverified(state: State): boolean;
+  viewLPAssetPools(state: State): boolean;
+  allowCustomSlippage(state: State): boolean;
+  getSlippagePerc(state: State): number;
   getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
@@ -83,15 +87,23 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
   },
+  getSlippagePerc: (state) => {
+    return state._Session.slippagePerc;
+  },
   hasSeenReedem: (state) => {
-    console.log(state._Session);
     return state._Session.hasSeenRedeem;
   },
   getPreferredGasPriceLevel: (state) => {
     return state._Session.gasPriceLevel;
   },
-  getAdvancedMode: (state) => {
-    return state._Session.advanced;
+  allowCustomSlippage: (state) => {
+    return state._Session.customSlippage;
+  },
+  viewUnverified: (state) => {
+    return state._Session.viewUnverified;
+  },
+  viewLPAssetPools: (state) => {
+    return state._Session.viewLPAssetPools;
   },
   getAllNumbers: (state) => {
     const numbers = Object.values(state.numbers).flat();

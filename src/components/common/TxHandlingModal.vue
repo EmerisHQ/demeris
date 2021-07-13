@@ -41,7 +41,7 @@
           {{ subTitle }}
         </template>
       </div>
-      <div class="transferred-image"></div>
+      <div v-if="status.startsWith('transfer')" class="transferred-image" />
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
         <template v-if="status == 'transacting' || status == 'complete'">
@@ -303,7 +303,6 @@ export default defineComponent({
       emit('next');
     }
     function emitDone() {
-      console.log('done');
       emit('done');
     }
     return {

@@ -173,7 +173,6 @@ export default defineComponent({
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
-        console.log(level);
         emit('update:gasPriceLevel', level);
         store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },

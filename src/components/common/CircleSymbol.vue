@@ -87,7 +87,7 @@ export default defineComponent({
       }
 
       if (props.variant === 'asset') {
-        const denomConfig = verifiedDenoms.value.find((item) => item.name === (props.denoms as string));
+        const denomConfig = verifiedDenoms.value?.find((item) => item.name === (props.denoms as string));
         return !denomConfig?.verified;
       }
 

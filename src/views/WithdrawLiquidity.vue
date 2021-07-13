@@ -193,7 +193,7 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
 
     const poolId = computed(() => route.params.id);
 
