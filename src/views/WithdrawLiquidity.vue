@@ -1,7 +1,7 @@
 <template>
   <div class="withdraw-liquidity" :class="{ 'withdraw-liquidity--insufficient-funds': !hasSufficientFunds }">
     <header class="withdraw-liquidity__header">
-      <button class="withdraw-liquidity__header__button" @click="goBack">
+      <button class="withdraw-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -137,13 +137,17 @@
         </div>
       </template>
 
-      <template v-if="state.step === 'review'">
+      <template v-else>
         <div class="withdraw-liquidity__content">
-          <TxStepsModal :data="actionSteps" :gas-price-level="gasPrice" />
+          <TxStepsModal
+            :data="actionSteps"
+            :gas-price-level="gasPrice"
+            @transacting="goToStep('send')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+          />
         </div>
       </template>
-
-      <template v-if="state.step === 'send'"> Send </template>
     </main>
   </div>
 </template>
@@ -189,7 +193,7 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
 
     const poolId = computed(() => route.params.id);
 
@@ -333,6 +337,13 @@ export default {
       actionSteps.value = await actionHandler(action);
     };
 
+    const resetHandler = () => {
+      state.amount = 0;
+      actionSteps.value = [];
+
+      goToStep('amount');
+    };
+
     onMounted(() => {
       state.selectedAsset = balances.value[0];
     });
@@ -378,6 +389,7 @@ export default {
       formatPoolName,
       goBack,
       onClose,
+      resetHandler,
     };
   },
 };
@@ -466,6 +478,11 @@ export default {
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {

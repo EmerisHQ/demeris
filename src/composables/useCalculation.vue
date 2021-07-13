@@ -1,5 +1,8 @@
 <script lang="ts">
+import { useStore } from '@/store';
 export default function () {
+  const store = useStore();
+
   // common setting
   const priceDecimalDigit = 6;
   const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
@@ -86,14 +89,48 @@ export default function () {
       return 0;
     }
   }
+  function getPrecision(denom) {
+    const chains = store.getters['demeris/getChains'];
+    const denomPrecisionIndexer = {};
+
+    for (let chain in chains) {
+      chains[chain].denoms.forEach((item) => {
+        denomPrecisionIndexer[item.name] = item;
+      });
+    }
+
+    return Number(denomPrecisionIndexer[denom].precision);
+  }
+
+  function getPrecisedAmount(denom, amount) {
+    try {
+      const precision = getPrecision(denom);
+      return parseInt(amount) / 10 ** precision;
+    } catch {
+      return amount;
+    }
+  }
+
+  function calculateSlippage(swapAmount, poolReserve) {
+    let slippage = (2 * swapAmount) / poolReserve;
+
+    if (slippage > 0.997) {
+      slippage = 0.997;
+    }
+
+    return slippage;
+  }
 
   return {
+    calculateSlippage,
     getCoinPrice,
     getCoinDollarValue,
     getPoolPrice,
     getSwapPrice,
     getPayCoinAmount,
     getReceiveCoinAmount,
+    getPrecision,
+    getPrecisedAmount,
   };
 }
 </script>

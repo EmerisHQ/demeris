@@ -34,9 +34,12 @@ export type APIPromise = {
   promise: Promise<void>;
 };
 export type UserData = {
-  advanced?: boolean;
+  customSlippage?: boolean;
+  viewLPAssetPools?: boolean;
+  viewUnverified?: boolean;
   gasPriceLevel?: GasPriceLevel;
   hasSeenRedeem?: boolean;
+  slippagePerc?: number;
   updateDT: number;
 };
 export type UserSession = {

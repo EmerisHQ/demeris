@@ -3,7 +3,21 @@
     <ListItem direction="column">
       <List>
         <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
-          <div class="w-bold">{{ pairName }}</div>
+          <div class="pool__item">
+            <div class="pool__item__symbols">
+              <CircleSymbol
+                size="sm"
+                :denom="data.pool.reserve_coin_denoms[0]"
+                class="pool__item__symbols__symbol token-a"
+              />
+              <CircleSymbol
+                size="sm"
+                :denom="data.pool.reserve_coin_denoms[1]"
+                class="pool__item__symbols__symbol token-b"
+              />
+            </div>
+            <div class="pool__item__name w-bold">{{ pairName }}</div>
+          </div>
         </ListItem>
 
         <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
@@ -16,8 +30,12 @@
     </ListItem>
 
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
-      <div>
-        <AmountDisplay class="w-bold" :amount="data.value.poolCoin" />
+      <div class="supply__item">
+        <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
+        <div class="supply__item__amount">
+          <AmountDisplay class="w-bold" :amount="data.poolCoin" />
+          <span class="supply__item__chain"><ChainName :name="chainName" /></span>
+        </div>
       </div>
     </ListItem>
 
@@ -26,14 +44,26 @@
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
       <div class="receive__item">
-        <div>
+        <div class="receive__item__wrapper">
+          <CircleSymbol
+            :denom="receiveAmount.coinA.denom"
+            :chain-name="chainName"
+            size="sm"
+            class="receive__item__symbol"
+          />
           <AmountDisplay class="w-bold" :amount="receiveAmount.coinA" />
         </div>
         <span class="receive__item__chain"><ChainName :name="chainName" /></span>
       </div>
 
       <div class="receive__item">
-        <div>
+        <div class="receive__item__wrapper">
+          <CircleSymbol
+            :denom="receiveAmount.coinB.denom"
+            :chain-name="chainName"
+            size="sm"
+            class="receive__item__symbol"
+          />
           <AmountDisplay class="w-bold" :amount="receiveAmount.coinB" />
         </div>
         <span class="receive__item__chain"><ChainName :name="chainName" /></span>
@@ -55,6 +85,7 @@ import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -68,6 +99,7 @@ export default defineComponent({
   components: {
     AmountDisplay,
     ChainName,
+    CircleSymbol,
     List,
     ListItem,
   },
@@ -123,13 +155,54 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.receive__item {
-  & + & {
-    margin-top: 1.6rem;
+.pool__item {
+  display: inline-flex;
+  align-items: center;
+
+  &__symbols {
+    display: inline-flex;
+    margin-right: 0.8rem;
+
+    .token-a {
+      z-index: 1;
+    }
+
+    .token-b {
+      margin-left: -0.6rem;
+    }
+  }
+}
+
+.supply__item {
+  display: inline-flex;
+  align-items: flex-start;
+
+  &__symbol {
+    margin-right: 0.8rem;
+  }
+
+  &__amount {
+    display: flex;
+    flex-direction: column;
   }
 
   &__chain {
-    margin-top: -0.5rem;
+    font-size: 1.2rem;
+  }
+}
+.receive__item {
+  &__wrapper {
+    display: inline-flex;
+    align-items: flex-start;
+  }
+  & + & {
+    margin-top: 1.6rem;
+  }
+  &__symbol {
+    margin-right: 0.8rem;
+  }
+  &__chain {
+    display: block;
     font-size: 1.2rem;
   }
 }

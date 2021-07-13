@@ -16,14 +16,19 @@
     <tbody>
       <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
         <td class="assets-table__row__asset">
-          <CircleSymbol :denoms="asset.denom" :chain-name="asset.chainsNames[0]" />
+          <CircleSymbol :denom="asset.denom" :chain-name="asset.chainsNames[0]" />
           <div class="assets-table__row__asset__denom">
             <Denom :name="asset.denom" />
             <div
               v-if="displayStyle === 'summary' && asset.chainsNames.length > 1"
               class="assets-table__row__asset__denom__chains s-minus"
             >
-              <AssetChainsIndicator :denom="asset.denom" :balances="balances" :show-indicators="false" />
+              <AssetChainsIndicator
+                :denom="asset.denom"
+                :balances="balances"
+                :show-indicators="false"
+                :show-description="true"
+              />
             </div>
           </div>
         </td>

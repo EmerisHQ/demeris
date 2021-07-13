@@ -18,7 +18,7 @@
   </fieldset>
 
   <fieldset class="form__field">
-    <Button :name="$t('generic_cta.confirm')" :disabled="!isValid" @click="onSubmit" />
+    <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="onSubmit" />
   </fieldset>
 </template>
 

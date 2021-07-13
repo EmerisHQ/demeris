@@ -1,21 +1,30 @@
 <template>
-  <!-- 
-		Displays a swap building component:
-		title, chose denom balance
-		Max Icon button (using ../ui/Icon.vue)
-		Reset Icon Button (using ../ui/Icon.vue)
-		from Denom selector (using ../common/DenomSelect.vue)
-		to Denom selector (using ../common/DenomSelect.vue)
-		switch Icon Button (using ../ui/Icon.vue)
-		price compoonent (using ../common/Price.vue)
-
-		dependencies:
-				vuex getter to obtain user's preferred UI lang (i18n texts)?
-	-->
   <div class="wrapper">
-    <SlippageSettingModal v-if="isSlippageSettingModalOpen" @goback="slippageSettingModalToggle" />
-    <ReviewModal v-else-if="isOpen" :data="actionHandlerResult" @close="reviewModalToggle" @goback="gobackFunc" />
-    <div v-else class="swap-widget elevation-panel" :style="isChildModalOpen ? 'box-shadow:none;' : ''">
+    <SlippageSettingModal
+      v-show="isSlippageSettingModalOpen"
+      :swap-data="{
+        pay: {
+          denom: payCoinData?.base_denom,
+          amount: payCoinAmount,
+        },
+        receive: { denom: receiveCoinData?.base_denom, amount: receiveCoinAmount },
+      }"
+      @goback="slippageSettingModalToggle"
+    />
+    <ReviewModal
+      v-if="isOpen && !isSlippageSettingModalOpen"
+      :data="actionHandlerResult"
+      :gas-price-level="gasPrice"
+      @close="reviewModalToggle"
+      @goback="gobackFunc"
+    />
+    <div
+      class="swap-widget elevation-panel"
+      :style="[
+        !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
+        isChildModalOpen ? 'box-shadow:none;' : '',
+      ]"
+    >
       <div class="swap-widget-header">
         <div class="s-2 w-bold">Swap</div>
         <div class="swap-widget-header__dot-button">
@@ -34,11 +43,11 @@
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
-        :input-header="`Pay ${getCoinDollarValue(payCoinData?.base_denom, payCoinAmount)}`"
+        :input-header="`Pay ${getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? ''}`"
         :selected-denom="payCoinData"
-        :assets="userBalances"
+        :assets="assetsToPay"
         :is-over="isOver"
-        @change="setConterPairCoinAmount"
+        @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -57,8 +66,7 @@
             }"
           />
           <IconButton
-            v-if="payCoinData"
-            :name="`${payCoinData.amount} ${$filters.getCoinName(payCoinData.base_denom)} Max `"
+            :name="maxButtonText"
             :type="'text'"
             :status="'normal'"
             :data="{
@@ -73,10 +81,10 @@
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="receiveCoinAmount"
-        :input-header="`Receive ${getCoinDollarValue(receiveCoinData?.base_denom, receiveCoinAmount, '~')}`"
+        :input-header="`Receive ${getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount, '~').value ?? ''}`"
         :selected-denom="receiveCoinData"
-        :assets="receiveAvailableDenom"
-        @change="setConterPairCoinAmount"
+        :assets="assetsToReceive"
+        @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
         @modalToggle="setChildModalOpenStatus"
       />
@@ -95,39 +103,42 @@
           :tooltip-text="buttonTooltipText"
         />
       </div>
+
       <FeeLevelSelector
-        v-model:gasPriceLevel="gasPriceLevel"
-        :transaction-count="1"
-        :base-dollar-fee="0.2"
-        :swap-dollar-fee="0.1"
+        v-if="actionHandlerResult && actionHandlerResult.length > 0"
+        v-model:gasPriceLevel="gasPrice"
+        :steps="actionHandlerResult"
       />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import ActionButton from '@/components/ui/Button.vue';
-// import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
+import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
-import usePrice from '@/composables/usePrice.vue';
+import usePools from '@/composables/usePools';
+import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
-import { SWAP_TEST_DATA, TEST_DATA } from '@/TEST_DATA';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { SwapAction } from '@/types/actions';
+import { getDisplayName } from '@/utils/actionHandler';
 import { actionHandler } from '@/utils/actionHandler';
+import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
     DenomSelect,
     IconButton,
     ActionButton,
-    // Icon,
     ReviewModal,
     Alert,
     SlippageSettingModal,
@@ -135,12 +146,316 @@ export default defineComponent({
   },
 
   setup() {
-    const { getCoinDollarValue, getPayCoinAmount, getReceiveCoinAmount } = usePrice();
+    const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
-    const store = useStore();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
+    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
+    const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
+    const slippage = ref(0);
+    const store = useStore();
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
+
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    // REFACTOR STARTS HERE
+    const availablePairs = ref([]);
+    onMounted(async () => {
+      const pairs = [];
+      const newPools = pools.value;
+      for (let pool of newPools) {
+        let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+        let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+
+        if (isNative(pool.reserve_coin_denoms[0])) {
+          reserveCoinA.base_denom = reserveCoinA.denom;
+          reserveCoinA.chain_name = store.getters['demeris/getDexChain'];
+        } else {
+          const verifyTraceA =
+            store.getters['demeris/getVerifyTrace']({
+              chain_name: store.getters['demeris/getDexChain'],
+              hash: pool.reserve_coin_denoms[0].split('/')[1],
+            }) ??
+            (await store.dispatch(
+              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                params: {
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[0].split('/')[1],
+                },
+              },
+              { root: true },
+            ));
+          reserveCoinA.base_denom = verifyTraceA.base_denom;
+          reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
+        }
+
+        if (isNative(pool.reserve_coin_denoms[1])) {
+          reserveCoinB.base_denom = reserveCoinB.denom;
+          reserveCoinB.chain_name = store.getters['demeris/getDexChain'];
+        } else {
+          const verifyTraceB =
+            store.getters['demeris/getVerifyTrace']({
+              chain_name: store.getters['demeris/getDexChain'],
+              hash: pool.reserve_coin_denoms[1].split('/')[1],
+            }) ??
+            (await store.dispatch(
+              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                params: {
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[1].split('/')[1],
+                },
+              },
+              { root: true },
+            ));
+          reserveCoinB.base_denom = verifyTraceB.base_denom;
+          reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
+        }
+        const pairAB = {
+          pool_id: pool.id,
+          pay: reserveCoinA,
+          receive: { denom: reserveCoinB.denom },
+        };
+        const pairBA = {
+          pool_id: pool.id,
+          pay: reserveCoinB,
+          receive: { denom: reserveCoinA.denom },
+        };
+
+        // TODO: get isAdvanced from local storage
+        const isAdvanced = false;
+
+        //Pool coin included(advanced) or excluded
+        if (isAdvanced) {
+          pairs.push(pairAB);
+          pairs.push(pairBA);
+        } else {
+          if (!hasPoolCoin(pairAB)) {
+            pairs.push(pairAB);
+            pairs.push(pairBA);
+          }
+        }
+
+        //helper
+        function hasPoolCoin(pair) {
+          const poolPrefix = 'pool';
+          return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
+        }
+      }
+      availablePairs.value = pairs;
+    });
+    watch(
+      () => pools.value,
+      async (newPools, oldPools) => {
+        if (JSON.stringify(newPools) != JSON.stringify(oldPools)) {
+          const pairs = [];
+          for (let pool of newPools) {
+            let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+            let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+
+            if (isNative(pool.reserve_coin_denoms[0])) {
+              reserveCoinA.base_denom = reserveCoinA.denom;
+              reserveCoinA.chain_name = store.getters['demeris/getDexChain'];
+            } else {
+              const verifyTraceA =
+                store.getters['demeris/getVerifyTrace']({
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[0].split('/')[1],
+                }) ??
+                (await store.dispatch(
+                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+                  {
+                    subscribe: false,
+                    params: {
+                      chain_name: store.getters['demeris/getDexChain'],
+                      hash: pool.reserve_coin_denoms[0].split('/')[1],
+                    },
+                  },
+                  { root: true },
+                ));
+              reserveCoinA.base_denom = verifyTraceA.base_denom;
+              reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
+            }
+
+            if (isNative(pool.reserve_coin_denoms[1])) {
+              reserveCoinB.base_denom = reserveCoinB.denom;
+              reserveCoinB.chain_name = store.getters['demeris/getDexChain'];
+            } else {
+              const verifyTraceB =
+                store.getters['demeris/getVerifyTrace']({
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: pool.reserve_coin_denoms[1].split('/')[1],
+                }) ??
+                (await store.dispatch(
+                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+                  {
+                    subscribe: false,
+                    params: {
+                      chain_name: store.getters['demeris/getDexChain'],
+                      hash: pool.reserve_coin_denoms[1].split('/')[1],
+                    },
+                  },
+                  { root: true },
+                ));
+              reserveCoinB.base_denom = verifyTraceB.base_denom;
+              reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
+            }
+            const pairAB = {
+              pool_id: pool.id,
+              pay: reserveCoinA,
+              receive: { denom: reserveCoinB.denom },
+            };
+            const pairBA = {
+              pool_id: pool.id,
+              pay: reserveCoinB,
+              receive: { denom: reserveCoinA.denom },
+            };
+
+            // TODO: get isAdvanced from local storage
+            const isAdvanced = false;
+
+            //Pool coin included(advanced) or excluded
+            if (isAdvanced) {
+              pairs.push(pairAB);
+              pairs.push(pairBA);
+            } else {
+              if (!hasPoolCoin(pairAB)) {
+                pairs.push(pairAB);
+                pairs.push(pairBA);
+              }
+            }
+
+            //helper
+            function hasPoolCoin(pair) {
+              const poolPrefix = 'pool';
+              return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
+            }
+          }
+          availablePairs.value = pairs;
+        }
+      },
+    );
+
+    const availablePaySide = computed(() => {
+      if (data?.receiveCoinData) {
+        let paySide = availablePairs.value.filter(
+          (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
+        );
+        return paySide;
+      } else {
+        return availablePairs.value;
+      }
+    });
+    const availableReceiveSide = computed(() => {
+      if (data?.payCoinData) {
+        let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
+
+        return receiveSide;
+      } else {
+        return availablePairs.value;
+      }
+    });
+    const allBalances = computed(() => {
+      //add denom to use generally
+      const userBalance = balances.value.map((coin) => {
+        return { ...coin, denom: coin.ibc.hash ? `ibc/${coin.ibc.hash}` : coin.base_denom };
+      });
+
+      const verifiedBalances = [
+        ...verifiedDenoms.value.map((denom) => ({
+          base_denom: denom.name,
+          denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: 0,
+        })),
+      ];
+
+      //merge if userBalance exist
+      if (userBalance.length) {
+        userBalance.forEach((coin) => {
+          const duplicatedCoin = verifiedBalances.find((asset) => {
+            return asset.denom === coin.denom;
+          });
+
+          //if duplicated replace amount
+          if (duplicatedCoin?.denom) {
+            duplicatedCoin.amount = coin.amount;
+          } else {
+            //if not, just add user coin to the balance
+            verifiedBalances.push(coin);
+          }
+        });
+      }
+      return verifiedBalances;
+    });
+    const assetsToPay = computed(() => {
+      let payAssets = allBalances.value.filter((x) => {
+        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
+      });
+
+      return payAssets;
+    });
+    const assetsToReceive = computed(() => {
+      let assets = availableReceiveSide.value.map((x) => {
+        const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
+        return {
+          denom: x.receive.denom,
+          base_denom: denomInfo.pay.base_denom,
+          on_chain: store.getters['demeris/getDexChain'],
+        };
+      });
+      return assets;
+    });
+
+    // default pay coin set
+    const isInit = ref(false);
+    watch(
+      () => {
+        return [assetsToPay.value, balances.value];
+      },
+      (watchValues, oldWatchValues) => {
+        //when wallet connected/disconnected set again
+        if (watchValues[1].length !== oldWatchValues[1].length) {
+          isInit.value = false;
+          data.payCoinAmount = null;
+          data.receiveCoinAmount = null;
+        }
+
+        if (!isInit.value && watchValues[0].length) {
+          data.receiveCoinData = null;
+          if (!isSignedIn.value) {
+            //no-wallet
+            data.payCoinData = {
+              amount: '0uatom',
+              base_denom: 'uatom',
+              denom: 'uatom',
+              display_name: 'ATOM',
+              on_chain: store.getters['demeris/getDexChain'],
+            };
+          } else {
+            //with-wallet
+            data.payCoinData =
+              assetsToPay.value.filter((coin) => {
+                return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
+              })[0] ?? assetsToPay.value[0];
+          }
+
+          isInit.value = true;
+        }
+      },
+    );
+    // REFACTOR ENDS HERE
+
     const data = reactive({
+      //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
           if (data.isNotEnoughLiquidity) {
@@ -166,54 +481,230 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (data.isOver || !data.isBothSelected || data.isNotEnoughLiquidity) {
-          return 'inactive';
-        } else {
+        if (data.isSwapReady) {
           return 'normal';
+        } else {
+          return 'inactive';
         }
       }),
+      maxButtonText: 'Max',
+      maxAmount: computed(() => {
+        return (
+          parseInt(
+            allBalances.value.filter((coin) => {
+              return coin.denom === data.payCoinData?.denom;
+            })[0]?.amount,
+          ) ?? 0
+        );
+      }),
+      //conditional-text-end
+
+      //pay-receive-data-start
       payCoinData: null,
       payCoinAmount: null,
       receiveCoinData: null,
       receiveCoinAmount: null,
-      userBalances: balances,
-      receiveAvailableDenom: computed(() => {
-        const payCoinRemovedDenoms = TEST_DATA.receiveAvailableDenoms.filter((denomInfo) => {
-          return denomInfo?.base_denom !== data.payCoinData?.base_denom;
-        });
-        return payCoinRemovedDenoms;
-      }),
-      gasPriceLevel: store.getters['getPreferredGasPriceLevel'],
+      //pay-receive-data-end
+
+      //selectedPoolData for various calculation(pool price, swap price ...etc)
+      selectedPoolData: null,
+
+      //tx fee level
+
+      // for swap action
       actionHandlerResult: null,
-      isOver: computed(() => (data.isBothSelected && data?.payCoinAmount > data?.payCoinData?.amount ? true : false)),
-      //TODO: test
-      isNotEnoughLiquidity: computed(() => (data?.payCoinAmount > 1500 ? true : false)),
+
+      // booleans-start(for various status check)
+      isOver: computed(() => {
+        if (isSignedIn.value) {
+          return data.isBothSelected &&
+            data.payCoinAmount >
+              parseInt(assetsToPay?.value[0]?.amount) /
+                Math.pow(
+                  10,
+                  parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
+                )
+            ? true
+            : false;
+        } else {
+          return false;
+        }
+      }),
+      isNotEnoughLiquidity: computed(() => (slippage.value >= 0.2 ? true : false)),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
+      isAmount: computed(() => {
+        if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }),
+      isSwapReady: computed(() => {
+        return !(
+          data.isOver ||
+          !data.isBothSelected ||
+          data.isNotEnoughLiquidity ||
+          !data.isAmount ||
+          !isSignedIn.value
+        );
+      }),
       isChildModalOpen: false,
-      isPriceChanged: true,
+      isPriceChanged: false,
+      isAssetList: false,
       isFeesOpen: false,
+      // booleans-end
+
+      //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    data.payCoinData = data?.userBalances[0];
+    //max button text set
+    watch(
+      () => data.payCoinData,
+      async () => {
+        if (data.payCoinData) {
+          const amount = getPrecisedAmount(data.payCoinData.base_denom, data.maxAmount);
+          if (amount > 0) {
+            const displayName = await getDisplayName(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
+            const formattedAmount = Math.floor(amount * 100) / 100;
+            data.maxButtonText = `${formattedAmount} ${displayName} Max`;
+          } else {
+            data.maxButtonText = 'Max';
+          }
+        } else {
+          data.maxButtonText = 'Max';
+        }
+      },
+    );
+
+    //calculate slippage and set
+    watch(
+      () => data.payCoinAmount,
+      () => {
+        if (data.selectedPoolData) {
+          const reserveCoin =
+            data.selectedPoolData.reserves.findIndex((coin) => coin === data.payCoinData.denom) === 0
+              ? 'balanceA'
+              : 'balanceB';
+
+          slippage.value = calculateSlippage(
+            data.payCoinAmount *
+              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }))),
+            data.selectedPoolData.reserveBalances[reserveCoin],
+          );
+        }
+      },
+    );
+
+    //set selecte pair pool info
+    watch(
+      () => {
+        return [data.payCoinData, data.receiveCoinData];
+      },
+      async (watchValues) => {
+        if (watchValues[0] && watchValues[1]) {
+          let payDenom = data.payCoinData.denom;
+          const receiveDenom = data.receiveCoinData.denom;
+          //if payCoin denom is not uatom & ibc token
+          if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+            const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
+              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+            }).pay.denom;
+
+            payDenom = nativeDenomToIBCDenom;
+          }
+
+          try {
+            const id = poolsByDenom(payDenom).find((pool) => {
+              return (
+                pool.reserve_coin_denoms.find((denom) => {
+                  return denom === receiveDenom;
+                })?.length > 0
+              );
+            })?.id;
+
+            const pool = poolById(id);
+            const poolPrice = await poolPriceById(id);
+            const reserves = await getReserveBaseDenoms(pool);
+            const reserveBalances = await reserveBalancesById(id);
+
+            data.selectedPoolData = {
+              pool,
+              poolPrice,
+              reserves,
+              reserveBalances,
+            };
+          } catch (e) {
+            data.selectedPoolData = null;
+          }
+        }
+      },
+    );
+
+    //set actionHandlerResult when swapable
+    watch(
+      () => data.payCoinAmount,
+      async () => {
+        if (data.isSwapReady) {
+          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
+
+          const swapParams = {
+            name: 'swap',
+            params: {
+              from: {
+                amount: {
+                  amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+                  denom: data.payCoinData.denom,
+                },
+                chain_name: data.payCoinData.on_chain,
+              },
+              to: {
+                amount: {
+                  amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+                  denom: data.receiveCoinData.denom,
+                },
+                chain_name: store.getters['demeris/getDexChain'],
+              },
+            },
+          };
+          data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+        } else {
+          data.actionHandlerResult = null;
+        }
+      },
+    );
 
     function changePayToReceive() {
-      const originPayCoinData = data.payCoinData;
-      const originReceiveCoinData = data.receiveCoinData;
+      const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
+      if (originPayCoinData) {
+        originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
+      }
 
-      const originReceiveCoinAmount = data.receiveCoinAmount;
+      const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
 
       data.payCoinData = originReceiveCoinData;
-      data.receiveCoinData = originPayCoinData;
-      data.payCoinAmount = originReceiveCoinAmount;
-      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      data.receiveCoinData = assetsToReceive.value.find((asset) => {
+        return asset.base_denom === originPayCoinData.base_denom;
+      });
+
+      data.payCoinAmount = 0;
+      data.receiveCoinAmount = 0;
     }
 
     function setMax() {
-      data.payCoinAmount = data.payCoinData.amount;
-      data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+      const precisionDecimal = Math.pow(
+        10,
+        parseInt(
+          store.getters['demeris/getDenomPrecision']({
+            name: data.payCoinData.base_denom,
+          }),
+        ),
+      );
+      data.payCoinAmount = parseInt(data.payCoinData.amount) / Number(precisionDecimal);
+      setCounterPairCoinAmount('Pay');
     }
 
     function denomSelectHandler(payload) {
@@ -228,10 +719,6 @@ export default defineComponent({
       }
     }
 
-    function openSetting() {
-      alert('open setting');
-    }
-
     function setChildModalOpenStatus(payload) {
       data.isChildModalOpen = payload;
     }
@@ -240,76 +727,49 @@ export default defineComponent({
       alert('goback');
     }
 
-    function setConterPairCoinAmount(e) {
+    function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
+        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+        //TEST
+        // data.selectedPoolData.reserveBalances.balanceA = 318000000;
+        // data.selectedPoolData.reserveBalances.balanceB = 159000000;
+        const balanceA = isReverse
+          ? data.selectedPoolData.reserveBalances.balanceA
+          : data.selectedPoolData.reserveBalances.balanceB;
+        const balanceB = isReverse
+          ? data.selectedPoolData.reserveBalances.balanceB
+          : data.selectedPoolData.reserveBalances.balanceA;
+
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, 100000000000, 100000000000);
+          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
         } else {
-          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, 100000000000, 100000000000);
+          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
         }
       }
     }
 
-    function swap() {
-      const swapParams = {
-        from: {
-          amount: {
-            denom: 'uatom',
-            amount: '2000000',
-          },
-          chain_name: 'gaia',
-        },
-        to: {
-          amount: {
-            denom: 'uluna',
-            amount: '2000000',
-          },
-          chain_name: 'gaia',
-        },
-      };
-
-      // const swapParams = {
-      //   from: {
-      //     amount: {
-      //       denom: data.payCoinData.base_denom,
-      //       amount: data.payCoinAmount,
-      //     },
-      //     chain_name: data.payCoinData.on_chain,
-      //   },
-      //   to: {
-      //     amount: {
-      //       denom: data.receiveCoinData.base_denom,
-      //       amount: data.receiveCoinAmount,
-      //     },
-      //     chain_name: 'gaia',
-      //   },
-      // };
-
-      console.log(SWAP_TEST_DATA);
-      data.actionHandlerResult = SWAP_TEST_DATA;
+    async function swap() {
       reviewModalToggle();
-
-      console.log('PAY', data.payCoinData, data.payCoinAmount);
-      console.log('RECEIVE', data.receiveCoinData, data.receiveCoinAmount);
-      console.log('SWAP', swapParams);
-      actionHandler({ name: 'swap', params: swapParams });
     }
 
     return {
       ...toRefs(data),
-      getCoinDollarValue,
-      openSetting,
       changePayToReceive,
       denomSelectHandler,
+      getPrecisedAmount,
       setMax,
       swap,
+      assetsToPay,
+      assetsToReceive,
       setChildModalOpenStatus,
       isOpen,
       reviewModalToggle,
       gobackFunc,
-      setConterPairCoinAmount,
+      setCounterPairCoinAmount,
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
+      getDisplayPrice,
+      gasPrice,
     };
   },
 });
