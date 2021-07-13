@@ -26,11 +26,7 @@
         {{ $t('navbar.send') }}
       </router-link>
 
-      <button class="header__menu-button">
-        <div class="header__menu-button__icon">
-          <MenuIcon />
-        </div>
-      </button>
+      <SettingsMenu class="header__settings-menu" />
 
       <Wallet />
     </div>
@@ -41,11 +37,11 @@ import { computed, defineComponent } from 'vue';
 
 import Wallet from '@/components/account/Wallet.vue';
 import Logo from '@/components/common/Logo.vue';
+import SettingsMenu from '@/components/common/SettingsMenu.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 
-import MenuIcon from '../common/Icons/MenuIcon.vue';
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
 import IconButton from '../ui/IconButton.vue';
@@ -57,7 +53,7 @@ export default defineComponent({
     Wallet,
     ReceiveIcon,
     SendIcon,
-    MenuIcon,
+    SettingsMenu,
     IconButton,
   },
   setup() {
@@ -125,24 +121,8 @@ export default defineComponent({
     }
   }
 
-  &__menu-button {
-    margin: 0 2rem 0 1.6rem;
-    width: 4rem;
-    height: 4rem;
-    border-radius: 2.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 100ms linear;
-
-    &:hover {
-      background: var(--fg-trans);
-    }
-
-    &__icon {
-      font-size: 2.2rem;
-      color: black;
-    }
+  &__settings-menu {
+    margin: 0 1.6rem 0 1rem;
   }
 }
 </style>
