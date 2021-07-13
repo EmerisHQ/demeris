@@ -72,12 +72,12 @@
 
         <!-- TODO: Staking -->
 
-        <section class="asset__main__staking asset__list">
+        <section v-if="assetConfig.stakable" class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
           </div>
 
-          <StakeTable class="asset__list__wrapper" />
+          <StakeTable class="asset__list__wrapper" :denom="denom" />
         </section>
 
         <!-- Pools -->
@@ -109,6 +109,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -123,6 +124,7 @@ import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { VerifiedDenoms } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -143,11 +145,17 @@ export default defineComponent({
   },
 
   setup() {
+    const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
     const { balancesByDenom } = useAccount();
     const { poolsByDenom } = usePools();
+
+    const assetConfig = computed(() => {
+      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
+      return verifiedDenoms.find((item) => item.name === denom.value);
+    });
 
     const assets = computed(() => balancesByDenom(denom.value));
     const pools = computed(() => poolsByDenom(denom.value));
@@ -156,7 +164,7 @@ export default defineComponent({
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
-    return { denom, assets, pools, totalAmount };
+    return { assetConfig, denom, assets, pools, totalAmount };
   },
 });
 </script>
