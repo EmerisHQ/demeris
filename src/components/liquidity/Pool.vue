@@ -85,7 +85,6 @@ export default defineComponent({
               ));
             denoms.value[0] = verifyTrace.base_denom;
           } catch (e) {
-            console.log(e);
             denoms.value[0] = newDenoms[0];
           }
         }
@@ -111,7 +110,6 @@ export default defineComponent({
               ));
             denoms.value[1] = verifyTrace.base_denom;
           } catch (e) {
-            console.log(e);
             denoms.value[1] = newDenoms[1];
           }
         }

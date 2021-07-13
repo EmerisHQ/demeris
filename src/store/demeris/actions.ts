@@ -366,9 +366,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', newData);
     } else {
       const newData = {
-        advanced: false,
+        customSlippage: false,
+        viewUnverified: false,
+        viewLPAssetPools: false,
         gasPriceLevel: GasPriceLevel.AVERAGE,
         hasSeenRedeem: false,
+        slippagePerc: 0.1,
         updateDT: Date.now(),
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
@@ -408,7 +411,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       await window.keplr.enable(chain.node_info.chain_id);
       const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-      console.log(msgs);
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
@@ -427,7 +429,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         accountNumber: parseInt(signerData.account_number),
         sequence: parseInt(signerData.sequence_number),
       };
-
+      console.log(msgs);
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
       const tx_data = Buffer.from(tx).toString('base64');

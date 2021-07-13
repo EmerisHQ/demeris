@@ -1,7 +1,12 @@
 <template>
   <div class="send">
     <header class="send__header">
-      <button v-if="showBackButton" class="send__header__button" @click="goBack">
+      <button
+        v-if="showBackButton"
+        :disabled="['move', 'send'].includes(step)"
+        class="send__header__button"
+        @click="goBack"
+      >
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -130,6 +135,11 @@ export default {
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {

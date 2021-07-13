@@ -1,7 +1,7 @@
 <template>
   <div class="add-liquidity">
     <header class="add-liquidity__header">
-      <button class="add-liquidity__header__button" @click="goBack">
+      <button class="add-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -215,9 +215,15 @@
         </template>
       </template>
 
-      <template v-if="state.step === 'review'">
+      <template v-else>
         <section class="add-liquidity__content add-liquidity__review">
-          <TxStepsModal :data="actionSteps" :gas-price-level="gasPrice" />
+          <TxStepsModal
+            :data="actionSteps"
+            :gas-price-level="gasPrice"
+            @transacting="goToStep('send')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+          />
         </section>
       </template>
     </main>
@@ -271,7 +277,6 @@ export default {
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
 
     const steps = ['amount', 'review', 'send'];
 
@@ -281,6 +286,10 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
+    });
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const form = reactive<Record<string, { asset: Balance; amount: number }>>({
@@ -504,6 +513,15 @@ export default {
       state.step = step;
     };
 
+    const resetHandler = () => {
+      form.coinA.amount = 0;
+      form.coinB.amount = 0;
+
+      actionSteps.value = [];
+
+      goToStep('amount');
+    };
+
     onMounted(async () => {
       if (!poolId.value) {
         return;
@@ -566,6 +584,7 @@ export default {
       totalEstimatedPrice,
       hasSufficientFunds,
       isValid,
+      resetHandler,
       inputChangeHandler,
       toggleChainsModal,
       goBack,
@@ -661,6 +680,11 @@ export default {
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {

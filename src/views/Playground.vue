@@ -205,7 +205,6 @@ export default defineComponent({
           },
         ],
       });
-      console.log(steps);
       //action.value = steps;
     };
     const sendStepTx = async () => {

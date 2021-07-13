@@ -1,7 +1,7 @@
 <template>
   <div class="redeem">
     <header class="redeem__header">
-      <button class="redeem__header__button" @click="goBack">
+      <button class="redeem__header__button" :disabled="state.step === 'transfer'" @click="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -69,7 +69,7 @@
               </div>
 
               <div class="redeem__list__item__fees">
-                <FeeLevelSelector v-if="asset.steps" v-model:gasPriceLevel="gasPrice" :steps="asset.steps" />
+                <FeeLevelSelector v-if="asset.steps" :gas-price-level="gasPrice" :steps="asset.steps" />
                 <!--<p class="redeem__list__item__fees__label s-minus">Fees</p>
                 <span class="redeem__list__item__fees__amount">0.08 ATOM</span>//-->
               </div>
@@ -82,14 +82,16 @@
         </div>
       </template>
 
-      <template v-else-if="state.step === 'review'">
+      <template v-else>
         <div class="redeem__content">
-          <TxStepsModal :data="state.selectedAsset.steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
+          <TxStepsModal
+            :data="state.selectedAsset.steps"
+            :gas-price-level="gasPrice"
+            @transacting="goToStep('transfer')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+          />
         </div>
-      </template>
-
-      <template v-else-if="state.step === 'transfer'">
-        <h2 class="redeem__title s-2">Transfer</h2>
       </template>
     </main>
   </div>
@@ -108,7 +110,6 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -124,13 +125,18 @@ export default defineComponent({
     const store = useStore();
 
     store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
       showInstruction: true,
     });
+
     const augmentedBalances = ref([]);
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
     watch(
       () => redeemableBalances.value,
       async (newBalances) => {
@@ -198,7 +204,6 @@ export default defineComponent({
         chain_name,
         hash,
       });
-      console.log(verifyTrace);
       const hops = [];
       for (let hop of verifyTrace.trace) {
         hops.unshift(hop.counterparty_name);
@@ -229,6 +234,13 @@ export default defineComponent({
       state.showInstruction = false;
     };
 
+    const resetHandler = () => {
+      state.selectedAsset = undefined;
+      state.showInstruction = false;
+
+      goToStep('assets');
+    };
+
     return {
       assets,
       augmentedBalances,
@@ -242,7 +254,7 @@ export default defineComponent({
       parseCoins,
       gasPrice,
       getRoute,
-      GasPriceLevel,
+      resetHandler,
     };
   },
 });
@@ -271,6 +283,11 @@ export default defineComponent({
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {

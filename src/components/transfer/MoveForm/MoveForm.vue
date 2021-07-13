@@ -4,11 +4,19 @@
       <h2 class="move-form__title s-2">Move assets</h2>
       <MoveFormAmount :balances="balances" @next="generateSteps" />
 
-      <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      <div class="move-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
-    <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" :gas-price-level="gasPrice" @complete="goToStep(complete)" />
+    <template v-else>
+      <TxStepsModal
+        :data="steps"
+        :gas-price-level="gasPrice"
+        @transacting="goToStep('move')"
+        @failed="goToStep('review')"
+        @reset="resetHandler"
+      />
     </template>
   </div>
 </template>
@@ -20,7 +28,6 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
-import { GasPriceLevel } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -53,7 +60,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
+
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',
@@ -66,6 +73,10 @@ export default defineComponent({
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
+    });
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     watch(
@@ -94,6 +105,7 @@ export default defineComponent({
         }
       },
     );
+
     const generateSteps = async () => {
       goToStep('review');
     };
@@ -102,13 +114,25 @@ export default defineComponent({
       step.value = value;
     };
 
+    const resetHandler = () => {
+      form.balance = {
+        denom: '',
+        amount: '0',
+      };
+      form.on_chain = '';
+      form.to_chain = '';
+      steps.value = [];
+
+      goToStep('amount');
+    };
+
     if (!props.step) {
       step.value = 'amount';
     }
 
     provide('moveForm', form);
 
-    return { steps, generateSteps, form, goToStep, GasPriceLevel, gasPrice };
+    return { steps, generateSteps, form, goToStep, gasPrice, resetHandler };
   },
 });
 </script>
@@ -118,6 +142,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 </style>
