@@ -121,7 +121,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -154,6 +154,9 @@ export default defineComponent({
   },
 
   setup() {
+    //SETTINGS-START
+    const priceUpdateTerm = 7; //price update term (sec)
+    //SETTINGS-END
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
@@ -527,7 +530,6 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value) {
-          console.log('assetsToPay', assetsToPay.value);
           return data.isBothSelected &&
             data.payCoinAmount >
               parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom).amount) /
@@ -610,6 +612,7 @@ export default defineComponent({
     );
 
     //set selecte pair pool info
+    const poolId = ref(null); // for price update
     watch(
       () => {
         return [data.payCoinData, data.receiveCoinData];
@@ -636,6 +639,8 @@ export default defineComponent({
               );
             })?.id;
 
+            poolId.value = id;
+
             const pool = poolById(id);
             const poolPrice = await poolPriceById(id);
             const reserves = await getReserveBaseDenoms(pool);
@@ -648,11 +653,41 @@ export default defineComponent({
               reserveBalances,
             };
           } catch (e) {
+            poolId.value = null;
             data.selectedPoolData = null;
           }
         }
       },
     );
+
+    //pool price updater
+    const setIntervalId = ref(null);
+    watch(
+      () => poolId.value,
+      (newValue, oldValue) => {
+        if (newValue !== oldValue && poolId.value) {
+          clearInterval(setIntervalId.value);
+          setIntervalId.value = setInterval(async () => {
+            const id = poolId.value;
+            const pool = poolById(id);
+            const poolPrice = await poolPriceById(id);
+            const reserves = await getReserveBaseDenoms(pool);
+            const reserveBalances = await reserveBalancesById(id);
+
+            data.selectedPoolData = {
+              pool,
+              poolPrice,
+              reserves,
+              reserveBalances,
+            };
+            setCounterPairCoinAmount('Pay');
+          }, priceUpdateTerm * 1000);
+        }
+      },
+    );
+    onUnmounted(() => {
+      clearInterval(setIntervalId.value);
+    });
 
     //set actionHandlerResult when swapable
     watch(
