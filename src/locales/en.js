@@ -103,6 +103,12 @@ export const messages = {
         withdrawLiqActionComplete: 'Liquidity withdrawn',
         txFail: 'Transaction failed',
       },
+      swap: {
+        title: 'Swap',
+        payHeader: 'Pay {amount}',
+        receiveHeader: 'Receive {amount}',
+        priceAlert: 'Prices have changed',
+      },
       previews: {
         addWithdrawLiquidity: {
           poolLbl: 'Pool',
@@ -128,7 +134,21 @@ export const messages = {
           txToSignHint: 'TODO',
           feeLbl: 'Transaction fee',
         },
-        swap: {},
+        swap: {
+          payLbl: 'Pay',
+          receiveLbl: 'Receive',
+          receiveLblHint: '(estimated)',
+          priceLbl: 'Price',
+          minReceivedLbl: 'Min. received',
+          minReceivedLblHint: 'TODO',
+          limitPriceLbl: 'Limit price',
+          limitPriceLblHint: 'TODO',
+          feesLbl: 'Fees',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'TODO',
+          swapFeeLbl: 'Swap fee',
+          swapFeeLblHint: 'TODO',
+        },
       },
     },
     context: {

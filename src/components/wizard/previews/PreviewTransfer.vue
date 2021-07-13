@@ -18,7 +18,7 @@
 
     <ListItem
       v-if="stepType !== 'transfer-to-hub'"
-      :label="$t('components.previews.redeem.fromLbl')"
+      :label="$t('components.previews.transfer.fromLbl')"
       direction="column"
       collapsable
       collapsed
@@ -63,7 +63,11 @@
       <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
 
-    <ListItem v-if="stepType !== 'transfer-to-hub'" :label="$t('components.previews.redeem.toLbl')" direction="column">
+    <ListItem
+      v-if="stepType !== 'transfer-to-hub'"
+      :label="$t('components.previews.transfer.toLbl')"
+      direction="column"
+    >
       <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
     </ListItem>
   </List>

@@ -1,13 +1,16 @@
 <template>
   <List>
     <ListItem>
-      <ListItem label="Pay">
+      <ListItem :label="$t('components.previews.swap.payLbl')">
         <div>
           <AmountDisplay class="w-bold" :amount="data.from" />
         </div>
         <sub><ChainName :name="chainName" /></sub>
       </ListItem>
-      <ListItem label="Receive" description="(estimated)">
+      <ListItem
+        :label="$t('components.previews.swap.receiveLbl')"
+        :description="$t('components.previews.swap.receiveLblHint')"
+      >
         <div>
           <AmountDisplay
             class="w-bold"
@@ -18,13 +21,21 @@
       </ListItem>
     </ListItem>
 
-    <ListItem label="Price" direction="column">
-      <ListItem description="Min. received" hint="TODO" inset>
+    <ListItem :label="$t('components.previews.swap.priceLbl')" direction="column">
+      <ListItem
+        :description="$t('components.previews.swap.minReceivedLbl')"
+        :hint="$t('components.previews.swap.minReceivedLblHint')"
+        inset
+      >
         <!-- TODO: Slippage -->
         <AmountDisplay class="s-minus" :amount="data.to" />
       </ListItem>
 
-      <ListItem description="Limit price" hint="TODO" inset>
+      <ListItem
+        :description="$t('components.previews.swap.limitPriceLbl')"
+        :hint="$t('components.previews.swap.limitPriceLblHint')"
+        inset
+      >
         <span class="s-minus">
           <AmountDisplay class="s-minus" :amount="{ amount: limitPrice, denom: data.to.amount.denom }" /> =
           <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: data.from.amount.denom }" />
@@ -32,12 +43,20 @@
       </ListItem>
     </ListItem>
 
-    <ListItem label="Fees" direction="column">
-      <ListItem description="Transaction fee" hint="TODO" inset>
+    <ListItem :label="$t('components.previews.swap.feesLbl')" direction="column">
+      <ListItem
+        :description="$t('components.previews.swap.feeLbl')"
+        :hint="$t('components.previews.swap.feeLblHint')"
+        inset
+      >
         <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: 'uatom' }" />
       </ListItem>
 
-      <ListItem description="Swap Fee" hint="TODO" inset>
+      <ListItem
+        :description="$t('components.previews.swap.swapFeeLbl')"
+        :hint="$t('components.previews.swap.swapFeeLblHint')"
+        inset
+      >
         <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: 'uatom' }" />
       </ListItem>
     </ListItem>
