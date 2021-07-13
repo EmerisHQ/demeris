@@ -2,8 +2,8 @@
   <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="pool" :style="cardStyle">
     <div class="pool__main">
       <div class="pool__main__token-pair">
-        <CircleSymbol :denoms="denoms[0]" class="pool__main__token-pair__token token-a" />
-        <CircleSymbol :denoms="denoms[1]" class="pool__main__token-pair__token token-b" />
+        <CircleSymbol :denom="denoms[0]" class="pool__main__token-pair__token token-a" />
+        <CircleSymbol :denom="denoms[1]" class="pool__main__token-pair__token token-b" />
       </div>
       <div class="pool__main__info">
         <p class="pool__main__info__name">{{ pairName }}</p>
@@ -12,7 +12,7 @@
     </div>
 
     <div class="pool__footer">
-      <p class="pool__footer__label">Equity</p>
+      <p class="pool__footer__label">{{ $t('context.pools.equity') }}</p>
       <span class="pool__footer__value">{{ toUSD(ownLiquidityPrice) }}</span>
     </div>
   </router-link>
@@ -85,7 +85,6 @@ export default defineComponent({
               ));
             denoms.value[0] = verifyTrace.base_denom;
           } catch (e) {
-            console.log(e);
             denoms.value[0] = newDenoms[0];
           }
         }
@@ -111,7 +110,6 @@ export default defineComponent({
               ));
             denoms.value[1] = verifyTrace.base_denom;
           } catch (e) {
-            console.log(e);
             denoms.value[1] = newDenoms[1];
           }
         }
@@ -308,14 +306,11 @@ export default defineComponent({
         border-radius: 9999px;
 
         &.token-a {
-          background-color: #f7f7f7;
           z-index: 1;
-          box-shadow: inset 0px 0px 4px rgba(255, 255, 255, 0.62);
         }
 
-        &.token-b {
-          margin-left: -0.8rem;
-          background-color: #e5e5e5;
+        & + & {
+          margin-left: -0.6rem;
         }
       }
     }

@@ -1,18 +1,24 @@
 <template>
   <List>
-    <ListItem label="Send">
-      <div>
+    <ListItem :label="$t('components.previews.transfer.sendLbl')">
+      <div class="send__item">
+        <CircleSymbol
+          :denom="transactionInfo.from.denom"
+          :chain-name="transactionInfo.from.chain"
+          size="sm"
+          class="send__item__symbol"
+        />
         <AmountDisplay
           class="w-bold"
           :amount="{ amount: transactionInfo.from.amount, denom: transactionInfo.from.denom }"
         />
       </div>
-      <sub><ChainName :name="transactionInfo.from.chain" /></sub>
+      <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
 
     <ListItem
-      v-if="!stepType.value !== 'transfer-to-hub'"
-      label="Send Address"
+      v-if="stepType !== 'transfer-to-hub'"
+      :label="$t('components.previews.transfer.fromLbl')"
       direction="column"
       collapsable
       collapsed
@@ -22,9 +28,9 @@
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="`${step.transactions.length} transfers to sign`"
+      :label="$t('components.previews.transfer.txToSign', { txCount: step.transactions.length })"
       direction="column"
-      hint="TODO"
+      :hint="$t('components.previews.transfer.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -33,7 +39,7 @@
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+    <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.transfer.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
@@ -42,16 +48,26 @@
     </ListItem>
 
     <ListItem label="Receive">
-      <div>
+      <div class="send__item">
+        <CircleSymbol
+          :denom="transactionInfo.to.denom"
+          :chain-name="transactionInfo.to.chain"
+          size="sm"
+          class="send__item__symbol"
+        />
         <AmountDisplay
           class="w-bold"
           :amount="{ amount: transactionInfo.to.amount, denom: transactionInfo.to.denom }"
         />
       </div>
-      <sub><ChainName :name="transactionInfo.to.chain" /></sub>
+      <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
 
-    <ListItem v-if="!stepType.value !== 'transfer-to-hub'" label="Recipient Address" direction="column">
+    <ListItem
+      v-if="stepType !== 'transfer-to-hub'"
+      :label="$t('components.previews.transfer.toLbl')"
+      direction="column"
+    >
       <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
     </ListItem>
   </List>
@@ -62,6 +78,7 @@ import { computed, defineComponent, PropType } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
 import { useStore } from '@/store';
@@ -75,6 +92,7 @@ export default defineComponent({
     AmountDisplay,
     Address,
     ChainName,
+    CircleSymbol,
     List,
     ListItem,
   },
@@ -180,3 +198,19 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.send__item {
+  display: inline-flex;
+
+  &__symbol {
+    margin-right: 0.8rem;
+  }
+}
+
+.preview-chain {
+  display: block;
+  margin-top: -0.2rem;
+  font-size: 1.2rem;
+}
+</style>
