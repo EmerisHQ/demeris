@@ -8,20 +8,23 @@
     <template v-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
       <SendFormAmount :balances="balances" @next="generateSteps" />
+
+      <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
     </template>
 
     <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" gas-price-level="gasPrice" />
+      <TxStepsModal :data="steps" :gas-price-level="gasPrice" />
     </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive, ref } from 'vue';
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
-import { GasPriceLevel, SendAddressForm, TransferAction } from '@/types/actions';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -37,6 +40,7 @@ export default defineComponent({
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
+    FeeLevelSelector,
   },
 
   props: {
@@ -55,7 +59,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -72,31 +76,34 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
-    const generateSteps = async () => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: form.balance.denom,
-      });
-
-      const action: TransferAction = {
-        name: 'transfer',
-        params: {
-          from: {
-            amount: {
-              amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
-              denom: form.balance.denom,
+    watch(
+      () => [form.balance.amount, form.balance.denom, form.chain_name],
+      async () => {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
+          const precision = store.getters['demeris/getDenomPrecision']({
+            name: form.balance.denom,
+          });
+          const action: TransferAction = {
+            name: 'transfer',
+            params: {
+              from: {
+                amount: {
+                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                  denom: form.balance.denom,
+                },
+                chain_name: form.chain_name,
+              },
+              to: {
+                chain_name: form.chain_name,
+                address: form.recipient,
+              },
             },
-            chain_name: form.chain_name,
-          },
-          to: {
-            chain_name: form.chain_name,
-            address: form.recipient,
-          },
-        },
-      };
-
-      const result = await actionHandler(action);
-
-      steps.value = result;
+          };
+          steps.value = await actionHandler(action);
+        }
+      },
+    );
+    const generateSteps = async () => {
       goToStep('review');
     };
 

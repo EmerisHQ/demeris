@@ -303,7 +303,6 @@ export default defineComponent({
       emit('next');
     }
     function emitDone() {
-      console.log('done');
       emit('done');
     }
     return {

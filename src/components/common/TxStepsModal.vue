@@ -131,6 +131,7 @@ export default defineComponent({
         );
       },
     );
+    console.log(fees);
     const txToResolve = ref({});
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
@@ -173,7 +174,6 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
-      console.log(fees);
       return modifiedData;
     });
     const confirm = async () => {
