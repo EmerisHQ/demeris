@@ -70,9 +70,9 @@
           </ul>
         </section>
 
-        <!-- TODO: Staking -->
+        <!-- Staking -->
 
-        <section v-if="assetConfig.stakable" class="asset__main__staking asset__list">
+        <section v-if="assetConfig?.stakable" class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
           </div>

@@ -33,7 +33,8 @@ export default defineComponent({
         <div class="stake__banner__wrapper">
           <p class="stake__banner__title">Earn rewards by staking <Denom :name="denom" /></p>
           <p class="stake__banner__subtitle">
-            Lock up your ATOM and earn passive income with an average <span class="w-bold">9.7% APY</span>.
+            Lock up your <Denom :name="denom" /> and earn passive income with an average
+            <span class="w-bold">9.7% APY</span>.
           </p>
         </div>
 
