@@ -42,11 +42,16 @@ export default defineComponent({
     clip: rect(0, 0, 0, 0);
   }
 
+  &__input:checked ~ &__track {
+    background: var(--text);
+  }
+
   &__input:checked ~ &__track &__thumb {
-    transform: translate(100%, -50%);
+    transform: translate(calc(100% - 0.2rem), -50%);
   }
 
   &__track {
+    transition: background ease-in-out 150ms;
     position: relative;
     display: inline-flex;
     height: 1.6rem;
@@ -55,7 +60,7 @@ export default defineComponent({
     background: var(--fg-trans);
     cursor: pointer;
     flex-shrink: 0;
-    padding: 2px;
+    padding: 0.2rem;
   }
 
   &__thumb {
@@ -79,6 +84,7 @@ export default defineComponent({
       #cea851 318.79deg,
       #fff1c3 360.05deg
     );
+    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.12);
   }
 }
 </style>
