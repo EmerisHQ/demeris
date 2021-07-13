@@ -9,7 +9,7 @@
       "
     />
     <div class="setting">
-      <div class="s-minus w-medium">Slippage tolerance</div>
+      <div class="s-minus w-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
       <div class="setting__sections">
         <button
           class="setting__sections-block"
@@ -57,10 +57,10 @@
     <div class="details">
       <div class="details__row">
         <div class="details__row-left s-minus w-medium">
-          Limit price
+          {{ $t('components.slippageSettingsModal.limitPrice') }}
           <tippy :max-width="192">
             <HintIcon />
-            <template #content> Assets will not be swapped at a higher rate than the limit rate. </template>
+            <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
         <div class="details__row-right s-minus w-normal">
@@ -69,10 +69,10 @@
       </div>
       <div class="details__row">
         <div class="details__row-left s-minus w-medium">
-          <div>Min. received<br />(if 100% swapped)</div>
+          <div>{{ $t('components.slippageSettingsModal.minReceivedLbl') }}</div>
           <tippy :max-width="192">
             <HintIcon />
-            <template #content> Minimum total received if your entire swap is fulfilled. </template>
+            <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
         <div class="details__row-right s-minus w-normal">{{ minReceivedText }}</div>

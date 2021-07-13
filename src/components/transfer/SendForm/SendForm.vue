@@ -1,12 +1,12 @@
 <template>
   <div class="send-form">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title s-2">Send to an address</h2>
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-else-if="step === 'amount'">
-      <h2 class="send-form__title s-2">Enter an amount</h2>
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
       <SendFormAmount :balances="balances" @next="goToStep('review')" />
       <div class="send-form__fees">
         <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />

@@ -1,7 +1,7 @@
 <template>
   <div class="move-form">
     <template v-if="step === 'amount'">
-      <h2 class="move-form__title s-2">Move assets</h2>
+      <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
       <MoveFormAmount :balances="balances" @next="generateSteps" />
 
       <div class="move-form__fees">

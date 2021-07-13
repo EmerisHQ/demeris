@@ -3,15 +3,17 @@
     <div class="wrapper">
       <div class="portfolio">
         <div class="portfolio__total">
-          <div class="portfolio__total__text">Total balance</div>
+          <div class="portfolio__total__text">{{ $t('context.assets.totalBalance') }}</div>
           <div class="portfolio__total__value">
             <TotalPrice :balances="balances" />
           </div>
         </div>
         <div class="portfolio__assets">
           <div class="portfolio__assets__header">
-            <div class="portfolio__assets__header__text">Assets</div>
-            <router-link class="portfolio__assets__header__link" to="/assets">See all <ArrowRightIcon /></router-link>
+            <div class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</div>
+            <router-link class="portfolio__assets__header__link" to="/assets">
+              {{ $t('generic_cta.seeall') }} <ArrowRightIcon />
+            </router-link>
           </div>
 
           <MoonpayBanner
@@ -32,8 +34,10 @@
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
-            <div class="portfolio__pools__header__text">Pools</div>
-            <router-link class="portfolio__pools__header__link" to="/pools">See all <ArrowRightIcon /></router-link>
+            <div class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</div>
+            <router-link class="portfolio__pools__header__link" to="/pools">
+              {{ $t('generic_cta.seeall') }} <ArrowRightIcon />
+            </router-link>
           </div>
           <div class="portfolio__pools__cards">
             <Pools :pools="invested.length > 0 ? invested : toppools" :limit="3" />

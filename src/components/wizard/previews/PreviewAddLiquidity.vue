@@ -2,11 +2,11 @@
   <List>
     <ListItem direction="column">
       <List>
-        <ListItem label="Pool" inset>
+        <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
           <div class="w-bold">{{ poolInfo.pairName }}</div>
         </ListItem>
 
-        <ListItem description="Pool price" inset>
+        <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
           <div class="s-minus">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
             <AmountDisplay :amount="{ amount: poolInfo.price * 1e6, denom: data.coinB.denom }" />
@@ -15,7 +15,7 @@
       </List>
     </ListItem>
 
-    <ListItem label="Supply">
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
       <div class="supply__item">
         <div>
           <AmountDisplay class="w-bold" :amount="data.coinA" />
@@ -31,14 +31,17 @@
       </div>
     </ListItem>
 
-    <ListItem label="Receive (estimated)" description="LP Asset">
+    <ListItem
+      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
+    >
       <div>
         <AmountDisplay class="w-bold" :amount="{ amount: receiveAmount * 1e6, denom: poolInfo.denom }" />
       </div>
     </ListItem>
 
-    <ListItem label="Fees" direction="column">
-      <ListItem class="fees__item" description="Transaction Fee" inset>
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
+      <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
           <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
         </template>

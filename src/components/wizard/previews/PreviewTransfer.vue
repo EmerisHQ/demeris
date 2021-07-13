@@ -1,6 +1,6 @@
 <template>
   <List>
-    <ListItem label="Send">
+    <ListItem :label="$t('components.previews.transfer.sendLbl')">
       <div class="send__item">
         <CircleSymbol
           :denom="transactionInfo.from.denom"
@@ -16,15 +16,21 @@
       <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
 
-    <ListItem v-if="stepType !== 'transfer-to-hub'" label="Send Address" direction="column" collapsable collapsed>
+    <ListItem
+      v-if="stepType !== 'transfer-to-hub'"
+      :label="$t('components.previews.transfer.fromLbl')"
+      direction="column"
+      collapsable
+      collapsed
+    >
       <Address :address="transactionInfo.from.address" :chain-name="transactionInfo.from.chain" readonly />
     </ListItem>
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="`${step.transactions.length} transfers to sign`"
+      :label="$t('components.previews.transfer.txToSign', { txCount: step.transactions.length })"
       direction="column"
-      hint="TODO"
+      :hint="$t('components.previews.transfer.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -33,7 +39,7 @@
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+    <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.transfer.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
@@ -57,7 +63,11 @@
       <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
 
-    <ListItem v-if="stepType !== 'transfer-to-hub'" label="Recipient Address" direction="column">
+    <ListItem
+      v-if="stepType !== 'transfer-to-hub'"
+      :label="$t('components.previews.transfer.toLbl')"
+      direction="column"
+    >
       <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
     </ListItem>
   </List>

@@ -2,7 +2,7 @@
   <List>
     <ListItem direction="column">
       <List>
-        <ListItem label="Pool" inset>
+        <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
           <div class="pool__item">
             <div class="pool__item__symbols">
               <CircleSymbol
@@ -20,7 +20,7 @@
           </div>
         </ListItem>
 
-        <ListItem description="Pool price" inset>
+        <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
           <div class="s-minus">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
             <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
@@ -29,7 +29,7 @@
       </List>
     </ListItem>
 
-    <ListItem label="Supply">
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
       <div class="supply__item">
         <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
         <div class="supply__item__amount">
@@ -39,7 +39,10 @@
       </div>
     </ListItem>
 
-    <ListItem label="Receive (estimated)" description="LP Asset">
+    <ListItem
+      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
+    >
       <div class="receive__item">
         <div class="receive__item__wrapper">
           <CircleSymbol
@@ -67,8 +70,8 @@
       </div>
     </ListItem>
 
-    <ListItem label="Fees" direction="column">
-      <ListItem class="fees__item" description="Transaction Fee" inset>
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
+      <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
           <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
         </template>

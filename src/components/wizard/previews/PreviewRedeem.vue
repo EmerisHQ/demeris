@@ -9,9 +9,9 @@
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="`${step.transactions.length} transfers to sign`"
+      :label="$t('components.previews.redeem.txToSign', { txCount: step.transactions.length })"
       direction="column"
-      hint="TODO"
+      :hint="$t('components.previews.redeem.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -20,7 +20,7 @@
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+    <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.redeem.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />

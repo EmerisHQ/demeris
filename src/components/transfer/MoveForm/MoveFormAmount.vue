@@ -36,7 +36,7 @@
         </label>
         <label class="move-form-amount__controls__button">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
-          <span class="elevation-button">Max</span>
+          <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
         </label>
       </div>
     </fieldset>
@@ -44,7 +44,7 @@
     <fieldset class="form__field">
       <div class="move-form-amount__assets elevation-card">
         <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
-          <span class="move-form-amount__assets__item__label s-minus">Move</span>
+          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.action') }}</span>
 
           <div class="move-form-amount__assets__item__asset">
             <CircleSymbol
@@ -63,7 +63,7 @@
         </button>
 
         <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
-          <span class="move-form-amount__assets__item__label s-minus">From</span>
+          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
 
           <div class="move-form-amount__assets__item__asset">
             <CircleSymbol variant="chain" :chain-name="form.on_chain" class="move-form-amount__assets__item__avatar" />
@@ -93,13 +93,13 @@
           :class="{ 'chain-selected': !!form.to_chain }"
           @click="toggleChainsModal(null, 'to')"
         >
-          <span class="move-form-amount__assets__item__label s-minus">To</span>
+          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
 
           <div class="move-form-amount__assets__item__asset">
             <CircleSymbol variant="chain" :chain-name="form.to_chain" class="move-form-amount__assets__item__avatar" />
             <span class="move-form-amount__assets__item__name w-bold">
               <ChainName v-if="form.to_chain" :name="form.to_chain" />
-              <span v-else>Select Chain</span>
+              <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
             </span>
           </div>
 
@@ -111,7 +111,11 @@
     </fieldset>
 
     <fieldset class="form__field">
-      <Button :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'" :disabled="!isValid" @click="onSubmit" />
+      <Button
+        :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
+        :disabled="!isValid"
+        @click="onSubmit"
+      />
     </fieldset>
   </div>
 </template>

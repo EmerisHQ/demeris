@@ -14,12 +14,17 @@
 
       <div class="asset-chains-indicator__count">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
-        <span v-if="showDescription"> chains</span>
+        <span v-if="showDescription"> {{ $t('context.assets.chains') }}</span>
       </div>
 
       <template #content>
         <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{ `${formatPrecision(balance.amount)} on ${getChainName(balance.on_chain)}` }}
+          {{
+            $t('context.assets.onchain', {
+              amount: formatPrecision(balance.amount),
+              chain: getChainName(balance.on_chain),
+            })
+          }}
         </p>
       </template>
     </tippy>

@@ -26,7 +26,7 @@
       ]"
     >
       <div class="swap-widget-header">
-        <div class="s-2 w-bold">Swap</div>
+        <div class="s-2 w-bold">{{ $t('components.swap.title') }}</div>
         <div class="swap-widget-header__dot-button">
           <IconButton
             :name="'ThreeDotsIcon'"
@@ -43,7 +43,11 @@
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
-        :input-header="`Pay ${getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? ''}`"
+        :input-header="
+          $t('components.swap.payHeader', {
+            amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
+          })
+        "
         :selected-denom="payCoinData"
         :assets="assetsToPay"
         :is-over="isOver"
@@ -81,7 +85,11 @@
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="receiveCoinAmount"
-        :input-header="`Receive ${getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount, '~').value ?? ''}`"
+        :input-header="
+          $t('components.swap.receiveHeader', {
+            amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
+          })
+        "
         :selected-denom="receiveCoinData"
         :assets="assetsToReceive"
         @change="setCounterPairCoinAmount"
@@ -91,7 +99,7 @@
 
       <!-- price change alert -->
       <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
-        <Alert status="warning" message="Prices have changed" />
+        <Alert status="warning" :message="$t('components.swap.priceAlert')" />
       </div>
 
       <!-- swap button -->

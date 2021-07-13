@@ -1,9 +1,9 @@
 <template>
   <section class="pools">
     <nav class="pools__nav">
-      <router-link to="/pools" class="pools__nav__item">My Pools</router-link>
+      <router-link to="/pools" class="pools__nav__item">{{ $t('context.pools.mine') }}</router-link>
       <router-link to="/pools" custom>
-        <span class="pools__nav__item pools__nav__item--inactive">All Pools</span>
+        <span class="pools__nav__item pools__nav__item--inactive">{{ $t('context.pools.all') }}</span>
       </router-link>
     </nav>
 
@@ -21,9 +21,9 @@
 
       <thead>
         <tr>
-          <th class="text-left">Token Pair</th>
-          <th class="text-right">Your share</th>
-          <th class="text-right">Liquidity</th>
+          <th class="text-left">{{ $t('context.pools.pair') }}</th>
+          <th class="text-right">{{ $t('context.pools.share') }}</th>
+          <th class="text-right">{{ $t('context.pools.liquidity') }}</th>
           <!--<th class="text-right">APY</th>//-->
           <th></th>
         </tr>

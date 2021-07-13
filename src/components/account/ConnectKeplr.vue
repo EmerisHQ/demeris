@@ -4,18 +4,18 @@
       <div class="connect-keplr__content">
         <div v-if="!isConnecting">
           <slot name="title">
-            <h2 class="connect-keplr__title">Connect to Keplr</h2>
+            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal.title') }}</h2>
           </slot>
 
           <div class="connect-keplr__description">
             <slot name="description">
-              <p>Install Keplr in your browser and connect your wallet to start using Demeris.</p>
-              <p>Demeris will support other wallets in the near future.</p>
+              <p>{{ $t('wallet.connect.modal.text1') }}</p>
+              <p>{{ $t('wallet.connect.modal.text2') }}</p>
             </slot>
           </div>
 
           <div class="connect-keplr__controls">
-            <Button name="Connect to Keplr" @click="signIn" />
+            <Button :name="$t('wallet.connect.modal.button')" @click="signIn" />
 
             <a
               href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
@@ -23,7 +23,7 @@
               target="_blank"
               class="connect-keplr__controls__help s-minus"
             >
-              Don’t have Keplr installed?
+              {{ $t('wallet.connect.modal.missing') }}
             </a>
           </div>
         </div>
@@ -31,11 +31,13 @@
         <div v-else class="connect-keplr__connecting">
           <div class="connect-keplr__connecting__main">
             <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">Opening Keplr</span>
-            <p class="s-2">Connecting</p>
+            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal.opening') }}</span>
+            <p class="s-2">{{ $t('wallet.connect.modal.connecting') }}</p>
           </div>
 
-          <button class="connect-keplr__connecting__button" @click="cancel">Cancel</button>
+          <button class="connect-keplr__connecting__button" @click="cancel">
+            {{ $t('generic_cta.cancel') }}
+          </button>
         </div>
       </div>
 
