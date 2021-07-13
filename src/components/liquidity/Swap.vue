@@ -166,7 +166,9 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
-    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
