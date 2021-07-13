@@ -429,7 +429,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         accountNumber: parseInt(signerData.account_number),
         sequence: parseInt(signerData.sequence_number),
       };
-
+      console.log(msgs);
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
       const tx_data = Buffer.from(tx).toString('base64');

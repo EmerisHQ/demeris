@@ -909,6 +909,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       if (a.denom > b.denom) return 1;
       return 0;
     });
+    console.log(data);
+    console.log(price);
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: {
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
@@ -917,7 +919,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         offerCoin: data.from.denom,
         demandCoinDenom: data.to.denom,
         offerCoinFee: 0,
-        orderPrice: (BigInt(price[0].amount) / BigInt(price[1].amount)).toString(),
+        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount)).toString(),
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
