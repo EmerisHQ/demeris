@@ -69,6 +69,17 @@ export const messages = {
         memoPlaceholder: 'Add reference/memo',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
       },
+      clipBoard: {
+        copied: 'Copied!',
+        copy: 'Copy to clipboard',
+      },
+      slippageSettingsModal: {
+        title: 'Slippage tolerance',
+        limitPrice: 'Limit price',
+        disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
+        minReceivedLbl: 'Min. received<br />(if 100% swapped)',
+        minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
+      },
     },
     context: {
       feeLevels: {
