@@ -9,6 +9,7 @@ export const messages = {
       noFunds: 'Insufficient Funds',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try again with another search',
+      discoverMore: 'Discover more',
       max: 'Max',
     },
     navbar: {
@@ -178,6 +179,8 @@ export const messages = {
         pair: 'Token Pair',
         share: 'Your share',
         liquidity: 'Liquidity',
+        empty: 'Pools you add liquidity to will appear here.',
+        explore: 'Explore pools',
       },
     },
   },

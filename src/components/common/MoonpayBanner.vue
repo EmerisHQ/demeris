@@ -1,5 +1,9 @@
 <template>
-  <button class="moonpay-banner" :class="`moonpay-banner--${variant}`" @click="goMoon">
+  <button
+    class="moonpay-banner"
+    :class="[`moonpay-banner--${variant}`, { 'elevation-button': variant === 'banner' }]"
+    @click="goMoon"
+  >
     <p class="moonpay-banner__title">{{ title }}</p>
     <div class="moonpay-banner__info">
       <!-- <div class="moonpay-banner__info__icon">
@@ -44,7 +48,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .moonpay-banner {
   background: var(--bg);
-  border: 1px solid var(--border-trans);
   border-radius: 1.6rem;
   padding: 2.4rem;
   display: flex;
