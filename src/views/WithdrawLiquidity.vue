@@ -48,7 +48,7 @@
               v-if="state.isChainsModalOpen"
               title="Select chain"
               :assets="balances"
-              :selected-denom="pool.poolCoinDenom"
+              :selected-denom="pool.pool_coin_denom"
               :func="() => toggleChainsModal()"
               @select="toggleChainsModal()"
             />
