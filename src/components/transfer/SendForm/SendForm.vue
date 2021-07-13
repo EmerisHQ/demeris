@@ -139,7 +139,6 @@ export default defineComponent({
     }
 
     provide('transferForm', form);
-    watch(form, generateSteps, { deep: true });
 
     return { steps, form, goToStep, generateSteps, resetHandler, gasPrice };
   },
