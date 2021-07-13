@@ -34,11 +34,7 @@
         </button>
         <button
           class="setting__sections-block"
-          :class="[
-            isCustomSelected ? 'selected custom-selected' : '',
-            Number(customSlippage) < 0 ? 'custom-error' : '',
-          ]"
-          @click="selectCustomSlippage"
+          :class="[isCustomSelected ? 'selected custom-selected' : '', Number(slippage) < 0 ? 'custom-error' : '']"
         >
           <div class="custom-slippage">
             <input
@@ -91,6 +87,7 @@ import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
 import { store } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { getDisplayName } from '@/utils/actionHandler';
 
 type SwapData = {
@@ -121,34 +118,68 @@ export default defineComponent({
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
     const state = reactive({
-      slippage: null,
-      customSlippage: null,
-      alertStatus: computed(() => {
-        if (state.slippage) {
-          if (state.slippage === 0.1) {
-            return 'warning';
+      trueSlippage: computed(() => {
+        return store.getters['demeris/getSlippagePerc'] || 0.5;
+      }),
+      slippage: computed(() => {
+        if (state.trueSlippage.value) {
+          if (state.trueSlippage.value == 0.1 || state.trueSlippage.value == 0.5 || state.trueSlippage.value == 1) {
+            return state.trueSlippage.value;
           } else {
             return null;
           }
         } else {
-          if (state.customSlippage <= 0.1) {
-            if (state.customSlippage < 0) {
-              return 'error';
-            } else {
-              return 'warning';
-            }
-          } else if (state.customSlippage >= 3) {
-            return 'error';
+          return 0.5;
+        }
+      }),
+      customSlippage: computed(() => {
+        if (state.trueSlippage) {
+          if (state.trueSlippage.value != 0.1 || state.trueSlippage.value != 0.5 || state.trueSlippage.value != 1) {
+            return state.trueSlippage.value;
           } else {
             return null;
           }
+        } else {
+          return null;
+        }
+      }),
+      isCustomSelected: computed(() => {
+        if (state.customSlippage?.value) {
+          return true;
+        } else {
+          return false;
+        }
+      }),
+      alertStatus: computed(() => {
+        if (state.slippage) {
+          if (state.slippage.value) {
+            if (state.slippage.value === 0.1) {
+              return 'warning';
+            } else {
+              return null;
+            }
+          } else {
+            if (state.slippage.value <= 0.1) {
+              if (state.slippage.value < 0) {
+                return 'error';
+              } else {
+                return 'warning';
+              }
+            } else if (state.slippage.value >= 3) {
+              return 'error';
+            } else {
+              return null;
+            }
+          }
+        } else {
+          return null;
         }
       }),
       alertText: computed(() => {
         if (state.alertStatus === 'warning') {
           return 'With a low slippage, only a very small part of your swap may be fulfilled';
         } else if (state.alertStatus === 'error') {
-          if (state.customSlippage < 0) {
+          if (state.slippage.value < 0) {
             return 'Please enter a valid slippage rate.';
           } else {
             return 'Your swap price may be significantly above the market price. ';
@@ -157,28 +188,19 @@ export default defineComponent({
           return '';
         }
       }),
-      isCustomSelected: false,
       emitHandler: (event) => {
         emit(event);
       },
       setSlippage: (slippage) => {
         state.validSlippageUpdater(slippage);
-        state.isCustomSelected = false;
-        state.slippage = slippage;
-        state.customSlippage = null;
       },
       setCustomSlippage: (e) => {
         state.validSlippageUpdater(e.target.value);
-        state.customSlippage = Number(e.target.value);
-        state.slippage = null;
-      },
-      selectCustomSlippage: () => {
-        state.isCustomSelected = true;
       },
       validSlippageUpdater(value) {
         const slippage = Number(value);
         if (slippage > 0 && slippage <= 100) {
-          localStorage.setItem('demeris-slippage', String(slippage));
+          store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { slippagePerc: slippage } });
         }
       },
     });
@@ -188,7 +210,7 @@ export default defineComponent({
 
     //TODO: dynamic digit float calculation
     watch(
-      () => [props.swapData, state.slippage, state.customSlippage],
+      () => [props.swapData, state.slippage],
       async () => {
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
           const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
@@ -200,9 +222,6 @@ export default defineComponent({
           const receiveAmount = props.swapData.receive.amount;
 
           let slippageTolerancePercent = 1 - state.slippage / 100;
-          if (state.customSlippage > 0) {
-            slippageTolerancePercent = 1 - state.customSlippage / 100;
-          }
 
           limitPriceText.value = `1 ${payDisplayName} = ${
             Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
@@ -215,13 +234,8 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      const slippage = Number(localStorage.getItem('demeris-slippage')) || 0.5;
-      if (slippage > 1 || slippage < 0.1) {
-        state.customSlippage = slippage;
-        state.selectCustomSlippage();
+      if (state.slippage != 0.1 || state.slippage != 0.5 || state.slippage != 1) {
         customSlippageInput.value.focus();
-      } else {
-        state.slippage = slippage;
       }
     });
 

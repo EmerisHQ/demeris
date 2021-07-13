@@ -366,9 +366,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', newData);
     } else {
       const newData = {
-        advanced: false,
+        customSlippage: false,
+        viewUnverified: false,
+        viewLPAssetPools: false,
         gasPriceLevel: GasPriceLevel.AVERAGE,
         hasSeenRedeem: false,
+        slippagePerc: 0.1,
         updateDT: Date.now(),
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
