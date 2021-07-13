@@ -144,6 +144,11 @@ export interface Actions {
     { msgs, chain_name }: DemerisSignParams,
   ): Promise<DemerisTxParams>;
   [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
+  [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({
+    commit,
+    getters,
+    dispatch,
+  }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
 
   [DemerisActionTypes.INIT](
@@ -229,6 +234,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_IN](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
+  [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -480,6 +488,45 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
+    try {
+      const chains = getters['getChains'];
+      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
+      for (const chain in chains) {
+        await addChain(chain);
+      }
+      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
+      const paths = new Set();
+      const toQuery = [];
+      for (const chain_name in chains) {
+        const chain = chains[chain_name];
+        if (paths.has(chain.derivation_path)) {
+          continue;
+        }
+        paths.add(chain.derivation_path);
+        toQuery.push(chain);
+      }
+      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
+      await window.keplr.enable(dexchain.node_info.chain_id);
+      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
+      commit(DemerisMutationTypes.SET_KEPLR, key);
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, key.name);
+      for (const chain of toQuery) {
+        await window.keplr.enable(chain.node_info.chain_id);
+        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+      }
+      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
+
+      dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
+      dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
+        subscribe: true,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');

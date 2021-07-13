@@ -27,6 +27,7 @@ export enum DemerisActionTypes {
   BROADCAST_TX = 'BROADCAST_TX',
   SIGN_WITH_KEPLR = 'SIGN_WITH_KEPLR',
   SIGN_IN = 'SIGN_IN',
+  SIGN_IN_WITH_WATCHER = 'SIGN_IN_WITH_WATCHER',
   // Internal module actions
   INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
@@ -61,6 +62,7 @@ export enum GlobalDemerisActionTypes {
   BROADCAST_TX = 'demeris/BROADCAST_TX',
   SIGN_WITH_KEPLR = 'demeris/SIGN_WITH_KEPLR',
   SIGN_IN = 'demeris/SIGN_IN',
+  SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
   // Internal module actions
   INIT = 'demeris/INIT',
   RESET_STATE = 'demeris/RESET_STATE',
