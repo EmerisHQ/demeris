@@ -33,14 +33,8 @@
         <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row" @click="rowClickHandler(pool)">
           <td class="pools-table__row__pair">
             <div class="pools-table__row__pair__pool">
-              <CircleSymbol
-                :denoms="pool.reserve_coin_denoms[0]"
-                class="pools-table__row__pair__pool__avatar token-a"
-              />
-              <CircleSymbol
-                :denoms="pool.reserve_coin_denoms[1]"
-                class="pools-table__row__pair__pool__avatar token-b"
-              />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pools-table__row__pair__pool__avatar token-a" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pools-table__row__pair__pool__avatar token-b" />
             </div>
             <span class="pools-table__row__pair__name w-bold">
               {{ pool.display_name }}
@@ -82,6 +76,7 @@ export default {
     pools: {
       type: Array as PropType<Pool[]>,
       required: true,
+      default: () => [],
     },
   },
   setup(props) {

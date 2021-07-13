@@ -30,8 +30,16 @@
 
           <div v-if="hasPair" class="add-liquidity__pool">
             <div class="add-liquidity__pool__pair">
-              <span class="add-liquidity__pool__pair__avatar token-a" />
-              <span class="add-liquidity__pool__pair__avatar token-b" />
+              <CircleSymbol
+                :denom="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom"
+                size="sm"
+                class="add-liquidity__pool__pair__avatar token-a"
+              />
+              <CircleSymbol
+                :denom="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom"
+                size="sm"
+                class="add-liquidity__pool__pair__avatar token-b"
+              />
             </div>
 
             <span class="add-liquidity__pool__name">
@@ -153,7 +161,7 @@
 
               <div class="add-liquidity__receive__wrapper">
                 <div class="add-liquidity__receive__token">
-                  <div class="add-liquidity__receive__token__avatar" />
+                  <CircleSymbol :denom="pool.pool_coin_denom" size="sm" class="add-liquidity__receive__token__avatar" />
                   <span class="w-bold">
                     <Denom v-if="hasPool" :name="pool.pool_coin_denom" />
                     <span v-else>G-LK-LP</span>
@@ -229,6 +237,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -250,6 +259,7 @@ export default {
   components: {
     AmountDisplay,
     Icon,
+    CircleSymbol,
     Button,
     ChainName,
     Denom,
@@ -732,14 +742,12 @@ export default {
       margin-right: 0.8rem;
 
       &__avatar {
-        width: 1.4rem;
-        height: 1.4rem;
-        border-radius: 2.4rem;
-        background: #ddd;
+        &.token-a {
+          z-index: 1;
+        }
 
         & + & {
-          margin-left: -0.4rem;
-          background: #aaa;
+          margin-left: -0.6rem;
         }
       }
     }
@@ -809,13 +817,10 @@ export default {
     }
 
     &__token {
+      display: flex;
+      align-items: center;
+
       &__avatar {
-        display: inline-block;
-        vertical-align: middle;
-        width: 2.4rem;
-        height: 2.4rem;
-        border-radius: 2.6rem;
-        background: var(--inactive);
         margin-right: 1.2rem;
       }
     }

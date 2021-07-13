@@ -1,22 +1,22 @@
 <template>
   <List>
     <ListItem label="Send">
-      <div>
+      <div class="send__item">
+        <CircleSymbol
+          :denom="transactionInfo.from.denom"
+          :chain-name="transactionInfo.from.chain"
+          size="sm"
+          class="send__item__symbol"
+        />
         <AmountDisplay
           class="w-bold"
           :amount="{ amount: transactionInfo.from.amount, denom: transactionInfo.from.denom }"
         />
       </div>
-      <sub><ChainName :name="transactionInfo.from.chain" /></sub>
+      <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
 
-    <ListItem
-      v-if="!stepType.value !== 'transfer-to-hub'"
-      label="Send Address"
-      direction="column"
-      collapsable
-      collapsed
-    >
+    <ListItem v-if="stepType !== 'transfer-to-hub'" label="Send Address" direction="column" collapsable collapsed>
       <Address :address="transactionInfo.from.address" :chain-name="transactionInfo.from.chain" readonly />
     </ListItem>
 
@@ -42,16 +42,22 @@
     </ListItem>
 
     <ListItem label="Receive">
-      <div>
+      <div class="send__item">
+        <CircleSymbol
+          :denom="transactionInfo.to.denom"
+          :chain-name="transactionInfo.to.chain"
+          size="sm"
+          class="send__item__symbol"
+        />
         <AmountDisplay
           class="w-bold"
           :amount="{ amount: transactionInfo.to.amount, denom: transactionInfo.to.denom }"
         />
       </div>
-      <sub><ChainName :name="transactionInfo.to.chain" /></sub>
+      <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
 
-    <ListItem v-if="!stepType.value !== 'transfer-to-hub'" label="Recipient Address" direction="column">
+    <ListItem v-if="stepType !== 'transfer-to-hub'" label="Recipient Address" direction="column">
       <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
     </ListItem>
   </List>
@@ -62,6 +68,7 @@ import { computed, defineComponent, PropType } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
 import { useStore } from '@/store';
@@ -75,6 +82,7 @@ export default defineComponent({
     AmountDisplay,
     Address,
     ChainName,
+    CircleSymbol,
     List,
     ListItem,
   },
@@ -180,3 +188,19 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.send__item {
+  display: inline-flex;
+
+  &__symbol {
+    margin-right: 0.8rem;
+  }
+}
+
+.preview-chain {
+  display: block;
+  margin-top: -0.2rem;
+  font-size: 1.2rem;
+}
+</style>

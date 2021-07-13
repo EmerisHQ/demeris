@@ -13,10 +13,10 @@
 		-->
 
     <CircleSymbol
-      :denoms="selectedDenom?.base_denom ?? ''"
+      :denom="selectedDenom?.base_denom ?? ''"
       :chain-name="selectedDenom?.on_chain ?? undefined"
-      :size="'sm'"
-      class="denom-select__symbol"
+      size="sm"
+      class="denom-select__coin-image"
       @click="toggleDenomSelectModal"
     />
 
@@ -77,7 +77,7 @@ import { store } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelect',
-  components: { ChainName, Denom, Icon, DenomSelectModal, CircleSymbol },
+  components: { ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
@@ -167,7 +167,7 @@ export default defineComponent({
 
   padding: 1.6rem 2.4rem;
 
-  &__symbol {
+  &__coin-image {
     cursor: pointer;
     margin-right: 1.2rem;
   }

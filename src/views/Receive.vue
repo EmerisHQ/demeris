@@ -25,9 +25,9 @@
       <template v-else>
         <div class="receive__main__asset">
           <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
-          <div class="receive__main__asset__qr">
+          <div class="receive__main__asset__qr" :style="gradientStyle">
             <div class="receive__main__asset__qr__code">
-              <QrCode :value="recipientAddress" width="160" />
+              <QrCode :value="recipientAddress" width="160" :color="gradientStyle.color" />
             </div>
           </div>
           <div>
@@ -52,7 +52,15 @@ import QrCode from '@/components/common/QrCode.vue';
 import Address from '@/components/ui/Address.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import symbolsData from '@/data/symbols';
 import { Balance, Balances } from '@/types/api';
+import { hexToRGB } from '@/utils/basic';
+
+const defaultColors = {
+  primary: '#E1E1E1',
+  secondary: '#F4F4F4',
+  tertiary: '#F9F9F9',
+};
 
 export default {
   name: 'Receive',
@@ -97,6 +105,29 @@ export default {
       return store.getters['demeris/getOwnAddress']({ chain_name: state.selectedAsset.on_chain });
     });
 
+    const generateBackground = (colors: Record<string, string>) => {
+      const hexArray = Object.values(colors).reverse();
+      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
+      const colorStops = [];
+
+      for (const [index, hex] of Object.entries(hexArray)) {
+        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+      }
+
+      return `radial-gradient(
+					ellipse farthest-corner at 16.67% 16.67%,
+					${colorStops.join(',')}
+				)`;
+    };
+
+    const gradientStyle = computed(() => {
+      const colors = symbolsData[state.selectedAsset.base_denom]?.colors;
+      return {
+        background: generateBackground(colors || defaultColors),
+        color: colors ? '#ffffff' : '#000000',
+      };
+    });
+
     const goBack = () => {
       state.selectedAsset = undefined;
     };
@@ -105,7 +136,7 @@ export default {
       state.selectedAsset = asset;
     };
 
-    return { balances: nativeBalances, state, recipientAddress, goBack, assetSelectHandler };
+    return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
 </script>

@@ -4,10 +4,11 @@
     "node": true
   },
   "root": true,
+  "parser": "vue-eslint-parser",
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
-  "plugins": ["@typescript-eslint", "simple-import-sort", "unused-imports"],
+  "plugins": ["@typescript-eslint", "simple-import-sort"],
   "extends": [
     "@vue/typescript/recommended",
     "plugin:vue/vue3-recommended",
@@ -22,7 +23,6 @@
     "vue/singleline-html-element-content-newline": "off",
     "simple-import-sort/imports": "warn",
     "simple-import-sort/exports": "warn",
-    "unused-imports/no-unused-imports-ts": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/ban-ts-comment": "off"
   },

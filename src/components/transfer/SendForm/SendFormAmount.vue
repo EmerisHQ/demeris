@@ -40,7 +40,7 @@
           <div class="send-form-amount__assets__item__asset">
             <CircleSymbol
               :chain-name="state.currentAsset.on_chain"
-              :denoms="state.currentAsset.base_denom"
+              :denom="state.currentAsset.base_denom"
               class="send-form-amount__assets__item__avatar"
             />
 

@@ -20,7 +20,7 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-        <CircleSymbol :denoms="coin.base_denom" :chain-name="coin.on_chain" />
+        <CircleSymbol :denom="coin.base_denom" :chain-name="coin.on_chain" />
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
@@ -57,7 +57,7 @@
       </div>
     </div>
     <div v-if="type === 'pay'" class="coin-list__select">
-      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
+      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
     </div>
     <div v-else-if="showBalance" class="coin-list__balance">
@@ -197,10 +197,6 @@ export default defineComponent({
   &__select {
     display: flex;
     justify-content: space-between;
-
-    .icon {
-      margin-left: 1rem;
-    }
   }
 
   .search-not-included {

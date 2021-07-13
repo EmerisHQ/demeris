@@ -6,7 +6,7 @@
 
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
-            <CircleSymbol :denoms="denom" class="asset__main__info__denom__symbol" />
+            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
             <span class="asset__main__info__denom__name"><Denom :name="denom" /></span>
           </p>
           <h1 class="asset__main__info__price">
@@ -54,7 +54,7 @@
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
                 <CircleSymbol
-                  :denoms="denom"
+                  :denom="denom"
                   :chain-name="asset.on_chain"
                   class="asset__main__chains__item__asset__avatar"
                 />
@@ -72,31 +72,12 @@
 
         <!-- TODO: Staking -->
 
-        <section v-if="false" class="asset__main__staking asset__list">
+        <section class="asset__main__staking asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Staking</h2>
           </div>
 
-          <div class="asset__main__staking__rewards">
-            <span class="asset__main__staking__rewards__label">Rewards</span>
-            <span class="asset__main__staking__rewards__amount">0.495 ATOM</span>
-            <span class="asset__main__staking__rewards__balance">+$10.15</span>
-          </div>
-
-          <ul class="asset__list__wrapper">
-            <li class="asset__list__item asset__main__staking__item">
-              <div class="asset__main__staking__item__validator">
-                <span class="asset__main__staking__item__validator__avatar"> N </span>
-                <span class="asset__main__staking__item__validator__name"> nylira </span>
-              </div>
-
-              <span class="asset__main__staking__item__amount"> 82.46 ATOM </span>
-
-              <div class="asset__main__staking__item__balance">
-                <span class="asset__main__staking__item__balance__value">$1,690.50</span>
-              </div>
-            </li>
-          </ul>
+          <StakeTable class="asset__list__wrapper" />
         </section>
 
         <!-- Pools -->
@@ -119,6 +100,7 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
+        <MoonpayBanner v-if="assets.length" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
   </AppLayout>
@@ -135,12 +117,14 @@ import Denom from '@/components/common/Denom.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
+import StakeTable from '@/components/common/StakeTable.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
+
 export default defineComponent({
   name: 'Asset',
 
@@ -149,6 +133,7 @@ export default defineComponent({
     ChainName,
     Denom,
     CircleSymbol,
+    StakeTable,
     AppLayout,
     Price,
     PlusIcon,
@@ -394,11 +379,16 @@ export default defineComponent({
 
   &__aside {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
     margin-left: 3.2rem;
 
     &__swap {
+      width: 80%;
+    }
+
+    &__buy {
+      margin-top: 2.6rem;
       width: 80%;
     }
   }
