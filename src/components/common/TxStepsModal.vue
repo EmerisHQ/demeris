@@ -131,6 +131,7 @@ export default defineComponent({
         );
       },
     );
+    console.log(fees);
     const txToResolve = ref({});
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {

@@ -261,7 +261,7 @@ export default {
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
-    const gasPrice = ref(store.getters['getPreferredGasPriceLevel']);
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
 
     const steps = ['amount', 'review', 'send'];
 

@@ -909,17 +909,18 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    console.log(data);
-    console.log(price);
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: {
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
-        poolId: data.pool.id,
+        poolId: parseInt(data.pool.id),
         swapTypeId: data.pool.type_id,
-        offerCoin: data.from.denom,
+        offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
-        offerCoinFee: 0,
-        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount)).toString(),
+        offerCoinFee: { amount: '0', denom: data.from.denom },
+        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount))
+          .toFixed(18)
+          .replace('.', '')
+          .replace(/(^0+)/, ''),
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
@@ -1070,11 +1071,13 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
       feeTotals[fees[0].chain_name] = {};
     }
     used = getUsedFee(fees, gasPriceLevel);
-
+    console.log(used);
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
           feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
       : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
+    console.log('here');
+    console.log(feeTotals);
   }
   return feeTotals;
 }
@@ -1108,6 +1111,7 @@ export async function feeForSteps(
 
 export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
   const feeOption = fees[0];
+  console.log(gasPriceLevel);
   const used = {
     amount: {
       amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
