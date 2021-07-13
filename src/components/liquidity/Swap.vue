@@ -527,9 +527,10 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value) {
+          console.log('assetsToPay', assetsToPay.value);
           return data.isBothSelected &&
             data.payCoinAmount >
-              parseInt(assetsToPay?.value[0]?.amount) /
+              parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom).amount) /
                 Math.pow(
                   10,
                   parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
