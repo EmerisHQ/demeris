@@ -5,15 +5,22 @@
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
-    <template v-if="step === 'amount'">
+    <template v-else-if="step === 'amount'">
       <h2 class="send-form__title s-2">Enter an amount</h2>
-      <SendFormAmount :balances="balances" @next="generateSteps" />
-
-      <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      <SendFormAmount :balances="balances" @next="goToStep('review')" />
+      <div class="send-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
-    <template v-if="step === 'review'">
-      <TxStepsModal :data="steps" :gas-price-level="gasPrice" />
+    <template v-else>
+      <TxStepsModal
+        :data="steps"
+        :gas-price-level="gasPrice"
+        @transacting="goToStep('send')"
+        @failed="goToStep('review')"
+        @reset="resetHandler"
+      />
     </template>
   </div>
 </template>
@@ -31,16 +38,16 @@ import { actionHandler } from '@/utils/actionHandler';
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
 
-type Step = 'recipient' | 'amount' | 'review';
+type Step = 'recipient' | 'amount' | 'review' | 'send';
 
 export default defineComponent({
   name: 'SendForm',
 
   components: {
+    FeeLevelSelector,
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
-    FeeLevelSelector,
   },
 
   props: {
@@ -59,7 +66,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -69,6 +75,10 @@ export default defineComponent({
         amount: undefined,
       },
       isTermChecked: false,
+    });
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const step = computed({
@@ -107,6 +117,19 @@ export default defineComponent({
       goToStep('review');
     };
 
+    const resetHandler = () => {
+      form.recipient = '';
+      form.chain_name = '';
+      form.memo = '';
+      form.balance = {
+        denom: '',
+        amount: undefined,
+      };
+      form.isTermChecked = false;
+      steps.value = [];
+
+      goToStep('recipient');
+    };
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -116,8 +139,9 @@ export default defineComponent({
     }
 
     provide('transferForm', form);
+    watch(form, generateSteps, { deep: true });
 
-    return { steps, form, goToStep, generateSteps, gasPrice };
+    return { steps, form, goToStep, generateSteps, resetHandler, gasPrice };
   },
 });
 </script>
@@ -127,6 +151,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 

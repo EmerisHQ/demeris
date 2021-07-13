@@ -17,7 +17,7 @@
   </fieldset>
 
   <fieldset class="form__field">
-    <Button name="Confirm" :disabled="!isValid" @click="onSubmit" />
+    <Button name="Continue" :disabled="!isValid" @click="onSubmit" />
   </fieldset>
 </template>
 
