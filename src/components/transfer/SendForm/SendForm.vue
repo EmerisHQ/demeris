@@ -24,7 +24,7 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
-import { GasPriceLevel, SendAddressForm, TransferAction } from '@/types/actions';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -59,7 +59,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-    const gasPrice = ref(GasPriceLevel.AVERAGE);
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -99,7 +99,6 @@ export default defineComponent({
               },
             },
           };
-          console.log(action);
           steps.value = await actionHandler(action);
         }
       },

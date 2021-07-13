@@ -14,7 +14,7 @@
     <ReviewModal
       v-if="isOpen && !isSlippageSettingModalOpen"
       :data="actionHandlerResult"
-      :gas-price-level="gasPriceLevel"
+      :gas-price-level="gasPrice"
       @close="reviewModalToggle"
       @goback="gobackFunc"
     />
@@ -106,7 +106,7 @@
 
       <FeeLevelSelector
         v-if="actionHandlerResult && actionHandlerResult.length > 0"
-        v-model:gasPriceLevel="gasPriceLevel"
+        v-model:gasPriceLevel="gasPrice"
         :steps="actionHandlerResult"
       />
     </div>
@@ -127,7 +127,8 @@ import useCalculation from '@/composables/useCalculation.vue';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
-import { store } from '@/store';
+import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 import { actionHandler } from '@/utils/actionHandler';
@@ -152,11 +153,12 @@ export default defineComponent({
     const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
     const slippage = ref(0);
-
+    const store = useStore();
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
 
+    const gasPrice = ref(store.getters['demeris/getPreferredGasPriceLevel']);
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
@@ -180,7 +182,7 @@ export default defineComponent({
               hash: pool.reserve_coin_denoms[0].split('/')[1],
             }) ??
             (await store.dispatch(
-              'demeris/GET_VERIFY_TRACE',
+              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
@@ -204,7 +206,7 @@ export default defineComponent({
               hash: pool.reserve_coin_denoms[1].split('/')[1],
             }) ??
             (await store.dispatch(
-              'demeris/GET_VERIFY_TRACE',
+              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
@@ -269,7 +271,7 @@ export default defineComponent({
                   hash: pool.reserve_coin_denoms[0].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  'demeris/GET_VERIFY_TRACE',
+                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {
@@ -293,7 +295,7 @@ export default defineComponent({
                   hash: pool.reserve_coin_denoms[1].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  'demeris/GET_VERIFY_TRACE',
+                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {
@@ -508,7 +510,6 @@ export default defineComponent({
       selectedPoolData: null,
 
       //tx fee level
-      gasPriceLevel: ref(store.getters['demeris/getPreferredGasPriceLevel']),
 
       // for swap action
       actionHandlerResult: null,
@@ -768,6 +769,7 @@ export default defineComponent({
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
       getDisplayPrice,
+      gasPrice,
     };
   },
 });
