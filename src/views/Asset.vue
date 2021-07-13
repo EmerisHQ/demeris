@@ -35,7 +35,7 @@
               </dd>
             </div>
 
-            <div class="asset__main__balance__card__item">
+            <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
               <dt class="asset__main__balance__card__label">Staked</dt>
               <dd class="asset__main__balance__card__value">-</dd>
             </div>
