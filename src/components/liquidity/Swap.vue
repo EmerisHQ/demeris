@@ -87,7 +87,7 @@
         v-model:amount="receiveCoinAmount"
         :input-header="
           $t('components.swap.receiveHeader', {
-            amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
+            amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',
           })
         "
         :selected-denom="receiveCoinData"
