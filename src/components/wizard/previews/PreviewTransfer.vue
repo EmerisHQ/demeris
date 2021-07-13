@@ -1,6 +1,6 @@
 <template>
   <List>
-    <ListItem label="Send">
+    <ListItem :label="$t('components.previews.transfer.sendLbl')">
       <div>
         <AmountDisplay
           class="w-bold"
@@ -12,7 +12,7 @@
 
     <ListItem
       v-if="!stepType.value !== 'transfer-to-hub'"
-      label="Send Address"
+      :label="$t('components.previews.redeem.fromLbl')"
       direction="column"
       collapsable
       collapsed
@@ -22,9 +22,9 @@
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="`${step.transactions.length} transfers to sign`"
+      :label="$t('components.previews.transfer.txToSign', { txCount: step.transactions.length })"
       direction="column"
-      hint="TODO"
+      :hint="$t('components.previews.transfer.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -33,7 +33,7 @@
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultipleTransactions" description="Transaction Fee">
+    <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.transfer.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
@@ -51,7 +51,11 @@
       <sub><ChainName :name="transactionInfo.to.chain" /></sub>
     </ListItem>
 
-    <ListItem v-if="!stepType.value !== 'transfer-to-hub'" label="Recipient Address" direction="column">
+    <ListItem
+      v-if="!stepType.value !== 'transfer-to-hub'"
+      :label="$t('components.previews.redeem.toLbl')"
+      direction="column"
+    >
       <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
     </ListItem>
   </List>

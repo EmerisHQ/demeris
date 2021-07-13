@@ -80,6 +80,34 @@ export const messages = {
         minReceivedLbl: 'Min. received<br />(if 100% swapped)',
         minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
       },
+      previews: {
+        addWithdrawLiquidity: {
+          poolLbl: 'Pool',
+          priceLbl: 'Pool price',
+          supplyLbl: 'Supply',
+          receiveLbl: 'Receive (estimated)',
+          receiveLblHint: 'LP token',
+          feesLbl: 'Fees',
+          feeLbl: 'Transaction fee',
+        },
+        withdrawLiquidity: {},
+        createPool: {},
+        transfer: {
+          sendLbl: 'Send',
+          fromLbl: 'Send address',
+          txToSign: '{txCount} transactions to sign',
+          txToSignHint: 'TODO',
+          feeLbl: 'Transaction fee',
+          toLbl: 'Recipient address',
+        },
+        redeem: {
+          sendLbl: 'Send',
+          txToSign: '{txCount} transactions to sign',
+          txToSignHint: 'TODO',
+          feeLbl: 'Transaction fee',
+        },
+        swap: {},
+      },
     },
     context: {
       feeLevels: {
