@@ -6,7 +6,9 @@ import { toRedeem, validBalances } from '@/utils/actionHandler';
 
 export default function useAccount() {
   const store = useStore();
-
+  const isDemoAccount = computed(() => {
+    return store.getters['demeris/isDemoAccount'];
+  });
   const allbalances = computed<Balances>(() => {
     // TODO: Remove after cloud is fully deployed
     /*
@@ -56,5 +58,5 @@ export default function useAccount() {
     return sortedBalances;
   });
 
-  return { balances, allbalances, balancesByDenom, userAccountBalances, redeemableBalances };
+  return { balances, allbalances, balancesByDenom, userAccountBalances, redeemableBalances, isDemoAccount };
 }

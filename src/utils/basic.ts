@@ -4,6 +4,7 @@ import { toHex } from '@cosmjs/encoding';
 import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
+import { demoAddresses } from '../store/demeris/demo-account';
 import { store } from '../store/index';
 
 export function toHexString(byteArray) {
@@ -27,9 +28,13 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
-  const chain = store.getters['demeris/getChain']({ chain_name });
-  const key = await window.keplr.getKey(chain.node_info.chain_id);
-  return key.bech32Address;
+  if (store.getters['demeris/isDemoAccount']) {
+    return demoAddresses[chain_name];
+  } else {
+    const chain = store.getters['demeris/getChain']({ chain_name });
+    const key = await window.keplr.getKey(chain.node_info.chain_id);
+    return key.bech32Address;
+  }
 }
 export function isNative(denom: string) {
   return denom.indexOf('ibc/') != 0 ? true : false;
