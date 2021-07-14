@@ -77,7 +77,7 @@ export const messages = {
         title: 'Slippage tolerance',
         limitPrice: 'Limit price',
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
-        minReceivedLbl: 'Min. received<br />(if 100% swapped)',
+        minReceivedLbl: 'Min. received/(if 100% swapped)',
         minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
       },
       txHandlingModal: {
