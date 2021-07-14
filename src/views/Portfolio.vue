@@ -55,8 +55,9 @@
           </div>
         </div>
       </div>
-      <div>
-        <LiquiditySwap />
+
+      <div class="portfolio__aside">
+        <LiquiditySwap class="portfolio__aside__swap" />
       </div>
     </div>
   </AppLayout>
@@ -115,14 +116,12 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
-  margin: 0 auto;
 
   .portfolio {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    width: 0;
-    margin-right: 6rem;
+    width: 60%;
+
     &__total {
       &__text {
         opacity: 0.67;
@@ -195,6 +194,22 @@ export default {
         &__button {
           margin-top: 2.4rem;
         }
+      }
+    }
+
+    &__aside {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-left: 3.2rem;
+
+      &__swap {
+        width: 80%;
+      }
+
+      &__buy {
+        margin-top: 2.6rem;
+        width: 80%;
       }
     }
   }

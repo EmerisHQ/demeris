@@ -40,6 +40,7 @@ export type UserData = {
   gasPriceLevel?: GasPriceLevel;
   hasSeenRedeem?: boolean;
   slippagePerc?: number;
+  isDemoAccount?: boolean;
   updateDT: number;
 };
 export type UserSession = {

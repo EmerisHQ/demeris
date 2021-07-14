@@ -11,6 +11,7 @@
 
     <template v-else>
       <TxStepsModal
+        v-if="steps.length > 0"
         :data="steps"
         :gas-price-level="gasPrice"
         @transacting="goToStep('move')"

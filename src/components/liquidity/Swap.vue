@@ -16,6 +16,12 @@
       :data="actionHandlerResult"
       :gas-price-level="gasPrice"
       @close="reviewModalToggle"
+      @reset="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
       @goback="gobackFunc"
     />
     <div
@@ -565,7 +571,14 @@ export default defineComponent({
       isAssetList: false,
       isFeesOpen: false,
       // booleans-end
-
+      reset: () => {
+        data.payCoinData = null;
+        data.payCoinAmount = null;
+        data.receiveCoinData = null;
+        data.receiveCoinAmount = null;
+        data.selectedPoolData = null;
+        isInit.value = false;
+      },
       //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });

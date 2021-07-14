@@ -47,8 +47,9 @@ export type Getters = {
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
   getKeyhashes(state: State): string[];
-  getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
+  getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
   getKeplrAccountName(state: State): string | null;
+  isDemoAccount(state: State): boolean;
   hasSeenReedem(state: State): boolean;
   viewUnverified(state: State): boolean;
   viewLPAssetPools(state: State): boolean;
@@ -89,6 +90,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getSlippagePerc: (state) => {
     return state._Session.slippagePerc;
+  },
+  isDemoAccount: (state) => {
+    return state._Session.isDemoAccount;
   },
   hasSeenReedem: (state) => {
     return state._Session.hasSeenRedeem;
