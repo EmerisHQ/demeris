@@ -15,6 +15,9 @@
       <div class="modal__content">
         <slot />
       </div>
+      <div class="modal__buttons">
+        <slot name="buttons"> </slot>
+      </div>
     </div>
   </div>
 </template>
@@ -136,6 +139,22 @@ export default defineComponent({
     padding: 2.4rem;
     width: 100%;
     z-index: 40;
+  }
+  &__buttons {
+    position: relative;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
+    margin-bottom: -2.4rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.17);
+    margin-top: 2.4rem;
+    border-bottom-left-radius: 1.6rem;
+    border-bottom-right-radius: 1.6rem;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    div {
+      flex: 1;
+    }
   }
 
   &--full {

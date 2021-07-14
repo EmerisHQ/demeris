@@ -39,23 +39,10 @@
         }
       "
     >
-      <template v-if="missingFees.length == 1">
-        <template v-if="missingFees[0].denom == 'uatom'">
-          <div class="fee-warning-modal__title">
-            {{ $t('components.feeWarningModal.missingOne', { denom: 'ATOM' }) }}
-          </div>
-          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingOneTextAtom') }}</div>
-          <Button :name="$t('generic_cta.getAtom')" />
-        </template>
-        <template v-else>
-          <div class="fee-warning-modal__title">
-            {{ $t('components.feeWarningModal.missingOne', { denom: 'LUNA' }) }}
-          </div>
-          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingOneText') }}</div>
-          <Button :name="$t('generic_cta.understand')" />
-        </template>
-      </template>
-      <template v-if="missingFees.length > 1">
+      <div class="fee-warning-modal__icon-warning">
+        <WarningIcon />
+      </div>
+      <template v-if="missingFees.length > 0">
         <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
         <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
         <div class="fee-warning-modal__list">
@@ -66,7 +53,6 @@
             </div>
           </div>
         </div>
-        <Button :name="$t('generic_cta.understand')" />
       </template>
       <template v-if="ibcWarning">
         <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}</div>
@@ -75,6 +61,47 @@
         </div>
         <Button :name="$t('generic_cta.cancel')" />
         <Button :name="$t('generic_cta.proceed')" />
+      </template>
+      <template #buttons>
+        <template v-if="missingFees.length == 1 && missingFees[0].denom == 'uatom'">
+          <ModalButton
+            :name="$t('generic_cta.cancel')"
+            :click-function="
+              () => {
+                emitHandler('close');
+              }
+            "
+          />
+          <ModalButton :name="$t('generic_cta.getAtom')" />
+        </template>
+        <template v-if="missingFees.length > 1 || (missingFees.length == 1 && missingFees[0].denom != 'uatom')">
+          <ModalButton
+            :name="$t('generic_cta.understand')"
+            :click-function="
+              () => {
+                emitHandler('close');
+              }
+            "
+          />
+        </template>
+        <template v-if="ibcWarning">
+          <ModalButton
+            :name="$t('generic_cta.cancel')"
+            :click-function="
+              () => {
+                emitHandler('close');
+              }
+            "
+          />
+          <ModalButton
+            :name="$t('generic_cta.proceed')"
+            :click-function="
+              () => {
+                feeWarning = false;
+              }
+            "
+          />
+        </template>
       </template>
     </Modal>
     <TxHandlingModal
@@ -119,9 +146,11 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
+import ModalButton from '@/components/ui/ModalButton.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
@@ -137,11 +166,13 @@ export default defineComponent({
   components: {
     GobackWithClose,
     PreviewTransfer,
+    WarningIcon,
     PreviewRedeem,
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
     PreviewSwap,
     Button,
+    ModalButton,
     TxHandlingModal,
     Modal,
     CircleSymbol,
@@ -493,6 +524,19 @@ export default defineComponent({
   }
   .fee-warning-modal {
     text-align: center;
+    &__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2.4rem 0;
+
+      &-warning {
+        font-size: 4.2rem;
+        display: flex;
+        justify-content: center;
+        color: var(--warning);
+      }
+    }
     &__title {
       font-size: 2.1rem;
       font-weight: bold;
@@ -503,9 +547,13 @@ export default defineComponent({
       opacity: 0.67;
       margin-bottom: 3rem;
       font-size: 1.6rem;
+      &__header {
+        text-align: center;
+      }
     }
     &__list {
       margin-bottom: 3rem;
+      padding-left: 39%;
       &__item {
         display: flex;
         margin: 1rem 0rem;
