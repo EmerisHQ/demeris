@@ -596,17 +596,22 @@ export default defineComponent({
     watch(
       () => data.payCoinAmount,
       () => {
+        console.log(data.payCoinAmount);
         if (data.selectedPoolData) {
           const reserveCoin =
-            data.selectedPoolData.reserves.findIndex((coin) => coin === data.payCoinData.denom) === 0
+            data.selectedPoolData.reserves.findIndex((coin) => coin === data.receiveCoinData.denom) === 1
               ? 'balanceA'
               : 'balanceB';
 
           slippage.value = calculateSlippage(
-            data.payCoinAmount *
-              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }))),
+            data.receiveCoinAmount *
+              Math.pow(
+                10,
+                parseInt(store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })),
+              ),
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
+          console.log('SP', slippage.value);
         }
       },
     );
@@ -788,6 +793,9 @@ export default defineComponent({
 
         if (e.includes('Pay')) {
           data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
+          if (data.payCoinAmount + data.receiveCoinAmount === 0) {
+            slippage.value = 0;
+          }
         } else {
           data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
         }
