@@ -84,7 +84,7 @@ export interface Actions {
   [DemerisActionTypes.GET_TX_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionsByTicketParams,
-  ): Promise<API.Ticket>;
+  ): Promise<string>;
   [DemerisActionTypes.GET_FEE_ADDRESSES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -535,9 +535,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TX_STATUS, payload: { params } });
       }
     } catch (e) {
+      console.log(e);
       throw new SpVuexError('Demeris:GetTXStatus', 'Could not perform API query.');
     }
-    return getters['getTxStatus'](params);
+    return 'pending';
   },
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
     try {
