@@ -52,8 +52,12 @@
       "
       @done="
         () => {
-          nextTx();
-          goBack();
+          if (transaction.name == 'swap') {
+            emitHandler('reset');
+          } else {
+            nextTx();
+            goBack();
+          }
         }
       "
       @reset="emitHandler('reset')"
