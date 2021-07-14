@@ -150,6 +150,20 @@ export const messages = {
           swapFeeLblHint: 'TODO',
         },
       },
+      settingsMenu: {
+        theme: 'Theme',
+        system: 'System',
+        light: 'Light',
+        advancedSettings: 'Advanced Settings',
+        customSlippage: 'Custom slippage',
+        viewAllAssets: 'View all assets',
+        lpAssetPool: 'LP asset pool',
+        support: 'Support',
+        twitter: 'Twitter',
+        privacy: 'Privacy',
+        termsOfUse: 'Terms of use',
+        cookiesPolicy: 'Cookies policy',
+      },
     },
     context: {
       feeLevels: {
