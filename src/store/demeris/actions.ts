@@ -278,7 +278,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
-      console.log(keyHashes);
       for (const keyHash of keyHashes) {
         await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
@@ -496,7 +495,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
-        console.log(hash);
         commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
       }
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
