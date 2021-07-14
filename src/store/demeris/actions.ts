@@ -501,7 +501,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
           '/' +
           (params as API.TicketReq).ticket,
       );
-      console.log(response);
       commit(DemerisMutationTypes.SET_TX_STATUS, { params, value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TX_STATUS, payload: { params } });
