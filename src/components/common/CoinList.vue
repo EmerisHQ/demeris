@@ -20,7 +20,11 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-        <CircleSymbol :denom="coin.base_denom" :chain-name="coin.on_chain" />
+        <CircleSymbol
+          :variant="type === 'chain' ? 'chain' : 'asset'"
+          :denom="coin.base_denom"
+          :chain-name="coin.on_chain"
+        />
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
