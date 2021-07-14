@@ -38,7 +38,9 @@
 
             <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
               <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">-</dd>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                {{ stakingBalance }}
+              </dd>
             </div>
 
             <div class="asset__main__balance__card__item">
@@ -154,7 +156,7 @@ export default defineComponent({
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
-    const { balancesByDenom } = useAccount();
+    const { balancesByDenom, stakingBalancesByChain } = useAccount();
     const { poolsByDenom } = usePools();
 
     const assetConfig = computed(() => {
@@ -169,7 +171,9 @@ export default defineComponent({
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
-    return { assetConfig, denom, assets, pools, totalAmount };
+    const stakingBalance = stakingBalancesByChain(assetConfig.value.chain_name);
+
+    return { assetConfig, denom, assets, pools, totalAmount, stakingBalance };
   },
 });
 </script>
