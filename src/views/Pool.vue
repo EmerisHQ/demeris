@@ -79,7 +79,7 @@
               <Button name="Add liquidity" @click="addLiquidityHandler" />
             </div>
 
-            <div v-if="walletBalances.poolCoin > 0" class="pool-equity__assets">
+            <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__assets">
               <span class="pool-equity__assets__label s-minus">Assets provided</span>
               <ul class="pool-equity__assets__list">
                 <li class="pool-equity__assets__list__item">
@@ -103,7 +103,7 @@
               </ul>
             </div>
 
-            <div v-if="walletBalances.poolCoin > 0" class="pool-equity__withdraw">
+            <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__withdraw">
               <Button name="Withdraw" status="secondary" @click="withdrawLiquidityHandler" />
             </div>
           </div>
