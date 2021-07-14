@@ -44,7 +44,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pools {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 21rem));
+  grid-template-columns: repeat(3, minmax(18rem, 21rem));
   gap: 1.6rem;
 
   &__pool {
