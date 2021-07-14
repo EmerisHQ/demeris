@@ -1,4 +1,4 @@
-export const demo_account = {
+export const demoAccount = {
   name: 'Demo Account',
   algo: 'secp256k1',
   pubKey: {
@@ -63,4 +63,10 @@ export const demo_account = {
 };
 export const demoAddresses = {
   'cosmos-hub': 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
+  akash: 'akash18jyrcrk3pg8cd0g53wna626wky5tfzqypja4mg',
+  regen: 'regen18jyrcrk3pg8cd0g53wna626wky5tfzqyntmw5k',
+  osmosis: 'osmo18jyrcrk3pg8cd0g53wna626wky5tfzqyyjrz5q',
+  iris: 'iaa18jyrcrk3pg8cd0g53wna626wky5tfzqyetsrqr',
+  sentinel: 'sent18jyrcrk3pg8cd0g53wna626wky5tfzqyhjxtxa',
+  'crypto-com': 'cro1uzuaeuppdkwe8r3xew6eejvuxeudj09en4jq8g',
 };

@@ -21,6 +21,7 @@ import {
   GlobalDemerisActionTypes,
 } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
+import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
@@ -103,7 +104,7 @@ export interface Actions {
   ): Promise<void>;
   [DemerisActionTypes.LOAD_SESSION_DATA](
     { commit, getters }: ActionContext<State, RootState>,
-    walletName: string,
+    { walletName, isDemoAccount }: { walletName: string; isDemoAccount: boolean },
   ): Promise<void>;
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
@@ -277,6 +278,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
+      console.log(keyHashes);
       for (const keyHash of keyHashes) {
         await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
@@ -366,7 +368,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, walletName) {
+  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
     if (data) {
       const newData = { ...JSON.parse(data), updateDT: Date.now() };
@@ -381,6 +383,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         hasSeenRedeem: false,
         slippagePerc: 0.1,
         updateDT: Date.now(),
+        isDemoAccount,
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
@@ -470,7 +473,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await window.keplr.enable(dexchain.node_info.chain_id);
       const key = await window.keplr.getKey(dexchain.node_info.chain_id);
       commit(DemerisMutationTypes.SET_KEPLR, key);
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, key.name);
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
       for (const chain of toQuery) {
         await window.keplr.enable(chain.node_info.chain_id);
         const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
@@ -490,33 +493,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
     try {
-      const chains = getters['getChains'];
-      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
-      for (const chain in chains) {
-        await addChain(chain);
+      const key = demoAccount;
+      commit(DemerisMutationTypes.SET_KEPLR, { ...key });
+      for (const hash of key.keyHashes) {
+        console.log(hash);
+        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
       }
-      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
-      const paths = new Set();
-      const toQuery = [];
-      for (const chain_name in chains) {
-        const chain = chains[chain_name];
-        if (paths.has(chain.derivation_path)) {
-          continue;
-        }
-        paths.add(chain.derivation_path);
-        toQuery.push(chain);
-      }
-      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
-      await window.keplr.enable(dexchain.node_info.chain_id);
-      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
-      commit(DemerisMutationTypes.SET_KEPLR, key);
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, key.name);
-      for (const chain of toQuery) {
-        await window.keplr.enable(chain.node_info.chain_id);
-        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-      }
-      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
+      dispatch('common/wallet/signIn', { keplr: null }, { root: true });
 
       dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
       dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
