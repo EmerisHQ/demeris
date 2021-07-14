@@ -538,7 +538,7 @@ export default defineComponent({
         if (isSignedIn.value) {
           return data.isBothSelected &&
             data.payCoinAmount >
-              parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom).amount) /
+              parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
                 Math.pow(
                   10,
                   parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
@@ -748,11 +748,13 @@ export default defineComponent({
       }
 
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+      console.log('originReceiveCoinDAta', originReceiveCoinData);
 
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = assetsToReceive.value.find((asset) => {
         return asset.base_denom === originPayCoinData.base_denom;
       });
+      console.log('payCoinData', data.payCoinData);
 
       data.payCoinAmount = 0;
       data.receiveCoinAmount = 0;
