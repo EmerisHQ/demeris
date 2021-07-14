@@ -47,7 +47,7 @@ export type Getters = {
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
   getKeyhashes(state: State): string[];
-  getTxStatus(state: State): { (params: API.APIRequests): Promise<void> | null };
+  getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
   getKeplrAccountName(state: State): string | null;
   hasSeenReedem(state: State): boolean;
   viewUnverified(state: State): boolean;

@@ -9,9 +9,10 @@ export type ChainMeta = {
 export type ChainData = API.Chain & ChainMeta;
 export type TransactionItem = {
   date: number;
+  status: API.Ticket;
   resolve: (value?: unknown | PromiseLike<unknown>) => void;
   reject: (reason?: Error) => void;
-  promise: Promise<void>;
+  promise: Promise<string>;
 };
 export type State = {
   endpoint: string;
