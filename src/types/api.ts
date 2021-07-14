@@ -228,7 +228,8 @@ export type FeeTokensResponse = {
 };
 export type Ticket = {
   status: string;
-  newTicket: string;
+  newTicket?: string;
+  err?: string;
 };
 export type SeqNumber = {
   chain_name: string;
