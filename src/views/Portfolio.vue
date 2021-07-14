@@ -10,7 +10,7 @@
         </div>
         <div class="portfolio__assets">
           <div class="portfolio__assets__header">
-            <div class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</div>
+            <h2 class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</h2>
             <router-link class="portfolio__assets__header__link" to="/assets">
               {{ balances.length ? $t('generic_cta.discoverMore') : $t('generic_cta.seeall') }} <ArrowRightIcon />
             </router-link>
@@ -24,7 +24,7 @@
           <div v-else class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
-              display-style="compact"
+              variant="balance"
               class="assets__table"
               :show-headers="false"
               :limit-rows="4"
@@ -34,7 +34,7 @@
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
-            <div class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</div>
+            <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
             <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/assets">
               {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
             </router-link>
@@ -146,7 +146,8 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.8rem;
+
         &__link {
           font-size: 1.6rem;
           font-weight: 600;

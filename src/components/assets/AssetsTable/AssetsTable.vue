@@ -1,27 +1,30 @@
 <template>
   <div class="assets-table__wrapper">
     <table class="assets-table">
+      <colgroup v-if="variant === 'balance'">
+        <col width="40%" />
+        <col width="20%" />
+        <col width="40%" />
+      </colgroup>
+
       <thead v-if="showHeaders">
         <tr>
           <th class="text-left">{{ $t('context.assets.asset') }}</th>
-          <th v-if="displayStyle !== 'summary'" class="text-right">{{ $t('context.assets.price') }}</th>
-          <!--<th v-if="displayStyle === 'full'" class="text-right">24h %</th>//-->
-          <th v-if="displayStyle === 'full'" class="text-right">{{ $t('context.assets.amount') }}</th>
-          <th class="text-right">{{ $t('context.assets.balance') }}</th>
-          <th v-if="displayStyle !== 'summary'">
-            <!-- Chains -->
-          </th>
+          <th v-if="variant === 'full'" class="text-left">{{ $t('context.assets.ticker') }}</th>
+          <th class="text-right">{{ $t('context.assets.price') }}</th>
+          <th v-if="variant === 'full'" class="text-right">{{ $t('context.assets.marketCap') }}</th>
+          <th v-if="variant === 'balance'" class="text-right">{{ $t('context.assets.balance') }}</th>
         </tr>
       </thead>
 
       <tbody>
         <tr v-for="asset in balancesFiltered" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
           <td class="assets-table__row__asset">
-            <CircleSymbol :denom="asset.denom" :chain-name="asset.chainsNames[0]" />
+            <CircleSymbol :denom="asset.denom" />
             <div class="assets-table__row__asset__denom">
               <Denom :name="asset.denom" />
               <div
-                v-if="displayStyle === 'summary' && asset.chainsNames.length > 1"
+                v-if="variant === 'balance' && asset.chainsNames.length > 1"
                 class="assets-table__row__asset__denom__chains s-minus"
               >
                 <AssetChainsIndicator
@@ -34,42 +37,20 @@
             </div>
           </td>
 
-          <td v-if="displayStyle !== 'summary'" class="assets-table__row__price text-right">
+          <td v-if="variant === 'full'" class="assets-table__row__ticker text-left">
+            <Denom :name="asset.denom" />
+          </td>
+
+          <td class="assets-table__row__price text-right">
             <Price :amount="{ denom: asset.denom, amount: null }" />
-            <!--<div
-            v-if="displayStyle !== 'full'"
-            class="assets-table__row__price__trending assets-table__row__trending__wrapper s-minus"
-          >
-            <TrendingUpIcon class="assets-table__row__trending__icon" />
-            <span class="assets-table__row__trending__value">52.21%</span>
-          </div>//-->
           </td>
 
-          <!--<td v-if="displayStyle === 'full'" class="assets-table__row__trending">
-          <div class="assets-table__row__trending__wrapper">
-            <TrendingUpIcon class="assets-table__row__trending__icon" />
-            <span class="assets-table__row__trending__value">52.21%</span>
-          </div>
-        </td>//-->
+          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">-</td>
 
-          <td v-if="displayStyle === 'full'" class="assets-table__row__amount text-right">
-            <span><AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" /></span>
-          </td>
-
-          <td class="assets-table__row__balance text-right">
+          <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
             <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            <div v-if="displayStyle !== 'full'" class="assets-table__row__balance__amount s-minus">
+            <div class="assets-table__row__balance__amount s-minus">
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            </div>
-          </td>
-
-          <td v-if="displayStyle !== 'summary'" class="assets-table__row__chains">
-            <div class="assets-table__row__chains__wrapper">
-              <AssetChainsIndicator :denom="asset.denom" :balances="balances.filter((x) => x.verified)" />
-
-              <button class="assets-table__row__arrow-button" @click="handleClick(asset)">
-                <ChevronRightIcon class="assets-table__row__arrow-button__icon" />
-              </button>
             </div>
           </td>
         </tr>
@@ -81,8 +62,8 @@
       class="assets-table__view-all elevation-button"
       @click="viewAllHandler"
     >
-      <span class="assets-table__view-all__label">View all ({{ balancesByAsset.length }})</span>
-      <Icon name="CaretDownIcon" :icon-size="1.6" />
+      <span class="assets-table__view-all__label">{{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})</span>
+      <Icon name="CaretDownIcon" :icon-size="1.3" />
     </button>
   </div>
 </template>
@@ -95,22 +76,21 @@ import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
-type TableStyleType = 'full' | 'compact' | 'summary';
+type TableStyleType = 'full' | 'balance';
 
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, CircleSymbol, Icon, Denom, Price, AmountDisplay },
+  components: { AssetChainsIndicator, CircleSymbol, Icon, Denom, Price, AmountDisplay },
 
   props: {
-    displayStyle: {
+    variant: {
       type: String as PropType<TableStyleType>,
       default: 'full',
     },
@@ -254,32 +234,19 @@ export default defineComponent({
 
     &__asset {
       padding: 2rem 0;
-      min-width: 1rem;
       font-weight: 600;
-      text-transform: uppercase;
       display: flex;
       align-items: center;
 
       &__denom {
         margin-left: 1.6rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
         &__chains {
-          margin-top: 0.8rem;
+          margin-top: 0.2rem;
         }
-      }
-    }
-
-    &__trending {
-      &__wrapper {
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-end;
-        color: rgb(6, 126, 62);
-      }
-
-      &__icon {
-        width: 1.6rem;
-        height: 1.6rem;
-        margin-right: 0.4rem;
       }
     }
 
@@ -302,27 +269,6 @@ export default defineComponent({
         margin-top: 0.8rem;
       }
     }
-
-    &__chains {
-      &__wrapper {
-        margin-left: 1rem;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-      }
-    }
-
-    &__arrow-button {
-      padding: 0.2rem;
-      color: rgba(0, 0, 0, 0.4);
-      margin-left: 1rem;
-
-      &__icon {
-        width: 1.6rem;
-        height: 1.6rem;
-      }
-    }
   }
 
   &__view-all {
@@ -330,7 +276,9 @@ export default defineComponent({
     padding: 1.2rem 2rem;
     display: flex;
     align-items: center;
+    border-radius: 5.6rem;
     font-weight: 600;
+    font-size: 1.3rem;
 
     &__label {
       margin-right: 0.7rem;

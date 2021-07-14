@@ -474,7 +474,7 @@ export default defineComponent({
     flex: 1 1 0%;
 
     &__widget {
-      width: 90%;
+      width: 80%;
     }
   }
 }
