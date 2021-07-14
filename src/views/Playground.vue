@@ -196,15 +196,7 @@ export default defineComponent({
       },
     ];
     const sendMessage = async () => {
-      const steps = await actionHandler({
-        name: 'redeem',
-        params: [
-          {
-            chain_name: 'cosmos-hub',
-            amount: { amount: '25000', denom: 'ibc/8371C119AD9ABB70F056791FFCBB02065CD06536B62E79E164324899CA37CD3D' },
-          },
-        ],
-      });
+      await store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
       //action.value = steps;
     };
     const sendStepTx = async () => {

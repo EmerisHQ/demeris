@@ -21,6 +21,7 @@ import {
   GlobalDemerisActionTypes,
 } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
+import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
@@ -103,7 +104,7 @@ export interface Actions {
   ): Promise<void>;
   [DemerisActionTypes.LOAD_SESSION_DATA](
     { commit, getters }: ActionContext<State, RootState>,
-    walletName: string,
+    { walletName, isDemoAccount }: { walletName: string; isDemoAccount: boolean },
   ): Promise<void>;
   // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
@@ -144,6 +145,11 @@ export interface Actions {
     { msgs, chain_name }: DemerisSignParams,
   ): Promise<DemerisTxParams>;
   [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
+  [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({
+    commit,
+    getters,
+    dispatch,
+  }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
 
   [DemerisActionTypes.INIT](
@@ -229,6 +235,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_IN](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
+  [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -358,7 +367,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, walletName) {
+  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
     if (data) {
       const newData = { ...JSON.parse(data), updateDT: Date.now() };
@@ -373,6 +382,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         hasSeenRedeem: false,
         slippagePerc: 0.1,
         updateDT: Date.now(),
+        isDemoAccount,
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
@@ -462,7 +472,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await window.keplr.enable(dexchain.node_info.chain_id);
       const key = await window.keplr.getKey(dexchain.node_info.chain_id);
       commit(DemerisMutationTypes.SET_KEPLR, key);
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, key.name);
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
       for (const chain of toQuery) {
         await window.keplr.enable(chain.node_info.chain_id);
         const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
@@ -480,6 +490,25 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
+    try {
+      const key = demoAccount;
+      commit(DemerisMutationTypes.SET_KEPLR, { ...key });
+      for (const hash of key.keyHashes) {
+        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
+      }
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
+      dispatch('common/wallet/signIn', { keplr: null }, { root: true });
+
+      dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
+      dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
+        subscribe: true,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
