@@ -767,7 +767,7 @@ export default defineComponent({
           }),
         ),
       );
-      data.payCoinAmount = parseInt(data.payCoinData.amount) / Number(precisionDecimal);
+      data.payCoinAmount = data.maxAmount / precisionDecimal;
       setCounterPairCoinAmount('Pay');
     }
 
