@@ -155,10 +155,14 @@ export default {
 
   th {
     color: var(--muted);
+    background: var(--bg);
     vertical-align: middle;
     font-size: 1.3rem;
     font-weight: 400;
-    padding-bottom: 1.2rem;
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   td,
