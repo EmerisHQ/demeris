@@ -30,20 +30,20 @@
 
           <dl class="asset__main__balance__card">
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Available</dt>
-              <dd class="asset__main__balance__card__value">
+              <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
                 <AmountDisplay :amount="{ amount: totalAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Staked</dt>
-              <dd class="asset__main__balance__card__value">-</dd>
+              <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">-</dd>
             </div>
 
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Pooled</dt>
-              <dd class="asset__main__balance__card__value">-</dd>
+              <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">-</dd>
             </div>
           </dl>
         </section>
@@ -51,6 +51,10 @@
         <!-- Chains -->
 
         <section v-if="assets.length" class="asset__main__chains asset__list">
+          <div class="asset__list__header">
+            <h2 class="asset__list__header__title">Chains</h2>
+          </div>
+
           <ul class="asset__list__wrapper">
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
@@ -212,7 +216,6 @@ export default defineComponent({
     }
     &__balance {
       margin-top: 6.4rem;
-      margin-bottom: -6rem;
       &__label {
         color: var(--muted);
       }
@@ -228,18 +231,17 @@ export default defineComponent({
         align-items: center;
         justify-content: space-between;
 
-        &__label {
-          margin-bottom: 0.3rem;
-          color: var(--muted);
+        &__item {
+          flex: 1;
         }
-
-        &__value {
-          font-weight: 600;
+        &__label {
+          color: var(--muted);
         }
       }
     }
 
     &__chains {
+      margin-top: 6.4rem;
       &__item {
         &__asset {
           flex: 1 1 0%;
