@@ -2,14 +2,22 @@
 import type { PropType } from 'vue';
 import { defineComponent } from 'vue';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
 import Button from '@/components/ui/Button.vue';
 import type { StakingBalance } from '@/types/api';
 
 export default defineComponent({
   components: {
     Button,
+    CircleSymbol,
+    Denom,
   },
   props: {
+    denom: {
+      type: String,
+      required: true,
+    },
     stakingBalances: {
       type: Array as PropType<StakingBalance[]>,
       default: () => [],
@@ -23,14 +31,19 @@ export default defineComponent({
     <template v-if="!stakingBalances.length">
       <div class="stake__banner">
         <div class="stake__banner__wrapper">
-          <p class="stake__banner__title">Earn rewards by staking ATOM</p>
+          <p class="stake__banner__title">Earn rewards by staking <Denom :name="denom" /></p>
           <p class="stake__banner__subtitle">
-            Lock up your ATOM and earn passive income with an average <span class="w-bold">9.7% APY</span>.
+            Lock up your <Denom :name="denom" /> and earn passive income with an average
+            <span class="w-bold">9.7% APY</span>.
           </p>
         </div>
 
         <div class="stake__banner__controls">
           <Button status="secondary" name="Coming soon" class="stake__banner__controls__button" />
+        </div>
+
+        <div class="stake__banner__symbol">
+          <CircleSymbol :denom="denom" size="xl" />
         </div>
       </div>
     </template>
@@ -72,9 +85,10 @@ export default defineComponent({
     justify-content: space-between;
     height: 23.5rem;
     width: 100%;
-    background-image: url('~@/assets/images/stake-atom.png');
+    background-image: url('~@/assets/images/stake-rings.png');
     background-repeat: no-repeat;
     background-position: center right;
+    position: relative;
 
     &__wrapper {
       flex: 1 1 0%;
@@ -98,6 +112,13 @@ export default defineComponent({
         color: var(--inactive);
         cursor: not-allowed;
       }
+    }
+
+    &__symbol {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translate(-95%, -50%);
     }
   }
 }

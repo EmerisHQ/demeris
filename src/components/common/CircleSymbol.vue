@@ -33,7 +33,7 @@
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg';
+type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 import { useStore } from 'vuex';
 
@@ -251,6 +251,10 @@ export default defineComponent({
 
   &--lg {
     --symbol-size: 4rem;
+  }
+
+  &--xl {
+    --symbol-size: 9.6rem;
   }
 
   &--ringed &__circle {
