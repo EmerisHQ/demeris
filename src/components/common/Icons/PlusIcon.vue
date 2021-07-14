@@ -11,3 +11,10 @@ export default defineComponent({
   name: 'PlusIcon',
 });
 </script>
+
+<style lang="scss" scoped>
+svg {
+  width: 1em;
+  height: 1em;
+}
+</style>
