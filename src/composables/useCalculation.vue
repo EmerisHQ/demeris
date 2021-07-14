@@ -7,33 +7,6 @@ export default function () {
   const priceDecimalDigit = 6;
   const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
 
-  //TODO: get price
-  function getCoinPrice(coin: string) {
-    if (coin) {
-      return 2;
-    } else {
-      return 0;
-    }
-  }
-
-  function getCoinDollarValue(coin: string, amount: number, prefix = '') {
-    if (coin && amount) {
-      const price = getCoinPrice(coin);
-      return `${prefix}$${(amount * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-    } else {
-      return '';
-    }
-  }
-
-  function getPoolPrice(payCoin: string, receiveCoin: string) {
-    //TODO
-    if (payCoin && receiveCoin) {
-      return 2;
-    } else {
-      return null;
-    }
-  }
-
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
     //TODO: get params to get half-half fee, pay coin amount should be modified
     const swapPrice =
@@ -123,9 +96,6 @@ export default function () {
 
   return {
     calculateSlippage,
-    getCoinPrice,
-    getCoinDollarValue,
-    getPoolPrice,
     getSwapPrice,
     getPayCoinAmount,
     getReceiveCoinAmount,
