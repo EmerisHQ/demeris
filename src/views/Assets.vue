@@ -1,81 +1,35 @@
 <template>
   <AppLayout>
     <section class="assets">
-      <nav class="assets__nav">
-        <router-link to="/assets" class="assets__nav__item" :class="{ 'assets__nav__item--inactive': isChainsTab }">
-          Assets
-        </router-link>
-        <router-link
-          to="/assets/chains"
-          class="assets__nav__item"
-          :class="{ 'assets__nav__item--inactive': !isChainsTab }"
-        >
-          Chains
-        </router-link>
-      </nav>
+      <div class="assets__header">
+        <h1 class="assets__title">Assets</h1>
+      </div>
 
-      <div
-        v-for="chain of availableChains"
-        :key="chain"
-        class="assets__group"
-        :class="{ 'assets__group--all': chain === 'all' }"
-      >
-        <h2 v-if="chain !== 'all'" class="assets__group__title w-bold"><ChainName :name="chain"> assets</ChainName></h2>
-        <AssetsTable :balances="filterBalances(chain)" class="assets__table" @row-click="openAssetPage" />
+      <div class="assets__group">
+        <AssetsTable :balances="[]" :show-all-assets="true" class="assets__table" @row-click="openAssetPage" />
       </div>
     </section>
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import ChainName from '@/components/common/ChainName.vue';
-import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useStore } from '@/store';
 
 export default {
   name: 'Assets',
-  components: { AppLayout, AssetsTable, ChainName },
+  components: { AppLayout, AssetsTable },
 
   setup() {
-    const store = useStore();
     const router = useRouter();
-    const route = useRoute();
-    const { balances } = useAccount();
-
-    const isChainsTab = computed(() => {
-      return route.params.tab === 'chains';
-    });
-
-    const chains = computed(() => {
-      return store.getters['demeris/getChains'];
-    });
-
-    const availableChains = computed(() => {
-      if (isChainsTab.value) {
-        return Object.keys(chains.value);
-      }
-
-      return ['all'];
-    });
-
-    const filterBalances = (chainName: string) => {
-      if (chainName === 'all') {
-        return balances.value;
-      }
-
-      return balances.value.filter((item) => item.on_chain === chainName);
-    };
 
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    return { availableChains, filterBalances, isChainsTab, openAssetPage };
+    return { openAssetPage };
   },
 };
 </script>
@@ -86,28 +40,14 @@ export default {
   flex-direction: column;
   font-size: 1.6rem;
 
-  &__nav {
-    display: flex;
-
-    &__item {
-      font-size: 2.8rem;
-      font-weight: 700;
-      margin-right: 2.4rem;
-
-      &--inactive {
-        color: var(--inactive);
-      }
-    }
+  &__title {
+    font-size: 5.1rem;
+    font-weight: 700;
+    margin-bottom: 3.2rem;
   }
 
   &__table {
     margin-top: 2.4rem;
-  }
-
-  &__group {
-    &:not(&--all) {
-      margin-top: 4rem;
-    }
   }
 }
 </style>
