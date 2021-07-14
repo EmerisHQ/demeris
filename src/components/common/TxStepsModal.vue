@@ -29,7 +29,54 @@
     <div class="button-wrapper">
       <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
     </div>
-
+    <Modal
+      v-if="feeWarning"
+      class="fee-warning-modal"
+      :modal-variant="asWidget ? 'bottom' : 'full'"
+      @close="
+        () => {
+          feeWarning = false;
+        }
+      "
+    >
+      <template v-if="missingFees.length == 1">
+        <template v-if="missingFees[0].denom == 'uatom'">
+          <div class="fee-warning-modal__title">
+            {{ $t('components.feeWarningModal.missingOne', { denom: 'ATOM' }) }}
+          </div>
+          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingOneTextAtom') }}</div>
+          <Button :name="$t('generic_cta.getAtom')" />
+        </template>
+        <template v-else>
+          <div class="fee-warning-modal__title">
+            {{ $t('components.feeWarningModal.missingOne', { denom: 'LUNA' }) }}
+          </div>
+          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingOneText') }}</div>
+          <Button :name="$t('generic_cta.understand')" />
+        </template>
+      </template>
+      <template v-if="missingFees.length > 1">
+        <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
+        <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
+        <div class="fee-warning-modal__list">
+          <div v-for="missing in missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
+            <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
+            <div class="fee-warning-modal__list__item__amount">
+              <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
+            </div>
+          </div>
+        </div>
+        <Button :name="$t('generic_cta.understand')" />
+      </template>
+      <template v-if="ibcWarning">
+        <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}</div>
+        <div class="fee-warning-modal__content">
+          {{ $t('components.feeWarningModal.ibcWarningText', { ibcDenom: 'ATOM', chain: 'Terra', denom: 'Luna' }) }}
+        </div>
+        <Button :name="$t('generic_cta.cancel')" />
+        <Button :name="$t('generic_cta.proceed')" />
+      </template>
+    </Modal>
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
@@ -69,9 +116,12 @@ import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import Modal from '@/components/ui/Modal.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
@@ -93,6 +143,9 @@ export default defineComponent({
     PreviewSwap,
     Button,
     TxHandlingModal,
+    Modal,
+    CircleSymbol,
+    AmountDisplay,
   },
   props: {
     data: {
@@ -119,6 +172,12 @@ export default defineComponent({
     const store = useStore();
     const hasMore = ref(false);
     const isFinal = ref(false);
+    const feeWarning = ref(true);
+    const missingFees = ref([
+      { denom: 'uatom', chain_name: 'cosmos-hub', amount: 1000 },
+      { denom: 'uakt', chain_name: 'akash', amount: 2000 },
+    ]);
+    const ibcWarning = ref(false);
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -307,6 +366,9 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
+      feeWarning,
+      missingFees,
+      ibcWarning,
     };
   },
 });
@@ -428,6 +490,35 @@ export default defineComponent({
 
   .button-wrapper {
     padding: 2.8rem 2.4rem 2.4rem;
+  }
+  .fee-warning-modal {
+    text-align: center;
+    &__title {
+      font-size: 2.1rem;
+      font-weight: bold;
+      margin: 3rem 0rem;
+      padding: 0rem 2rem;
+    }
+    &__content {
+      opacity: 0.67;
+      margin-bottom: 3rem;
+      font-size: 1.6rem;
+    }
+    &__list {
+      margin-bottom: 3rem;
+      &__item {
+        display: flex;
+        margin: 1rem 0rem;
+        align-items: center;
+        .circle-symbol {
+          margin-right: 1rem;
+        }
+        &__amount {
+          font-weight: bold;
+          font-size: 1.6rem;
+        }
+      }
+    }
   }
 }
 </style>

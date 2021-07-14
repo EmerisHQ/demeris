@@ -10,6 +10,9 @@ export const messages = {
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try again with another search',
       max: 'Max',
+      understand: 'I understand',
+      getAtom: 'Get ATOM',
+      proceed: 'Proceed',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -79,6 +82,15 @@ export const messages = {
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
         minReceivedLbl: 'Min. received<br />(if 100% swapped)',
         minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
+      },
+      feeWarningModal: {
+        missingOne: 'You need {denom} to pay fees',
+        missingOneText: 'Lorem ipsum',
+        missingOneTextAtom: 'Lorem ipsum Atom',
+        missingMany: 'You have no assets to pay fees',
+        missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        ibcWarning: 'You may need {denom} to pay fees',
+        ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
