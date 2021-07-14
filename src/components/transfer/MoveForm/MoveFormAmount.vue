@@ -256,11 +256,15 @@ export default defineComponent({
         }
       },
     );
-
-    // TODO: Select defaut asset based in specific conditions
-    if (!state.currentAsset && (props.balances as Balances).length) {
-      setCurrentAsset(props.balances[0]);
-    }
+    watch(
+      () => props.balances,
+      (newVal, oldVal) => {
+        if (oldVal.length == 0 && newVal.length > 0 && !state.currentAsset) {
+          setCurrentAsset(props.balances[0]);
+        }
+      },
+      { immediate: true },
+    );
 
     return {
       form,

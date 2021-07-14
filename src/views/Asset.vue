@@ -100,7 +100,7 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
-        <MoonpayBanner v-if="assets.length" variant="widget" class="asset__aside__buy" />
+        <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
   </AppLayout>
