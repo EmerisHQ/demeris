@@ -7,9 +7,10 @@
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
             <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
-            <span class="asset__main__info__denom__name"><Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__name title-2-bold"><Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"><Denom :name="denom" /></span>
           </p>
-          <h1 class="asset__main__info__price">
+          <h1 class="asset__main__info__price title-2-bold">
             <Price :amount="{ amount: 0, denom }" />
           </h1>
         </section>
@@ -19,12 +20,12 @@
         <MoonpayBanner v-if="!assets.length" class="asset__main__buy-banner" variant="banner" />
 
         <section v-else class="asset__main__balance">
-          <p class="asset__main__balance__label">Balance</p>
-          <h2 class="asset__main__balance__value">
-            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
-          </h2>
-          <span class="asset__main__balance__price">
+          <p class="asset__main__balance__label title-0-normal">Balance</p>
+          <h2 class="asset__main__balance__value title-3-bold">
             <Price :amount="{ amount: totalAmount, denom }" />
+          </h2>
+          <span class="asset__main__balance__price title-0-normal">
+            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
           </span>
 
           <dl class="asset__main__balance__card">
@@ -182,6 +183,11 @@ export default defineComponent({
     width: 60%;
 
     &__info {
+      display: flex;
+      &__denom,
+      &__price {
+        flex: 1;
+      }
       &__denom {
         display: inline-flex;
         align-items: center;
@@ -190,16 +196,14 @@ export default defineComponent({
           margin-right: 1.2rem;
         }
         &__name {
-          font-size: 2.8rem;
-          font-weight: 700;
           margin-right: 1.2rem;
+        }
+        &__ticker {
+          color: var(--muted);
         }
       }
       &__price {
-        line-height: 1.2;
-        font-weight: 700;
-        font-size: 5.1rem;
-        margin-top: 1.2rem;
+        text-align: right;
       }
     }
 
@@ -211,12 +215,6 @@ export default defineComponent({
       margin-bottom: -6rem;
       &__label {
         color: var(--muted);
-        font-weight: 400;
-      }
-      &__value {
-        font-size: 2.8rem;
-        font-weight: 600;
-        line-height: 1.4;
       }
       &__price {
         color: var(--muted);
