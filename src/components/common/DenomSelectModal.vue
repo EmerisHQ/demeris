@@ -94,7 +94,13 @@ export default defineComponent({
         emit('select', payload);
       } else {
         selectedDenom.value = payload.base_denom;
-        toggleChainSelectModal();
+
+        if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+          toggleChainSelectModal();
+          return;
+        }
+
+        emit('select', payload);
       }
     }
 
