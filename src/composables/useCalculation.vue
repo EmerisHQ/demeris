@@ -1,7 +1,9 @@
 <script lang="ts">
-import { useStore } from '@/store';
+import { useAllStores, useStore } from '@/store';
+
 export default function () {
   const store = useStore();
+  const stores = useAllStores();
 
   // common setting
   const priceDecimalDigit = 6;
@@ -22,6 +24,7 @@ export default function () {
     maxDecimal = 2,
   ) {
     if (payCoinAmount) {
+      console.log(store.getters['tendermint.liquidity.v1beta1/getParams']());
       const swapFeeRate = 0.9985; // TODO: get params
 
       const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
