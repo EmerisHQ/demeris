@@ -59,7 +59,11 @@ export const demoAccount = {
     19: 4,
   },
   bech32Address: 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
-  keyHashes: ['3c883c0ed10a0f86bd148ba7dd2b4eb128b48804'],
+  keyHashes: [
+    '3c883c0ed10a0f86bd148ba7dd2b4eb128b48804',
+    '2cb0a889f81ce355e3c90746a174ee669fd71946',
+    'e0b9dcf0216d9d938e26cbb59cc99c3678d93cb9',
+  ],
 };
 export const demoAddresses = {
   'cosmos-hub': 'cosmos18jyrcrk3pg8cd0g53wna626wky5tfzqyvfsjzj',
@@ -69,4 +73,5 @@ export const demoAddresses = {
   iris: 'iaa18jyrcrk3pg8cd0g53wna626wky5tfzqyetsrqr',
   sentinel: 'sent18jyrcrk3pg8cd0g53wna626wky5tfzqyhjxtxa',
   'crypto-com': 'cro1uzuaeuppdkwe8r3xew6eejvuxeudj09en4jq8g',
+  persistence: 'persistence19jc23z0crn34tc7fqar2za8wv60awx2xh7uat6',
 };
