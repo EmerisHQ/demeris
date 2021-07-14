@@ -5,6 +5,10 @@
         <section class="pool__main__stats">
           <span class="pool__main__stats__subtitle">Gravity DEX Pool</span>
           <div class="pool__main__stats__header">
+            <div class="pool__main__stats__pair">
+              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pool__main__stats__pair__token token-a" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pool__main__stats__pair__token token-b" />
+            </div>
             <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
           <h1 class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
@@ -39,7 +43,7 @@
 
         <section v-if="relatedPools.length" class="pool__main__pools">
           <div class="pool__main__pools__header">
-            <h2 class="s-2">Other pools</h2>
+            <h2 class="s-2">More pools</h2>
             <router-link :to="{ name: 'Pools' }" class="pool__main__pools__header__button">
               See all
               <Icon name="ArrowRightIcon" :icon-size="1.6" />
@@ -54,7 +58,7 @@
 
       <div class="pool__aside">
         <div class="pool__aside__widget">
-          <div class="pool-equity elevation-panel">
+          <div class="pool-equity elevation-panel" :style="equityGradientStyle">
             <div class="pool-equity__header">
               <h2 class="s-2 w-bold">Equity</h2>
               <Icon name="ThreeDotsIcon" />
@@ -124,10 +128,17 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
-import { isNative } from '@/utils/basic';
+import { hexToRGB, isNative } from '@/utils/basic';
+
+const defaultColors = {
+  primary: '#E1E1E1',
+  secondary: '#F4F4F4',
+  tertiary: '#F9F9F9',
+};
 
 export default defineComponent({
   name: 'Pool',
@@ -147,6 +158,8 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const denoms = ref([]);
+
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -194,6 +207,37 @@ export default defineComponent({
       ].filter((item) => item.id !== pool.value.id);
     });
 
+    const generateBackground = (colors: Record<string, string>) => {
+      const hexArray = Object.values(colors).reverse();
+      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
+      const colorStops = [];
+
+      for (const [index, hex] of Object.entries(hexArray)) {
+        colorStops.push(`rgba(${hexToRGB(hex)}, 0.06) ${positions[index]}`);
+      }
+
+      return `radial-gradient(
+					ellipse farthest-corner at 16.67% 16.67%,
+					${colorStops.join(',')}
+				)`;
+    };
+
+    const equityGradientStyle = computed(() => {
+      let colors = defaultColors;
+
+      if (denoms.value.length) {
+        colors = {
+          primary: symbolsData[denoms.value[0]]?.colors.primary || defaultColors.primary,
+          secondary: symbolsData['gdex'].colors.primary,
+          tertiary: symbolsData[denoms.value[1]]?.colors.primary || defaultColors.secondary,
+        };
+      }
+
+      return {
+        background: generateBackground(colors),
+      };
+    });
+
     const addLiquidityHandler = () => {
       router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
     };
@@ -208,6 +252,7 @@ export default defineComponent({
       }
 
       const reserveDenoms = await getReserveBaseDenoms(pool.value);
+      denoms.value = reserveDenoms;
 
       let total = 0;
 
@@ -302,8 +347,8 @@ export default defineComponent({
 
       ownLiquidityPrice.value = total;
     };
-    watch(reserveBalances, updateTotalLiquidityPrice);
 
+    watch(reserveBalances, updateTotalLiquidityPrice);
     watch(walletBalances, updateOwnLiquidityPrice);
 
     return {
@@ -313,6 +358,7 @@ export default defineComponent({
       relatedPools,
       walletBalances,
       totalLiquidityPrice,
+      equityGradientStyle,
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,
@@ -337,9 +383,23 @@ export default defineComponent({
 
     &__stats {
       &__header {
+        margin-top: 1.2rem;
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
+        align-items: center;
+      }
+
+      &__pair {
+        margin-right: 1.2rem;
+
+        &__token {
+          &.token-a {
+            z-index: 1;
+          }
+          &.token-b {
+            z-index: 0;
+            margin-left: -0.6rem;
+          }
+        }
       }
 
       &__name {
@@ -462,7 +522,6 @@ export default defineComponent({
   background: red;
   padding: 2.4rem;
   border-radius: 1.6rem;
-  background: linear-gradient(98.5deg, rgba(195, 152, 252, 0.06) 0%, rgba(253, 131, 140, 0.06) 100%), #ffffff;
 
   &__header {
     display: flex;

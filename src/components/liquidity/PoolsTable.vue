@@ -1,15 +1,11 @@
 <template>
   <section class="pools">
-    <nav class="pools__nav">
-      <router-link to="/pools" class="pools__nav__item">{{ $t('context.pools.mine') }}</router-link>
-      <router-link to="/pools" custom>
-        <span class="pools__nav__item pools__nav__item--inactive">{{ $t('context.pools.all') }}</span>
-      </router-link>
-    </nav>
-
     <div class="pools__subheader">
-      <Search v-model:keyword="keyword" />
-      <Button name="Add liquidity" @click="openAddLiqudityPage" />
+      <Search v-model:keyword="keyword" class="pools__search" />
+      <button class="pools__add-button" @click="openAddLiqudityPage">
+        <Icon name="PlusIcon" :icon-size="2" />
+        <span class="pools__add-button__label">Add liquidity</span>
+      </button>
     </div>
 
     <table class="pools-table">
@@ -63,14 +59,13 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
-import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 
 export default {
   name: 'PoolsTable',
-  components: { Search, Button, Icon, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
+  components: { Search, Icon, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
 
   props: {
     pools: {
@@ -122,31 +117,31 @@ export default {
   flex-direction: column;
   font-size: 1.6rem;
 
+  &__search {
+    width: 36rem;
+  }
+
+  &__add-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 1.6rem 1.2rem;
+    font-weight: 600;
+
+    &__label {
+      margin-left: 1rem;
+    }
+  }
+
   &__subheader {
     margin-top: 2.4rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-
-  &__nav {
-    display: flex;
-
-    &__item {
-      font-size: 2.8rem;
-      font-weight: 600;
-      margin-right: 2.4rem;
-
-      &--inactive {
-        color: rgba(0, 0, 0, 0.33);
-        cursor: not-allowed;
-      }
-    }
-  }
 }
 
 .pools-table {
-  margin: 2.4rem -2rem 0 -2rem;
+  margin: 4rem -2rem 0 -2rem;
   width: calc(100% + 4rem);
   table-layout: fixed;
 
@@ -213,6 +208,7 @@ export default {
           height: 3.2rem;
           border-radius: 2.4rem;
           background: #ddd;
+          z-index: 0;
 
           &.token-a {
             z-index: 1;
