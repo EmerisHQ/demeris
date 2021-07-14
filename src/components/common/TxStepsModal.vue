@@ -247,16 +247,32 @@ export default defineComponent({
                 continue;
               }
               try {
-                const txPromise = store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                let status = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
                   subscribe: true,
                   params: { chain_name: res.chain_name, ticket: result.ticket },
                 });
-                await txPromise;
+
+                while (
+                  status != 'complete' &&
+                  status != 'failed' &&
+                  status != 'IBC_receive_success' &&
+                  status != 'Tokens_unlocked_timeout' &&
+                  status != 'Tokens_unlocked_ack'
+                ) {
+                  console.log(status);
+                  status = await store.getters['demeris/getTxStatus']({
+                    chain_name: res.chain_name,
+                    ticket: result.ticket,
+                  });
+                }
+                // TODO: deal with status here
+                console.log(status);
                 emit('complete');
                 txstatus.value = 'complete';
 
                 await txToResolve.value['promise'];
               } catch (e) {
+                console.log(e);
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];

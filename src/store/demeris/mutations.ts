@@ -89,35 +89,52 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
-
-    const txPromise = state.transactions.get(JSON.stringify(payload.params));
+    let txPromise = state.transactions.get(JSON.stringify(payload.params));
     if (txPromise == null) {
       let responseResolve, responseReject;
-      const responsePromise: Promise<void> = new Promise((res, rej) => {
+      const responsePromise: Promise<string> = new Promise((res, rej) => {
         responseResolve = res;
         responseReject = rej;
       });
-
       state.transactions.set(JSON.stringify(payload.params), {
         date: Date.now(),
+        status: { status: 'pending' },
         resolve: responseResolve,
         reject: responseReject,
         promise: responsePromise,
       });
-    } else {
-      if (ticket.status == 'complete') {
-        txPromise.resolve();
-        state.transactions.delete(JSON.stringify(payload.params));
+    }
+    txPromise = state.transactions.get(JSON.stringify(payload.params));
+    const oldStatus = txPromise.status;
+    if (ticket.status != oldStatus.status) {
+      txPromise.resolve(ticket.status);
+      if (
+        ticket.status == 'complete' ||
+        ticket.status == 'failed' ||
+        ticket.status == 'IBC_receive_success' ||
+        ticket.status == 'Tokens_unlocked_timeout' ||
+        ticket.status == 'Tokens_unlocked_ack'
+      ) {
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
         );
-      } else if (ticket.status != 'pending' && ticket.status != 'transit') {
-        txPromise.reject();
-        state.transactions.delete(JSON.stringify(payload.params));
-        state._Subscriptions.delete(
-          JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
-        );
+      } else {
+        let responseResolve, responseReject;
+        const responsePromise: Promise<string> = new Promise((res, rej) => {
+          responseResolve = res;
+          responseReject = rej;
+        });
+        state.transactions.set(JSON.stringify(payload.params), {
+          date: Date.now(),
+          status: ticket,
+          resolve: responseResolve,
+          reject: responseReject,
+          promise: responsePromise,
+        });
       }
+    } else {
+      txPromise.date = Date.now();
+      state.transactions.set(JSON.stringify(payload.params), txPromise);
     }
   },
   [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
