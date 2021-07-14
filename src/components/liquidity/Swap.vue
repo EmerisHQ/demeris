@@ -609,7 +609,6 @@ export default defineComponent({
     watch(
       () => data.payCoinAmount,
       () => {
-        console.log(data.payCoinAmount);
         if (data.selectedPoolData) {
           const reserveCoin =
             data.selectedPoolData.reserves.findIndex((coin) => coin === data.receiveCoinData.denom) === 1
@@ -624,7 +623,6 @@ export default defineComponent({
               ),
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
-          console.log('SP', slippage.value);
         }
       },
     );
@@ -743,18 +741,18 @@ export default defineComponent({
 
     function changePayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
+      let originReceiveCoinData = null;
       if (originPayCoinData) {
         originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
       }
-
-      const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      console.log('originReceiveCoinDAta', originReceiveCoinData);
+      if (data.receiveCoinData) {
+        originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+      }
 
       data.payCoinData = originReceiveCoinData;
       data.receiveCoinData = assetsToReceive.value.find((asset) => {
-        return asset.base_denom === originPayCoinData.base_denom;
+        return asset?.base_denom === originPayCoinData?.base_denom;
       });
-      console.log('payCoinData', data.payCoinData);
 
       data.payCoinAmount = 0;
       data.receiveCoinAmount = 0;
