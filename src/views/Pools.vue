@@ -1,5 +1,9 @@
 <template>
   <AppLayout>
+    <div class="pools__header">
+      <h1 class="pools__title">Pools</h1>
+    </div>
+
     <PoolsTable :pools="pools" />
   </AppLayout>
 </template>
@@ -23,4 +27,12 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.pools {
+  &__title {
+    font-size: 5.1rem;
+    font-weight: 700;
+    margin-bottom: 3.2rem;
+  }
+}
+</style>

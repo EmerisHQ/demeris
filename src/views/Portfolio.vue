@@ -10,9 +10,9 @@
         </div>
         <div class="portfolio__assets">
           <div class="portfolio__assets__header">
-            <div class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</div>
+            <h2 class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</h2>
             <router-link class="portfolio__assets__header__link" to="/assets">
-              {{ $t('generic_cta.seeall') }} <ArrowRightIcon />
+              {{ balances.length ? $t('generic_cta.discoverMore') : $t('generic_cta.seeall') }} <ArrowRightIcon />
             </router-link>
           </div>
 
@@ -24,7 +24,7 @@
           <div v-else class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
-              display-style="compact"
+              variant="balance"
               class="assets__table"
               :show-headers="false"
               :limit-rows="4"
@@ -34,13 +34,24 @@
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
-            <div class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</div>
-            <router-link class="portfolio__pools__header__link" to="/pools">
-              {{ $t('generic_cta.seeall') }} <ArrowRightIcon />
+            <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
+            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/assets">
+              {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
             </router-link>
           </div>
-          <div class="portfolio__pools__cards">
-            <Pools :pools="invested.length > 0 ? invested : toppools" :limit="3" />
+
+          <div v-if="poolsInvested.length" class="portfolio__pools__cards">
+            <Pools :pools="poolsInvested" />
+          </div>
+
+          <div v-else class="portfolio__pools__empty">
+            <p class="portfolio__pools__empty__description">{{ $t('context.pools.empty') }}</p>
+            <Button
+              status="secondary"
+              class="portfolio__pools__empty__button"
+              :name="$t('context.pools.explore')"
+              @click="openPoolsPage"
+            />
           </div>
         </div>
       </div>
@@ -62,20 +73,29 @@ import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+
 export default {
   name: 'Portfolio',
-  components: { AppLayout, MoonpayBanner, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
+  components: { AppLayout, Button, MoonpayBanner, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
+
   setup() {
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
+
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
-    const invested = computed(() => {
+
+    const openPoolsPage = () => {
+      router.push({ name: 'Pools' });
+    };
+
+    const poolsInvested = computed(() => {
       const bals = [];
       for (const balance of balances.value) {
         if (pools.value.length > 0) {
@@ -87,10 +107,8 @@ export default {
       }
       return bals;
     });
-    const toppools = computed(() => {
-      return pools.value.slice(0, 2);
-    });
-    return { balances, openAssetPage, pools, invested, toppools };
+
+    return { balances, poolsInvested, openAssetPage, openPoolsPage };
   },
 };
 </script>
@@ -128,7 +146,8 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.8rem;
+
         &__link {
           font-size: 1.6rem;
           font-weight: 600;
@@ -148,7 +167,8 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.6rem;
+
         &__link {
           font-size: 1.6rem;
           font-weight: 600;
@@ -157,6 +177,23 @@ export default {
           svg {
             margin-left: 1rem;
           }
+        }
+      }
+
+      &__empty {
+        padding: 3.2rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &__description {
+          color: var(--muted);
+        }
+
+        &__button {
+          margin-top: 2.4rem;
         }
       }
     }
