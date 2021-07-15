@@ -549,7 +549,14 @@ export default defineComponent({
           return false;
         }
       }),
-      isNotEnoughLiquidity: computed(() => (slippage.value >= 0.2 ? true : false)),
+      isNotEnoughLiquidity: computed(() => {
+        console.log(data.selectedPoolData);
+        if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
+          return true;
+        } else {
+          return false;
+        }
+      }),
       isBothSelected: computed(() => {
         return data.payCoinData && data.receiveCoinData;
       }),
@@ -612,31 +619,16 @@ export default defineComponent({
         if (data.selectedPoolData) {
           const minimalDecimal = Math.pow(
             10,
-            parseInt(store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })),
+            parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom })),
           );
+
           const reserveCoin =
-            data.selectedPoolData.reserves.findIndex((coin) => coin === data.receiveCoinData.base_denom) === 0
+            data.selectedPoolData.reserves.findIndex((coin) => coin === data.payCoinData.base_denom) === 0
               ? 'balanceA'
               : 'balanceB';
 
-          const isReverse = reserveCoin === 'balanceB' ? false : true;
-
-          const receiveAmountByPoolPrice =
-            data.payCoinAmount * (isReverse ? data.selectedPoolData.poolPrice : 1 / data.selectedPoolData.poolPrice) >
-            data.receiveCoinAmount
-              ? data.payCoinAmount * (isReverse ? data.selectedPoolData.poolPrice : 1 / data.selectedPoolData.poolPrice)
-              : data.receiveCoinAmount;
-          console.log('receiveAmountByPoolPrice', receiveAmountByPoolPrice);
-          console.log(
-            'poolPercent',
-            Number(
-              BigInt(Math.trunc(receiveAmountByPoolPrice * minimalDecimal) * 10000) /
-                BigInt(data.selectedPoolData.reserveBalances[reserveCoin]),
-            ) / 10000,
-          );
-
           slippage.value = calculateSlippage(
-            Math.trunc(receiveAmountByPoolPrice * minimalDecimal),
+            data.payCoinAmount * minimalDecimal,
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
           console.log(slippage.value * 100);
