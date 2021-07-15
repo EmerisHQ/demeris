@@ -521,21 +521,31 @@ export default {
 
     const coinAChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      if (!reserveBalances.value) {
+
+      if (!hasPair.value && hasPool.value) {
         return;
       }
-      const result =
-        (form.coinA.amount * 1e6 * reserveBalances.value[1].amount) / reserveBalances.value[0].amount / 1e6;
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      const result = (form.coinA.amount * priceA) / priceB;
+
       form.coinB.amount = +result.toFixed(6);
     };
 
     const coinBChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      if (!reserveBalances.value) {
+
+      if (!hasPair.value && hasPool.value) {
         return;
       }
-      const result =
-        (form.coinB.amount * 1e6 * reserveBalances.value[0].amount) / reserveBalances.value[1].amount / 1e6;
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      const result = (form.coinB.amount * priceB) / priceA;
+
       form.coinA.amount = +result.toFixed(6);
     };
 
