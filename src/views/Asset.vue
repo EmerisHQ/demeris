@@ -73,7 +73,7 @@
               </div>
               <span class="asset__main__chains__item__amount">
                 <AmountDisplay
-                  v-if="asset.on_chain === assetConfig.chain_name"
+                  v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                   :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
@@ -81,7 +81,7 @@
               <div class="asset__main__chains__item__balance">
                 <span class="asset__main__chains__item__balance__value">
                   <Price
-                    v-if="asset.on_chain === assetConfig.chain_name"
+                    v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                     :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
                   />
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
@@ -188,12 +188,15 @@ export default defineComponent({
     });
 
     const stakingBalance = computed(() => {
-      return stakingBalancesByChain(assetConfig.value.chain_name);
+      if (assetConfig.value && assetConfig.value.chain_name) {
+        return stakingBalancesByChain(assetConfig.value.chain_name);
+      }
+      return 0;
     });
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      if (staked && staked.length > 0 && staked[0].amount) {
+      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
         return parseFloat(staked[0].amount);
       }
       return 0;

@@ -63,7 +63,11 @@ export default function useAccount() {
   });
 
   const stakingBalancesByChain = (chain_name: string) => {
-    return stakingBalances.value.filter((item) => item.chain_name === chain_name);
+    return stakingBalances.value.filter((item) => {
+      if (item) {
+        return item.chain_name === chain_name;
+      }
+    });
   };
 
   return {
