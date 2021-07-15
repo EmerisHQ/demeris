@@ -66,6 +66,7 @@ export default defineComponent({
     });
     try {
       await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
     }

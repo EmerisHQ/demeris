@@ -1,5 +1,6 @@
 <script lang="ts">
 import { useStore } from '@/store';
+
 export default function () {
   const store = useStore();
 
@@ -7,35 +8,7 @@ export default function () {
   const priceDecimalDigit = 6;
   const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
 
-  //TODO: get price
-  function getCoinPrice(coin: string) {
-    if (coin) {
-      return 2;
-    } else {
-      return 0;
-    }
-  }
-
-  function getCoinDollarValue(coin: string, amount: number, prefix = '') {
-    if (coin && amount) {
-      const price = getCoinPrice(coin);
-      return `${prefix}$${(amount * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-    } else {
-      return '';
-    }
-  }
-
-  function getPoolPrice(payCoin: string, receiveCoin: string) {
-    //TODO
-    if (payCoin && receiveCoin) {
-      return 2;
-    } else {
-      return null;
-    }
-  }
-
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
-    //TODO: get params to get half-half fee, pay coin amount should be modified
     const swapPrice =
       ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** priceDecimalDigit)) /
       BigInt(toCoinPoolAmount);
@@ -49,8 +22,8 @@ export default function () {
     maxDecimal = 2,
   ) {
     if (payCoinAmount) {
-      const swapFeeRate = 0.9985; // TODO: get params
-
+      const swapFeeRate =
+        1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
       const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
       const maxDecimalMultiplier = 10 ** maxDecimal;
       const swapPrice = Number(getSwapPrice(payCoinMinimalDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
@@ -73,7 +46,8 @@ export default function () {
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
-    const swapFeeRate = 0.9985; // TODO: get params
+    const swapFeeRate =
+      1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
     const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** minimalDemomDigit);
     const maxDecimalMultiplier = 10 ** maxDecimal;
     const payCoinAmount =
@@ -123,9 +97,6 @@ export default function () {
 
   return {
     calculateSlippage,
-    getCoinPrice,
-    getCoinDollarValue,
-    getPoolPrice,
     getSwapPrice,
     getPayCoinAmount,
     getReceiveCoinAmount,
