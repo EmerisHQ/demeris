@@ -5,12 +5,12 @@ export default function () {
   const store = useStore();
 
   // common setting
-  const priceDecimalDigit = 6;
-  const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
+  const precisionDigits = 6;
+  const demomDigits = 6; // example: 1 atom => 1000000uatom
 
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
     const swapPrice =
-      ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** priceDecimalDigit)) /
+      ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** precisionDigits)) /
       BigInt(toCoinPoolAmount);
     return swapPrice;
   }
@@ -24,17 +24,15 @@ export default function () {
     if (payCoinAmount) {
       const swapFeeRate =
         1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
-      const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
-      const maxDecimalMultiplier = 10 ** maxDecimal;
+      const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** demomDigits);
+      const decimalMaxDigits = 10 ** maxDecimal;
       const swapPrice = Number(getSwapPrice(payCoinMinimalDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
 
       const receiveCoinAmount =
-        (((BigInt(payCoinMinimalDenomAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(maxDecimalMultiplier)) /
-        BigInt(10 ** minimalDemomDigit);
+        (((BigInt(payCoinMinimalDenomAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(decimalMaxDigits)) /
+        BigInt(10 ** demomDigits);
 
-      return (
-        Math.trunc((Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate * maxDecimalMultiplier) / maxDecimalMultiplier
-      );
+      return Math.trunc((Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate * decimalMaxDigits) / decimalMaxDigits;
     } else {
       return 0;
     }
@@ -48,21 +46,20 @@ export default function () {
   ) {
     const swapFeeRate =
       1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
-    const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** minimalDemomDigit);
-    const maxDecimalMultiplier = 10 ** maxDecimal;
+    const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** demomDigits);
+    const decimalMaxDigits = 10 ** maxDecimal;
     const payCoinAmount =
       payCoinPoolAmount /
       receiveCoinPoolAmount /
       (swapFeeRate / receiveCoinMinimalDenomAmount - 2 / receiveCoinPoolAmount);
 
     if (payCoinAmount > 0) {
-      return (
-        Math.trunc(Number((payCoinAmount / 10 ** minimalDemomDigit) * maxDecimalMultiplier)) / maxDecimalMultiplier
-      );
+      return Math.trunc(Number((payCoinAmount / 10 ** demomDigits) * decimalMaxDigits)) / decimalMaxDigits;
     } else {
       return 0;
     }
   }
+
   function getPrecision(denom) {
     const chains = store.getters['demeris/getChains'];
     const denomPrecisionIndexer = {};
