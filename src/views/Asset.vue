@@ -198,8 +198,9 @@ export default defineComponent({
       return 0;
     });
 
+    // TODO: get true pooled amount
     const pooledAmount = computed(() => {
-      return 5000000;
+      return 0;
     });
 
     const totalAmount = computed(() => {
