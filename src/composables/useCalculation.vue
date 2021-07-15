@@ -1,9 +1,8 @@
 <script lang="ts">
-import { useAllStores, useStore } from '@/store';
+import { useStore } from '@/store';
 
 export default function () {
   const store = useStore();
-  const stores = useAllStores();
 
   // common setting
   const priceDecimalDigit = 6;
@@ -24,9 +23,8 @@ export default function () {
     maxDecimal = 2,
   ) {
     if (payCoinAmount) {
-      console.log(store.getters['tendermint.liquidity.v1beta1/getParams']());
-      const swapFeeRate = 0.9985; // TODO: get params
-
+      const swapFeeRate =
+        1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
       const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** minimalDemomDigit);
       const maxDecimalMultiplier = 10 ** maxDecimal;
       const swapPrice = Number(getSwapPrice(payCoinMinimalDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
@@ -49,7 +47,8 @@ export default function () {
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
-    const swapFeeRate = 0.9985; // TODO: get params
+    const swapFeeRate =
+      1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
     const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** minimalDemomDigit);
     const maxDecimalMultiplier = 10 ** maxDecimal;
     const payCoinAmount =
