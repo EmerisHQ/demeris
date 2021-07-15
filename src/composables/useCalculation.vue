@@ -9,7 +9,6 @@ export default function () {
   const minimalDemomDigit = 6; // example: 1 atom => 1000000uatom
 
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
-    //TODO: get params to get half-half fee, pay coin amount should be modified
     const swapPrice =
       ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** priceDecimalDigit)) /
       BigInt(toCoinPoolAmount);

@@ -161,7 +161,7 @@ export default defineComponent({
 
   setup() {
     //SETTINGS-START
-    const priceUpdateTerm = 7; //price update term (sec)
+    const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
@@ -610,19 +610,36 @@ export default defineComponent({
       () => data.payCoinAmount,
       () => {
         if (data.selectedPoolData) {
+          const minimalDecimal = Math.pow(
+            10,
+            parseInt(store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })),
+          );
           const reserveCoin =
-            data.selectedPoolData.reserves.findIndex((coin) => coin === data.receiveCoinData.denom) === 1
+            data.selectedPoolData.reserves.findIndex((coin) => coin === data.receiveCoinData.base_denom) === 0
               ? 'balanceA'
               : 'balanceB';
 
+          const isReverse = reserveCoin === 'balanceB' ? false : true;
+
+          const receiveAmountByPoolPrice =
+            data.payCoinAmount * (isReverse ? data.selectedPoolData.poolPrice : 1 / data.selectedPoolData.poolPrice) >
+            data.receiveCoinAmount
+              ? data.payCoinAmount * (isReverse ? data.selectedPoolData.poolPrice : 1 / data.selectedPoolData.poolPrice)
+              : data.receiveCoinAmount;
+          console.log('receiveAmountByPoolPrice', receiveAmountByPoolPrice);
+          console.log(
+            'poolPercent',
+            Number(
+              BigInt(Math.trunc(receiveAmountByPoolPrice * minimalDecimal) * 10000) /
+                BigInt(data.selectedPoolData.reserveBalances[reserveCoin]),
+            ) / 10000,
+          );
+
           slippage.value = calculateSlippage(
-            data.receiveCoinAmount *
-              Math.pow(
-                10,
-                parseInt(store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })),
-              ),
+            Math.trunc(receiveAmountByPoolPrice * minimalDecimal),
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
+          console.log(slippage.value * 100);
         }
       },
     );
