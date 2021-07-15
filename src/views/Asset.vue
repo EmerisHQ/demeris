@@ -46,9 +46,7 @@
             <div class="asset__main__balance__card__item">
               <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
               <dd class="asset__main__balance__card__value title-0-medium">
-                <template v-for="pool in pools" :key="pool.reserve_account_address">
-                  <OwnLiquidity :pool="pool" />
-                </template>
+                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
             </div>
           </dl>
@@ -138,7 +136,6 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
-import OwnLiquidity from '@/components/common/OwnLiquidity.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -164,7 +161,6 @@ export default defineComponent({
     LiquiditySwap,
     Pools,
     MoonpayBanner,
-    OwnLiquidity,
   },
 
   setup() {
@@ -202,11 +198,15 @@ export default defineComponent({
       return 0;
     });
 
+    const pooledAmount = computed(() => {
+      return 0;
+    });
+
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value;
     });
 
-    return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, totalAmount };
+    return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });
 </script>
