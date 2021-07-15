@@ -7,9 +7,10 @@
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
             <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
-            <span class="asset__main__info__denom__name"><Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"> <Denom :name="denom" /></span>
           </p>
-          <h1 class="asset__main__info__price">
+          <h1 class="asset__main__info__price title-2-bold">
             <Price :amount="{ amount: 0, denom }" />
           </h1>
         </section>
@@ -19,30 +20,34 @@
         <MoonpayBanner v-if="!assets.length" class="asset__main__buy-banner" variant="banner" />
 
         <section v-else class="asset__main__balance">
-          <p class="asset__main__balance__label">Balance</p>
-          <h2 class="asset__main__balance__value">
-            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
-          </h2>
-          <span class="asset__main__balance__price">
+          <p class="asset__main__balance__label title-0-normal">Balance</p>
+          <h2 class="asset__main__balance__value title-3-bold">
             <Price :amount="{ amount: totalAmount, denom }" />
+          </h2>
+          <span class="asset__main__balance__price title-0-normal">
+            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
           </span>
 
           <dl class="asset__main__balance__card">
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Available</dt>
-              <dd class="asset__main__balance__card__value">
-                <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+              <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Staked</dt>
-              <dd class="asset__main__balance__card__value">-</dd>
+              <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
+              </dd>
             </div>
 
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label">Pooled</dt>
-              <dd class="asset__main__balance__card__value">-</dd>
+              <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+              </dd>
             </div>
           </dl>
         </section>
@@ -50,6 +55,10 @@
         <!-- Chains -->
 
         <section v-if="assets.length" class="asset__main__chains asset__list">
+          <div class="asset__list__header">
+            <h2 class="asset__list__header__title">Chains</h2>
+          </div>
+
           <ul class="asset__list__wrapper">
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
@@ -60,10 +69,20 @@
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
-              <span class="asset__main__chains__item__amount"><AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
+              <span class="asset__main__chains__item__amount">
+                <AmountDisplay
+                  v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
+                  :amount="{ amount: totalAmount, denom }"
+                />
+                <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
+              </span>
               <div class="asset__main__chains__item__balance">
                 <span class="asset__main__chains__item__balance__value">
-                  <Price :amount="{ amount: asset.amount, denom }" />
+                  <Price
+                    v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
+                    :amount="{ amount: totalAmount, denom }"
+                  />
+                  <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
               </div>
             </li>
@@ -149,7 +168,7 @@ export default defineComponent({
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
-    const { balancesByDenom } = useAccount();
+    const { balancesByDenom, stakingBalancesByChain } = useAccount();
     const { poolsByDenom } = usePools();
 
     const assetConfig = computed(() => {
@@ -160,11 +179,35 @@ export default defineComponent({
     const assets = computed(() => balancesByDenom(denom.value));
     const pools = computed(() => poolsByDenom(denom.value));
 
-    const totalAmount = computed(() => {
+    const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
-    return { assetConfig, denom, assets, pools, totalAmount };
+    const stakingBalance = computed(() => {
+      if (assetConfig.value && assetConfig.value.chain_name) {
+        return stakingBalancesByChain(assetConfig.value.chain_name);
+      }
+      return 0;
+    });
+
+    const stakedAmount = computed(() => {
+      let staked = stakingBalance.value;
+      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
+        return parseFloat(staked[0].amount);
+      }
+      return 0;
+    });
+
+    // TODO: get true pooled amount
+    const pooledAmount = computed(() => {
+      return 0;
+    });
+
+    const totalAmount = computed(() => {
+      return availableAmount.value + stakedAmount.value + pooledAmount.value;
+    });
+
+    return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });
 </script>
@@ -182,6 +225,11 @@ export default defineComponent({
     width: 60%;
 
     &__info {
+      display: flex;
+      &__denom,
+      &__price {
+        flex: 1;
+      }
       &__denom {
         display: inline-flex;
         align-items: center;
@@ -190,16 +238,14 @@ export default defineComponent({
           margin-right: 1.2rem;
         }
         &__name {
-          font-size: 2.8rem;
-          font-weight: 700;
           margin-right: 1.2rem;
+        }
+        &__ticker {
+          color: var(--muted);
         }
       }
       &__price {
-        line-height: 1.2;
-        font-weight: 700;
-        font-size: 5.1rem;
-        margin-top: 1.2rem;
+        text-align: right;
       }
     }
 
@@ -208,15 +254,8 @@ export default defineComponent({
     }
     &__balance {
       margin-top: 6.4rem;
-      margin-bottom: -6rem;
       &__label {
         color: var(--muted);
-        font-weight: 400;
-      }
-      &__value {
-        font-size: 2.8rem;
-        font-weight: 600;
-        line-height: 1.4;
       }
       &__price {
         color: var(--muted);
@@ -230,18 +269,17 @@ export default defineComponent({
         align-items: center;
         justify-content: space-between;
 
-        &__label {
-          margin-bottom: 0.3rem;
-          color: var(--muted);
+        &__item {
+          flex: 1;
         }
-
-        &__value {
-          font-weight: 600;
+        &__label {
+          color: var(--muted);
         }
       }
     }
 
     &__chains {
+      margin-top: 6.4rem;
       &__item {
         &__asset {
           flex: 1 1 0%;
