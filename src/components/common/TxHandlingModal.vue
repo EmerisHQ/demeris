@@ -57,6 +57,15 @@
               <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.chain_name }" />
             </template>
           </div>
+
+          <!-- TEST -->
+          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem'">
+            <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
+              You received <AmountDisplay :amount="{ denom: 'uatom', amount: '100000000000' }" /> <br />
+              on <ChainName :name="'cosmos-hub'" />.
+            </template>
+          </div>
+          <!-- TEST -->
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="tx.data.amount" />
@@ -268,7 +277,7 @@ export default defineComponent({
                 title.value = 'Transferred';
                 break;
               case 'swap':
-                title.value = 'Swapped';
+                title.value = 'Assets swapped';
                 break;
               case 'addliquidity':
                 title.value = 'Liquidity added';
