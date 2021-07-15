@@ -7,8 +7,8 @@
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
             <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
-            <span class="asset__main__info__denom__name title-2-bold"><Denom :name="denom" /></span>
-            <span class="asset__main__info__denom__ticker title-0-normal"><Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"> <Denom :name="denom" /></span>
           </p>
           <h1 class="asset__main__info__price title-2-bold">
             <Price :amount="{ amount: 0, denom }" />
@@ -32,14 +32,14 @@
             <div class="asset__main__balance__card__item">
               <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
               <dd class="asset__main__balance__card__value title-0-medium">
-                <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+                <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
               <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
               <dd class="asset__main__balance__card__value title-0-medium">
-                <AmountDisplay :amount="{ amount: stakingBalanceAmount, denom }" />
+                <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
@@ -71,10 +71,20 @@
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
-              <span class="asset__main__chains__item__amount"><AmountDisplay :amount="{ amount: asset.amount, denom }" /></span>
+              <span class="asset__main__chains__item__amount">
+                <AmountDisplay
+                  v-if="asset.on_chain === assetConfig.chain_name"
+                  :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                />
+                <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
+              </span>
               <div class="asset__main__chains__item__balance">
                 <span class="asset__main__chains__item__balance__value">
-                  <Price :amount="{ amount: asset.amount, denom }" />
+                  <Price
+                    v-if="asset.on_chain === assetConfig.chain_name"
+                    :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                  />
+                  <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
               </div>
             </li>
@@ -173,7 +183,7 @@ export default defineComponent({
     const assets = computed(() => balancesByDenom(denom.value));
     const pools = computed(() => poolsByDenom(denom.value));
 
-    const totalAmount = computed(() => {
+    const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
@@ -181,7 +191,7 @@ export default defineComponent({
       return stakingBalancesByChain(assetConfig.value.chain_name);
     });
 
-    const stakingBalanceAmount = computed(() => {
+    const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
       if (staked && staked.length > 0 && staked[0].amount) {
         return parseFloat(staked[0].amount);
@@ -189,7 +199,11 @@ export default defineComponent({
       return 0;
     });
 
-    return { assetConfig, denom, assets, pools, totalAmount, stakingBalanceAmount };
+    const totalAmount = computed(() => {
+      return availableAmount.value + stakedAmount.value;
+    });
+
+    return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, totalAmount };
   },
 });
 </script>
