@@ -72,7 +72,7 @@
               <span class="asset__main__chains__item__amount">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                  :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                  :amount="{ amount: totalAmount, denom }"
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
               </span>
@@ -80,7 +80,7 @@
                 <span class="asset__main__chains__item__balance__value">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                    :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                    :amount="{ amount: totalAmount, denom }"
                   />
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
@@ -199,11 +199,11 @@ export default defineComponent({
     });
 
     const pooledAmount = computed(() => {
-      return 0;
+      return 5000000;
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value;
+      return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
 
     return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, pooledAmount, totalAmount };
