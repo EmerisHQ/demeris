@@ -48,9 +48,9 @@
             </span>
           </div>
 
-          <div class="add-liquidity__estimated">
+          <div v-if="hasPair" class="add-liquidity__estimated">
             <span class="add-liquidity__estimated__price s-2 w-bold">
-              {{ totalEstimatedPrice }}
+              {{ state.totalEstimatedPrice }}
             </span>
             <label class="add-liquidity__estimated__max">
               <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
@@ -92,7 +92,7 @@
                     :selected-denom="form.coinA.asset"
                     :assets="balances"
                     @select="coinSelectHandler('coinA', $event)"
-                    @change="inputChangeHandler"
+                    @change="coinAChangeHandler"
                   />
                 </div>
               </div>
@@ -135,6 +135,7 @@
                     :selected-denom="form.coinB.asset"
                     :assets="balancesForSecond"
                     @select="coinSelectHandler('coinB', $event)"
+                    @change="coinBChangeHandler"
                   />
                 </div>
               </div>
@@ -161,11 +162,15 @@
 
               <div class="add-liquidity__receive__wrapper">
                 <div class="add-liquidity__receive__token">
-                  <CircleSymbol :denom="pool.pool_coin_denom" size="sm" class="add-liquidity__receive__token__avatar" />
-                  <span class="w-bold">
-                    <Denom v-if="hasPool" :name="pool.pool_coin_denom" />
-                    <span v-else>G-LK-LP</span>
+                  <CircleSymbol
+                    :denom="hasPool ? pool.pool_coin_denom : ''"
+                    size="sm"
+                    class="add-liquidity__receive__token__avatar"
+                  />
+                  <span v-if="hasPool" class="w-bold">
+                    <Denom :name="pool.pool_coin_denom" />
                   </span>
+                  <span v-else class="w-bold">G-LK-LP</span>
                 </div>
 
                 <span class="add-liqudity__receive__amount w-bold"> {{ receiveAmount }} </span>
@@ -286,6 +291,7 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
+      totalEstimatedPrice: '0.00',
     });
 
     const gasPrice = computed(() => {
@@ -309,7 +315,7 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount } = usePool(computed(() => pool.value?.id));
+    const { calculateSupplyTokenAmount, reserveBalances } = usePool(computed(() => pool.value?.id));
 
     const { balances } = useAccount();
 
@@ -374,7 +380,7 @@ export default {
       return false;
     });
 
-    const totalEstimatedPrice = computed(() => {
+    const updateTotalCurrencyPrice = () => {
       let total = 0;
 
       if (form.coinA.asset) {
@@ -387,13 +393,8 @@ export default {
         total += priceB * form.coinB.amount;
       }
 
-      const displayTotal = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(total);
-
-      return displayTotal;
-    });
+      state.totalEstimatedPrice = total.toFixed(2);
+    };
 
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
@@ -463,10 +464,6 @@ export default {
       pool.value = undefined;
     };
 
-    const inputChangeHandler = () => {
-      state.isMaximumAmountChecked = false;
-    };
-
     const onClose = () => {
       router.push('/pools');
     };
@@ -522,6 +519,26 @@ export default {
       goToStep('amount');
     };
 
+    const coinAChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+      if (!reserveBalances.value) {
+        return;
+      }
+      const result =
+        (form.coinA.amount * 1e6 * reserveBalances.value[1].amount) / reserveBalances.value[0].amount / 1e6;
+      form.coinB.amount = +result.toFixed(6);
+    };
+
+    const coinBChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+      if (!reserveBalances.value) {
+        return;
+      }
+      const result =
+        (form.coinB.amount * 1e6 * reserveBalances.value[0].amount) / reserveBalances.value[1].amount / 1e6;
+      form.coinA.amount = +result.toFixed(6);
+    };
+
     onMounted(async () => {
       if (!poolId.value) {
         return;
@@ -549,6 +566,8 @@ export default {
         await generateActionSteps();
       }
     });
+
+    watch(() => [form.coinA.amount, form.coinB.amount], updateTotalCurrencyPrice);
 
     watch(
       () => [state.isMaximumAmountChecked, form.coinA, form.coinB],
@@ -581,11 +600,11 @@ export default {
       steps,
       needsTransferToHub,
       receiveAmount,
-      totalEstimatedPrice,
       hasSufficientFunds,
       isValid,
+      coinAChangeHandler,
+      coinBChangeHandler,
       resetHandler,
-      inputChangeHandler,
       toggleChainsModal,
       goBack,
       goToReview,
@@ -735,6 +754,8 @@ export default {
 
   &__pool {
     margin-top: 1.6rem;
+    display: flex;
+    align-items: center;
 
     &__pair {
       display: inline-flex;
