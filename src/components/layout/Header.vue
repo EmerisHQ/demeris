@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <router-link to="/" class="header__logo">
-      <Logo width="57px" height="80px" />
+      <Logo />
     </router-link>
 
     <Navbar />
