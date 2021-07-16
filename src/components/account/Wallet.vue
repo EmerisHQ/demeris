@@ -96,6 +96,21 @@ export default defineComponent({
         z-index: 1;
         position: relative;
 
+        &:before {
+          content: '';
+          display: block;
+          background: url(../../assets/images/rectangle-avatar.png);
+          background-size: 20px;
+          background-repeat: no-repeat;
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          margin-top: -10px;
+          margin-left: -10px;
+        }
+
         svg {
           width: 100%;
           height: 100%;
