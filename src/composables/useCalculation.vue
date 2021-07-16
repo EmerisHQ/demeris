@@ -14,17 +14,24 @@ export default function () {
   }
 
   function getReceiveCoinAmount(
-    payCoinAmount: number,
+    payCoinData: { base_denom: string; amount: number },
     payCoinPoolAmount: number,
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
-    if (payCoinAmount) {
+    if (payCoinData.amount) {
+      const payCoinBaseDenomDecimalDigits =
+        store.getters['demeris/getDenomPrecision']({ name: payCoinData.base_denom }) ?? 6;
+      //  const precision =
+      //       store.getters['demeris/getDenomPrecision']({
+      //         name: data.receiveCoinData.base_denom,
+      //       }) ?? alert('Error: getDenomPrecision');
+      const payCoinBaseDenomAmount = payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits;
       const decimalMaxDigits = 10 ** maxDecimal;
       const swapFeeRate =
         1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
-      const swapPrice = Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount));
-      const receiveCoinAmount = BigInt(payCoinAmount * precisionDigits) / BigInt(swapPrice);
+      const swapPrice = Number(getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
+      const receiveCoinAmount = BigInt(payCoinBaseDenomAmount * precisionDigits) / BigInt(swapPrice);
 
       return (
         Math.trunc((Number(receiveCoinAmount) / precisionDigits) * decimalMaxDigits * swapFeeRate) / decimalMaxDigits
@@ -35,18 +42,28 @@ export default function () {
   }
 
   function getPayCoinAmount(
-    receiveCoinAmount: number,
+    receiveCoinData: { base_denom: string; amount: number },
     payCoinPoolAmount: number,
     receiveCoinPoolAmount: number,
     maxDecimal = 2,
   ) {
     const swapFeeRate =
       1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
+    const receiveCoinBaseDenomDecimalDigits =
+      store.getters['demeris/getDenomPrecision']({ name: receiveCoinData.base_denom }) ?? 6; //?? alert('Error: getDenomPrecision');
+    const receiveCoinBaseDenomAmount = receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits;
+
     const payCoinAmount =
-      payCoinPoolAmount / receiveCoinPoolAmount / (swapFeeRate / receiveCoinAmount - 2 / receiveCoinPoolAmount);
+      payCoinPoolAmount /
+      receiveCoinPoolAmount /
+      (swapFeeRate / receiveCoinBaseDenomAmount - 2 / receiveCoinPoolAmount);
 
     if (payCoinAmount > 0) {
-      return parseFloat(String(Math.ceil((payCoinAmount / precisionDigits) * 10 ** maxDecimal) / 10 ** maxDecimal));
+      return parseFloat(
+        String(
+          Math.ceil((payCoinAmount / 10 ** receiveCoinBaseDenomDecimalDigits) * 10 ** maxDecimal) / 10 ** maxDecimal,
+        ),
+      );
     } else {
       return 0;
     }

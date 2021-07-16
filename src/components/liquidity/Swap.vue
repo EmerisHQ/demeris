@@ -189,8 +189,11 @@ export default defineComponent({
     //         store.getters['demeris/getDenomPrecision']({
     //           name: data.receiveCoinData.denom,
     //         }) ?? '6';
-    console.log('getReceiveCoinAmount', getReceiveCoinAmount(Math.trunc(40 * 10 ** 6), 2100000000, 2100000000));
-    console.log('getPayCoinAmount', getPayCoinAmount(Math.trunc(38.47 * 10 ** 6), 2100000000, 2100000000));
+    console.log(
+      'getReceiveCoinAmount',
+      getReceiveCoinAmount({ base_denom: 'uatom', amount: 42.24 }, 2100000000, 3200000000),
+    );
+    console.log('getPayCoinAmount', getPayCoinAmount({ base_denom: 'uakt', amount: 26.96 }, 3200000000, 2100000000));
 
     console.groupEnd();
     //TEST
@@ -824,12 +827,8 @@ export default defineComponent({
           : data.selectedPoolData.reserveBalances.balanceA;
 
         if (e.includes('Pay')) {
-          const precision =
-            store.getters['demeris/getDenomPrecision']({
-              name: data.payCoinData.base_denom,
-            }) ?? alert('Error: getDenomPrecision');
           data.receiveCoinAmount = getReceiveCoinAmount(
-            Math.trunc(data.payCoinAmount * 10 ** precision),
+            { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
             balanceA,
             balanceB,
           );
@@ -837,12 +836,8 @@ export default defineComponent({
             slippage.value = 0;
           }
         } else {
-          const precision =
-            store.getters['demeris/getDenomPrecision']({
-              name: data.receiveCoinData.base_denom,
-            }) ?? alert('Error: getDenomPrecision');
           data.payCoinAmount = getPayCoinAmount(
-            Math.trunc(data.receiveCoinAmount * 10 ** precision),
+            { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
             balanceB,
             balanceA,
           );
