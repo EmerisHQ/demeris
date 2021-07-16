@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
-import { Balances } from '@/types/api';
+import { Balances, StakingBalances } from '@/types/api';
 import { toRedeem, validBalances } from '@/utils/actionHandler';
 
 export default function useAccount() {
@@ -58,5 +58,26 @@ export default function useAccount() {
     return sortedBalances;
   });
 
-  return { balances, allbalances, balancesByDenom, userAccountBalances, redeemableBalances, isDemoAccount };
+  const stakingBalances = computed<StakingBalances>(() => {
+    return store.getters['demeris/getAllStakingBalances'] || [];
+  });
+
+  const stakingBalancesByChain = (chain_name: string) => {
+    return stakingBalances.value.filter((item) => {
+      if (item) {
+        return item.chain_name === chain_name;
+      }
+    });
+  };
+
+  return {
+    balances,
+    allbalances,
+    balancesByDenom,
+    userAccountBalances,
+    redeemableBalances,
+    isDemoAccount,
+    stakingBalances,
+    stakingBalancesByChain,
+  };
 }
