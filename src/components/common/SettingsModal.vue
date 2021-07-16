@@ -2,10 +2,10 @@
   <div class="settings-modal elevation-panel">
     <!-- basic settings -->
     <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
+      <p class="settings-modal__label">
+        {{ $t('components.settingsMenu.connectedWallet') }}
+      </p>
       <div class="connected-wallet">
-        <div class="connected-wallet__label">
-          {{ $t('components.settingsMenu.connectedWallet') }}
-        </div>
         <AvatarBalance wallet-name="Keplr" />
         <div class="settings-modal__button" @click="disconnectWallet">
           <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
@@ -172,7 +172,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 2.4rem;
+    padding: 0.8rem 2.4rem;
     width: 100%;
     transition: background ease-in-out 150ms;
     cursor: pointer;
@@ -199,8 +199,9 @@ export default defineComponent({
   }
 
   &__label {
-    padding: 1.2rem 2.4rem;
-    font-size: 1.2rem;
+    padding: 0.95rem 2.4rem;
+    font-size: 1.3rem;
+    font-weight: 400;
     color: var(--muted);
   }
 
@@ -238,12 +239,8 @@ export default defineComponent({
 .external-icon {
   transform: rotate(45deg);
 }
-.connected-wallet__label {
-  font-size: 1.3rem;
-  font-weight: 400;
-  color: var(--muted);
-  line-height: 1.6rem;
-  padding: 1.6rem 2.4rem 0.4rem;
+.connected-wallet {
+  margin-top: -0.8rem;
 }
 .modal-header {
   display: flex;
