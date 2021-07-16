@@ -183,19 +183,17 @@ export default defineComponent({
     });
 
     //TEST
-    console.group('TEST');
-    console.log(balances.value);
-    // const precision =
-    //         store.getters['demeris/getDenomPrecision']({
-    //           name: data.receiveCoinData.denom,
-    //         }) ?? '6';
-    console.log(
-      'getReceiveCoinAmount',
-      getReceiveCoinAmount({ base_denom: 'uatom', amount: 42.24 }, 2100000000, 3200000000),
-    );
-    console.log('getPayCoinAmount', getPayCoinAmount({ base_denom: 'uakt', amount: 26.96 }, 3200000000, 2100000000));
+    // console.group('TEST');
+    // setTimeout(() => {
+    //   console.log(balances.value);
+    // }, 10000);
+    // console.log(
+    //   'getReceiveCoinAmount',
+    //   getReceiveCoinAmount({ base_denom: 'uatom', amount: 36 }, 2100000000, 3200000000),
+    // );
+    // console.log('getPayCoinAmount', getPayCoinAmount({ base_denom: 'uakt', amount: 23.07 }, 3200000000, 2100000000));
 
-    console.groupEnd();
+    // console.groupEnd();
     //TEST
 
     // REFACTOR STARTS HERE
