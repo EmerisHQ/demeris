@@ -20,18 +20,37 @@
     </div>
 
     <fieldset class="form__field move-form-amount">
-      <div class="move-form-amount__input">
-        <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-        <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
-      </div>
+      <template v-if="state.isUSDInputChecked">
+        <div class="move-form-amount__input">
+          <USDInput
+            v-model="form.balance.amount"
+            :denom="state.currentAsset?.base_denom"
+            class="move-form-amount__input__control"
+            min="0"
+            placeholder="0"
+          />
+          <span class="move-form-amount__input__denom">$</span>
+        </div>
 
-      <span class="move-form-amount__estimated">
-        <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
-      </span>
+        <span class="move-form-amount__estimated">
+          <AmountDisplay
+            :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+          />
+        </span>
+      </template>
+      <template v-else>
+        <div class="move-form-amount__input">
+          <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
+          <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
+        </div>
 
+        <span class="move-form-amount__estimated">
+          <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
+        </span>
+      </template>
       <div class="move-form-amount__controls">
         <label class="move-form-amount__controls__button">
-          <input type="checkbox" name="move-form-amount-usd" />
+          <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
           <span class="elevation-button">USD</span>
         </label>
         <label class="move-form-amount__controls__button">
@@ -131,6 +150,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
+import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
@@ -151,6 +171,7 @@ export default defineComponent({
     CircleSymbol,
     Icon,
     Price,
+    USDInput,
   },
 
   props: {
@@ -169,6 +190,7 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
+      isUSDInputChecked: false,
       isDenomModalOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'from',
