@@ -72,7 +72,7 @@
               <span class="asset__main__chains__item__amount">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                  :amount="{ amount: totalAmount, denom }"
+                  :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
               </span>
@@ -80,7 +80,7 @@
                 <span class="asset__main__chains__item__balance__value">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                    :amount="{ amount: totalAmount, denom }"
+                    :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
                   />
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
@@ -218,6 +218,7 @@ export default defineComponent({
   margin-bottom: 2rem;
   font-size: 1.6rem;
   padding-bottom: 4rem;
+  justify-content: space-between;
 
   &__main {
     display: flex;
@@ -427,15 +428,11 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    margin-left: 3.2rem;
-
-    &__swap {
-      width: 80%;
-    }
+    margin-left: 6.4rem;
+    width: 32rem;
 
     &__buy {
       margin-top: 2.6rem;
-      width: 80%;
     }
   }
 

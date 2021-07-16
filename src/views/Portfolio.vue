@@ -57,6 +57,7 @@
       </div>
 
       <div class="portfolio__aside">
+        <Intro />
         <LiquiditySwap class="portfolio__aside__swap" />
       </div>
     </div>
@@ -69,6 +70,7 @@ import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
 import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
+import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -80,7 +82,17 @@ import AppLayout from '@/layouts/AppLayout.vue';
 
 export default {
   name: 'Portfolio',
-  components: { AppLayout, Button, MoonpayBanner, LiquiditySwap, TotalPrice, AssetsTable, ArrowRightIcon, Pools },
+  components: {
+    AppLayout,
+    Button,
+    MoonpayBanner,
+    LiquiditySwap,
+    TotalPrice,
+    AssetsTable,
+    ArrowRightIcon,
+    Pools,
+    Intro,
+  },
 
   setup() {
     const router = useRouter();
@@ -116,6 +128,7 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   display: flex;
+  justify-content: space-between;
 
   .portfolio {
     display: flex;
@@ -202,15 +215,11 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      margin-left: 3.2rem;
-
-      &__swap {
-        width: 80%;
-      }
+      margin-left: 6.4rem;
+      width: 32rem;
 
       &__buy {
         margin-top: 2.6rem;
-        width: 80%;
       }
     }
   }
