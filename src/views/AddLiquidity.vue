@@ -582,8 +582,8 @@ export default {
       state.isMaximumAmountChecked = false;
       const result = calculateWithdrawBalances(state.receiveAmount);
 
-      form.coinA.amount = result[0].amount / 1e6;
-      form.coinB.amount = result[1].amount / 1e6;
+      form.coinA.amount = +(result[0].amount / 1e6).toFixed(6);
+      form.coinB.amount = +(result[1].amount / 1e6).toFixed(6);
     };
 
     const currencyAmountHandler = () => {
@@ -592,8 +592,8 @@ export default {
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      form.coinA.amount = parseFloat(state.totalEstimatedPrice) / 2 / priceA;
-      form.coinB.amount = parseFloat(state.totalEstimatedPrice) / 2 / priceB;
+      form.coinA.amount = +(parseFloat(state.totalEstimatedPrice) / 2 / priceA).toFixed(6);
+      form.coinB.amount = +(parseFloat(state.totalEstimatedPrice) / 2 / priceB).toFixed(6);
     };
 
     onMounted(async () => {
@@ -691,6 +691,10 @@ export default {
   }
 
   .denom-select__coin-from {
+    display: none;
+  }
+
+  .denom-select__coin-amount-type {
     display: none;
   }
 
