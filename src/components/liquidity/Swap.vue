@@ -189,7 +189,8 @@ export default defineComponent({
     //         store.getters['demeris/getDenomPrecision']({
     //           name: data.receiveCoinData.denom,
     //         }) ?? '6';
-    console.log('getReceiveCoinAmount', getReceiveCoinAmount(Math.trunc(21.44 * 10 ** 6), 2100000000, 2100000000));
+    console.log('getReceiveCoinAmount', getReceiveCoinAmount(Math.trunc(40 * 10 ** 6), 2100000000, 2100000000));
+    console.log('getPayCoinAmount', getPayCoinAmount(Math.trunc(38.47 * 10 ** 6), 2100000000, 2100000000));
 
     console.groupEnd();
     //TEST

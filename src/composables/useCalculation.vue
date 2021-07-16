@@ -4,9 +4,8 @@ import { useStore } from '@/store';
 export default function () {
   const store = useStore();
 
-  // common setting
+  // precision setting (0.000000 level precision below than this decimal digits will be truncated)
   const precisionDigits = 10 ** 6;
-  const demomDigits = 6; // example: 1 atom => 1000000uatom
 
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
     const swapPrice =
@@ -43,15 +42,11 @@ export default function () {
   ) {
     const swapFeeRate =
       1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
-    const receiveCoinMinimalDenomAmount = Math.trunc(receiveCoinAmount * 10 ** demomDigits);
-    const decimalMaxDigits = 10 ** maxDecimal;
     const payCoinAmount =
-      payCoinPoolAmount /
-      receiveCoinPoolAmount /
-      (swapFeeRate / receiveCoinMinimalDenomAmount - 2 / receiveCoinPoolAmount);
+      payCoinPoolAmount / receiveCoinPoolAmount / (swapFeeRate / receiveCoinAmount - 2 / receiveCoinPoolAmount);
 
     if (payCoinAmount > 0) {
-      return Math.trunc(Number((payCoinAmount / 10 ** demomDigits) * decimalMaxDigits)) / decimalMaxDigits;
+      return parseFloat(String(Math.ceil((payCoinAmount / precisionDigits) * 10 ** maxDecimal) / 10 ** maxDecimal));
     } else {
       return 0;
     }
