@@ -116,7 +116,7 @@
               <div class="add-liquidity__price__container">
                 <template v-if="form.coinA.asset && form.coinB.asset">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> :
-                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinB.asset.base_denom }" />
+                  <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
                 </template>
                 <span v-else>Price</span>
               </div>
@@ -173,7 +173,13 @@
                   <span v-else class="w-bold">G-LK-LP</span>
                 </div>
 
-                <span class="add-liqudity__receive__amount w-bold"> {{ receiveAmount }} </span>
+                <input
+                  v-model="state.receiveAmount"
+                  :readonly="!hasPool"
+                  type="number"
+                  class="add-liquidity__receive__amount w-bold"
+                  @input="coinPoolChangeHandler"
+                />
               </div>
             </div>
 
@@ -292,6 +298,7 @@ export default {
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
       totalEstimatedPrice: '0.00',
+      receiveAmount: 0,
     });
 
     const gasPrice = computed(() => {
@@ -315,7 +322,7 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, reserveBalances } = usePool(computed(() => pool.value?.id));
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances } = usePool(computed(() => pool.value?.id));
 
     const { balances } = useAccount();
 
@@ -327,12 +334,28 @@ export default {
       return !!pool.value;
     });
 
-    const receiveAmount = computed(() => {
+    const updateReceiveAmount = () => {
       if (!form.coinA.asset?.amount || !form.coinB.asset?.amount) {
-        return 0;
+        state.receiveAmount = 0;
+        return;
       }
 
-      return calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      state.receiveAmount = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+    };
+
+    const exchangeAmount = computed(() => {
+      if (!hasPair.value) {
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return 1e6;
+      }
+
+      return ((priceA / priceB) * 1e6).toFixed(6);
     });
 
     const hasSufficientFunds = computed(() => {
@@ -522,7 +545,7 @@ export default {
     const coinAChangeHandler = () => {
       state.isMaximumAmountChecked = false;
 
-      if (!hasPair.value && hasPool.value) {
+      if (!hasPair.value || !hasPool.value) {
         return;
       }
 
@@ -537,7 +560,7 @@ export default {
     const coinBChangeHandler = () => {
       state.isMaximumAmountChecked = false;
 
-      if (!hasPair.value && hasPool.value) {
+      if (!hasPair.value || !hasPool.value) {
         return;
       }
 
@@ -547,6 +570,14 @@ export default {
       const result = (form.coinB.amount * priceB) / priceA;
 
       form.coinA.amount = +result.toFixed(6);
+    };
+
+    const coinPoolChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+      const result = calculateWithdrawBalances(state.receiveAmount);
+
+      form.coinA.amount = result[0].amount;
+      form.coinB.amount = result[1].amount;
     };
 
     onMounted(async () => {
@@ -577,7 +608,13 @@ export default {
       }
     });
 
-    watch(() => [form.coinA.amount, form.coinB.amount], updateTotalCurrencyPrice);
+    watch(
+      () => [form.coinA.amount, form.coinB.amount],
+      () => {
+        updateTotalCurrencyPrice();
+        updateReceiveAmount();
+      },
+    );
 
     watch(
       () => [state.isMaximumAmountChecked, form.coinA, form.coinB],
@@ -609,11 +646,12 @@ export default {
       state,
       steps,
       needsTransferToHub,
-      receiveAmount,
       hasSufficientFunds,
       isValid,
+      exchangeAmount,
       coinAChangeHandler,
       coinBChangeHandler,
+      coinPoolChangeHandler,
       resetHandler,
       toggleChainsModal,
       goBack,
@@ -858,6 +896,21 @@ export default {
 
     &__label {
       color: var(--muted);
+    }
+
+    &__amount {
+      text-align: right;
+      appearance: none;
+
+      &:read-only {
+        &::-webkit-inner-spin-button {
+          appearance: none;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
     }
   }
 
