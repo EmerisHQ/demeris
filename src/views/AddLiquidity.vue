@@ -49,9 +49,14 @@
           </div>
 
           <div v-if="hasPair" class="add-liquidity__estimated">
-            <span class="add-liquidity__estimated__price s-2 w-bold">
-              {{ state.totalEstimatedPrice }}
-            </span>
+            <input
+              v-model="state.totalEstimatedPrice"
+              type="number"
+              step=".01"
+              min="1"
+              class="add-liquidity__estimated__price s-2 w-bold"
+              @input="currencyAmountHandler"
+            />
             <label class="add-liquidity__estimated__max">
               <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
               <span class="elevation-button">Max</span>
@@ -581,6 +586,16 @@ export default {
       form.coinB.amount = result[1].amount;
     };
 
+    const currencyAmountHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      form.coinA.amount = parseFloat(state.totalEstimatedPrice) / 2 / priceA;
+      form.coinB.amount = parseFloat(state.totalEstimatedPrice) / 2 / priceB;
+    };
+
     onMounted(async () => {
       if (!poolId.value) {
         return;
@@ -653,6 +668,7 @@ export default {
       coinAChangeHandler,
       coinBChangeHandler,
       coinPoolChangeHandler,
+      currencyAmountHandler,
       resetHandler,
       toggleChainsModal,
       goBack,
@@ -688,6 +704,14 @@ export default {
     width: 100%;
     text-align: center;
     line-height: 1;
+
+    &__price {
+      text-align: center;
+      padding-right: 2rem;
+      &:focus {
+        outline: none;
+      }
+    }
 
     &__max {
       margin-top: -0.6rem;
