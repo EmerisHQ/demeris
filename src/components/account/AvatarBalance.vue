@@ -19,7 +19,7 @@
 <script lang="ts">
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
-import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
@@ -32,12 +32,10 @@ export default defineComponent({
     TotalPrice,
   },
   props: {
-    walletName: { type: String, required: false },
+    walletName: { type: String, required: false, default: '' },
   },
 
   setup() {
-    // wallet stuff
-    const isWalletModalOpen = ref(false);
     const store = useStore();
 
     const { balances } = useAccount();
