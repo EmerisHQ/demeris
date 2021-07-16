@@ -10,8 +10,7 @@ export default function () {
 
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
     const swapPrice =
-      ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(precisionDigits)) /
-      BigInt(toCoinPoolAmount);
+      ((BigInt(fromCoinPoolAmount) + BigInt(2 * payCoinAmount)) * BigInt(precisionDigits)) / BigInt(toCoinPoolAmount);
     return swapPrice;
   }
 
@@ -26,10 +25,11 @@ export default function () {
       const swapFeeRate =
         1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
       const swapPrice = Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount));
-
       const receiveCoinAmount = BigInt(payCoinAmount * precisionDigits) / BigInt(swapPrice);
 
-      return Math.trunc((Number(receiveCoinAmount) / precisionDigits) * decimalMaxDigits) / decimalMaxDigits;
+      return (
+        Math.trunc((Number(receiveCoinAmount) / precisionDigits) * decimalMaxDigits * swapFeeRate) / decimalMaxDigits
+      );
     } else {
       return 0;
     }
