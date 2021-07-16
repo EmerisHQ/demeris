@@ -155,8 +155,6 @@ export default defineComponent({
   }
   &__details {
     margin-left: 1.2rem;
-    display: flex;
-    flex-direction: column;
     &__account-name {
       font-size: 1.3rem;
       line-height: 100%;
