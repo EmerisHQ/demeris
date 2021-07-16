@@ -157,6 +157,8 @@ export const messages = {
         light: 'Light',
         settings: 'Settings',
         customSlippage: 'Custom slippage',
+        connectedWallet: 'Connected wallet',
+        disconnectWallet: 'Disconnect wallet',
         viewAllAssets: 'View all assets',
         lpAssetPool: 'LP asset pool',
         support: 'Support',

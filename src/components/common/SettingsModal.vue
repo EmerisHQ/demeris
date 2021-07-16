@@ -2,13 +2,21 @@
   <div class="settings-modal elevation-panel">
     <!-- basic settings -->
     <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
-      <div class="connected-wallet"></div>
+      <div class="connected-wallet">
+        <div class="connected-wallet__label">
+          {{ $t('components.settingsMenu.connectedWallet') }}
+        </div>
+        <AvatarBalance wallet-name="Keplr" />
+        <div class="settings-modal__button" @click="disconnectWallet">
+          <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
+        </div>
+      </div>
 
       <hr class="settings-modal__divider" />
 
       <div class="settings-modal__button" @click="toggleAdvancedSettings">
         <span>{{ $t('components.settingsMenu.settings') }}</span>
-        <Icon name="ArrowRightIcon" :icon-size="1.5" class="external-icon" />
+        <Icon name="CaretRightIcon" :icon-size="1.5" />
       </div>
 
       <hr class="settings-modal__divider" />
@@ -83,6 +91,7 @@
 import { computed, defineComponent, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
 
+import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Switch from '@/components/ui/Switch.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -92,6 +101,7 @@ export default defineComponent({
   components: {
     Icon,
     Switch,
+    AvatarBalance,
   },
   setup() {
     const store = useStore();
@@ -122,11 +132,16 @@ export default defineComponent({
       settings[key] = !settings[key];
     };
 
+    const disconnectWallet = () => {
+      window.alert('TODO: Disconnect wallet');
+    };
+
     return {
       settings,
       toggleSetting,
       isAdvancedSettingsOpen,
       toggleAdvancedSettings,
+      disconnectWallet,
     };
   },
 });
@@ -137,9 +152,9 @@ export default defineComponent({
   position: absolute;
   background: var(--bg);
   border-radius: 1rem;
-  min-width: min-content;
   min-height: 4.8rem;
-  transform: translate(-15rem, 1.6rem);
+  transform: translate(-14rem, 0.8rem);
+  width: 28rem;
   z-index: 50;
 
   &__item {
@@ -216,5 +231,12 @@ export default defineComponent({
 
 .external-icon {
   transform: rotate(45deg);
+}
+.connected-wallet__label {
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.6rem;
+  padding: 1.6rem 2.4rem 0.4rem;
 }
 </style>

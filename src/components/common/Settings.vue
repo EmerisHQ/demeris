@@ -6,17 +6,7 @@
       :class="{ 'settings--open': isSettingsModalOpen }"
       @click="toggleSettingsModal"
     >
-      <div class="settings__avatar">
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="settings__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
-        <div class="settings__avatar__glow" />
-      </div>
-      <div class="settings__details">
-        <div class="settings__details__account-name">{{ keplrAccountName }}</div>
-        <div class="settings__details__value">
-          <TotalPrice :balances="balances" variant="none" />
-        </div>
-      </div>
+      <AvatarBalance />
     </div>
 
     <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
@@ -31,9 +21,9 @@ import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
 
+import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import SettingsModal from '@/components/common/SettingsModal.vue';
-import TotalPrice from '@/components/common/TotalPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
@@ -42,10 +32,10 @@ export default defineComponent({
   name: 'Settings',
 
   components: {
+    AvatarBalance,
     Button,
     ConnectWalletModal,
     SettingsModal,
-    TotalPrice,
   },
 
   setup() {
@@ -57,13 +47,6 @@ export default defineComponent({
 
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
-    });
-
-    const keplrAccountName = computed(() => {
-      return store.getters['demeris/getKeplrAccountName'];
-    });
-    const keplrAddress = computed(() => {
-      return store.getters['demeris/getKeplrAddress'];
     });
 
     const toggleWalletModal = () => {
@@ -99,8 +82,6 @@ export default defineComponent({
       toggleWalletModal,
       isSettingsModalOpen,
       toggleSettingsModal,
-      keplrAccountName,
-      keplrAddress,
       menuRef,
     };
   },
@@ -131,56 +112,6 @@ export default defineComponent({
   &:hover {
     background: var(--fg-trans);
     cursor: pointer;
-  }
-
-  &__avatar {
-    width: 3.2rem;
-    height: 3.2rem;
-    border-radius: 1.6rem;
-    position: relative;
-
-    &__gradient {
-      width: 3.2rem;
-      height: 3.2rem;
-      border-radius: 1.6rem;
-      overflow: hidden;
-      z-index: 1;
-      position: relative;
-
-      &:before {
-        content: '';
-        display: block;
-        background: url(../../assets/images/rectangle-avatar.png);
-        background-size: 20px;
-        background-repeat: no-repeat;
-        width: 20px;
-        height: 20px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-top: -10px;
-        margin-left: -10px;
-      }
-
-      svg {
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-  &__details {
-    margin-left: 1.2rem;
-    &__account-name {
-      font-size: 1.3rem;
-      line-height: 100%;
-      font-feature-settings: 'zero' on;
-      margin-bottom: 0.3rem;
-    }
-    &__value {
-      font-size: 1.6rem;
-      line-height: 100%;
-      font-weight: bold;
-    }
   }
 }
 </style>
