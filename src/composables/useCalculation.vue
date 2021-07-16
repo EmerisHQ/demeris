@@ -5,12 +5,12 @@ export default function () {
   const store = useStore();
 
   // common setting
-  const precisionDigits = 6;
+  const precisionDigits = 10 ** 6;
   const demomDigits = 6; // example: 1 atom => 1000000uatom
 
   function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
     const swapPrice =
-      ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(10 ** precisionDigits)) /
+      ((BigInt(fromCoinPoolAmount) + BigInt(2) * BigInt(payCoinAmount)) * BigInt(precisionDigits)) /
       BigInt(toCoinPoolAmount);
     return swapPrice;
   }
@@ -22,17 +22,14 @@ export default function () {
     maxDecimal = 2,
   ) {
     if (payCoinAmount) {
+      const decimalMaxDigits = 10 ** maxDecimal;
       const swapFeeRate =
         1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
-      const payCoinMinimalDenomAmount = Math.trunc(payCoinAmount * 10 ** demomDigits);
-      const decimalMaxDigits = 10 ** maxDecimal;
-      const swapPrice = Number(getSwapPrice(payCoinMinimalDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
+      const swapPrice = Number(getSwapPrice(payCoinAmount, receiveCoinPoolAmount, payCoinPoolAmount));
 
-      const receiveCoinAmount =
-        (((BigInt(payCoinMinimalDenomAmount) * BigInt(10 ** 12)) / BigInt(swapPrice)) * BigInt(decimalMaxDigits)) /
-        BigInt(10 ** demomDigits);
+      const receiveCoinAmount = BigInt(payCoinAmount * precisionDigits) / BigInt(swapPrice);
 
-      return Math.trunc((Number(receiveCoinAmount) / 10 ** 8) * swapFeeRate * decimalMaxDigits) / decimalMaxDigits;
+      return Math.trunc((Number(receiveCoinAmount) / precisionDigits) * decimalMaxDigits) / decimalMaxDigits;
     } else {
       return 0;
     }

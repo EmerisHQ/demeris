@@ -182,6 +182,18 @@ export default defineComponent({
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
+    //TEST
+    console.group('TEST');
+    console.log(balances.value);
+    // const precision =
+    //         store.getters['demeris/getDenomPrecision']({
+    //           name: data.receiveCoinData.denom,
+    //         }) ?? '6';
+    console.log('getReceiveCoinAmount', getReceiveCoinAmount(Math.trunc(21.44 * 10 ** 6), 2100000000, 2100000000));
+
+    console.groupEnd();
+    //TEST
+
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
     onMounted(async () => {
@@ -803,9 +815,6 @@ export default defineComponent({
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
-        //TEST
-        // data.selectedPoolData.reserveBalances.balanceA = 318000000;
-        // data.selectedPoolData.reserveBalances.balanceB = 159000000;
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
@@ -814,12 +823,28 @@ export default defineComponent({
           : data.selectedPoolData.reserveBalances.balanceA;
 
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: data.payCoinData.base_denom,
+            }) ?? alert('Error: getDenomPrecision');
+          data.receiveCoinAmount = getReceiveCoinAmount(
+            Math.trunc(data.payCoinAmount * 10 ** precision),
+            balanceA,
+            balanceB,
+          );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: data.receiveCoinData.base_denom,
+            }) ?? alert('Error: getDenomPrecision');
+          data.payCoinAmount = getPayCoinAmount(
+            Math.trunc(data.receiveCoinAmount * 10 ** precision),
+            balanceB,
+            balanceA,
+          );
         }
       }
     }
