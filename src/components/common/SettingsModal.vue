@@ -7,14 +7,14 @@
       <hr class="settings-modal__divider" />
 
       <div class="settings-modal__button" @click="toggleAdvancedSettings">
-        <span>{{ $t('components.settingsMenu.advancedSettings') }}</span>
+        <span>{{ $t('components.settingsMenu.settings') }}</span>
         <Icon name="ArrowRightIcon" :icon-size="1.5" class="external-icon" />
       </div>
 
       <hr class="settings-modal__divider" />
 
       <div>
-        <a href="https://cosmos.network" target="_blank" class="settings-modal__button">
+        <a href="https://t.me/EmerisHQ" target="_blank" class="settings-modal__button">
           <span>{{ $t('components.settingsMenu.support') }}</span>
           <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
         </a>
@@ -60,7 +60,7 @@
       </div>
       <hr class="settings-modal__divider" />
       <div>
-        <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
+        <p class="settings-modal__label">{{ $t('components.settingsMenu.settings') }}</p>
         <button class="settings-modal__button" @click="toggleSetting('allowCustomSlippage')">
           <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
           <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
@@ -157,6 +157,7 @@ export default defineComponent({
     padding: 1.2rem 2.4rem;
     width: 100%;
     transition: background ease-in-out 150ms;
+    cursor: pointer;
 
     &:hover {
       background: rgba(0, 0, 0, 0.03);

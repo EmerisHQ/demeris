@@ -155,7 +155,7 @@ export const messages = {
         theme: 'Theme',
         system: 'System',
         light: 'Light',
-        advancedSettings: 'Advanced Settings',
+        settings: 'Settings',
         customSlippage: 'Custom slippage',
         viewAllAssets: 'View all assets',
         lpAssetPool: 'LP asset pool',
