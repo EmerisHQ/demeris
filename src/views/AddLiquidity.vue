@@ -582,8 +582,8 @@ export default {
       state.isMaximumAmountChecked = false;
       const result = calculateWithdrawBalances(state.receiveAmount);
 
-      form.coinA.amount = result[0].amount;
-      form.coinB.amount = result[1].amount;
+      form.coinA.amount = result[0].amount / 1e6;
+      form.coinB.amount = result[1].amount / 1e6;
     };
 
     const currencyAmountHandler = () => {
