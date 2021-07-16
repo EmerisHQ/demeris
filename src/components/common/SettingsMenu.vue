@@ -4,117 +4,26 @@
       <Icon name="MenuIcon" :icon-size="2.2" class="settings-menu__button__icon" />
     </button>
 
-    <div v-show="isOpen" class="settings-menu__dropdown elevation-panel">
-      <div class="settings-menu__dropdown__item">
-        <span>{{ $t('components.settingsMenu.theme') }}</span>
-
-        <select v-model="settings.theme" class="settings-menu__dropdown__button__select">
-          <option value="system">{{ $t('components.settingsMenu.system') }}</option>
-          <option value="light">{{ $t('components.settingsMenu.light') }}</option>
-        </select>
-      </div>
-
-      <hr class="settings-menu__dropdown__divider" />
-
-      <div>
-        <p class="settings-menu__dropdown__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
-        <button class="settings-menu__dropdown__button" @click="toggleSetting('allowCustomSlippage')">
-          <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
-          <Switch v-model="settings.allowCustomSlippage" class="settings-menu__dropdown__button__switch" />
-        </button>
-        <button class="settings-menu__dropdown__button" @click="toggleSetting('viewUnverified')">
-          <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
-          <Switch v-model="settings.viewUnverified" class="settings-menu__dropdown__button__switch" />
-        </button>
-        <button class="settings-menu__dropdown__button" @click="toggleSetting('viewLPAssetPools')">
-          <span>{{ $t('components.settingsMenu.lpAssetPool') }}</span>
-          <Switch v-model="settings.viewLPAssetPools" class="settings-menu__dropdown__button__switch" />
-        </button>
-      </div>
-
-      <hr class="settings-menu__dropdown__divider" />
-
-      <div>
-        <a href="https://cosmos.network" target="_blank" class="settings-menu__dropdown__button">
-          <span>{{ $t('components.settingsMenu.support') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-
-        <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-menu__dropdown__button">
-          <span>{{ $t('components.settingsMenu.twitter') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-
-        <a href="https://emeris.com" target="_blank" class="settings-menu__dropdown__button">
-          <span>emeris.com</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-      </div>
-
-      <div class="settings-menu__dropdown__list">
-        <router-link to="/" class="settings-menu__dropdown__list__item">
-          {{
-            $t('components.settingsMenu.privacy')
-          }}
-        </router-link>
-        <router-link to="/" class="settings-menu__dropdown__list__item">
-          {{
-            $t('components.settingsMenu.termsOfUse')
-          }}
-        </router-link>
-        <router-link to="/" class="settings-menu__dropdown__list__item">
-          {{
-            $t('components.settingsMenu.cookiesPolicy')
-          }}
-        </router-link>
-      </div>
-    </div>
+    <SettingsMenuModal v-show="isOpen" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent, onMounted, onUnmounted, ref } from 'vue';
 
+import SettingsMenuModal from '@/components/common/SettingsMenuModal.vue';
 import Icon from '@/components/ui/Icon.vue';
-import Switch from '@/components/ui/Switch.vue';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
   components: {
     Icon,
-    Switch,
+    SettingsMenuModal,
   },
   setup() {
-    const store = useStore();
     const menuRef = ref(null);
 
     const isOpen = ref(false);
     const toggleOpen = () => (isOpen.value = !isOpen.value);
-
-    const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { [key]: value } });
-    };
-
-    const settings = reactive({
-      theme: 'system',
-      allowCustomSlippage: computed({
-        get: () => store.getters['demeris/allowCustomSlippage'],
-        set: (value: boolean) => updateSession('customSlippage', value),
-      }),
-      viewUnverified: computed({
-        get: () => store.getters['demeris/viewUnverified'],
-        set: (value: boolean) => updateSession('viewUnverified', value),
-      }),
-      viewLPAssetPools: computed({
-        get: () => store.getters['demeris/viewLPAssetPools'],
-        set: (value: boolean) => updateSession('viewLPAssetPools', value),
-      }),
-    });
-
-    const toggleSetting = (key: string) => {
-      settings[key] = !settings[key];
-    };
 
     const clickOutsideListener = (event: Event) => {
       if (event.composedPath().includes(menuRef.value)) {
@@ -135,9 +44,7 @@ export default defineComponent({
     return {
       isOpen,
       menuRef,
-      settings,
       toggleOpen,
-      toggleSetting,
     };
   },
 });
