@@ -207,8 +207,6 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
 
-    console.log(assets.value);
-
     return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });
