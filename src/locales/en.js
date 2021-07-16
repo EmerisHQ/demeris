@@ -11,6 +11,7 @@ export const messages = {
       filterRetry: 'Try again with another search',
       discoverMore: 'Discover more',
       max: 'Max',
+      learnMore: 'Learn more',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -109,6 +110,18 @@ export const messages = {
         payHeader: 'Pay {amount}',
         receiveHeader: 'Receive {amount}',
         priceAlert: 'Prices have changed',
+      },
+      transferToHub: {
+        swap: 'Assets are swapped on the Cosmos Hub',
+        swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        addLiquidity: 'Liquidity providing happens on the Cosmos Hub',
+        addLiquidityDescription:
+          'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
+        addLiquidityDescriptionMultiple:
+          'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
+        transfer: 'You are about to send your {denom} to another chain',
+        transferDescription:
+          'The address you have selected is a Cosmos Hub address. Sending your {denom} to this address will result in a cross-chain transfer.',
       },
       previews: {
         addWithdrawLiquidity: {
