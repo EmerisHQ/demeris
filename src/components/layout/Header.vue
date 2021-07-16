@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <router-link to="/" class="header__logo">
-      <Logo width="1em" height="1em" />
+      <Logo />
     </router-link>
 
     <Navbar />
@@ -79,12 +79,6 @@ export default defineComponent({
   height: 8rem;
   align-items: center;
   justify-content: space-between;
-
-  &__logo {
-    svg {
-      font-size: 1.6rem;
-    }
-  }
 
   &__wallet {
     display: flex;
