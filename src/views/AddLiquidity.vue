@@ -164,6 +164,7 @@
                 <div class="add-liquidity__receive__token">
                   <CircleSymbol
                     :denom="hasPool ? pool.pool_coin_denom : ''"
+                    :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
                     size="sm"
                     class="add-liquidity__receive__token__avatar"
                   />
@@ -726,7 +727,7 @@ export default {
 
     &__title {
       margin-top: 1.2rem;
-      text-align: center;
+      text-align: left;
     }
 
     &__description {
