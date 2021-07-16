@@ -55,8 +55,11 @@
     <!-- advanced settings -->
     <div v-else class="settings-modal-advanced">
       <div class="modal-header">
-        <p>Advanced Settings</p>
-        <p @click="toggleAdvancedSettings">Back</p>
+        <div class="modal-header__action" @click="toggleAdvancedSettings">
+          <Icon name="ArrowLeftIcon" :icon-size="2" />
+        </div>
+        <div class="modal-header__title title-1-bold">{{ $t('components.settingsMenu.settings') }}</div>
+        <div class="modal-header__action" />
       </div>
       <div class="settings-modal__item">
         <span>{{ $t('components.settingsMenu.theme') }}</span>
@@ -68,7 +71,7 @@
       </div>
       <hr class="settings-modal__divider" />
       <div>
-        <p class="settings-modal__label">{{ $t('components.settingsMenu.settings') }}</p>
+        <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
         <button class="settings-modal__button" @click="toggleSetting('allowCustomSlippage')">
           <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
           <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
@@ -190,6 +193,9 @@ export default defineComponent({
         outline: none;
       }
     }
+    &:last-child {
+      margin-bottom: 0.4rem;
+    }
   }
 
   &__label {
@@ -199,7 +205,7 @@ export default defineComponent({
   }
 
   &__divider {
-    margin: 0.5rem 0;
+    margin: 0.4rem 0;
     border-top: 1px solid var(--border-trans);
   }
 
@@ -238,5 +244,23 @@ export default defineComponent({
   color: var(--muted);
   line-height: 1.6rem;
   padding: 1.6rem 2.4rem 0.4rem;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  height: 6.4rem;
+  padding: 0.8rem;
+}
+.modal-header__title {
+  flex: 1;
+  text-align: center;
+}
+.modal-header__action {
+  height: 4.8rem;
+  width: 4.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 </style>

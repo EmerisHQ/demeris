@@ -155,6 +155,7 @@ export const messages = {
         theme: 'Theme',
         system: 'System',
         light: 'Light',
+        advancedSettings: 'Advanced settings',
         settings: 'Settings',
         customSlippage: 'Custom slippage',
         connectedWallet: 'Connected wallet',
