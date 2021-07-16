@@ -1,92 +1,110 @@
 <template>
-  <div class="settings-modal elevation-panel">
-    <!-- basic settings -->
-    <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
-      <p class="settings-modal__label">
-        {{ $t('components.settingsMenu.connectedWallet') }}
-      </p>
-      <div class="connected-wallet">
-        <AvatarBalance wallet-name="Keplr" />
-        <div class="settings-modal__button" @click="disconnectWallet">
-          <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
+  <div>
+    <div class="settings-modal elevation-panel">
+      <!-- basic settings -->
+      <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
+        <p class="settings-modal__label">
+          {{ $t('components.settingsMenu.connectedWallet') }}
+        </p>
+        <div class="connected-wallet">
+          <AvatarBalance wallet-name="Keplr" />
+          <div class="settings-modal__button" @click="disconnectWallet">
+            <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
+          </div>
+        </div>
+
+        <hr class="settings-modal__divider" />
+
+        <div class="settings-modal__button" @click="toggleAdvancedSettings">
+          <span>{{ $t('components.settingsMenu.settings') }}</span>
+          <Icon name="CaretRightIcon" :icon-size="1.5" />
+        </div>
+
+        <hr class="settings-modal__divider" />
+
+        <div>
+          <a href="https://t.me/EmerisHQ" target="_blank" class="settings-modal__button">
+            <span>{{ $t('components.settingsMenu.support') }}</span>
+            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          </a>
+
+          <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-modal__button">
+            <span>{{ $t('components.settingsMenu.twitter') }}</span>
+            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          </a>
+
+          <a href="https://emeris.com" target="_blank" class="settings-modal__button">
+            <span>emeris.com</span>
+            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          </a>
+        </div>
+
+        <div class="settings-modal__list">
+          <router-link to="/" class="settings-modal__list__item">
+            {{ $t('components.settingsMenu.privacy') }}
+          </router-link>
+          <router-link to="/" class="settings-modal__list__item">
+            {{ $t('components.settingsMenu.termsOfUse') }}
+          </router-link>
+          <router-link to="/" class="settings-modal__list__item">
+            {{ $t('components.settingsMenu.cookiesPolicy') }}
+          </router-link>
         </div>
       </div>
+      <!-- end settings-basic-->
 
-      <hr class="settings-modal__divider" />
-
-      <div class="settings-modal__button" @click="toggleAdvancedSettings">
-        <span>{{ $t('components.settingsMenu.settings') }}</span>
-        <Icon name="CaretRightIcon" :icon-size="1.5" />
-      </div>
-
-      <hr class="settings-modal__divider" />
-
-      <div>
-        <a href="https://t.me/EmerisHQ" target="_blank" class="settings-modal__button">
-          <span>{{ $t('components.settingsMenu.support') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-
-        <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-modal__button">
-          <span>{{ $t('components.settingsMenu.twitter') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-
-        <a href="https://emeris.com" target="_blank" class="settings-modal__button">
-          <span>emeris.com</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-        </a>
-      </div>
-
-      <div class="settings-modal__list">
-        <router-link to="/" class="settings-modal__list__item">
-          {{ $t('components.settingsMenu.privacy') }}
-        </router-link>
-        <router-link to="/" class="settings-modal__list__item">
-          {{ $t('components.settingsMenu.termsOfUse') }}
-        </router-link>
-        <router-link to="/" class="settings-modal__list__item">
-          {{ $t('components.settingsMenu.cookiesPolicy') }}
-        </router-link>
-      </div>
-    </div>
-    <!-- end settings-basic-->
-
-    <!-- advanced settings -->
-    <div v-else class="settings-modal-advanced">
-      <div class="modal-header">
-        <div class="modal-header__action" @click="toggleAdvancedSettings">
-          <Icon name="ArrowLeftIcon" :icon-size="2" />
+      <!-- advanced settings -->
+      <div v-else class="settings-modal-advanced">
+        <div class="settings-header">
+          <div class="settings-header__action" @click="toggleAdvancedSettings">
+            <Icon name="ArrowLeftIcon" :icon-size="2" />
+          </div>
+          <div class="settings-header__title title-1-bold">{{ $t('components.settingsMenu.settings') }}</div>
+          <div class="settings-header__action" />
         </div>
-        <div class="modal-header__title title-1-bold">{{ $t('components.settingsMenu.settings') }}</div>
-        <div class="modal-header__action" />
-      </div>
-      <div class="settings-modal__item">
-        <span>{{ $t('components.settingsMenu.theme') }}</span>
+        <div class="settings-modal__item">
+          <span>{{ $t('components.settingsMenu.theme') }}</span>
 
-        <select v-model="settings.theme" class="settings-modal__button__select">
-          <option value="system">{{ $t('components.settingsMenu.system') }}</option>
-          <option value="light">{{ $t('components.settingsMenu.light') }}</option>
-        </select>
+          <select v-model="settings.theme" class="settings-modal__button__select">
+            <option value="system">{{ $t('components.settingsMenu.system') }}</option>
+            <option value="light">{{ $t('components.settingsMenu.light') }}</option>
+          </select>
+        </div>
+        <hr class="settings-modal__divider" />
+        <div>
+          <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
+          <button class="settings-modal__button" @click="toggleSetting('allowCustomSlippage')">
+            <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
+            <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
+          </button>
+          <button class="settings-modal__button" @click="toggleSetting('viewUnverified')">
+            <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
+            <Switch v-model="settings.viewUnverified" class="settings-modal__button__switch" />
+          </button>
+          <button class="settings-modal__button" @click="toggleSetting('viewLPAssetPools')">
+            <span>{{ $t('components.settingsMenu.lpAssetPool') }}</span>
+            <Switch v-model="settings.viewLPAssetPools" class="settings-modal__button__switch" />
+          </button>
+        </div>
       </div>
-      <hr class="settings-modal__divider" />
-      <div>
-        <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
-        <button class="settings-modal__button" @click="toggleSetting('allowCustomSlippage')">
-          <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
-          <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
-        </button>
-        <button class="settings-modal__button" @click="toggleSetting('viewUnverified')">
-          <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
-          <Switch v-model="settings.viewUnverified" class="settings-modal__button__switch" />
-        </button>
-        <button class="settings-modal__button" @click="toggleSetting('viewLPAssetPools')">
-          <span>{{ $t('components.settingsMenu.lpAssetPool') }}</span>
-          <Switch v-model="settings.viewLPAssetPools" class="settings-modal__button__switch" />
-        </button>
-      </div>
+      <!-- end advanced settings -->
     </div>
-    <!-- end advanced settings -->
+
+    <!-- warning modal - price slippage -->
+    <Modal style="display: none" class="warning-modal" variant="dialog" :show-close-button="false" width="320px">
+      <div class="warning-modal__icon">
+        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+      </div>
+      <div class="warning-modal__title title-1-bold">Price slippage</div>
+      <div class="warning-modal__body">
+        <p>Be careful, being able to change price slippage is an advanced setting.</p>
+        <p>This means that if you don’t know what you are doing, you may risk significant loss.</p>
+      </div>
+      <div class="warning-modal__actions">
+        <div class="warning-modal__action">Cancel</div>
+        <div class="warning-modal__action">Proceed</div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -96,6 +114,7 @@ import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import Icon from '@/components/ui/Icon.vue';
+import Modal from '@/components/ui/Modal.vue';
 import Switch from '@/components/ui/Switch.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
@@ -103,6 +122,7 @@ export default defineComponent({
   name: 'SettingsModal',
   components: {
     Icon,
+    Modal,
     Switch,
     AvatarBalance,
   },
@@ -242,22 +262,61 @@ export default defineComponent({
 .connected-wallet {
   margin-top: -0.8rem;
 }
-.modal-header {
+.settings-header {
   display: flex;
   align-items: center;
   height: 6.4rem;
   padding: 0.8rem;
 }
-.modal-header__title {
+.settings-header__title {
   flex: 1;
   text-align: center;
 }
-.modal-header__action {
+.settings-header__action {
   height: 4.8rem;
   width: 4.8rem;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
+}
+
+.warning-modal__icon {
+  height: 6.4rem;
+  display: flex;
+  justify-content: center;
+  margin: 0.8rem 0 1.6rem;
+}
+.warning-modal__title {
+  margin-bottom: 2.4rem;
+}
+.warning-modal__title,
+.warning-modal__body {
+  text-align: center;
+  margin-bottom: 1.6rem;
+}
+.warning-modal__body p {
+  margin-bottom: 1.6rem;
+  line-height: 162.5%;
+  color: var(--muted);
+}
+.warning-modal__actions {
+  border-top: 1px solid var(--border-trans);
+  height: 6.4rem;
+  display: flex;
+  margin: 3.2rem -2.4rem -2.4rem;
+}
+.warning-modal__action {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+.warning-modal__action:hover {
+  cursor: pointer;
+}
+.warning-modal__action:not(:last-child) {
+  border-right: 1px solid var(--border-trans);
 }
 </style>
