@@ -27,15 +27,12 @@
       </router-link>
 
       <SettingsMenu class="header__settings-menu" />
-
-      <Wallet />
     </div>
   </header>
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import Wallet from '@/components/account/Wallet.vue';
 import Logo from '@/components/common/Logo.vue';
 import SettingsMenu from '@/components/common/SettingsMenu.vue';
 import Navbar from '@/components/layout/Navbar.vue';
@@ -50,7 +47,6 @@ export default defineComponent({
   components: {
     Logo,
     Navbar,
-    Wallet,
     ReceiveIcon,
     SendIcon,
     SettingsMenu,
