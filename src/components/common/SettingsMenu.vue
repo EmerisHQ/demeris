@@ -1,24 +1,28 @@
 <template>
-  <div v-if="isSignedIn" class="header__wallet-badge">
-    <div ref="menuRef" class="settings-menu" :class="{ 'settings-menu--open': isOpen }" @click="toggleOpen">
-      <div class="header__wallet-badge__avatar">
+  <div ref="menuRef">
+    <div
+      v-if="isSignedIn"
+      class="settings"
+      :class="{ 'settings--open': isSettingsModalOpen }"
+      @click="toggleSettingsModal"
+    >
+      <div class="settings__avatar">
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="header__wallet-badge__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
-        <div class="header__wallet-badge__avatar__glow" />
+        <div class="settings__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
+        <div class="settings__avatar__glow" />
       </div>
-      <div class="header__wallet-badge__details">
-        <div class="header__wallet-badge__details__account-name">{{ keplrAccountName }}</div>
-        <div class="header__wallet-badge__details__value">
+      <div class="settings__details">
+        <div class="settings__details__account-name">{{ keplrAccountName }}</div>
+        <div class="settings__details__value">
           <TotalPrice :balances="balances" variant="none" />
         </div>
       </div>
     </div>
-    <SettingsMenuModal v-show="isOpen" />
-  </div>
 
-  <div v-else>
-    <Button :name="$t('wallet.connect.button')" @click="toggleModal" />
-    <ConnectWalletModal :open="isModalOpen" @close="toggleModal" />
+    <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
+
+    <SettingsMenuModal v-show="isSettingsModalOpen" />
+    <ConnectWalletModal :open="isWalletModalOpen" @close="toggleWalletModal" />
   </div>
 </template>
 
@@ -46,7 +50,7 @@ export default defineComponent({
 
   setup() {
     // wallet stuff
-    const isModalOpen = ref(false);
+    const isWalletModalOpen = ref(false);
     const store = useStore();
 
     const { balances } = useAccount();
@@ -62,22 +66,22 @@ export default defineComponent({
       return store.getters['demeris/getKeplrAddress'];
     });
 
-    const toggleModal = () => {
-      isModalOpen.value = !isModalOpen.value;
+    const toggleWalletModal = () => {
+      isWalletModalOpen.value = !isWalletModalOpen.value;
     };
 
     // settings menu stuff
     const menuRef = ref(null);
 
-    const isOpen = ref(false);
-    const toggleOpen = () => (isOpen.value = !isOpen.value);
+    const isSettingsModalOpen = ref(false);
+    const toggleSettingsModal = () => (isSettingsModalOpen.value = !isSettingsModalOpen.value);
 
     const clickOutsideListener = (event: Event) => {
       if (event.composedPath().includes(menuRef.value)) {
         return;
       }
 
-      isOpen.value = false;
+      isSettingsModalOpen.value = false;
     };
 
     onMounted(() => {
@@ -90,14 +94,14 @@ export default defineComponent({
 
     return {
       balances,
-      isModalOpen,
-      toggleModal,
       isSignedIn,
+      isWalletModalOpen,
+      toggleWalletModal,
+      isSettingsModalOpen,
+      toggleSettingsModal,
       keplrAccountName,
       keplrAddress,
-      isOpen,
       menuRef,
-      toggleOpen,
     };
   },
   methods: {
@@ -109,59 +113,53 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-// wallet component
-.header {
-  &__wallet-badge {
-    display: flex;
-    align-items: center;
+.settings {
+  display: flex;
+  align-items: center;
 
-    &__avatar {
-      width: 3.2rem;
-      height: 3.2rem;
-      border-radius: 1.6rem;
-      position: relative;
-
-      &__gradient {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 1.6rem;
-        overflow: hidden;
-        z-index: 1;
-        position: relative;
-
-        svg {
-          width: 100%;
-          height: 100%;
-        }
-      }
-    }
-    &__details {
-      margin-left: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      &__account-name {
-        font-size: 1.3rem;
-        line-height: 1.7rem;
-        font-feature-settings: 'zero' on;
-      }
-      &__value {
-        margin-top: 0.2rem;
-        font-size: 1.6rem;
-        line-height: 2rem;
-        font-weight: bold;
-      }
-    }
-  }
-}
-
-// settings component
-.settings-menu {
   &--open {
     background: var(--fg-trans);
   }
 
   &:hover {
     background: var(--fg-trans);
+  }
+
+  &__avatar {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 1.6rem;
+    position: relative;
+
+    &__gradient {
+      width: 3.2rem;
+      height: 3.2rem;
+      border-radius: 1.6rem;
+      overflow: hidden;
+      z-index: 1;
+      position: relative;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  &__details {
+    margin-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    &__account-name {
+      font-size: 1.3rem;
+      line-height: 1.7rem;
+      font-feature-settings: 'zero' on;
+    }
+    &__value {
+      margin-top: 0.2rem;
+      font-size: 1.6rem;
+      line-height: 2rem;
+      font-weight: bold;
+    }
   }
 }
 </style>
