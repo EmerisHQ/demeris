@@ -1,5 +1,5 @@
 <template>
-  <div ref="menuRef">
+  <div ref="menuRef" class="settings-wrapper">
     <div
       v-if="isSignedIn"
       class="settings"
@@ -21,7 +21,7 @@
 
     <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
 
-    <SettingsMenuModal v-show="isSettingsModalOpen" />
+    <SettingsModal v-show="isSettingsModalOpen" />
     <ConnectWalletModal :open="isWalletModalOpen" @close="toggleWalletModal" />
   </div>
 </template>
@@ -32,19 +32,19 @@ import avatar from 'gradient-avatar';
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
-import SettingsMenuModal from '@/components/common/SettingsMenuModal.vue';
+import SettingsModal from '@/components/common/SettingsModal.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 
 export default defineComponent({
-  name: 'SettingsMenu',
+  name: 'Settings',
 
   components: {
     Button,
     ConnectWalletModal,
-    SettingsMenuModal,
+    SettingsModal,
     TotalPrice,
   },
 
@@ -113,9 +113,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.settings-wrapper {
+  height: 4.8rem;
+  padding: 0.4rem;
+}
+
 .settings {
   display: flex;
   align-items: center;
+  border-radius: 0.8rem;
+  padding: 0.4rem 0.8rem;
 
   &--open {
     background: var(--fg-trans);
@@ -123,6 +130,7 @@ export default defineComponent({
 
   &:hover {
     background: var(--fg-trans);
+    cursor: pointer;
   }
 
   &__avatar {
@@ -151,13 +159,13 @@ export default defineComponent({
     flex-direction: column;
     &__account-name {
       font-size: 1.3rem;
-      line-height: 1.7rem;
+      line-height: 100%;
       font-feature-settings: 'zero' on;
+      margin-bottom: 0.3rem;
     }
     &__value {
-      margin-top: 0.2rem;
       font-size: 1.6rem;
-      line-height: 2rem;
+      line-height: 100%;
       font-weight: bold;
     }
   }

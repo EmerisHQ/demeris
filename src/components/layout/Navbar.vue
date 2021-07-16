@@ -20,10 +20,9 @@ export default defineComponent({
   align-items: center;
 
   &-link {
-    padding: 1rem;
-    margin-right: 1rem;
+    padding: 0 1.6rem;
     text-decoration: none;
-    text-align: left;
+    line-height: 4.8rem;
 
     &:visited {
       color: inherit;
