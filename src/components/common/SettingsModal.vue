@@ -73,16 +73,16 @@
         <hr class="settings-modal__divider" />
         <div>
           <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
-          <button class="settings-modal__button" @click="toggleSetting('allowCustomSlippage')">
-            <span>{{ $t('components.settingsMenu.customSlippage') }}</span>
+          <button class="settings-modal__button" @click="confirmToggleSetting('allowCustomSlippage')">
+            <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
           </button>
-          <button class="settings-modal__button" @click="toggleSetting('viewUnverified')">
+          <button class="settings-modal__button" @click="confirmToggleSetting('viewUnverified')">
             <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
             <Switch v-model="settings.viewUnverified" class="settings-modal__button__switch" />
           </button>
-          <button class="settings-modal__button" @click="toggleSetting('viewLPAssetPools')">
-            <span>{{ $t('components.settingsMenu.lpAssetPool') }}</span>
+          <button class="settings-modal__button" @click="confirmToggleSetting('viewLPAssetPools')">
+            <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
             <Switch v-model="settings.viewLPAssetPools" class="settings-modal__button__switch" />
           </button>
         </div>
@@ -90,19 +90,81 @@
       <!-- end advanced settings -->
     </div>
 
-    <!-- warning modal - price slippage -->
-    <Modal style="display: none" class="warning-modal" variant="dialog" :show-close-button="false" width="320px">
+    <!-- warning modal - custom slippage -->
+    <Modal
+      v-show="isWarningCustomSlippageOpen"
+      class="warning-modal"
+      variant="dialog"
+      :show-close-button="false"
+      :close-on-overlay-click="true"
+      width="320px"
+      @close="toggleWarningCustomSlippage"
+    >
       <div class="warning-modal__icon">
         <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
       </div>
-      <div class="warning-modal__title title-1-bold">Price slippage</div>
+      <div class="warning-modal__title title-1-bold">
+        {{ $t('components.settingsMenu.allowCustomSlippage') }}
+      </div>
       <div class="warning-modal__body">
-        <p>Be careful, being able to change price slippage is an advanced setting.</p>
-        <p>This means that if you don’t know what you are doing, you may risk significant loss.</p>
+        <p>{{ $t('components.settingsMenu.warningCustomSlippage') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
       </div>
       <div class="warning-modal__actions">
-        <div class="warning-modal__action">Cancel</div>
-        <div class="warning-modal__action">Proceed</div>
+        <div class="warning-modal__action" @click="toggleWarningCustomSlippage">Cancel</div>
+        <div class="warning-modal__action" @click="toggleSetting('allowCustomSlippage')">Proceed</div>
+      </div>
+    </Modal>
+
+    <!-- warning modal - view unverified assets -->
+    <Modal
+      v-show="isWarningViewUnverifiedOpen"
+      class="warning-modal"
+      variant="dialog"
+      :show-close-button="false"
+      :close-on-overlay-click="true"
+      width="320px"
+      @close="toggleWarningViewUnverified"
+    >
+      <div class="warning-modal__icon">
+        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+      </div>
+      <div class="warning-modal__title title-1-bold">
+        {{ $t('components.settingsMenu.viewAllAssets') }}
+      </div>
+      <div class="warning-modal__body">
+        <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
+      <div class="warning-modal__actions">
+        <div class="warning-modal__action" @click="toggleWarningViewUnverified">Cancel</div>
+        <div class="warning-modal__action" @click="toggleSetting('viewUnverified')">Proceed</div>
+      </div>
+    </Modal>
+
+    <!-- warning modal - view lp asset pools -->
+    <Modal
+      v-show="isWarningViewLPAssetPoolsOpen"
+      class="warning-modal"
+      variant="dialog"
+      :show-close-button="false"
+      :close-on-overlay-click="true"
+      width="320px"
+      @close="toggleWarningViewLPAssetPools"
+    >
+      <div class="warning-modal__icon">
+        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+      </div>
+      <div class="warning-modal__title title-1-bold">
+        {{ $t('components.settingsMenu.viewLPAssetPools') }}
+      </div>
+      <div class="warning-modal__body">
+        <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
+      <div class="warning-modal__actions">
+        <div class="warning-modal__action" @click="toggleWarningViewLPAssetPools">Cancel</div>
+        <div class="warning-modal__action" @click="toggleSetting('viewLPAssetPools')">Proceed</div>
       </div>
     </Modal>
   </div>
@@ -129,7 +191,15 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const isAdvancedSettingsOpen = ref(false);
+    const isWarningCustomSlippageOpen = ref(false);
+    const isWarningViewUnverifiedOpen = ref(false);
+    const isWarningViewLPAssetPoolsOpen = ref(false);
+
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
+    const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
+    const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
+    const toggleWarningViewLPAssetPools = () =>
+      (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
 
     const updateSession = (key: string, value: any) => {
       store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { [key]: value } });
@@ -151,7 +221,32 @@ export default defineComponent({
       }),
     });
 
+    const toggleWarningModals = (key: string) => {
+      switch (key) {
+        case 'allowCustomSlippage':
+          toggleWarningCustomSlippage();
+          break;
+        case 'viewUnverified':
+          toggleWarningViewUnverified();
+          break;
+        case 'viewLPAssetPools':
+          toggleWarningViewLPAssetPools();
+          break;
+        default:
+          break;
+      }
+    };
+
+    const confirmToggleSetting = (key: string) => {
+      if (!settings[key]) {
+        toggleWarningModals(key);
+      } else {
+        settings[key] = !settings[key];
+      }
+    };
+
     const toggleSetting = (key: string) => {
+      toggleWarningModals(key);
       settings[key] = !settings[key];
     };
 
@@ -161,9 +256,16 @@ export default defineComponent({
 
     return {
       settings,
+      confirmToggleSetting,
       toggleSetting,
       isAdvancedSettingsOpen,
+      isWarningCustomSlippageOpen,
+      isWarningViewUnverifiedOpen,
+      isWarningViewLPAssetPoolsOpen,
       toggleAdvancedSettings,
+      toggleWarningCustomSlippage,
+      toggleWarningViewUnverified,
+      toggleWarningViewLPAssetPools,
       disconnectWallet,
     };
   },
@@ -281,6 +383,9 @@ export default defineComponent({
   cursor: pointer;
 }
 
+.modal.warning-modal {
+  z-index: 51;
+}
 .warning-modal__icon {
   height: 6.4rem;
   display: flex;

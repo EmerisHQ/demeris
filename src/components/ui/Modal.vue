@@ -84,7 +84,9 @@ export default defineComponent({
     };
 
     const onOverlayClick = () => {
+      console.log('clicking on overlay');
       if (props.closeOnOverlayClick) {
+        console.log('emitting close');
         emitClose();
       }
     };
