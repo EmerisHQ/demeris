@@ -251,7 +251,8 @@ export default defineComponent({
     };
 
     const disconnectWallet = () => {
-      window.alert('TODO: Disconnect wallet');
+      window.localStorage.setItem('lastEmerisSession', '');
+      location.reload();
     };
 
     return {
