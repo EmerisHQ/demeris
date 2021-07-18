@@ -77,10 +77,12 @@
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
           </button>
+          <!--
           <button class="settings-modal__button" @click="confirmToggleSetting('viewUnverified')">
             <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
             <Switch v-model="settings.viewUnverified" class="settings-modal__button__switch" />
           </button>
+          -->
           <button class="settings-modal__button" @click="confirmToggleSetting('viewLPAssetPools')">
             <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
             <Switch v-model="settings.viewLPAssetPools" class="settings-modal__button__switch" />
