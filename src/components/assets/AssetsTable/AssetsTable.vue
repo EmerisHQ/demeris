@@ -2,9 +2,10 @@
   <div class="assets-table__wrapper">
     <table class="assets-table">
       <colgroup v-if="variant === 'balance'">
-        <col width="40%" />
+        <col width="35%" />
         <col width="20%" />
-        <col width="40%" />
+        <col width="35%" />
+        <col width="10%" />
       </colgroup>
 
       <thead v-if="showHeaders">
@@ -23,17 +24,6 @@
             <CircleSymbol :denom="asset.denom" />
             <div class="assets-table__row__asset__denom">
               <Denom :name="asset.denom" />
-              <div
-                v-if="variant === 'balance' && asset.chainsNames.length > 1"
-                class="assets-table__row__asset__denom__chains s-minus"
-              >
-                <AssetChainsIndicator
-                  :denom="asset.denom"
-                  :balances="balances"
-                  :show-indicators="false"
-                  :show-description="true"
-                />
-              </div>
             </div>
           </td>
 
@@ -53,6 +43,9 @@
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             </div>
           </td>
+          <td v-if="variant === 'balance'" class="assets-table__row__chains">
+            <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -62,7 +55,9 @@
       class="assets-table__view-all elevation-button"
       @click="viewAllHandler"
     >
-      <span class="assets-table__view-all__label">{{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})</span>
+      <span class="assets-table__view-all__label">
+        {{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})
+      </span>
       <Icon name="CaretDownIcon" :icon-size="1.3" />
     </button>
   </div>
@@ -72,7 +67,7 @@
 import groupBy from 'lodash.groupby';
 import { computed, defineComponent, PropType, ref } from 'vue';
 
-import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -87,7 +82,7 @@ type TableStyleType = 'full' | 'balance';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, CircleSymbol, Icon, Denom, Price, AmountDisplay },
+  components: { AssetChains, CircleSymbol, Icon, Denom, Price, AmountDisplay },
 
   props: {
     variant: {
@@ -247,10 +242,6 @@ export default defineComponent({
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-
-        &__chains {
-          margin-top: 0.2rem;
-        }
       }
     }
 
@@ -273,6 +264,9 @@ export default defineComponent({
         margin-top: 0.8rem;
       }
     }
+    &__chains {
+      padding-left: 1.6rem;
+    }
   }
 
   &__view-all {
@@ -287,11 +281,6 @@ export default defineComponent({
     &__label {
       margin-right: 0.7rem;
     }
-  }
-
-  .asset-chains-indicator {
-    width: 100%;
-    justify-content: flex-end;
   }
 }
 </style>
