@@ -7,9 +7,10 @@ export default function () {
   // precision setting (0.000000 level precision below than this decimal digits will be truncated)
   const precisionDigits = 10 ** 6;
 
-  function getSwapPrice(payCoinAmount: number, fromCoinPoolAmount: number, toCoinPoolAmount: number) {
+  function getSwapPrice(payCoinAmount: number, payCoinPoolAmount: number, receiveCoinPoolAmount: number) {
     const swapPrice =
-      ((BigInt(fromCoinPoolAmount) + BigInt(2 * payCoinAmount)) * BigInt(precisionDigits)) / BigInt(toCoinPoolAmount);
+      ((BigInt(payCoinPoolAmount) + BigInt(2 * payCoinAmount)) * BigInt(precisionDigits)) /
+      BigInt(receiveCoinPoolAmount);
     return swapPrice;
   }
 

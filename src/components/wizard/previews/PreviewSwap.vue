@@ -1,5 +1,6 @@
 <template>
   <List>
+    <!-- Pay/Receive -->
     <ListItem direction="column">
       <ListItem :label="$t('components.previews.swap.payLbl')">
         <div class="coin-info">
@@ -20,14 +21,15 @@
       </ListItem>
     </ListItem>
 
+    <!-- Price  -->
     <ListItem :label="$t('components.previews.swap.priceLbl')" direction="column">
+      <!-- minReceivedAmount -->
       <ListItem
         :description="$t('components.previews.swap.minReceivedLbl')"
         :hint="$t('components.previews.swap.minReceivedLblHint')"
         inset
       >
-        <!-- TODO: Slippage -->
-        <AmountDisplay class="s-minus" :amount="data.to" />
+        <AmountDisplay class="s-minus" :amount="minReceivedAmount" />
       </ListItem>
 
       <ListItem
@@ -42,6 +44,7 @@
       </ListItem>
     </ListItem>
 
+    <!-- Fee -->
     <ListItem :label="$t('components.previews.swap.feesLbl')" direction="column">
       <ListItem
         :description="$t('components.previews.swap.feeLbl')"
@@ -68,11 +71,13 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
+import useCalculation from '@/composables/useCalculation.vue';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'PreviewSwap',
@@ -98,9 +103,71 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { poolPriceById } = usePools();
-    const limitPrice = ref(1);
+    const { poolPriceById, reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
+    const { getSwapPrice, getPrecision } = useCalculation();
 
+    //tx data
+    const data = computed(() => {
+      return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
+    });
+
+    //for receive coin chain_name(always cosmos hub)
+    const dexChainName = computed(() => {
+      return store.getters['demeris/getDexChain'];
+    });
+
+    //swap price
+    const minReceivedAmount = ref({});
+    watch(
+      () => {
+        ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
+      },
+      async () => {
+        const id = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
+        const pool = poolById(id);
+        const reserveDenoms = await getReserveBaseDenoms(pool);
+        const reserveBalances = await reserveBalancesById(id);
+        const toCoinBaseDenom = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
+        const swapFeeRate =
+          1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
+        let swapPrice = null;
+
+        if (reserveDenoms[1] === toCoinBaseDenom) {
+          swapPrice = getSwapPrice(
+            parseInt(data.value.from.amount),
+            reserveBalances.balanceA,
+            reserveBalances.balanceB,
+          );
+        } else {
+          //reverse
+          swapPrice = getSwapPrice(
+            parseInt(data.value.from.amount),
+            reserveBalances.balanceB,
+            reserveBalances.balanceA,
+          );
+        }
+
+        minReceivedAmount.value = {
+          denom: toCoinBaseDenom,
+          amount:
+            (1 / Number(swapPrice)) *
+            Number(data.value.from.amount) *
+            Number((1 - (1 - swapFeeRate) / 2).toFixed(4)) ** 2 *
+            (1 - slippageTolerance.value / 100) *
+            10 ** getPrecision(toCoinBaseDenom),
+        };
+      },
+      { immediate: true },
+    );
+
+    //user slippage tolerance
+    const slippageTolerance = computed(() => {
+      return store.getters['demeris/getSlippagePerc'] || 0.5;
+    });
+    console.log('slippageTolerance', slippageTolerance.value);
+
+    //limit price
+    const limitPrice = ref(1);
     onMounted(async () => {
       limitPrice.value = await poolPriceById(
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id,
@@ -112,12 +179,14 @@ export default defineComponent({
         limitPrice.value = await poolPriceById(newId);
       },
     );
-    const dexChainName = computed(() => {
-      return store.getters['demeris/getDexChain'];
-    });
-    const data = computed(() => {
-      return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
-    });
+
+    //fee todo
+    // const gasPrice = computed(() => {
+    //   return store.getters['demeris/getPreferredGasPriceLevel'];
+    // });
+    // console.log('gasPrice', gasPrice.value);
+
+    //for pay coin image(chain_name ring style)
     const payCoinChainName = ref('');
     watch(
       () => data.value.from.denom,
@@ -141,7 +210,6 @@ export default defineComponent({
               },
               { root: true },
             ));
-          console.log('TEST', verifyTrace);
           payCoinChainName.value = verifyTrace.trace[0].chain_name;
         }
       },
@@ -149,10 +217,12 @@ export default defineComponent({
     );
 
     return {
-      dexChainName,
       data,
-      limitPrice,
+      dexChainName,
       payCoinChainName,
+      limitPrice,
+      minReceivedAmount,
+      // gasPrice,
     };
   },
 });
