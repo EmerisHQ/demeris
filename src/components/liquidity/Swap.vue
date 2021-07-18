@@ -13,6 +13,7 @@
     />
     <ReviewModal
       v-if="isOpen && !isSlippageSettingModalOpen"
+      :as-widget="true"
       :data="actionHandlerResult"
       :gas-price-level="gasPrice"
       @close="reviewModalToggle"
@@ -564,7 +565,6 @@ export default defineComponent({
         }
       }),
       isNotEnoughLiquidity: computed(() => {
-        console.log(data.selectedPoolData);
         if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
           return true;
         } else {

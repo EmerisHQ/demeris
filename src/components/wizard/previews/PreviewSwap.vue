@@ -1,23 +1,22 @@
 <template>
   <List>
-    <ListItem>
+    <ListItem direction="column">
       <ListItem :label="$t('components.previews.swap.payLbl')">
-        <div>
+        <div class="coin-info">
+          <CircleSymbol :denom="data.from.denom" :chain-name="payCoinChainName" class="coin-info__image" :size="'xs'" />
           <AmountDisplay class="w-bold" :amount="data.from" />
         </div>
-        <sub><ChainName :name="chainName" /></sub>
+        <sub class="chain-name"><ChainName :name="payCoinChainName" /></sub>
       </ListItem>
       <ListItem
         :label="$t('components.previews.swap.receiveLbl')"
         :description="$t('components.previews.swap.receiveLblHint')"
       >
-        <div>
-          <AmountDisplay
-            class="w-bold"
-            :amount="{ amount: '' + parseFloat(data.from.amount) * limitPrice, denom: data.to.denom }"
-          />
+        <div class="coin-info">
+          <CircleSymbol :denom="data.to.denom" class="coin-info__image" :size="'xs'" />
+          <AmountDisplay class="w-bold" :amount="data.to" />
         </div>
-        <sub><ChainName :name="chainName" /></sub>
+        <sub class="chain-name"><ChainName :name="dexChainName" /></sub>
       </ListItem>
     </ListItem>
 
@@ -67,12 +66,13 @@ import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue'
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
-
+import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'PreviewSwap',
 
@@ -81,6 +81,7 @@ export default defineComponent({
     ChainName,
     List,
     ListItem,
+    CircleSymbol,
   },
 
   props: {
@@ -110,17 +111,46 @@ export default defineComponent({
         limitPrice.value = await poolPriceById(newId);
       },
     );
-    const chainName = computed(() => {
+    const dexChainName = computed(() => {
       return store.getters['demeris/getDexChain'];
     });
     const data = computed(() => {
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
+    const payCoinChainName = computed(() => {
+      if (isNative(data.value.from.denom)) {
+        return store.getters['demeris/getDexChain'];
+      } else {
+        console.log('IBC token');
+        const verifyTrace = store.getters['demeris/getVerifyTrace']({
+          chain_name: store.getters['demeris/getDexChain'],
+          hash: data.value.from.denom.split('/')[1],
+        });
+        return verifyTrace.trace[0].chain_name;
+      }
+    });
+
     return {
-      chainName,
+      dexChainName,
       data,
       limitPrice,
+      payCoinChainName,
     };
   },
 });
 </script>
+<style lang="scss" scoped>
+.coin-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  &__image {
+    margin-right: 0.8rem;
+  }
+}
+
+.chain-name {
+  color: var(--muted);
+}
+</style>
