@@ -13,7 +13,7 @@
         :description="$t('components.previews.swap.receiveLblHint')"
       >
         <div class="coin-info">
-          <CircleSymbol :denom="data.to.denom" class="coin-info__image" :size="'xs'" />
+          <CircleSymbol :denom="data.to.denom" :chain-name="dexChainName" class="coin-info__image" :size="'xs'" />
           <AmountDisplay class="w-bold" :amount="data.to" />
         </div>
         <sub class="chain-name"><ChainName :name="dexChainName" /></sub>
@@ -70,6 +70,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { isNative } from '@/utils/basic';
@@ -117,18 +118,35 @@ export default defineComponent({
     const data = computed(() => {
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
     });
-    const payCoinChainName = computed(() => {
-      if (isNative(data.value.from.denom)) {
-        return store.getters['demeris/getDexChain'];
-      } else {
-        console.log('IBC token');
-        const verifyTrace = store.getters['demeris/getVerifyTrace']({
-          chain_name: store.getters['demeris/getDexChain'],
-          hash: data.value.from.denom.split('/')[1],
-        });
-        return verifyTrace.trace[0].chain_name;
-      }
-    });
+    const payCoinChainName = ref('');
+    watch(
+      () => data.value.from.denom,
+      async () => {
+        if (isNative(data.value.from.denom)) {
+          payCoinChainName.value = store.getters['demeris/getDexChain'];
+        } else {
+          const verifyTrace =
+            store.getters['demeris/getVerifyTrace']({
+              chain_name: store.getters['demeris/getDexChain'],
+              hash: data.value.from.denom.split('/')[1],
+            }) ??
+            (await store.dispatch(
+              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                params: {
+                  chain_name: store.getters['demeris/getDexChain'],
+                  hash: data.value.from.denom.split('/')[1],
+                },
+              },
+              { root: true },
+            ));
+          console.log('TEST', verifyTrace);
+          payCoinChainName.value = verifyTrace.trace[0].chain_name;
+        }
+      },
+      { immediate: true },
+    );
 
     return {
       dexChainName,
