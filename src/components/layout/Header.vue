@@ -26,18 +26,15 @@
         {{ $t('navbar.send') }}
       </router-link>
 
-      <SettingsMenu class="header__settings-menu" />
-
-      <Wallet />
+      <Settings />
     </div>
   </header>
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import Wallet from '@/components/account/Wallet.vue';
 import Logo from '@/components/common/Logo.vue';
-import SettingsMenu from '@/components/common/SettingsMenu.vue';
+import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
@@ -50,10 +47,9 @@ export default defineComponent({
   components: {
     Logo,
     Navbar,
-    Wallet,
     ReceiveIcon,
     SendIcon,
-    SettingsMenu,
+    Settings,
     IconButton,
   },
   setup() {
@@ -94,7 +90,8 @@ export default defineComponent({
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0rem 1.5rem;
+      padding: 0 1.6rem;
+      line-height: 4.8rem;
 
       &__icon {
         margin-right: 1rem;

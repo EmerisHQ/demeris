@@ -4,6 +4,8 @@ import { toHex } from '@cosmjs/encoding';
 import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
+import { Chain } from '@/types/api';
+
 import { demoAddresses } from '../store/demeris/demo-account';
 import { store } from '../store/index';
 
@@ -13,6 +15,14 @@ export function toHexString(byteArray) {
       return ('0' + (byte & 0xff).toString(16)).slice(-2);
     })
     .join('');
+}
+export function getChainFromRecipient(recipient: string) {
+  const prefix = bech32.decode(recipient).prefix;
+  return (
+    (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
+      (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
+    )?.chain_name ?? null
+  );
 }
 export function hashObject(str: unknown): string {
   return toHex(sha256(encodeUTF8(JSON.stringify(str)))).toUpperCase();
