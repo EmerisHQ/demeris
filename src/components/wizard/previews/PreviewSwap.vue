@@ -58,13 +58,23 @@
       >
         <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: 'uatom' }" />
       </ListItem>
-
+      <!-- swap fee -->
       <ListItem
         :description="$t('components.previews.swap.swapFeeLbl')"
         :hint="$t('components.previews.swap.swapFeeLblHint')"
         inset
       >
-        <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: 'uatom' }" />
+        <div>
+          <AmountDisplay
+            class="s-minus"
+            :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
+          />
+        </div>
+
+        <AmountDisplay
+          class="s-minus"
+          :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+        />
       </ListItem>
     </ListItem>
   </List>
@@ -110,7 +120,11 @@ export default defineComponent({
     const store = useStore();
     const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
     const { getSwapPrice, getPrecision } = useCalculation();
-
+    const swapFeeRate = computed(() => {
+      const feeRate =
+        1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003 / 2);
+      return Number((1 - (1 - feeRate) / 2).toFixed(4));
+    });
     //tx data
     const data = computed(() => {
       return (props.step as Actions.Step).transactions[0].data as Actions.SwapData;
@@ -134,8 +148,6 @@ export default defineComponent({
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await reserveBalancesById(id);
         const toCoinBaseDenom = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
-        const swapFeeRate =
-          1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
         let swapPrice = null;
 
         if (reserveDenoms[1] === toCoinBaseDenom) {
@@ -158,7 +170,7 @@ export default defineComponent({
           amount:
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
-            Number((1 - (1 - swapFeeRate) / 2).toFixed(4)) ** 2 *
+            swapFeeRate.value ** 2 *
             (1 - slippageTolerance.value / 100) *
             10 ** getPrecision(toCoinBaseDenom),
         };
@@ -166,7 +178,7 @@ export default defineComponent({
           Math.trunc(
             ((1 / Number(swapPrice)) *
               Number(10 ** getPrecision(toCoinBaseDenom)) *
-              Number((1 - (1 - swapFeeRate) / 2).toFixed(4)) ** 2 *
+              swapFeeRate.value ** 2 *
               (1 - slippageTolerance.value / 100) *
               10 ** getPrecision(toCoinBaseDenom)) /
               10000,
@@ -224,6 +236,7 @@ export default defineComponent({
       limitPrice,
       minReceivedAmount,
       getPrecision,
+      swapFeeRate,
       // gasPrice,
     };
   },
