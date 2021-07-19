@@ -94,7 +94,7 @@ import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
-import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
+import { getBaseDenom } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'PreviewSwap',
@@ -118,7 +118,7 @@ export default defineComponent({
     },
   },
 
-  setup(props: { step: Actions.Step; fees: PropType<Record<string, Base.Amount>> }) {
+  setup(props) {
     const store = useStore();
     const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
     const { getSwapPrice, getPrecision } = useCalculation();
