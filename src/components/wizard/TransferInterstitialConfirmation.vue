@@ -1,9 +1,9 @@
 <template>
-  <div class="transfer-interstitial" :class="`transfer-interstitial--${action}`">
+  <div class="transfer-interstitial" :class="`transfer-interstitial--${currentAction}`">
     <div class="transfer-interstitial__header">
       <h2 class="transfer-interstitial__title">{{ title }}</h2>
 
-      <img src="@/assets/images/transfer-interstitial.png" class="transfer-interstitial__img" />
+      <img src="@/assets/images/transfer-interstitial.png" name="Transfer" class="transfer-interstitial__img" />
     </div>
 
     <p class="transfer-interstitial__description">
@@ -27,7 +27,7 @@ import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { Step, TransferData } from '@/types/actions';
+import { IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -37,7 +37,7 @@ export default defineComponent({
   },
   props: {
     action: {
-      type: String as PropType<'swap' | 'addliquidity'>,
+      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
       default: 'swap',
     },
     step: {
@@ -54,12 +54,32 @@ export default defineComponent({
     const denoms = ref([]);
 
     const hasMultiple = computed(() => props.step.transactions.length > 1);
+    const currentAction = computed(() => {
+      if (props.action === 'move') {
+        return 'transfer';
+      }
+      return props.action;
+    });
 
     const title = computed(() => {
-      return {
-        addliquidity: t('components.transferToHub.addLiquidity'),
-        swap: t('components.transferToHub.swap'),
-      }[props.action];
+      let result = '';
+
+      switch (currentAction.value) {
+        case 'transfer':
+          const data = props.step.transactions[0].data as IBCForwardsData;
+          const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
+          const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+          result = t('components.transferToHub.transfer', { from: chainFrom, to: chainTo });
+          break;
+        case 'addliquidity':
+          result = t('components.transferToHub.addLiquidity');
+          break;
+        case 'swap':
+          result = t('components.transferToHub.swap');
+          break;
+      }
+
+      return result;
     });
 
     const description = computed(() => {
@@ -69,7 +89,7 @@ export default defineComponent({
         return description;
       }
 
-      switch (props.action) {
+      switch (currentAction.value) {
         case 'addliquidity':
           if (hasMultiple.value) {
             description = t('components.transferToHub.addLiquidityDescriptionMultiple', {
@@ -82,6 +102,9 @@ export default defineComponent({
           break;
         case 'swap':
           description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
+          break;
+        case 'transfer':
+          description = t('components.transferToHub.transferDescription');
           break;
       }
 
@@ -139,6 +162,10 @@ export default defineComponent({
     line-height: 1.4;
     white-space: pre-line;
     margin-bottom: 2.4rem;
+  }
+
+  &__img {
+    margin-bottom: -2rem;
   }
 
   &__description {

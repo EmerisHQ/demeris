@@ -119,9 +119,9 @@ export const messages = {
           'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
         addLiquidityDescriptionMultiple:
           'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
-        transfer: 'You are about to send your {denom} to another chain',
+        transfer: 'Cross-chain transfers from {from} to {to}',
         transferDescription:
-          'The address you have selected is a Cosmos Hub address. Sending your {denom} to this address will result in a cross-chain transfer.',
+          'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
       },
       previews: {
         addWithdrawLiquidity: {

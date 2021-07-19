@@ -320,9 +320,19 @@ export default defineComponent({
     watch(
       props,
       () => {
-        if (props.data.length > 1 && ['swap', 'addliquidity', 'transfer'].includes(props.actionName)) {
-          isTransferConfirmationOpen.value = true;
+        let shouldOpenConfirmation = false;
+
+        if (props.actionName === 'move') {
+          shouldOpenConfirmation = true;
+        } else if (props.actionName === 'transfer') {
+          if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+            shouldOpenConfirmation = true;
+          }
+        } else if (['swap', 'addliquidity'].includes(props.actionName)) {
+          shouldOpenConfirmation = props.data.length > 1;
         }
+
+        isTransferConfirmationOpen.value = shouldOpenConfirmation;
       },
       { immediate: true },
     );
