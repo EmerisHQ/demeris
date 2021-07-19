@@ -51,13 +51,15 @@
 
     <!-- Fee -->
     <ListItem :label="$t('components.previews.swap.feesLbl')" direction="column">
+      <!-- tx fee -->
       <ListItem
         :description="$t('components.previews.swap.feeLbl')"
         :hint="$t('components.previews.swap.feeLblHint')"
         inset
       >
-        <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: 'uatom' }" />
+        <AmountDisplay class="s-minus" :amount="{ amount: fee, denom: 'uatom' }" />
       </ListItem>
+
       <!-- swap fee -->
       <ListItem
         :description="$t('components.previews.swap.swapFeeLbl')"
@@ -92,7 +94,7 @@ import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
-import { getBaseDenom } from '@/utils/actionHandler';
+import { getBaseDenom, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'PreviewSwap',
@@ -116,7 +118,7 @@ export default defineComponent({
     },
   },
 
-  setup(props) {
+  setup(props: { step: Actions.Step; fees: PropType<Record<string, Base.Amount>> }) {
     const store = useStore();
     const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
     const { getSwapPrice, getPrecision } = useCalculation();
@@ -191,15 +193,7 @@ export default defineComponent({
     const slippageTolerance = computed(() => {
       return store.getters['demeris/getSlippagePerc'] || 0.5;
     });
-    console.log('slippageTolerance', slippageTolerance.value);
 
-    //fee todo
-    // const gasPrice = computed(() => {
-    //   return store.getters['demeris/getPreferredGasPriceLevel'];
-    // });
-    // console.log('gasPrice', gasPrice.value);
-
-    //for pay coin image(chain_name ring style)
     const payCoinChainName = ref('');
     watch(
       () => data.value.from.denom,
@@ -229,6 +223,11 @@ export default defineComponent({
       { immediate: true },
     );
 
+    // tx fee
+    const fee = computed(() => {
+      return props.fees[store.getters['demeris/getDexChain']]['uatom'];
+    });
+
     return {
       data,
       dexChainName,
@@ -237,7 +236,7 @@ export default defineComponent({
       minReceivedAmount,
       getPrecision,
       swapFeeRate,
-      // gasPrice,
+      fee,
     };
   },
 });
