@@ -10,11 +10,13 @@
       {{ description }}
     </p>
 
-    <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="transfer-interstitial__link">
-      {{ $t('generic_cta.learnMore') }} <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-    </a>
+    <div class="transfer-interstitial__controls">
+      <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="transfer-interstitial__link">
+        {{ $t('generic_cta.learnMore') }} <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+      </a>
 
-    <Button :name="$t('generic_cta.continue')" class="transfer-interstitial__button" @click="emitContinue" />
+      <Button :name="$t('generic_cta.continue')" class="transfer-interstitial__button" @click="emitContinue" />
+    </div>
   </div>
 </template>
 
@@ -123,11 +125,6 @@ export default defineComponent({
     flex-direction: column-reverse;
   }
 
-  &--swap &__title {
-    margin-top: 2.4rem;
-    margin-bottom: 0;
-  }
-
   &__header {
     display: flex;
     flex-direction: column;
@@ -161,12 +158,20 @@ export default defineComponent({
     margin-top: 2.4rem;
   }
 
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0 2.4rem;
+  }
+
   &__button {
     width: 100%;
-    margin-top: 4rem;
+    margin: 2.4rem 0;
   }
 
   .external-icon {
+    margin-left: 0.4rem;
     transform: rotate(45deg);
   }
 }

@@ -17,6 +17,7 @@
       <TxStepsModal
         :data="steps"
         :gas-price-level="gasPrice"
+        action-name="transfer"
         @transacting="goToStep('send')"
         @failed="goToStep('review')"
         @reset="resetHandler"
