@@ -32,14 +32,19 @@
         <AmountDisplay class="s-minus" :amount="minReceivedAmount" />
       </ListItem>
 
+      <!-- limit price -->
       <ListItem
         :description="$t('components.previews.swap.limitPriceLbl')"
         :hint="$t('components.previews.swap.limitPriceLblHint')"
         inset
       >
         <span class="s-minus">
-          <AmountDisplay class="s-minus" :amount="{ amount: limitPrice, denom: data.to.amount.denom }" /> =
-          <AmountDisplay class="s-minus" :amount="{ amount: 1, denom: data.from.amount.denom }" />
+          <AmountDisplay
+            class="s-minus"
+            :amount="{ amount: 10 ** getPrecision(data.from.denom), denom: data.from.denom }"
+          />
+          =
+          <AmountDisplay class="s-minus" :amount="{ amount: limitPrice, denom: data.to.denom }" />
         </span>
       </ListItem>
     </ListItem>
@@ -65,7 +70,7 @@
   </List>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -103,7 +108,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { poolPriceById, reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
+    const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
     const { getSwapPrice, getPrecision } = useCalculation();
 
     //tx data
@@ -116,8 +121,9 @@ export default defineComponent({
       return store.getters['demeris/getDexChain'];
     });
 
-    //swap price
+    // minReceivedAmount & limit price
     const minReceivedAmount = ref({});
+    const limitPrice = ref(0);
     watch(
       () => {
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
@@ -156,6 +162,15 @@ export default defineComponent({
             (1 - slippageTolerance.value / 100) *
             10 ** getPrecision(toCoinBaseDenom),
         };
+        limitPrice.value =
+          Math.trunc(
+            ((1 / Number(swapPrice)) *
+              Number(10 ** getPrecision(toCoinBaseDenom)) *
+              Number((1 - (1 - swapFeeRate) / 2).toFixed(4)) ** 2 *
+              (1 - slippageTolerance.value / 100) *
+              10 ** getPrecision(toCoinBaseDenom)) /
+              10000,
+          ) * 10000;
       },
       { immediate: true },
     );
@@ -165,20 +180,6 @@ export default defineComponent({
       return store.getters['demeris/getSlippagePerc'] || 0.5;
     });
     console.log('slippageTolerance', slippageTolerance.value);
-
-    //limit price
-    const limitPrice = ref(1);
-    onMounted(async () => {
-      limitPrice.value = await poolPriceById(
-        ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id,
-      );
-    });
-    watch(
-      () => ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id,
-      async (newId) => {
-        limitPrice.value = await poolPriceById(newId);
-      },
-    );
 
     //fee todo
     // const gasPrice = computed(() => {
@@ -222,6 +223,7 @@ export default defineComponent({
       payCoinChainName,
       limitPrice,
       minReceivedAmount,
+      getPrecision,
       // gasPrice,
     };
   },
