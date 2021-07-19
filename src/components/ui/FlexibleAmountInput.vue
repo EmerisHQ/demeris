@@ -86,7 +86,11 @@ const containerStyle = computed(() => {
         type="text"
         class="flexible-input__input"
       />
-      <span ref="suffixElementRef" class="flexible-input__suffix">{{ suffix }}</span>
+      <span ref="suffixElementRef" class="flexible-input__suffix">
+        <slot name="suffix">
+          {{ suffix }}
+        </slot>
+      </span>
       <span ref="sizeElementRef" class="flexible-input__size-reference">
         {{ model }}
       </span>
