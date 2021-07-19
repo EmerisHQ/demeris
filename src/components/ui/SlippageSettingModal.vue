@@ -33,6 +33,7 @@
           1%
         </button>
         <button
+          v-if="allowCustomSlippage"
           class="setting__sections-block"
           :class="[isCustomSelected ? 'selected custom-selected' : '', Number(slippage) < 0 ? 'custom-error' : '']"
         >
@@ -208,6 +209,10 @@ export default defineComponent({
     const limitPriceText = ref('');
     const minReceivedText = ref(null);
 
+    const allowCustomSlippage = computed(() => {
+      return store.getters['demeris/allowCustomSlippage'];
+    });
+
     //TODO: dynamic digit float calculation
     watch(
       () => [props.swapData, state.slippage],
@@ -239,7 +244,7 @@ export default defineComponent({
       }
     });
 
-    return { ...toRefs(state), customSlippageInput, limitPriceText, minReceivedText };
+    return { ...toRefs(state), allowCustomSlippage, customSlippageInput, limitPriceText, minReceivedText };
   },
 });
 </script>
