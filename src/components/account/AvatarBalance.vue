@@ -3,7 +3,7 @@
     <div class="avatar-balance__avatar">
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="avatar-balance__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
-      <div class="avatar-balance__avatar__glow" />
+      <div class="avatar-balance__avatar__glow" v-html="getAvatar(keplrAccountName)" />
     </div>
 
     <div class="avatar-balance__details">
@@ -68,12 +68,16 @@ export default defineComponent({
   &__avatar {
     width: 3.2rem;
     height: 3.2rem;
+    position: relative;
 
-    &__gradient {
+    &__gradient,
+    &__glow {
       width: 3.2rem;
       height: 3.2rem;
       border-radius: 1.6rem;
       overflow: hidden;
+    }
+    &__gradient {
       z-index: 1;
       position: relative;
 
@@ -96,6 +100,14 @@ export default defineComponent({
         width: 100%;
         height: 100%;
       }
+    }
+    &__glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.5;
+      filter: blur(1.28rem);
+      top: 12.5%;
     }
   }
 
