@@ -1,6 +1,6 @@
 <template>
   <Modal
-    :variant="'full'"
+    :variant="modalVariant ?? 'full'"
     :show-close-button="false"
     :body-class="status === 'complete' ? 'transferred-bg' : ''"
     @close="emitClose"
