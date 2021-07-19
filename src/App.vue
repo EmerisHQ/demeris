@@ -29,7 +29,7 @@ export default defineComponent({
     document.documentElement.setAttribute('color-theme', 'light');
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
-      endpoint: 'https://dev.demeris.io/v1',
+      endpoint: 'https://staging.demeris.io/v1',
       hub_chain: 'cosmos-hub',
       refreshTime: 5000,
       gas_limit: 300000,
@@ -54,7 +54,7 @@ export default defineComponent({
       });
     }
     await this.$store.dispatch('common/env/config', {
-      apiNode: 'https://dev.demeris.io/v1/liquidity',
+      apiNode: 'https://staging.demeris.io/v1/liquidity',
       rpcNode: null,
       wsNode: null,
       chainId: 'cosmos-hub',
