@@ -43,7 +43,7 @@ export default defineComponent({
   }
 
   &__input:checked ~ &__track {
-    background: var(--text);
+    background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
   }
 
   &__input:checked ~ &__track &__thumb {
@@ -54,21 +54,21 @@ export default defineComponent({
     transition: background ease-in-out 150ms;
     position: relative;
     display: inline-flex;
-    height: 1.6rem;
-    min-width: 2.6rem;
-    border-radius: 0.8rem;
+    height: 2.4rem;
+    min-width: 4rem;
+    border-radius: 1.2rem;
     background: var(--fg-trans);
     cursor: pointer;
     flex-shrink: 0;
-    padding: 0.2rem;
+    padding: 0.3rem;
   }
 
   &__thumb {
     transition: all ease-in-out 150ms;
     position: absolute;
-    border-radius: 2.6rem;
-    width: 1.2rem;
-    height: 1.2rem;
+    border-radius: 1.8rem;
+    width: 1.8rem;
+    height: 1.8rem;
     top: 50%;
     transform: translate(0%, -50%);
     background: conic-gradient(
