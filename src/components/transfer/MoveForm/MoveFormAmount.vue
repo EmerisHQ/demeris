@@ -18,105 +18,114 @@
         @select="toggleChainsModal"
       />
     </div>
+    <template v-if="state.currentAsset">
+      <fieldset class="form__field move-form-amount">
+        <div class="move-form-amount__input">
+          <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
+          <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
+        </div>
 
-    <fieldset class="form__field move-form-amount">
-      <div class="move-form-amount__input">
-        <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-        <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
-      </div>
+        <span class="move-form-amount__estimated">
+          <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
+        </span>
 
-      <span class="move-form-amount__estimated">
-        <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
-      </span>
+        <div class="move-form-amount__controls">
+          <label class="move-form-amount__controls__button">
+            <input type="checkbox" name="move-form-amount-usd" />
+            <span class="elevation-button">USD</span>
+          </label>
+          <label class="move-form-amount__controls__button">
+            <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
+            <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
+          </label>
+        </div>
+      </fieldset>
 
-      <div class="move-form-amount__controls">
-        <label class="move-form-amount__controls__button">
-          <input type="checkbox" name="move-form-amount-usd" />
-          <span class="elevation-button">USD</span>
-        </label>
-        <label class="move-form-amount__controls__button">
-          <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
-          <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
-        </label>
-      </div>
-    </fieldset>
+      <fieldset class="form__field">
+        <div class="move-form-amount__assets elevation-card">
+          <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.action') }}</span>
 
-    <fieldset class="form__field">
-      <div class="move-form-amount__assets elevation-card">
-        <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
-          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.action') }}</span>
-
-          <div class="move-form-amount__assets__item__asset">
-            <CircleSymbol
-              :chain-name="form.on_chain"
-              :denom="form.balance.denom"
-              class="move-form-amount__assets__item__avatar"
-            />
-            <span class="move-form-amount__assets__item__name w-bold">
-              <Denom :name="form.balance.denom || ''" />
-            </span>
-          </div>
-
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
-
-        <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
-          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
-
-          <div class="move-form-amount__assets__item__asset">
-            <CircleSymbol variant="chain" :chain-name="form.on_chain" class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold">
-              <ChainName :name="form.on_chain" />
-            </span>
-          </div>
-
-          <div class="move-form-amount__assets__item__amount">
-            <p class="move-form-amount__assets__item__amount__balance s-minus">
-              <Price :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }" />
-            </p>
-            <p class="move-form-amount__assets__item__amount__available s-minus">
-              <AmountDisplay
-                :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                :chain-name="form.on_chain"
+                :denom="form.balance.denom"
+                class="move-form-amount__assets__item__avatar"
               />
-            </p>
-          </div>
+              <span class="move-form-amount__assets__item__name w-bold">
+                <Denom :name="form.balance.denom || ''" />
+              </span>
+            </div>
 
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
 
-        <button
-          class="move-form-amount__assets__item to-item"
-          :class="{ 'chain-selected': !!form.to_chain }"
-          @click="toggleChainsModal(null, 'to')"
-        >
-          <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
+          <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
 
-          <div class="move-form-amount__assets__item__asset">
-            <CircleSymbol variant="chain" :chain-name="form.to_chain" class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold">
-              <ChainName v-if="form.to_chain" :name="form.to_chain" />
-              <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
-            </span>
-          </div>
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                variant="chain"
+                :chain-name="form.on_chain"
+                class="move-form-amount__assets__item__avatar"
+              />
+              <span class="move-form-amount__assets__item__name w-bold">
+                <ChainName :name="form.on_chain" />
+              </span>
+            </div>
 
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
-      </div>
-    </fieldset>
+            <div class="move-form-amount__assets__item__amount">
+              <p class="move-form-amount__assets__item__amount__balance s-minus">
+                <Price :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }" />
+              </p>
+              <p class="move-form-amount__assets__item__amount__available s-minus">
+                <AmountDisplay
+                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                />
+              </p>
+            </div>
 
-    <fieldset class="form__field">
-      <Button
-        :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
-        :disabled="!isValid"
-        @click="onSubmit"
-      />
-    </fieldset>
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
+
+          <button
+            class="move-form-amount__assets__item to-item"
+            :class="{ 'chain-selected': !!form.to_chain }"
+            @click="toggleChainsModal(null, 'to')"
+          >
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
+
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                variant="chain"
+                :chain-name="form.to_chain"
+                class="move-form-amount__assets__item__avatar"
+              />
+              <span class="move-form-amount__assets__item__name w-bold">
+                <ChainName v-if="form.to_chain" :name="form.to_chain" />
+                <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
+              </span>
+            </div>
+
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset class="form__field">
+        <Button
+          :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
+          :disabled="!isValid"
+          @click="onSubmit"
+        />
+      </fieldset>
+    </template>
   </div>
 </template>
 
@@ -175,11 +184,16 @@ export default defineComponent({
     });
 
     const denomDecimals = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: state.currentAsset.base_denom,
-      });
+      if (state.currentAsset) {
+        console.log(state.currentAsset);
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: state.currentAsset.base_denom,
+        });
 
-      return Math.pow(10, precision);
+        return Math.pow(10, precision);
+      } else {
+        return 1;
+      }
     });
 
     const availableRecipientsChains = computed(() => {
@@ -259,7 +273,7 @@ export default defineComponent({
     watch(
       () => props.balances,
       (newVal, oldVal) => {
-        if (oldVal.length == 0 && newVal.length > 0 && !state.currentAsset) {
+        if (newVal.length > 0 && !state.currentAsset) {
           setCurrentAsset(props.balances[0]);
         }
       },

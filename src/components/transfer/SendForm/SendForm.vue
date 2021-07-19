@@ -34,6 +34,7 @@ import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
@@ -93,6 +94,7 @@ export default defineComponent({
           const precision = store.getters['demeris/getDenomPrecision']({
             name: form.balance.denom,
           });
+
           const action: TransferAction = {
             name: 'transfer',
             params: {
@@ -104,7 +106,7 @@ export default defineComponent({
                 chain_name: form.chain_name,
               },
               to: {
-                chain_name: form.chain_name,
+                chain_name: getChainFromRecipient(form.recipient),
                 address: form.recipient,
               },
             },
