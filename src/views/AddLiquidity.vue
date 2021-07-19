@@ -49,11 +49,12 @@
           </div>
 
           <div v-if="hasPair" class="add-liquidity__estimated">
-            <input
+            <FlexibleAmountInput
               v-model="state.totalEstimatedPrice"
-              type="number"
-              step=".01"
-              min="1"
+              :max-width="250"
+              :min-width="32"
+              prefix="$"
+              placeholder="0"
               class="add-liquidity__estimated__price s-2 w-bold"
               @input="currencyAmountHandler"
             />
@@ -179,10 +180,9 @@
                   <span v-else class="w-bold">G-LK-LP</span>
                 </div>
 
-                <input
+                <AmountInput
                   v-model="state.receiveAmount"
                   :readonly="!hasPool"
-                  type="number"
                   class="add-liquidity__receive__amount w-bold"
                   @input="coinPoolChangeHandler"
                 />
@@ -260,7 +260,9 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -274,17 +276,19 @@ import { parseCoins } from '@/utils/basic';
 export default {
   name: 'AddLiquidity',
   components: {
+    Alert,
     AmountDisplay,
-    Icon,
-    CircleSymbol,
+    AmountInput,
     Button,
     ChainName,
+    ChainSelectModal,
+    CircleSymbol,
     Denom,
     DenomSelect,
-    Alert,
-    ChainSelectModal,
-    TxStepsModal,
     FeeLevelSelector,
+    FlexibleAmountInput,
+    Icon,
+    TxStepsModal,
   },
 
   setup() {
@@ -303,8 +307,9 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
-      totalEstimatedPrice: '0.00',
+      totalEstimatedPrice: '0',
       receiveAmount: 0,
+      poolBaseDenoms: [],
     });
 
     const gasPrice = computed(() => {
@@ -341,12 +346,13 @@ export default {
     });
 
     const updateReceiveAmount = () => {
-      if (!form.coinA.asset?.amount || !form.coinB.asset?.amount) {
+      if (!form.coinA.amount || !form.coinB.amount) {
         state.receiveAmount = 0;
         return;
       }
 
-      state.receiveAmount = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      state.receiveAmount = +result.toFixed(6);
     };
 
     const exchangeAmount = computed(() => {
@@ -410,6 +416,14 @@ export default {
     });
 
     const updateTotalCurrencyPrice = () => {
+      if (!state.receiveAmount && !form.coinA.amount && !form.coinB.amount) {
+        return;
+      }
+
+      if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
+        return;
+      }
+
       let total = 0;
 
       if (form.coinA.asset) {
@@ -422,7 +436,9 @@ export default {
         total += priceB * form.coinB.amount;
       }
 
-      state.totalEstimatedPrice = total.toFixed(2);
+      const totalString = (+total.toFixed(2)).toString();
+
+      state.totalEstimatedPrice = totalString;
     };
 
     const generateActionSteps = async () => {
@@ -582,8 +598,8 @@ export default {
       state.isMaximumAmountChecked = false;
       const result = calculateWithdrawBalances(state.receiveAmount);
 
-      form.coinA.amount = +(result[0].amount / 1e6).toFixed(6);
-      form.coinB.amount = +(result[1].amount / 1e6).toFixed(6);
+      form.coinA.amount = +result[0].amount.toFixed(6);
+      form.coinB.amount = +result[1].amount.toFixed(6);
     };
 
     const currencyAmountHandler = () => {
@@ -605,6 +621,7 @@ export default {
 
       if (poolFromRoute) {
         const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
+        state.poolBaseDenoms = poolBaseDenoms;
         form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
         form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
       }
@@ -710,10 +727,11 @@ export default {
     line-height: 1;
 
     &__price {
-      text-align: center;
-      padding-right: 2rem;
-      &:focus {
-        outline: none;
+      font-size: 5.1rem;
+      font-weight: 600;
+
+      &::placeholder {
+        color: red;
       }
     }
 

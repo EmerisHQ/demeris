@@ -44,12 +44,11 @@
 
     <div class="denom-select__coin-amount">
       <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
-      <input
+      <AmountInput
         :value="amount"
         :class="isOver ? 'over' : ''"
         :readonly="readonly"
         class="denom-select__coin-amount-input s-1"
-        type="number"
         placeholder="0"
         min="0"
         @input="$emit('update:amount', Math.abs(Number($event.target.value))), $emit('change', inputHeader)"
@@ -72,12 +71,13 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { store } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelect',
-  components: { ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
+  components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
