@@ -220,17 +220,11 @@
       </template>
 
       <template v-else>
-        <TransferToHubConfirmation
-          v-if="state.isTransferConfirmationOpen"
-          :action="'addliquidity'"
-          :step="actionSteps[0]"
-          class="add-liquidity__content"
-          @continue="state.isTransferConfirmationOpen = false"
-        />
-        <section v-else class="add-liquidity__content add-liquidity__review">
+        <section class="add-liquidity__content add-liquidity__review">
           <TxStepsModal
             :data="actionSteps"
             :gas-price-level="gasPrice"
+            action-name="addliquidity"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
             @reset="resetHandler"
@@ -256,7 +250,6 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import TransferToHubConfirmation from '@/components/wizard/TransferToHubConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -280,7 +273,6 @@ export default {
     ChainSelectModal,
     TxStepsModal,
     FeeLevelSelector,
-    TransferToHubConfirmation,
   },
 
   setup() {
@@ -296,7 +288,6 @@ export default {
     const state = reactive({
       step: 'amount',
       isCreationConfirmationOpen: false,
-      isTransferConfirmationOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
@@ -457,9 +448,6 @@ export default {
         } as CreatePoolAction;
       }
       const result = await actionHandler(action);
-      if (needsTransferToHub.value) {
-        state.isTransferConfirmationOpen = true;
-      }
       actionSteps.value = result;
     };
 

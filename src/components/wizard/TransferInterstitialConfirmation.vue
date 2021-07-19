@@ -1,20 +1,20 @@
 <template>
-  <div class="transfer-to-hub" :class="`transfer-to-hub--${action}`">
-    <div class="transfer-to-hub__header">
-      <h2 class="transfer-to-hub__title">{{ title }}</h2>
+  <div class="transfer-interstitial" :class="`transfer-interstitial--${action}`">
+    <div class="transfer-interstitial__header">
+      <h2 class="transfer-interstitial__title">{{ title }}</h2>
 
-      <img src="@/assets/images/transfer-to-hub.png" class="transfer-to-hub__img" />
+      <img src="@/assets/images/transfer-interstitial.png" class="transfer-interstitial__img" />
     </div>
 
-    <p class="transfer-to-hub__description">
+    <p class="transfer-interstitial__description">
       {{ description }}
     </p>
 
-    <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="transfer-to-hub__link">
+    <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="transfer-interstitial__link">
       {{ $t('generic_cta.learnMore') }} <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
     </a>
 
-    <Button :name="$t('generic_cta.continue')" class="transfer-to-hub__button" @click="emitContinue" />
+    <Button :name="$t('generic_cta.continue')" class="transfer-interstitial__button" @click="emitContinue" />
   </div>
 </template>
 
@@ -63,10 +63,10 @@ export default defineComponent({
     const description = computed(() => {
       let description = '';
 
-      debugger;
       if (!denoms.value.length) {
         return description;
       }
+
       switch (props.action) {
         case 'addliquidity':
           if (hasMultiple.value) {
@@ -114,7 +114,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.transfer-to-hub {
+.transfer-interstitial {
   display: flex;
   flex-direction: column;
   align-items: center;
