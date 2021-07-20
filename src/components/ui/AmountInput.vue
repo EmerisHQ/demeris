@@ -42,7 +42,7 @@ const format = (value: string) => {
 };
 
 const model = computed({
-  get: () => props.modelValue.toString(),
+  get: () => (props.modelValue || '').toString(),
   set: (value) => {
     if (!inputRef.value) {
       return;
