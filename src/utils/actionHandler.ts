@@ -833,7 +833,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sourceChannel: data.through,
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
-        timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
+        timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
         token: data.amount,
       },
     });

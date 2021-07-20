@@ -73,7 +73,7 @@
               <span class="asset__main__chains__item__amount">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                  :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                  :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
               </span>
@@ -81,7 +81,7 @@
                 <span class="asset__main__chains__item__balance__value">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
-                    :amount="{ amount: parseInt(asset.amount.slice(0, -5)) + stakedAmount + 'uatom', denom }"
+                    :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
                   />
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>

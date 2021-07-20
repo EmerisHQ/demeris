@@ -2,7 +2,7 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
-      <MoveFormAmount :balances="balances" @next="generateSteps" />
+      <MoveFormAmount v-if="balances" :balances="balances" @next="generateSteps" />
 
       <div class="move-form__fees">
         <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
@@ -14,6 +14,7 @@
         v-if="steps.length > 0"
         :data="steps"
         :gas-price-level="gasPrice"
+        action-name="move"
         @transacting="goToStep('move')"
         @failed="goToStep('review')"
         @reset="resetHandler"
@@ -83,7 +84,9 @@ export default defineComponent({
     watch(
       () => [form.balance.amount, form.balance.denom, form.on_chain, form.to_chain],
       async () => {
+        console.log(form);
         if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
+          console.log(form);
           const precision = store.getters['demeris/getDenomPrecision']({
             name: form.balance.denom,
           });
