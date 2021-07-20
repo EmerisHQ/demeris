@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: [String, Number],
     default: '',
   },
 });
@@ -32,7 +32,7 @@ const format = (value: string) => {
 };
 
 const model = computed({
-  get: () => props.modelValue,
+  get: () => props.modelValue.toString(),
   set: (value) => {
     if (!inputRef.value) {
       return;
@@ -40,8 +40,8 @@ const model = computed({
 
     let currentValue = value;
 
-    if (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
-      currentValue = Number.MAX_SAFE_INTEGER.toString();
+    while (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
+      currentValue = currentValue.slice(0, -1);
     }
 
     const formatted = format(currentValue);
