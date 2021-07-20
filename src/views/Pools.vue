@@ -9,6 +9,8 @@
 </template>
 
 <script lang="ts">
+import { computed } from '@vue/runtime-core';
+
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores } from '@/store';
@@ -19,9 +21,12 @@ export default {
 
   setup() {
     const stores = useAllStores();
-    const pools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+    const pools = computed(() => {
+      let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+      return liquidityPools.pools;
+    });
     return {
-      pools: pools.pools,
+      pools,
     };
   },
 };

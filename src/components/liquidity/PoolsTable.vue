@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { ref } from '@vue/reactivity';
-import { computed, onMounted, PropType } from '@vue/runtime-core';
+import { computed, PropType,watch } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -80,14 +80,21 @@ export default {
     const renderedPools = ref([]);
 
     const { formatPoolName } = usePools();
-    onMounted(async () => {
-      renderedPools.value = await Promise.all(
-        props.pools.map(async (pool) => {
-          pool.display_name = await formatPoolName(pool);
-          return pool;
-        }),
-      );
-    });
+    watch(
+      () => props.pools,
+      async (newVal) => {
+        if (newVal.length > 0) {
+          renderedPools.value = await Promise.all(
+            props.pools.map(async (pool) => {
+              pool.display_name = await formatPoolName(pool);
+              return pool;
+            }),
+          );
+        }
+      },
+      { immediate: true },
+    );
+
     const filteredPools = computed(() => {
       return renderedPools.value.filter((pool) => pool.reserve_coin_denoms.join().indexOf(keyword.value) !== -1);
     });
@@ -101,6 +108,7 @@ export default {
     };
 
     return {
+      renderedPools,
       filteredPools,
       keyword,
       rowClickHandler,
