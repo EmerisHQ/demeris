@@ -14,6 +14,7 @@
         v-if="steps.length > 0"
         :data="steps"
         :gas-price-level="gasPrice"
+        action-name="move"
         @transacting="goToStep('move')"
         @failed="goToStep('review')"
         @reset="resetHandler"
