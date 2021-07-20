@@ -34,7 +34,7 @@ const format = (value: string) => {
 
   const [integerDigits, fractionDigits] = newValue.split('.');
 
-  if (fractionDigits.length > props.maxDecimals) {
+  if (fractionDigits?.length > props.maxDecimals) {
     newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`;
   }
 
