@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { ref } from '@vue/reactivity';
-import { computed, PropType,watch } from '@vue/runtime-core';
+import { computed, PropType, watch } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -108,7 +108,6 @@ export default {
     };
 
     return {
-      renderedPools,
       filteredPools,
       keyword,
       rowClickHandler,
