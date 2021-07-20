@@ -205,12 +205,20 @@ export default defineComponent({
 
       for (const pool of pools.value) {
         const balances = balancesByDenom(pool.pool_coin_denom);
+
         for (const balance of balances) {
           const poolFns = usePool(pool.id, { autoUpdate: false });
-          const poolCoinAmount = +parseCoins(balance.amount)[0].amount / 1e6;
-          const withdrawBalances = poolFns.calculateWithdrawBalances(poolCoinAmount);
-          const denomBalance = withdrawBalances.find((item) => item.denom === denom.value);
-          amount += denomBalance.amount;
+
+          if (poolFns.reserveBalances) {
+            const poolCoinAmount = +parseCoins(balance.amount)[0].amount / 1e6;
+            const withdrawBalances = poolFns.calculateWithdrawBalances(poolCoinAmount);
+            const denomBalance = withdrawBalances.find(
+              (item) => item.base_denom === denom.value || item.denom === denom.value,
+            );
+            if (denomBalance) {
+              amount += denomBalance.amount;
+            }
+          }
         }
       }
 
