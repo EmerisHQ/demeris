@@ -23,7 +23,7 @@
 
     <main class="add-liquidity__wrapper">
       <template v-if="state.step === 'amount'">
-        <template v-if="!state.isTransferConfirmationOpen">
+        <template v-if="!state.isCreationConfirmationOpen">
           <h2 class="add-liquidity__title s-2">
             {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
           </h2>
@@ -161,7 +161,11 @@
 
               <div class="add-liquidity__receive__wrapper">
                 <div class="add-liquidity__receive__token">
-                  <CircleSymbol :denom="pool.pool_coin_denom" size="sm" class="add-liquidity__receive__token__avatar" />
+                  <CircleSymbol
+                    :denom="hasPool ? pool.pool_coin_denom : ''"
+                    size="sm"
+                    class="add-liquidity__receive__token__avatar"
+                  />
                   <span class="w-bold">
                     <Denom v-if="hasPool" :name="pool.pool_coin_denom" />
                     <span v-else>G-LK-LP</span>
@@ -189,7 +193,7 @@
           </div>
         </template>
 
-        <template v-else>
+        <template v-else-if="state.isCreationConfirmationOpen">
           <section class="add-liquidity__content add-liquidity__confirmation">
             <h2 class="add-liquidity__title s-2">Creating a pool is risky business</h2>
 
@@ -203,7 +207,7 @@
             <div class="add-liquidity__confirmation__controls">
               <button
                 class="add-liquidity__confirmation__controls__button elevation-button"
-                @click="state.isTransferConfirmationOpen = false"
+                @click="state.isCreationConfirmationOpen = false"
               >
                 Cancel
               </button>
@@ -220,6 +224,7 @@
           <TxStepsModal
             :data="actionSteps"
             :gas-price-level="gasPrice"
+            action-name="addliquidity"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
             @reset="resetHandler"
@@ -282,7 +287,7 @@ export default {
 
     const state = reactive({
       step: 'amount',
-      isTransferConfirmationOpen: false,
+      isCreationConfirmationOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
@@ -487,14 +492,14 @@ export default {
     };
 
     const goToReview = () => {
-      if (state.isTransferConfirmationOpen) {
+      if (state.isCreationConfirmationOpen) {
         goToStep('review');
-        state.isTransferConfirmationOpen = false;
+        state.isCreationConfirmationOpen = false;
         return;
       }
 
       if (!hasPool.value) {
-        state.isTransferConfirmationOpen = true;
+        state.isCreationConfirmationOpen = true;
         return;
       }
 

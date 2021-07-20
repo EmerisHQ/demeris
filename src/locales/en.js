@@ -11,6 +11,7 @@ export const messages = {
       filterRetry: 'Try again with another search',
       discoverMore: 'Discover more',
       max: 'Max',
+      learnMore: 'Learn more',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -109,6 +110,18 @@ export const messages = {
         payHeader: 'Pay {amount}',
         receiveHeader: 'Receive {amount}',
         priceAlert: 'Prices have changed',
+      },
+      transferToHub: {
+        swap: 'Assets are swapped on the Cosmos Hub',
+        swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        addLiquidity: 'Liquidity providing happens on the Cosmos Hub',
+        addLiquidityDescription:
+          'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
+        addLiquidityDescriptionMultiple:
+          'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
+        transfer: 'Cross-chain transfers from {from} to {to}',
+        transferDescription:
+          'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
       },
       previews: {
         addWithdrawLiquidity: {
