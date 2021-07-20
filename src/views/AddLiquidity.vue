@@ -48,7 +48,7 @@
             </span>
           </div>
 
-          <div v-if="hasPair" class="add-liquidity__estimated">
+          <div v-if="hasPrices" class="add-liquidity__estimated">
             <FlexibleAmountInput
               v-model="state.totalEstimatedPrice"
               :max-width="250"
@@ -183,6 +183,7 @@
                 <AmountInput
                   v-model="state.receiveAmount"
                   :readonly="!hasPool"
+                  placeholder="0"
                   class="add-liquidity__receive__amount w-bold"
                   @input="coinPoolChangeHandler"
                 />
@@ -307,13 +308,28 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
-      totalEstimatedPrice: '0',
+      totalEstimatedPrice: '',
       receiveAmount: 0,
       poolBaseDenoms: [],
     });
 
     const gasPrice = computed(() => {
       return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
+    const hasPrices = computed(() => {
+      if (!hasPair.value) {
+        return false;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
     });
 
     const form = reactive<Record<string, { asset: Balance; amount: number }>>({
@@ -417,10 +433,6 @@ export default {
 
     const updateTotalCurrencyPrice = () => {
       if (!state.receiveAmount && !form.coinA.amount && !form.coinB.amount) {
-        return;
-      }
-
-      if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
         return;
       }
 
@@ -577,6 +589,8 @@ export default {
       const result = (form.coinA.amount * priceA) / priceB;
 
       form.coinB.amount = +result.toFixed(6);
+      updateTotalCurrencyPrice();
+      updateReceiveAmount();
     };
 
     const coinBChangeHandler = () => {
@@ -592,6 +606,8 @@ export default {
       const result = (form.coinB.amount * priceB) / priceA;
 
       form.coinA.amount = +result.toFixed(6);
+      updateTotalCurrencyPrice();
+      updateReceiveAmount();
     };
 
     const coinPoolChangeHandler = () => {
@@ -600,16 +616,25 @@ export default {
 
       form.coinA.amount = +result[0].amount.toFixed(6);
       form.coinB.amount = +result[1].amount.toFixed(6);
+      updateTotalCurrencyPrice();
     };
 
     const currencyAmountHandler = () => {
       state.isMaximumAmountChecked = false;
+
+      if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
+        form.coinA.amount = undefined;
+        form.coinB.amount = undefined;
+        state.receiveAmount = undefined;
+        return;
+      }
 
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
       form.coinA.amount = +(parseFloat(state.totalEstimatedPrice) / 2 / priceA).toFixed(6);
       form.coinB.amount = +(parseFloat(state.totalEstimatedPrice) / 2 / priceB).toFixed(6);
+      updateReceiveAmount();
     };
 
     onMounted(async () => {
@@ -642,14 +667,6 @@ export default {
     });
 
     watch(
-      () => [form.coinA.amount, form.coinB.amount],
-      () => {
-        updateTotalCurrencyPrice();
-        updateReceiveAmount();
-      },
-    );
-
-    watch(
       () => [state.isMaximumAmountChecked, form.coinA, form.coinB],
       () => {
         if (state.isMaximumAmountChecked) {
@@ -662,6 +679,9 @@ export default {
             const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom });
             form.coinB.amount = +parseCoins(form.coinB.asset.amount)[0].amount / Math.pow(10, precision);
           }
+
+          updateReceiveAmount();
+          updateTotalCurrencyPrice();
         }
       },
       { deep: true },
@@ -682,6 +702,7 @@ export default {
       hasSufficientFunds,
       isValid,
       exchangeAmount,
+      hasPrices,
       coinAChangeHandler,
       coinBChangeHandler,
       coinPoolChangeHandler,
