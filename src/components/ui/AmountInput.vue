@@ -6,6 +6,10 @@ const props = defineProps({
     type: [String, Number],
     default: '',
   },
+  maxDecimals: {
+    type: Number,
+    default: 6,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -26,6 +30,12 @@ const format = (value: string) => {
   if (newValue.split('').filter((char) => char === '.').length > 1) {
     // Remove subsequent separators
     newValue = newValue.replace(/(?<=\..*)\./g, '');
+  }
+
+  const [integerDigits, fractionDigits] = newValue.split('.');
+
+  if (fractionDigits.length > props.maxDecimals) {
+    newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`;
   }
 
   return newValue;
