@@ -120,7 +120,7 @@
             <div class="add-liquidity__price">
               <span class="add-liquidity__price__divider" />
               <div class="add-liquidity__price__container">
-                <template v-if="form.coinA.asset && form.coinB.asset">
+                <template v-if="exchangeAmount">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> :
                   <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
                 </template>
@@ -310,7 +310,7 @@ export default {
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
       totalEstimatedPrice: '',
-      receiveAmount: 0,
+      receiveAmount: '',
       poolBaseDenoms: [],
     });
 
@@ -319,6 +319,10 @@ export default {
     });
 
     const hasPrices = computed(() => {
+      if (!hasPool.value) {
+        return false;
+      }
+
       if (!hasPair.value) {
         return false;
       }
@@ -363,13 +367,18 @@ export default {
     });
 
     const updateReceiveAmount = () => {
+      if (!hasPool.value) {
+        state.receiveAmount = '1';
+        return;
+      }
+
       if (!form.coinA.amount || !form.coinB.amount) {
-        state.receiveAmount = 0;
+        state.receiveAmount = undefined;
         return;
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = +result.toFixed(6);
+      state.receiveAmount = (+result.toFixed(6)).toString();
     };
 
     const exchangeAmount = computed(() => {
@@ -377,11 +386,19 @@ export default {
         return;
       }
 
+      if (!hasPool.value && (!form.coinB.amount || !form.coinA.amount)) {
+        return;
+      }
+
+      if (!hasPool.value) {
+        return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
+      }
+
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
       if (!priceA || !priceB) {
-        return 1e6;
+        return undefined;
       }
 
       return ((priceA / priceB) * 1e6).toFixed(6);
@@ -411,7 +428,7 @@ export default {
     });
 
     const isValid = computed(() => {
-      if (form.coinA.amount <= 0 || form.coinB.amount <= 0) {
+      if (+form.coinA.amount <= 0 || +form.coinB.amount <= 0) {
         return false;
       }
 
@@ -585,11 +602,16 @@ export default {
       state.isMaximumAmountChecked = false;
 
       if (!hasPair.value || !hasPool.value) {
+        updateReceiveAmount();
         return;
       }
 
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return;
+      }
 
       const result = (form.coinA.amount * priceA) / priceB;
 
@@ -602,11 +624,16 @@ export default {
       state.isMaximumAmountChecked = false;
 
       if (!hasPair.value || !hasPool.value) {
+        updateReceiveAmount();
         return;
       }
 
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return;
+      }
 
       const result = (form.coinB.amount * priceB) / priceA;
 
@@ -617,7 +644,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = calculateWithdrawBalances(state.receiveAmount);
+      const result = calculateWithdrawBalances(+state.receiveAmount);
 
       form.coinA.amount = +result[0].amount.toFixed(6);
       form.coinB.amount = +result[1].amount.toFixed(6);
@@ -658,7 +685,7 @@ export default {
     });
 
     watch(
-      [form.coinA.asset, form.coinB.asset, hasPair],
+      [form.coinA, form.coinB, hasPair],
       async () => {
         await findPoolByDenoms();
       },

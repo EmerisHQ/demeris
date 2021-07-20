@@ -51,7 +51,7 @@
           size="sm"
           class="pool__item__symbol"
         />
-        <AmountDisplay class="w-bold" :amount="{ amount: receiveAmount * 1e6, denom: poolInfo.denom }" />
+        <AmountDisplay class="w-bold" :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }" />
       </div>
     </ListItem>
 
@@ -73,6 +73,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
+import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
@@ -123,11 +124,12 @@ export default defineComponent({
 
     // Add liquidity to a existing pool
     const { calculateSupplyTokenAmount, pairName } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+    const { formatPoolName } = usePools();
 
     const updatePoolInfo = async () => {
       if (hasPool.value) {
         const pool = (data.value as Actions.AddLiquidityData).pool;
-        poolInfo.pairName = pairName.value;
+        poolInfo.pairName = await formatPoolName(pool);
         poolInfo.denom = pool.pool_coin_denom;
         return;
       }
@@ -152,6 +154,7 @@ export default defineComponent({
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      hasPool,
       poolInfo,
       chainName,
       data,

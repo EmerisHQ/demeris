@@ -51,7 +51,7 @@
         class="denom-select__coin-amount-input s-1"
         placeholder="0"
         min="0"
-        @input="$emit('update:amount', Math.abs(Number($event.target.value))), $emit('change', inputHeader)"
+        @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
       />
     </div>
   </div>
@@ -82,7 +82,7 @@ export default defineComponent({
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
     assets: { type: Object, required: true },
-    amount: { type: Number, required: false, default: null },
+    amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
   },
