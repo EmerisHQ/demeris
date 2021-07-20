@@ -65,18 +65,19 @@
         :description="$t('components.previews.swap.swapFeeLbl')"
         :hint="$t('components.previews.swap.swapFeeLblHint')"
         inset
+        style="margin-bottom: 20px"
       >
-        <div>
-          <AmountDisplay
-            class="s-minus"
-            :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
-          />
-        </div>
-
         <AmountDisplay
           class="s-minus"
-          :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+          :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
         />
+
+        <div style="margin-bottom: -2.4rem">
+          <AmountDisplay
+            class="s-minus"
+            :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+          />
+        </div>
       </ListItem>
     </ListItem>
   </List>
