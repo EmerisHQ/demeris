@@ -2,108 +2,125 @@
   <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
     <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
 
-    <div class="title s-2 w-bold">
-      {{ currentData.title }}
-    </div>
-
-    <div v-if="currentData && currentData.fees" class="detail">
-      <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
-      <PreviewAddLiquidity
-        v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
-        :step="currentData.data"
-        :fees="currentData.fees"
+    <template v-if="isTransferConfirmationOpen">
+      <TransferInterstitialConfirmation
+        :action="actionName"
+        :step="data[0]"
+        @continue="isTransferConfirmationOpen = false"
       />
-      <PreviewWithdrawLiquidity
-        v-else-if="currentData.data.name === 'withdrawliquidity'"
-        :step="currentData.data"
-        :fees="currentData.fees"
-      />
-      <PreviewRedeem v-else-if="currentData.data.name === 'redeem'" :step="currentData.data" :fees="currentData.fees" />
-      <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
-    </div>
+    </template>
 
-    <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
-      Non-revertable transactions. Prices not guaranteed etc.
-    </div>
-
-    <div class="button-wrapper">
-      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
-    </div>
-    <Modal
-      v-if="feeWarning"
-      class="fee-warning-modal"
-      :modal-variant="asWidget ? 'bottom' : 'full'"
-      @close="
-        () => {
-          feeWarning = false;
-        }
-      "
-    >
-      <div class="fee-warning-modal__icon-warning">
-        <WarningIcon />
+    <template v-else>
+      <div class="title s-2 w-bold">
+        {{ currentData.title }}
       </div>
-      <template v-if="missingFees.length > 0">
-        <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
-        <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
-        <div class="fee-warning-modal__list">
-          <div v-for="missing in missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
-            <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
-            <div class="fee-warning-modal__list__item__amount">
-              <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
+
+      <div v-if="currentData && currentData.fees" class="detail">
+        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+        <PreviewAddLiquidity
+          v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewWithdrawLiquidity
+          v-else-if="currentData.data.name === 'withdrawliquidity'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewRedeem
+          v-else-if="currentData.data.name === 'redeem'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+      </div>
+
+      <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+        Non-revertable transactions. Prices not guaranteed etc.
+      </div>
+
+      <div class="button-wrapper">
+        <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+      </div>
+      <Modal
+        v-if="feeWarning"
+        class="fee-warning-modal"
+        :modal-variant="asWidget ? 'bottom' : 'full'"
+        @close="
+          () => {
+            feeWarning = false;
+          }
+        "
+      >
+        <div class="fee-warning-modal__icon-warning">
+          <WarningIcon />
+        </div>
+        <template v-if="missingFees.length > 0">
+          <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
+          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
+          <div class="fee-warning-modal__list">
+            <div v-for="missing in missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
+              <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
+              <div class="fee-warning-modal__list__item__amount">
+                <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-      <template v-if="ibcWarning">
-        <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}</div>
-        <div class="fee-warning-modal__content">
-          {{ $t('components.feeWarningModal.ibcWarningText', { ibcDenom: 'ATOM', chain: 'Terra', denom: 'Luna' }) }}
-        </div>
-        <Button :name="$t('generic_cta.cancel')" />
-        <Button :name="$t('generic_cta.proceed')" />
-      </template>
-      <template #buttons>
-        <template v-if="missingFees.length == 1 && missingFees[0].denom == 'uatom'">
-          <ModalButton
-            :name="$t('generic_cta.cancel')"
-            :click-function="
-              () => {
-                emitHandler('close');
-              }
-            "
-          />
-          <ModalButton :name="$t('generic_cta.getAtom')" />
-        </template>
-        <template v-if="missingFees.length > 1 || (missingFees.length == 1 && missingFees[0].denom != 'uatom')">
-          <ModalButton
-            :name="$t('generic_cta.understand')"
-            :click-function="
-              () => {
-                emitHandler('close');
-              }
-            "
-          />
         </template>
         <template v-if="ibcWarning">
-          <ModalButton
-            :name="$t('generic_cta.cancel')"
-            :click-function="
-              () => {
-                emitHandler('close');
-              }
-            "
-          />
-          <ModalButton
-            :name="$t('generic_cta.proceed')"
-            :click-function="
-              () => {
-                feeWarning = false;
-              }
-            "
-          />
+          <div class="fee-warning-modal__title">
+            {{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}
+          </div>
+          <div class="fee-warning-modal__content">
+            {{ $t('components.feeWarningModal.ibcWarningText', { ibcDenom: 'ATOM', chain: 'Terra', denom: 'Luna' }) }}
+          </div>
+          <Button :name="$t('generic_cta.cancel')" />
+          <Button :name="$t('generic_cta.proceed')" />
         </template>
-      </template>
-    </Modal>
+        <template #buttons>
+          <template v-if="missingFees.length == 1 && missingFees[0].denom == 'uatom'">
+            <ModalButton
+              :name="$t('generic_cta.cancel')"
+              :click-function="
+                () => {
+                  emitHandler('close');
+                }
+              "
+            />
+            <ModalButton :name="$t('generic_cta.getAtom')" />
+          </template>
+          <template v-if="missingFees.length > 1 || (missingFees.length == 1 && missingFees[0].denom != 'uatom')">
+            <ModalButton
+              :name="$t('generic_cta.understand')"
+              :click-function="
+                () => {
+                  emitHandler('close');
+                }
+              "
+            />
+          </template>
+          <template v-if="ibcWarning">
+            <ModalButton
+              :name="$t('generic_cta.cancel')"
+              :click-function="
+                () => {
+                  emitHandler('close');
+                }
+              "
+            />
+            <ModalButton
+              :name="$t('generic_cta.proceed')"
+              :click-function="
+                () => {
+                  feeWarning = false;
+                }
+              "
+            />
+          </template>
+        </template>
+      </Modal>
+    </template>
+
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
@@ -156,6 +173,7 @@ import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
@@ -177,8 +195,13 @@ export default defineComponent({
     Modal,
     CircleSymbol,
     AmountDisplay,
+    TransferInterstitialConfirmation,
   },
   props: {
+    actionName: {
+      type: String,
+      required: true,
+    },
     data: {
       type: Array as PropType<Step[]>,
       required: true,
@@ -209,6 +232,8 @@ export default defineComponent({
       { denom: 'uakt', chain_name: 'akash', amount: 2000 },
     ]);
     const ibcWarning = ref(false);
+    const isTransferConfirmationOpen = ref(false);
+
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -384,7 +409,29 @@ export default defineComponent({
     const emitHandler = (event) => {
       emit(event);
     };
+
+    watch(
+      props,
+      () => {
+        let shouldOpenConfirmation = false;
+
+        if (props.actionName === 'move') {
+          shouldOpenConfirmation = true;
+        } else if (props.actionName === 'transfer') {
+          if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+            shouldOpenConfirmation = true;
+          }
+        } else if (['swap', 'addliquidity'].includes(props.actionName)) {
+          shouldOpenConfirmation = props.data.length > 1;
+        }
+
+        isTransferConfirmationOpen.value = shouldOpenConfirmation;
+      },
+      { immediate: true },
+    );
+
     return {
+      isTransferConfirmationOpen,
       emitHandler,
       txstatus,
       confirm,

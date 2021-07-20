@@ -14,6 +14,7 @@ export const messages = {
       understand: 'I understand',
       getAtom: 'Get ATOM',
       proceed: 'Proceed',
+      learnMore: 'Learn more',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -122,6 +123,18 @@ export const messages = {
         receiveHeader: 'Receive {amount}',
         priceAlert: 'Prices have changed',
       },
+      transferToHub: {
+        swap: 'Assets are swapped on the Cosmos Hub',
+        swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        addLiquidity: 'Liquidity providing happens on the Cosmos Hub',
+        addLiquidityDescription:
+          'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
+        addLiquidityDescriptionMultiple:
+          'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
+        transfer: 'Cross-chain transfers from {from} to {to}',
+        transferDescription:
+          'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
+      },
       previews: {
         addWithdrawLiquidity: {
           poolLbl: 'Pool',
@@ -167,15 +180,22 @@ export const messages = {
         theme: 'Theme',
         system: 'System',
         light: 'Light',
-        advancedSettings: 'Advanced Settings',
-        customSlippage: 'Custom slippage',
-        viewAllAssets: 'View all assets',
-        lpAssetPool: 'LP asset pool',
+        advancedSettings: 'Advanced settings',
+        settings: 'Settings',
+        connectedWallet: 'Connected wallet',
+        disconnectWallet: 'Disconnect wallet',
         support: 'Support',
         twitter: 'Twitter',
         privacy: 'Privacy',
         termsOfUse: 'Terms of use',
         cookiesPolicy: 'Cookies policy',
+        allowCustomSlippage: 'Allow custom slippage',
+        viewAllAssets: 'View all assets',
+        viewLPAssetPools: 'View LP asset pools',
+        warningCustomSlippage: 'Be careful, being able to change price slippage is an advanced setting.',
+        warningViewUnverified: 'Be careful, being able to trade any asset is an advanced setting.',
+        warningLPAssetPools: 'Be careful, being able to see and trade LP asset pools is an advanced setting.',
+        warningSignificantLoss: 'This means that if you don’t know what you are doing, you may risk significant loss.',
       },
     },
     context: {

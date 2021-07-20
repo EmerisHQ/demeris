@@ -16,14 +16,13 @@ export default defineComponent({
 <style scoped lang="scss">
 .nav {
   display: flex;
-  margin-left: 6rem;
+  margin-left: 1.6rem;
   align-items: center;
 
   &-link {
-    padding: 1rem;
-    margin-right: 1rem;
+    padding: 0 1.6rem;
     text-decoration: none;
-    text-align: left;
+    line-height: 4.8rem;
 
     &:visited {
       color: inherit;
