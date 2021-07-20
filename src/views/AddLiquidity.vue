@@ -436,6 +436,10 @@ export default {
         return;
       }
 
+      if (!hasPrices.value) {
+        return;
+      }
+
       let total = 0;
 
       if (form.coinA.asset) {
