@@ -17,7 +17,7 @@
     <template v-else-if="assetConfig">
       <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
       <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
-      <img v-else alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
+      <img v-if="glow" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
     </template>
 
     <template v-else>
@@ -72,6 +72,10 @@ export default defineComponent({
     size: {
       type: String as PropType<CircleSymbolSize>,
       default: 'md',
+    },
+    glow: {
+      type: Boolean,
+      default: true,
     },
   },
 

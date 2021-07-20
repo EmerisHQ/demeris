@@ -3,6 +3,7 @@
     <div class="asset-chains__count">
       <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
     </div>
+    <CircleSymbol :denom="denom" :glow="false" />
 
     <template #content>
       <p v-for="balance of filteredBalances" :key="balance.on_chain">
@@ -20,12 +21,16 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'AssetChains',
+  components: {
+    CircleSymbol,
+  },
   props: {
     balances: {
       type: Object as PropType<Balances>,
@@ -93,16 +98,22 @@ export default defineComponent({
 .asset-chains {
   width: 3.2rem;
   height: 3.2rem;
-  border: 2px solid var(--muted);
-  display: flex;
-  border-radius: 3.2rem;
-
-  justify-content: center;
-  align-items: center;
+  position: relative;
 
   &__count {
+    position: absolute;
+    top: 0.3rem;
+    left: 0.3rem;
     font-weight: 400;
     font-size: 1.3rem;
+    background: var(--bg);
+    width: 2.6rem;
+    height: 2.6rem;
+    z-index: 10;
+    display: flex;
+    border-radius: 3.2rem;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>
