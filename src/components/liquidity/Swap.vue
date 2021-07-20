@@ -16,6 +16,8 @@
       :as-widget="true"
       :data="actionHandlerResult"
       :gas-price-level="gasPrice"
+      action-name="swap"
+      as-widget
       @close="reviewModalToggle"
       @reset="
         () => {
