@@ -183,20 +183,6 @@ export default defineComponent({
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
-    //TEST
-    // console.group('TEST');
-    // setTimeout(() => {
-    //   console.log(balances.value);
-    // }, 10000);
-    // console.log(
-    //   'getReceiveCoinAmount',
-    //   getReceiveCoinAmount({ base_denom: 'uatom', amount: 36 }, 2100000000, 3200000000),
-    // );
-    // console.log('getPayCoinAmount', getPayCoinAmount({ base_denom: 'uakt', amount: 23.07 }, 3200000000, 2100000000));
-
-    // console.groupEnd();
-    //TEST
-
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
     onMounted(async () => {
@@ -408,7 +394,7 @@ export default defineComponent({
           base_denom: denom.name,
           denom: denom.name,
           on_chain: denom.chain_name,
-          amount: 0,
+          amount: 0 + denom.name,
         })),
       ];
 
@@ -434,7 +420,6 @@ export default defineComponent({
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
-
       return payAssets;
     });
     const assetsToReceive = computed(() => {
@@ -645,7 +630,6 @@ export default defineComponent({
             data.payCoinAmount * minimalDecimal,
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
-          console.log(slippage.value * 100);
         }
       },
     );
