@@ -1,9 +1,22 @@
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 import { store, useAllStores } from '../store/index';
+
+type PoolMeta = {
+  name?: string;
+  reserveBaseDenoms?: string[];
+};
+
+type State = {
+  meta: Record<string, PoolMeta>;
+};
+
+const state = reactive<State>({
+  meta: {},
+});
 
 export default function usePools() {
   const stores = useAllStores();
@@ -12,22 +25,51 @@ export default function usePools() {
     return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
   });
 
+  const getPoolMeta = (poolId: string) => {
+    return state.meta[poolId];
+  };
+
+  const updatePoolMeta = (poolId: string, data: PoolMeta) => {
+    state.meta[poolId] = {
+      ...(state.meta[poolId] || {}),
+      ...data,
+    };
+  };
+
   const formatPoolName = async (pool: Pool) => {
-    return (
+    const result = (
       await Promise.all(
         pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
       )
     )
       .join('/')
       .toUpperCase();
+
+    updatePoolMeta(pool.id, { name: result });
+
+    return result;
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
-    return Promise.all(pool.reserve_coin_denoms.map((denom) => getBaseDenom(denom)));
+    const result = await Promise.all(pool.reserve_coin_denoms.map((denom) => getBaseDenom(denom)));
+
+    updatePoolMeta(pool.id, { reserveBaseDenoms: result });
+
+    return result;
   };
 
   const poolsByDenom = (denom: string) => {
-    return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
+    return pools.value.filter((item) => {
+      if (item.reserve_coin_denoms.includes(denom)) {
+        return true;
+      }
+
+      if (getPoolMeta(item.id).reserveBaseDenoms?.includes(denom)) {
+        return true;
+      }
+
+      return false;
+    });
   };
 
   const poolById = (id: string) => {
@@ -170,6 +212,7 @@ export default function usePools() {
   };
   return {
     pools,
+    getPoolMeta,
     getReserveBaseDenoms,
     poolsByDenom,
     poolById,

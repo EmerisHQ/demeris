@@ -65,6 +65,7 @@
                 <CircleSymbol
                   :denom="denom"
                   :chain-name="asset.on_chain"
+                  variant="chain"
                   class="asset__main__chains__item__asset__avatar"
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
@@ -141,6 +142,7 @@ import StakeTable from '@/components/common/StakeTable.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
@@ -198,9 +200,29 @@ export default defineComponent({
       return 0;
     });
 
-    // TODO: get true pooled amount
     const pooledAmount = computed(() => {
-      return 0;
+      let amount = 0;
+
+      for (const pool of pools.value) {
+        const balances = balancesByDenom(pool.pool_coin_denom);
+
+        for (const balance of balances) {
+          const poolFns = usePool(pool.id, { autoUpdate: false });
+
+          if (poolFns.reserveBalances) {
+            const poolCoinAmount = +parseCoins(balance.amount)[0].amount / 1e6;
+            const withdrawBalances = poolFns.calculateWithdrawBalances(poolCoinAmount);
+            const denomBalance = withdrawBalances.find(
+              (item) => item.base_denom === denom.value || item.denom === denom.value,
+            );
+            if (denomBalance) {
+              amount += denomBalance.amount;
+            }
+          }
+        }
+      }
+
+      return amount * 1e6;
     });
 
     const totalAmount = computed(() => {

@@ -4,11 +4,15 @@ import { useAllStores } from '@/store';
 
 import usePools from './usePools';
 
-export default function usePool(id?: string | ComputedRef<string>) {
+type Options = {
+  autoUpdate?: boolean;
+};
+
+export default function usePool(id?: string | ComputedRef<string>, options: Options = { autoUpdate: true }) {
   const store = useAllStores();
   const reserveBaseDenoms = ref([]);
 
-  const { poolById, formatPoolName, poolPriceById, getReserveBaseDenoms } = usePools();
+  const { poolById, formatPoolName, poolPriceById, getReserveBaseDenoms, getPoolMeta } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -83,14 +87,17 @@ export default function usePool(id?: string | ComputedRef<string>) {
      * WithdrawAmount = ReserveAmount * PoolCoinAmount * WithdrawFeeProportion / TotalSupply
      * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
      */
+    const reserveDenoms = getPoolMeta(pool.value.id)?.reserveBaseDenoms || [];
 
     const withdrawCoins = [
       {
         amount: (reserveBalances.value[0].amount * poolCoinAmount) / totalSupply.value,
+        base_denom: reserveDenoms[0],
         denom: reserveBalances.value[0].denom,
       },
       {
         amount: (reserveBalances.value[1].amount * poolCoinAmount) / totalSupply.value,
+        base_denom: reserveDenoms[1],
         denom: reserveBalances.value[1].denom,
       },
     ];
@@ -101,7 +108,9 @@ export default function usePool(id?: string | ComputedRef<string>) {
   watch(
     pool,
     () => {
-      updateReserveBalances();
+      if (options.autoUpdate) {
+        updateReserveBalances();
+      }
       setPairName();
     },
     { immediate: true },
