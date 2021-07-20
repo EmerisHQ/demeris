@@ -303,7 +303,7 @@ export default defineComponent({
     &::before {
       position: absolute;
       content: '';
-      inset: 2px;
+      inset: 0.3rem;
       border-radius: 2.6rem;
       background: var(--bg);
     }

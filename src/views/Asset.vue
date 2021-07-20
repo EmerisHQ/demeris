@@ -66,6 +66,7 @@
                   :denom="denom"
                   :chain-name="asset.on_chain"
                   class="asset__main__chains__item__asset__avatar"
+                  :glow="false"
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
@@ -237,6 +238,7 @@ export default defineComponent({
 
         &__symbol {
           margin-right: 1.2rem;
+          position: relative;
         }
         &__name {
           margin-right: 1.2rem;
@@ -287,6 +289,21 @@ export default defineComponent({
           display: flex;
           align-items: center;
 
+          &__avatar {
+            position: relative;
+            &:before {
+              display: block;
+              content: '';
+              width: 2.6rem;
+              height: 2.6rem;
+              position: absolute;
+              top: 0.3rem;
+              left: 0.3rem;
+              border-radius: 1.3rem;
+              background: var(--bg);
+              z-index: 5;
+            }
+          }
           &__denom {
             margin-left: 1.6rem;
             font-weight: 600;
