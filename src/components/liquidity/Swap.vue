@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper">
     <SlippageSettingModal
       v-show="isSlippageSettingModalOpen"
       :swap-data="{
@@ -170,6 +170,7 @@ export default defineComponent({
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
+    const isInit = ref(false);
     const slippage = ref(0);
     const store = useStore();
     const isSignedIn = computed(() => {
@@ -435,7 +436,6 @@ export default defineComponent({
     });
 
     // default pay coin set
-    const isInit = ref(false);
     watch(
       () => {
         return [assetsToPay.value, balances.value];
@@ -485,6 +485,9 @@ export default defineComponent({
             if (data.isPriceChanged) {
               return 'Update prices';
             } else {
+              if (data.buttonStatus === 'normal') {
+                return 'Review';
+              }
               return 'Swap';
             }
           }
@@ -500,6 +503,9 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
+        if (!isInit.value) {
+          return 'loading';
+        }
         if (data.isSwapReady) {
           return 'normal';
         } else {
@@ -833,6 +839,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      isInit,
       changePayToReceive,
       denomSelectHandler,
       getPrecisedAmount,
