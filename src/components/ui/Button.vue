@@ -2,9 +2,9 @@
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
-      :class="[status, isOutline ? 'outline-theme' : '']"
+      :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
       :disabled="disabled"
-      class="button s-0 w-medium elevation-button"
+      class="button s-0 w-medium"
       @click="clickFunction"
     >
       {{ name }}
@@ -85,7 +85,7 @@ export default defineComponent({
 
 .outline-theme {
   color: var(--text);
-  border: 1px solid var(--border-trans);
+  /* border: 1px solid var(--border-trans); */
   background-color: transparent;
 }
 </style>
