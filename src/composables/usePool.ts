@@ -4,7 +4,11 @@ import { useAllStores } from '@/store';
 
 import usePools from './usePools';
 
-export default function usePool(id?: string | ComputedRef<string>) {
+type Options = {
+  autoUpdate?: boolean;
+};
+
+export default function usePool(id?: string | ComputedRef<string>, options: Options = { autoUpdate: true }) {
   const store = useAllStores();
   const reserveBaseDenoms = ref([]);
 
@@ -101,7 +105,9 @@ export default function usePool(id?: string | ComputedRef<string>) {
   watch(
     pool,
     () => {
-      updateReserveBalances();
+      if (options.autoUpdate) {
+        updateReserveBalances();
+      }
       setPairName();
     },
     { immediate: true },
