@@ -45,7 +45,7 @@
     <div class="denom-select__coin-amount">
       <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
       <AmountInput
-        :value="amount"
+        :model-value="amount"
         :class="isOver ? 'over' : ''"
         :readonly="readonly"
         class="denom-select__coin-amount-input s-1"

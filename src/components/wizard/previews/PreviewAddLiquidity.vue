@@ -123,7 +123,7 @@ export default defineComponent({
     });
 
     // Add liquidity to a existing pool
-    const { calculateSupplyTokenAmount, pairName } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+    const { calculateSupplyTokenAmount } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
     const { formatPoolName } = usePools();
 
     const updatePoolInfo = async () => {
