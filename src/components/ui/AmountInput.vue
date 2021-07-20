@@ -38,7 +38,13 @@ const model = computed({
       return;
     }
 
-    const formatted = format(value);
+    let currentValue = value;
+
+    if (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
+      currentValue = Number.MAX_SAFE_INTEGER.toString();
+    }
+
+    const formatted = format(currentValue);
     emit('update:modelValue', formatted);
     inputRef.value.value = formatted;
   },
