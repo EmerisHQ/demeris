@@ -17,7 +17,7 @@ export default defineComponent({
     const price = computed(() => {
       return store.getters['demeris/getPrice']({ denom: props.denom });
     });
-    const usdValue = ref(props.modelValue);
+    const usdValue = ref(props.modelValue * parseFloat(price.value));
 
     const trueValue = computed(() => {
       return usdValue.value / parseFloat(price.value);

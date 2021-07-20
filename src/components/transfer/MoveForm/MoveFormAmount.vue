@@ -51,9 +51,10 @@
         <div class="move-form-amount__controls">
           <label class="move-form-amount__controls__button">
             <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
-            <span class="elevation-button">USD</span>
+            <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
+            <span v-else class="elevation-button">USD</span>
           </label>
-          <label class="move-form-amount__controls__button">
+          <label class="move-form-amount__controls__button is-toggle">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
             <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
           </label>
@@ -380,13 +381,13 @@ export default defineComponent({
       input {
         display: none;
       }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
+      &.is-toggle {
+        input:checked + span {
+          background: var(--text);
+          color: var(--bg);
+          font-weight: 500;
+        }
       }
-
       span {
         padding: 1rem 1.6rem;
         border-radius: 2.4rem;

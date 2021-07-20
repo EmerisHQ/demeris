@@ -10,20 +10,41 @@
     </div>
 
     <fieldset class="form__field send-form-amount">
-      <div class="send-form-amount__input">
-        <input v-model="form.balance.amount" class="send-form-amount__input__control" min="0" placeholder="0" />
-        <span class="send-form-amount__input__denom">{{ $filters.getCoinName(state.currentAsset?.base_denom) }}</span>
-      </div>
+      <template v-if="state.isUSDInputChecked">
+        <div class="send-form-amount__input">
+          <USDInput
+            v-model="form.balance.amount"
+            :denom="state.currentAsset?.base_denom"
+            class="send-form-amount__input__control"
+            min="0"
+            placeholder="0"
+          />
+          <span class="send-form-amount__input__denom">$</span>
+        </div>
 
-      <span class="send-form-amount__estimated"> $8,866.34 </span>
+        <span class="send-form-amount__estimated">
+          <AmountDisplay
+            :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+          />
+        </span>
+      </template>
+      <template v-else>
+        <div class="send-form-amount__input">
+          <input v-model="form.balance.amount" class="send-form-amount__input__control" min="0" placeholder="0" />
+          <span class="send-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
+        </div>
 
+        <span class="send-form-amount__estimated">
+          <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" /></span>
+      </template>
       <div class="send-form-amount__controls">
         <label class="send-form-amount__controls__button">
-          <input type="checkbox" name="send-form-amount-usd" />
-          <span class="elevation-button">USD</span>
+          <input v-model="state.isUSDInputChecked" type="checkbox" name="send-form-amount-usd" />
+          <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
+          <span v-else class="elevation-button">USD</span>
         </label>
 
-        <label class="send-form-amount__controls__button">
+        <label class="send-form-amount__controls__button is-toggle">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
           <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
         </label>
@@ -93,6 +114,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
+import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
@@ -111,6 +133,7 @@ export default defineComponent({
     Icon,
     DenomSelectModal,
     Price,
+    USDInput,
   },
 
   props: {
@@ -129,15 +152,20 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
+      isUSDInputChecked: false,
       isSelectModalOpen: false,
     });
 
     const denomDecimals = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: state.currentAsset.base_denom,
-      });
+      if (state.currentAsset) {
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: state.currentAsset.base_denom,
+        });
 
-      return Math.pow(10, precision);
+        return Math.pow(10, precision);
+      } else {
+        return 1;
+      }
     });
 
     const hasSufficientFunds = computed(() => {
@@ -195,7 +223,7 @@ export default defineComponent({
       setCurrentAsset(props.balances[0]);
     }
 
-    return { form, onSubmit, state, setCurrentAsset, hasSufficientFunds, isValid, toggleSelectModal };
+    return { form, onSubmit, state, setCurrentAsset, hasSufficientFunds, denomDecimals, isValid, toggleSelectModal };
   },
 });
 </script>
@@ -259,13 +287,13 @@ export default defineComponent({
       input {
         display: none;
       }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
+      &.is-toggle {
+        input:checked + span {
+          background: var(--text);
+          color: var(--bg);
+          font-weight: 500;
+        }
       }
-
       span {
         padding: 1rem 1.6rem;
         border-radius: 2.4rem;
