@@ -13,7 +13,6 @@
     />
     <ReviewModal
       v-if="isOpen && !isSlippageSettingModalOpen"
-      :as-widget="true"
       :data="actionHandlerResult"
       :gas-price-level="gasPrice"
       action-name="swap"
