@@ -5,6 +5,7 @@
     :body-class="status === 'complete' ? 'transferred-bg' : ''"
     @close="emitClose"
   >
+    <!-- {{ tx }} {{ status }} -->
     <div class="status">
       <div v-if="iconType" class="status__icon">
         <SpinnerIcon v-if="iconType === 'pending'" :size="3.2" />
@@ -79,7 +80,9 @@
           </div>
         </template>
         <template v-else>
+          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">Keplr troubleshooting ↗️</a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
+          <div v-if="status === 'keplr-reject'" class="spacer-2" />
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               Your <AmountDisplay :amount="tx.data.amount" /> on <ChainName :name="tx.data.from_chain" /> could not be
@@ -362,8 +365,17 @@ export default defineComponent({
   }
 
   &__detail {
+    .link {
+      display: block;
+      margin-top: 1.6rem;
+    }
+
     .spacer {
       height: 8.8rem;
+    }
+
+    .spacer-2 {
+      height: 4.8rem;
     }
 
     &-transferring {
