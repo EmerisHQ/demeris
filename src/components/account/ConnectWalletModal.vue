@@ -1,14 +1,34 @@
 <template>
   <teleport to="body">
-    <Modal :open="open" class="connect-wallet-modal" body-class="elevation-panel" width="72rem" @close="close">
-      <ConnectKeplr
-        v-if="isKeplrSupported && isKeplrInstalled"
-        ref="connectKeplrRef"
-        @cancel="close"
-        @connect="close"
-      />
-      <GetKeplr v-else-if="isKeplrSupported && !isKeplrInstalled" ref="getKeplrRef" @cancel="close" @get="close" />
-      <GetBrowser v-else ref="getBrowserRef" @cancel="close" @get="close" />
+    <Modal
+      v-if="isKeplrSupported && isKeplrInstalled"
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeConnectKeplr"
+    >
+      <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
+    </Modal>
+    <Modal
+      v-else-if="isKeplrSupported && !isKeplrInstalled"
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeGetKeplr"
+    >
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" @get="closeGetKeplr" />
+    </Modal>
+    <Modal
+      v-else
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeGetBrowser"
+    >
+      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" @get="closeGetBrowser" />
     </Modal>
   </teleport>
 </template>
@@ -51,10 +71,16 @@ export default defineComponent({
     const isChrome = ref(null);
     const isBrave = ref(null);
 
-    const close = () => {
+    const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
-      getKeplrRef.value.cancel();
-      getBrowserRef.value.cancel();
+      emit('close');
+    };
+    const closeGetKeplr = () => {
+      connectKeplrRef.value.cancel();
+      emit('close');
+    };
+    const closeGetBrowser = () => {
+      connectKeplrRef.value.cancel();
       emit('close');
     };
 
@@ -78,7 +104,16 @@ export default defineComponent({
     }
     console.log('is keplr installed?', isKeplrInstalled.value);
 
-    return { connectKeplrRef, getKeplrRef, getBrowserRef, isKeplrSupported, isKeplrInstalled, close };
+    return {
+      connectKeplrRef,
+      getKeplrRef,
+      getBrowserRef,
+      isKeplrSupported,
+      isKeplrInstalled,
+      closeConnectKeplr,
+      closeGetKeplr,
+      closeGetBrowser,
+    };
   },
 });
 </script>

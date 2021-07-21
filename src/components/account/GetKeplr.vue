@@ -14,7 +14,7 @@
 
         <div class="get-keplr__controls">
           <Button
-            :name="$t('wallet.connect.modal.button')"
+            name="Install Keplr"
             href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
             rel="noopener noreferrer"
             target="_blank"
