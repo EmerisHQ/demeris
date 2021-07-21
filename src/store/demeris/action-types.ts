@@ -16,6 +16,7 @@ export enum DemerisActionTypes {
   GET_TX_STATUS = 'GET_TX_STATUS',
   SET_SESSION_DATA = 'SET_SESSION_DATA',
   LOAD_SESSION_DATA = 'LOAD_SESSION_DATA',
+  GET_END_BLOCK_EVENTS = 'GET_END_BLOCK_EVENTS',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'GET_VERIFY_TRACE',
   GET_FEE_ADDRESS = 'GET_FEE_ADDRESS',
@@ -49,6 +50,7 @@ export enum GlobalDemerisActionTypes {
   GET_CHAINS = 'demeris/GET_CHAINS',
   GET_PRICES = 'demeris/GET_PRICES',
   GET_TX_STATUS = 'demeris/GET_TX_STATUS',
+  GET_END_BLOCK_EVENTS = 'demeris/GET_END_BLOCK_EVENTS',
   SET_SESSION_DATA = 'demeris/SET_SESSION_DATA',
   LOAD_SESSION_DATA = 'demeris/LOAD_SESSION_DATA',
   // Chain-specific endpoint actions

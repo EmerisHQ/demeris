@@ -93,10 +93,10 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { ChainData } from '@/store/demeris/state';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
-
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -287,6 +287,12 @@ export default defineComponent({
                     ticket: result.ticket,
                   });
                 }
+                //Get end block events
+                let endBlocks = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                  height: txResultData.height,
+                });
+                console.log('endBlocks', endBlocks);
+
                 // TODO: deal with status here
                 emit('complete');
                 txstatus.value = 'complete';
