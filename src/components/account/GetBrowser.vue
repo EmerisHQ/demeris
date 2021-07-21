@@ -9,8 +9,8 @@
         <div class="get-browser__description">
           <slot name="description">
             <p>
-              Emeris beta is currently only compatible with web browers that support the Chrome Web Store. These include
-              Google Chrome, Brave, Microsoft Edge, etc.
+              Emeris beta is only compatible with Chromium-based web browsers. These include Google Chrome, Brave,
+              Microsoft Edge, etc.
             </p>
           </slot>
         </div>

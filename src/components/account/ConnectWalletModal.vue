@@ -87,7 +87,7 @@ export default defineComponent({
       window.addEventListener('load', () => {
         // detect chrome extension support
         // @ts-ignore
-        isKeplrSupported.value = !!window.chrome || !!navigator.brave;
+        isKeplrSupported.value = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
 
         // detect keplr installed
         // @ts-ignore
