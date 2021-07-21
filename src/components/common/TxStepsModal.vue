@@ -45,11 +45,11 @@
     </template>
 
     <TxHandlingModal
-      v-if="true || isTxHandlingModalOpen"
+      v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
-      :status="'transacting' || txstatus"
+      :status="txstatus"
       :has-more="hasMore"
-      :tx="{ name: 'swap' } || transaction"
+      :tx="transaction"
       :is-final="isFinal"
       @next="nextTx"
       @retry="
