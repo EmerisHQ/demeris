@@ -22,7 +22,7 @@
       <fieldset class="form__field move-form-amount">
         <template v-if="state.isUSDInputChecked">
           <div class="move-form-amount__input">
-            <FlexibleAmountInput v-model="state.usdValue" :max-width="250" :min-width="35" prefix="$">
+            <FlexibleAmountInput v-model="state.usdValue" :max-width="300" :min-width="35" prefix="$">
               <template #default="inputProps">
                 <USDInput
                   v-model="form.balance.amount"
@@ -159,7 +159,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
