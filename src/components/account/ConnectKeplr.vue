@@ -9,8 +9,8 @@
 
           <div class="connect-keplr__description">
             <slot name="description">
-              <p>{{ $t('wallet.connect.modal.text1') }}</p>
-              <p>{{ $t('wallet.connect.modal.text2') }}</p>
+              <p>To use Emeris, you will need to allow this web app to connect your accounts stored on Keplr.</p>
+              <p>Note that you need to create an account within Keplr before connecting to Emeris will work.</p>
             </slot>
           </div>
 
@@ -18,12 +18,12 @@
             <Button :name="$t('wallet.connect.modal.button')" @click="signIn" />
 
             <a
-              href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
+              href="https://t.me/EmerisHQ"
               rel="noopener noreferrer"
               target="_blank"
               class="connect-keplr__controls__help s-minus"
             >
-              {{ $t('wallet.connect.modal.missing') }}
+              Need help?
             </a>
           </div>
         </div>

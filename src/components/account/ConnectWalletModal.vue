@@ -10,6 +10,7 @@
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
     </Modal>
+
     <Modal
       v-else-if="isKeplrSupported && !isKeplrInstalled"
       :open="open"
@@ -20,6 +21,7 @@
     >
       <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" @get="closeGetKeplr" />
     </Modal>
+
     <Modal
       v-else
       :open="open"
@@ -76,11 +78,11 @@ export default defineComponent({
       emit('close');
     };
     const closeGetKeplr = () => {
-      connectKeplrRef.value.cancel();
+      getKeplrRef.value.cancel();
       emit('close');
     };
     const closeGetBrowser = () => {
-      connectKeplrRef.value.cancel();
+      getBrowserRef.value.cancel();
       emit('close');
     };
 

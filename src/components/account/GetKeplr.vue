@@ -3,22 +3,18 @@
     <div class="get-keplr__wrapper">
       <div class="get-keplr__content">
         <slot name="title">
-          <h2 class="get-keplr__title">Install Keplr</h2>
+          <h2 class="get-keplr__title">Keplr is required</h2>
         </slot>
 
         <div class="get-keplr__description">
           <slot name="description">
-            <p>You need to install the Keplr extension from the Chrome Web Store.</p>
+            <p>To use Emeris, you need to install the Keplr browser extension wallet from the Chrome Web Store.</p>
           </slot>
         </div>
 
         <div class="get-keplr__controls">
-          <Button
-            name="Install Keplr"
-            href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
-            rel="noopener noreferrer"
-            target="_blank"
-          />
+          <Button name="Get Keplr" @click="openUrl" />
+          <Button :is-outline="true" name="I got Keplr" @click="reloadApp" />
         </div>
       </div>
       <div v-if="showBanner" class="connect-keplr__banner">
@@ -59,7 +55,18 @@ export default defineComponent({
       emit('cancel');
     };
 
-    return { emitCancel };
+    const openUrl = () => {
+      window.open(
+        'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en',
+        '_blank',
+        'noopener',
+      );
+    };
+    const reloadApp = () => {
+      location.reload();
+    };
+
+    return { emitCancel, openUrl, reloadApp };
   },
 });
 </script>
@@ -118,12 +125,8 @@ export default defineComponent({
     flex-direction: column;
     margin-top: 5rem;
 
-    &__help {
-      margin-top: 1.6rem;
-      color: var(--muted);
-      display: block;
-      text-align: center;
-      padding: 0.6rem 0;
+    button {
+      margin-bottom: 1.6rem;
     }
   }
 

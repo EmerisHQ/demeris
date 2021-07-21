@@ -3,22 +3,21 @@
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
         <slot name="title">
-          <h2 class="get-browser__title">Install Chrome</h2>
+          <h2 class="get-browser__title">Unsupported browser</h2>
         </slot>
 
         <div class="get-browser__description">
           <slot name="description">
-            <p>You need to install Chrome, a web browser that supports the Keplr extension.</p>
+            <p>
+              Emeris is a web app that is compatible with Google Chrome and Brave Browser. You will need to use one of
+              these web browsers.
+            </p>
           </slot>
         </div>
 
         <div class="get-browser__controls">
-          <Button
-            name="Download Chrome"
-            href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
-            rel="noopener noreferrer"
-            target="_blank"
-          />
+          <Button name="Get Chrome" @click="openUrlChrome" />
+          <Button name="Get Brave" @click="openUrlBrave" />
         </div>
       </div>
       <div v-if="showBanner" class="connect-keplr__banner">
@@ -59,7 +58,14 @@ export default defineComponent({
       emit('cancel');
     };
 
-    return { emitCancel };
+    const openUrlChrome = () => {
+      window.open('https://www.google.com/chrome/', '_blank', 'noopener');
+    };
+    const openUrlBrave = () => {
+      window.open('https://www.brave.com', '_blank', 'noopener');
+    };
+
+    return { emitCancel, openUrlChrome, openUrlBrave };
   },
 });
 </script>
@@ -118,12 +124,8 @@ export default defineComponent({
     flex-direction: column;
     margin-top: 5rem;
 
-    &__help {
+    div + div {
       margin-top: 1.6rem;
-      color: var(--muted);
-      display: block;
-      text-align: center;
-      padding: 0.6rem 0;
     }
   }
 
