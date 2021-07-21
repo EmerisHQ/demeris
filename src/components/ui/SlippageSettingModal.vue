@@ -8,6 +8,7 @@
         }
       "
     />
+
     <div class="setting">
       <div class="s-minus w-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
       <div class="setting__sections">
@@ -70,7 +71,11 @@
       </div>
       <div class="details__row">
         <div class="details__row-left s-minus w-medium">
-          <div>{{ $t('components.slippageSettingsModal.minReceivedLbl') }}</div>
+          <div>
+            {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
+              $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
+            }}
+          </div>
           <tippy :max-width="192">
             <HintIcon />
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
@@ -118,14 +123,26 @@ export default defineComponent({
   },
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
+    const trueSlippage = computed(() => {
+      return store.getters['demeris/getSlippagePerc'] || 0.5;
+    });
+    const customSlippage = computed(() => {
+      if (trueSlippage.value) {
+        if (trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1) {
+          return trueSlippage.value;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    });
+
     const state = reactive({
-      trueSlippage: computed(() => {
-        return store.getters['demeris/getSlippagePerc'] || 0.5;
-      }),
       slippage: computed(() => {
-        if (state.trueSlippage.value) {
-          if (state.trueSlippage.value == 0.1 || state.trueSlippage.value == 0.5 || state.trueSlippage.value == 1) {
-            return state.trueSlippage.value;
+        if (trueSlippage.value) {
+          if (trueSlippage.value == 0.1 || trueSlippage.value == 0.5 || trueSlippage.value == 1) {
+            return trueSlippage.value;
           } else {
             return null;
           }
@@ -133,19 +150,9 @@ export default defineComponent({
           return 0.5;
         }
       }),
-      customSlippage: computed(() => {
-        if (state.trueSlippage) {
-          if (state.trueSlippage.value != 0.1 || state.trueSlippage.value != 0.5 || state.trueSlippage.value != 1) {
-            return state.trueSlippage.value;
-          } else {
-            return null;
-          }
-        } else {
-          return null;
-        }
-      }),
+
       isCustomSelected: computed(() => {
-        if (state.customSlippage?.value) {
+        if (customSlippage?.value) {
           return true;
         } else {
           return false;
@@ -189,6 +196,7 @@ export default defineComponent({
           return '';
         }
       }),
+
       emitHandler: (event) => {
         emit(event);
       },
@@ -239,7 +247,7 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (state.slippage != 0.1 || state.slippage != 0.5 || state.slippage != 1) {
+      if (state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
         customSlippageInput.value.focus();
       }
     });
@@ -252,7 +260,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .slippage-modal {
   position: relative;
-  width: 100%;
+  width: 40rem;
   /* height: 55.8rem; */
 
   margin-bottom: 5rem;
@@ -308,6 +316,7 @@ export default defineComponent({
             input {
               background-color: transparent;
               width: 6rem;
+              outline: none;
             }
 
             &__percent {
@@ -356,7 +365,7 @@ export default defineComponent({
   }
 
   .selected {
-    background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%), linear-gradient(0deg, #9ff9ff, #9ff9ff);
+    background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
   }
 
   .alert-wrapper {
