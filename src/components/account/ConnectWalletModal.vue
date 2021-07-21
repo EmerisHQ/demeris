@@ -1,7 +1,14 @@
 <template>
   <teleport to="body">
     <Modal :open="open" class="connect-wallet-modal" body-class="elevation-panel" width="72rem" @close="close">
-      <ConnectKeplr ref="connectKeplrRef" @cancel="close" @connect="close" />
+      <ConnectKeplr
+        v-if="isKeplrSupported && isKeplrInstalled"
+        ref="connectKeplrRef"
+        @cancel="close"
+        @connect="close"
+      />
+      <GetKeplr v-else-if="isKeplrSupported && !isKeplrInstalled" ref="getKeplrRef" @cancel="close" @get="close" />
+      <GetBrowser v-else ref="getBrowserRef" @cancel="close" @get="close" />
     </Modal>
   </teleport>
 </template>
@@ -12,6 +19,8 @@ import { defineComponent, ref } from 'vue';
 import Modal from '@/components/ui/Modal.vue';
 
 import ConnectKeplr from './ConnectKeplr.vue';
+import GetBrowser from './GetBrowser.vue';
+import GetKeplr from './GetKeplr.vue';
 
 export default defineComponent({
   name: 'ConnectWalletModal',
@@ -19,6 +28,8 @@ export default defineComponent({
   components: {
     Modal,
     ConnectKeplr,
+    GetKeplr,
+    GetBrowser,
   },
 
   props: {
@@ -32,13 +43,39 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const connectKeplrRef = ref(null);
+    const getKeplrRef = ref(null);
+    const getBrowserRef = ref(null);
+    const isKeplrSupported = ref(null);
+    const isKeplrInstalled = ref(null);
 
     const close = () => {
       connectKeplrRef.value.cancel();
+      getKeplrRef.value.cancel();
+      getBrowserRef.value.cancel();
       emit('close');
     };
 
-    return { connectKeplrRef, close };
+    // detect chrome extension support
+    // @ts-ignore
+    if (window.chrome) {
+      const isChrome = true;
+    }
+    // @ts-ignore
+    if (navigator.brave) {
+      const isBrave = true;
+    }
+    if (isChrome.value || isBrave.value) {
+      isKeplrSupported.value = true;
+    }
+    console.log('is keplr supported?', isKeplrSupported.value);
+
+    // @ts-ignore
+    if (window.keplr) {
+      isKeplrInstalled.value = true;
+    }
+    console.log('is keplr installed?', isKeplrInstalled.value);
+
+    return { connectKeplrRef, getKeplrRef, getBrowserRef, isKeplrSupported, isKeplrInstalled, close };
   },
 });
 </script>
