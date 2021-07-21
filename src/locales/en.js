@@ -26,8 +26,7 @@ export const messages = {
         button: 'Connect my wallet',
         modal1: {
           title: 'Connect to Keplr',
-          text1: 'To use Emeris, you will need to allow this web app to connect your accounts stored on Keplr.',
-          text2: 'Note that you need to create an account within Keplr before connecting to Emeris will work.',
+          text: 'To use Emeris, you will need to give permissions to this web app to connect to Keplr.',
           button: 'Connect to Keplr',
           needHelp: 'Need help?',
           opening: 'Opening Keplr',

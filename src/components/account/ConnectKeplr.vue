@@ -9,8 +9,7 @@
 
           <div class="connect-keplr__description">
             <slot name="description">
-              <p>{{ $t('wallet.connect.modal1.text1') }}</p>
-              <p>{{ $t('wallet.connect.modal1.text2') }}</p>
+              <p>{{ $t('wallet.connect.modal1.text') }}</p>
             </slot>
           </div>
 
@@ -39,7 +38,7 @@
             {{ $t('generic_cta.cancel') }}
           </button>
         </div>
-        <KeplrBanner />
+        <ConnectBanner />
       </div>
     </div>
   </div>
@@ -53,14 +52,14 @@ import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
-import KeplrBanner from './KeplrBanner.vue';
+import ConnectBanner from './ConnectBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    KeplrBanner,
+    ConnectBanner,
     Spinner,
   },
 

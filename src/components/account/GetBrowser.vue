@@ -19,7 +19,7 @@
           <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
         </div>
       </div>
-      <KeplrBanner />
+      <ConnectBanner />
     </div>
   </div>
 </template>
@@ -29,14 +29,14 @@ import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
-import KeplrBanner from './KeplrBanner.vue';
+import ConnectBanner from './ConnectBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    KeplrBanner,
+    ConnectBanner,
   },
 
   emits: ['cancel', 'connect'],
