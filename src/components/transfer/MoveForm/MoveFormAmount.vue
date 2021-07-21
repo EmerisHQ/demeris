@@ -81,7 +81,7 @@
                 class="move-form-amount__assets__item__avatar"
               />
               <span class="move-form-amount__assets__item__name w-bold">
-                <Denom :name="form.balance.denom || ''" />
+                <Denom :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
               </span>
             </div>
 
