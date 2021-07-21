@@ -185,9 +185,11 @@ export default defineComponent({
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
+
     const formatChain = (name: string) => {
       return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
     };
+
     return {
       stepType,
       formatChain,
