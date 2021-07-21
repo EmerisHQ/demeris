@@ -102,6 +102,10 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    hideLpAssets: {
+      type: Boolean,
+      default: false,
+    },
     limitRows: {
       type: Number,
       default: undefined,
@@ -137,8 +141,21 @@ export default defineComponent({
       return props.balances as Balances;
     });
 
+    const filteredBalances = computed<Balances>(() => {
+      if (props.hideLpAssets) {
+        let balances = allBalances.value.filter((balance) => {
+          if (balance.base_denom.substring(0, 4) !== 'pool') {
+            return balance;
+          }
+        });
+        return balances as Balances;
+      }
+
+      return props.balances as Balances;
+    });
+
     const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(allBalances.value, 'base_denom');
+      const denomsAggregate = groupBy(filteredBalances.value, 'base_denom');
 
       const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
