@@ -471,7 +471,7 @@ export default {
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      state.totalEstimatedPrice = total.decimalPlaces(2).toString();
+      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
     };
 
     const generateActionSteps = async () => {
