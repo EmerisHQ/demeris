@@ -251,6 +251,7 @@
 
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
+import BigNumber from 'bignumber.js';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -405,19 +406,19 @@ export default {
     });
 
     const hasSufficientFunds = computed(() => {
-      let coinA = false;
-      let coinB = false;
+      let coinA = true;
+      let coinB = true;
 
-      if (form.coinA.asset) {
+      if (form.coinA.asset && form.coinA.amount) {
         const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-        const amountA = +form.coinA.amount * Math.pow(10, precisionA);
-        coinA = +parseCoins(form.coinA.asset.amount)[0].amount >= amountA;
+        const amountA = new BigNumber(form.coinA.amount).shiftedBy(precisionA);
+        coinA = amountA.isLessThanOrEqualTo(parseCoins(form.coinA.asset.amount)[0].amount);
       }
 
-      if (form.coinB.asset) {
-        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-        const amountB = +form.coinB.amount * Math.pow(10, precisionB);
-        coinB = +parseCoins(form.coinB.asset.amount)[0].amount >= amountB;
+      if (form.coinB.asset && form.coinB.amount) {
+        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+        const amountB = new BigNumber(form.coinB.amount).shiftedBy(precisionB);
+        coinB = amountB.isLessThanOrEqualTo(parseCoins(form.coinB.asset.amount)[0].amount);
       }
 
       return {
@@ -458,21 +459,19 @@ export default {
         return;
       }
 
-      let total = 0;
+      let total = new BigNumber(0);
 
       if (form.coinA.asset) {
         const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-        total += priceA * +form.coinA.amount;
+        total = total.plus(new BigNumber(priceA).multipliedBy(form.coinA.amount));
       }
 
       if (form.coinB.asset) {
         const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-        total += priceB * +form.coinB.amount;
+        total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      const totalString = (+total.toFixed(2)).toString();
-
-      state.totalEstimatedPrice = totalString;
+      state.totalEstimatedPrice = total.decimalPlaces(2).toString();
     };
 
     const generateActionSteps = async () => {
@@ -492,14 +491,14 @@ export default {
       const baseParams = {
         coinA: {
           amount: {
-            amount: (+form.coinA.amount * Math.pow(10, precisions[0])).toString(),
+            amount: new BigNumber(form.coinA.amount).shiftedBy(precisions[0]).toString(),
             denom: coinAdenom,
           },
           chain_name: form.coinA.asset.on_chain,
         },
         coinB: {
           amount: {
-            amount: (+form.coinB.amount * Math.pow(10, precisions[1])).toString(),
+            amount: new BigNumber(form.coinB.amount).shiftedBy(precisions[1]).toString(),
             denom: coinBdenom,
           },
           chain_name: form.coinB.asset.on_chain,
@@ -617,9 +616,9 @@ export default {
         return;
       }
 
-      const result = (+form.coinA.amount * priceA) / priceB;
+      const result = new BigNumber(form.coinA.amount).multipliedBy(priceA).dividedBy(priceB);
 
-      form.coinB.amount = result ? (+result.toFixed(6)).toString() : '';
+      form.coinB.amount = result ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
       updateReceiveAmount();
     };
@@ -639,9 +638,9 @@ export default {
         return;
       }
 
-      const result = (+form.coinB.amount * priceB) / priceA;
+      const result = new BigNumber(form.coinB.amount).multipliedBy(priceB).dividedBy(priceA);
 
-      form.coinA.amount = result ? (+result.toFixed(6)).toString() : '';
+      form.coinA.amount = result ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
       updateReceiveAmount();
     };
@@ -650,8 +649,8 @@ export default {
       state.isMaximumAmountChecked = false;
       const result = calculateWithdrawBalances(+state.receiveAmount);
 
-      form.coinA.amount = (+result[0].amount.toFixed(6)).toString();
-      form.coinB.amount = (+result[1].amount.toFixed(6)).toString();
+      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
       updateTotalCurrencyPrice();
     };
 
@@ -668,8 +667,16 @@ export default {
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      form.coinA.amount = (+(parseFloat(state.totalEstimatedPrice) / 2 / priceA).toFixed(6)).toString();
-      form.coinB.amount = (+(parseFloat(state.totalEstimatedPrice) / 2 / priceB).toFixed(6)).toString();
+      form.coinA.amount = new BigNumber(state.totalEstimatedPrice)
+        .dividedBy(2)
+        .dividedBy(priceA)
+        .decimalPlaces(6)
+        .toString();
+      form.coinB.amount = new BigNumber(state.totalEstimatedPrice)
+        .dividedBy(2)
+        .dividedBy(priceB)
+        .decimalPlaces(6)
+        .toString();
       updateReceiveAmount();
     };
 
@@ -726,12 +733,14 @@ export default {
         if (state.isMaximumAmountChecked) {
           if (form.coinA.asset) {
             const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom });
-            form.coinA.amount = (+parseCoins(form.coinA.asset.amount)[0].amount / Math.pow(10, precision)).toString();
+            const amount = parseCoins(form.coinA.asset.amount)[0].amount;
+            form.coinA.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
           }
 
           if (form.coinB.asset) {
             const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom });
-            form.coinB.amount = (+parseCoins(form.coinB.asset.amount)[0].amount / Math.pow(10, precision)).toString();
+            const amount = parseCoins(form.coinB.asset.amount)[0].amount;
+            form.coinB.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
           }
 
           updateReceiveAmount();
