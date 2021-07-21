@@ -1,5 +1,5 @@
 <template>
-  <div class="get-browser" :class="{ 'get-browser--banner': showBanner }">
+  <div class="get-browser">
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
         <slot name="title">
@@ -19,14 +19,7 @@
           <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
         </div>
       </div>
-      <div v-if="showBanner" class="connect-keplr__banner">
-        <img
-          class="connect-keplr__banner__logo"
-          :src="require('@/assets/images/keplr-wallet-logo.png')"
-          title="Keplr Wallet"
-        />
-        <div class="connect-keplr__banner__surfer" />
-      </div>
+      <KeplrBanner />
     </div>
   </div>
 </template>
@@ -36,18 +29,14 @@ import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
+import KeplrBanner from './KeplrBanner.vue';
+
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-  },
-
-  props: {
-    showBanner: {
-      type: Boolean,
-      default: true,
-    },
+    KeplrBanner,
   },
 
   emits: ['cancel', 'connect'],
@@ -78,44 +67,10 @@ export default defineComponent({
     min-height: inherit;
   }
 
-  &--banner &__content {
-    width: 50%;
-  }
-
   &__content {
-    width: 100%;
+    width: 50%;
     min-height: inherit;
     padding: 4.8rem;
-  }
-
-  &__connecting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-
-    &__main {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      &__label {
-        margin-top: 2.6rem;
-        color: var(--muted);
-      }
-    }
-
-    &__button {
-      width: 100%;
-      padding: 1.6rem 2rem;
-      border: 1px solid #e6e6e6;
-      border-radius: 0.8rem;
-      font-weight: 600;
-    }
   }
 
   &__controls {
@@ -125,36 +80,6 @@ export default defineComponent({
 
     div + div {
       margin-top: 1.6rem;
-    }
-  }
-
-  &__banner {
-    position: absolute;
-    background-image: url('~@/assets/images/gradient-light-2.png');
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: cover;
-    width: 50%;
-    height: 100%;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 4.8rem;
-
-    &__surfer {
-      content: '';
-      flex: 1 1 0%;
-      background-image: url('~@/assets/images/silver-surfer-1.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      width: 100%;
-      display: block;
-    }
-
-    &__logo {
-      width: 11rem;
-      margin: 0 auto;
     }
   }
 

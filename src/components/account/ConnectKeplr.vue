@@ -1,5 +1,5 @@
 <template>
-  <div class="connect-keplr" :class="{ 'connect-keplr--banner': showBanner }">
+  <div class="connect-keplr">
     <div class="connect-keplr__wrapper">
       <div class="connect-keplr__content">
         <div v-if="!isConnecting">
@@ -39,15 +39,7 @@
             {{ $t('generic_cta.cancel') }}
           </button>
         </div>
-      </div>
-
-      <div v-if="showBanner" class="connect-keplr__banner">
-        <img
-          class="connect-keplr__banner__logo"
-          :src="require('@/assets/images/keplr-wallet-logo.png')"
-          title="Keplr Wallet"
-        />
-        <div class="connect-keplr__banner__surfer" />
+        <KeplrBanner />
       </div>
     </div>
   </div>
@@ -61,20 +53,15 @@ import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
+import KeplrBanner from './KeplrBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
+    KeplrBanner,
     Spinner,
-  },
-
-  props: {
-    showBanner: {
-      type: Boolean,
-      default: true,
-    },
   },
 
   emits: ['cancel', 'connect'],
@@ -121,12 +108,8 @@ export default defineComponent({
     min-height: inherit;
   }
 
-  &--banner &__content {
-    width: 50%;
-  }
-
   &__content {
-    width: 100%;
+    width: 50%;
     min-height: inherit;
     padding: 4.8rem;
   }
@@ -172,36 +155,6 @@ export default defineComponent({
       display: block;
       text-align: center;
       padding: 0.6rem 0;
-    }
-  }
-
-  &__banner {
-    position: absolute;
-    background-image: url('~@/assets/images/gradient-light-2.png');
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: cover;
-    width: 50%;
-    height: 100%;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 4.8rem;
-
-    &__surfer {
-      content: '';
-      flex: 1 1 0%;
-      background-image: url('~@/assets/images/silver-surfer-1.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      width: 100%;
-      display: block;
-    }
-
-    &__logo {
-      width: 11rem;
-      margin: 0 auto;
     }
   }
 

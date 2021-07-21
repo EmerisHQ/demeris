@@ -19,7 +19,7 @@
       width="72rem"
       @close="closeGetKeplr"
     >
-      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" @get="closeGetKeplr" />
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
     </Modal>
 
     <Modal
@@ -30,7 +30,7 @@
       width="72rem"
       @close="closeGetBrowser"
     >
-      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" @get="closeGetBrowser" />
+      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" />
     </Modal>
   </teleport>
 </template>
