@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
@@ -86,11 +87,19 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     const withdrawCoins = [
       {
-        amount: (reserveBalances.value[0].amount * poolCoinAmount) / totalSupply.value,
+        amount: new BigNumber(poolCoinAmount)
+          .multipliedBy(reserveBalances.value[0].amount)
+          .dividedBy(totalSupply.value)
+          .decimalPlaces(6)
+          .toNumber(),
         denom: reserveBalances.value[0].denom,
       },
       {
-        amount: (reserveBalances.value[1].amount * poolCoinAmount) / totalSupply.value,
+        amount: new BigNumber(poolCoinAmount)
+          .multipliedBy(reserveBalances.value[1].amount)
+          .dividedBy(totalSupply.value)
+          .decimalPlaces(6)
+          .toNumber(),
         denom: reserveBalances.value[1].denom,
       },
     ];
