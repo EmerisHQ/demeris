@@ -45,11 +45,11 @@
     </template>
 
     <TxHandlingModal
-      v-if="isTxHandlingModalOpen"
+      v-if="true || isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
-      :status="txstatus"
+      :status="'transacting' || txstatus"
       :has-more="hasMore"
-      :tx="transaction"
+      :tx="{ name: 'swap' } || transaction"
       :is-final="isFinal"
       @next="nextTx"
       @retry="
@@ -129,7 +129,7 @@ export default defineComponent({
     },
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
-  setup(props, { emit }) {
+  setup(props: any, { emit }) {
     const router = useRouter();
     const goBack = () => {
       router.go(-1);
