@@ -3,21 +3,20 @@
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
         <slot name="title">
-          <h2 class="get-browser__title">Unsupported browser</h2>
+          <h2 class="get-browser__title">{{ $t('wallet.connect.modal3.title') }}</h2>
         </slot>
 
         <div class="get-browser__description">
           <slot name="description">
             <p>
-              Emeris beta is only compatible with Chromium-based web browsers. These include Google Chrome, Brave,
-              Microsoft Edge, etc.
+              {{ $t('wallet.connect.modal3.text') }}
             </p>
           </slot>
         </div>
 
         <div class="get-browser__controls">
-          <Button name="Get Chrome" @click="openUrlChrome" />
-          <Button name="Get Brave" @click="openUrlBrave" />
+          <Button :name="$t('wallet.connect.modal3.button1')" @click="openUrlChrome" />
+          <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
         </div>
       </div>
       <div v-if="showBanner" class="connect-keplr__banner">

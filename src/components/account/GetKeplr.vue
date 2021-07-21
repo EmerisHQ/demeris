@@ -3,18 +3,18 @@
     <div class="get-keplr__wrapper">
       <div class="get-keplr__content">
         <slot name="title">
-          <h2 class="get-keplr__title">Keplr is required</h2>
+          <h2 class="get-keplr__title">{{ $t('wallet.connect.modal2.title') }}</h2>
         </slot>
 
         <div class="get-keplr__description">
           <slot name="description">
-            <p>To use Emeris, you need to install the Keplr browser extension wallet from the Chrome Web Store.</p>
+            <p>{{ $t('wallet.connect.modal2.text') }}</p>
           </slot>
         </div>
 
         <div class="get-keplr__controls">
-          <Button name="Get Keplr" @click="openUrl" />
-          <Button :is-outline="true" name="I got Keplr" @click="reloadApp" />
+          <Button :name="$t('wallet.connect.modal2.button1')" @click="openUrl" />
+          <Button :name="$t('wallet.connect.modal2.button2')" :is-outline="true" @click="reloadApp" />
         </div>
       </div>
       <div v-if="showBanner" class="connect-keplr__banner">
