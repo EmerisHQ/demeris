@@ -8,7 +8,7 @@ export default function usePrice() {
     const formatedValue = computed(() => {
       let value = 0;
       if (store.getters['demeris/getPrice']({ denom })) {
-        value = parseInt(amount) * store.getters['demeris/getPrice']({ denom });
+        value = parseFloat(amount) * store.getters['demeris/getPrice']({ denom });
         const formatter = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
