@@ -5,10 +5,9 @@
     :body-class="status === 'complete' ? 'transferred-bg' : ''"
     @close="emitClose"
   >
-    <!-- {{ tx }} {{ status }} -->
     <div class="status">
       <div v-if="iconType" class="status__icon">
-        <SpinnerIcon v-if="iconType === 'pending'" :size="3.2" />
+        <SpinnerIcon v-if="iconType === 'pending'" :size="4.2" :gradients="['#FFF1C3', '#9B7C3A']" />
         <div v-else-if="iconType === 'warning'" class="status__icon-warning">
           <WarningIcon />
         </div>
@@ -16,6 +15,7 @@
           <ErrorIcon />
         </div>
       </div>
+      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
       <div v-else class="status__icon-none" />
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
@@ -80,7 +80,9 @@
           </div>
         </template>
         <template v-else>
-          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">Keplr troubleshooting ↗️</a>
+          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
+            Keplr troubleshooting ↗️
+          </a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
           <div v-if="status === 'keplr-reject'" class="spacer-2" />
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
@@ -191,11 +193,11 @@ export default defineComponent({
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
-  setup(props, { emit }) {
+  setup(props: any, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
     const iconType = computed(() => {
-      if (props.status == 'keplr-sign') {
+      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
         return 'pending';
       }
       if (props.status == 'keplr-reject') {
@@ -231,7 +233,7 @@ export default defineComponent({
             blackButton.value = 'Try again';
             break;
           case 'transacting':
-            subTitle.value = 'Please wait';
+            subTitle.value = 'Transaction in progress';
             whiteButton.value = '';
             blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
@@ -246,7 +248,7 @@ export default defineComponent({
                 title.value = 'Transferring';
                 break;
               case 'swap':
-                title.value = 'Swapping';
+                title.value = 'Please Wait';
                 break;
               case 'addliquidity':
                 title.value = 'Adding liquidity';
@@ -357,6 +359,13 @@ export default defineComponent({
     &-error {
       font-size: 3.2rem;
       color: var(--negative-text);
+    }
+
+    &-swap-result {
+      background-image: url('../../assets/images/swap-result.png');
+      height: 21rem;
+      transform: translate(-2.4rem, -2.4rem);
+      width: 3.2rem;
     }
 
     &-none {
