@@ -158,9 +158,8 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -177,6 +176,7 @@ import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
 import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'MoveFormAmount',
@@ -310,7 +310,7 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.base_denom as string;
+      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.on_chain = asset.on_chain as string;
     };
 
@@ -329,7 +329,16 @@ export default defineComponent({
       () => props.balances,
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          setCurrentAsset(props.balances[0]);
+          let asset = props.balances[0];
+
+          if (form.balance.denom) {
+            asset = props.balances.find((item) => {
+              const balance = parseCoins(item.amount)[0];
+              return balance.denom === form.balance.denom;
+            });
+          }
+
+          setCurrentAsset(asset);
         }
       },
       { immediate: true },

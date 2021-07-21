@@ -14,16 +14,19 @@
         v-if="steps.length > 0"
         :data="steps"
         :gas-price-level="gasPrice"
+        :back-route="{ name: 'Portfolio' }"
         action-name="move"
         @transacting="goToStep('move')"
         @failed="goToStep('review')"
         @reset="resetHandler"
+        @done="resetHandler"
       />
     </template>
   </div>
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -83,15 +86,13 @@ export default defineComponent({
 
     watch(form, async () => {
       if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
-        const precision = store.getters['demeris/getDenomPrecision']({
-          name: form.balance.denom,
-        });
+        const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
         const action: MoveAction = {
           name: 'move',
           params: {
             from: {
               amount: {
-                amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
                 denom: form.balance.denom,
               },
               chain_name: form.on_chain,
