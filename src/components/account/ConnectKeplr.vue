@@ -4,18 +4,18 @@
       <div class="connect-keplr__content">
         <div v-if="!isConnecting">
           <slot name="title">
-            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal.title') }}</h2>
+            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
 
           <div class="connect-keplr__description">
             <slot name="description">
-              <p>To use Emeris, you will need to allow this web app to connect your accounts stored on Keplr.</p>
-              <p>Note that you need to create an account within Keplr before connecting to Emeris will work.</p>
+              <p>{{ $t('wallet.connect.modal1.text1') }}</p>
+              <p>{{ $t('wallet.connect.modal1.text2') }}</p>
             </slot>
           </div>
 
           <div class="connect-keplr__controls">
-            <Button :name="$t('wallet.connect.modal.button')" @click="signIn" />
+            <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
 
             <a
               href="https://t.me/EmerisHQ"
@@ -23,7 +23,7 @@
               target="_blank"
               class="connect-keplr__controls__help s-minus"
             >
-              Need help?
+              {{ $t('wallet.connect.modal1.needHelp') }}
             </a>
           </div>
         </div>
@@ -31,8 +31,8 @@
         <div v-else class="connect-keplr__connecting">
           <div class="connect-keplr__connecting__main">
             <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal.opening') }}</span>
-            <p class="s-2">{{ $t('wallet.connect.modal.connecting') }}</p>
+            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
+            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
           </div>
 
           <button class="connect-keplr__connecting__button" @click="cancel">

@@ -24,14 +24,26 @@ export const messages = {
     wallet: {
       connect: {
         button: 'Connect my wallet',
-        modal: {
+        modal1: {
           title: 'Connect to Keplr',
-          text1: 'Install Keplr in your browser and connect your wallet to start using Demeris.',
-          text2: 'Demeris will support other wallets in the near future.',
+          text1: 'To use Emeris, you will need to allow this web app to connect your accounts stored on Keplr.',
+          text2: 'Note that you need to create an account within Keplr before connecting to Emeris will work.',
           button: 'Connect to Keplr',
-          missing: "Don't have Keplr installed?",
+          needHelp: 'Need help?',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
+        },
+        modal2: {
+          title: 'Connect to Keplr',
+          text: 'Install Keplr in your browser and connect your wallet to start using Demeris.',
+          button1: 'Connect to Keplr',
+          button2: 'Connect to Keplr',
+        },
+        modal3: {
+          title: 'Connect to Keplr',
+          text: 'Install Keplr in your browser and connect your wallet to start using Demeris.',
+          button1: 'Connect to Keplr',
+          button2: 'Connect to Keplr',
         },
       },
     },
