@@ -25,6 +25,7 @@
             <div class="assets-table__row__asset__denom">
               <Denom :name="asset.denom" />
             </div>
+            <Pool :pool="asset.denom" />
           </td>
 
           <td v-if="variant === 'full'" class="assets-table__row__ticker text-left">
@@ -72,6 +73,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
+import Pool from '@/components/liquidity/Pools.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
@@ -82,7 +84,7 @@ type TableStyleType = 'full' | 'balance';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChains, CircleSymbol, Icon, Denom, Price, AmountDisplay },
+  components: { AssetChains, CircleSymbol, Icon, Denom, Price, AmountDisplay, Pool },
 
   props: {
     variant: {
