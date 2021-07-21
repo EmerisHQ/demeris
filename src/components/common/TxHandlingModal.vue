@@ -60,9 +60,10 @@
           </div>
 
           <!-- TEST -->
-          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem'">
+          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
-              You received <AmountDisplay :amount="{ denom: 'uatom', amount: '100000000000' }" /> <br />
+              You received
+              <span class="w-bold"><AmountDisplay :amount="{ denom: 'uatom', amount: '100000000000' }" /></span> <br />
               on <ChainName :name="'cosmos-hub'" />.
             </template>
           </div>
@@ -113,6 +114,14 @@
         </template>
       </div>
       <Button
+        v-if="whiteButton && tx.name === 'swap' && status === 'complete'"
+        :name="`Send 122,172.58 LUNA ->`"
+        class="send-another-button"
+        :status="'normal'"
+        :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
+        :is-outline="true"
+      />
+      <Button
         v-if="blackButton"
         :name="blackButton"
         :status="'normal'"
@@ -130,7 +139,7 @@
         :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
       />
       <Button
-        v-if="whiteButton"
+        v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
         :name="whiteButton"
         :status="'normal'"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
@@ -365,7 +374,7 @@ export default defineComponent({
       background-image: url('../../assets/images/swap-result.png');
       height: 21rem;
       transform: translate(-2.4rem, -2.4rem);
-      width: 3.2rem;
+      width: 32rem;
     }
 
     &-none {
@@ -438,5 +447,13 @@ export default defineComponent({
   height: 17.7rem;
   display: block;
   margin: 0 auto;
+}
+
+.send-another-button {
+  @import '@/assets/scss/_elevation.scss';
+  margin-top: -2.4rem;
+  margin-bottom: 1.2rem;
+  border-radius: $border-radius;
+  background-color: var(--surface);
 }
 </style>
