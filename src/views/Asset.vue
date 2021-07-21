@@ -8,7 +8,7 @@
           <p class="asset__main__info__denom">
             <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
             <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
-            <span class="asset__main__info__denom__ticker title-0-normal"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"> <Ticker :name="denom" /></span>
           </p>
           <h1 class="asset__main__info__price title-2-bold">
             <Price :amount="{ amount: 0, denom }" />
@@ -139,6 +139,7 @@ import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
@@ -154,6 +155,7 @@ export default defineComponent({
     AmountDisplay,
     ChainName,
     Denom,
+    Ticker,
     CircleSymbol,
     StakeTable,
     AppLayout,

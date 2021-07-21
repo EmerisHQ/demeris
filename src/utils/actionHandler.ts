@@ -1005,6 +1005,45 @@ export async function getDisplayName(name, chain_name = null) {
     }
   }
 }
+export async function getTicker(name, chain_name = null) {
+  if (isNative(name)) {
+    const ticker = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.ticker ?? null;
+    if (ticker) {
+      return ticker;
+    }
+    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+    if (pools && pools.pools) {
+      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
+      if (pool) {
+        return (
+          'GDEX ' +
+          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
+          '/' +
+          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
+          ' Pool'
+        );
+      } else {
+        return name + '(unverified)';
+      }
+    }
+  } else {
+    let verifyTrace;
+    try {
+      verifyTrace =
+        store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
+        (await store.dispatch(
+          'demeris/GET_VERIFY_TRACE',
+          { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
+          { root: true },
+        ));
+      return await getDisplayName(verifyTrace.base_denom);
+    } catch (e) {
+      console.log(e);
+      return name + '(unverified)';
+    }
+  }
+}
+
 export async function isLive(chain_name) {
   const status =
     store.getters['demeris/getChainStatus']({
