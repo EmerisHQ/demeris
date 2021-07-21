@@ -78,6 +78,7 @@ export default defineComponent({
           return [];
         }
       },
+      { immediate: true },
     );
 
     const keywordFilteredAssets = computed(() => {

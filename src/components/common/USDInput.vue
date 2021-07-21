@@ -1,35 +1,49 @@
 <template>
-  <input v-model="usdValue" />
+  <AmountInput v-model="usdValue" />
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
+import AmountInput from '@/components/ui/AmountInput.vue';
 import { useStore } from '@/store';
+
 export default defineComponent({
   name: 'USDInput',
+  components: {
+    AmountInput,
+  },
   props: {
     denom: { type: String, required: true },
-    modelValue: { type: Number, default: 0 },
+    modelValue: { type: String, default: '' },
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'update:price'],
   setup(props, { emit }) {
     const store = useStore();
     const price = computed(() => {
       return store.getters['demeris/getPrice']({ denom: props.denom });
     });
-    const usdValue = ref(props.modelValue * parseFloat(price.value));
+
+    const usdValue = ref('');
 
     const trueValue = computed(() => {
-      return usdValue.value / parseFloat(price.value);
+      return new BigNumber(usdValue.value).dividedBy(price.value).decimalPlaces(6).toString();
     });
-    watch(
-      () => trueValue.value,
-      (newVal, oldVal) => {
-        if (newVal != oldVal) {
-          emit('update:modelValue', trueValue.value);
-        }
-      },
-    );
+
+    watch(usdValue, () => emit('update:price', usdValue));
+
+    onMounted(() => {
+      const value = new BigNumber(props.modelValue);
+
+      if (value.isFinite()) {
+        usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
+        return;
+      }
+
+      usdValue.value = '';
+    });
+
+    watch(trueValue, () => emit('update:modelValue', trueValue.value));
 
     return { usdValue };
   },

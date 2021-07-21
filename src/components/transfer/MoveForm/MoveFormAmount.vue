@@ -22,26 +22,34 @@
       <fieldset class="form__field move-form-amount">
         <template v-if="state.isUSDInputChecked">
           <div class="move-form-amount__input">
-            <USDInput
-              v-model="form.balance.amount"
-              :denom="state.currentAsset?.base_denom"
-              class="move-form-amount__input__control"
-              min="0"
-              placeholder="0"
-            />
-            <span class="move-form-amount__input__denom">$</span>
+            <FlexibleAmountInput v-model="state.usdValue" :max-width="250" :min-width="35" prefix="$">
+              <template #default="inputProps">
+                <USDInput
+                  v-model="form.balance.amount"
+                  :denom="state.currentAsset?.base_denom"
+                  :class="[inputProps.class]"
+                  :style="inputProps.style"
+                  placeholder="0"
+                  @update:price="state.usdValue = $event"
+                />
+              </template>
+            </FlexibleAmountInput>
           </div>
 
           <span class="move-form-amount__estimated">
             <AmountDisplay
-              :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+              :amount="{
+                amount: form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                denom: state.currentAsset?.base_denom,
+              }"
             />
           </span>
         </template>
         <template v-else>
           <div class="move-form-amount__input">
-            <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-            <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
+            <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+              <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+            </FlexibleAmountInput>
           </div>
 
           <span class="move-form-amount__estimated">
@@ -162,6 +170,7 @@ import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
 import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
@@ -172,6 +181,7 @@ export default defineComponent({
   name: 'MoveFormAmount',
 
   components: {
+    FlexibleAmountInput,
     AmountDisplay,
     Button,
     Denom,
@@ -204,6 +214,7 @@ export default defineComponent({
       isDenomModalOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'from',
+      usdValue: '',
     });
 
     const denomDecimals = computed(() => {
@@ -294,12 +305,17 @@ export default defineComponent({
     );
     watch(
       () => props.balances,
-      (newVal, oldVal) => {
+      (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
           setCurrentAsset(props.balances[0]);
         }
       },
       { immediate: true },
+    );
+
+    watch(
+      () => state.isUSDInputChecked,
+      () => (state.usdValue = ''),
     );
 
     return {
@@ -349,8 +365,9 @@ export default defineComponent({
     font-size: 5.1rem;
     font-weight: 700;
     text-transform: uppercase;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     transition: color linear 100ms;
 
     &__control {
@@ -370,14 +387,17 @@ export default defineComponent({
   &__estimated {
     color: var(--muted);
     margin-top: 1.2rem;
+    text-align: center;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
-    margin-top: 1.4rem;
+    justify-content: center;
+    margin: 2.4rem 0 3.2rem 0;
 
     &__button {
+      line-height: 1;
       input {
         display: none;
       }

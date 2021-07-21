@@ -61,6 +61,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    poolDenoms: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
     chainName: {
       type: String,
       default: undefined,
@@ -84,7 +88,7 @@ export default defineComponent({
 
     const isPoolCoin = computed(() => {
       if (props.variant === 'asset') {
-        return (props.denom as string).startsWith('pool');
+        return (props.denom as string).startsWith('pool') || props.poolDenoms.length;
       }
 
       return false;
@@ -194,15 +198,15 @@ export default defineComponent({
     });
 
     watch(
-      () => props.denom,
+      () => [props.denom, props.poolDenoms],
       async () => {
-        if (!props.denom) {
-          return;
-        }
         if (isPoolCoin.value) {
-          const pool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
-          if (pool) {
-            denoms.value = await getReserveBaseDenoms(pool);
+          let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
+
+          if (existingPool) {
+            denoms.value = await getReserveBaseDenoms(existingPool);
+          } else if (props.poolDenoms.filter(Boolean).length) {
+            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
           }
         } else {
           denoms.value = [await getBaseDenom(props.denom as string, props.chainName)];
