@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <Modal
-      v-if="isKeplrSupported && isKeplrInstalled"
+      v-if="isKeplrInstalled"
       :open="open"
       class="connect-wallet-modal"
       body-class="elevation-panel"
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
@@ -70,9 +70,6 @@ export default defineComponent({
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
 
-    const isChrome = ref(null);
-    const isBrave = ref(null);
-
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
       emit('close');
@@ -86,25 +83,17 @@ export default defineComponent({
       emit('close');
     };
 
-    // detect chrome extension support
-    // @ts-ignore
-    if (window.chrome) {
-      isChrome.value = true;
-    }
-    // @ts-ignore
-    if (navigator.brave) {
-      isBrave.value = true;
-    }
-    if (isChrome.value || isBrave.value) {
-      isKeplrSupported.value = true;
-    }
-    console.log('is keplr supported?', isKeplrSupported.value);
+    onMounted(() => {
+      window.addEventListener('load', () => {
+        // detect chrome extension support
+        // @ts-ignore
+        isKeplrSupported.value = !!window.chrome || !!navigator.brave;
 
-    // @ts-ignore
-    if (window.keplr) {
-      isKeplrInstalled.value = true;
-    }
-    console.log('is keplr installed?', isKeplrInstalled.value);
+        // detect keplr installed
+        // @ts-ignore
+        isKeplrInstalled.value = !!window.keplr;
+      });
+    });
 
     return {
       connectKeplrRef,

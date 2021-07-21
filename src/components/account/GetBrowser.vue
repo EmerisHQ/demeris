@@ -9,8 +9,8 @@
         <div class="get-browser__description">
           <slot name="description">
             <p>
-              Emeris is a web app that is compatible with Google Chrome and Brave Browser. You will need to use one of
-              these web browsers.
+              Emeris beta is currently only compatible with web browers that support the Chrome Web Store. These include
+              Google Chrome, Brave, Microsoft Edge, etc.
             </p>
           </slot>
         </div>
