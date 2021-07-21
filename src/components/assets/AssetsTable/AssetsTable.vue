@@ -102,6 +102,15 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    hideLpAssets: {
+      type: Boolean,
+      default: false,
+    },
+    hideZeroAssets: {
+      type: Boolean,
+      default: false,
+    },
+
     limitRows: {
       type: Number,
       default: undefined,
@@ -123,8 +132,9 @@ export default defineComponent({
     });
 
     const allBalances = computed<Balances>(() => {
+      let balances = props.balances;
       if (props.showAllAssets) {
-        return [
+        balances = [
           ...(props.balances as Balances),
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
@@ -134,7 +144,24 @@ export default defineComponent({
         ];
       }
 
-      return props.balances as Balances;
+      if (props.hideLpAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.base_denom.substring(0, 4) !== 'pool') {
+            return balance;
+          }
+        });
+        return balances as Balances;
+      }
+
+      if (props.hideZeroAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.amount.charAt(0) !== '0') {
+            return balance;
+          }
+        });
+      }
+
+      return balances as Balances;
     });
 
     const balancesByAsset = computed(() => {
