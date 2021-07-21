@@ -24,6 +24,7 @@
           <div v-else class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
+              :hide-zero-assets="true"
               variant="balance"
               class="assets__table"
               :show-headers="false"

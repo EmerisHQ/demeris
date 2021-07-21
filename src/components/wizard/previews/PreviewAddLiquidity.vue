@@ -3,13 +3,20 @@
     <ListItem direction="column">
       <List>
         <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
-          <div class="w-bold">{{ poolInfo.pairName }}</div>
+          <div class="pool__pair">
+            <div v-if="poolInfo.denoms.length" class="pool__pair__symbols">
+              <CircleSymbol :denom="poolInfo.denoms[0]" size="xs" class="pool__pair__symbols__token token-a" />
+              <CircleSymbol :denom="poolInfo.denoms[1]" size="xs" class="pool__pair__symbols__token token-b" />
+            </div>
+
+            <span class="pool__pair__name w-bold">{{ poolInfo.pairName }}</span>
+          </div>
         </ListItem>
 
         <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
           <div class="s-minus">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: poolInfo.price * 1e6, denom: data.coinB.denom }" />
+            <AmountDisplay :amount="{ amount: poolInfo.exchangeAmountPrice * 1e6, denom: data.coinB.denom }" />
           </div>
         </ListItem>
       </List>
@@ -17,14 +24,16 @@
 
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
       <div class="supply__item">
-        <div>
+        <div class="pool__item">
+          <CircleSymbol :denom="data.coinA.denom" size="sm" class="pool__item__symbol" />
           <AmountDisplay class="w-bold" :amount="data.coinA" />
         </div>
         <span class="supply__item__chain"><ChainName :name="chainName" /></span>
       </div>
 
       <div class="supply__item">
-        <div>
+        <div class="pool__item">
+          <CircleSymbol :denom="data.coinB.denom" size="sm" class="pool__item__symbol" />
           <AmountDisplay class="w-bold" :amount="data.coinB" />
         </div>
         <span class="supply__item__chain"><ChainName :name="chainName" /></span>
@@ -35,8 +44,14 @@
       :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
-      <div>
-        <AmountDisplay class="w-bold" :amount="{ amount: receiveAmount * 1e6, denom: poolInfo.denom }" />
+      <div class="pool__item">
+        <CircleSymbol
+          v-if="poolInfo.denoms.length"
+          :pool-denoms="poolInfo.denoms"
+          size="sm"
+          class="pool__item__symbol"
+        />
+        <AmountDisplay class="w-bold" :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }" />
       </div>
     </ListItem>
 
@@ -55,13 +70,14 @@ import { computed, defineComponent, PropType, reactive, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'PreviewAddLiquidity',
@@ -71,6 +87,7 @@ export default defineComponent({
     ChainName,
     List,
     ListItem,
+    CircleSymbol,
   },
 
   props: {
@@ -87,9 +104,10 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const poolInfo = reactive({
-      price: 1,
+      exchangeAmountPrice: 1,
       pairName: '-/-',
       denom: '-',
+      denoms: [],
     });
 
     const data = computed(() => {
@@ -105,23 +123,28 @@ export default defineComponent({
     });
 
     // Add liquidity to a existing pool
-    const { calculateSupplyTokenAmount, pairName } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
-    const { poolPriceById } = usePools();
+    const { calculateSupplyTokenAmount } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+    const { formatPoolName } = usePools();
 
     const updatePoolInfo = async () => {
       if (hasPool.value) {
         const pool = (data.value as Actions.AddLiquidityData).pool;
-        poolInfo.price = await poolPriceById(pool.id);
-        poolInfo.pairName = pairName.value;
+        poolInfo.pairName = await formatPoolName(pool);
         poolInfo.denom = pool.pool_coin_denom;
         return;
       }
 
-      const denomA = await getDisplayName(data.value.coinA.denom, chainName.value);
-      const denomB = await getDisplayName(data.value.coinB.denom, chainName.value);
-      poolInfo.price = 1;
+      const denoms = await Promise.all([getBaseDenom(data.value.coinA.denom), getBaseDenom(data.value.coinB.denom)]);
+      const denomA = await getDisplayName(denoms[0], chainName.value);
+      const denomB = await getDisplayName(denoms[1], chainName.value);
+
+      const priceA = store.getters['demeris/getPrice']({ denom: denoms[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: denoms[1] });
+
+      poolInfo.exchangeAmountPrice = !priceA || !priceB ? 1 : priceA / priceB;
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
       poolInfo.denom = `GDEX ${denomA}/${denomB}`;
+      poolInfo.denoms = denoms;
     };
 
     const receiveAmount = computed(() => {
@@ -131,6 +154,7 @@ export default defineComponent({
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      hasPool,
       poolInfo,
       chainName,
       data,
@@ -141,6 +165,36 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.pool__pair {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  &__symbols {
+    display: flex;
+    align-items: center;
+    margin-right: 0.8rem;
+
+    &__token {
+      z-index: 0;
+
+      &.token-a {
+        z-index: 1;
+        margin-right: -0.6rem;
+      }
+    }
+  }
+}
+
+.pool__item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  &__symbol {
+    margin-right: 0.8rem;
+  }
+}
 .supply__item {
   & + & {
     margin-top: 1.6rem;

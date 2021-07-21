@@ -48,10 +48,16 @@
             </span>
           </div>
 
-          <div class="add-liquidity__estimated">
-            <span class="add-liquidity__estimated__price s-2 w-bold">
-              {{ totalEstimatedPrice }}
-            </span>
+          <div v-if="hasPrices" class="add-liquidity__estimated">
+            <FlexibleAmountInput
+              v-model="state.totalEstimatedPrice"
+              :max-width="250"
+              :min-width="32"
+              prefix="$"
+              placeholder="0"
+              class="add-liquidity__estimated__price s-2 w-bold"
+              @input="currencyAmountHandler"
+            />
             <label class="add-liquidity__estimated__max">
               <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
               <span class="elevation-button">Max</span>
@@ -92,7 +98,7 @@
                     :selected-denom="form.coinA.asset"
                     :assets="balances"
                     @select="coinSelectHandler('coinA', $event)"
-                    @change="inputChangeHandler"
+                    @change="coinAChangeHandler"
                   />
                 </div>
               </div>
@@ -114,9 +120,9 @@
             <div class="add-liquidity__price">
               <span class="add-liquidity__price__divider" />
               <div class="add-liquidity__price__container">
-                <template v-if="form.coinA.asset && form.coinB.asset">
+                <template v-if="exchangeAmount">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> :
-                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinB.asset.base_denom }" />
+                  <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
                 </template>
                 <span v-else>Price</span>
               </div>
@@ -135,6 +141,7 @@
                     :selected-denom="form.coinB.asset"
                     :assets="balancesForSecond"
                     @select="coinSelectHandler('coinB', $event)"
+                    @change="coinBChangeHandler"
                   />
                 </div>
               </div>
@@ -163,16 +170,23 @@
                 <div class="add-liquidity__receive__token">
                   <CircleSymbol
                     :denom="hasPool ? pool.pool_coin_denom : ''"
+                    :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
                     size="sm"
                     class="add-liquidity__receive__token__avatar"
                   />
-                  <span class="w-bold">
-                    <Denom v-if="hasPool" :name="pool.pool_coin_denom" />
-                    <span v-else>G-LK-LP</span>
+                  <span v-if="hasPool" class="w-bold">
+                    <Denom :name="pool.pool_coin_denom" />
                   </span>
+                  <span v-else class="w-bold">G-LK-LP</span>
                 </div>
 
-                <span class="add-liqudity__receive__amount w-bold"> {{ receiveAmount }} </span>
+                <AmountInput
+                  v-model="state.receiveAmount"
+                  :readonly="!hasPool"
+                  placeholder="0"
+                  class="add-liquidity__receive__amount w-bold"
+                  @input="coinPoolChangeHandler"
+                />
               </div>
             </div>
 
@@ -236,7 +250,8 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
+import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
+import BigNumber from 'bignumber.js';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -248,7 +263,9 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -262,17 +279,19 @@ import { parseCoins } from '@/utils/basic';
 export default {
   name: 'AddLiquidity',
   components: {
+    Alert,
     AmountDisplay,
-    Icon,
-    CircleSymbol,
+    AmountInput,
     Button,
     ChainName,
+    ChainSelectModal,
+    CircleSymbol,
     Denom,
     DenomSelect,
-    Alert,
-    ChainSelectModal,
-    TxStepsModal,
     FeeLevelSelector,
+    FlexibleAmountInput,
+    Icon,
+    TxStepsModal,
   },
 
   setup() {
@@ -291,20 +310,42 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
       isMaximumAmountChecked: false,
+      totalEstimatedPrice: '',
+      receiveAmount: '',
+      poolBaseDenoms: [],
     });
 
     const gasPrice = computed(() => {
       return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
-    const form = reactive<Record<string, { asset: Balance; amount: number }>>({
+    const hasPrices = computed(() => {
+      if (!hasPool.value) {
+        return false;
+      }
+
+      if (!hasPair.value) {
+        return false;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const form = reactive<Record<string, { asset: Balance; amount: string }>>({
       coinA: {
         asset: undefined,
-        amount: 0,
+        amount: '',
       },
       coinB: {
         asset: undefined,
-        amount: 0,
+        amount: '',
       },
     });
 
@@ -314,7 +355,7 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount } = usePool(computed(() => pool.value?.id));
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances } = usePool(computed(() => pool.value?.id));
 
     const { balances } = useAccount();
 
@@ -326,28 +367,58 @@ export default {
       return !!pool.value;
     });
 
-    const receiveAmount = computed(() => {
-      if (!form.coinA.asset?.amount || !form.coinB.asset?.amount) {
-        return 0;
+    const updateReceiveAmount = () => {
+      if (!hasPool.value) {
+        state.receiveAmount = '1';
+        return;
       }
 
-      return calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      if (!form.coinA.amount || !form.coinB.amount) {
+        state.receiveAmount = undefined;
+        return;
+      }
+
+      const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      state.receiveAmount = (+result.toFixed(6)).toString();
+    };
+
+    const exchangeAmount = computed(() => {
+      if (!hasPair.value) {
+        return;
+      }
+
+      if (!hasPool.value && (!form.coinB.amount || !form.coinA.amount)) {
+        return;
+      }
+
+      if (!hasPool.value) {
+        return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return undefined;
+      }
+
+      return ((priceA / priceB) * 1e6).toFixed(6);
     });
 
     const hasSufficientFunds = computed(() => {
-      let coinA = false;
-      let coinB = false;
+      let coinA = true;
+      let coinB = true;
 
-      if (form.coinA.asset) {
+      if (form.coinA.asset && form.coinA.amount) {
         const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-        const amountA = form.coinA.amount * Math.pow(10, precisionA);
-        coinA = +parseCoins(form.coinA.asset.amount)[0].amount >= amountA;
+        const amountA = new BigNumber(form.coinA.amount).shiftedBy(precisionA);
+        coinA = amountA.isLessThanOrEqualTo(parseCoins(form.coinA.asset.amount)[0].amount);
       }
 
-      if (form.coinB.asset) {
-        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-        const amountB = form.coinB.amount * Math.pow(10, precisionB);
-        coinB = +parseCoins(form.coinB.asset.amount)[0].amount >= amountB;
+      if (form.coinB.asset && form.coinB.amount) {
+        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+        const amountB = new BigNumber(form.coinB.amount).shiftedBy(precisionB);
+        coinB = amountB.isLessThanOrEqualTo(parseCoins(form.coinB.asset.amount)[0].amount);
       }
 
       return {
@@ -358,7 +429,7 @@ export default {
     });
 
     const isValid = computed(() => {
-      if (form.coinA.amount <= 0 || form.coinB.amount <= 0) {
+      if (+form.coinA.amount <= 0 || +form.coinB.amount <= 0) {
         return false;
       }
 
@@ -379,26 +450,29 @@ export default {
       return false;
     });
 
-    const totalEstimatedPrice = computed(() => {
-      let total = 0;
+    const updateTotalCurrencyPrice = () => {
+      if (!state.receiveAmount && !form.coinA.amount && !form.coinB.amount) {
+        return;
+      }
+
+      if (!hasPrices.value) {
+        return;
+      }
+
+      let total = new BigNumber(0);
 
       if (form.coinA.asset) {
         const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-        total += priceA * form.coinA.amount;
+        total = total.plus(new BigNumber(priceA).multipliedBy(form.coinA.amount));
       }
 
       if (form.coinB.asset) {
         const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-        total += priceB * form.coinB.amount;
+        total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      const displayTotal = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(total);
-
-      return displayTotal;
-    });
+      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+    };
 
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
@@ -417,14 +491,14 @@ export default {
       const baseParams = {
         coinA: {
           amount: {
-            amount: (+form.coinA.amount * Math.pow(10, precisions[0])).toString(),
+            amount: new BigNumber(form.coinA.amount).shiftedBy(precisions[0]).toString(),
             denom: coinAdenom,
           },
           chain_name: form.coinA.asset.on_chain,
         },
         coinB: {
           amount: {
-            amount: (+form.coinB.amount * Math.pow(10, precisions[1])).toString(),
+            amount: new BigNumber(form.coinB.amount).shiftedBy(precisions[1]).toString(),
             denom: coinBdenom,
           },
           chain_name: form.coinB.asset.on_chain,
@@ -466,10 +540,6 @@ export default {
       }
 
       pool.value = undefined;
-    };
-
-    const inputChangeHandler = () => {
-      state.isMaximumAmountChecked = false;
     };
 
     const onClose = () => {
@@ -519,12 +589,95 @@ export default {
     };
 
     const resetHandler = () => {
-      form.coinA.amount = 0;
-      form.coinB.amount = 0;
+      form.coinA.amount = '';
+      form.coinB.amount = '';
+      state.receiveAmount = '';
+      state.totalEstimatedPrice = '';
+      updateTotalCurrencyPrice();
+      updateReceiveAmount();
 
       actionSteps.value = [];
 
       goToStep('amount');
+    };
+
+    const coinAChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!hasPair.value || !hasPool.value) {
+        updateReceiveAmount();
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return;
+      }
+
+      const result = new BigNumber(form.coinA.amount).multipliedBy(priceA).dividedBy(priceB);
+
+      form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
+      updateTotalCurrencyPrice();
+      updateReceiveAmount();
+    };
+
+    const coinBChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!hasPair.value || !hasPool.value) {
+        updateReceiveAmount();
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      if (!priceA || !priceB) {
+        return;
+      }
+
+      const result = new BigNumber(form.coinB.amount).multipliedBy(priceB).dividedBy(priceA);
+
+      form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
+      updateTotalCurrencyPrice();
+      updateReceiveAmount();
+    };
+
+    const coinPoolChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+      const result = calculateWithdrawBalances(+state.receiveAmount);
+
+      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      updateTotalCurrencyPrice();
+    };
+
+    const currencyAmountHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
+        form.coinA.amount = undefined;
+        form.coinB.amount = undefined;
+        state.receiveAmount = undefined;
+        return;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+
+      form.coinA.amount = new BigNumber(state.totalEstimatedPrice)
+        .dividedBy(2)
+        .dividedBy(priceA)
+        .decimalPlaces(6)
+        .toString();
+      form.coinB.amount = new BigNumber(state.totalEstimatedPrice)
+        .dividedBy(2)
+        .dividedBy(priceB)
+        .decimalPlaces(6)
+        .toString();
+      updateReceiveAmount();
     };
 
     onMounted(async () => {
@@ -536,17 +689,36 @@ export default {
 
       if (poolFromRoute) {
         const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
+        state.poolBaseDenoms = poolBaseDenoms;
         form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
         form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
       }
     });
 
+    const { asset: assetA } = toRefs(form.coinA);
+    const { asset: assetB } = toRefs(form.coinB);
+
     watch(
-      [form.coinA.asset, form.coinB.asset, hasPair],
-      async () => {
+      [assetA, assetB, hasPair],
+      async ([assetANew, assetBNew], [assetAOld, assetBOld]) => {
+        if (assetANew?.base_denom === assetBNew?.base_denom) {
+          form.coinB.asset = undefined;
+        }
+
+        if (assetANew?.base_denom > assetBNew?.base_denom) {
+          form.coinA.asset = assetBNew;
+          form.coinB.asset = assetANew;
+        }
+
         await findPoolByDenoms();
+
+        if (assetANew?.base_denom !== assetAOld?.base_denom || assetBNew?.base_denom !== assetBOld?.base_denom) {
+          resetHandler();
+        }
       },
-      { deep: true },
+      {
+        immediate: true,
+      },
     );
 
     watch([form.coinA, form.coinB, pool, hasPair], async () => {
@@ -561,13 +733,18 @@ export default {
         if (state.isMaximumAmountChecked) {
           if (form.coinA.asset) {
             const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom });
-            form.coinA.amount = +parseCoins(form.coinA.asset.amount)[0].amount / Math.pow(10, precision);
+            const amount = parseCoins(form.coinA.asset.amount)[0].amount;
+            form.coinA.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
           }
 
           if (form.coinB.asset) {
             const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom });
-            form.coinB.amount = +parseCoins(form.coinB.asset.amount)[0].amount / Math.pow(10, precision);
+            const amount = parseCoins(form.coinB.asset.amount)[0].amount;
+            form.coinB.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
           }
+
+          updateReceiveAmount();
+          updateTotalCurrencyPrice();
         }
       },
       { deep: true },
@@ -585,12 +762,15 @@ export default {
       state,
       steps,
       needsTransferToHub,
-      receiveAmount,
-      totalEstimatedPrice,
       hasSufficientFunds,
       isValid,
+      exchangeAmount,
+      hasPrices,
+      coinAChangeHandler,
+      coinBChangeHandler,
+      coinPoolChangeHandler,
+      currencyAmountHandler,
       resetHandler,
-      inputChangeHandler,
       toggleChainsModal,
       goBack,
       goToReview,
@@ -615,6 +795,10 @@ export default {
     display: none;
   }
 
+  .denom-select__coin-amount-type {
+    display: none;
+  }
+
   &__estimated {
     margin-top: 3.2rem;
     position: relative;
@@ -625,6 +809,15 @@ export default {
     width: 100%;
     text-align: center;
     line-height: 1;
+
+    &__price {
+      font-size: 5.1rem;
+      font-weight: 600;
+
+      &::placeholder {
+        color: red;
+      }
+    }
 
     &__max {
       margin-top: -0.6rem;
@@ -664,7 +857,7 @@ export default {
 
     &__title {
       margin-top: 1.2rem;
-      text-align: center;
+      text-align: left;
     }
 
     &__description {
@@ -740,6 +933,8 @@ export default {
 
   &__pool {
     margin-top: 1.6rem;
+    display: flex;
+    align-items: center;
 
     &__pair {
       display: inline-flex;
@@ -832,6 +1027,21 @@ export default {
 
     &__label {
       color: var(--muted);
+    }
+
+    &__amount {
+      text-align: right;
+      appearance: none;
+
+      &:read-only {
+        &::-webkit-inner-spin-button {
+          appearance: none;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
     }
   }
 
