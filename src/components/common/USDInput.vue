@@ -30,7 +30,7 @@ export default defineComponent({
       return new BigNumber(usdValue.value).dividedBy(price.value).decimalPlaces(6).toString();
     });
 
-    watch(usdValue, () => emit('update:price', usdValue));
+    watch(usdValue, () => emit('update:price', usdValue.value));
 
     onMounted(() => {
       const value = new BigNumber(props.modelValue);
@@ -43,7 +43,9 @@ export default defineComponent({
       usdValue.value = '';
     });
 
-    watch(trueValue, () => emit('update:modelValue', trueValue.value));
+    watch(trueValue, () => {
+      emit('update:modelValue', new BigNumber(trueValue.value).isFinite() ? trueValue.value : '');
+    });
 
     return { usdValue };
   },

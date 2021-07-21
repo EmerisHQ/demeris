@@ -136,6 +136,11 @@ const inputProps = computed(() => {
     font-size: 0.56em;
     align-self: flex-start;
     line-height: 1.8;
+    white-space: nowrap;
+  }
+
+  &__suffix {
+    white-space: nowrap;
   }
 
   &__input {

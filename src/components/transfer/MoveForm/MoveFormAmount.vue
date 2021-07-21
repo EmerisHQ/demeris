@@ -39,7 +39,7 @@
           <span class="move-form-amount__estimated">
             <AmountDisplay
               :amount="{
-                amount: form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
                 denom: state.currentAsset?.base_denom,
               }"
             />
@@ -52,12 +52,12 @@
             </FlexibleAmountInput>
           </div>
 
-          <span class="move-form-amount__estimated">
+          <span v-if="hasPrice" class="move-form-amount__estimated">
             <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
           </span>
         </template>
         <div class="move-form-amount__controls">
-          <label class="move-form-amount__controls__button">
+          <label v-if="hasPrice" class="move-form-amount__controls__button">
             <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
             <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
             <span v-else class="elevation-button">USD</span>
@@ -159,7 +159,8 @@
 
 <script lang="ts">
 import { parseCoins } from '@cosmjs/amino';
-import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -217,6 +218,16 @@ export default defineComponent({
       usdValue: '',
     });
 
+    const hasPrice = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const price = store.getters['demeris/getPrice']({ denom: state.currentAsset.base_denom });
+
+      return !!price;
+    });
+
     const denomDecimals = computed(() => {
       if (state.currentAsset) {
         const precision = store.getters['demeris/getDenomPrecision']({
@@ -255,13 +266,23 @@ export default defineComponent({
       return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
     });
 
-    const isValid = () => {
+    const isValid = computed(() => {
+      const value = new BigNumber(form.balance.amount);
+
+      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+        return false;
+      }
+
       if (!hasSufficientFunds.value) {
         return false;
       }
 
+      if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
+        return false;
+      }
+
       return true;
-    };
+    });
 
     const toggleDenomModal = (asset?: Record<string, unknown>) => {
       if (asset) {
@@ -300,6 +321,7 @@ export default defineComponent({
         if (state.isMaximumAmountChecked) {
           const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
           form.balance.amount = (assetAmount / denomDecimals.value).toString();
+          return;
         }
       },
     );
@@ -318,9 +340,21 @@ export default defineComponent({
       () => (state.usdValue = ''),
     );
 
+    const { on_chain: onChain, to_chain: toChain } = toRefs(form);
+    watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
+      if (onChainNew === toChainNew) {
+        if (onChainOld !== onChainNew) {
+          form.to_chain = onChainOld;
+        } else {
+          form.to_chain = undefined;
+        }
+      }
+    });
+
     return {
       form,
       onSubmit,
+      hasPrice,
       state,
       setCurrentAsset,
       hasSufficientFunds,

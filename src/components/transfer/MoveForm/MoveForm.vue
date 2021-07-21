@@ -81,34 +81,31 @@ export default defineComponent({
       return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
-    watch(
-      () => [form.balance.amount, form.balance.denom, form.on_chain, form.to_chain],
-      async () => {
-        console.log(form);
-        if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
-          console.log(form);
-          const precision = store.getters['demeris/getDenomPrecision']({
-            name: form.balance.denom,
-          });
-          const action: MoveAction = {
-            name: 'move',
-            params: {
-              from: {
-                amount: {
-                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
-                  denom: form.balance.denom,
-                },
-                chain_name: form.on_chain,
+    watch(form, async () => {
+      if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: form.balance.denom,
+        });
+        const action: MoveAction = {
+          name: 'move',
+          params: {
+            from: {
+              amount: {
+                amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                denom: form.balance.denom,
               },
-              to: {
-                chain_name: form.to_chain,
-              },
+              chain_name: form.on_chain,
             },
-          };
-          steps.value = await actionHandler(action);
-        }
-      },
-    );
+            to: {
+              chain_name: form.to_chain,
+            },
+          },
+        };
+        steps.value = await actionHandler(action);
+      } else {
+        steps.value = [];
+      }
+    });
 
     const generateSteps = async () => {
       goToStep('review');
@@ -121,7 +118,7 @@ export default defineComponent({
     const resetHandler = () => {
       form.balance = {
         denom: '',
-        amount: '0',
+        amount: '',
       };
       form.on_chain = '';
       form.to_chain = '';
