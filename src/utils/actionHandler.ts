@@ -891,11 +891,17 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
   if (stepTx.name == 'createpool') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.CreatePoolData;
+    let depositCoins;
+    if (data.coinA.denom > data.coinB.denom) {
+      depositCoins = [data.coinB, data.coinA];
+    } else {
+      depositCoins = [data.coinA, data.coinB];
+    }
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
-        depositCoins: [data.coinA, data.coinB],
+        depositCoins: depositCoins,
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
