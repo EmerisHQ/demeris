@@ -618,7 +618,7 @@ export default {
 
       const result = new BigNumber(form.coinA.amount).multipliedBy(priceA).dividedBy(priceB);
 
-      form.coinB.amount = result ? result.decimalPlaces(6).toString() : '';
+      form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
       updateReceiveAmount();
     };
@@ -640,7 +640,7 @@ export default {
 
       const result = new BigNumber(form.coinB.amount).multipliedBy(priceB).dividedBy(priceA);
 
-      form.coinA.amount = result ? result.decimalPlaces(6).toString() : '';
+      form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
       updateReceiveAmount();
     };
