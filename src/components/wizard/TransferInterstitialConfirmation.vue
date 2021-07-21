@@ -130,6 +130,7 @@ export default defineComponent({
     );
 
     return {
+      currentAction,
       title,
       description,
       emitContinue,
