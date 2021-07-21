@@ -19,15 +19,17 @@
       />
     </div>
     <template v-if="state.currentAsset">
-      <fieldset class="form__field move-form-amount">
+      <fieldset clss="form__field move-form-amount">
         <div class="move-form-amount__input">
-          <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-          <span class="move-form-amount__input__denom"><Denom :name="state.currentAsset?.base_denom || ''" /></span>
+          <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+            <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+          </FlexibleAmountInput>
         </div>
 
-        <span class="move-form-amount__estimated">
-          <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
-        </span>
+        <Price
+          class="move-form-amount__estimated"
+          :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+        />
 
         <div class="move-form-amount__controls">
           <label class="move-form-amount__controls__button">
@@ -141,6 +143,7 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
@@ -151,6 +154,7 @@ export default defineComponent({
   name: 'MoveFormAmount',
 
   components: {
+    FlexibleAmountInput,
     AmountDisplay,
     Button,
     Denom,
@@ -327,8 +331,9 @@ export default defineComponent({
     font-size: 5.1rem;
     font-weight: 700;
     text-transform: uppercase;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     transition: color linear 100ms;
 
     &__control {
@@ -348,14 +353,17 @@ export default defineComponent({
   &__estimated {
     color: var(--muted);
     margin-top: 1.2rem;
+    text-align: center;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
-    margin-top: 1.4rem;
+    justify-content: center;
+    margin: 2.4rem 0 3.2rem 0;
 
     &__button {
+      line-height: 1;
       input {
         display: none;
       }

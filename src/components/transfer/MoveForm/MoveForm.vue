@@ -66,7 +66,7 @@ export default defineComponent({
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',
-        amount: '0',
+        amount: '',
       },
       on_chain: '',
       to_chain: '',
