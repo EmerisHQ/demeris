@@ -698,6 +698,11 @@ export default {
           form.coinB.asset = undefined;
         }
 
+        if (assetANew?.base_denom > assetBNew?.base_denom) {
+          form.coinA.asset = assetBNew;
+          form.coinB.asset = assetANew;
+        }
+
         await findPoolByDenoms();
 
         if (assetANew?.base_denom !== assetAOld?.base_denom || assetBNew?.base_denom !== assetBOld?.base_denom) {
