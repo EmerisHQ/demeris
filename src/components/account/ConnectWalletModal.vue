@@ -48,6 +48,9 @@ export default defineComponent({
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
 
+    const isChrome = ref(null);
+    const isBrave = ref(null);
+
     const close = () => {
       connectKeplrRef.value.cancel();
       getKeplrRef.value.cancel();
@@ -58,11 +61,11 @@ export default defineComponent({
     // detect chrome extension support
     // @ts-ignore
     if (window.chrome) {
-      const isChrome = true;
+      isChrome.value = true;
     }
     // @ts-ignore
     if (navigator.brave) {
-      const isBrave = true;
+      isBrave.value = true;
     }
     if (isChrome.value || isBrave.value) {
       isKeplrSupported.value = true;
