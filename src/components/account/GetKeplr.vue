@@ -80,6 +80,7 @@ export default defineComponent({
     width: 50%;
     min-height: inherit;
     padding: 4.8rem;
+    text-align: center;
   }
 
   &__controls {
