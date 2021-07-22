@@ -1,7 +1,6 @@
 <template>
   <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
     <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
-
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -48,6 +47,7 @@
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
       :status="txstatus"
+      :tx-result="txResult"
       :has-more="hasMore"
       :tx="transaction"
       :is-final="isFinal"
@@ -140,6 +140,7 @@ export default defineComponent({
     const hasMore = ref(false);
     const isFinal = ref(false);
     const isTransferConfirmationOpen = ref(false);
+    const txResult = ref(null);
 
     onMounted(async () => {
       fees.value = await Promise.all(
@@ -291,6 +292,7 @@ export default defineComponent({
                 let endBlocks = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                   height: txResultData.height,
                 });
+                txResult.value = { swappedPercent: 1, demandCoinSwappedAmount: 1, demandCoinDenom: '1' };
                 console.log('endBlocks', endBlocks);
 
                 // TODO: deal with status here
@@ -334,7 +336,7 @@ export default defineComponent({
             shouldOpenConfirmation = true;
           }
         } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-          shouldOpenConfirmation = props.data.length > 1;
+          shouldOpenConfirmation = props.data?.length > 1;
         }
 
         isTransferConfirmationOpen.value = shouldOpenConfirmation;
@@ -346,6 +348,7 @@ export default defineComponent({
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,
+      txResult,
       confirm,
       toggleTxHandlingModal,
       currentData,

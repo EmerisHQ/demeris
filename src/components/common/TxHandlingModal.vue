@@ -63,6 +63,7 @@
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
+              <div>{{ txResult.demandCoinDenom }}</div>
               <span class="w-bold"><AmountDisplay :amount="{ denom: 'uatom', amount: '100000000000' }" /></span> <br />
               on <ChainName :name="'cosmos-hub'" />.
             </template>
@@ -165,7 +166,7 @@ import SpinnerIcon from '@/components/ui/Spinner.vue';
 import { StepTransaction } from '@/types/actions';
 
 type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
-
+type Result = { demandCoinDenom: string; swappedPercent: number; demandCoinSwappedAmount: number };
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
@@ -199,6 +200,12 @@ export default defineComponent({
     isFinal: {
       type: Boolean as PropType<boolean>,
       default: false,
+    },
+    txResult: {
+      type: Object as PropType<Result>,
+      default: () => {
+        return { swappedPercent: 0, demandCoinSwappedAmount: 0, demandCoinDenom: '' };
+      },
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],

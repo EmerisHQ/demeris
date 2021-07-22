@@ -1,7 +1,6 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
-import { bech32 } from 'bech32';
 import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
@@ -11,7 +10,6 @@ import { Amount } from '@/types/base';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
-import { store } from '.';
 import {
   DemerisActionParams,
   DemerisActionsByAddressParams,
@@ -56,9 +54,6 @@ export type DemerisSessionParams = {
 };
 export type TicketResponse = {
   ticket: string;
-};
-export type EndBlockEventsResponse = {
-  endBlocks: Array<{ amount: number }>;
 };
 export interface Actions {
   // Cross-chain endpoint actions
@@ -152,7 +147,7 @@ export interface Actions {
   [DemerisActionTypes.GET_END_BLOCK_EVENTS](
     { commit, getters }: ActionContext<State, RootState>,
     { height }: DemerisTxResultParams,
-  ): Promise<EndBlockEventsResponse>;
+  ): Promise<unknown>;
 
   [DemerisActionTypes.SIGN_WITH_KEPLR](
     { commit, getters }: ActionContext<State, RootState>,
@@ -701,22 +696,25 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
     try {
-      console.log('requesterAddress', getters['getOwnAddress']({ chain_name: getters['getDexChain'] }));
       const response = await axios.get(
         `https://cosmos-hub-emeris.app.alpha.starport.cloud/block_results?height=${height}`,
       );
       const successData = {};
+
       if (response.data.result?.end_block_events) {
         let isMine = false;
 
-        const checks = getEndBlockChecks({ type: 'Swap' });
+        const checks = getEndBlockChecks({
+          type: 'Swap',
+          requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
+        });
         response.data.result?.end_block_events?.forEach((item) => {
           if (item.type === checks.type) {
             item.attributes.forEach((result) => {
               console.log(atob(result.key), atob(result.value));
 
               if (atob(result.key) === checks.txAddress) {
-                if (atob(result.value) === checks.userAddress) {
+                if (atob(result.value) === checks.requesterAddress) {
                   isMine = true;
                 } else {
                   isMine = false;
@@ -728,21 +726,24 @@ export const actions: ActionTree<State, RootState> & Actions = {
             });
           }
         });
+        if (isMine) {
+          return successData;
+        } else {
+          return null;
+        }
       }
-      console.log('successData', successData);
-      return response.data;
 
       function getEndBlockChecks(data) {
         if (data.type === 'Swap') {
-          return { type: 'swap_transacted', txAddress: 'swap_requester', userAddress: data.userAddress };
+          return { type: 'swap_transacted', txAddress: 'swap_requester', requesterAddress: data.requesterAddress };
         }
 
         if (data.type === 'Redeem') {
-          return { type: 'withdraw_from_pool', txAddress: 'withdrawer', userAddress: data.userAddress };
+          return { type: 'withdraw_from_pool', txAddress: 'withdrawer', requesterAddress: data.requesterAddress };
         }
 
         if (data.type === 'Add Liquidity') {
-          return { type: 'deposit_to_pool', txAddress: 'depositor', userAddress: data.userAddress };
+          return { type: 'deposit_to_pool', txAddress: 'depositor', requesterAddress: data.requesterAddress };
         }
       }
     } catch (e) {
