@@ -20,6 +20,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
+import { useStore } from '@/store';
+
 export default defineComponent({
   name: 'MoonpayBanner',
 
@@ -34,6 +36,8 @@ export default defineComponent({
     },
   },
   setup() {
+    const store = useStore();
+
     // const moonPayDomain = 'https://buy-staging.moonpay.com';
     const moonPayDomain = 'https://buy.moonpay.io';
     const moonPayParams = {
@@ -42,7 +46,7 @@ export default defineComponent({
       // Cosmostation api key
       apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
       currencyCode: 'atom',
-      walletAddress: 'cosmos16je620jgjy8xkrs3207r653kl44hn94wt3yq64',
+      walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmoshub-4' }),
       baseCurrencyCode: 'usd',
     };
     const params = new URLSearchParams(moonPayParams).toString();

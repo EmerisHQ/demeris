@@ -16,12 +16,7 @@
             </router-link>
           </div>
 
-          <MoonpayBanner
-            v-if="!balances.length"
-            title="Add crypto to your account"
-            class="portfolio__assets__buy-banner"
-          />
-          <div v-else class="portfolio__assets__table>">
+          <div class="portfolio__assets__table>">
             <AssetsTable
               :balances="balances"
               :hide-zero-assets="true"
@@ -32,6 +27,8 @@
               @row-click="openAssetPage"
             />
           </div>
+
+          <MoonpayBanner title="Add ATOM to your account" class="portfolio__assets__buy-banner" />
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
