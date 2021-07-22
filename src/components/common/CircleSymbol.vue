@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -61,6 +61,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    poolDenoms: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
     chainName: {
       type: String,
       default: undefined,
@@ -84,7 +88,7 @@ export default defineComponent({
 
     const isPoolCoin = computed(() => {
       if (props.variant === 'asset') {
-        return (props.denom as string).startsWith('pool');
+        return (props.denom as string).startsWith('pool') || props.poolDenoms.length > 0;
       }
 
       return false;
@@ -194,18 +198,24 @@ export default defineComponent({
     });
 
     watch(
-      () => props.denom,
+      () => toRefs(props),
       async () => {
-        if (!props.denom) {
-          return;
-        }
         if (isPoolCoin.value) {
-          const pool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
-          if (pool) {
-            denoms.value = await getReserveBaseDenoms(pool);
+          let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
+
+          if (existingPool) {
+            denoms.value = await getReserveBaseDenoms(existingPool);
+          } else if (props.poolDenoms.filter(Boolean).length) {
+            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
           }
         } else {
-          denoms.value = [await getBaseDenom(props.denom as string, props.chainName)];
+          let baseDenom = props.denom;
+          try {
+            baseDenom = await getBaseDenom(props.denom as string, props.chainName);
+          } catch {
+            //
+          }
+          denoms.value = [baseDenom];
         }
         isLoaded.value = true;
       },

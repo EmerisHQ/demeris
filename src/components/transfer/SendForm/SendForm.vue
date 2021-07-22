@@ -17,15 +17,19 @@
       <TxStepsModal
         :data="steps"
         :gas-price-level="gasPrice"
+        :back-route="{ name: 'Portfolio' }"
+        action-name="transfer"
         @transacting="goToStep('send')"
         @failed="goToStep('review')"
         @reset="resetHandler"
+        @done="resetHandler"
       />
     </template>
   </div>
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -34,6 +38,7 @@ import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
@@ -90,21 +95,20 @@ export default defineComponent({
       () => [form.balance.amount, form.balance.denom, form.chain_name],
       async () => {
         if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
-          const precision = store.getters['demeris/getDenomPrecision']({
-            name: form.balance.denom,
-          });
+          const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
+
           const action: TransferAction = {
             name: 'transfer',
             params: {
               from: {
                 amount: {
-                  amount: (+form.balance.amount * Math.pow(10, precision)).toString(),
+                  amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
                   denom: form.balance.denom,
                 },
                 chain_name: form.chain_name,
               },
               to: {
-                chain_name: form.chain_name,
+                chain_name: getChainFromRecipient(form.recipient),
                 address: form.recipient,
               },
             },

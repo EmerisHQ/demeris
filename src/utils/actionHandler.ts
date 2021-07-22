@@ -5,7 +5,7 @@ import { Balances, Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
-import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative } from './basic';
+import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative, keyHashfromAddress } from './basic';
 
 const stores = useAllStores();
 // Basic step-building blocks
@@ -833,7 +833,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sourceChannel: data.through,
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
-        timeoutTimestamp: Long.fromString(new Date().getTime() + 60000 + '000000'),
+        timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
         token: data.amount,
       },
     });
@@ -865,11 +865,17 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
   if (stepTx.name == 'addliquidity') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.AddLiquidityData;
+    let depositCoins;
+    if (data.coinA.denom > data.coinB.denom) {
+      depositCoins = [data.coinB, data.coinA];
+    } else {
+      depositCoins = [data.coinA, data.coinB];
+    }
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
         depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
-        depositCoins: [data.coinA, data.coinB],
+        depositCoins,
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
@@ -891,11 +897,17 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
   if (stepTx.name == 'createpool') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.CreatePoolData;
+    let depositCoins;
+    if (data.coinA.denom > data.coinB.denom) {
+      depositCoins = [data.coinB, data.coinA];
+    } else {
+      depositCoins = [data.coinA, data.coinB];
+    }
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
-        depositCoins: [data.coinA, data.coinB],
+        depositCoins: depositCoins,
       },
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
@@ -1000,7 +1012,7 @@ export async function getDisplayName(name, chain_name = null) {
         ));
       return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return name + '(unverified)';
     }
   }
@@ -1166,6 +1178,13 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   for (const balance of balances) {
+    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+    const hashAddress = keyHashfromAddress(ownAddress);
+
+    if (balance.address !== hashAddress) {
+      continue;
+    }
+
     if (Object.keys(balance.ibc).length == 0) {
       validBalances.push(balance);
     } else {

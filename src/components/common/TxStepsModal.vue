@@ -2,33 +2,47 @@
   <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
     <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
 
-    <div class="title s-2 w-bold">
-      {{ currentData.title }}
-    </div>
-
-    <div v-if="currentData && currentData.fees" class="detail">
-      <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
-      <PreviewAddLiquidity
-        v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
-        :step="currentData.data"
-        :fees="currentData.fees"
+    <template v-if="isTransferConfirmationOpen">
+      <TransferInterstitialConfirmation
+        :action="actionName"
+        :step="data[0]"
+        @continue="isTransferConfirmationOpen = false"
       />
-      <PreviewWithdrawLiquidity
-        v-else-if="currentData.data.name === 'withdrawliquidity'"
-        :step="currentData.data"
-        :fees="currentData.fees"
-      />
-      <PreviewRedeem v-else-if="currentData.data.name === 'redeem'" :step="currentData.data" :fees="currentData.fees" />
-      <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
-    </div>
+    </template>
 
-    <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
-      Non-revertable transactions. Prices not guaranteed etc.
-    </div>
+    <template v-else>
+      <div class="title s-2 w-bold">
+        {{ currentData.title }}
+      </div>
 
-    <div class="button-wrapper">
-      <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
-    </div>
+      <div v-if="currentData && currentData.fees" class="detail">
+        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+        <PreviewAddLiquidity
+          v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewWithdrawLiquidity
+          v-else-if="currentData.data.name === 'withdrawliquidity'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewRedeem
+          v-else-if="currentData.data.name === 'redeem'"
+          :step="currentData.data"
+          :fees="currentData.fees"
+        />
+        <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+      </div>
+
+      <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+        Non-revertable transactions. Prices not guaranteed etc.
+      </div>
+
+      <div class="button-wrapper">
+        <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+      </div>
+    </template>
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
@@ -52,6 +66,7 @@
       "
       @done="
         () => {
+          emitHandler('done');
           if (transaction.name == 'swap') {
             emitHandler('reset');
           } else {
@@ -66,7 +81,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
@@ -77,6 +92,7 @@ import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
@@ -93,8 +109,13 @@ export default defineComponent({
     PreviewSwap,
     Button,
     TxHandlingModal,
+    TransferInterstitialConfirmation,
   },
   props: {
+    actionName: {
+      type: String,
+      required: true,
+    },
     data: {
       type: Array as PropType<Step[]>,
       required: true,
@@ -103,15 +124,23 @@ export default defineComponent({
       type: String as PropType<GasPriceLevel>,
       required: true,
     },
+    backRoute: {
+      type: [Object, String] as PropType<RouteLocationRaw>,
+      default: undefined,
+    },
     asWidget: {
       type: Boolean,
       default: false,
     },
   },
-  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
+  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
   setup(props, { emit }) {
     const router = useRouter();
     const goBack = () => {
+      if (props.backRoute) {
+        router.push(props.backRoute);
+        return;
+      }
       router.go(-1);
     };
     const fees = ref([]);
@@ -119,6 +148,8 @@ export default defineComponent({
     const store = useStore();
     const hasMore = ref(false);
     const isFinal = ref(false);
+    const isTransferConfirmationOpen = ref(false);
+
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -229,6 +260,7 @@ export default defineComponent({
                 memo: 'a memo',
               });
             } catch (e) {
+              console.error(e);
               txstatus.value = 'keplr-reject';
               await txToResolve.value['promise'];
               continue;
@@ -294,7 +326,29 @@ export default defineComponent({
     const emitHandler = (event) => {
       emit(event);
     };
+
+    watch(
+      props,
+      () => {
+        let shouldOpenConfirmation = false;
+
+        if (props.actionName === 'move') {
+          shouldOpenConfirmation = true;
+        } else if (props.actionName === 'transfer') {
+          if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+            shouldOpenConfirmation = true;
+          }
+        } else if (['swap', 'addliquidity'].includes(props.actionName)) {
+          shouldOpenConfirmation = props.data.length > 1;
+        }
+
+        isTransferConfirmationOpen.value = shouldOpenConfirmation;
+      },
+      { immediate: true },
+    );
+
     return {
+      isTransferConfirmationOpen,
       emitHandler,
       txstatus,
       confirm,

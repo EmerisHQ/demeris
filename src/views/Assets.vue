@@ -6,7 +6,13 @@
       </div>
 
       <div class="assets__group">
-        <AssetsTable :balances="[]" :show-all-assets="true" class="assets__table" @row-click="openAssetPage" />
+        <AssetsTable
+          :balances="[]"
+          :show-all-assets="true"
+          :hide-lp-assets="true"
+          class="assets__table"
+          @row-click="openAssetPage"
+        />
       </div>
     </section>
   </AppLayout>

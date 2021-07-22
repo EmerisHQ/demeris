@@ -11,6 +11,7 @@ export const messages = {
       filterRetry: 'Try again with another search',
       discoverMore: 'Discover more',
       max: 'Max',
+      learnMore: 'Learn more',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -23,14 +24,25 @@ export const messages = {
     wallet: {
       connect: {
         button: 'Connect my wallet',
-        modal: {
+        modal1: {
           title: 'Connect to Keplr',
-          text1: 'Install Keplr in your browser and connect your wallet to start using Demeris.',
-          text2: 'Demeris will support other wallets in the near future.',
+          text: 'To use Emeris beta, please allow this web app to connect to the Keplr browser extension wallet.',
           button: 'Connect to Keplr',
-          missing: "Don't have Keplr installed?",
+          needHelp: 'Need help?',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
+        },
+        modal2: {
+          title: 'Keplr is required',
+          text: 'To use Emeris beta, please install the Keplr browser extension wallet from the Chrome Web Store.',
+          button1: 'Get Keplr',
+          button2: 'I got Keplr',
+        },
+        modal3: {
+          title: 'Not compatible',
+          text: 'Emeris beta is only compatible with Chromium-based web browsers. These include Google Chrome, Brave Browser, and Microsoft Edge.',
+          button1: 'Get Chrome',
+          button2: 'Get Brave',
         },
       },
     },
@@ -78,7 +90,7 @@ export const messages = {
         title: 'Slippage tolerance',
         limitPrice: 'Limit price',
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
-        minReceivedLbl: 'Min. received<br />(if 100% swapped)',
+        minReceivedLbl: 'Min. received/(if 100% swapped)',
         minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
       },
       txHandlingModal: {
@@ -109,6 +121,18 @@ export const messages = {
         payHeader: 'Pay {amount}',
         receiveHeader: 'Receive {amount}',
         priceAlert: 'Prices have changed',
+      },
+      transferToHub: {
+        swap: 'Assets are swapped on the Cosmos Hub',
+        swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        addLiquidity: 'Liquidity providing happens on the Cosmos Hub',
+        addLiquidityDescription:
+          'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
+        addLiquidityDescriptionMultiple:
+          'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
+        transfer: 'Cross-chain transfers from {from} to {to}',
+        transferDescription:
+          'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
       },
       previews: {
         addWithdrawLiquidity: {
@@ -155,15 +179,22 @@ export const messages = {
         theme: 'Theme',
         system: 'System',
         light: 'Light',
-        advancedSettings: 'Advanced Settings',
-        customSlippage: 'Custom slippage',
-        viewAllAssets: 'View all assets',
-        lpAssetPool: 'LP asset pool',
+        advancedSettings: 'Advanced settings',
+        settings: 'Settings',
+        connectedWallet: 'Connected wallet',
+        disconnectWallet: 'Disconnect wallet',
         support: 'Support',
         twitter: 'Twitter',
         privacy: 'Privacy',
         termsOfUse: 'Terms of use',
         cookiesPolicy: 'Cookies policy',
+        allowCustomSlippage: 'Allow custom slippage',
+        viewAllAssets: 'View all assets',
+        viewLPAssetPools: 'View LP asset pools',
+        warningCustomSlippage: 'Be careful, being able to change price slippage is an advanced setting.',
+        warningViewUnverified: 'Be careful, being able to trade any asset is an advanced setting.',
+        warningLPAssetPools: 'Be careful, being able to see and trade LP asset pools is an advanced setting.',
+        warningSignificantLoss: 'This means that if you don’t know what you are doing, you may risk significant loss.',
       },
     },
     context: {

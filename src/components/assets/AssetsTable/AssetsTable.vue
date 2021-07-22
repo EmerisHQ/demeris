@@ -45,7 +45,9 @@
             <Price :amount="{ denom: asset.denom, amount: null }" />
           </td>
 
-          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">-</td>
+          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">
+            {{ getFormattedMarketCap(asset.denom) }}
+          </td>
 
           <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
             <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
@@ -102,6 +104,15 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    hideLpAssets: {
+      type: Boolean,
+      default: false,
+    },
+    hideZeroAssets: {
+      type: Boolean,
+      default: false,
+    },
+
     limitRows: {
       type: Number,
       default: undefined,
@@ -123,8 +134,9 @@ export default defineComponent({
     });
 
     const allBalances = computed<Balances>(() => {
+      let balances = props.balances;
       if (props.showAllAssets) {
-        return [
+        balances = [
           ...(props.balances as Balances),
           ...verifiedDenoms.value.map((denom) => ({
             base_denom: denom.name,
@@ -134,7 +146,24 @@ export default defineComponent({
         ];
       }
 
-      return props.balances as Balances;
+      if (props.hideLpAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.base_denom.substring(0, 4) !== 'pool') {
+            return balance;
+          }
+        });
+        return balances as Balances;
+      }
+
+      if (props.hideZeroAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.amount.charAt(0) !== '0') {
+            return balance;
+          }
+        });
+      }
+
+      return balances as Balances;
     });
 
     const balancesByAsset = computed(() => {
@@ -159,6 +188,16 @@ export default defineComponent({
       return balancesByAsset.value.slice(0, currentLimit.value);
     });
 
+    const getFormattedMarketCap = (denom: string) => {
+      const supply = store.getters['demeris/getMarketCap']({ denom });
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return supply ? formatter.format(supply) : '-';
+    };
+
     const viewAllHandler = () => {
       currentLimit.value = undefined;
     };
@@ -167,7 +206,7 @@ export default defineComponent({
       emit('row-click', asset);
     };
 
-    return { allBalances, balancesByAsset, balancesFiltered, handleClick, viewAllHandler };
+    return { allBalances, balancesByAsset, balancesFiltered, getFormattedMarketCap, handleClick, viewAllHandler };
   },
 });
 </script>

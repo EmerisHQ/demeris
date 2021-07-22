@@ -1,17 +1,48 @@
 <template>
   <teleport to="body">
-    <Modal :open="open" class="connect-wallet-modal" body-class="elevation-panel" width="72rem" @close="close">
-      <ConnectKeplr ref="connectKeplrRef" @cancel="close" @connect="close" />
+    <Modal
+      v-if="isKeplrInstalled"
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeConnectKeplr"
+    >
+      <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
+    </Modal>
+
+    <Modal
+      v-else-if="isKeplrSupported && !isKeplrInstalled"
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeGetKeplr"
+    >
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
+    </Modal>
+
+    <Modal
+      v-else
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeGetBrowser"
+    >
+      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" />
     </Modal>
   </teleport>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
 import ConnectKeplr from './ConnectKeplr.vue';
+import GetBrowser from './GetBrowser.vue';
+import GetKeplr from './GetKeplr.vue';
 
 export default defineComponent({
   name: 'ConnectWalletModal',
@@ -19,6 +50,8 @@ export default defineComponent({
   components: {
     Modal,
     ConnectKeplr,
+    GetKeplr,
+    GetBrowser,
   },
 
   props: {
@@ -32,13 +65,44 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const connectKeplrRef = ref(null);
+    const getKeplrRef = ref(null);
+    const getBrowserRef = ref(null);
+    const isKeplrSupported = ref(null);
+    const isKeplrInstalled = ref(null);
 
-    const close = () => {
+    const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
       emit('close');
     };
+    const closeGetKeplr = () => {
+      emit('close');
+    };
+    const closeGetBrowser = () => {
+      emit('close');
+    };
 
-    return { connectKeplrRef, close };
+    onMounted(() => {
+      window.addEventListener('load', () => {
+        // detect chrome extension support
+        // @ts-ignore
+        isKeplrSupported.value = !!window.chrome;
+
+        // detect keplr installed
+        // @ts-ignore
+        isKeplrInstalled.value = !!window.keplr;
+      });
+    });
+
+    return {
+      connectKeplrRef,
+      getKeplrRef,
+      getBrowserRef,
+      isKeplrSupported,
+      isKeplrInstalled,
+      closeConnectKeplr,
+      closeGetKeplr,
+      closeGetBrowser,
+    };
   },
 });
 </script>

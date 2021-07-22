@@ -167,7 +167,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrice: (state, getters) => (params) => {
     const ticker = (getters['getDisplayDenom']({ name: params.denom }) + 'USDT').toUpperCase();
-    return state.prices.find((x) => x.Symbol == ticker)?.Price ?? null;
+    return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
+  },
+  getMarketCap: (state, getters) => (params) => {
+    const ticker = (getters['getDisplayDenom']({ name: params.denom }) + 'USDT').toUpperCase();
+    return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Supply ?? null;
   },
   getEndpoint: (state) => {
     return state.endpoint;

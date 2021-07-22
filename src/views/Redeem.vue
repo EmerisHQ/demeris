@@ -58,7 +58,7 @@
 
               <div class="redeem__list__item__asset">
                 <p class="redeem__list__item__asset__amount w-bold">
-                  <AmountDisplay :amount="parseCoins(asset.amount)[0]" />
+                  <AmountDisplay :amount="parseCoins(asset.amount)[0]" :chain="asset.on_chain" />
                 </p>
                 <span class="redeem__list__item__asset__route s-minus">
                   <template v-for="(hop, index) in asset.hops" :key="asset.ibc.hash + '_' + index">
