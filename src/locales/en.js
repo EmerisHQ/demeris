@@ -24,14 +24,25 @@ export const messages = {
     wallet: {
       connect: {
         button: 'Connect my wallet',
-        modal: {
+        modal1: {
           title: 'Connect to Keplr',
-          text1: 'Install Keplr in your browser and connect your wallet to start using Demeris.',
-          text2: 'Demeris will support other wallets in the near future.',
+          text: 'To use Emeris beta, please allow this web app to connect to the Keplr browser extension wallet.',
           button: 'Connect to Keplr',
-          missing: "Don't have Keplr installed?",
+          needHelp: 'Need help?',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
+        },
+        modal2: {
+          title: 'Keplr is required',
+          text: 'To use Emeris beta, please install the Keplr browser extension wallet from the Chrome Web Store.',
+          button1: 'Get Keplr',
+          button2: 'I got Keplr',
+        },
+        modal3: {
+          title: 'Not compatible',
+          text: 'Emeris beta is only compatible with Chromium-based web browsers. These include Google Chrome, Brave Browser, and Microsoft Edge.',
+          button1: 'Get Chrome',
+          button2: 'Get Brave',
         },
       },
     },
