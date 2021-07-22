@@ -49,10 +49,11 @@ export default defineComponent({
       walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmoshub-4' }),
       baseCurrencyCode: 'usd',
     };
-    const params = new URLSearchParams(moonPayParams).toString();
-    const moonUrl = moonPayDomain + '/?' + params;
+    const moonPayParamsMerged = new URLSearchParams(moonPayParams).toString();
+    const moonPayUrl = moonPayDomain + '/?' + moonPayParamsMerged;
+    console.log(moonPayUrl);
     const goMoon = () => {
-      window.open(moonUrl, '', 'height=480,width=320');
+      window.open(moonPayUrl, '', 'height=480,width=320');
     };
     return { goMoon };
   },
