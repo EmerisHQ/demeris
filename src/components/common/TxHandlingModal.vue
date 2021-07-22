@@ -19,22 +19,22 @@
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" />
+            <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
           </template>
           <template v-if="tx.name == 'transfer'">
-            <Denom :name="tx.data.amount.denom" /> (<ChainName :name="tx.data.chain_name" />)
+            <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
           </template>
           <template v-if="tx.name == 'swap'">
-            <Denom :name="tx.data.from.denom" /> -> <Denom :name="tx.data.to.denom" />
+            <Denom :name="getDenom(tx.data.from.denom)" /> -> <Denom :name="getDenom(tx.data.to.denom)" />
           </template>
           <template v-if="tx.name == 'addliquidity'">
-            <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> Pool
+            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
           </template>
           <template v-if="tx.name == 'createpool'">
-            <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> Pool
+            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
           </template>
           <template v-if="tx.name == 'withdrawliquidity'">
-            <Denom :name="tx.data.poolCoin.denom" />
+            <Denom :name="getDenom(tx.data.poolCoin.denom)" />
           </template>
         </template>
         <template v-else>
@@ -47,19 +47,19 @@
         <template v-if="status == 'transacting' || status == 'complete'">
           <div v-if="status === 'transacting'" class="status__detail-transferring">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.from_chain }" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.from_chain" />
               <div class="arrow">-></div>
-              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.to_chain }" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.to_chain" />
             </template>
             <template v-if="tx.name == 'transfer'">
-              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.chain_name }" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.chain_name" />
               <div class="arrow">-></div>
-              <CoinImageWithRing :coin-data="{ denom: tx.data.amount.denom, on_chain: tx.data.chain_name }" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.chain_name" />
             </template>
           </div>
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
-              <AmountDisplay :amount="tx.data.amount" />
+              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
             </template>
           </div>
           <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
@@ -73,27 +73,32 @@
           <div v-if="status === 'keplr-sign'" class="spacer" />
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              Your <AmountDisplay :amount="tx.data.amount" /> on <ChainName :name="tx.data.from_chain" /> could not be
-              transferred to <ChainName :name="tx.data.to_chain" />
+              Your
+              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+              <ChainName :name="tx.data.from_chain" /> could not be transferred to
+              <ChainName :name="tx.data.to_chain" />
             </template>
             <template v-if="tx.name == 'transfer'">
-              Your <AmountDisplay :amount="tx.data.amount" /> on <ChainName :name="tx.data.chain_name" /> could not be
-              transferred.
+              Your
+              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+              <ChainName :name="tx.data.chain_name" /> could not be transferred.
             </template>
             <template v-if="tx.name == 'swap'">
-              Your <AmountDisplay :amount="tx.data.from" /> could not be swapped to
-              <Denom :name="tx.data.to.denom" /> on the Cosmos Hub.
+              Your
+              <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not
+              be swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
             </template>
             <template v-if="tx.name == 'addliquidity'">
-              Could not add liquidity to the <Denom :name="tx.data.coinA.denom" /> /
-              <Denom :name="tx.data.coinB.denom" /> pool on the Cosmos Hub.
+              Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> /
+              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
             </template>
             <template v-if="tx.name == 'createpool'">
-              Could not create a <Denom :name="tx.data.coinA.denom" /> / <Denom :name="tx.data.coinB.denom" /> pool on
-              the Cosmos Hub.
+              Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
+              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
             </template>
             <template v-if="tx.name == 'withdrawliquidity'">
-              Could not withdraw liquidity from the <Denom :name="tx.data.poolCoin.denom" /> on the Cosmos Hub.
+              Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
+              Hub.
             </template>
           </div>
         </template>
@@ -127,19 +132,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
-import CoinImageWithRing from '@/components/common/CoinImageWithRing.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
-import { StepTransaction } from '@/types/actions';
+import {
+  AddLiquidityData,
+  CreatePoolData,
+  IBCForwardsData,
+  StepTransaction,
+  SwapData,
+  WithdrawLiquidityData,
+} from '@/types/actions';
+import { getBaseDenom } from '@/utils/actionHandler';
 
 type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
 
@@ -151,10 +164,10 @@ export default defineComponent({
     WarningIcon,
     ErrorIcon,
     Button,
-    CoinImageWithRing,
     AmountDisplay,
     ChainName,
     Denom,
+    CircleSymbol,
   },
   props: {
     status: {
@@ -200,6 +213,15 @@ export default defineComponent({
     const title = ref(t('components.txHandlingModal.signTx'));
     const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
+    const baseDenoms = reactive({});
+
+    const isIBC = computed(() => {
+      return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
+    });
+
+    const getDenom = (denom: string) => {
+      return baseDenoms[denom] || denom;
+    };
 
     // Watch for status changes
     watch(
@@ -291,6 +313,36 @@ export default defineComponent({
       },
     );
 
+    onMounted(async () => {
+      let denoms = [];
+      let chain = undefined;
+
+      if (isIBC.value) {
+        denoms.push((props.tx.data as IBCForwardsData).amount.denom);
+        chain = (props.tx.data as IBCForwardsData).from_chain;
+      } else if (props.tx.name === 'swap') {
+        denoms.push((props.tx.data as SwapData).from.denom);
+      } else if (props.tx.name === 'addliquidity') {
+        denoms.push((props.tx.data as AddLiquidityData).coinA.denom);
+        denoms.push((props.tx.data as AddLiquidityData).coinB.denom);
+      } else if (props.tx.name === 'createpool') {
+        denoms.push((props.tx.data as CreatePoolData).coinA.denom);
+        denoms.push((props.tx.data as CreatePoolData).coinB.denom);
+      } else if (props.tx.name === 'withdrawliquidity') {
+        denoms.push((props.tx.data as WithdrawLiquidityData).poolCoin.denom);
+      }
+
+      if (!denoms.length) {
+        return;
+      }
+
+      for (const denom of denoms) {
+        if (!baseDenoms[denom]) {
+          baseDenoms[denom] = await getBaseDenom(denom, chain);
+        }
+      }
+    });
+
     function emitClose() {
       emit('close');
     }
@@ -313,6 +365,7 @@ export default defineComponent({
       emitClose,
       emitAnother,
       emitDone,
+      getDenom,
       iconType,
       subTitle,
       title,
