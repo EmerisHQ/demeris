@@ -34,11 +34,21 @@ export default defineComponent({
     },
   },
   setup() {
+    // const moonPayDomain = 'https://buy-staging.moonpay.com';
+    const moonPayDomain = 'https://buy.moonpay.io';
+    const moonPayParams = {
+      // Emeris staging key
+      // apiKey: 'pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz',
+      // Cosmostation api key
+      apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
+      currencyCode: 'atom',
+      walletAddress: 'cosmos16je620jgjy8xkrs3207r653kl44hn94wt3yq64',
+      baseCurrencyCode: 'usd',
+    };
+    const params = new URLSearchParams(moonPayParams).toString();
+    const moonUrl = moonPayDomain + '/?' + params;
     const goMoon = () => {
-      window.open(
-        'https://buy-staging.moonpay.com?apiKey=pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz&currencyCode=atom',
-        '_blank',
-      );
+      window.open(moonUrl, '', 'height=480,width=320');
     };
     return { goMoon };
   },
