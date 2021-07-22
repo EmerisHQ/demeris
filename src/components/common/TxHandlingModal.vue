@@ -157,6 +157,7 @@
 </template>
 
 <script lang="ts">
+import { TxResult } from '@cosmjs/stargate/build/codec/tendermint/abci/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -333,7 +334,11 @@ export default defineComponent({
                 title.value = 'Transferred';
                 break;
               case 'swap':
-                title.value = 'Assets swapped';
+                if (props.txResult.swappedPercent !== 100) {
+                  title.value = `Assets partially swapped (${parseInt(props.txResult.swappedPercent)}%)`;
+                } else {
+                  title.value = 'Assets swapped';
+                }
                 break;
               case 'addliquidity':
                 title.value = 'Liquidity added';
