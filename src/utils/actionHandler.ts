@@ -1012,7 +1012,7 @@ export async function getDisplayName(name, chain_name = null) {
         ));
       return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return name + '(unverified)';
     }
   }
