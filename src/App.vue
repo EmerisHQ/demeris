@@ -75,7 +75,7 @@ export default defineComponent({
     this.initialized = true;
   },
   errorCaptured(err) {
-    console.log(err);
+    console.error(err);
     return false;
   },
 });

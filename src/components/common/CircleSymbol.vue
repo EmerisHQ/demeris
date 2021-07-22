@@ -213,7 +213,7 @@ export default defineComponent({
           try {
             baseDenom = await getBaseDenom(props.denom as string, props.chainName);
           } catch {
-            baseDenom = await getBaseDenom(props.denom as string, store.getters['demeris/getDexChain']);
+            //
           }
           denoms.value = [baseDenom];
         }

@@ -3,7 +3,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import AmountInput from '@/components/ui/AmountInput.vue';
 import { useStore } from '@/store';
@@ -20,9 +20,8 @@ export default defineComponent({
   emits: ['update:modelValue', 'update:price'],
   setup(props, { emit }) {
     const store = useStore();
-    const price = computed(() => {
-      return store.getters['demeris/getPrice']({ denom: props.denom });
-    });
+    // Should not observe price changes
+    const price = ref(store.getters['demeris/getPrice']({ denom: props.denom }));
 
     const usdValue = ref('');
 
@@ -32,16 +31,20 @@ export default defineComponent({
 
     watch(usdValue, () => emit('update:price', usdValue.value));
 
-    onMounted(() => {
-      const value = new BigNumber(props.modelValue);
+    watch(
+      props,
+      () => {
+        const value = new BigNumber(props.modelValue);
 
-      if (value.isFinite()) {
-        usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
-        return;
-      }
+        if (value.isFinite()) {
+          usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
+          return;
+        }
 
-      usdValue.value = '';
-    });
+        usdValue.value = '';
+      },
+      { immediate: true },
+    );
 
     watch(trueValue, () => {
       emit('update:modelValue', new BigNumber(trueValue.value).isFinite() ? trueValue.value : '');

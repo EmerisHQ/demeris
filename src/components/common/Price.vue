@@ -26,10 +26,21 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    autoUpdate: {
+      type: Boolean,
+      default: true,
+    },
   },
   setup(props) {
     const store = useStore();
     const denom = ref((props.amount as Amount).denom);
+    const isLoaded = ref(false);
+
+    const price = ref();
+
+    const priceObserver = computed(() => {
+      return store.getters['demeris/getPrice']({ denom: denom.value });
+    });
 
     const displayPrice = computed(() => {
       const precision =
@@ -41,15 +52,15 @@ export default defineComponent({
         style: 'currency',
         currency: 'USD',
       });
-      const price = store.getters['demeris/getPrice']({ denom: denom.value });
+
       if ((props.amount as Amount).amount) {
-        value = price
+        value = price.value
           ? formatter
-              .format((price * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
+              .format((price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
               .split('.')
           : parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
       } else if (!props.showZero) {
-        value = price ? formatter.format(price).split('.') : '-';
+        value = price.value ? formatter.format(price.value).split('.') : '-';
       } else {
         value = formatter.format(0);
       }
@@ -61,8 +72,21 @@ export default defineComponent({
       () => props.amount as Amount,
       async (value) => {
         denom.value = await getBaseDenom((value as Amount).denom);
+        if (!isLoaded.value) {
+          price.value = priceObserver.value;
+        }
+        isLoaded.value = true;
       },
       { immediate: true },
+    );
+
+    watch(
+      () => [props.autoUpdate, priceObserver, props.amount],
+      ([autoUpdate]) => {
+        if (autoUpdate) {
+          price.value = priceObserver.value;
+        }
+      },
     );
 
     return { displayPrice };

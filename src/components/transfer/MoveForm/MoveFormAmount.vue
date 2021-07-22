@@ -20,22 +20,33 @@
     </div>
     <template v-if="state.currentAsset">
       <fieldset class="form__field move-form-amount">
-        <template v-if="state.isUSDInputChecked">
+        <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
           <div class="move-form-amount__input">
-            <FlexibleAmountInput v-model="state.usdValue" :max-width="300" :min-width="35" prefix="$">
+            <FlexibleAmountInput
+              v-model="state.usdValue"
+              :max-width="300"
+              :min-width="state.isUSDInputChecked ? 35 : 0"
+              prefix="$"
+            >
               <template #default="inputProps">
                 <USDInput
-                  v-model="form.balance.amount"
+                  :model-value="form.balance.amount"
                   :denom="state.currentAsset?.base_denom"
                   :class="[inputProps.class]"
                   :style="inputProps.style"
                   placeholder="0"
                   @update:price="state.usdValue = $event"
+                  @update:modelValue="
+                    ($event) => {
+                      if (state.isUSDInputChecked) {
+                        form.balance.amount = $event;
+                      }
+                    }
+                  "
                 />
               </template>
             </FlexibleAmountInput>
           </div>
-
           <span class="move-form-amount__estimated">
             <AmountDisplay
               :amount="{
@@ -44,8 +55,8 @@
               }"
             />
           </span>
-        </template>
-        <template v-else>
+        </div>
+        <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
           <div class="move-form-amount__input">
             <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
               <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
@@ -53,12 +64,9 @@
           </div>
 
           <span v-if="hasPrice" class="move-form-amount__estimated">
-            <Price
-              :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
-              show-zero
-            />
+            {{ displayUSDValue }}
           </span>
-        </template>
+        </div>
         <div class="move-form-amount__controls">
           <label v-if="hasPrice" class="move-form-amount__controls__button">
             <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
@@ -111,6 +119,7 @@
               <p class="move-form-amount__assets__item__amount__balance s-minus">
                 <Price
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                  :auto-update="false"
                   show-zero
                 />
               </p>
@@ -222,6 +231,15 @@ export default defineComponent({
       isChainsModalOpen: false,
       chainsModalSource: 'from',
       usdValue: '',
+    });
+
+    const displayUSDValue = computed(() => {
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return formatter.format(+state.usdValue);
     });
 
     const hasPrice = computed(() => {
@@ -350,11 +368,6 @@ export default defineComponent({
       { immediate: true },
     );
 
-    watch(
-      () => state.isUSDInputChecked,
-      () => (state.usdValue = ''),
-    );
-
     const { on_chain: onChain, to_chain: toChain } = toRefs(form);
     watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
       if (onChainNew === toChainNew) {
@@ -367,6 +380,7 @@ export default defineComponent({
     });
 
     return {
+      displayUSDValue,
       form,
       onSubmit,
       hasPrice,

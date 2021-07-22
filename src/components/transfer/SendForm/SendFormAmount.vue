@@ -10,29 +10,40 @@
     </div>
 
     <fieldset class="form__field send-form-amount">
-      <template v-if="state.isUSDInputChecked">
+      <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
         <div class="send-form-amount__input">
-          <FlexibleAmountInput v-model="state.usdValue" :max-width="300" :min-width="35" prefix="$">
+          <FlexibleAmountInput
+            v-model="state.usdValue"
+            :max-width="300"
+            :min-width="state.isUSDInputChecked ? 35 : 0"
+            prefix="$"
+          >
             <template #default="inputProps">
               <USDInput
-                v-model="form.balance.amount"
+                :model-value="form.balance.amount"
                 :denom="state.currentAsset?.base_denom"
                 :class="[inputProps.class]"
                 :style="inputProps.style"
                 placeholder="0"
                 @update:price="state.usdValue = $event"
+                @update:modelValue="
+                  ($event) => {
+                    if (state.isUSDInputChecked) {
+                      form.balance.amount = $event;
+                    }
+                  }
+                "
               />
             </template>
           </FlexibleAmountInput>
         </div>
-
         <span class="send-form-amount__estimated">
           <AmountDisplay
             :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
           />
         </span>
-      </template>
-      <template v-else>
+      </div>
+      <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
         <div class="send-form-amount__input">
           <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
             <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
@@ -40,9 +51,9 @@
         </div>
 
         <span v-if="hasPrice" class="send-form-amount__estimated">
-          <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
+          {{ displayUSDPrice }}
         </span>
-      </template>
+      </div>
       <div class="send-form-amount__controls">
         <label v-if="hasPrice" class="send-form-amount__controls__button">
           <input v-model="state.isUSDInputChecked" type="checkbox" name="send-form-amount-usd" />
@@ -85,7 +96,11 @@
 
           <div class="send-form-amount__assets__item__amount">
             <p class="send-form-amount__assets__item__amount__balance">
-              <Price :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+              <Price
+                :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }"
+                :auto-update="false"
+                show-zero
+              />
             </p>
             <p class="send-form-amount__assets__item__amount__available s-minus">
               <span>
@@ -165,6 +180,16 @@ export default defineComponent({
       isMaximumAmountChecked: false,
       isUSDInputChecked: false,
       isSelectModalOpen: false,
+      usdValue: '',
+    });
+
+    const displayUSDValue = computed(() => {
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return formatter.format(+state.usdValue);
     });
 
     const denomDecimals = computed(() => {
@@ -258,6 +283,7 @@ export default defineComponent({
       state,
       form,
       hasPrice,
+      displayUSDValue,
       hasSufficientFunds,
       denomDecimals,
       isValid,
