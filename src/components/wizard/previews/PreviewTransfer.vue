@@ -3,15 +3,12 @@
     <ListItem :label="$t('components.previews.transfer.sendLbl')">
       <div class="send__item">
         <CircleSymbol
-          :denom="transactionInfo.from.denom"
+          :denom="denomName"
           :chain-name="transactionInfo.from.chain"
           size="sm"
           class="send__item__symbol"
         />
-        <AmountDisplay
-          class="w-bold"
-          :amount="{ amount: transactionInfo.from.amount, denom: transactionInfo.from.denom }"
-        />
+        <AmountDisplay class="w-bold" :amount="{ amount: transactionInfo.from.amount, denom: denomName }" />
       </div>
       <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
@@ -49,16 +46,8 @@
 
     <ListItem label="Receive">
       <div class="send__item">
-        <CircleSymbol
-          :denom="transactionInfo.to.denom"
-          :chain-name="transactionInfo.to.chain"
-          size="sm"
-          class="send__item__symbol"
-        />
-        <AmountDisplay
-          class="w-bold"
-          :amount="{ amount: transactionInfo.to.amount, denom: transactionInfo.to.denom }"
-        />
+        <CircleSymbol :denom="denomName" :chain-name="transactionInfo.to.chain" size="sm" class="send__item__symbol" />
+        <AmountDisplay class="w-bold" :amount="{ amount: transactionInfo.to.amount, denom: denomName }" />
       </div>
       <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
@@ -74,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -84,6 +73,7 @@ import { List, ListItem } from '@/components/ui/List';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'PreviewTransfer',
@@ -110,6 +100,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
+    const denomName = ref('-');
 
     const stepType = computed(() => {
       const description = (props.step as Actions.Step).description;
@@ -135,6 +126,8 @@ export default defineComponent({
         string,
         any
       >[];
+
+      const isIBC = ['ibc_forward', 'ibc_backward'].includes(firstTransaction.name);
 
       const from = {
         address: '',
@@ -175,6 +168,7 @@ export default defineComponent({
       }
 
       return {
+        isIBC,
         from,
         to,
       };
@@ -190,7 +184,20 @@ export default defineComponent({
       return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
     };
 
+    watch(
+      transactionInfo,
+      async (detail) => {
+        if (detail.isIBC) {
+          denomName.value = await getBaseDenom(detail.from.denom, detail.from.chain);
+        } else {
+          denomName.value = detail.from.denom;
+        }
+      },
+      { immediate: true },
+    );
+
     return {
+      denomName,
       stepType,
       formatChain,
       transactionInfo,

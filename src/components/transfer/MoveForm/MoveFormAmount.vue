@@ -19,24 +19,61 @@
       />
     </div>
     <template v-if="state.currentAsset">
-      <fieldset clss="form__field move-form-amount">
-        <div class="move-form-amount__input">
-          <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
-            <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
-          </FlexibleAmountInput>
+      <fieldset class="form__field move-form-amount">
+        <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
+          <div class="move-form-amount__input">
+            <FlexibleAmountInput
+              v-model="state.usdValue"
+              :max-width="300"
+              :min-width="state.isUSDInputChecked ? 35 : 0"
+              prefix="$"
+            >
+              <template #default="inputProps">
+                <USDInput
+                  :model-value="form.balance.amount"
+                  :denom="state.currentAsset?.base_denom"
+                  :class="[inputProps.class]"
+                  :style="inputProps.style"
+                  placeholder="0"
+                  @update:price="state.usdValue = $event"
+                  @update:modelValue="
+                    ($event) => {
+                      if (state.isUSDInputChecked) {
+                        form.balance.amount = $event;
+                      }
+                    }
+                  "
+                />
+              </template>
+            </FlexibleAmountInput>
+          </div>
+          <span class="move-form-amount__estimated">
+            <AmountDisplay
+              :amount="{
+                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                denom: state.currentAsset?.base_denom,
+              }"
+            />
+          </span>
         </div>
+        <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
+          <div class="move-form-amount__input">
+            <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+              <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+            </FlexibleAmountInput>
+          </div>
 
-        <Price
-          class="move-form-amount__estimated"
-          :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
-        />
-
+          <span v-if="hasPrice" class="move-form-amount__estimated">
+            {{ displayUSDValue }}
+          </span>
+        </div>
         <div class="move-form-amount__controls">
-          <label class="move-form-amount__controls__button">
-            <input type="checkbox" name="move-form-amount-usd" />
-            <span class="elevation-button">USD</span>
+          <label v-if="hasPrice" class="move-form-amount__controls__button">
+            <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
+            <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
+            <span v-else class="elevation-button">USD</span>
           </label>
-          <label class="move-form-amount__controls__button">
+          <label class="move-form-amount__controls__button is-toggle">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
             <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
           </label>
@@ -55,7 +92,7 @@
                 class="move-form-amount__assets__item__avatar"
               />
               <span class="move-form-amount__assets__item__name w-bold">
-                <Denom :name="form.balance.denom || ''" />
+                <Denom :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
               </span>
             </div>
 
@@ -80,7 +117,11 @@
 
             <div class="move-form-amount__assets__item__amount">
               <p class="move-form-amount__assets__item__amount__balance s-minus">
-                <Price :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }" />
+                <Price
+                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                  :auto-update="false"
+                  show-zero
+                />
               </p>
               <p class="move-form-amount__assets__item__amount__available s-minus">
                 <AmountDisplay
@@ -132,8 +173,8 @@
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/amino';
-import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -142,6 +183,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
+import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -149,6 +191,7 @@ import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
 import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'MoveFormAmount',
@@ -164,6 +207,7 @@ export default defineComponent({
     CircleSymbol,
     Icon,
     Price,
+    USDInput,
   },
 
   props: {
@@ -182,14 +226,34 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
+      isUSDInputChecked: false,
       isDenomModalOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'from',
+      usdValue: '',
+    });
+
+    const displayUSDValue = computed(() => {
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return formatter.format(+state.usdValue);
+    });
+
+    const hasPrice = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const price = store.getters['demeris/getPrice']({ denom: state.currentAsset.base_denom });
+
+      return !!price;
     });
 
     const denomDecimals = computed(() => {
       if (state.currentAsset) {
-        console.log(state.currentAsset);
         const precision = store.getters['demeris/getDenomPrecision']({
           name: state.currentAsset.base_denom,
         });
@@ -226,13 +290,23 @@ export default defineComponent({
       return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
     });
 
-    const isValid = () => {
+    const isValid = computed(() => {
+      const value = new BigNumber(form.balance.amount);
+
+      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+        return false;
+      }
+
       if (!hasSufficientFunds.value) {
         return false;
       }
 
+      if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
+        return false;
+      }
+
       return true;
-    };
+    });
 
     const toggleDenomModal = (asset?: Record<string, unknown>) => {
       if (asset) {
@@ -260,7 +334,7 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.base_denom as string;
+      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.on_chain = asset.on_chain as string;
     };
 
@@ -271,22 +345,45 @@ export default defineComponent({
         if (state.isMaximumAmountChecked) {
           const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
           form.balance.amount = (assetAmount / denomDecimals.value).toString();
+          return;
         }
       },
     );
     watch(
       () => props.balances,
-      (newVal, oldVal) => {
+      (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          setCurrentAsset(props.balances[0]);
+          let asset = props.balances[0];
+
+          if (form.balance.denom) {
+            asset = props.balances.find((item) => {
+              const balance = parseCoins(item.amount)[0];
+              return balance.denom === form.balance.denom;
+            });
+          }
+
+          setCurrentAsset(asset);
         }
       },
       { immediate: true },
     );
 
+    const { on_chain: onChain, to_chain: toChain } = toRefs(form);
+    watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
+      if (onChainNew === toChainNew) {
+        if (onChainOld !== onChainNew) {
+          form.to_chain = onChainOld;
+        } else {
+          form.to_chain = undefined;
+        }
+      }
+    });
+
     return {
+      displayUSDValue,
       form,
       onSubmit,
+      hasPrice,
       state,
       setCurrentAsset,
       hasSufficientFunds,
@@ -367,13 +464,13 @@ export default defineComponent({
       input {
         display: none;
       }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
+      &.is-toggle {
+        input:checked + span {
+          background: var(--text);
+          color: var(--bg);
+          font-weight: 500;
+        }
       }
-
       span {
         padding: 1rem 1.6rem;
         border-radius: 2.4rem;

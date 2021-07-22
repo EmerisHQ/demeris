@@ -11,9 +11,10 @@
 				Dependencies:
 					vuex getter to get  chain name from chain id
 		-->
-
+    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin 
+    when it changed-->
     <CircleSymbol
-      :denom="selectedDenom?.base_denom ?? ''"
+      :denom="selectedDenom?.base_denom ?? 'empty'"
       :chain-name="selectedDenom?.on_chain ?? undefined"
       size="sm"
       class="denom-select__coin-image"

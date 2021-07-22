@@ -10,6 +10,10 @@ const props = defineProps({
     type: Number,
     default: 6,
   },
+  placeholder: {
+    type: String,
+    default: '0',
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -65,6 +69,7 @@ const model = computed({
   <input
     ref="inputRef"
     v-model="model"
+    :placeholder="placeholder"
     type="text"
     inputmode="decimal"
     pattern="^[0-9]*[.,]?[0-9]*$"

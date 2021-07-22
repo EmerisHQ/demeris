@@ -45,7 +45,9 @@
             <Price :amount="{ denom: asset.denom, amount: null }" />
           </td>
 
-          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">-</td>
+          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">
+            {{ getFormattedMarketCap(asset.denom) }}
+          </td>
 
           <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
             <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
@@ -186,6 +188,16 @@ export default defineComponent({
       return balancesByAsset.value.slice(0, currentLimit.value);
     });
 
+    const getFormattedMarketCap = (denom: string) => {
+      const supply = store.getters['demeris/getMarketCap']({ denom });
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return supply ? formatter.format(supply) : '-';
+    };
+
     const viewAllHandler = () => {
       currentLimit.value = undefined;
     };
@@ -194,7 +206,7 @@ export default defineComponent({
       emit('row-click', asset);
     };
 
-    return { allBalances, balancesByAsset, balancesFiltered, handleClick, viewAllHandler };
+    return { allBalances, balancesByAsset, balancesFiltered, getFormattedMarketCap, handleClick, viewAllHandler };
   },
 });
 </script>

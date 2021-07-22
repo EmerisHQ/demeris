@@ -41,9 +41,13 @@ export default defineComponent({
       subscribe: false,
     });
 
-    await this.$store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
-      subscribe: true,
-    });
+    try {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
+        subscribe: true,
+      });
+    } catch {
+      //
+    }
 
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
@@ -66,6 +70,7 @@ export default defineComponent({
     });
     try {
       await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', { options: { subscribe: true } });
+      await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
     } catch (e) {
       console.log(e);
     }
@@ -75,7 +80,7 @@ export default defineComponent({
     this.initialized = true;
   },
   errorCaptured(err) {
-    console.log(err);
+    console.error(err);
     return false;
   },
 });
