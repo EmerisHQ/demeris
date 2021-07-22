@@ -8,7 +8,6 @@
       <img src="@/assets/images/intro-panel.png" />
     </a>
   </div>
-  {{ displayDenom }}
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';

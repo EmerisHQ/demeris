@@ -40,7 +40,10 @@ export function getDefaultState(): State {
     numbers: {},
     verifiedDenoms: [],
     keplr: null,
-    prices: [],
+    prices: {
+      Fiats: [],
+      Tokens: [],
+    },
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
