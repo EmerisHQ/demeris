@@ -1,6 +1,6 @@
 <template>
-  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
-    <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
+  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }">
+    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('goback')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -45,12 +45,13 @@
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
-      :modal-variant="asWidget ? 'bottom' : 'full'"
+      :modal-variant="variant === 'widget' ? 'bottom' : 'full'"
       :status="txstatus"
       :tx-result="txResult"
       :has-more="hasMore"
       :tx="transaction"
       :is-final="isFinal"
+      :error="errorMessage"
       @next="nextTx"
       @retry="
         () => {
@@ -127,9 +128,9 @@ export default defineComponent({
       type: [Object, String] as PropType<RouteLocationRaw>,
       default: undefined,
     },
-    asWidget: {
-      type: Boolean,
-      default: false,
+    variant: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
     },
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
@@ -179,6 +180,7 @@ export default defineComponent({
     };
     const currentStep = ref(0);
     const txstatus = ref('keplr-sign');
+    const errorMessage = ref(undefined);
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
 
@@ -291,12 +293,25 @@ export default defineComponent({
                   txResultData.status != 'Tokens_unlocked_timeout' &&
                   txResultData.status != 'Tokens_unlocked_ack'
                 ) {
-                  console.log(status);
+                  console.log(txResultData.status);
                   txResultData = await store.getters['demeris/getTxStatus']({
                     chain_name: res.chain_name,
                     ticket: result.ticket,
                   });
                 }
+
+                if (txResultData.status !== 'IBC_receive_success') {
+                  let errorMessage = `Demeris:Ticket - Status: "${txResultData.status}"; Ticket: "${
+                    result.ticket
+                  }"; Action: "${props.actionName}"; Transaction: "${JSON.stringify(stepTx)}"`;
+                  if (txResultData.error) {
+                    errorMessage += `; Error: "${txResultData.error}"`;
+                  }
+                  throw new Error(errorMessage);
+                }
+
+                errorMessage.value = undefined;
+
                 if (currentData.value.data.name === 'swap') {
                   const result = {
                     swappedPercent: 0,
@@ -325,12 +340,14 @@ export default defineComponent({
                 }
 
                 // TODO: deal with status here
+                // if (txResultData.status)
                 emit('complete');
                 txstatus.value = 'complete';
 
                 await txToResolve.value['promise'];
               } catch (e) {
-                console.log(e);
+                console.error(e);
+                errorMessage.value = e.message;
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -388,6 +405,7 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
+      errorMessage,
     };
   },
 });

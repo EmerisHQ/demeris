@@ -2,7 +2,7 @@
   <Modal
     :variant="modalVariant ?? 'full'"
     :show-close-button="false"
-    :body-class="status === 'complete' ? 'transferred-bg' : ''"
+    :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
     @close="emitClose"
   >
     <div class="status">
@@ -126,6 +126,11 @@
               Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
               Hub.
             </template>
+            <Collapse label-open="Show details" label-hide="Hide details" class="status__error-collapse">
+              <Alert v-if="error" status="error" :show-icon="false">
+                <p>{{ error }}</p>
+              </Alert>
+            </Collapse>
           </div>
         </template>
       </div>
@@ -147,16 +152,10 @@
         :status="'normal'"
         :click-function="
           () => {
-            status == 'keplr-reject'
-              ? emitRetry()
-              : status == 'failed'
-                ? emitClose()
-                : isFinal
-                  ? emitDone()
-                  : emitNext();
+            status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
           }
         "
-        :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
+        :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
       />
       <Button
         v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
@@ -180,7 +179,9 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
+import Collapse from '@/components/ui/Collapse.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
 import { useStore } from '@/store';
@@ -215,6 +216,8 @@ export default defineComponent({
     ChainName,
     Denom,
     CircleSymbol,
+    Alert,
+    Collapse,
   },
   props: {
     status: {
@@ -236,6 +239,10 @@ export default defineComponent({
     isFinal: {
       type: Boolean as PropType<boolean>,
       default: false,
+    },
+    error: {
+      type: String,
+      default: undefined,
     },
     txResult: {
       type: Object as PropType<Result>,
@@ -334,17 +341,21 @@ export default defineComponent({
             subTitle.value = '';
             if (props.isFinal) {
               blackButton.value = 'Done';
-              whiteButton.value = `Send ${
-                Math.trunc(
-                  (Number(props.txResult.demandCoinSwappedAmount) * 100) /
-                    Math.pow(
-                      10,
-                      store.getters['demeris/getDenomPrecision']({
-                        name: await getBaseDenom(props.txResult.demandCoinDenom),
-                      }),
-                    ),
-                ) / 100
-              } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
+              if (props.tx.name === 'swap') {
+                whiteButton.value = `Send ${
+                  Math.trunc(
+                    (Number(props.txResult.demandCoinSwappedAmount) * 100) /
+                      Math.pow(
+                        10,
+                        store.getters['demeris/getDenomPrecision']({
+                          name: await getBaseDenom(props.txResult.demandCoinDenom),
+                        }),
+                      ),
+                  ) / 100
+                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
+              } else {
+                whiteButton.value = 'Send another';
+              }
             } else {
               props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
               whiteButton.value = '';
@@ -380,9 +391,9 @@ export default defineComponent({
             break;
           case 'failed':
             title.value = 'Transaction failed';
-            whiteButton.value = '';
             subTitle.value = '';
-            blackButton.value = 'Cancel';
+            whiteButton.value = 'Cancel';
+            blackButton.value = 'Try again';
             break;
         }
       },
@@ -455,6 +466,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .status {
   text-align: center;
+
+  &__error-collapse {
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  &__title {
+    margin-top: 2rem;
+  }
 
   &__title-sub {
     color: var(--muted);
