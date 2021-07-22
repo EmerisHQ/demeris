@@ -125,7 +125,10 @@ export type Price = {
   Symbol: string;
   Price: number;
 };
-export type Prices = Array<Price>;
+export type Prices = {
+  Fiats: Price[];
+  Tokens: (Price & { Supply: number })[];
+};
 export type PricesResponse = {
   data: Prices;
   message: string | null;
