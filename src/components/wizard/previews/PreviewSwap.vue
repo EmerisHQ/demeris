@@ -41,7 +41,14 @@
         <span class="s-minus">
           <AmountDisplay
             class="s-minus"
-            :amount="{ amount: 10 ** getPrecision(data.from.denom), denom: data.from.denom }"
+            :amount="{
+              amount:
+                10 **
+                store.getters['demeris/getDenomPrecision']({
+                  name: toCoinBaseDenom,
+                }),
+              denom: data.from.denom,
+            }"
           />
           =
           <AmountDisplay class="s-minus" :amount="{ amount: limitPrice, denom: data.to.denom }" />
@@ -122,7 +129,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
-    const { getSwapPrice, getPrecision } = useCalculation();
+    const { getSwapPrice } = useCalculation();
     const swapFeeRate = computed(() => {
       const feeRate =
         1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003 / 2);
@@ -141,6 +148,7 @@ export default defineComponent({
     // minReceivedAmount & limit price
     const minReceivedAmount = ref({});
     const limitPrice = ref(0);
+    const toCoinBaseDenom = ref('');
     watch(
       () => {
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
@@ -150,10 +158,10 @@ export default defineComponent({
         const pool = poolById(id);
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await reserveBalancesById(id);
-        const toCoinBaseDenom = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
+        toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
         let swapPrice = null;
 
-        if (reserveDenoms[1] === toCoinBaseDenom) {
+        if (reserveDenoms[1] === toCoinBaseDenom.value) {
           swapPrice = getSwapPrice(
             parseInt(data.value.from.amount),
             reserveBalances.balanceA,
@@ -169,21 +177,32 @@ export default defineComponent({
         }
 
         minReceivedAmount.value = {
-          denom: toCoinBaseDenom,
+          denom: toCoinBaseDenom.value,
           amount:
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
             (1 - slippageTolerance.value / 100) *
-            10 ** getPrecision(toCoinBaseDenom),
+            10 **
+              store.getters['demeris/getDenomPrecision']({
+                name: toCoinBaseDenom.value,
+              }),
         };
         limitPrice.value =
           Math.trunc(
             ((1 / Number(swapPrice)) *
-              Number(10 ** getPrecision(toCoinBaseDenom)) *
+              Number(
+                10 **
+                  store.getters['demeris/getDenomPrecision']({
+                    name: toCoinBaseDenom.value,
+                  }),
+              ) *
               swapFeeRate.value ** 2 *
               (1 - slippageTolerance.value / 100) *
-              10 ** getPrecision(toCoinBaseDenom)) /
+              10 **
+                store.getters['demeris/getDenomPrecision']({
+                  name: toCoinBaseDenom.value,
+                })) /
               10000,
           ) * 10000;
       },
@@ -235,7 +254,8 @@ export default defineComponent({
       payCoinChainName,
       limitPrice,
       minReceivedAmount,
-      getPrecision,
+      toCoinBaseDenom,
+      store,
       swapFeeRate,
       fee,
     };

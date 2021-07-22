@@ -68,7 +68,7 @@
               /></span>
               <br />
               on <ChainName :name="'cosmos-hub'" />.
-              <div v-if="true || txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+              <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
                 <span class="w-bold">
                   <AmountDisplay
                     :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
@@ -333,19 +333,6 @@ export default defineComponent({
           case 'complete':
             subTitle.value = '';
             if (props.isFinal) {
-              console.log(
-                'fjsldfjdlksfjldks',
-
-                Math.trunc(
-                  Number(props.txResult.demandCoinSwappedAmount) /
-                    Math.pow(
-                      10,
-                      store.getters['demeris/getDenomPrecision']({
-                        name: await getBaseDenom(props.txResult.demandCoinDenom),
-                      }),
-                    ),
-                ),
-              );
               blackButton.value = 'Done';
               whiteButton.value = `Send ${
                 Math.trunc(
