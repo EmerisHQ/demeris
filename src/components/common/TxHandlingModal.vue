@@ -63,7 +63,6 @@
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
-              <div>{{ txResult.swappedPercent }}</div>
               <span class="w-bold"><AmountDisplay
                 :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
               /></span>
@@ -119,7 +118,7 @@
       </div>
       <Button
         v-if="whiteButton && tx.name === 'swap' && status === 'complete'"
-        :name="`Send 122,172.58 LUNA ->`"
+        :name="whiteButton"
         class="send-another-button"
         :status="'normal'"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
@@ -166,7 +165,10 @@ import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import { useStore } from '@/store';
 import { StepTransaction } from '@/types/actions';
+import { getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom } from '@/utils/actionHandler';
 
 type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
 type Result = { demandCoinDenom: string; swappedPercent: number; demandCoinSwappedAmount: number };
@@ -215,6 +217,7 @@ export default defineComponent({
   setup(props: any, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
+    const store = useStore();
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
         return 'pending';
@@ -237,7 +240,7 @@ export default defineComponent({
     // Watch for status changes
     watch(
       () => props.status,
-      (newStatus) => {
+      async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
             subTitle.value = 'Opening Keplr';
@@ -283,8 +286,21 @@ export default defineComponent({
           case 'complete':
             subTitle.value = '';
             if (props.isFinal) {
+              console.log(
+                store.getters['demeris/getDenomPrecision']({
+                  name: await getBaseDenom(props.txResult.demandCoinDenom),
+                }),
+              );
               blackButton.value = 'Done';
-              whiteButton.value = 'Send another';
+              whiteButton.value = `Send ${
+                Number(props.txResult.demandCoinSwappedAmount) /
+                Math.pow(
+                  10,
+                  store.getters['demeris/getDenomPrecision']({
+                    name: await getBaseDenom(props.txResult.demandCoinDenom),
+                  }),
+                )
+              } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
             } else {
               props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
               whiteButton.value = '';
