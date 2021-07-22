@@ -10,20 +10,60 @@
     </div>
 
     <fieldset class="form__field send-form-amount">
-      <div class="send-form-amount__input">
-        <input v-model="form.balance.amount" class="send-form-amount__input__control" min="0" placeholder="0" />
-        <span class="send-form-amount__input__denom">{{ $filters.getCoinName(state.currentAsset?.base_denom) }}</span>
+      <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
+        <div class="send-form-amount__input">
+          <FlexibleAmountInput
+            v-model="state.usdValue"
+            :max-width="300"
+            :min-width="state.isUSDInputChecked ? 35 : 0"
+            prefix="$"
+          >
+            <template #default="inputProps">
+              <USDInput
+                :model-value="form.balance.amount"
+                :denom="state.currentAsset?.base_denom"
+                :class="[inputProps.class]"
+                :style="inputProps.style"
+                placeholder="0"
+                @update:price="state.usdValue = $event"
+                @update:modelValue="
+                  ($event) => {
+                    if (state.isUSDInputChecked) {
+                      form.balance.amount = $event;
+                    }
+                  }
+                "
+              />
+            </template>
+          </FlexibleAmountInput>
+        </div>
+        <span class="send-form-amount__estimated">
+          <AmountDisplay
+            :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+          />
+        </span>
       </div>
+      <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
+        <div class="send-form-amount__input">
+          <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+            <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+          </FlexibleAmountInput>
+        </div>
 
-      <span class="send-form-amount__estimated"> $8,866.34 </span>
-
+        <span v-if="hasPrice" class="send-form-amount__estimated">
+          {{ displayUSDValue }}
+        </span>
+      </div>
       <div class="send-form-amount__controls">
-        <label class="send-form-amount__controls__button">
-          <input type="checkbox" name="send-form-amount-usd" />
-          <span class="elevation-button">USD</span>
+        <label v-if="hasPrice" class="send-form-amount__controls__button">
+          <input v-model="state.isUSDInputChecked" type="checkbox" name="send-form-amount-usd" />
+          <span v-if="state.isUSDInputChecked" class="elevation-button">
+            <Denom :name="state.currentAsset?.base_denom" />
+          </span>
+          <span v-else class="elevation-button">USD</span>
         </label>
 
-        <label class="send-form-amount__controls__button">
+        <label class="send-form-amount__controls__button is-toggle">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
           <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
         </label>
@@ -56,7 +96,11 @@
 
           <div class="send-form-amount__assets__item__amount">
             <p class="send-form-amount__assets__item__amount__balance">
-              <Price :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+              <Price
+                :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }"
+                :auto-update="false"
+                show-zero
+              />
             </p>
             <p class="send-form-amount__assets__item__amount__available s-minus">
               <span>
@@ -84,6 +128,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -93,7 +138,9 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import Price from '@/components/common/Price.vue';
+import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
 import { Balances } from '@/types/api';
@@ -111,6 +158,8 @@ export default defineComponent({
     Icon,
     DenomSelectModal,
     Price,
+    USDInput,
+    FlexibleAmountInput,
   },
 
   props: {
@@ -129,15 +178,40 @@ export default defineComponent({
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
+      isUSDInputChecked: false,
       isSelectModalOpen: false,
+      usdValue: '',
+    });
+
+    const displayUSDValue = computed(() => {
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return formatter.format(+state.usdValue);
     });
 
     const denomDecimals = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
-        name: state.currentAsset.base_denom,
-      });
+      if (state.currentAsset) {
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: state.currentAsset.base_denom,
+        });
 
-      return Math.pow(10, precision);
+        return Math.pow(10, precision);
+      } else {
+        return 1;
+      }
+    });
+
+    const hasPrice = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const price = store.getters['demeris/getPrice']({ denom: state.currentAsset.base_denom });
+
+      return !!price;
     });
 
     const hasSufficientFunds = computed(() => {
@@ -151,7 +225,17 @@ export default defineComponent({
     });
 
     const isValid = computed(() => {
+      const value = new BigNumber(form.balance.amount);
+
+      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+        return false;
+      }
+
       if (!hasSufficientFunds.value) {
+        return false;
+      }
+
+      if (!form.chain_name) {
         return false;
       }
 
@@ -168,7 +252,7 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.base_denom as string;
+      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.chain_name = asset.on_chain as string;
     };
 
@@ -195,7 +279,18 @@ export default defineComponent({
       setCurrentAsset(props.balances[0]);
     }
 
-    return { form, onSubmit, state, setCurrentAsset, hasSufficientFunds, isValid, toggleSelectModal };
+    return {
+      state,
+      form,
+      hasPrice,
+      displayUSDValue,
+      hasSufficientFunds,
+      denomDecimals,
+      isValid,
+      onSubmit,
+      setCurrentAsset,
+      toggleSelectModal,
+    };
   },
 });
 </script>
@@ -259,13 +354,13 @@ export default defineComponent({
       input {
         display: none;
       }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
+      &.is-toggle {
+        input:checked + span {
+          background: var(--text);
+          color: var(--bg);
+          font-weight: 500;
+        }
       }
-
       span {
         padding: 1rem 1.6rem;
         border-radius: 2.4rem;

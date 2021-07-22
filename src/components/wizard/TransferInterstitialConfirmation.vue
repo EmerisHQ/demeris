@@ -120,8 +120,9 @@ export default defineComponent({
       async () => {
         denoms.value = await Promise.all(
           props.step.transactions.map(async (transaction) => {
-            const denom = await getBaseDenom((transaction.data as TransferData).amount.denom);
-            const displayDenom = await getDisplayName(denom, store.getters['demeris/getDexChain']);
+            const chain = (transaction.data as IBCForwardsData).from_chain || store.getters['demeris/getDexChain'];
+            const denom = await getBaseDenom((transaction.data as TransferData).amount.denom, chain);
+            const displayDenom = await getDisplayName(denom, chain);
             return displayDenom;
           }),
         );

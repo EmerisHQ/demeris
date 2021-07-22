@@ -66,6 +66,7 @@
       "
       @done="
         () => {
+          emitHandler('done');
           if (transaction.name == 'swap') {
             emitHandler('reset');
           } else {
@@ -80,7 +81,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
@@ -123,15 +124,23 @@ export default defineComponent({
       type: String as PropType<GasPriceLevel>,
       required: true,
     },
+    backRoute: {
+      type: [Object, String] as PropType<RouteLocationRaw>,
+      default: undefined,
+    },
     asWidget: {
       type: Boolean,
       default: false,
     },
   },
-  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
+  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
   setup(props, { emit }) {
     const router = useRouter();
     const goBack = () => {
+      if (props.backRoute) {
+        router.push(props.backRoute);
+        return;
+      }
       router.go(-1);
     };
     const fees = ref([]);
@@ -251,6 +260,7 @@ export default defineComponent({
                 memo: 'a memo',
               });
             } catch (e) {
+              console.error(e);
               txstatus.value = 'keplr-reject';
               await txToResolve.value['promise'];
               continue;

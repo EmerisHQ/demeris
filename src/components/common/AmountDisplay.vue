@@ -11,6 +11,10 @@ export default defineComponent({
   name: 'AmountDisplay',
   props: {
     amount: { type: Object as PropType<Amount>, required: true },
+    chain: {
+      type: String,
+      default: undefined,
+    },
   },
   setup(props) {
     const store = useStore();
@@ -28,7 +32,10 @@ export default defineComponent({
     watch(
       () => props.amount,
       async () => {
-        ticker.value = await getTicker((props.amount as Amount).denom, store.getters['demeris/getDexChain']);
+        ticker.value = await getTicker(
+          (props.amount as Amount).denom,
+          props.chain || store.getters['demeris/getDexChain'],
+        );
       },
       { immediate: true },
     );

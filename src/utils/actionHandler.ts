@@ -5,7 +5,7 @@ import { Balances, Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
-import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative } from './basic';
+import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative, keyHashfromAddress } from './basic';
 
 const stores = useAllStores();
 // Basic step-building blocks
@@ -1012,7 +1012,7 @@ export async function getDisplayName(name, chain_name = null) {
         ));
       return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return name + '(unverified)';
     }
   }
@@ -1217,6 +1217,13 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   for (const balance of balances) {
+    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+    const hashAddress = keyHashfromAddress(ownAddress);
+
+    if (balance.address !== hashAddress) {
+      continue;
+    }
+
     if (Object.keys(balance.ibc).length == 0) {
       validBalances.push(balance);
     } else {
