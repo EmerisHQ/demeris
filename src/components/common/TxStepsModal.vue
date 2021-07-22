@@ -260,6 +260,7 @@ export default defineComponent({
                 memo: 'a memo',
               });
             } catch (e) {
+              console.error(e);
               txstatus.value = 'keplr-reject';
               await txToResolve.value['promise'];
               continue;
