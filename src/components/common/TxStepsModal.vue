@@ -288,7 +288,13 @@ export default defineComponent({
                   });
                 }
                 if (currentData.value.data.name === 'swap') {
-                  const result = { swappedPercent: 0, demandCoinSwappedAmount: 0, demandCoinDenom: '' };
+                  const result = {
+                    swappedPercent: 0,
+                    demandCoinSwappedAmount: 0,
+                    demandCoinDenom: '',
+                    remainingOfferCoinAmount: 0,
+                    offerCoinDenom: '',
+                  };
 
                   //Get end block events
                   let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
@@ -302,7 +308,8 @@ export default defineComponent({
                         Number(endBlockEvent.exchanged_offer_coin_amount))) *
                     100;
                   result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
-
+                  result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
+                  result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                   txResult.value = result;
                   console.log('swap result', result);
                 }

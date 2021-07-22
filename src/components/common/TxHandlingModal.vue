@@ -68,6 +68,14 @@
               /></span>
               <br />
               on <ChainName :name="'cosmos-hub'" />.
+              <div v-if="true || txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+                <span class="w-bold">
+                  <AmountDisplay
+                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                  />
+                </span>
+                not swapped
+              </div>
             </template>
           </div>
           <!-- TEST -->
@@ -157,7 +165,6 @@
 </template>
 
 <script lang="ts">
-import { TxResult } from '@cosmjs/stargate/build/codec/tendermint/abci/types';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -177,7 +184,13 @@ import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
 type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
-type Result = { demandCoinDenom: string; swappedPercent: number; demandCoinSwappedAmount: number };
+type Result = {
+  demandCoinDenom: string;
+  swappedPercent: number;
+  demandCoinSwappedAmount: number;
+  offerCoinDenom: string;
+  remainingOfferCoinAmount: number;
+};
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
@@ -215,7 +228,13 @@ export default defineComponent({
     txResult: {
       type: Object as PropType<Result>,
       default: () => {
-        return { swappedPercent: 0, demandCoinSwappedAmount: 0, demandCoinDenom: '' };
+        return {
+          swappedPercent: 0,
+          demandCoinSwappedAmount: 0,
+          demandCoinDenom: '',
+          offerCoinDenom: '',
+          remainingOfferCoinAmount: 0,
+        };
       },
     },
   },
