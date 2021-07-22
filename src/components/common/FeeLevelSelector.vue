@@ -249,7 +249,7 @@ export default defineComponent({
       }
 
       .selected {
-        background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%);
+        background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
       }
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper">
     <SlippageSettingModal
       v-show="isSlippageSettingModalOpen"
       :swap-data="{
@@ -171,6 +171,7 @@ export default defineComponent({
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
+    const isInit = ref(false);
     const slippage = ref(0);
     const store = useStore();
     const isSignedIn = computed(() => {
@@ -395,7 +396,7 @@ export default defineComponent({
           base_denom: denom.name,
           denom: denom.name,
           on_chain: denom.chain_name,
-          amount: 0,
+          amount: 0 + denom.name,
         })),
       ];
 
@@ -421,7 +422,6 @@ export default defineComponent({
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
       });
-
       return payAssets;
     });
     const assetsToReceive = computed(() => {
@@ -437,7 +437,6 @@ export default defineComponent({
     });
 
     // default pay coin set
-    const isInit = ref(false);
     watch(
       () => {
         return [assetsToPay.value, balances.value];
@@ -487,6 +486,9 @@ export default defineComponent({
             if (data.isPriceChanged) {
               return 'Update prices';
             } else {
+              if (data.buttonStatus === 'normal') {
+                return 'Review';
+              }
               return 'Swap';
             }
           }
@@ -502,6 +504,9 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
+        if (!isInit.value) {
+          return 'loading';
+        }
         if (data.isSwapReady) {
           return 'normal';
         } else {
@@ -804,9 +809,6 @@ export default defineComponent({
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
-        //TEST
-        // data.selectedPoolData.reserveBalances.balanceA = 318000000;
-        // data.selectedPoolData.reserveBalances.balanceB = 159000000;
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
@@ -815,12 +817,20 @@ export default defineComponent({
           : data.selectedPoolData.reserveBalances.balanceA;
 
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(data.payCoinAmount, balanceA, balanceB);
+          data.receiveCoinAmount = getReceiveCoinAmount(
+            { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+            balanceA,
+            balanceB,
+          );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = getPayCoinAmount(data.receiveCoinAmount, balanceB, balanceA);
+          data.payCoinAmount = getPayCoinAmount(
+            { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+            balanceB,
+            balanceA,
+          );
         }
       }
     }
@@ -831,6 +841,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      isInit,
       changePayToReceive,
       denomSelectHandler,
       getPrecisedAmount,
