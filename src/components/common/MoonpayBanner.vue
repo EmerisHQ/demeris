@@ -18,8 +18,7 @@
 </template>
 
 <script lang="ts">
-import crypto from 'crypto';
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 
 import { useStore } from '@/store';
 
@@ -42,13 +41,12 @@ export default defineComponent({
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
-        // Emeris staging key
-        // apiKey: 'pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz',
-        // Cosmostation live key
+        // key currently from Cosmostation
         apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
         currencyCode: 'atom',
         walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
+        // baseCurrencyAmount: '50',
       };
     });
     const mpQuery = computed(() => {
@@ -57,13 +55,7 @@ export default defineComponent({
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
     });
-    // TODO: need to implement backend service to sign URLs
-    const mpSignature = computed(() => {
-      return crypto.createHmac('sha256', 'TODO_PRIVATE_API_KEY').update(new URL(mpUrl.value).search).digest('base64');
-    });
-    const mpUrlSigned = computed(() => {
-      return `${mpUrl.value}&signature=${encodeURIComponent(mpSignature.value)}`;
-    });
+
     const goMoon = () => {
       window.open(mpUrl.value, '', 'height=480,width=320');
     };
