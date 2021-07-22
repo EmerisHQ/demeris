@@ -479,7 +479,7 @@ export default defineComponent({
       buttonName: computed(() => {
         if (data.isBothSelected) {
           if (data.isNotEnoughLiquidity) {
-            return 'Insufficient liquidity';
+            return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
           } else {
@@ -497,8 +497,8 @@ export default defineComponent({
         }
       }),
       buttonTooltipText: computed(() => {
-        if (data.buttonName === 'Insufficient liquidity') {
-          return 'Insufficient liquidity available for this swap. Try swapping a smaller amount.';
+        if (data.buttonName === 'Swap limit reached') {
+          return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
         } else {
           return '';
         }
@@ -637,6 +637,7 @@ export default defineComponent({
             data.payCoinAmount * minimalDecimal,
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
+          console.log(slippage.value * 100);
         }
       },
     );
