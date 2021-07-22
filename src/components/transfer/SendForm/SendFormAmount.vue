@@ -51,7 +51,7 @@
         </div>
 
         <span v-if="hasPrice" class="send-form-amount__estimated">
-          {{ displayUSDPrice }}
+          {{ displayUSDValue }}
         </span>
       </div>
       <div class="send-form-amount__controls">
