@@ -43,23 +43,23 @@
         <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
       </div>
       <Modal
-        v-if="feeWarning"
+        v-if="currentData.feeWarning"
         class="fee-warning-modal"
         :modal-variant="asWidget ? 'bottom' : 'full'"
         @close="
           () => {
-            feeWarning = false;
+            currentData.feeWarning = false;
           }
         "
       >
         <div class="fee-warning-modal__icon-warning">
           <WarningIcon />
         </div>
-        <template v-if="missingFees.length > 0">
+        <template v-if="currentData.missingFees.length > 0">
           <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
           <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
           <div class="fee-warning-modal__list">
-            <div v-for="missing in missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
+            <div v-for="missing in currentData.missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
               <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
               <div class="fee-warning-modal__list__item__amount">
                 <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
@@ -67,7 +67,7 @@
             </div>
           </div>
         </template>
-        <template v-if="ibcWarning">
+        <template v-if="currentData.ibcWarning">
           <div class="fee-warning-modal__title">
             {{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}
           </div>
@@ -78,7 +78,7 @@
           <Button :name="$t('generic_cta.proceed')" />
         </template>
         <template #buttons>
-          <template v-if="missingFees.length == 1 && missingFees[0].denom == 'uatom'">
+          <template v-if="currentData.missingFees.length == 1 && currentData.missingFees[0].denom == 'uatom'">
             <ModalButton
               :name="$t('generic_cta.cancel')"
               :click-function="
@@ -89,7 +89,12 @@
             />
             <ModalButton :name="$t('generic_cta.getAtom')" />
           </template>
-          <template v-if="missingFees.length > 1 || (missingFees.length == 1 && missingFees[0].denom != 'uatom')">
+          <template
+            v-if="
+              currentData.missingFees.length > 1 ||
+                (currentData.missingFees.length == 1 && currentData.missingFees[0].denom != 'uatom')
+            "
+          >
             <ModalButton
               :name="$t('generic_cta.understand')"
               :click-function="
@@ -99,7 +104,7 @@
               "
             />
           </template>
-          <template v-if="ibcWarning">
+          <template v-if="currentData.ibcWarning">
             <ModalButton
               :name="$t('generic_cta.cancel')"
               :click-function="
@@ -112,7 +117,7 @@
               :name="$t('generic_cta.proceed')"
               :click-function="
                 () => {
-                  feeWarning = false;
+                  currentData.feeWarning = false;
                 }
               "
             />
@@ -157,6 +162,7 @@
   </div>
 </template>
 <script lang="ts">
+import { parseCoins } from '@cosmjs/amino';
 import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -175,8 +181,10 @@ import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
+import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, Step } from '@/types/actions';
+import { CreatePoolData, GasPriceLevel, IBCForwardsData, Step, StepTransaction, TransferData } from '@/types/actions';
+import { Balances } from '@/types/api';
 import { Amount } from '@/types/base';
 import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 
@@ -235,13 +243,8 @@ export default defineComponent({
     const store = useStore();
     const hasMore = ref(false);
     const isFinal = ref(false);
-    const feeWarning = ref(true);
-    const missingFees = ref([
-      { denom: 'uatom', chain_name: 'cosmos-hub', amount: 1000 },
-      { denom: 'uakt', chain_name: 'akash', amount: 2000 },
-    ]);
-    const ibcWarning = ref(false);
     const isTransferConfirmationOpen = ref(false);
+    const { balances } = useAccount();
 
     onMounted(async () => {
       fees.value = await Promise.all(
@@ -260,7 +263,7 @@ export default defineComponent({
         );
       },
     );
-    console.log(fees);
+
     const txToResolve = ref({});
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
@@ -280,7 +283,18 @@ export default defineComponent({
         title: '',
         fees: [],
         data: currentStepData,
-      } as { isSwap: boolean; title: string; fees: Array<Amount>; data: Step };
+        missingFees: [],
+        ibcWarning: false,
+        feeWarning: false,
+      } as {
+        isSwap: boolean;
+        title: string;
+        fees: Array<Amount>;
+        data: Step;
+        missingFees: Array<{ amount: string; denom: string; chain_name: string }>;
+        ibcWarning: boolean;
+        feeWarning: boolean;
+      };
       switch (currentStepData.name) {
         case 'swap':
           modifiedData.isSwap = true;
@@ -303,6 +317,102 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
+      const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
+      for (const checkedBalance of toCheckBalances) {
+        if (
+          modifiedData.fees[checkedBalance.on_chain] &&
+          modifiedData.fees[checkedBalance.on_chain][parseCoins(checkedBalance.amount)[0].denom]
+        ) {
+          checkedBalance.amount =
+            parseInt(parseCoins(checkedBalance.amount)[0].amount) -
+            parseInt(modifiedData.fees[checkedBalance.on_chain][parseCoins(checkedBalance.amount)[0].denom]) +
+            parseCoins(checkedBalance.amount)[0].denom;
+        }
+      }
+      for (const stepTx of currentStepData.transactions) {
+        if ((stepTx as StepTransaction).name == 'transfer') {
+          const whatBalance = toCheckBalances.find(
+            (x) =>
+              x.on_chain == (stepTx.data as TransferData).chain_name &&
+              x.base_denom == (stepTx.data as TransferData).amount.denom,
+          );
+          if (whatBalance) {
+            let newAmount =
+              parseInt(parseCoins(whatBalance.amount)[0].amount) -
+              parseInt((stepTx.data as TransferData).amount.amount);
+            if (newAmount < 0) {
+              modifiedData.missingFees.push({
+                denom: parseCoins(whatBalance.amount)[0].denom,
+                amount: 0 - newAmount + '',
+                chain_name: whatBalance.on_chain,
+              });
+              modifiedData.feeWarning = true;
+            }
+            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
+          }
+        }
+        if ((stepTx as StepTransaction).name == 'ibc_forward' || (stepTx as StepTransaction).name == 'ibc_backward') {
+          const whatBalance = toCheckBalances.find(
+            (x) =>
+              x.on_chain == (stepTx.data as IBCForwardsData).from_chain &&
+              x.base_denom == (stepTx.data as IBCForwardsData).amount.denom,
+          );
+          if (whatBalance) {
+            let newAmount =
+              parseInt(parseCoins(whatBalance.amount)[0].amount) -
+              parseInt((stepTx.data as TransferData).amount.amount);
+            if (newAmount < 0) {
+              modifiedData.missingFees.push({
+                denom: parseCoins(whatBalance.amount)[0].denom,
+                amount: 0 - newAmount + '',
+                chain_name: whatBalance.on_chain,
+              });
+              modifiedData.feeWarning = true;
+            }
+            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
+          }
+        }
+        if ((stepTx as StepTransaction).name == 'createpool' || (stepTx as StepTransaction).name == 'addliquidity') {
+          const whatBalance = toCheckBalances.find(
+            (x) =>
+              x.on_chain == store.getters['demeris/getDexChain'] &&
+              x.base_denom == (stepTx.data as CreatePoolData).coinA.denom,
+          );
+          if (whatBalance) {
+            let newAmount =
+              parseInt(parseCoins(whatBalance.amount)[0].amount) -
+              parseInt((stepTx.data as CreatePoolData).coinA.amount);
+            if (newAmount < 0) {
+              modifiedData.missingFees.push({
+                denom: parseCoins(whatBalance.amount)[0].denom,
+                amount: 0 - newAmount + '',
+                chain_name: whatBalance.on_chain,
+              });
+              modifiedData.feeWarning = true;
+            }
+            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
+          }
+          const whatBalanceB = toCheckBalances.find(
+            (x) =>
+              x.on_chain == store.getters['demeris/getDexChain'] &&
+              x.base_denom == (stepTx.data as CreatePoolData).coinB.denom,
+          );
+          if (whatBalanceB) {
+            let newAmount =
+              parseInt(parseCoins(whatBalanceB.amount)[0].amount) -
+              parseInt((stepTx.data as CreatePoolData).coinB.amount);
+            if (newAmount < 0) {
+              modifiedData.missingFees.push({
+                denom: parseCoins(whatBalanceB.amount)[0].denom,
+                amount: 0 - newAmount + '',
+                chain_name: whatBalanceB.on_chain,
+              });
+              modifiedData.feeWarning = true;
+            }
+            whatBalanceB.amount = '0' + parseCoins(whatBalanceB.amount)[0].denom;
+          }
+        }
+      }
       return modifiedData;
     });
     const confirm = async () => {
@@ -454,9 +564,6 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
-      feeWarning,
-      missingFees,
-      ibcWarning,
     };
   },
 });
