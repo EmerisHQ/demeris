@@ -696,9 +696,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
     try {
-      const response = await axios.get(
-        `https://cosmos-hub-emeris.app.alpha.starport.cloud/block_results?height=${height}`,
-      );
+      const response = await axios.get(`${getters['getEndpoint']}/block?height=${height}`);
       const successData = {};
 
       if (response.data.result?.end_block_events) {
