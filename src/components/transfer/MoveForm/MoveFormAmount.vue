@@ -53,7 +53,10 @@
           </div>
 
           <span v-if="hasPrice" class="move-form-amount__estimated">
-            <Price :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }" />
+            <Price
+              :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
+              show-zero
+            />
           </span>
         </template>
         <div class="move-form-amount__controls">
@@ -106,7 +109,10 @@
 
             <div class="move-form-amount__assets__item__amount">
               <p class="move-form-amount__assets__item__amount__balance s-minus">
-                <Price :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }" />
+                <Price
+                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                  show-zero
+                />
               </p>
               <p class="move-form-amount__assets__item__amount__available s-minus">
                 <AmountDisplay

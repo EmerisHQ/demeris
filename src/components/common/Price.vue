@@ -22,6 +22,10 @@ export default defineComponent({
       type: Object as PropType<Amount>,
       required: true,
     },
+    showZero: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const store = useStore();
@@ -44,8 +48,10 @@ export default defineComponent({
               .format((price * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
               .split('.')
           : parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
-      } else {
+      } else if (!props.showZero) {
         value = price ? formatter.format(price).split('.') : '-';
+      } else {
+        value = formatter.format(0);
       }
 
       return value;
