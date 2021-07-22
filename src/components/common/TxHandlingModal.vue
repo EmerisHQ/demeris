@@ -121,7 +121,11 @@
         :name="whiteButton"
         class="send-another-button"
         :status="'normal'"
-        :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
+        :click-function="
+          () => {
+            router.push('/send');
+          }
+        "
         :is-outline="true"
       />
       <Button
@@ -155,6 +159,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -217,6 +222,7 @@ export default defineComponent({
   setup(props: any, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
+    const router = useRouter();
     const store = useStore();
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
@@ -287,19 +293,29 @@ export default defineComponent({
             subTitle.value = '';
             if (props.isFinal) {
               console.log(
-                store.getters['demeris/getDenomPrecision']({
-                  name: await getBaseDenom(props.txResult.demandCoinDenom),
-                }),
+                'fjsldfjdlksfjldks',
+
+                Math.trunc(
+                  Number(props.txResult.demandCoinSwappedAmount) /
+                    Math.pow(
+                      10,
+                      store.getters['demeris/getDenomPrecision']({
+                        name: await getBaseDenom(props.txResult.demandCoinDenom),
+                      }),
+                    ),
+                ),
               );
               blackButton.value = 'Done';
               whiteButton.value = `Send ${
-                Number(props.txResult.demandCoinSwappedAmount) /
-                Math.pow(
-                  10,
-                  store.getters['demeris/getDenomPrecision']({
-                    name: await getBaseDenom(props.txResult.demandCoinDenom),
-                  }),
-                )
+                Math.trunc(
+                  (Number(props.txResult.demandCoinSwappedAmount) * 100) /
+                    Math.pow(
+                      10,
+                      store.getters['demeris/getDenomPrecision']({
+                        name: await getBaseDenom(props.txResult.demandCoinDenom),
+                      }),
+                    ),
+                ) / 100
               } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
             } else {
               props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
@@ -367,6 +383,7 @@ export default defineComponent({
       title,
       whiteButton,
       blackButton,
+      router,
     };
   },
 });
