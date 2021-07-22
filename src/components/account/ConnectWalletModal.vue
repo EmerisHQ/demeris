@@ -75,11 +75,9 @@ export default defineComponent({
       emit('close');
     };
     const closeGetKeplr = () => {
-      getKeplrRef.value.cancel();
       emit('close');
     };
     const closeGetBrowser = () => {
-      getBrowserRef.value.cancel();
       emit('close');
     };
 
