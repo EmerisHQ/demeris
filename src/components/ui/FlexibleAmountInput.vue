@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, toRef, unref, watch } from 'vue';
 
 import AmountInput from './AmountInput.vue';
 
@@ -73,19 +73,29 @@ const containerStyle = computed(() => {
     maxWidth: `${props.maxWidth}px`,
   };
 });
+
+const inputProps = computed(() => {
+  return {
+    style: { width: `${state.width}px` },
+    placeholder: props.placeholder,
+    class: 'flexible-input__input',
+  };
+});
 </script>
 
 <template>
   <div class="flexible-input" :style="containerStyle" :class="{ 'flexible-input--empty': !model }">
     <div class="flexible-input__container">
       <span ref="prefixElementRef" class="flexible-input__prefix">{{ prefix }}</span>
-      <AmountInput
-        v-model="model"
-        :placeholder="placeholder"
-        :style="{ width: `${state.width}px` }"
-        type="text"
-        class="flexible-input__input"
-      />
+      <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
+        <AmountInput
+          v-model="model"
+          :placeholder="inputProps.placeholder"
+          :style="inputProps.style"
+          :class="inputProps.class"
+          type="text"
+        />
+      </slot>
       <span ref="suffixElementRef" class="flexible-input__suffix">
         <slot name="suffix">
           {{ suffix }}
@@ -98,7 +108,7 @@ const containerStyle = computed(() => {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .flexible-input {
   position: relative;
   flex-shrink: 0;
@@ -126,6 +136,11 @@ const containerStyle = computed(() => {
     font-size: 0.56em;
     align-self: flex-start;
     line-height: 1.8;
+    white-space: nowrap;
+  }
+
+  &__suffix {
+    white-space: nowrap;
   }
 
   &__input {
