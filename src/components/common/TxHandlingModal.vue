@@ -63,8 +63,11 @@
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
-              <div>{{ txResult.demandCoinDenom }}</div>
-              <span class="w-bold"><AmountDisplay :amount="{ denom: 'uatom', amount: '100000000000' }" /></span> <br />
+              <div>{{ txResult.swappedPercent }}</div>
+              <span class="w-bold"><AmountDisplay
+                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
+              /></span>
+              <br />
               on <ChainName :name="'cosmos-hub'" />.
             </template>
           </div>
