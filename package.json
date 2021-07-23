@@ -16,6 +16,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",
     "@cosmjs/cosmwasm-stargate": "0.25.5",
     "@cosmjs/crypto": "0.25.5",
+    "@cosmjs/amino": "0.25.5",
     "@cosmjs/encoding": "0.25.5",
     "@cosmjs/faucet-client": "0.25.5",
     "@cosmjs/math": "0.25.5",
