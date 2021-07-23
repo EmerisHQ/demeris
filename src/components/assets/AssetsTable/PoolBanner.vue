@@ -1,5 +1,5 @@
 <template>
-  <div v-if="name" class="elevation-panel" @click="openPoolPage">
+  <div v-if="pool" class="elevation-panel" @click="openPoolPage">
     <p class="title-1-bold">What is <Ticker :name="name" />?</p>
     <p><Denom :name="name" /> is a liquidity pool asset. LP assets represents shares of a particular liquidity pool.</p>
     <ArrowRightIcon />
@@ -55,7 +55,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .elevation-panel {
   position: relative;
-  z-index: 100;
   cursor: pointer;
   margin-top: 2.4rem;
   padding: 2.4rem;
