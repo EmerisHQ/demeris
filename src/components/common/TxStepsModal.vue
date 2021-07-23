@@ -1,7 +1,6 @@
 <template>
   <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
     <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
-
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -48,6 +47,7 @@
       v-if="isTxHandlingModalOpen"
       :modal-variant="asWidget ? 'bottom' : 'full'"
       :status="txstatus"
+      :tx-result="txResult"
       :has-more="hasMore"
       :tx="transaction"
       :is-final="isFinal"
@@ -97,7 +97,6 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
-
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -134,7 +133,7 @@ export default defineComponent({
     },
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
-  setup(props, { emit }) {
+  setup(props: any, { emit }) {
     const router = useRouter();
     const goBack = () => {
       if (props.backRoute) {
@@ -149,6 +148,7 @@ export default defineComponent({
     const hasMore = ref(false);
     const isFinal = ref(false);
     const isTransferConfirmationOpen = ref(false);
+    const txResult = ref(null);
 
     onMounted(async () => {
       fees.value = await Promise.all(
@@ -279,26 +279,55 @@ export default defineComponent({
                 continue;
               }
               try {
-                let status = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                let txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
                   subscribe: true,
                   params: { chain_name: res.chain_name, ticket: result.ticket },
                 });
 
                 while (
-                  status != 'complete' &&
-                  status != 'failed' &&
-                  status != 'IBC_receive_success' &&
-                  status != 'Tokens_unlocked_timeout' &&
-                  status != 'Tokens_unlocked_ack'
+                  txResultData.status != 'complete' &&
+                  txResultData.status != 'failed' &&
+                  txResultData.status != 'IBC_receive_success' &&
+                  txResultData.status != 'Tokens_unlocked_timeout' &&
+                  txResultData.status != 'Tokens_unlocked_ack'
                 ) {
                   console.log(status);
-                  status = await store.getters['demeris/getTxStatus']({
+                  txResultData = await store.getters['demeris/getTxStatus']({
                     chain_name: res.chain_name,
                     ticket: result.ticket,
                   });
                 }
+                if (currentData.value.data.name === 'swap') {
+                  console.log('txResultData', txResultData);
+                  //Get end block events
+                  let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                    height: txResultData.height,
+                  });
+
+                  const result = {
+                    swappedPercent: 0,
+                    demandCoinSwappedAmount: 0,
+                    demandCoinDenom: '',
+                    remainingOfferCoinAmount: 0,
+                    offerCoinDenom: '',
+                  };
+
+                  console.log('endBlockEvent', endBlockEvent);
+
+                  result.demandCoinDenom = endBlockEvent.demand_coin_denom;
+                  result.swappedPercent =
+                    (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                      (Number(endBlockEvent.remaining_offer_coin_amount) +
+                        Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                    100;
+                  result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
+                  result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
+                  result.offerCoinDenom = endBlockEvent.offer_coin_denom;
+                  txResult.value = result;
+                  console.log('swap result', result);
+                }
+
                 // TODO: deal with status here
-                console.log(status);
                 emit('complete');
                 txstatus.value = 'complete';
 
@@ -339,7 +368,7 @@ export default defineComponent({
             shouldOpenConfirmation = true;
           }
         } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-          shouldOpenConfirmation = props.data.length > 1;
+          shouldOpenConfirmation = props.data?.length > 1;
         }
 
         isTransferConfirmationOpen.value = shouldOpenConfirmation;
@@ -351,6 +380,7 @@ export default defineComponent({
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,
+      txResult,
       confirm,
       toggleTxHandlingModal,
       currentData,

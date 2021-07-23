@@ -231,6 +231,7 @@ export type FeeTokensResponse = {
 };
 export type Ticket = {
   status: string;
+  height?: number;
   newTicket?: string;
   err?: string;
 };
