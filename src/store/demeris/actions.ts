@@ -458,6 +458,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       console.log(Buffer.from(tx).toString('hex'));
       return { tx: tx_data, chain_name };
     } catch (e) {
+      console.error(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
     }
   },
