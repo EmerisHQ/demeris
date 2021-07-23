@@ -1,4 +1,5 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { sleep } from '@cosmjs/utils';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -696,7 +697,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
+    function sleep(ms) {
+      const wakeUpTime = Date.now() + ms;
+      while (Date.now() < wakeUpTime) {}
+    }
+
     try {
+      sleep(800);
       const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
       const successData = {};
 
