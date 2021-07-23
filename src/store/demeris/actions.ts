@@ -487,6 +487,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
+      console.log(e);
       return false;
     }
   },
