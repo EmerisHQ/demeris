@@ -342,8 +342,37 @@ export default defineComponent({
                   txResult.value = result;
                   console.log('swap result', result);
                 }
+                if (currentData.value.data.name === 'swap') {
+                  console.log('txResultData', txResultData);
+                  //Get end block events
+                  let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                    height: txResultData.height,
+                  });
+
+                  const result = {
+                    swappedPercent: 0,
+                    demandCoinSwappedAmount: 0,
+                    demandCoinDenom: '',
+                    remainingOfferCoinAmount: 0,
+                    offerCoinDenom: '',
+                  };
+
+                  console.log('endBlockEvent', endBlockEvent);
+
+                  result.demandCoinDenom = endBlockEvent.demand_coin_denom;
+                  result.swappedPercent =
+                    (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                      (Number(endBlockEvent.remaining_offer_coin_amount) +
+                        Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                    100;
+                  result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
+                  result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
+                  result.offerCoinDenom = endBlockEvent.offer_coin_denom;
+                  txResult.value = result;
+                  console.log('swap result', result);
+                }
+
                 // TODO: deal with status here
-                // if (txResultData.status)
                 emit('complete');
                 txstatus.value = 'complete';
 
