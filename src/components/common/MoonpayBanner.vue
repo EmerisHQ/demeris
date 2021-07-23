@@ -20,6 +20,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
 
+import useEmitter from '@/composables/useEmitter';
 import { useStore } from '@/store';
 
 export default defineComponent({
@@ -37,6 +38,11 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const emitter = useEmitter();
+
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
 
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
@@ -57,9 +63,13 @@ export default defineComponent({
     });
 
     const goMoon = () => {
-      window.open(mpUrl.value, '', 'height=480,width=320');
+      if (isSignedIn.value) {
+        window.open(mpUrl.value, '', 'height=480,width=320');
+      } else {
+        emitter.emit('toggle-settings-modal');
+      }
     };
-    return { goMoon };
+    return { isSignedIn, goMoon };
   },
 });
 </script>

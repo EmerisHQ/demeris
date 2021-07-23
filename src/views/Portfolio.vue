@@ -28,7 +28,11 @@
             />
           </div>
 
-          <MoonpayBanner title="Add ATOM to your account" class="portfolio__assets__buy-banner" />
+          <MoonpayBanner
+            v-if="!balances.length"
+            title="Add ATOM to your account"
+            class="portfolio__assets__buy-banner"
+          />
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
