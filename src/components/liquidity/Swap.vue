@@ -146,7 +146,7 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getTicker } from '@/utils/actionHandler';
 import { actionHandler } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
@@ -601,9 +601,9 @@ export default defineComponent({
         if (data.payCoinData) {
           const amount = getPrecisedAmount(data.payCoinData.base_denom, data.maxAmount);
           if (amount > 0) {
-            const displayName = await getDisplayName(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
+            const ticker = await getTicker(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
             const formattedAmount = Math.floor(amount * 100) / 100;
-            data.maxButtonText = `${formattedAmount} ${displayName} Max`;
+            data.maxButtonText = `${formattedAmount} ${ticker} Max`;
           } else {
             data.maxButtonText = 'Max';
           }
