@@ -120,6 +120,7 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
+        <PoolBanner :name="denom" />
         <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
@@ -131,6 +132,7 @@ import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
+import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -163,6 +165,7 @@ export default defineComponent({
     PlusIcon,
     LiquiditySwap,
     Pools,
+    PoolBanner,
     MoonpayBanner,
   },
 
