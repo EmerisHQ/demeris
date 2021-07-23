@@ -168,7 +168,6 @@ export default defineComponent({
       }),
       alertStatus: computed(() => {
         const slippage = state.slippage ?? customSlippage.value;
-        console.log('Slippage', slippage);
         if (slippage) {
           if (slippage == 0.1) {
             return 'warning';
