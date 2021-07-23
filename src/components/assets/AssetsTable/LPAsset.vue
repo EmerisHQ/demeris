@@ -1,11 +1,13 @@
 <template>
-  <div>
-    <p>Display Name: <Denom :name="walletBalances.poolCoin.denom" /></p>
+  <div v-if="validPool && walletBalances && walletBalances.poolCoin">
     <p>LP <Ticker :name="walletBalances.coinA.denom" /> &middot; <Ticker :name="walletBalances.coinB.denom" /></p>
+    <!--
+    <p>Display Name: <Denom :name="walletBalances.poolCoin.denom" /></p>
     <p>Ticker: <Ticker :name="walletBalances.poolCoin.denom" /></p>
     <p>Balance: <AmountDisplay :amount="walletBalances.poolCoin" /></p>
     <p>Balance USD: {{ toUSD(ownLiquidityPrice) }}</p>
     {{ walletBalances.poolCoin.denom }}
+    -->
   </div>
 </template>
 
@@ -13,8 +15,8 @@
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import Denom from '@/components/common/Denom.vue';
+// import AmountDisplay from '@/components/common/AmountDisplay.vue';
+// import Denom from '@/components/common/Denom.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -26,8 +28,8 @@ import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'LPAsset',
   components: {
-    AmountDisplay,
-    Denom,
+    // AmountDisplay,
+    // Denom,
     Ticker,
   },
   props: {
@@ -52,11 +54,9 @@ export default defineComponent({
       let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
       return liquidityPools.pools;
     });
-    const thisPool = computed(() => {
+    const validPool = computed(() => {
       return pools.value.find((pool) => pool.pool_coin_denom == props.name);
     });
-    console.log(thisPool.value);
-    console.log(thisPool.value.id);
 
     const { pool, reserveBalances, calculateWithdrawBalances } = usePool('1');
 
@@ -166,6 +166,7 @@ export default defineComponent({
     watch(walletBalances, updateOwnLiquidityPrice);
 
     return {
+      validPool,
       pool,
       reserveBalances,
       walletBalances,
@@ -175,3 +176,10 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+p {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+</style>
