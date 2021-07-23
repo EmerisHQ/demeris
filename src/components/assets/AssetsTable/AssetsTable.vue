@@ -110,7 +110,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-
     limitRows: {
       type: Number,
       default: undefined,
