@@ -104,8 +104,10 @@
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p class="pool-equity__stats__balance s-2 w-bold">{{ toUSD(ownLiquidityPrice) }}</p>
-                <span class="pool-equity__stats__share s-minus">{{ parseFloat((100 * ownLiquidityPrice) / totalLiquidityPrice).toFixed(2) }}% of pool</span>
+                <p class="pool-equity__stats__balance s-2 w-bold">
+                  {{ toUSD(ownLiquidityPrice) }}
+                </p>
+                <span class="pool-equity__stats__share s-minus"> {{ ownLiquidityShare }}% of pool </span>
               </div>
             </div>
 
@@ -384,6 +386,14 @@ export default defineComponent({
       ownLiquidityPrice.value = total;
     };
 
+    const ownLiquidityShare = computed(() => {
+      let share = (100 * ownLiquidityPrice.value) / totalLiquidityPrice.value;
+      if (share > 100) {
+        return 100;
+      }
+      return share.toFixed(2);
+    });
+
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
@@ -403,6 +413,7 @@ export default defineComponent({
       withdrawLiquidityHandler,
       formatPoolName,
       ownLiquidityPrice,
+      ownLiquidityShare,
       toUSD,
       openAssetPage,
     };
