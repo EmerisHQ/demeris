@@ -1,10 +1,7 @@
 <template>
-  <div v-if="validPool && walletBalances && walletBalances.poolCoin" class="elevation-panel" @click="openPoolPage">
-    <p class="title-1-bold">What is <Ticker :name="walletBalances.poolCoin.denom" />?</p>
-    <p>
-      <Denom :name="walletBalances.poolCoin.denom" /> is a liquidity pool asset. LP assets represents shares of a
-      particular liquidity pool.
-    </p>
+  <div v-if="name" class="elevation-panel" @click="openPoolPage">
+    <p class="title-1-bold">What is <Ticker :name="name" />?</p>
+    <p><Denom :name="name" /> is a liquidity pool asset. LP assets represents shares of a particular liquidity pool.</p>
     <ArrowRightIcon />
   </div>
 </template>
@@ -16,7 +13,6 @@ import { useRouter } from 'vue-router';
 import Denom from '@/components/common/Denom.vue';
 import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import usePool from '@/composables/usePool';
 import { useAllStores } from '@/store';
 
 export default defineComponent({
@@ -41,37 +37,16 @@ export default defineComponent({
       return liquidityPools.pools;
     });
 
-    const validPool = computed(() => {
-      if (pools.value) {
-        return pools.value.find((pool) => pool.pool_coin_denom == props.name);
-      }
-      return false;
-    });
-    console.log('validPool', validPool.value);
-
-    const { pool, reserveBalances } = usePool(validPool.value.id);
-
-    const walletBalances = computed(() => {
-      if (!pool.value || !reserveBalances.value?.length) {
-        return;
-      }
-
-      const poolCoin = {
-        denom: pool.value.pool_coin_denom,
-      };
-
-      return {
-        poolCoin,
-      };
+    const pool = computed(() => {
+      return pools.value.find((pool) => pool.pool_coin_denom == props.name);
     });
 
     const openPoolPage = () => {
-      router.push({ name: 'Pool', params: { id: validPool.value.id } });
+      router.push({ name: 'Pool', params: { id: pool.value.id } });
     };
 
     return {
-      validPool,
-      walletBalances,
+      pool,
       openPoolPage,
     };
   },
