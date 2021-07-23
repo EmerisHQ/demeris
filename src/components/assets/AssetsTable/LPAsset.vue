@@ -5,7 +5,7 @@
     <p>Ticker: <Ticker :name="walletBalances.poolCoin.denom" /></p>
     <p>Balance: <AmountDisplay :amount="walletBalances.poolCoin" /></p>
     <p>Balance USD: {{ toUSD(ownLiquidityPrice) }}</p>
-    {{ walletBalances.poolCoin }}
+    {{ walletBalances.poolCoin.denom }}
   </div>
 </template>
 
@@ -18,7 +18,7 @@ import Denom from '@/components/common/Denom.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
+import { useAllStores } from '@/store';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
@@ -31,13 +31,14 @@ export default defineComponent({
     Ticker,
   },
   props: {
-    poolId: {
+    name: {
       type: String,
-      default: '1',
+      default: '',
     },
   },
   setup(props) {
     const store = useStore();
+    const stores = useAllStores();
 
     const toUSD = (value) => {
       let formatter = new Intl.NumberFormat('en-US', {
@@ -47,10 +48,17 @@ export default defineComponent({
       return formatter.format(value);
     };
     const { balancesByDenom } = useAccount();
-    const { formatPoolName } = usePools();
+    const pools = computed(() => {
+      let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+      return liquidityPools.pools;
+    });
+    const thisPool = computed(() => {
+      return pools.value.find((pool) => pool.pool_coin_denom == props.name);
+    });
+    console.log(thisPool.value);
+    console.log(thisPool.value.id);
 
-    const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool(props.poolId);
-    const totalLiquidityPrice = ref();
+    const { pool, reserveBalances, calculateWithdrawBalances } = usePool('1');
 
     const ownLiquidityPrice = ref();
     const walletBalances = computed(() => {
@@ -159,11 +167,8 @@ export default defineComponent({
 
     return {
       pool,
-      pairName,
       reserveBalances,
       walletBalances,
-      totalLiquidityPrice,
-      formatPoolName,
       ownLiquidityPrice,
       toUSD,
     };

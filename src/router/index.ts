@@ -44,7 +44,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/pool/:id?',
     name: 'Pool',
-    component: () => import('@/components/assets/AssetsTable/LPAsset.vue'),
+    component: () => import('@/views/Pool.vue'),
   },
   {
     path: '/pools/add/:id?',
