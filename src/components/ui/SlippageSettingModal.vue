@@ -14,21 +14,30 @@
       <div class="setting__sections">
         <button
           class="setting__sections-block"
-          :class="slippage === 0.1 && !isCustomSelected ? 'selected' : ''"
+          :class="[
+            slippage === 0.1 && !isCustomSelected ? 'selected' : '',
+            allowCustomSlippage ? '' : 'no-custom-slippage',
+          ]"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
           class="setting__sections-block"
-          :class="slippage === 0.5 && !isCustomSelected ? 'selected' : ''"
+          :class="[
+            slippage === 0.5 && !isCustomSelected ? 'selected' : '',
+            allowCustomSlippage ? '' : 'no-custom-slippage',
+          ]"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
           class="setting__sections-block"
-          :class="slippage === 1 && !isCustomSelected ? 'selected' : ''"
+          :class="[
+            slippage === 1 && !isCustomSelected ? 'selected' : '',
+            allowCustomSlippage ? '' : 'no-custom-slippage',
+          ]"
           @click="setSlippage(1)"
         >
           1%
@@ -51,7 +60,6 @@
         </button>
       </div>
     </div>
-
     <div v-if="alertStatus" class="alert-wrapper">
       <Alert :status="alertStatus" :message="alertText" />
     </div>
@@ -159,25 +167,21 @@ export default defineComponent({
         }
       }),
       alertStatus: computed(() => {
-        if (state.slippage) {
-          if (state.slippage.value) {
-            if (state.slippage.value === 0.1) {
-              return 'warning';
-            } else {
-              return null;
-            }
-          } else {
-            if (state.slippage.value <= 0.1) {
-              if (state.slippage.value < 0) {
-                return 'error';
-              } else {
-                return 'warning';
-              }
-            } else if (state.slippage.value >= 3) {
+        const slippage = state.slippage ?? customSlippage.value;
+        console.log('Slippage', slippage);
+        if (slippage) {
+          if (slippage == 0.1) {
+            return 'warning';
+          } else if (slippage <= 0.1) {
+            if (slippage < 0) {
               return 'error';
             } else {
-              return null;
+              return 'warning';
             }
+          } else if (slippage >= 3) {
+            return 'error';
+          } else {
+            return null;
           }
         } else {
           return null;
@@ -187,7 +191,7 @@ export default defineComponent({
         if (state.alertStatus === 'warning') {
           return 'With a low slippage, only a very small part of your swap may be fulfilled';
         } else if (state.alertStatus === 'error') {
-          if (state.slippage.value < 0) {
+          if (state.slippage < 0) {
             return 'Please enter a valid slippage rate.';
           } else {
             return 'Your swap price may be significantly above the market price. ';
@@ -252,7 +256,14 @@ export default defineComponent({
       }
     });
 
-    return { ...toRefs(state), allowCustomSlippage, customSlippageInput, limitPriceText, minReceivedText };
+    return {
+      ...toRefs(state),
+      allowCustomSlippage,
+      customSlippageInput,
+      customSlippage,
+      limitPriceText,
+      minReceivedText,
+    };
   },
 });
 </script>
@@ -301,7 +312,7 @@ export default defineComponent({
 
         outline: none;
 
-        &:last-child {
+        &:nth-child(4) {
           width: 9.2rem;
           padding: 0.6rem 1.2rem;
           text-align: center;
@@ -371,5 +382,9 @@ export default defineComponent({
   .alert-wrapper {
     padding: 0 2.4rem;
   }
+}
+
+.no-custom-slippage {
+  width: 9.2rem !important;
 }
 </style>
