@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
