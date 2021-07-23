@@ -67,12 +67,13 @@
       "
       @done="
         () => {
-          emitHandler('done');
           if (transaction.name == 'swap') {
             emitHandler('reset');
           } else {
             nextTx();
-            goBack();
+            if (!hasMore) {
+              goBack();
+            }
           }
         }
       "
@@ -133,7 +134,7 @@ export default defineComponent({
       default: 'default',
     },
   },
-  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
+  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props: any, { emit }) {
     const router = useRouter();
     const goBack = () => {
@@ -268,12 +269,15 @@ export default defineComponent({
               continue;
             }
             if (tx) {
+              errorMessage.value = undefined;
               emit('transacting');
               txstatus.value = 'transacting';
               let result;
               try {
                 result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
               } catch (e) {
+                console.error(e);
+                errorMessage.value = e.message;
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -293,14 +297,14 @@ export default defineComponent({
                   txResultData.status != 'Tokens_unlocked_timeout' &&
                   txResultData.status != 'Tokens_unlocked_ack'
                 ) {
-                  console.log(txResultData.status);
                   txResultData = await store.getters['demeris/getTxStatus']({
                     chain_name: res.chain_name,
                     ticket: result.ticket,
                   });
+                  console.log(txResultData.status);
                 }
 
-                if (txResultData.status !== 'IBC_receive_success') {
+                if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
                   let errorMessage = `Demeris:Ticket - Status: "${txResultData.status}"; Ticket: "${
                     result.ticket
                   }"; Action: "${props.actionName}"; Transaction: "${JSON.stringify(stepTx)}"`;
@@ -338,7 +342,6 @@ export default defineComponent({
                   txResult.value = result;
                   console.log('swap result', result);
                 }
-
                 // TODO: deal with status here
                 // if (txResultData.status)
                 emit('complete');

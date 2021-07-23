@@ -126,8 +126,8 @@
               Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
               Hub.
             </template>
-            <Collapse label-open="Show details" label-hide="Hide details" class="status__error-collapse">
-              <Alert v-if="error" status="error" :show-icon="false">
+            <Collapse v-if="error" label-open="Show details" label-hide="Hide details" class="status__error-collapse">
+              <Alert status="error" :show-icon="false">
                 <p>{{ error }}</p>
               </Alert>
             </Collapse>
@@ -339,7 +339,7 @@ export default defineComponent({
             break;
           case 'complete':
             subTitle.value = '';
-            if (props.isFinal) {
+            if (props.isFinal && !props.hasMore) {
               blackButton.value = 'Done';
               if (props.tx.name === 'swap') {
                 whiteButton.value = `Send ${
@@ -391,6 +391,22 @@ export default defineComponent({
             break;
           case 'failed':
             title.value = 'Transaction failed';
+            switch ((props.tx as StepTransaction).name) {
+              //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+              case 'swap':
+                title.value = 'Swap failed';
+                break;
+              case 'addliquidity':
+                title.value = 'Add liquidity failed';
+                break;
+              case 'withdrawliquidity':
+                title.value = 'Withdraw liquidity failed';
+                break;
+              case 'createpool':
+                title.value = 'Create pool failed';
+                break;
+            }
+
             subTitle.value = '';
             whiteButton.value = 'Cancel';
             blackButton.value = 'Try again';
