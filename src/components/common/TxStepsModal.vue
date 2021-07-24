@@ -43,23 +43,23 @@
         <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
       </div>
       <Modal
-        v-if="currentData.feeWarning"
+        v-if="feeWarning.feeWarning"
         class="fee-warning-modal"
         :modal-variant="asWidget ? 'bottom' : 'full'"
         @close="
           () => {
-            currentData.feeWarning = false;
+            feeWarning.feeWarning = false;
           }
         "
       >
         <div class="fee-warning-modal__icon-warning">
           <WarningIcon />
         </div>
-        <template v-if="currentData.missingFees.length > 0">
+        <template v-if="feeWarning.missingFees.length > 0">
           <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
           <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
           <div class="fee-warning-modal__list">
-            <div v-for="missing in currentData.missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
+            <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
               <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
               <div class="fee-warning-modal__list__item__amount">
                 <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
@@ -67,18 +67,24 @@
             </div>
           </div>
         </template>
-        <template v-if="currentData.ibcWarning">
+        <template v-if="feeWarning.ibcWarning">
           <div class="fee-warning-modal__title">
-            {{ $t('components.feeWarningModal.ibcWarning', { denom: 'LUNA' }) }}
+            {{ $t('components.feeWarningModal.ibcWarning', { denom: feeWarning.ibcDetails.denom }) }}
           </div>
           <div class="fee-warning-modal__content">
-            {{ $t('components.feeWarningModal.ibcWarningText', { ibcDenom: 'ATOM', chain: 'Terra', denom: 'Luna' }) }}
+            {{
+              $t('components.feeWarningModal.ibcWarningText', {
+                ibcDenom: feeWarning.ibcDetails.ibcDenom,
+                chain: feeWarning.ibcDetails.chain_name,
+                denom: feeWarning.ibcDetails.denom,
+              })
+            }}
           </div>
           <Button :name="$t('generic_cta.cancel')" />
           <Button :name="$t('generic_cta.proceed')" />
         </template>
         <template #buttons>
-          <template v-if="currentData.missingFees.length == 1 && currentData.missingFees[0].denom == 'uatom'">
+          <template v-if="feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom == 'uatom'">
             <ModalButton
               :name="$t('generic_cta.cancel')"
               :click-function="
@@ -91,8 +97,8 @@
           </template>
           <template
             v-if="
-              currentData.missingFees.length > 1 ||
-                (currentData.missingFees.length == 1 && currentData.missingFees[0].denom != 'uatom')
+              feeWarning.missingFees.length > 1 ||
+                (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
             "
           >
             <ModalButton
@@ -104,7 +110,7 @@
               "
             />
           </template>
-          <template v-if="currentData.ibcWarning">
+          <template v-if="feeWarning.ibcWarning">
             <ModalButton
               :name="$t('generic_cta.cancel')"
               :click-function="
@@ -117,7 +123,7 @@
               :name="$t('generic_cta.proceed')"
               :click-function="
                 () => {
-                  currentData.feeWarning = false;
+                  feeWarning.feeWarning = false;
                 }
               "
             />
@@ -183,10 +189,23 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { CreatePoolData, GasPriceLevel, IBCForwardsData, Step, StepTransaction, TransferData } from '@/types/actions';
+import {
+  CreatePoolData,
+  FeeTotals,
+  GasPriceLevel,
+  IBCForwardsData,
+  Step,
+  StepTransaction,
+  TransferData,
+} from '@/types/actions';
 import { Balances } from '@/types/api';
 import { Amount } from '@/types/base';
-import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import {
+  feeForStep,
+  feeForStepTransaction,
+  msgFromStepTransaction,
+  validateStepFeeBalances,
+} from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -245,7 +264,16 @@ export default defineComponent({
     const isFinal = ref(false);
     const isTransferConfirmationOpen = ref(false);
     const { balances } = useAccount();
-
+    const feeWarning = ref({
+      missingFees: [],
+      ibcWarning: false,
+      feeWarning: false,
+      ibcDetails: {
+        ibcDenom: '',
+        chain_name: '',
+        denom: '',
+      },
+    });
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -263,7 +291,6 @@ export default defineComponent({
         );
       },
     );
-
     const txToResolve = ref({});
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
@@ -281,19 +308,13 @@ export default defineComponent({
       const modifiedData = {
         isSwap: false,
         title: '',
-        fees: [],
+        fees: {},
         data: currentStepData,
-        missingFees: [],
-        ibcWarning: false,
-        feeWarning: false,
       } as {
         isSwap: boolean;
         title: string;
-        fees: Array<Amount>;
+        fees: FeeTotals;
         data: Step;
-        missingFees: Array<{ amount: string; denom: string; chain_name: string }>;
-        ibcWarning: boolean;
-        feeWarning: boolean;
       };
       switch (currentStepData.name) {
         case 'swap':
@@ -317,104 +338,17 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
-      const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
-      for (const checkedBalance of toCheckBalances) {
-        if (
-          modifiedData.fees[checkedBalance.on_chain] &&
-          modifiedData.fees[checkedBalance.on_chain][parseCoins(checkedBalance.amount)[0].denom]
-        ) {
-          checkedBalance.amount =
-            parseInt(parseCoins(checkedBalance.amount)[0].amount) -
-            parseInt(modifiedData.fees[checkedBalance.on_chain][parseCoins(checkedBalance.amount)[0].denom]) +
-            parseCoins(checkedBalance.amount)[0].denom;
-        }
-      }
-      for (const stepTx of currentStepData.transactions) {
-        if ((stepTx as StepTransaction).name == 'transfer') {
-          const whatBalance = toCheckBalances.find(
-            (x) =>
-              x.on_chain == (stepTx.data as TransferData).chain_name &&
-              x.base_denom == (stepTx.data as TransferData).amount.denom,
-          );
-          if (whatBalance) {
-            let newAmount =
-              parseInt(parseCoins(whatBalance.amount)[0].amount) -
-              parseInt((stepTx.data as TransferData).amount.amount);
-            if (newAmount < 0) {
-              modifiedData.missingFees.push({
-                denom: parseCoins(whatBalance.amount)[0].denom,
-                amount: 0 - newAmount + '',
-                chain_name: whatBalance.on_chain,
-              });
-              modifiedData.feeWarning = true;
-            }
-            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
-          }
-        }
-        if ((stepTx as StepTransaction).name == 'ibc_forward' || (stepTx as StepTransaction).name == 'ibc_backward') {
-          const whatBalance = toCheckBalances.find(
-            (x) =>
-              x.on_chain == (stepTx.data as IBCForwardsData).from_chain &&
-              x.base_denom == (stepTx.data as IBCForwardsData).amount.denom,
-          );
-          if (whatBalance) {
-            let newAmount =
-              parseInt(parseCoins(whatBalance.amount)[0].amount) -
-              parseInt((stepTx.data as TransferData).amount.amount);
-            if (newAmount < 0) {
-              modifiedData.missingFees.push({
-                denom: parseCoins(whatBalance.amount)[0].denom,
-                amount: 0 - newAmount + '',
-                chain_name: whatBalance.on_chain,
-              });
-              modifiedData.feeWarning = true;
-            }
-            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
-          }
-        }
-        if ((stepTx as StepTransaction).name == 'createpool' || (stepTx as StepTransaction).name == 'addliquidity') {
-          const whatBalance = toCheckBalances.find(
-            (x) =>
-              x.on_chain == store.getters['demeris/getDexChain'] &&
-              x.base_denom == (stepTx.data as CreatePoolData).coinA.denom,
-          );
-          if (whatBalance) {
-            let newAmount =
-              parseInt(parseCoins(whatBalance.amount)[0].amount) -
-              parseInt((stepTx.data as CreatePoolData).coinA.amount);
-            if (newAmount < 0) {
-              modifiedData.missingFees.push({
-                denom: parseCoins(whatBalance.amount)[0].denom,
-                amount: 0 - newAmount + '',
-                chain_name: whatBalance.on_chain,
-              });
-              modifiedData.feeWarning = true;
-            }
-            whatBalance.amount = '0' + parseCoins(whatBalance.amount)[0].denom;
-          }
-          const whatBalanceB = toCheckBalances.find(
-            (x) =>
-              x.on_chain == store.getters['demeris/getDexChain'] &&
-              x.base_denom == (stepTx.data as CreatePoolData).coinB.denom,
-          );
-          if (whatBalanceB) {
-            let newAmount =
-              parseInt(parseCoins(whatBalanceB.amount)[0].amount) -
-              parseInt((stepTx.data as CreatePoolData).coinB.amount);
-            if (newAmount < 0) {
-              modifiedData.missingFees.push({
-                denom: parseCoins(whatBalanceB.amount)[0].denom,
-                amount: 0 - newAmount + '',
-                chain_name: whatBalanceB.on_chain,
-              });
-              modifiedData.feeWarning = true;
-            }
-            whatBalanceB.amount = '0' + parseCoins(whatBalanceB.amount)[0].denom;
-          }
-        }
-      }
+
       return modifiedData;
     });
+
+    watch(
+      () => currentData.value,
+      async (newData) => {
+        const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
+        feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
+      },
+    );
     const confirm = async () => {
       let abort = false;
 
@@ -564,6 +498,7 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
+      feeWarning,
     };
   },
 });

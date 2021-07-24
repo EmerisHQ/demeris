@@ -1232,7 +1232,21 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   }
   return validBalances;
 }
-export async function validateStepFeeBalances(step: Actions.Step, balances: Balances, fees: Actions.FeeTotals) {
+export async function validateStepFeeBalances(
+  step: Actions.Step,
+  balances: Balances,
+  fees: Actions.FeeTotals,
+): Promise<Actions.FeeWarning> {
+  const feeWarning: Actions.FeeWarning = {
+    missingFees: [],
+    ibcWarning: false,
+    feeWarning: false,
+    ibcDetails: {
+      ibcDenom: '',
+      chain_name: '',
+      denom: '',
+    },
+  };
   for (const stepTx of step.transactions) {
     if (stepTx.name == 'addliquidity') {
       const data = stepTx.data as Actions.AddLiquidityData;
@@ -1328,10 +1342,20 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
         if (newAmount >= 0) {
           feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
         } else {
-          // Add missing fee
+          feeWarning.feeWarning = true;
+          feeWarning.missingFees.push({
+            amount: '' + creationFee.amount,
+            chain_name: store.getters['demeris/getDexChain'],
+            denom: creationFee.denom,
+          });
         }
       } else {
-        // Add missing fee
+        feeWarning.feeWarning = true;
+        feeWarning.missingFees.push({
+          amount: '' + creationFee.amount,
+          chain_name: store.getters['demeris/getDexChain'],
+          denom: creationFee.denom,
+        });
       }
     }
     if (stepTx.name == 'ibc_backward') {
@@ -1441,6 +1465,13 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
+      feeWarning.feeWarning = true;
+      feeWarning.ibcWarning = true;
+      feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+      feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
+      feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
+        chain_name: data.to_chain,
+      }).denoms.find((x) => x.fee_token == true).display_name;
     }
     if (stepTx.name == 'swap') {
       const data = stepTx.data as Actions.SwapData;
@@ -1472,7 +1503,12 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
       if (newSwapAmount >= 0) {
         balance.amount = newSwapAmount + parseCoins(balance.amount)[0].denom;
       } else {
-        // add missing swap fee
+        feeWarning.feeWarning = true;
+        feeWarning.missingFees.push({
+          amount: '' + swapFee.amount,
+          chain_name: store.getters['demeris/getDexChain'],
+          denom: swapFee.denom,
+        });
       }
     }
     if (stepTx.name == 'transfer') {
@@ -1521,4 +1557,37 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
       }
     }
   }
+  for (const chain_name in fees) {
+    for (const denom in fees[chain_name]) {
+      const feeBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == denom && x.on_chain == chain_name) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (feeBalance) {
+        const newAmount = parseInt(parseCoins(feeBalance.amount)[0].amount) - fees[chain_name][denom];
+        if (newAmount >= 0) {
+          feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
+        } else {
+          feeWarning.feeWarning = true;
+          feeWarning.missingFees.push({
+            amount: '' + fees[chain_name][denom],
+            chain_name: chain_name,
+            denom: denom,
+          });
+        }
+      } else {
+        feeWarning.feeWarning = true;
+        feeWarning.missingFees.push({
+          amount: '' + fees[chain_name][denom],
+          chain_name: chain_name,
+          denom: denom,
+        });
+      }
+    }
+  }
+  return feeWarning;
 }
