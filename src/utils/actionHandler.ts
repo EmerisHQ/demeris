@@ -1447,9 +1447,48 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
     }
     if (stepTx.name == 'transfer') {
       const data = stepTx.data as Actions.TransferData;
+      if (data.to_address != (await getOwnAddress({ chain_name: data.chain_name }))) {
+        const balance = balances.find((x) => {
+          const amount = parseCoins(x.amount)[0];
+          if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+        if (balance) {
+          const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.amount.amount);
+          if (newAmount >= 0) {
+            balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
+          } else {
+            throw new Error('Insufficient balance: ' + data.amount.denom);
+          }
+        } else {
+          throw new Error('Insufficient balance: ' + data.amount.denom);
+        }
+      }
     }
     if (stepTx.name == 'withdrawliquidity') {
       const data = stepTx.data as Actions.WithdrawLiquidityData;
+
+      const balance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.poolCoin.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (balance) {
+        const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.poolCoin.amount);
+        if (newAmount >= 0) {
+          balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.poolCoin.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.poolCoin.denom);
+      }
     }
   }
 }
