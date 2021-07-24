@@ -1,11 +1,19 @@
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
-import { Balances, Denom } from '@/types/api';
+import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
 import { store, useAllStores } from '../store/index';
-import { generateDenomHash, getChannel, getDenomHash, getOwnAddress, isNative, keyHashfromAddress } from './basic';
+import {
+  generateDenomHash,
+  getChannel,
+  getDenomHash,
+  getOwnAddress,
+  isNative,
+  keyHashfromAddress,
+  parseCoins,
+} from './basic';
 
 const stores = useAllStores();
 // Basic step-building blocks
@@ -1223,4 +1231,225 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     }
   }
   return validBalances;
+}
+export async function validateStepFeeBalances(step: Actions.Step, balances: Balances, fees: Actions.FeeTotals) {
+  for (const stepTx of step.transactions) {
+    if (stepTx.name == 'addliquidity') {
+      const data = stepTx.data as Actions.AddLiquidityData;
+      const balanceA = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (balanceA) {
+        const newAmount = parseInt(parseCoins(balanceA.amount)[0].amount) - parseInt(data.coinA.amount);
+        if (newAmount >= 0) {
+          balanceA.amount = newAmount + parseCoins(balanceA.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.coinA.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.coinA.denom);
+      }
+      const balanceB = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (balanceB) {
+        const newAmount = parseInt(parseCoins(balanceB.amount)[0].amount) - parseInt(data.coinB.amount);
+        if (newAmount >= 0) {
+          balanceB.amount = newAmount + parseCoins(balanceB.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.coinB.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.coinB.denom);
+      }
+    }
+    if (stepTx.name == 'createpool') {
+      const data = stepTx.data as Actions.CreatePoolData;
+      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee;
+      const feeBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      const balanceA = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (balanceA) {
+        const newAmount = parseInt(parseCoins(balanceA.amount)[0].amount) - parseInt(data.coinA.amount);
+        if (newAmount >= 0) {
+          balanceA.amount = newAmount + parseCoins(balanceA.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.coinA.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.coinA.denom);
+      }
+      const balanceB = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (balanceB) {
+        const newAmount = parseInt(parseCoins(balanceB.amount)[0].amount) - parseInt(data.coinB.amount);
+        if (newAmount >= 0) {
+          balanceB.amount = newAmount + parseCoins(balanceB.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.coinB.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.coinB.denom);
+      }
+      if (feeBalance) {
+        const newAmount = parseInt(parseCoins(feeBalance.amount)[0].amount) - parseInt(creationFee.amount);
+        if (newAmount >= 0) {
+          feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
+        } else {
+          // Add missing fee
+        }
+      } else {
+        // Add missing fee
+      }
+    }
+    if (stepTx.name == 'ibc_backward') {
+      const data = stepTx.data as Actions.IBCBackwardsData;
+      const ibcBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (ibcBalance) {
+        const newAmount = parseInt(parseCoins(ibcBalance.amount)[0].amount) - parseInt(data.amount.amount);
+        if (newAmount >= 0) {
+          ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
+          let newDenom;
+          if (ibcBalance.ibc.path.split('/').length > 2) {
+            newDenom = getDenomHash(ibcBalance.ibc.path, ibcBalance.base_denom, 1);
+          } else {
+            newDenom = ibcBalance.base_denom;
+          }
+          if (!data.to_address) {
+            const rcptBalance = balances.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            if (rcptBalance) {
+              const newIbcAmount = parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount);
+              rcptBalance.amount = newIbcAmount + parseCoins(rcptBalance.amount)[0].denom;
+            } else {
+              const ibcDetails: IbcInfo = {};
+              if (ibcBalance.ibc.path.split('/').length > 2) {
+                ibcDetails.path = ibcBalance.ibc.path.split('/').slice(2).join('/');
+                ibcDetails.hash = newDenom.replace('ibc/', '');
+              }
+              const newIbcBalance: Balance = {
+                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                base_denom: ibcBalance.base_denom,
+                verified: ibcBalance.verified,
+                on_chain: data.to_chain,
+                amount: data.amount.amount + newDenom,
+                ibc: ibcDetails,
+              };
+              balances.push(newIbcBalance);
+            }
+          }
+        } else {
+          throw new Error('Insufficient balance: ' + data.amount.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.amount.denom);
+      }
+    }
+    if (stepTx.name == 'ibc_forward') {
+      const data = stepTx.data as Actions.IBCForwardsData;
+      const ibcBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.amount.denom && x.on_chain == data.from_chain) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (ibcBalance) {
+        const newAmount = parseInt(parseCoins(ibcBalance.amount)[0].amount) - parseInt(data.amount.amount);
+        if (newAmount >= 0) {
+          ibcBalance.amount = newAmount + parseCoins(ibcBalance.amount)[0].denom;
+          const newDenom = generateDenomHash(data.through, ibcBalance.base_denom);
+
+          if (!data.to_address) {
+            const rcptBalance = balances.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (amount.denom == newDenom && x.on_chain == data.to_chain) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            if (rcptBalance) {
+              const newIbcAmount = parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount);
+              rcptBalance.amount = newIbcAmount + parseCoins(rcptBalance.amount)[0].denom;
+            } else {
+              const ibcDetails: IbcInfo = {};
+              if (ibcBalance.ibc.path.split('/').length > 2) {
+                ibcDetails.path = 'transfer/' + data.through;
+                ibcDetails.hash = newDenom.replace('ibc/', '');
+              }
+              const newIbcBalance: Balance = {
+                address: keyHashfromAddress(await getOwnAddress({ chain_name: data.to_chain })),
+                base_denom: ibcBalance.base_denom,
+                verified: ibcBalance.verified,
+                on_chain: data.to_chain,
+                amount: data.amount.amount + newDenom,
+                ibc: ibcDetails,
+              };
+              balances.push(newIbcBalance);
+            }
+          }
+        } else {
+          throw new Error('Insufficient balance: ' + data.amount.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.amount.denom);
+      }
+    }
+    if (stepTx.name == 'swap') {
+      const data = stepTx.data as Actions.SwapData;
+    }
+    if (stepTx.name == 'transfer') {
+      const data = stepTx.data as Actions.TransferData;
+    }
+    if (stepTx.name == 'withdrawliquidity') {
+      const data = stepTx.data as Actions.WithdrawLiquidityData;
+    }
+  }
 }

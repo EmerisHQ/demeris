@@ -19,8 +19,8 @@ export type VerifyTraceReq = {
 
 // Helper type to hold ibc information
 export type IbcInfo = {
-  path: string;
-  hash: string;
+  path?: string;
+  hash?: string;
 };
 
 // helper type to hold denom information
