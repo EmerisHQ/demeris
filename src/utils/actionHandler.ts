@@ -1444,6 +1444,36 @@ export async function validateStepFeeBalances(step: Actions.Step, balances: Bala
     }
     if (stepTx.name == 'swap') {
       const data = stepTx.data as Actions.SwapData;
+      const balance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.from.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (balance) {
+        const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.from.amount);
+        if (newAmount >= 0) {
+          balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.from.denom);
+        }
+      } else {
+        throw new Error('Insufficient balance: ' + data.from.denom);
+      }
+      const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+      const swapFee = {
+        amount: Math.ceil((parseInt(data.from.amount) * parseFloat(swapFeeRate)) / 2) + '',
+        denom: data.from.denom,
+      };
+      const newSwapAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(swapFee.amount);
+      if (newSwapAmount >= 0) {
+        balance.amount = newSwapAmount + parseCoins(balance.amount)[0].denom;
+      } else {
+        // add missing swap fee
+      }
     }
     if (stepTx.name == 'transfer') {
       const data = stepTx.data as Actions.TransferData;
