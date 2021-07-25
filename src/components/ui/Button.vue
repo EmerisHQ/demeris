@@ -2,12 +2,16 @@
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
-      :class="[status, isOutline ? 'outline-theme' : '']"
+      :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
       :disabled="disabled"
-      class="button s-0 w-medium elevation-button"
+      class="button s-0 w-medium"
       @click="clickFunction"
     >
-      {{ name }}
+      <div v-if="status === 'loading'" class="spinner">
+        <Spinner :size="1.5" :color="'black'" :variant="'circle'" />
+      </div>
+
+      <span v-else>{{ name }}</span>
     </button>
     <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
@@ -17,8 +21,12 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
+import Spinner from '@/components/ui/Spinner.vue';
 export default defineComponent({
   name: 'Button',
+  components: {
+    Spinner,
+  },
   props: {
     name: { type: String, required: true },
     status: { type: String, required: false, default: 'normal' },
@@ -62,6 +70,7 @@ export default defineComponent({
 
 .normal {
   background-color: var(--text);
+  color: var(--bg);
 }
 
 .secondary {
@@ -74,7 +83,15 @@ export default defineComponent({
 }
 
 .inactive {
-  background-color: var(--inactive);
+  background-color: var(--text);
+  color: #ababab;
+  pointer-events: none;
+}
+
+.loading {
+  background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
+  display: flex;
+  justify-content: center;
   pointer-events: none;
 }
 
@@ -85,7 +102,7 @@ export default defineComponent({
 
 .outline-theme {
   color: var(--text);
-  border: 1px solid var(--border-trans);
+  /* border: 1px solid var(--border-trans); */
   background-color: transparent;
 }
 </style>
