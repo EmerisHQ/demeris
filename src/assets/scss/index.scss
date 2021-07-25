@@ -1,14 +1,10 @@
-// @import '@starport/vue/src/styles/_normalize';
-// @import '@starport/vue/src/styles/_colors';
-// @import '@starport/vue/src/styles/_fonts';
-
 @import './tailwind';
 
 // theme config
+@import '_typography';
 @import '_theme-colors';
 
 // todo
-@import '_typography';
 @import '_animations';
 @import '_responsive';
 @import '_elevation';
