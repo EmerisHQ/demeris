@@ -2,16 +2,16 @@
   <div class="receive">
     <header class="receive__header">
       <button v-if="state.selectedAsset" class="receive__header__button" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
+        <Icon name="ArrowLeftIcon" :icon-size="1" />
       </button>
 
       <div v-if="state.selectedAsset" class="receive__header__title">
-        <h2 class="s-2">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
+        <h2 class="text-2">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
         <p class="receive__header__title__label">on <ChainName :name="state.selectedAsset.on_chain" /></p>
       </div>
 
       <router-link to="/" class="receive__header__button close-button">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+        <Icon name="CloseIcon" :icon-size="1" />
       </router-link>
     </header>
 
@@ -24,14 +24,14 @@
 
       <template v-else-if="state.selectedAsset && recipientAddress">
         <div class="receive__main__asset">
-          <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
+          <p class="receive__main__asset__title font-bold">Which assets can I use?</p>
           <div class="receive__main__asset__qr" :style="gradientStyle">
             <div class="receive__main__asset__qr__code">
               <QrCode :value="recipientAddress" width="160" :color="gradientStyle.color" />
             </div>
           </div>
           <div>
-            <p class="receive__main__asset__label s-minus w-bold">Your address</p>
+            <p class="receive__main__asset__label -text-1 font-bold">Your address</p>
             <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
           </div>
         </div>
@@ -145,15 +145,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3rem 4rem;
+    padding: 2rem 2.5rem;
     background: var(--bg);
 
     &__button {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
+      border-radius: 0.5rem;
+      padding: 0.375rem;
     }
 
     .close-button {
@@ -177,13 +177,13 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 3rem;
+    padding-bottom: 2rem;
 
     &__select {
       position: absolute;
       top: 0;
       width: 100%;
-      max-width: 44rem;
+      max-width: 27.5rem;
       height: 100%;
 
       .denom-select-modal {
@@ -193,7 +193,7 @@ export default {
 
     &__asset {
       width: 100%;
-      max-width: 36rem;
+      max-width: 22.5rem;
 
       &__title {
         text-align: center;
@@ -201,10 +201,10 @@ export default {
 
       &__qr {
         width: 100%;
-        height: 38rem;
+        height: 24rem;
         background: var(--border);
-        border-radius: 1rem;
-        margin: 3.2rem auto;
+        border-radius: 0.625rem;
+        margin: 2rem auto;
 
         &__code {
           height: 100%;
@@ -215,7 +215,7 @@ export default {
       }
 
       &__label {
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.5rem;
       }
     }
   }

@@ -61,10 +61,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .address {
-  padding: 1.6rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  border-radius: 1rem;
+  border-radius: 0.625rem;
 
   &--invalid {
     color: var(--negative-text);
@@ -80,7 +80,7 @@ export default defineComponent({
     appearance: none;
     outline: none;
     background: transparent;
-    font-size: 1.6rem;
+    font-size: 1rem;
     resize: none;
 
     &::placeholder {
@@ -89,14 +89,14 @@ export default defineComponent({
   }
 
   &__controls {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
   }
 
   &__chain {
-    font-size: 1.2rem;
+    font-size: 0.8125rem;
     color: rgba(0, 0, 0, 0.667);
   }
 }

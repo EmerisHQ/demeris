@@ -4,11 +4,11 @@
     <button
       :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
       :disabled="disabled"
-      class="button s-0 w-medium"
+      class="button text-0 font-medium"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-if="status === 'loading'" class="spinner">
-        <Spinner :size="1.5" :color="'black'" :variant="'circle'" />
+        <Spinner :size="1" :color="'black'" :variant="'circle'" />
       </div>
 
       <span v-else>{{ name }}</span>
@@ -55,7 +55,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .button {
   width: 100%;
-  padding: 1.6rem 3.2rem;
+  padding: 1rem 2rem;
   color: var(--bg);
 
   border-radius: 8px;

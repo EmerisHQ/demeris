@@ -8,7 +8,7 @@
         </slot>
 
         <button v-if="showCloseButton" class="modal__close" @click="emitClose">
-          <Icon name="CloseIcon" :icon-size="1.4" />
+          <Icon name="CloseIcon" :icon-size="1" />
         </button>
       </div>
 
@@ -109,7 +109,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  font-size: 1rem;
   margin: 0 !important;
 
   &__overlay {
@@ -132,7 +132,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.6rem;
+    padding: 0.375rem;
   }
 
   &__content {
@@ -141,8 +141,8 @@ export default defineComponent({
 
   &__body {
     background: var(--bg);
-    border-radius: 1.6rem;
-    padding: 2.4rem;
+    border-radius: 1rem;
+    padding: 1.5rem;
     width: 100%;
     z-index: 40;
   }

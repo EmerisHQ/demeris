@@ -44,11 +44,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pools {
   display: grid;
-  grid-template-columns: repeat(3, minmax(18rem, 21rem));
-  gap: 1.6rem;
+  grid-template-columns: repeat(3, minmax(11.25rem, 13.125rem));
+  gap: 1rem;
 
   &__pool {
-    height: 24rem;
+    height: 15rem;
   }
 }
 </style>

@@ -133,7 +133,7 @@ export default defineComponent({
 .denom-select-modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 55.8rem !important;
+  height: 35rem !important; // is important needed?
   top: 0;
   left: 0;
 
@@ -143,12 +143,12 @@ export default defineComponent({
   z-index: 10;
 
   .search-bar {
-    padding: 0 2.4rem 2.4rem;
+    padding: 0 1.5rem 1.5rem;
   }
 
   .coin-list {
-    padding: 0 1.6rem 0 2.4rem;
-    height: 37.8rem;
+    padding: 0 1rem 0 1.5rem;
+    height: 24rem;
 
     overflow-y: scroll;
 

@@ -32,7 +32,7 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pools-table__row__pair__pool__avatar token-a" />
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pools-table__row__pair__pool__avatar token-b" />
             </div>
-            <span class="pools-table__row__pair__name w-bold">
+            <span class="pools-table__row__pair__name font-bold">
               {{ pool.displayName }}
             </span>
           </td>
@@ -127,25 +127,25 @@ export default {
 .pools {
   display: flex;
   flex-direction: column;
-  font-size: 1.6rem;
+  font-size: 1rem;
 
   &__search {
-    width: 36rem;
+    width: 22.5rem;
   }
 
   &__add-button {
     display: inline-flex;
     align-items: center;
-    padding: 1.6rem 1.2rem;
+    padding: 1rem 0.75rem;
     font-weight: 600;
 
     &__label {
-      margin-left: 1rem;
+      margin-left: 0.625rem;
     }
   }
 
   &__subheader {
-    margin-top: 2.4rem;
+    margin-top: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -153,8 +153,8 @@ export default {
 }
 
 .pools-table {
-  margin: 4rem -2rem 0 -2rem;
-  width: calc(100% + 4rem);
+  margin: 2.5rem -1.25rem 0 -1.25rem;
+  width: calc(100% + 2.5rem);
   table-layout: fixed;
 
   .text-right {
@@ -169,9 +169,9 @@ export default {
     color: var(--muted);
     background: var(--bg);
     vertical-align: middle;
-    font-size: 1.3rem;
+    font-size: 0.8125rem;
     font-weight: 400;
-    padding: 1.5rem 0;
+    padding: 0.9375rem 0;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -182,11 +182,11 @@ export default {
     transition: all 100ms ease-in;
 
     &:first-child {
-      padding-left: 2rem;
+      padding-left: 1.25rem;
     }
 
     &:last-child {
-      padding-right: 2rem;
+      padding-right: 1.25rem;
     }
   }
 
@@ -199,30 +199,30 @@ export default {
       }
 
       td:first-child {
-        border-top-left-radius: 0.8rem;
-        border-bottom-left-radius: 0.8rem;
+        border-top-left-radius: 0.5rem;
+        border-bottom-left-radius: 0.5rem;
       }
 
       td:last-child {
-        border-top-right-radius: 0.8rem;
-        border-bottom-right-radius: 0.8rem;
+        border-top-right-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
       }
     }
 
     &__pair {
-      padding: 2rem 0;
+      padding: 1.25rem 0;
       display: flex;
       align-items: center;
 
       &__pool {
         display: inline-flex;
         align-items: center;
-        margin-right: 1.6rem;
+        margin-right: 1rem;
 
         &__avatar {
-          width: 3.2rem;
-          height: 3.2rem;
-          border-radius: 2.4rem;
+          width: 2rem;
+          height: 2rem;
+          border-radius: 1.5rem;
           background: #ddd;
           z-index: 0;
 
@@ -231,7 +231,7 @@ export default {
           }
 
           & + & {
-            margin-left: -0.6rem;
+            margin-left: -0.375rem;
             background: #aaa;
           }
         }
@@ -247,13 +247,13 @@ export default {
 
     &__controls {
       &__button {
-        padding: 0.2rem;
+        padding: 0.125rem;
         color: var(--inactive);
-        margin-left: 1rem;
+        margin-left: 0.625rem;
 
         &__icon {
-          width: 1.6rem;
-          height: 1.6rem;
+          width: 1rem;
+          height: 1rem;
         }
       }
     }

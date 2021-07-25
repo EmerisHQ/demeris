@@ -29,8 +29,8 @@ img {
 .version {
   background: rgba(0, 0, 0, 0.03);
   color: var(--muted);
-  border-radius: 1rem;
-  font-size: 1rem;
+  border-radius: 0.625rem;
+  font-size: 0.625rem;
   text-align: center;
   width: 39px;
   line-height: 23px;

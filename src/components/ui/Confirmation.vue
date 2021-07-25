@@ -2,13 +2,13 @@
   <Modal
     :open="open"
     variant="dialog"
-    width="32rem"
+    width="20rem"
     class="confirmation"
     :class="{ 'confirmation--single': !showNoButton }"
     @close="emitClose"
   >
     <div class="confirmation__wrapper">
-      <h2 class="confirmation__title s-2">{{ title }}</h2>
+      <h2 class="confirmation__title text-2">{{ title }}</h2>
 
       <div class="confirmation__description">
         <slot>
@@ -99,24 +99,24 @@ export default defineComponent({
 
   &__description {
     text-align: center;
-    margin-top: 2.4rem;
+    margin-top: 1.5rem;
     line-height: 1.5;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
-    margin-top: 6rem;
+    margin-top: 3.75rem;
     width: 100%;
 
     &__button {
       flex: 1 1 0%;
-      border-radius: 0.8rem;
-      padding: 1.6rem 2rem;
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
       border: 1px solid #e6e6e6;
 
       & + & {
-        margin-left: 2.4rem;
+        margin-left: 1.5rem;
       }
     }
   }

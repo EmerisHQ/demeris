@@ -1,21 +1,21 @@
 <template>
-  <div v-if="steps" class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
+  <div v-if="steps" class="fees -text-1" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
     <div class="fees-total">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
-      <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
-      <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
+      <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1" :color="feeIconColor" />
+      <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1" :color="feeIconColor" />
     </div>
   </div>
   <div v-if="isFeesOpen" class="fees-detail">
-    <div class="fees-detail__info s-minus">
+    <div class="fees-detail__info -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
     </div>
 
-    <div class="fees-detail__selector s-minus">
+    <div class="fees-detail__selector -text-1">
       <button
         class="fees-detail__selector-block"
         :class="gasPriceLevel === GasPriceLevel.LOW ? 'selected' : ''"
@@ -54,11 +54,11 @@
       :message="$t('components.feeLevelSelector.slowWarning')"
     />
 
-    <div v-if="swapDollarFee" class="fees-detail__info s-minus">
+    <div v-if="swapDollarFee" class="fees-detail__info -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
       <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
     </div>
-    <div class="fees-detail__info s-minus">
+    <div class="fees-detail__info -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
@@ -231,7 +231,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .fees {
   display: flex;
-  padding: 0 2.4rem 0;
+  padding: 0 1.5rem 0;
   cursor: pointer;
   justify-content: space-between;
   color: var(--muted);
@@ -242,7 +242,7 @@ export default defineComponent({
   }
 
   &-detail {
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
     color: var(--text);
 
     &__info {
@@ -250,7 +250,7 @@ export default defineComponent({
       align-items: center;
       justify-content: space-between;
 
-      margin: 1.6rem 0;
+      margin: 1rem 0;
 
       &:last-child {
         margin-bottom: 0;
@@ -270,8 +270,8 @@ export default defineComponent({
       justify-content: space-between;
 
       &-block {
-        width: 8.3rem;
-        height: 4.9rem;
+        width: 5.25rem;
+        height: 3rem;
         color: var(--text);
 
         background-color: var(--fg);
@@ -289,12 +289,12 @@ export default defineComponent({
 }
 
 .alert--warning {
-  margin-top: 1.6rem;
+  margin-top: 1rem;
 }
 
 .fees-detail-open {
   font-weight: bold;
-  padding-bottom: 2.4rem;
+  padding-bottom: 1.5rem;
   color: var(--text);
 
   .icon {

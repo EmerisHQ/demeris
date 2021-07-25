@@ -1,11 +1,10 @@
 <template>
-  <div class="intro elevation-panel">
+  <div class="relative mb-6 elevation-panel">
     <a href="https://medium.com/emeris-blog" target="_blank" rel="noopener noreferrer">
-      <div class="label">
-        <p>Introductory guide</p>
-        <p class="muted">10 min</p>
+      <div class="absolute bottom-6 left-6">
+        <p class="-text-1">Introductory guide</p>
       </div>
-      <img src="@/assets/images/intro-panel.png" />
+      <img class="w-auto block" src="@/assets/images/intro-panel.png" />
     </a>
   </div>
 </template>
@@ -15,22 +14,4 @@ export default defineComponent({
   name: 'Intro',
 });
 </script>
-<style lang="scss" scoped>
-.intro {
-  margin-top: 2.6rem;
-  position: relative;
-}
-.label {
-  position: absolute;
-  bottom: 2.4rem;
-  left: 2.4rem;
-  font-size: 1.4rem;
-}
-.muted {
-  color: var(--muted);
-}
-img {
-  width: auto;
-  display: block;
-}
-</style>
+<style lang="scss" scoped></style>

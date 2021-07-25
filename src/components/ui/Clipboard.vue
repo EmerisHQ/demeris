@@ -48,11 +48,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .clipboard {
-  font-size: 1.8rem;
+  font-size: 1.125rem;
 
   &__button {
     outline: none;
-    padding: 0.4rem;
+    padding: 0.25rem;
   }
 }
 </style>

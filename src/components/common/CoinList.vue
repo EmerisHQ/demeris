@@ -1,8 +1,8 @@
 <template>
   <div v-if="modifiedData.length === 0" class="no-result">
     <div class="no-result__board">
-      <div class="title s-1 w-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
-      <div class="sub-title s-0">{{ $t('generic_cta.filterRetry') }}</div>
+      <div class="title text-1 font-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
+      <div class="sub-title text-0">{{ $t('generic_cta.filterRetry') }}</div>
     </div>
   </div>
   <div
@@ -27,18 +27,18 @@
         />
       </tippy>
       <div class="coin-list__info-details">
-        <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
+        <div v-if="keyword" class="coin-list__info-details-denom text-0 font-medium">
           <span v-for="word in coin.display_name" :key="word" :class="setWordColorByKeyword(keyword, word)">
             {{ word }}
           </span>
         </div>
-        <div v-else-if="type === 'chain'" class="coin-list__info-details-denom s-0 w-medium">
+        <div v-else-if="type === 'chain'" class="coin-list__info-details-denom text-0 font-medium">
           <ChainName :name="coin.on_chain" />
         </div>
-        <div v-else class="coin-list__info-details-denom s-0 w-medium">
+        <div v-else class="coin-list__info-details-denom text-0 font-medium">
           <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="type === 'pay'" class="coin-list__info-details-data s-minus w-normal">
+        <div v-if="type === 'pay'" class="coin-list__info-details-data -text-1 font-normal">
           <div v-if="type === 'pay'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <!-- <span
@@ -52,7 +52,7 @@
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
-        <div v-else class="coin-list__info-details-data s-minus w-normal">
+        <div v-else class="coin-list__info-details-data -text-1 font-normal">
           <span v-if="type === 'pay' || type === 'chain'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             {{ $t('components.coinList.available') }}
@@ -63,7 +63,7 @@
     </div>
     <div v-if="type === 'pay'" class="coin-list__select">
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
-      <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
+      <Icon name="CaretRightIcon" :icon-size="1" :color="iconColor" />
     </div>
     <div v-else-if="showBalance" class="coin-list__balance">
       <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
@@ -153,13 +153,13 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 6.3rem;
-  padding: 1.2rem 0;
+  height: 4rem;
+  padding: 0.75rem 0;
 
   cursor: pointer;
 
   .tippy-info {
-    margin-right: 1.6rem;
+    margin-right: 1rem;
   }
 
   &__balance {
@@ -173,10 +173,10 @@ export default defineComponent({
     width: 100%;
 
     &-image {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: 1.5rem;
+      height: 1.5rem;
 
-      margin: 0.4rem;
+      margin: 0.25rem;
 
       border-radius: 50%;
     }

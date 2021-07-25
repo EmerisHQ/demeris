@@ -67,28 +67,28 @@ export default defineComponent({
 .input {
   display: flex;
   align-items: center;
-  font-size: 1.6rem;
+  font-size: 1rem;
   position: relative;
 
   &__wrapper {
     flex: 1 1 0%;
     width: 100%;
-    border-radius: 1rem;
-    padding: 1.2rem 1.4rem;
+    border-radius: 0.625rem;
+    padding: 0.75rem 0.875rem;
     background-color: rgba(0, 0, 0, 0.03);
     display: flex;
     align-items: center;
     color: rgba(0, 0, 0, 0.33);
-    line-height: 2.1rem;
+    line-height: 1.3125rem;
     position: relative;
   }
 
   &__start {
-    padding-right: 1.2rem;
+    padding-right: 0.75rem;
   }
 
   &__end {
-    padding-left: 1.2rem;
+    padding-left: 0.75rem;
   }
 
   &__field {
@@ -110,11 +110,11 @@ export default defineComponent({
   }
 
   &__hint {
-    margin-left: 1.2rem;
+    margin-left: 0.75rem;
 
     &__icon {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 0.9375rem;
+      height: 0.9375rem;
     }
   }
 }

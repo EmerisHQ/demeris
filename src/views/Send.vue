@@ -7,7 +7,7 @@
         class="send__header__button"
         @click="goBack"
       >
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
+        <Icon name="ArrowLeftIcon" :icon-size="1" />
       </button>
 
       <nav v-if="transferType" class="send__steps">
@@ -22,35 +22,35 @@
       </nav>
 
       <button class="send__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+        <Icon name="CloseIcon" :icon-size="1" />
       </button>
     </header>
 
     <main class="send__wrapper">
       <template v-if="!transferType">
-        <h2 class="send__title s-2">Who are you sending to?</h2>
+        <h2 class="send__title text-2">Who are you sending to?</h2>
 
         <div class="send__type">
           <router-link :to="{ name: 'Send', params: { type: 'address' } }" class="send__type__button elevation-card">
             <div class="send__type__button__icon">
-              <Icon name="SendIcon" :icon-size="1.6" />
+              <Icon name="SendIcon" :icon-size="1" />
             </div>
 
-            <h4 class="send__type__button__title w-bold">Send to address</h4>
+            <h4 class="send__type__button__title font-bold">Send to address</h4>
 
-            <p class="send__type__button__description s-minus">
+            <p class="send__type__button__description -text-1">
               Send assets to someone else or another account with a crypto address.
             </p>
           </router-link>
 
           <router-link :to="{ name: 'Send', params: { type: 'move' } }" class="send__type__button elevation-card">
             <div class="send__type__button__icon">
-              <Icon name="SwapLRIcon" :icon-size="1.6" />
+              <Icon name="SwapLRIcon" :icon-size="1" />
             </div>
 
-            <h4 class="send__type__button__title w-bold">Move assets</h4>
+            <h4 class="send__type__button__title font-bold">Move assets</h4>
 
-            <p class="send__type__button__description s-minus">
+            <p class="send__type__button__description -text-1">
               Move assets between your addresses on different chains.
             </p>
           </router-link>
@@ -126,15 +126,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3rem 4rem;
+    padding: 2rem 2.5rem;
     background: var(--bg);
 
     &__button {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
+      border-radius: 0.5rem;
+      padding: 0.375rem;
 
       &:disabled {
         cursor: not-allowed;
@@ -154,7 +154,7 @@ export default {
     justify-content: center;
 
     &__item {
-      margin-right: 4.8rem;
+      margin-right: 3rem;
       text-transform: capitalize;
       color: var(--inactive);
       font-weight: 600;
@@ -170,34 +170,34 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3.1rem;
+    margin-top: 2rem;
   }
 
   &__content {
     width: 100%;
-    max-width: 44rem;
+    max-width: 27.5rem;
   }
 
   &__type {
     display: flex;
-    margin-top: 4.8rem;
+    margin-top: 3rem;
 
     &__button {
-      width: 27rem;
+      width: 17rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 3.2rem;
+      padding: 2rem;
 
       & + & {
-        margin-left: 1.2rem;
+        margin-left: 0.75rem;
       }
 
       &__icon {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 2rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 1.25rem;
         background: var(--fg);
         display: flex;
         align-items: center;
@@ -205,8 +205,8 @@ export default {
       }
 
       &__title {
-        margin-top: 2.4rem;
-        margin-bottom: 0.8rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
       }
 
       &__description {

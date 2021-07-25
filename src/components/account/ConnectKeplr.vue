@@ -20,7 +20,7 @@
               href="https://t.me/EmerisHQ"
               rel="noopener noreferrer"
               target="_blank"
-              class="connect-keplr__controls__help s-minus"
+              class="connect-keplr__controls__help -text-1"
             >
               {{ $t('wallet.connect.modal1.needHelp') }}
             </a>
@@ -29,9 +29,9 @@
 
         <div v-else class="connect-keplr__connecting">
           <div class="connect-keplr__connecting__main">
-            <Spinner :size="3.2" />
+            <Spinner :size="2" />
             <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
-            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
+            <p class="text-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
           </div>
 
           <button class="connect-keplr__connecting__button" @click="cancel">
@@ -112,7 +112,7 @@ export default defineComponent({
     flex-direction: column;
     width: 50%;
     min-height: inherit;
-    padding: 4.8rem;
+    padding: 3rem;
     text-align: center;
   }
 
@@ -132,16 +132,16 @@ export default defineComponent({
       justify-content: center;
 
       &__label {
-        margin-top: 2.6rem;
+        margin-top: 1.5rem;
         color: var(--muted);
       }
     }
 
     &__button {
       width: 100%;
-      padding: 1.6rem 2rem;
+      padding: 1rem 1.25rem;
       border: 1px solid #e6e6e6;
-      border-radius: 0.8rem;
+      border-radius: 0.5rem;
       font-weight: 600;
     }
   }
@@ -149,30 +149,30 @@ export default defineComponent({
   &__controls {
     display: flex;
     flex-direction: column;
-    margin-top: 5rem;
+    margin-top: 3rem;
 
     &__help {
-      margin-top: 1.6rem;
+      margin-top: 1rem;
       color: var(--muted);
       display: block;
       text-align: center;
-      padding: 0.6rem 0;
+      padding: 0.375rem 0;
     }
   }
 
   &__description {
     flex: 1 1 0%;
-    margin-top: 4rem;
+    margin-top: 2.5rem;
     line-height: 1.8;
     color: var(--muted);
 
     p:first-child {
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.125rem;
     }
   }
 
   &__title {
-    font-size: 2.8rem;
+    font-size: 1.75rem;
     font-weight: 600;
   }
 }

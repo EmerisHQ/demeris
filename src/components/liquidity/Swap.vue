@@ -34,7 +34,7 @@
       ]"
     >
       <div class="swap-widget-header">
-        <div class="s-2 w-bold">{{ $t('components.swap.title') }}</div>
+        <div class="text-2 font-bold">{{ $t('components.swap.title') }}</div>
         <div class="swap-widget-header__dot-button">
           <IconButton
             :name="'ThreeDotsIcon'"
@@ -910,24 +910,24 @@ export default defineComponent({
 <style lang="scss" scoped>
 .wrapper {
   position: relative;
-  width: 32rem;
-  /* height: 42.6rem; */
+  width: 20rem;
+  /* min-height: 17rem; */
 }
 
 .swap-widget {
-  padding-bottom: 2.4rem;
+  padding-bottom: 1.5rem;
   background-color: var(--surface);
 
   &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 3rem 2.4rem;
+    padding: 2rem 1.5rem;
 
     color: var(--text);
     /* &__dot-button {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: 1.5rem;
+      height: 1.5rem;
     } */
   }
 
@@ -936,7 +936,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
 
-    height: 3.6rem;
+    height: 2.25rem;
 
     &-divider {
       width: 100%;
@@ -955,16 +955,16 @@ export default defineComponent({
   }
 
   .price-alert-wrapper {
-    padding: 0.8rem 2.4rem;
+    padding: 0.5rem 1.5rem;
   }
 
   .button-wrapper {
-    padding: 1.6rem 2.4rem 2.4rem;
+    padding: 1rem 1.5rem 1.5rem;
   }
 
   .fees {
     display: flex;
-    padding: 0 2.4rem 2.4rem;
+    padding: 0 1.5rem 1.5rem;
     justify-content: space-between;
     color: var(--muted);
 
@@ -974,7 +974,7 @@ export default defineComponent({
     }
 
     &-detail {
-      padding: 0 2.4rem;
+      padding: 0 1.5rem;
       color: var(--text);
 
       &__info {
@@ -982,7 +982,7 @@ export default defineComponent({
         align-items: center;
         justify-content: space-between;
 
-        margin: 1.6rem 0;
+        margin: 1rem 0;
 
         &:last-child {
           margin-bottom: 0;
@@ -1002,8 +1002,8 @@ export default defineComponent({
         justify-content: space-between;
 
         &-block {
-          width: 8.3rem;
-          height: 4.9rem;
+          width: 5.25rem;
+          height: 3rem;
           color: var(--text);
 
           background-color: var(--fg);
@@ -1021,7 +1021,7 @@ export default defineComponent({
   }
 
   .alert--warning {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
   }
 
   .fees-detail-open {

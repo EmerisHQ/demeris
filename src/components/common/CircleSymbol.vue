@@ -237,7 +237,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .circle-symbol {
-  border-radius: 2.6rem;
+  border-radius: 1.5rem;
   position: relative;
   display: flex;
   align-items: center;
@@ -247,23 +247,23 @@ export default defineComponent({
   height: var(--symbol-size);
 
   &--xs {
-    --symbol-size: 2rem;
+    --symbol-size: 1.25rem;
   }
 
   &--sm {
-    --symbol-size: 2.4rem;
+    --symbol-size: 1.5rem;
   }
 
   &--md {
-    --symbol-size: 3.2rem;
+    --symbol-size: 2rem;
   }
 
   &--lg {
-    --symbol-size: 4.2rem;
+    --symbol-size: 2.5rem;
   }
 
   &--xl {
-    --symbol-size: 9.6rem;
+    --symbol-size: 6rem;
   }
 
   &--ringed &__circle {
@@ -274,14 +274,14 @@ export default defineComponent({
   &__circle {
     width: 100%;
     height: 100%;
-    border-radius: 2.6rem;
+    border-radius: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     z-index: 1;
     &:not(.logo) {
-      padding: 0.6rem;
+      padding: 0.375rem;
     }
   }
 
@@ -300,7 +300,7 @@ export default defineComponent({
     height: 100%;
     width: 100%;
     height: 100%;
-    border-radius: 2.6rem;
+    border-radius: 1.5rem;
     z-index: 0;
     flex-shrink: 0;
     box-shadow: none !important;
@@ -308,11 +308,11 @@ export default defineComponent({
     &::before {
       position: absolute;
       content: '';
-      top: 0.3rem;
-      bottom: 0.3rem;
-      left: 0.3rem;
-      right: 0.3rem;
-      border-radius: 2.6rem;
+      top: 0.1875rem;
+      bottom: 0.1875rem;
+      left: 0.1875rem;
+      right: 0.1875rem;
+      border-radius: 999px;
       background: var(--bg);
     }
   }
@@ -326,13 +326,13 @@ export default defineComponent({
     // display: block;
     display: none;
     position: absolute;
-    width: 1.2rem;
-    height: 1.2rem;
-    top: -0.3rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    top: -0.1875rem;
     right: 0;
     content: '';
     background: #ff7d05;
-    border-radius: 2.6rem;
+    border-radius: 1.5rem;
   }
 }
 </style>

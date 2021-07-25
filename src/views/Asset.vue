@@ -6,46 +6,46 @@
 
         <section class="asset__main__info">
           <p class="asset__main__info__denom">
-            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
-            <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
-            <span class="asset__main__info__denom__ticker title-0-normal"> <Ticker :name="denom" /></span>
+            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol mr-3 relative" />
+            <span class="asset__main__info__denom__name text-2 font-bold"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker text-0"> <Ticker :name="denom" /></span>
           </p>
-          <h1 class="asset__main__info__price title-2-bold">
+          <h1 class="asset__main__info__price text-2 font-bold">
             <Price :amount="{ amount: 0, denom }" />
           </h1>
         </section>
 
         <!-- Balance -->
 
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="asset__main__buy-banner" variant="banner" />
+        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="asset__main__buy-banner" size="large" />
 
         <section v-else class="asset__main__balance">
-          <p class="asset__main__balance__label title-0-normal">Balance</p>
-          <h2 class="asset__main__balance__value title-3-bold">
+          <p class="asset__main__balance__label text-0">Balance</p>
+          <h2 class="asset__main__balance__value text-3 font-bold">
             <Price :amount="{ amount: totalAmount, denom }" />
           </h2>
-          <span class="asset__main__balance__price title-0-normal">
+          <span class="asset__main__balance__price text-0">
             <AmountDisplay :amount="{ amount: totalAmount, denom }" />
           </span>
 
           <dl class="asset__main__balance__card">
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+              <dt class="asset__main__balance__card__label text-0">Available</dt>
+              <dd class="asset__main__balance__card__value text-0 font-medium">
                 <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+              <dt class="asset__main__balance__card__label text-0">Staked</dt>
+              <dd class="asset__main__balance__card__value text-0 font-medium">
                 <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
             <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+              <dt class="asset__main__balance__card__label text-0">Pooled</dt>
+              <dd class="asset__main__balance__card__value text-0 font-medium">
                 <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
             </div>
@@ -123,7 +123,7 @@
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
         <PoolBanner :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
+        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="asset__aside__buy" />
       </div>
     </div>
   </AppLayout>
@@ -301,9 +301,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .asset {
   display: flex;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-  padding-bottom: 4rem;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  padding-bottom: 2.5rem;
   justify-content: space-between;
 
   &__main {
@@ -321,12 +321,8 @@ export default defineComponent({
         display: inline-flex;
         align-items: center;
 
-        &__symbol {
-          margin-right: 1.2rem;
-          position: relative;
-        }
         &__name {
-          margin-right: 1.2rem;
+          margin-right: 0.75rem;
         }
         &__ticker {
           color: var(--muted);
@@ -338,10 +334,10 @@ export default defineComponent({
     }
 
     &__buy-banner {
-      margin-top: 6.4rem;
+      margin-top: 4rem;
     }
     &__balance {
-      margin-top: 6.4rem;
+      margin-top: 4rem;
       &__label {
         color: var(--muted);
       }
@@ -349,10 +345,10 @@ export default defineComponent({
         color: var(--muted);
       }
       &__card {
-        margin-top: 2.6rem;
+        margin-top: 1.5rem;
         border: 1px solid var(--border);
-        border-radius: 1.2rem;
-        padding: 1.6rem;
+        border-radius: 0.75rem;
+        padding: 1rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -367,7 +363,7 @@ export default defineComponent({
     }
 
     &__chains {
-      margin-top: 6.4rem;
+      margin-top: 4rem;
       &__item {
         &__asset {
           flex: 1 1 0%;
@@ -390,7 +386,7 @@ export default defineComponent({
             }
           }
           &__denom {
-            margin-left: 1.6rem;
+            margin-left: 1rem;
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
@@ -399,14 +395,14 @@ export default defineComponent({
         }
 
         &__amount {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           width: 33.33%;
           text-align: right;
           color: var(--muted);
         }
 
         &__balance {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           width: 33.33%;
           display: flex;
           align-items: center;
@@ -419,15 +415,15 @@ export default defineComponent({
         }
 
         &__more {
-          margin-left: 1.6rem;
-          width: 3.2rem;
-          height: 3.2rem;
-          border-radius: 2.6rem;
+          margin-left: 1rem;
+          width: 2rem;
+          height: 2rem;
+          border-radius: 1.5rem;
           background-color: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 0.8rem;
+          padding: 0.5rem;
           box-shadow: 0px 8px 24px rgba(0, 3, 66, 0.08);
         }
       }
@@ -435,9 +431,9 @@ export default defineComponent({
 
     &__staking {
       &__rewards {
-        margin-top: 3rem;
-        padding: 1.6rem 2.4rem;
-        border-radius: 1.2rem;
+        margin-top: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
         background: var(--fg);
         display: flex;
         align-items: center;
@@ -448,23 +444,23 @@ export default defineComponent({
         }
 
         &__amount {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           color: var(--muted);
         }
 
         &__balance {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           font-weight: 600;
           text-align: right;
         }
 
         &__button {
-          margin-left: 1.6rem;
-          padding: 1.2rem 2.4rem;
+          margin-left: 1rem;
+          padding: 0.75rem 1.5rem;
           background-color: black;
           color: white;
           font-weight: 600;
-          border-radius: 2rem;
+          border-radius: 1.25rem;
         }
       }
 
@@ -475,9 +471,9 @@ export default defineComponent({
           align-items: center;
 
           &__avatar {
-            border-radius: 0.8rem;
-            width: 4rem;
-            height: 4rem;
+            border-radius: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
             background-color: rgba(0, 0, 0, 0.1);
             font-weight: 500;
             display: flex;
@@ -486,21 +482,21 @@ export default defineComponent({
           }
 
           &__name {
-            margin-left: 1.6rem;
+            margin-left: 1rem;
             flex: 1 1 0%;
             font-weight: bold;
           }
         }
 
         &__amount {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           width: 33.33%;
           text-align: right;
           color: var(--muted);
         }
 
         &__balance {
-          margin-left: 1.6rem;
+          margin-left: 1rem;
           width: 33.33%;
           display: flex;
           align-items: center;
@@ -513,15 +509,15 @@ export default defineComponent({
         }
 
         &__more {
-          margin-left: 1.6rem;
-          padding: 0.4rem;
+          margin-left: 1rem;
+          padding: 0.25rem;
         }
       }
     }
 
     &__pools {
       &__wrapper {
-        margin-top: 2.4rem;
+        margin-top: 1.5rem;
       }
     }
   }
@@ -530,16 +526,16 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    margin-left: 6.4rem;
-    width: 32rem;
+    margin-left: 4rem;
+    width: 20rem;
 
     &__buy {
-      margin-top: 2.6rem;
+      margin-top: 1.5rem;
     }
   }
 
   &__list {
-    margin-top: 6.4rem;
+    margin-top: 4rem;
     display: flex;
     flex-direction: column;
 
@@ -559,14 +555,14 @@ export default defineComponent({
       }
 
       &__title {
-        font-size: 2.8rem;
+        font-size: 1.75rem;
         font-weight: 700;
       }
     }
 
     &__wrapper {
-      margin-top: 3.2rem;
-      margin-bottom: 1rem;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -579,7 +575,7 @@ export default defineComponent({
     }
 
     &__item + &__item {
-      margin-top: 3.2rem;
+      margin-top: 2rem;
     }
   }
 }

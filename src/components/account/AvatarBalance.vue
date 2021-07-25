@@ -7,9 +7,14 @@
     </div>
 
     <div class="avatar-balance__details">
-      <div class="avatar-balance__details__account-name">{{ keplrAccountName }}</div>
-      <div class="avatar-balance__details__value">
-        <TotalPrice :balances="balances" variant="none" />
+      <div class="avatar-balance__details__account-name -text-1" :class="{ 'font-bold leading-none': walletName }">
+        {{ keplrAccountName }}
+      </div>
+      <div
+        class="avatar-balance__details__value"
+        :class="[walletName ? '-text-1 text-muted' : 'text-0 font-bold leading-none']"
+      >
+        <TotalPrice :balances="balances" />
         <span v-if="walletName">&middot; {{ walletName }}</span>
       </div>
     </div>
@@ -66,15 +71,15 @@ export default defineComponent({
   display: flex;
 
   &__avatar {
-    width: 3.2rem;
-    height: 3.2rem;
+    width: 2rem;
+    height: 2rem;
     position: relative;
 
     &__gradient,
     &__glow {
-      width: 3.2rem;
-      height: 3.2rem;
-      border-radius: 1.6rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 1rem;
       overflow: hidden;
     }
     &__gradient {
@@ -106,43 +111,29 @@ export default defineComponent({
       width: 100%;
       height: 100%;
       opacity: 0.5;
-      filter: blur(1.28rem);
+      filter: blur(0.8rem);
       top: 12.5%;
     }
   }
 
   &__details {
     flex: 1;
-    margin-left: 1.2rem;
+    margin-left: 0.75rem;
     &__account-name {
-      font-size: 1.3rem;
-      line-height: 100%;
       font-feature-settings: 'zero' on;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.1875rem;
     }
     &__value {
-      font-size: 1.6rem;
-      line-height: 100%;
-      font-weight: bold;
       display: flex;
     }
   }
 }
 .avatar-balance.avatar-balance--wallet {
-  padding: 1.4rem 2.4rem;
+  padding: 0.875rem 1.5rem;
 
   .avatar-balance__details {
     &__account-name {
-      font-size: 1.3rem;
-      font-weight: 600;
-      line-height: 1.5rem;
-      margin-bottom: 0.2rem;
-    }
-    &__value {
-      font-size: 1.3rem;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.5rem;
+      margin-bottom: 0.125rem;
     }
     .total-price {
       padding-right: 0.25em;

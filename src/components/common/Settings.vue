@@ -101,14 +101,15 @@ export default defineComponent({
 
 <style lang="scss">
 .settings-wrapper {
-  padding: 0.4rem;
+  height: 3rem;
+  padding: 0.25rem;
 }
 
 .settings {
   display: flex;
   align-items: center;
-  border-radius: 0.8rem;
-  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
 
   &--open {
     background: var(--fg);

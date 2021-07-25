@@ -1,7 +1,7 @@
 <template>
   <div ref="menuRef" class="settings-menu" :class="{ 'settings-menu--open': isOpen }">
     <button class="settings-menu__button" @click="toggleOpen">
-      <Icon name="MenuIcon" :icon-size="2.2" class="settings-menu__button__icon" />
+      <Icon name="MenuIcon" :icon-size="1.5" class="settings-menu__button__icon" />
     </button>
 
     <div v-show="isOpen" class="settings-menu__dropdown elevation-panel">
@@ -144,9 +144,9 @@ export default defineComponent({
   }
 
   &__button {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 2.6rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,17 +160,17 @@ export default defineComponent({
   &__dropdown {
     position: absolute;
     background: var(--bg);
-    border-radius: 1rem;
+    border-radius: 0.625rem;
     min-width: min-content;
-    min-height: 4.8rem;
-    transform: translate(-15rem, 1.6rem);
+    min-height: 3rem;
+    transform: translate(-9.375rem, 1rem);
     z-index: 50;
 
     &__item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.2rem 2.4rem;
+      padding: 0.75rem 1.5rem;
       width: 100%;
     }
 
@@ -178,7 +178,7 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.2rem 2.4rem;
+      padding: 0.75rem 1.5rem;
       width: 100%;
       transition: background ease-in-out 150ms;
 
@@ -201,13 +201,13 @@ export default defineComponent({
     }
 
     &__label {
-      padding: 1.2rem 2.4rem;
-      font-size: 1.2rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8125rem;
       color: var(--muted);
     }
 
     &__divider {
-      margin: 0.5rem 0;
+      margin: 0.3125rem 0;
       border-top: 1px solid var(--border);
     }
 
@@ -215,8 +215,8 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.2rem 2.4rem;
-      font-size: 1.2rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8125rem;
       color: var(--muted);
 
       &__item {
@@ -227,7 +227,7 @@ export default defineComponent({
         }
 
         &:after {
-          padding: 0 0.7rem;
+          padding: 0 0.4375rem;
           content: '\00b7';
         }
         &:last-child:after {

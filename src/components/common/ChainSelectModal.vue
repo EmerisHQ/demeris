@@ -2,7 +2,7 @@
   <div class="chain-select-wrapper elevation-panel">
     <TitleWithGoback :title="title" :func="func" />
 
-    <div class="chain-info s-minus w-normal">
+    <div class="mb-6 -text-1 text-center font-normal">
       <template v-if="showSubtitle">
         {{
           $t('components.chainSelect.text1', {
@@ -84,7 +84,7 @@ export default defineComponent({
 .chain-select-wrapper {
   position: absolute;
   width: 100%;
-  height: 42.8rem;
+  height: 27rem;
   top: 0;
   left: 0;
 
@@ -93,18 +93,13 @@ export default defineComponent({
   background-color: var(--surface);
   z-index: 10;
 
-  .chain-info {
-    text-align: center;
-    margin-bottom: 2.4rem;
-  }
-
   .sub-title {
-    padding: 0 2.4rem 2.4rem;
+    padding: 0 1.5rem 1.5rem;
   }
 
   .coin-list {
-    padding: 0 1.6rem 0 2.4rem;
-    height: 26.8rem;
+    padding: 0 1rem 0 1.5rem;
+    min-height: 17rem;
 
     overflow-y: scroll;
 

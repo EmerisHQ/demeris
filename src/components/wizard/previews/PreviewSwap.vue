@@ -5,7 +5,7 @@
       <ListItem :label="$t('components.previews.swap.payLbl')">
         <div class="coin-info">
           <CircleSymbol :denom="data.from.denom" :chain-name="payCoinChainName" class="coin-info__image" :size="'xs'" />
-          <AmountDisplay class="w-bold" :amount="data.from" />
+          <AmountDisplay class="font-bold" :amount="data.from" />
         </div>
         <sub class="chain-name"><ChainName :name="payCoinChainName" /></sub>
       </ListItem>
@@ -15,7 +15,7 @@
       >
         <div class="coin-info">
           <CircleSymbol :denom="data.to.denom" :chain-name="dexChainName" class="coin-info__image" :size="'xs'" />
-          <AmountDisplay class="w-bold" :amount="data.to" />
+          <AmountDisplay class="font-bold" :amount="data.to" />
         </div>
         <sub class="chain-name"><ChainName :name="dexChainName" /></sub>
       </ListItem>
@@ -29,7 +29,7 @@
         :hint="$t('components.previews.swap.minReceivedLblHint')"
         inset
       >
-        <AmountDisplay class="s-minus" :amount="minReceivedAmount" />
+        <AmountDisplay class="-text-1" :amount="minReceivedAmount" />
       </ListItem>
 
       <!-- limit price -->
@@ -38,9 +38,9 @@
         :hint="$t('components.previews.swap.limitPriceLblHint')"
         inset
       >
-        <span class="s-minus">
+        <span class="-text-1">
           <AmountDisplay
-            class="s-minus"
+            class="-text-1"
             :amount="{
               amount:
                 10 **
@@ -51,7 +51,7 @@
             }"
           />
           =
-          <AmountDisplay class="s-minus" :amount="{ amount: limitPrice, denom: data.to.denom }" />
+          <AmountDisplay class="-text-1" :amount="{ amount: limitPrice, denom: data.to.denom }" />
         </span>
       </ListItem>
     </ListItem>
@@ -64,7 +64,7 @@
         :hint="$t('components.previews.swap.feeLblHint')"
         inset
       >
-        <AmountDisplay class="s-minus" :amount="{ amount: fee, denom: 'uatom' }" />
+        <AmountDisplay class="-text-1" :amount="{ amount: fee, denom: 'uatom' }" />
       </ListItem>
 
       <!-- swap fee -->
@@ -75,13 +75,13 @@
         style="margin-bottom: 20px"
       >
         <AmountDisplay
-          class="s-minus"
+          class="-text-1"
           :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
         />
 
-        <div style="margin-bottom: -2.4rem">
+        <div style="margin-bottom: -1.5rem">
           <AmountDisplay
-            class="s-minus"
+            class="-text-1"
             :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
           />
         </div>
@@ -269,7 +269,7 @@ export default defineComponent({
   justify-content: flex-end;
 
   &__image {
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
   }
 }
 

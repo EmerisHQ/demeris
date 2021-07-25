@@ -7,10 +7,10 @@
   >
     <Icon v-if="isIcon" :name="name" :icon-size="iconSize" />
     <div v-else>
-      <div style="display: flex" class="s-minus">
+      <div style="display: flex" class="-text-1">
         <div
           v-if="buttonName.includes('Max')"
-          style="max-width: 18rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+          style="max-width: 11.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
         >
           {{ buttonName?.split('Max')[0] }}
         </div>
@@ -32,7 +32,7 @@ export default defineComponent({
   components: { Icon },
   props: {
     name: { type: String, required: true },
-    iconSize: { type: Number, required: false, default: 2.4 },
+    iconSize: { type: Number, required: false, default: 1.5 },
     data: { type: Object as PropType<ButtonFunctionData>, default: undefined },
     type: {
       type: String,
@@ -89,30 +89,30 @@ export default defineComponent({
 
   &__badge {
     position: absolute;
-    width: 1.2rem;
-    height: 1.2rem;
-    top: -0.3rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    top: -0.1875rem;
     right: 0;
     content: '';
     background: #ff7d05;
-    border-radius: 2.6rem;
+    border-radius: 1.5rem;
   }
 }
 
 .flat {
-  height: 4rem;
-  width: 4rem;
+  height: 2.5rem;
+  width: 2.5rem;
 }
 
 .circle {
-  height: 3.6rem;
-  width: 3.6rem;
-  padding: 0.6rem;
+  height: 2.25rem;
+  width: 2.25rem;
+  padding: 0.375rem;
   border-radius: 24px;
 }
 
 .text {
-  padding: 1rem 1.6rem;
+  padding: 0.625rem 1rem;
   border-radius: 24px;
 }
 

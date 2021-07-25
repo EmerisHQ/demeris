@@ -1,11 +1,11 @@
 <template>
   <div class="goback-with-close">
     <div class="icon-wrapper" @click="clickIcon('goback')">
-      <Icon :name="'ArrowLeftIcon'" class="icon" :icon-size="2.1" />
+      <Icon :name="'ArrowLeftIcon'" class="icon" :icon-size="1.5" />
     </div>
     <div class="space"></div>
     <div class="icon-wrapper" @click="clickIcon('close')">
-      <Icon :name="'CloseIcon'" class="icon" :icon-size="1.6" />
+      <Icon :name="'CloseIcon'" class="icon" :icon-size="1" />
     </div>
   </div>
 </template>
@@ -30,15 +30,15 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2.8rem 1.6rem;
+  padding: 1.75rem 1rem;
 
   .space {
-    width: 2.4rem;
+    width: 1.5rem;
   }
 
   .icon-wrapper {
-    width: 4rem;
-    height: 4rem;
+    width: 2.5rem;
+    height: 2.5rem;
     cursor: pointer;
 
     display: flex;

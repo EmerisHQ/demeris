@@ -1,6 +1,6 @@
 <template>
-  <div class="total-price" :class="`total-price--${variant}`">
-    {{ displayPrice[0] }}<span>.{{ displayPrice[1] }}</span>
+  <div class="total-price">
+    {{ displayPrice[0] }}<span :class="{ 'text-2': smallDecimals }">.{{ displayPrice[1] }}</span>
   </div>
 </template>
 <script lang="ts">
@@ -15,9 +15,9 @@ export default defineComponent({
       type: Array as PropType<Balances>,
       required: true,
     },
-    variant: {
-      type: String as PropType<'styled' | 'none'>,
-      default: 'styled',
+    smallDecimals: {
+      type: Boolean as PropType<true | false>,
+      default: false,
     },
   },
   setup(props) {
@@ -60,14 +60,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.total-price {
-  &--styled {
-    letter-spacing: -0.15rem;
-  }
-
-  &--styled span {
-    font-size: 0.42em;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

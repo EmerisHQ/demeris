@@ -85,10 +85,10 @@
             />
 
             <div class="send-form-amount__assets__item__chain">
-              <p class="send-form-amount__assets__item__denom w-bold">
+              <p class="send-form-amount__assets__item__denom font-bold">
                 <Denom :name="state.currentAsset.base_denom" />
               </p>
-              <p class="send-form-amount__assets__item__name s-minus">
+              <p class="send-form-amount__assets__item__name -text-1">
                 <ChainName :name="state.currentAsset.on_chain" />
               </p>
             </div>
@@ -102,7 +102,7 @@
                 show-zero
               />
             </p>
-            <p class="send-form-amount__assets__item__amount__available s-minus">
+            <p class="send-form-amount__assets__item__amount__available -text-1">
               <span>
                 <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
                 {{ $t('components.sendForm.available') }}
@@ -111,7 +111,7 @@
           </div>
 
           <button class="send-form-amount__assets__item__button" @click.prevent.stop="">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
+            <Icon name="CaretRightIcon" :icon-size="0.75" />
           </button>
         </button>
       </div>
@@ -390,7 +390,7 @@ export default defineComponent({
   }
 
   &__input {
-    font-size: 5.1rem;
+    font-size: 3.1875rem;
     font-weight: 700;
     text-transform: uppercase;
     display: inline-flex;
@@ -407,19 +407,19 @@ export default defineComponent({
 
     &__denom {
       flex: 1;
-      margin-left: 1rem;
+      margin-left: 0.625rem;
     }
   }
 
   &__estimated {
     color: var(--muted);
-    margin-top: 1.2rem;
+    margin-top: 0.75rem;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
-    margin-top: 1.4rem;
+    margin-top: 0.875rem;
 
     &__button {
       input {
@@ -433,9 +433,9 @@ export default defineComponent({
         }
       }
       span {
-        padding: 1rem 1.6rem;
-        border-radius: 2.4rem;
-        margin-right: 1.6rem;
+        padding: 0.625rem 1rem;
+        border-radius: 1.5rem;
+        margin-right: 1rem;
         font-size: 12px;
         cursor: pointer;
         user-select: none;
@@ -445,8 +445,8 @@ export default defineComponent({
 
   &__assets {
     &__item {
-      border-radius: 1rem;
-      padding: 1.6rem;
+      border-radius: 0.625rem;
+      padding: 1rem;
       display: flex;
       align-items: stretch;
       width: 100%;
@@ -456,7 +456,7 @@ export default defineComponent({
       }
 
       & + & {
-        margin-top: 1.6rem;
+        margin-top: 1rem;
       }
 
       &__asset {
@@ -473,11 +473,11 @@ export default defineComponent({
 
       &__avatar {
         position: relative;
-        margin-right: 1.6rem;
+        margin-right: 1rem;
       }
 
       &__denom {
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.125rem;
         text-transform: uppercase;
         text-align: left;
       }
@@ -500,8 +500,8 @@ export default defineComponent({
       }
 
       &__button {
-        margin-left: 0.6rem;
-        padding: 0 0.6rem;
+        margin-left: 0.375rem;
+        padding: 0 0.375rem;
         display: flex;
         align-items: center;
       }

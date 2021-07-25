@@ -1,7 +1,7 @@
 <template>
   <label class="checkbox">
     <input v-model="model" class="checkbox__control" type="checkbox" />
-    <span v-if="label" class="checkbox__label s-minus">{{ label }}</span>
+    <span v-if="label" class="checkbox__label -text-1">{{ label }}</span>
   </label>
 </template>
 
@@ -42,15 +42,15 @@ export default defineComponent({
   cursor: pointer;
 
   &__label {
-    margin-left: 1.6rem;
+    margin-left: 1rem;
   }
 
   &__control {
     appearance: none;
     user-select: none;
     flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
+    width: 1.25rem;
+    height: 1.25rem;
     border-radius: 4px;
     border: 2px solid transparent;
     cursor: pointer;

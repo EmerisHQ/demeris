@@ -1,12 +1,12 @@
 <template>
   <div class="send-form">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title s-2">{{ $t('components.sendForm.title') }}</h2>
+      <h2 class="send-form__title text-2">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-else-if="step === 'amount'">
-      <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
+      <h2 class="send-form__title text-2">{{ $t('components.sendForm.amountSelect') }}</h2>
       <SendFormAmount :balances="balances" :fees="state.fees" @next="goToStep('review')" />
       <div class="send-form__fees">
         <FeeLevelSelector
@@ -159,13 +159,13 @@ export default defineComponent({
 .send-form {
   &__title {
     text-align: center;
-    margin-bottom: 3.2rem;
+    margin-bottom: 2rem;
   }
 
   &__fees {
-    margin-top: 2.4rem;
-    margin-left: -2.4rem;
-    margin-right: -2.4rem;
+    margin-top: 1.5rem;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
   }
 }
 
@@ -173,13 +173,13 @@ export default defineComponent({
   &__field {
     & > label {
       display: block;
-      font-size: 1.2rem;
+      font-size: 0.8125rem;
       color: var(--muted);
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.5rem;
     }
 
     & + & {
-      margin-top: 3.2rem;
+      margin-top: 2rem;
     }
   }
 }

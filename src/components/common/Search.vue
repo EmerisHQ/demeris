@@ -3,17 +3,17 @@
     <input
       ref="searchInput"
       :value="keyword"
-      class="s-0 w-normal"
+      class="text-0 font-normal"
       type="text"
       placeholder="Search assets"
       @input="$emit('update:keyword', $event.target.value)"
     />
-    <Icon class="icon-search" :name="'MagnifyingGlassIcon'" :icon-size="1.6" />
+    <Icon class="icon-search" :name="'MagnifyingGlassIcon'" :icon-size="1" />
     <Icon
       v-show="keyword !== ''"
       class="icon-reset"
       :name="'CloseCircleIcon'"
-      :icon-size="1.6"
+      :icon-size="1"
       @click="
         () => {
           $emit('update:keyword', '');
@@ -58,7 +58,7 @@ export default defineComponent({
   display: flex;
   overflow: hidden;
   background-color: var(--fg);
-  padding: 0.2rem;
+  padding: 0.125rem;
   border-radius: 10px;
 
   /* background-image: linear-gradient(white, white), linear-gradient(to right, rgba(255, 222, 157, 1), #9ff9ff);
@@ -72,9 +72,9 @@ export default defineComponent({
     z-index: 8;
     width: 100%;
     outline: none;
-    padding: 0.95rem 1rem 0.95rem 3.9rem;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    height: 3rem;
     background-color: var(--fg);
-    border-radius: 10px;
   }
 
   input::placeholder {
@@ -124,16 +124,16 @@ export default defineComponent({
     position: absolute;
     z-index: 9;
     height: 100%;
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.3125rem;
     color: var(--muted);
   }
 
   .icon-search {
-    margin-left: 1.2rem;
+    margin-left: 0.75rem;
   }
 
   .icon-reset {
-    right: 1.2rem;
+    right: 0.75rem;
     cursor: pointer;
   }
 

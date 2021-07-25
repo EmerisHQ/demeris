@@ -3,20 +3,30 @@
     <div class="wrapper">
       <div class="portfolio">
         <div class="portfolio__total">
-          <div class="portfolio__total__text">{{ $t('context.assets.totalBalance') }}</div>
-          <div class="portfolio__total__value">
-            <TotalPrice :balances="balances" />
+          <div class="portfolio__total__text text-muted">{{ $t('context.assets.totalBalance') }}</div>
+          <div class="portfolio__total__value text-5 font-bold">
+            <TotalPrice :balances="balances" small-decimals />
           </div>
         </div>
         <div class="portfolio__assets">
           <div class="portfolio__assets__header">
-            <h2 class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</h2>
-            <router-link class="portfolio__assets__header__link" to="/assets">
+            <h2 class="portfolio__assets__header__text text-2 font-bold">{{ $t('context.assets.title') }}</h2>
+            <router-link class="portfolio__assets__header__link font-medium" to="/assets">
               {{ balances.length ? $t('generic_cta.discoverMore') : $t('generic_cta.seeall') }} <ArrowRightIcon />
             </router-link>
           </div>
 
+<<<<<<< HEAD
           <div class="portfolio__assets__table>">
+=======
+          <MoonpayBanner
+            v-if="!balances.length"
+            title="Add crypto to your account"
+            size="large"
+            class="portfolio__assets__buy-banner"
+          />
+          <div v-else class="portfolio__assets__table>">
+>>>>>>> style: convert 10px rem to 16px rem
             <AssetsTable
               :balances="balances"
               :hide-zero-assets="true"
@@ -36,8 +46,13 @@
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
+<<<<<<< HEAD
             <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
             <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/pools">
+=======
+            <h2 class="portfolio__pools__header__text text-2 font-bold">{{ $t('context.pools.title') }}</h2>
+            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link font-medium" to="/assets">
+>>>>>>> style: convert 10px rem to 16px rem
               {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
             </router-link>
           </div>
@@ -47,7 +62,7 @@
           </div>
 
           <div v-else class="portfolio__pools__empty">
-            <p class="portfolio__pools__empty__description">{{ $t('context.pools.empty') }}</p>
+            <p class="portfolio__pools__empty__description text-muted">{{ $t('context.pools.empty') }}</p>
             <Button
               status="secondary"
               class="portfolio__pools__empty__button"
@@ -130,77 +145,58 @@ export default {
     width: 60%;
 
     &__total {
-      &__text {
-        opacity: 0.67;
-        font-size: 1.6rem;
-      }
       &__value {
-        margin-top: 0.8rem;
-        font-weight: 700;
-        font-size: 6.7rem;
-        line-height: 1.3;
+        margin-top: 0.5rem;
       }
-      margin-bottom: 6rem;
+      margin-bottom: 3.75rem;
     }
     &__assets {
       &__buy-banner {
-        margin-top: 2.6rem;
-        margin-bottom: 2.6rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
       }
       &__header {
-        font-size: 2.8rem;
-        font-weight: bold;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2.8rem;
+        margin-bottom: 1.75rem;
 
         &__link {
-          font-size: 1.6rem;
-          font-weight: 600;
           display: flex;
           align-items: center;
           svg {
-            margin-left: 1rem;
+            margin-left: 0.625rem;
           }
         }
       }
-      margin-bottom: 6rem;
+      margin-bottom: 3.75rem;
     }
     &__pools {
       &__header {
-        font-size: 2.8rem;
-        font-weight: bold;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2.6rem;
+        margin-bottom: 1.5rem;
 
         &__link {
-          font-size: 1.6rem;
-          font-weight: 600;
           display: flex;
           align-items: center;
           svg {
-            margin-left: 1rem;
+            margin-left: 0.625rem;
           }
         }
       }
 
       &__empty {
-        padding: 3.2rem;
+        padding: 2rem;
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
 
-        &__description {
-          color: var(--muted);
-        }
-
         &__button {
-          margin-top: 2.4rem;
+          margin-top: 1.5rem;
         }
       }
     }
@@ -209,11 +205,11 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      margin-left: 6.4rem;
-      width: 32rem;
+      margin-left: 4rem;
+      width: 20rem;
 
       &__buy {
-        margin-top: 2.6rem;
+        margin-top: 1.5rem;
       }
     }
   }

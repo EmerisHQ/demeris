@@ -23,7 +23,7 @@ module.exports = {
       0: [
         '1rem',
         {
-          letterSpacing: '0em',
+          // letterSpacing: '0em',
           lineHeight: '1.3125',
         },
       ],

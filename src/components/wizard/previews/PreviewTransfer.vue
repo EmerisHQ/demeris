@@ -8,7 +8,7 @@
           size="sm"
           class="send__item__symbol"
         />
-        <AmountDisplay class="w-bold" :amount="{ amount: transactionInfo.from.amount, denom: denomName }" />
+        <AmountDisplay class="font-bold" :amount="{ amount: transactionInfo.from.amount, denom: denomName }" />
       </div>
       <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
@@ -31,7 +31,7 @@
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
         </template>
       </ListItem>
     </ListItem>
@@ -39,7 +39,7 @@
     <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.transfer.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
         </template>
       </template>
     </ListItem>
@@ -47,7 +47,7 @@
     <ListItem label="Receive">
       <div class="send__item">
         <CircleSymbol :denom="denomName" :chain-name="transactionInfo.to.chain" size="sm" class="send__item__symbol" />
-        <AmountDisplay class="w-bold" :amount="{ amount: transactionInfo.to.amount, denom: denomName }" />
+        <AmountDisplay class="font-bold" :amount="{ amount: transactionInfo.to.amount, denom: denomName }" />
       </div>
       <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
@@ -206,13 +206,13 @@ export default defineComponent({
   display: inline-flex;
 
   &__symbol {
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
   }
 }
 
 .preview-chain {
   display: block;
-  margin-top: -0.2rem;
-  font-size: 1.2rem;
+  margin-top: -0.125rem;
+  font-size: 0.8125rem;
 }
 </style>

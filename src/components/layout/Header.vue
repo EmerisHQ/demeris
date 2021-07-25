@@ -74,9 +74,9 @@ export default defineComponent({
 }
 
 .header {
-  padding: 0 3.2rem;
+  padding: 0 2rem;
   display: flex;
-  height: 8rem;
+  height: 5rem;
   align-items: center;
   justify-content: space-between;
 
@@ -85,16 +85,16 @@ export default defineComponent({
     align-items: center;
 
     &-button {
-      font-size: 1.6rem;
+      font-size: 1rem;
       font-weight: 600;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0 1.6rem;
-      line-height: 4.8rem;
+      padding: 0 1rem;
+      line-height: 3rem;
 
       &__icon {
-        margin-right: 1rem;
+        margin-right: 0.625rem;
       }
     }
 
@@ -113,7 +113,7 @@ export default defineComponent({
   }
 
   &__settings-menu {
-    margin: 0 1.6rem 0 1rem;
+    margin: 0 1rem 0 0.625rem;
   }
 }
 </style>

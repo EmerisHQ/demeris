@@ -42,11 +42,11 @@
 
           <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
             <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            <div class="assets-table__row__balance__amount s-minus">
+            <div class="assets-table__row__balance__amount -text-1">
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             </div>
           </td>
-          <td v-if="variant === 'balance'" class="assets-table__row__chains">
+          <td v-if="variant === 'balance'" class="assets-table__row__chains mt-0.5">
             <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" />
           </td>
         </tr>
@@ -61,7 +61,7 @@
       <span class="assets-table__view-all__label">
         {{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})
       </span>
-      <Icon name="CaretDownIcon" :icon-size="1.3" />
+      <Icon name="CaretDownIcon" :icon-size="0.75" />
     </button>
   </div>
 </template>
@@ -219,8 +219,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .assets-table {
-  width: calc(100% + 4rem);
-  margin-inline: -2rem;
+  width: calc(100% + 2.5rem);
+  margin-inline: -1.25rem;
   table-layout: fixed;
 
   &__wrapper {
@@ -241,9 +241,9 @@ export default defineComponent({
     color: var(--muted);
     background: var(--bg);
     vertical-align: middle;
-    font-size: 1.3rem;
+    font-size: 0.8125rem;
     font-weight: 400;
-    padding: 1.5rem 0;
+    padding: 0.9375rem 0;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -254,11 +254,11 @@ export default defineComponent({
     transition: all 100ms ease-in;
 
     &:first-child {
-      padding-left: 2rem;
+      padding-left: 1.25rem;
     }
 
     &:last-child {
-      padding-right: 2rem;
+      padding-right: 1.25rem;
     }
   }
 
@@ -271,24 +271,24 @@ export default defineComponent({
       }
 
       td:first-child {
-        border-top-left-radius: 0.8rem;
-        border-bottom-left-radius: 0.8rem;
+        border-top-left-radius: 0.5rem;
+        border-bottom-left-radius: 0.5rem;
       }
 
       td:last-child {
-        border-top-right-radius: 0.8rem;
-        border-bottom-right-radius: 0.8rem;
+        border-top-right-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
       }
     }
 
     &__asset {
-      padding: 2rem 0;
+      padding: 1.25rem 0;
       font-weight: 600;
       display: flex;
       align-items: center;
 
       &__denom {
-        margin-left: 1.6rem;
+        margin-left: 1rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -297,7 +297,7 @@ export default defineComponent({
 
     &__price {
       &__trending {
-        margin-top: 0.8rem;
+        margin-top: 0.5rem;
       }
     }
 
@@ -311,7 +311,7 @@ export default defineComponent({
 
       &__amount {
         color: var(--muted);
-        margin-top: 0.8rem;
+        margin-top: 0.5rem;
       }
     }
     &__chains {
@@ -320,16 +320,16 @@ export default defineComponent({
   }
 
   &__view-all {
-    margin: 2.4rem auto 0 auto;
-    padding: 1.2rem 2rem;
+    margin: 1.5rem auto 0 auto;
+    padding: 0.75rem 1.25rem;
     display: flex;
     align-items: center;
-    border-radius: 5.6rem;
+    border-radius: 3.5rem;
     font-weight: 600;
-    font-size: 1.3rem;
+    font-size: 0.8125rem;
 
     &__label {
-      margin-right: 0.7rem;
+      margin-right: 0.4375rem;
     }
   }
 }

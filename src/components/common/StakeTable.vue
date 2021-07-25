@@ -31,10 +31,10 @@ export default defineComponent({
     <template v-if="!stakingBalances.length">
       <div class="stake__banner">
         <div class="stake__banner__wrapper">
-          <p class="stake__banner__title">Earn rewards by staking <Denom :name="denom" /></p>
-          <p class="stake__banner__subtitle">
+          <p class="stake__banner__title text-1 font-bold">Earn rewards by staking <Denom :name="denom" /></p>
+          <p class="stake__banner__subtitle text-muted">
             Lock up your <Denom :name="denom" /> and earn passive income with an average
-            <span class="w-bold">9.7% APY</span>.
+            <span class="font-bold">9.7% APY</span>.
           </p>
         </div>
 
@@ -76,14 +76,13 @@ export default defineComponent({
 <style lang="scss">
 .stake {
   &__banner {
-    background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 1.6rem;
-    padding: 2.4rem;
+    border-radius: 1rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 23.5rem;
+    min-height: 15rem;
     width: 100%;
     background-image: url('~@/assets/images/stake-rings.png');
     background-repeat: no-repeat;
@@ -95,14 +94,8 @@ export default defineComponent({
       width: 60%;
     }
 
-    &__title {
-      font-size: 2.1rem;
-      font-weight: 700;
-    }
-
     &__subtitle {
-      color: var(--muted);
-      margin-top: 1.2rem;
+      margin-top: 0.75rem;
     }
 
     &__controls {

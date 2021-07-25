@@ -158,23 +158,23 @@ export default defineComponent({
 
   &__title {
     font-weight: 700;
-    font-size: 2.8rem;
-    padding: 0 2.4rem;
+    font-size: 1.75rem;
+    padding: 0 1.5rem;
     text-align: center;
     line-height: 1.4;
     white-space: pre-line;
-    margin-bottom: 2.4rem;
+    margin-bottom: 1.5rem;
   }
 
   &__img {
-    margin-bottom: -2rem;
+    margin-bottom: -1.25rem;
   }
 
   &__description {
     color: var(--muted);
     text-align: center;
     line-height: 1.6;
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
   }
 
   &__link {
@@ -183,24 +183,24 @@ export default defineComponent({
     justify-content: center;
     font-weight: 600;
     width: 100%;
-    padding: 1.6rem;
-    margin-top: 2.4rem;
+    padding: 1rem;
+    margin-top: 1.5rem;
   }
 
   &__controls {
     display: flex;
     flex-direction: column;
     width: 100%;
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
   }
 
   &__button {
     width: 100%;
-    margin: 2.4rem 0;
+    margin: 1.5rem 0;
   }
 
   .external-icon {
-    margin-left: 0.4rem;
+    margin-left: 0.25rem;
     transform: rotate(45deg);
   }
 }

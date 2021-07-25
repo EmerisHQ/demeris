@@ -2,7 +2,7 @@
   <div class="add-liquidity">
     <header class="add-liquidity__header">
       <button class="add-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
+        <Icon name="ArrowLeftIcon" :icon-size="1" />
       </button>
 
       <nav class="add-liquidity__steps">
@@ -17,14 +17,14 @@
       </nav>
 
       <button class="add-liquidity__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+        <Icon name="CloseIcon" :icon-size="1" />
       </button>
     </header>
 
     <main class="add-liquidity__wrapper">
       <template v-if="state.step === 'amount'">
         <template v-if="!state.isCreationConfirmationOpen">
-          <h2 class="add-liquidity__title s-2">
+          <h2 class="add-liquidity__title text-2">
             {{ hasPair && !hasPool ? 'Create Liquidity' : 'Add Liquidity' }}
           </h2>
 
@@ -57,7 +57,7 @@
               :min-width="32"
               prefix="$"
               placeholder="0"
-              class="add-liquidity__estimated__price s-2 w-bold"
+              class="add-liquidity__estimated__price text-2 font-bold"
               @input="currencyAmountHandler"
             />
             <label class="add-liquidity__estimated__max">
@@ -83,7 +83,7 @@
               :class="{ 'input-invalid': !hasSufficientFunds.coinA }"
             >
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
-                <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
+                <p class="add-liquidity__create-warning__title font-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
                   As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> /
                   <Ticker :name="form.coinB.asset.base_denom" />
@@ -92,9 +92,9 @@
               </Alert>
 
               <div class="add-liquidity__input__main">
-                <div class="add-liquidity__input__header">
-                  <span class="add-liquidity__input__header__label">Supply</span>
-                  <div v-if="form.coinA.asset && hasFunds.coinA" class="add-liquidity__input__header__available">
+                <div class="flex items-center justify-between mb-4 -text-1">
+                  <span class="text-muted">Supply</span>
+                  <div v-if="form.coinA.asset && hasFunds.coinA" class="text-muted -text-1">
                     <AmountDisplay
                       :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                     />
@@ -104,7 +104,7 @@
                   <router-link
                     v-else-if="form.coinA.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinA.asset.base_denom } }"
-                    class="add-liquidity__input__header__buy inline-flex items-center"
+                    class="-text-1 font-medium inline-flex items-center"
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
                     <Denom :name="form.coinA.asset.base_denom" />
@@ -124,12 +124,15 @@
                 </div>
               </div>
 
-              <div v-if="form.coinA.asset" class="add-liquidity__input__details">
-                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinA')">
+              <div v-if="form.coinA.asset" class="py-3 px-4 border-t border-border">
+                <button
+                  class="py-4 px-6 text-muted flex items-center justify-between w-full"
+                  @click="toggleChainsModal(null, 'coinA')"
+                >
                   <div>
-                    From <span class="w-bold text-black"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
+                    From <span class="font-bold text-text"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
                   </div>
-                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
+                  <Icon name="ChevronRightIcon" :icon-size="1" />
                 </button>
               </div>
             </div>
@@ -150,9 +153,9 @@
               :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
             >
               <div class="add-liquidity__input__main">
-                <div class="add-liquidity__input__header">
-                  <span class="add-liquidity__input__header__label">Supply</span>
-                  <div v-if="form.coinB.asset && hasFunds.coinB" class="add-liquidity__input__header__available">
+                <div class="flex items-center justify-between mb-4 -text-1">
+                  <span class="text-muted">Supply</span>
+                  <div v-if="form.coinB.asset && hasFunds.coinB" class="text-muted -text-1">
                     <AmountDisplay
                       :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                     />
@@ -162,11 +165,11 @@
                   <router-link
                     v-else-if="form.coinB.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinB.asset.base_denom } }"
-                    class="add-liquidity__input__header__buy inline-flex items-center"
+                    class="-text-1 font-medium inline-flex items-center"
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
                     <Denom :name="form.coinB.asset.base_denom" />
-                    <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+                    <Icon name="ArrowRightIcon" :icon-size="1" class="ml-2" />
                   </router-link>
                 </div>
 
@@ -182,20 +185,23 @@
                 </div>
               </div>
 
-              <div v-if="form.coinB.asset" class="add-liquidity__input__details">
-                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinB')">
+              <div v-if="form.coinB.asset" class="py-3 px-4 border-t border-border">
+                <button
+                  class="py-4 px-6 text-muted flex items-center justify-between w-full"
+                  @click="toggleChainsModal(null, 'coinB')"
+                >
                   <div>
-                    From <span class="w-bold text-black"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
+                    From <span class="font-bold text-text"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
                   </div>
-                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
+                  <Icon name="ChevronRightIcon" :icon-size="1" />
                 </button>
               </div>
             </div>
 
             <div v-if="hasPair" class="add-liquidity__receive">
               <div class="add-liquidity__receive__header">
-                <label class="add-liquidity__receive__label s-minus">Receive</label>
-                <Icon v-tippy content="TODO" name="HintIcon" :icon-size="1.6" />
+                <label class="add-liquidity__receive__label -text-1">Receive</label>
+                <Icon v-tippy content="TODO" name="HintIcon" :icon-size="1" />
               </div>
 
               <div class="add-liquidity__receive__wrapper">
@@ -206,17 +212,17 @@
                     size="sm"
                     class="add-liquidity__receive__token__avatar"
                   />
-                  <span v-if="hasPool" class="w-bold">
+                  <span v-if="hasPool" class="font-bold">
                     <Ticker :name="pool.pool_coin_denom" />
                   </span>
-                  <span v-else class="w-bold">G-LK-LP</span>
+                  <span v-else class="font-bold">G-LK-LP</span>
                 </div>
 
                 <AmountInput
                   v-model="state.receiveAmount"
                   :readonly="!hasPool"
                   placeholder="0"
-                  class="add-liquidity__receive__amount w-bold"
+                  class="add-liquidity__receive__amount font-bold"
                   @input="coinPoolChangeHandler"
                 />
               </div>
@@ -246,7 +252,7 @@
 
         <template v-else-if="state.isCreationConfirmationOpen">
           <section class="add-liquidity__content add-liquidity__confirmation">
-            <h2 class="add-liquidity__title s-2">Creating a pool is risky business</h2>
+            <h2 class="add-liquidity__title text-2">Creating a pool is risky business</h2>
 
             <div class="add-liquidity__confirmation__placeholder" />
 
@@ -911,7 +917,7 @@ export default {
 <style lang="scss">
 .add-liquidity {
   position: relative;
-  padding-bottom: 2rem;
+  padding-bottom: 1.25rem;
 
   .denom-select {
     padding: 0;
@@ -931,18 +937,18 @@ export default {
   }
 
   &__estimated {
-    margin-top: 3.2rem;
+    margin-top: 2rem;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 42rem;
+    max-width: 27rem;
     width: 100%;
     text-align: center;
     line-height: 1;
 
     &__price {
-      font-size: 5.1rem;
+      font-size: 3.1875rem;
       font-weight: 600;
 
       &::placeholder {
@@ -951,7 +957,7 @@ export default {
     }
 
     &__max {
-      margin-top: -0.6rem;
+      margin-top: -0.375rem;
       position: absolute;
       right: 0;
 
@@ -960,9 +966,9 @@ export default {
       }
 
       span {
-        border-radius: 2.4rem;
-        padding: 1rem 1.6rem;
-        font-size: 1.2rem;
+        border-radius: 1.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
         cursor: pointer;
       }
 
@@ -975,10 +981,10 @@ export default {
   }
 
   &__create-warning {
-    width: 20rem;
+    width: 12.5rem;
     position: absolute;
     right: 0;
-    transform: translateX(26rem);
+    transform: translateX(16.25rem);
     flex-direction: column;
     align-items: flex-start !important;
 
@@ -987,12 +993,12 @@ export default {
     }
 
     &__title {
-      margin-top: 1.2rem;
+      margin-top: 0.75rem;
       text-align: left;
     }
 
     &__description {
-      margin-top: 1.2rem;
+      margin-top: 0.75rem;
     }
   }
 
@@ -1000,15 +1006,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3rem 4rem;
+    padding: 2rem 2.5rem;
     background: var(--bg);
 
     &__button {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
+      border-radius: 0.5rem;
+      padding: 0.375rem;
 
       &:disabled {
         cursor: not-allowed;
@@ -1025,7 +1031,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3.1rem;
+    margin-top: 2rem;
   }
 
   &__steps {
@@ -1041,7 +1047,7 @@ export default {
       cursor: default;
 
       & + & {
-        margin-left: 4.8rem;
+        margin-left: 2rem;
       }
       &--active {
         color: var(--text);
@@ -1051,7 +1057,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 42rem;
+    max-width: 27rem;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1059,18 +1065,18 @@ export default {
   }
 
   &__review {
-    max-width: 44rem;
+    max-width: 27.5rem;
   }
 
   &__pool {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
     display: flex;
     align-items: center;
 
     &__pair {
       display: inline-flex;
       align-items: center;
-      margin-right: 0.8rem;
+      margin-right: 0.5rem;
 
       &__avatar {
         &.token-a {
@@ -1078,7 +1084,7 @@ export default {
         }
 
         & + & {
-          margin-left: -0.6rem;
+          margin-left: -0.375rem;
         }
       }
     }
@@ -1093,13 +1099,13 @@ export default {
     overflow: hidden;
 
     &__container {
-      padding: 0.8rem 1.2rem;
-      font-size: 1.2rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
       color: var(--muted);
-      border-radius: 2.4rem;
+      border-radius: 1.5rem;
       background: #e6e6e6;
       display: inline-block;
-      margin: 1.5rem auto;
+      margin: 0.9375rem auto;
       position: relative;
     }
 
@@ -1116,29 +1122,29 @@ export default {
   }
 
   &__controls {
-    margin-top: 3.2rem;
+    margin-top: 2rem;
     width: 100%;
 
     &__fees {
-      margin-top: 2.4rem;
-      margin-left: -2.4rem;
-      margin-right: -2.4rem;
+      margin-top: 1.5rem;
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
     }
   }
 
   &__receive {
     width: 100%;
-    border-radius: 1rem;
+    border-radius: 0.625rem;
     border: 1px solid var(--border);
-    padding: 1.6rem;
+    padding: 1rem;
     margin-top: 3rem;
 
     &__header {
-      font-size: 1.2rem;
+      font-size: 0.8125rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.6rem;
+      margin-bottom: 1rem;
     }
 
     &__wrapper {
@@ -1152,7 +1158,7 @@ export default {
       align-items: center;
 
       &__avatar {
-        margin-right: 1.2rem;
+        margin-right: 0.75rem;
       }
     }
 
@@ -1186,16 +1192,16 @@ export default {
 
     &__placeholder {
       background: var(--fg);
-      width: 36rem;
-      height: 15rem;
-      margin-top: 3.4rem;
-      border-radius: 1rem;
+      width: 22.5rem;
+      height: 9.375rem;
+      margin-top: 2rem;
+      border-radius: 0.625rem;
     }
 
     &__description {
       color: var(--muted);
       line-height: 1.8;
-      margin-top: 3.4rem;
+      margin-top: 2rem;
     }
 
     &__controls {
@@ -1203,11 +1209,11 @@ export default {
       display: flex;
 
       &__button {
-        margin-top: 4rem;
+        margin-top: 2.5rem;
         font-weight: 600;
-        padding: 1.6rem 2rem;
+        padding: 1rem 1.25rem;
         flex: 1 1 0%;
-        border-radius: 0.8rem;
+        border-radius: 0.5rem;
 
         &.confirmation-button {
           background: var(--text);
@@ -1215,7 +1221,7 @@ export default {
         }
 
         & + & {
-          margin-left: 2.4rem;
+          margin-left: 1.5rem;
         }
       }
     }
@@ -1223,7 +1229,7 @@ export default {
 
   &__input {
     width: 100%;
-    border-radius: 1rem;
+    border-radius: 0.625rem;
     background: var(--bg);
 
     &.input-invalid &__header__available {
@@ -1231,7 +1237,7 @@ export default {
     }
 
     &.input-a {
-      margin-top: 3.2rem;
+      margin-top: 2rem;
     }
 
     &__container {
@@ -1239,48 +1245,9 @@ export default {
     }
 
     &__main {
-      padding: 1.6rem 2rem;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-    }
-
-    &__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.6rem;
-
-      &__label {
-        color: var(--muted);
-      }
-
-      &__available {
-        color: var(--muted);
-        font-size: 1.3rem;
-      }
-
-      &__buy {
-        font-size: 1.3rem;
-        font-weight: 600;
-      }
-    }
-
-    &__details {
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-
-      &__from {
-        padding: 1.6rem 2rem;
-        color: var(--muted);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-
-        &__icon {
-          width: 1.6rem;
-          height: 1.6rem;
-        }
-      }
     }
   }
 }

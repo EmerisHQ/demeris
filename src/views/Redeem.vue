@@ -2,7 +2,7 @@
   <div class="redeem">
     <header class="redeem__header">
       <button class="redeem__header__button" :disabled="state.step === 'transfer'" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
+        <Icon name="ArrowLeftIcon" :icon-size="1" />
       </button>
 
       <nav v-if="!state.showInstruction" class="redeem__steps">
@@ -17,13 +17,13 @@
       </nav>
 
       <button class="redeem__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+        <Icon name="CloseIcon" :icon-size="1" />
       </button>
     </header>
 
     <main class="redeem__wrapper">
       <div v-if="state.showInstruction" class="redeem__instruction">
-        <h2 class="redeem__title s-2">Redeeming assets</h2>
+        <h2 class="redeem__title text-2">Redeeming assets</h2>
 
         <div class="redeem__content">
           <div class="redeem__instruction__placeholder" />
@@ -49,7 +49,7 @@
       </div>
 
       <template v-else-if="state.step === 'assets'">
-        <h2 class="redeem__title s-2">Select an asset to redeem</h2>
+        <h2 class="redeem__title text-2">Select an asset to redeem</h2>
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
@@ -57,10 +57,10 @@
               <div class="redeem__list__item__icon" />
 
               <div class="redeem__list__item__asset">
-                <p class="redeem__list__item__asset__amount w-bold">
+                <p class="redeem__list__item__asset__amount font-bold">
                   <AmountDisplay :amount="parseCoins(asset.amount)[0]" :chain="asset.on_chain" />
                 </p>
-                <span class="redeem__list__item__asset__route s-minus">
+                <span class="redeem__list__item__asset__route -text-1">
                   <template v-for="(hop, index) in asset.hops" :key="asset.ibc.hash + '_' + index">
                     <template v-if="index != 0"> -> </template>
                     <ChainName :name="hop" />
@@ -70,7 +70,7 @@
 
               <div class="redeem__list__item__fees">
                 <FeeLevelSelector v-if="asset.steps" :gas-price-level="gasPrice" :steps="asset.steps" />
-                <!--<p class="redeem__list__item__fees__label s-minus">Fees</p>
+                <!--<p class="redeem__list__item__fees__label -text-1">Fees</p>
                 <span class="redeem__list__item__fees__amount">0.08 ATOM</span>//-->
               </div>
 
@@ -247,26 +247,26 @@ export default defineComponent({
 <style lang="scss" scoped>
 .redeem {
   position: relative;
-  padding-bottom: 2rem;
+  padding-bottom: 1.25rem;
 
   &__controls {
     width: 100%;
-    margin-top: 3.2rem;
+    margin-top: 2rem;
   }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3rem 4rem;
+    padding: 2rem 2.5rem;
     background: var(--bg);
 
     &__button {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
+      border-radius: 0.5rem;
+      padding: 0.375rem;
 
       &:disabled {
         cursor: not-allowed;
@@ -283,7 +283,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3.1rem;
+    margin-top: 2rem;
   }
 
   &__steps {
@@ -299,7 +299,7 @@ export default defineComponent({
       cursor: default;
 
       & + & {
-        margin-left: 4.8rem;
+        margin-left: 3rem;
       }
       &--active {
         color: var(--text);
@@ -309,43 +309,43 @@ export default defineComponent({
 
   &__content {
     width: 100%;
-    max-width: 36rem;
+    max-width: 22.5rem;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
 
     &.assets-content {
-      max-width: 64rem;
+      max-width: 40rem;
     }
   }
 
   &__instruction {
-    margin-top: -3rem;
+    margin-top: -2rem;
     text-align: center;
 
     &__placeholder {
       background: var(--fg);
-      width: 36rem;
-      height: 15rem;
-      margin-top: 3.4rem;
-      border-radius: 1rem;
+      width: 22.5rem;
+      height: 9.375rem;
+      margin-top: 2rem;
+      border-radius: 0.625rem;
     }
 
     &__link {
-      margin-top: 3.2rem;
+      margin-top: 2rem;
       font-weight: 600;
     }
 
     &__description {
       color: var(--muted);
       line-height: 1.8;
-      margin-top: 3.4rem;
+      margin-top: 2rem;
     }
   }
 
   &__list {
-    margin-top: 6rem;
+    margin-top: 3.75rem;
     width: 100%;
 
     &__item {
@@ -353,36 +353,36 @@ export default defineComponent({
       align-items: center;
 
       &__icon {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 2.6rem;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 1.5rem;
         background: rgba(0, 0, 0, 0.1);
-        margin-right: 1.2rem;
+        margin-right: 0.75rem;
         flex-shrink: 0;
       }
 
       &__asset {
         flex: 1 1 0%;
-        margin-right: 2.4rem;
+        margin-right: 1.5rem;
 
         &__route {
-          margin-top: 0.2rem;
+          margin-top: 0.125rem;
           color: var(--muted);
         }
       }
 
       &__fees {
-        margin-right: 2.4rem;
+        margin-right: 1.5rem;
 
         &__label {
-          margin-bottom: 0.2rem;
+          margin-bottom: 0.125rem;
           color: var(--muted);
           text-align: right;
         }
       }
 
       & + & {
-        margin-top: 4.8rem;
+        margin-top: 3rem;
       }
     }
   }

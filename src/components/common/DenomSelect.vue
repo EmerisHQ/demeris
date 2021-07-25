@@ -11,7 +11,7 @@
 				Dependencies:
 					vuex getter to get  chain name from chain id
 		-->
-    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin 
+    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
     when it changed-->
     <CircleSymbol
       :denom="selectedDenom?.base_denom ?? 'empty'"
@@ -22,7 +22,7 @@
     />
 
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom s-0 w-medium">
+      <div class="denom-select__coin-denom text-0 font-medium">
         <tippy
           v-if="displayName.startsWith('GDEX')"
           :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
@@ -32,24 +32,24 @@
           <template #content> {{ displayName }} </template>
         </tippy>
         <Denom v-else :name="selectedDenom?.base_denom" />
-        <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
+        <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" />
       </div>
-      <div class="denom-select__coin-from s-minus"><ChainName :name="selectedDenom.on_chain" /></div>
+      <div class="denom-select__coin-from -text-1"><ChainName :name="selectedDenom.on_chain" /></div>
     </div>
 
     <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom s-0 w-medium">
-        {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1.6" />
+      <div class="denom-select__coin-denom text-0 font-medium">
+        {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" />
       </div>
     </div>
 
     <div class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
+      <div class="denom-select__coin-amount-type -text-1">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
         :class="isOver ? 'over' : ''"
         :readonly="readonly"
-        class="denom-select__coin-amount-input s-1"
+        class="denom-select__coin-amount-input text-1"
         placeholder="0"
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
@@ -166,11 +166,11 @@ export default defineComponent({
   display: flex;
   align-items: center;
 
-  padding: 1.6rem 2.4rem;
+  padding: 1rem 1.5rem;
 
   &__coin-image {
     cursor: pointer;
-    margin-right: 1.2rem;
+    margin-right: 0.75rem;
   }
 
   &--empty &__coin {
@@ -191,11 +191,11 @@ export default defineComponent({
       color: var(--text);
 
       .icon {
-        margin-left: 0.4rem;
+        margin-left: 0.25rem;
       }
 
       .max-display-width {
-        max-width: 15rem;
+        max-width: 9.375rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -207,7 +207,10 @@ export default defineComponent({
     }
 
     &-image {
-      margin-right: 1.2rem;
+      width: 1.5rem;
+      height: 1.5rem;
+
+      margin-right: 0.75rem;
 
       cursor: pointer;
     }
@@ -216,7 +219,7 @@ export default defineComponent({
   &__coin-amount {
     text-align: right;
     width: 100%;
-    margin-left: 1.2rem;
+    margin-left: 0.75rem;
 
     &-type {
       color: var(--muted);

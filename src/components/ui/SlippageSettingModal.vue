@@ -10,7 +10,7 @@
     />
 
     <div class="setting">
-      <div class="s-minus w-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
+      <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
       <div class="setting__sections">
         <button
           class="setting__sections-block"
@@ -66,19 +66,19 @@
 
     <div class="details">
       <div class="details__row">
-        <div class="details__row-left s-minus w-medium">
+        <div class="details__row-left -text-1 font-medium">
           {{ $t('components.slippageSettingsModal.limitPrice') }}
           <tippy :max-width="192">
             <HintIcon />
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">
+        <div class="details__row-right -text-1 font-normal">
           {{ limitPriceText }}
         </div>
       </div>
       <div class="details__row">
-        <div class="details__row-left s-minus w-medium">
+        <div class="details__row-left -text-1 font-medium">
           <div>
             {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
               $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
@@ -89,7 +89,7 @@
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">{{ minReceivedText }}</div>
+        <div class="details__row-right -text-1 font-normal">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
@@ -270,10 +270,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .slippage-modal {
   position: relative;
-  width: 40rem;
-  /* height: 55.8rem; */
+  width: 25rem;
+  /* height: 35rem; */
 
-  margin-bottom: 5rem;
+  margin-bottom: 3rem;
   top: 0;
   left: 0;
 
@@ -283,13 +283,13 @@ export default defineComponent({
   z-index: 10;
 
   .setting {
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
 
     &__sections {
       display: flex;
       justify-content: space-between;
 
-      margin: 1.6rem 0;
+      margin: 1rem 0;
 
       /* Chrome, Safari, Edge, Opera */
       input::-webkit-outer-spin-button,
@@ -303,8 +303,8 @@ export default defineComponent({
         -moz-appearance: textfield;
       }
       &-block {
-        width: 5.2rem;
-        height: 4rem;
+        width: 3.25rem;
+        height: 2.5rem;
         background-color: var(--fg);
 
         border-radius: 8px;
@@ -312,8 +312,8 @@ export default defineComponent({
         outline: none;
 
         &:nth-child(4) {
-          width: 9.2rem;
-          padding: 0.6rem 1.2rem;
+          width: 5.75rem;
+          padding: 0.375rem 0.75rem;
           text-align: center;
 
           display: flex;
@@ -325,7 +325,7 @@ export default defineComponent({
 
             input {
               background-color: transparent;
-              width: 6rem;
+              width: 3.75rem;
               outline: none;
             }
 
@@ -337,7 +337,7 @@ export default defineComponent({
       }
       .custom-selected {
         input {
-          width: 2.8rem !important;
+          width: 1.75rem !important;
           text-align: right;
           outline: none;
           &::placeholder {
@@ -354,21 +354,21 @@ export default defineComponent({
   }
 
   .details {
-    padding: 0 2.4rem 2.4rem;
-    margin-top: 3.2rem;
+    padding: 0 1.5rem 1.5rem;
+    margin-top: 2rem;
     &__row {
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      margin-bottom: 1.6rem;
+      margin-bottom: 1rem;
 
       &-left {
         display: flex;
         align-items: center;
 
         span {
-          margin-left: 0.45rem;
+          margin-left: 0.25rem;
         }
       }
     }
@@ -379,11 +379,11 @@ export default defineComponent({
   }
 
   .alert-wrapper {
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
   }
 }
 
 .no-custom-slippage {
-  width: 9.2rem !important;
+  width: 5.75rem !important;
 }
 </style>

@@ -5,7 +5,7 @@
       :open="open"
       class="connect-wallet-modal"
       body-class="elevation-panel"
-      width="72rem"
+      width="45rem"
       @close="closeConnectKeplr"
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
@@ -16,7 +16,7 @@
       :open="open"
       class="connect-wallet-modal"
       body-class="elevation-panel"
-      width="72rem"
+      width="45rem"
       @close="closeGetKeplr"
     >
       <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
@@ -27,7 +27,7 @@
       :open="open"
       class="connect-wallet-modal"
       body-class="elevation-panel"
-      width="72rem"
+      width="45rem"
       @close="closeGetBrowser"
     >
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
@@ -138,13 +138,13 @@ export default defineComponent({
     position: relative;
     overflow: hidden;
     padding: 0;
-    min-height: 48rem;
+    min-height: 30rem;
   }
 
   .modal__close {
     position: absolute;
-    top: 2rem;
-    right: 2rem;
+    top: 1.25rem;
+    right: 1.25rem;
     z-index: 40;
   }
 }

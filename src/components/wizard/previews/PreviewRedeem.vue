@@ -2,7 +2,7 @@
   <List>
     <ListItem label="Send">
       <div>
-        <AmountDisplay class="w-bold" :amount="step.transactions[0].data.amount" />
+        <AmountDisplay class="font-bold" :amount="step.transactions[0].data.amount" />
       </div>
       <sub><ChainName :name="step.transactions[0].data.from_chain" /></sub>
     </ListItem>
@@ -15,7 +15,7 @@
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
         </template>
       </ListItem>
     </ListItem>
@@ -23,14 +23,14 @@
     <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.redeem.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
         </template>
       </template>
     </ListItem>
 
     <ListItem label="Receive">
       <div>
-        <AmountDisplay class="w-bold" :amount="step.transactions[step.transactions.length - 1].data.amount" />
+        <AmountDisplay class="font-bold" :amount="step.transactions[step.transactions.length - 1].data.amount" />
       </div>
       <sub><ChainName :name="step.transactions[step.transactions.length - 1].data.to_chain" /></sub>
     </ListItem>

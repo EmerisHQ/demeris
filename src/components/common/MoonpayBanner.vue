@@ -1,11 +1,11 @@
 <template>
   <button
-    class="moonpay-banner theme-inverse dark:theme-inverse bg-app text-left"
-    :class="[`moonpay-banner--${variant}`, { 'elevation-button': variant === 'banner' }]"
+    class="moonpay-banner theme-inverse dark:theme-inverse bg-app text-left elevation-card"
+    :class="`moonpay-banner--${size}`"
     @click="goMoon"
   >
-    <p class="moonpay-banner__title text-text">{{ title }}</p>
-    <p class="moonpay-banner__info text-muted">Powered by Moonpay</p>
+    <p class="moonpay-banner__title text-text text-1 font-bold">{{ title }}</p>
+    <p class="moonpay-banner__info text-muted -text-1 mt-14">Powered by Moonpay</p>
   </button>
 </template>
 
@@ -23,9 +23,9 @@ export default defineComponent({
       type: String,
       default: 'Purchase ATOM',
     },
-    variant: {
-      type: String as PropType<'banner' | 'widget'>,
-      default: 'banner',
+    size: {
+      type: String as PropType<'large' | 'small'>,
+      default: 'large',
     },
   },
   setup() {
@@ -67,13 +67,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .moonpay-banner {
-  border-radius: 1.6rem;
+  border-radius: 1rem;
   overflow: hidden;
-  padding: 2.4rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 13.5rem;
+  min-height: 5rem;
   width: 100%;
   background-image: url('~@/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;
@@ -84,15 +84,6 @@ export default defineComponent({
     background-position: left 13rem top 0%;
     background-size: 95% auto;
     border: none;
-  }
-
-  &__title {
-    font-size: 2.1rem;
-    font-weight: 700;
-  }
-
-  &__info {
-    font-size: 1.2rem;
   }
 }
 </style>

@@ -5,7 +5,7 @@
         <CircleSymbol :denom="denoms[0]" class="pool__main__token-pair__token token-a" />
         <CircleSymbol :denom="denoms[1]" class="pool__main__token-pair__token token-b" />
       </div>
-      <div class="pool__main__info">
+      <div class="pool__main__info w-full mt-4">
         <p class="pool__main__info__name">{{ pairName }}</p>
         <span v-if="hasPrices" class="pool__main__info__total">{{ toUSD(totalLiquidityPrice) }}</span>
       </div>
@@ -304,9 +304,9 @@ export default defineComponent({
 .pool {
   display: flex;
   flex-direction: column;
-  border-radius: 1.6rem;
-  padding: 2.4rem;
-  font-size: 1.6rem;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  font-size: 1rem;
 
   &__main {
     flex: 1;
@@ -319,8 +319,8 @@ export default defineComponent({
       align-items: center;
 
       &__token {
-        width: 3.2rem;
-        height: 3.2rem;
+        width: 2rem;
+        height: 2rem;
         border-radius: 9999px;
         z-index: 0;
 
@@ -329,14 +329,12 @@ export default defineComponent({
         }
 
         & + & {
-          margin-left: -0.6rem;
+          margin-left: -0.375rem;
         }
       }
     }
 
     &__info {
-      width: 100%;
-      margin-top: 1.6rem;
       &__name {
         width: 100%;
         font-weight: 600;
@@ -345,7 +343,7 @@ export default defineComponent({
       }
       &__total {
         color: var(--muted);
-        font-size: 1.2rem;
+        font-size: 0.8125rem;
       }
     }
   }
@@ -356,7 +354,7 @@ export default defineComponent({
 
     &__label {
       color: var(--muted);
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.125rem;
       font-weight: 400;
     }
     &__value {

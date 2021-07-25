@@ -1,7 +1,7 @@
 <template>
   <div class="title-with-goback">
     <Icon :name="'ArrowLeftIcon'" class="icon" @click="func" />
-    <div class="s-2 w-bold">{{ title }}</div>
+    <div class="text-2 font-bold">{{ title }}</div>
     <div class="space"></div>
   </div>
 </template>
@@ -31,10 +31,10 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3rem 2.4rem;
+  padding: 2rem 1.5rem;
 
   .space {
-    width: 2.4rem;
+    width: 1.5rem;
   }
 
   .icon {

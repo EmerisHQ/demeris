@@ -83,7 +83,9 @@
         <div class="move-form-amount__controls">
           <label v-if="hasPrice" class="move-form-amount__controls__button">
             <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
-            <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
+            <span v-if="state.isUSDInputChecked" class="elevation-button"
+              ><Denom :name="state.currentAsset?.base_denom"
+            /></span>
             <span v-else class="elevation-button">USD</span>
           </label>
           <label class="move-form-amount__controls__button is-toggle">
@@ -101,7 +103,7 @@
       <fieldset class="form__field">
         <div class="move-form-amount__assets elevation-card">
           <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
-            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.action') }}</span>
+            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.action') }}</span>
 
             <div class="move-form-amount__assets__item__asset">
               <CircleSymbol
@@ -109,14 +111,14 @@
                 :denom="form.balance.denom"
                 class="move-form-amount__assets__item__avatar"
               />
-              <span class="move-form-amount__assets__item__name w-bold">
+              <span class="move-form-amount__assets__item__name font-bold">
                 <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
                 <span v-else>Select asset</span>
               </span>
             </div>
 
             <div class="move-form-amount__assets__item__button">
-              <Icon name="CaretRightIcon" :icon-size="1.2" />
+              <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
@@ -125,7 +127,7 @@
             class="move-form-amount__assets__item from-item"
             @click="toggleChainsModal(null, 'from')"
           >
-            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
+            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.from') }}</span>
 
             <div class="move-form-amount__assets__item__asset">
               <CircleSymbol
@@ -133,20 +135,20 @@
                 :chain-name="form.on_chain"
                 class="move-form-amount__assets__item__avatar"
               />
-              <span class="move-form-amount__assets__item__name w-bold">
+              <span class="move-form-amount__assets__item__name font-bold">
                 <ChainName :name="form.on_chain" />
               </span>
             </div>
 
             <div class="move-form-amount__assets__item__amount">
-              <p class="move-form-amount__assets__item__amount__balance s-minus">
+              <p class="move-form-amount__assets__item__amount__balance -text-1">
                 <Price
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
                   :auto-update="false"
                   show-zero
                 />
               </p>
-              <p class="move-form-amount__assets__item__amount__available s-minus">
+              <p class="move-form-amount__assets__item__amount__available -text-1">
                 <AmountDisplay
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
                 />
@@ -154,7 +156,7 @@
             </div>
 
             <div class="move-form-amount__assets__item__button">
-              <Icon name="CaretRightIcon" :icon-size="1.2" />
+              <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
@@ -164,7 +166,7 @@
             :disabled="!state.currentAsset"
             @click="toggleChainsModal(null, 'to')"
           >
-            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
+            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.to') }}</span>
 
             <div class="move-form-amount__assets__item__asset">
               <CircleSymbol
@@ -172,14 +174,14 @@
                 :chain-name="form.to_chain"
                 class="move-form-amount__assets__item__avatar"
               />
-              <span class="move-form-amount__assets__item__name w-bold">
+              <span class="move-form-amount__assets__item__name font-bold">
                 <ChainName v-if="form.to_chain" :name="form.to_chain" />
                 <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
               </span>
             </div>
 
             <div class="move-form-amount__assets__item__button">
-              <Icon name="CaretRightIcon" :icon-size="1.2" />
+              <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
         </div>
@@ -600,7 +602,7 @@ export default defineComponent({
   }
 
   &__input {
-    font-size: 5.1rem;
+    font-size: 3.1875rem;
     font-weight: 700;
     text-transform: uppercase;
     display: flex;
@@ -618,13 +620,13 @@ export default defineComponent({
 
     &__denom {
       flex: 1;
-      margin-left: 1rem;
+      margin-left: 0.625rem;
     }
   }
 
   &__estimated {
     color: var(--muted);
-    margin-top: 1.2rem;
+    margin-top: 0.75rem;
     text-align: center;
   }
 
@@ -632,7 +634,7 @@ export default defineComponent({
     display: flex;
     align-items: stretch;
     justify-content: center;
-    margin: 2.4rem 0 3.2rem 0;
+    margin: 1.5rem 0 2rem 0;
 
     &__button {
       line-height: 1;
@@ -651,9 +653,9 @@ export default defineComponent({
         }
       }
       span {
-        padding: 1rem 1.6rem;
-        border-radius: 2.4rem;
-        margin-right: 1.6rem;
+        padding: 0.625rem 1rem;
+        border-radius: 1.5rem;
+        margin-right: 1rem;
         font-size: 12px;
         cursor: pointer;
         user-select: none;
@@ -663,7 +665,7 @@ export default defineComponent({
 
   &__assets {
     &__item {
-      padding: 1.6rem;
+      padding: 1rem;
       display: flex;
       align-items: stretch;
       width: 100%;
@@ -693,14 +695,14 @@ export default defineComponent({
       }
 
       &__avatar {
-        margin-right: 1.2rem;
+        margin-right: 0.75rem;
       }
 
       &__label {
         color: var(--muted);
         text-align: left;
-        margin-right: 1rem;
-        width: 4rem;
+        margin-right: 0.625rem;
+        width: 2.5rem;
         align-self: center;
       }
 
@@ -713,13 +715,13 @@ export default defineComponent({
         &__available {
           transition: color linear 100ms;
           color: var(--muted);
-          margin-top: 0.1rem;
+          margin-top: 0.0625rem;
         }
       }
 
       &__button {
-        margin-left: 0.6rem;
-        padding: 0 0.6rem;
+        margin-left: 0.375rem;
+        padding: 0 0.375rem;
         display: flex;
         align-items: center;
       }

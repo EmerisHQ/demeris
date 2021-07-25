@@ -9,21 +9,21 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pool__main__stats__pair__token token-a" />
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pool__main__stats__pair__token token-b" />
             </div>
-            <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
+            <h2 class="pool__main__stats__name text-2 font-bold">{{ pairName }}</h2>
           </div>
           <h1 v-if="hasPrices.all" class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
         </section>
 
         <section v-if="reserveBalances" class="pool__main__assets">
-          <h2 class="pool__main__assets__title s-2">Underlying assets</h2>
+          <h2 class="pool__main__assets__title text-2 font-bold">Underlying assets</h2>
 
           <table class="pool__main__assets__table assets-table">
             <thead>
               <tr>
-                <th class="text-left">Asset</th>
-                <th class="text-right">Quantity</th>
-                <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th class="py-4 text-left -text-1 font-normal">Asset</th>
+                <th class="py-4 text-right -text-1 font-normal">Quantity</th>
+                <th class="py-4 text-right -text-1 font-normal">Price</th>
+                <th class="py-4 text-right -text-1 font-normal">Allocation</th>
               </tr>
             </thead>
 
@@ -36,11 +36,11 @@
               >
                 <td class="assets-table__row__denom">
                   <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
-                  <span class="w-bold"><Denom :name="balance.denom" /></span>
+                  <span class="font-bold"><Denom :name="balance.denom" /></span>
                 </td>
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
                 <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold">
+                <td class="text-right font-bold">
                   <Price v-if="hasPrices[index === 0 ? 'coinA' : 'coinB']" :amount="balance" />
                   <span v-else>-</span>
                 </td>
@@ -55,10 +55,10 @@
           <table class="pool__main__assets__table assets-table">
             <thead>
               <tr>
-                <th class="text-left">Asset</th>
-                <th class="text-right">Ticker</th>
-                <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th class="py-4 text-left -text-1 font-normal">Asset</th>
+                <th class="py-4 text-right -text-1 font-normal">Ticker</th>
+                <th class="py-4 text-right -text-1 font-normal">Price</th>
+                <th class="py-4 text-right -text-1 font-normal">Allocation</th>
               </tr>
             </thead>
 
@@ -66,13 +66,13 @@
               <tr class="assets-table__row" @click="openAssetPage(walletBalances.poolCoin)">
                 <td class="assets-table__row__denom">
                   <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
-                  <span class="w-bold"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                  <span class="font-bold"><Denom :name="walletBalances.poolCoin.denom" /></span>
                 </td>
                 <td class="text-right">
                   <Ticker :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="text-right"><Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold">
+                <td class="text-right font-bold">
                   <span v-if="hasPrices.all">{{ toUSD(totalLiquidityPrice) }}</span>
                   <span v-else>-</span>
                 </td>
@@ -83,10 +83,10 @@
 
         <section v-if="relatedPools.length" class="pool__main__pools">
           <div class="pool__main__pools__header">
-            <h2 class="s-2">More pools</h2>
+            <h2 class="text-2 font-bold">More pools</h2>
             <router-link :to="{ name: 'Pools' }" class="pool__main__pools__header__button">
               See all
-              <Icon name="ArrowRightIcon" :icon-size="1.6" />
+              <Icon name="ArrowRightIcon" :icon-size="1" />
             </router-link>
           </div>
 
@@ -100,20 +100,20 @@
         <div class="pool__aside__widget">
           <div v-if="walletBalances" class="pool-equity elevation-panel" :style="equityGradientStyle">
             <div class="pool-equity__header">
-              <h2 class="s-2 w-bold">Equity</h2>
+              <h2 class="text-2 font-bold">Equity</h2>
               <Icon name="ThreeDotsIcon" />
             </div>
 
             <div class="pool-equity__stats">
               <CircleSymbol :denom="walletBalances.poolCoin.denom" class="pool-equity__stats__avatar" />
               <div class="pool-equity__stats__wrapper">
-                <p class="pool-equity__stats__amount w-bold">
+                <p class="pool-equity__stats__amount font-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p v-if="hasPrices.all" class="pool-equity__stats__balance s-2 w-bold">
+                <p v-if="hasPrices.all" class="pool-equity__stats__balance text-2 font-bold">
                   {{ toUSD(ownSharePrice) }}
                 </p>
-                <span class="pool-equity__stats__share s-minus"> {{ ownShare.toFixed(2) }}% of pool </span>
+                <span class="pool-equity__stats__share -text-1"> {{ ownShare.toFixed(2) }}% of pool </span>
               </div>
             </div>
 
@@ -122,11 +122,11 @@
             </div>
 
             <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__assets">
-              <span class="pool-equity__assets__label s-minus">Assets provided</span>
+              <span class="pool-equity__assets__label -text-1">Assets provided</span>
               <ul class="pool-equity__assets__list">
                 <li class="pool-equity__assets__list__item">
                   <CircleSymbol :denom="walletBalances.coinA.denom" class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">
+                  <span class="pool-equity__assets__list__item__denom font-bold">
                     <AmountDisplay :amount="walletBalances.coinA" />
                   </span>
                   <span v-if="hasPrices.coinA"><Price :amount="walletBalances.coinA" /></span>
@@ -138,7 +138,7 @@
                     size="sm"
                     class="pool-equity__assets__list__item__avatar"
                   />
-                  <span class="pool-equity__assets__list__item__denom w-bold">
+                  <span class="pool-equity__assets__list__item__denom font-bold">
                     <AmountDisplay :amount="walletBalances.coinB" />
                   </span>
                   <span v-if="hasPrices.coinB"><Price :amount="walletBalances.coinB" /></span>
@@ -378,9 +378,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .pool {
   display: flex;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-  padding-bottom: 4rem;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+  padding-bottom: 2.5rem;
 
   &__main {
     display: flex;
@@ -389,13 +389,13 @@ export default defineComponent({
 
     &__stats {
       &__header {
-        margin-top: 1.2rem;
+        margin-top: 0.75rem;
         display: flex;
         align-items: center;
       }
 
       &__pair {
-        margin-right: 1.2rem;
+        margin-right: 0.75rem;
 
         &__token {
           &.token-a {
@@ -403,7 +403,7 @@ export default defineComponent({
           }
           &.token-b {
             z-index: 0;
-            margin-left: -0.6rem;
+            margin-left: -0.375rem;
           }
         }
       }
@@ -417,41 +417,41 @@ export default defineComponent({
       }
 
       &__supply {
-        font-size: 5.1rem;
+        font-size: 3.1875rem;
         font-weight: 700;
         line-height: 1.2;
-        margin-top: 0.4rem;
+        margin-top: 0.25rem;
       }
 
       &__pair {
         display: inline-flex;
 
         &__avatar {
-          width: 3.4rem;
-          height: 3.4rem;
+          width: 2rem;
+          height: 2rem;
           background: rgba(0, 0, 0, 0.1);
-          border-radius: 2.6rem;
+          border-radius: 1.5rem;
 
           & + & {
-            margin-left: -1rem;
+            margin-left: -0.625rem;
           }
         }
       }
     }
 
     &__assets {
-      margin-top: 6.4rem;
+      margin-top: 4rem;
 
       &__table {
-        margin-top: 3.2rem;
+        margin-top: 2rem;
       }
     }
 
     &__pools {
-      margin-top: 4rem;
+      margin-top: 2.5rem;
 
       &__wrapper {
-        margin-top: 3rem;
+        margin-top: 2rem;
       }
 
       &__header {
@@ -465,7 +465,7 @@ export default defineComponent({
           font-weight: 600;
 
           .icon {
-            margin-left: 0.6rem;
+            margin-left: 0.375rem;
           }
         }
       }
@@ -476,7 +476,7 @@ export default defineComponent({
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
-    margin-left: 3.2rem;
+    margin-left: 2rem;
     flex: 1 1 0%;
 
     &__widget {
@@ -508,9 +508,6 @@ export default defineComponent({
     color: var(--muted);
     background: var(--bg);
     vertical-align: middle;
-    font-size: 1.3rem;
-    font-weight: 400;
-    padding: 1.5rem 0;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -549,16 +546,16 @@ export default defineComponent({
     }
 
     &__denom {
-      padding: 2.4rem 0;
+      padding: 1.5rem 0;
       display: flex;
       align-items: center;
 
       &__avatar {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 2.6rem;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 1.5rem;
         background: rgba(0, 0, 0, 0.1);
-        margin-right: 1.6rem;
+        margin-right: 1rem;
         flex-shrink: 0;
       }
     }
@@ -568,8 +565,8 @@ export default defineComponent({
 .pool-equity {
   width: 100%;
   background: red;
-  padding: 2.4rem;
-  border-radius: 1.6rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
 
   &__header {
     display: flex;
@@ -580,10 +577,10 @@ export default defineComponent({
   &__stats {
     display: flex;
     align-items: flex-start;
-    margin-top: 3rem;
+    margin-top: 2rem;
 
     &__avatar {
-      margin-right: 1.2rem;
+      margin-right: 0.75rem;
     }
 
     &__wrapper {
@@ -592,7 +589,7 @@ export default defineComponent({
     }
 
     &__balance {
-      margin: 0.2rem 0;
+      margin: 0.125rem 0;
     }
 
     &__share {
@@ -601,33 +598,33 @@ export default defineComponent({
   }
 
   &__supply {
-    margin-top: 3.2rem;
+    margin-top: 2rem;
   }
 
   &__withdraw {
-    margin-top: 3.2rem;
+    margin-top: 2rem;
   }
 
   &__assets {
-    margin-top: 4rem;
+    margin-top: 2.5rem;
 
     &__label {
       color: var(--muted);
     }
 
     &__list {
-      margin-top: 2.1rem;
+      margin-top: 1.3125rem;
 
       &__item {
         display: flex;
         align-items: center;
 
         &__avatar {
-          width: 2.4rem;
-          height: 2.4rem;
-          border-radius: 2.6rem;
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 1.5rem;
           background: rgba(0, 0, 0, 0.1);
-          margin-right: 1.2rem;
+          margin-right: 0.75rem;
         }
 
         &__denom {
@@ -635,7 +632,7 @@ export default defineComponent({
         }
 
         & + & {
-          margin-top: 1.6rem;
+          margin-top: 1rem;
         }
       }
     }

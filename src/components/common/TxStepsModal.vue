@@ -14,7 +14,7 @@
 
     <template v-else>
       <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
-        <div class="title s-2 w-bold">
+        <div class="title text-2 font-bold">
           {{ currentData.title }}
         </div>
 
@@ -38,7 +38,7 @@
           <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
         </div>
 
-        <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+        <div class="warn -text-1 font-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
           Non-revertable transactions. Prices not guaranteed etc.
         </div>
 
@@ -638,9 +638,9 @@ export default defineComponent({
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;
-  /* height: 55.8rem; */
+  /* height: 35rem; */
 
-  margin-bottom: 5rem;
+  margin-bottom: 3rem;
   top: 0;
   left: 0;
 
@@ -654,7 +654,7 @@ export default defineComponent({
   }
 
   .title {
-    padding: 0 2.4rem 2.4rem;
+    padding: 0 1.5rem 1.5rem;
     text-align: center;
   }
 
@@ -664,8 +664,8 @@ export default defineComponent({
 
     color: var(--text);
 
-    padding: 0 2.4rem;
-    margin-bottom: 1.6rem;
+    padding: 0 1.5rem;
+    margin-bottom: 1rem;
     &__type {
       &-subtitle {
         color: var(--muted);
@@ -677,11 +677,11 @@ export default defineComponent({
         display: flex;
         align-items: center;
         &-image {
-          width: 2rem;
-          height: 2rem;
+          width: 1.25rem;
+          height: 1.25rem;
         }
         &-amount {
-          padding: 0 0.8rem;
+          padding: 0 0.5rem;
         }
       }
       &-chain {
@@ -691,22 +691,22 @@ export default defineComponent({
   }
 
   .divider {
-    margin: 0 2.4rem;
+    margin: 0 1.5rem;
     height: 1px;
     background-color: var(--border);
   }
 
   .detail {
-    padding: 0 2.4rem;
+    padding: 0 1.5rem;
     &__title {
       color: var(--text);
-      padding: 1.6rem 0;
+      padding: 1rem 0;
     }
 
     &__row {
       display: flex;
       justify-content: space-between;
-      padding-bottom: 1.6rem;
+      padding-bottom: 1rem;
 
       &-key {
         display: flex;
@@ -714,7 +714,7 @@ export default defineComponent({
         color: var(--muted);
 
         div {
-          margin-right: 0.4rem;
+          margin-right: 0.25rem;
         }
       }
     }
@@ -730,14 +730,14 @@ export default defineComponent({
     }
 
     .icon {
-      font-size: 1.6rem;
+      font-size: 1rem;
       color: var(--muted);
     }
   }
 
   .warn {
-    margin: 0 2.4rem;
-    padding: 1.2rem;
+    margin: 0 1.5rem;
+    padding: 0.75rem;
     border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 8px;
@@ -749,7 +749,7 @@ export default defineComponent({
   }
 
   .button-wrapper {
-    padding: 2.8rem 2.4rem 2.4rem;
+    padding: 1.75rem 1.5rem 1.5rem;
   }
   .fee-warning-modal {
     text-align: center;

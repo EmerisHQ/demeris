@@ -9,7 +9,7 @@
   >
     <div class="status">
       <div v-if="iconType" class="status__icon">
-        <SpinnerIcon v-if="iconType === 'pending'" :size="4.2" :gradients="['#FFF1C3', '#9B7C3A']" />
+        <SpinnerIcon v-if="iconType === 'pending'" :size="2.5" :gradients="['#FFF1C3', '#9B7C3A']" />
         <div v-else-if="iconType === 'warning'" class="status__icon-warning">
           <WarningIcon />
         </div>
@@ -19,7 +19,7 @@
       </div>
       <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
       <div v-else class="status__icon-none" />
-      <div class="status__title-sub w-normal s-0">
+      <div class="status__title-sub font-normal text-0">
         <template v-if="status == 'failed' || status == 'unknown'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
             <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
@@ -46,7 +46,7 @@
       </div>
 
       <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
-      <div class="status__title s-2 w-bold">{{ title }}</div>
+      <div class="status__title text-2 font-bold">{{ title }}</div>
       <div class="status__detail">
         <template
           v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
@@ -74,16 +74,21 @@
             </template>
           </div>
 
-          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
+          <div
+            v-if="status === 'complete'"
+            class="status__detail-detail text-0 font-normal"
+            :style="'margin-top: 1rem;'"
+          >
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
-              <span class="w-bold"><AmountDisplay
-                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
+              <span class="font-bold"
+                ><AmountDisplay
+                  :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
               /></span>
               <br />
               on <ChainName :name="'cosmos-hub'" />.
-              <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
-                <span class="w-bold">
+              <div v-if="txResult.swappedPercent < 100" style="margin: 1rem 0">
+                <span class="font-bold">
                   <AmountDisplay
                     :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
                   />
@@ -92,12 +97,15 @@
               </div>
             </template>
           </div>
-          <div class="status__detail-amount s-0 w-medium">
+          <div class="status__detail-amount text-0 font-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
             </template>
           </div>
-          <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
+          <div
+            class="status__detail-path text-0 font-normal"
+            :style="status === 'complete' ? 'margin-bottom: 3rem' : ''"
+          >
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" /> chain
             </template>
@@ -105,10 +113,14 @@
           </div>
         </template>
         <template v-else>
-          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
+          <a
+            v-if="status === 'keplr-reject'"
+            href="https://faq.keplr.app"
+            target="_blank"
+            class="link text-0 font-bold"
+          >
             {{ $t('components.txHandlingModal.keplrSupport') }}
-          </a>
-          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link s-0 w-bold">
+          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link text-0 font-bold">
             {{ $t('components.txHandlingModal.contactSupport') }}
           </a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
@@ -183,7 +195,7 @@
             status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
           }
         "
-        :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
+        :class="{ 'mb-6': blackButton && whiteButton }"
       />
       {{ router?.pathname }}
       <Button
@@ -592,41 +604,38 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2.4rem 0;
+    padding: 1.5rem 0;
 
     &-warning {
-      font-size: 4.2rem;
+      font-size: 2rem;
       color: var(--warning);
     }
 
     &-error {
-      font-size: 3.2rem;
+      font-size: 2rem;
       color: var(--negative-text);
     }
 
     &-swap-result {
       background-image: url('../../assets/images/swap-result.png');
-      height: 21rem;
-      transform: translate(-2.4rem, -2.4rem);
-      width: 32rem;
+      height: 13.125rem;
+      transform: translate(-1.5rem, -1.5rem);
+      width: 20rem;
     }
-
-    /* &-none {
-    } */
   }
 
   &__detail {
     .link {
       display: block;
-      margin-top: 1.6rem;
+      margin-top: 1rem;
     }
 
     .spacer {
-      height: 8.8rem;
+      height: 5.5rem;
     }
 
     .spacer-2 {
-      height: 4.8rem;
+      height: 3rem;
     }
 
     .spacer-3 {
@@ -634,8 +643,8 @@ export default defineComponent({
     }
 
     &-transferring {
-      width: 9.6rem;
-      margin: 3.2rem auto;
+      width: 6rem;
+      margin: 2rem auto;
 
       display: flex;
       align-items: center;
@@ -654,7 +663,7 @@ export default defineComponent({
 
     &-text,
     &-link {
-      padding: 4rem 0 3.2rem;
+      padding: 2.5rem 0 2rem;
     }
 
     &-text {
@@ -663,7 +672,7 @@ export default defineComponent({
 
     &-text-weak {
       color: var(--muted);
-      padding: 1.6rem 0 3.2rem;
+      padding: 1rem 0 2rem;
     }
 
     &-link {
@@ -671,11 +680,11 @@ export default defineComponent({
     }
 
     &-amount {
-      margin-top: 0.8rem;
+      margin-top: 0.5rem;
     }
 
     &-path {
-      margin-bottom: 2.4rem;
+      margin-bottom: 1.5rem;
       color: var(--muted);
     }
   }
@@ -685,16 +694,16 @@ export default defineComponent({
   background-image: url('~@/assets/images/blue-surfer-1.png');
   background-repeat: no-repeat;
   background-position: center;
-  width: 18.8rem;
-  height: 17.7rem;
+  width: 188px;
+  height: 177px;
   display: block;
   margin: 0 auto;
 }
 
 .send-another-button {
   @import '@/assets/scss/_elevation.scss';
-  margin-top: -2.4rem;
-  margin-bottom: 1.2rem;
+  margin-top: -1.5rem;
+  margin-bottom: 0.75rem;
   border-radius: $border-radius;
   background-color: var(--surface);
 }

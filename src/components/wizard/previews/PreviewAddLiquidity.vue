@@ -9,12 +9,12 @@
               <CircleSymbol :denom="poolInfo.denoms[1]" size="xs" class="pool__pair__symbols__token token-b" />
             </div>
 
-            <span class="pool__pair__name w-bold">{{ poolInfo.pairName }}</span>
+            <span class="pool__pair__name font-bold">{{ poolInfo.pairName }}</span>
           </div>
         </ListItem>
 
         <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-          <div class="s-minus">
+          <div class="-text-1">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
             <AmountDisplay :amount="{ amount: poolInfo.exchangeAmountPrice * 1e6, denom: data.coinB.denom }" />
           </div>
@@ -26,7 +26,7 @@
       <div class="supply__item">
         <div class="pool__item">
           <CircleSymbol :denom="data.coinA.denom" size="sm" class="pool__item__symbol" />
-          <AmountDisplay class="w-bold" :amount="data.coinA" />
+          <AmountDisplay class="font-bold" :amount="data.coinA" />
         </div>
         <span class="supply__item__chain"><ChainName :name="chainName" /></span>
       </div>
@@ -34,7 +34,7 @@
       <div class="supply__item">
         <div class="pool__item">
           <CircleSymbol :denom="data.coinB.denom" size="sm" class="pool__item__symbol" />
-          <AmountDisplay class="w-bold" :amount="data.coinB" />
+          <AmountDisplay class="font-bold" :amount="data.coinB" />
         </div>
         <span class="supply__item__chain"><ChainName :name="chainName" /></span>
       </div>
@@ -51,14 +51,14 @@
           size="sm"
           class="pool__item__symbol"
         />
-        <AmountDisplay class="w-bold" :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }" />
+        <AmountDisplay class="font-bold" :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }" />
       </div>
     </ListItem>
 
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
       <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
-          <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
+          <AmountDisplay class="-text-1" :amount="{ amount: amount, denom: denom }" />
         </template>
       </ListItem>
     </ListItem>
@@ -173,14 +173,14 @@ export default defineComponent({
   &__symbols {
     display: flex;
     align-items: center;
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
 
     &__token {
       z-index: 0;
 
       &.token-a {
         z-index: 1;
-        margin-right: -0.6rem;
+        margin-right: -0.375rem;
       }
     }
   }
@@ -192,17 +192,17 @@ export default defineComponent({
   justify-content: flex-end;
 
   &__symbol {
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
   }
 }
 .supply__item {
   & + & {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
   }
 
   &__chain {
-    margin-top: -0.5rem;
-    font-size: 1.2rem;
+    margin-top: -0.3125rem;
+    font-size: 0.8125rem;
   }
 }
 

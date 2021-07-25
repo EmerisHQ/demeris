@@ -1,6 +1,6 @@
 <template>
   <!-- Displays an icon
-		props: 
+		props:
 		  type: string (the icon to display)
 		//-->
   <div class="icon" :style="`font-size:${iconSize}rem; color: ${color}`">
@@ -18,7 +18,7 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    iconSize: { type: Number, required: false, default: 2.4 },
+    iconSize: { type: Number, required: false, default: 1.5 },
     color: { type: String, required: false, default: 'inherit' },
   },
 

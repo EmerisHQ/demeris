@@ -51,8 +51,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .alert {
-  padding: 1.4rem 1.6rem;
-  border-radius: 0.8rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   border: 1px solid transparent;
@@ -85,13 +85,13 @@ export default defineComponent({
   }
 
   &__icon {
-    font-size: 1.8rem;
+    font-size: 1.125rem;
     flex-shrink: 0;
   }
 
   &__content {
-    margin-left: 1.2rem;
-    font-size: 1.3rem;
+    margin-left: 0.75rem;
+    font-size: 0.8125rem;
     text-align: left;
     white-space: pre-wrap;
     word-break: break-all;

@@ -102,14 +102,14 @@ export default defineComponent({
   align-items: flex-start;
   justify-content: space-between;
   width: 100%;
-  padding: 1.6rem 0;
+  padding: 1rem 0;
 
   &--descripted {
     align-items: center;
   }
 
   &--inset {
-    padding: 0.6rem 0;
+    padding: 0.375rem 0;
   }
 
   &--row {
@@ -121,7 +121,7 @@ export default defineComponent({
   }
 
   &__label {
-    font-size: 1.2rem;
+    font-size: 0.8125rem;
     font-weight: 600;
   }
 
@@ -130,11 +130,11 @@ export default defineComponent({
   }
 
   &--column > &__content {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
   }
 
   &__description {
-    font-size: 1.2rem;
+    font-size: 0.8125rem;
     color: var(--muted);
   }
 
@@ -156,7 +156,7 @@ export default defineComponent({
     width: 100%;
 
     &__value {
-      font-size: 1.2rem;
+      font-size: 0.8125rem;
     }
   }
 
@@ -167,7 +167,7 @@ export default defineComponent({
   }
 
   &__collapse-button {
-    padding: 0.4rem;
+    padding: 0.25rem;
   }
 }
 </style>

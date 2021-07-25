@@ -140,11 +140,11 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     width: 50%;
-    margin-right: 0.6rem;
+    margin-right: 0.375rem;
 
     &__item {
       &:not(:last-child) {
-        margin-right: -1rem;
+        margin-right: -0.625rem;
       }
     }
   }

@@ -3,7 +3,7 @@
     <div class="settings-modal elevation-panel">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
-        <p class="settings-modal__label">
+        <p class="settings-modal__label text-muted">
           {{ $t('components.settingsMenu.connectedWallet') }}
         </p>
         <div class="connected-wallet">
@@ -59,7 +59,7 @@
           <div class="settings-header__action" @click="toggleAdvancedSettings">
             <Icon name="ArrowLeftIcon" :icon-size="2" />
           </div>
-          <div class="settings-header__title title-1-bold">{{ $t('components.settingsMenu.settings') }}</div>
+          <div class="settings-header__title text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
           <div class="settings-header__action" />
         </div>
         <div class="settings-modal__item">
@@ -72,7 +72,7 @@
         </div>
         <hr class="settings-modal__divider" />
         <div>
-          <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
+          <p class="settings-modal__label text-muted">{{ $t('components.settingsMenu.advancedSettings') }}</p>
           <button class="settings-modal__button" @click="confirmToggleSetting('allowCustomSlippage')">
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
@@ -103,9 +103,9 @@
       @close="toggleWarningCustomSlippage"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="2" />
       </div>
-      <div class="warning-modal__title title-1-bold">
+      <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.allowCustomSlippage') }}
       </div>
       <div class="warning-modal__body">
@@ -129,9 +129,9 @@
       @close="toggleWarningViewUnverified"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="2" />
       </div>
-      <div class="warning-modal__title title-1-bold">
+      <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.viewAllAssets') }}
       </div>
       <div class="warning-modal__body">
@@ -155,9 +155,9 @@
       @close="toggleWarningViewLPAssetPools"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="2" />
       </div>
-      <div class="warning-modal__title title-1-bold">
+      <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.viewLPAssetPools') }}
       </div>
       <div class="warning-modal__body">
@@ -279,17 +279,17 @@ export default defineComponent({
 .settings-modal {
   position: absolute;
   background: var(--bg);
-  border-radius: 1rem;
-  min-height: 4.8rem;
-  transform: translate(-14rem, 0.8rem);
-  width: 28rem;
+  border-radius: 0.625rem;
+  min-height: 3rem;
+  transform: translate(-8.75rem, 0.5rem);
+  width: 17.5rem;
   z-index: 50;
 
   &__item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 2.4rem;
+    padding: 0.75rem 1.5rem;
     width: 100%;
   }
 
@@ -297,7 +297,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.8rem 2.4rem;
+    padding: 0.5rem 1.5rem;
     width: 100%;
     transition: background ease-in-out 150ms;
     cursor: pointer;
@@ -319,19 +319,17 @@ export default defineComponent({
       }
     }
     &:last-child {
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.25rem;
     }
   }
 
   &__label {
-    padding: 0.95rem 2.4rem;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: var(--muted);
+    padding: 0.625rem 1.5rem;
+    font-size: 0.8125rem;
   }
 
   &__divider {
-    margin: 0.4rem 0;
+    margin: 0.25rem 0;
     border-top: 1px solid var(--border);
   }
 
@@ -339,8 +337,8 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 2.4rem;
-    font-size: 1.2rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.8125rem;
     color: var(--muted);
 
     &__item {
@@ -351,7 +349,7 @@ export default defineComponent({
       }
 
       &:after {
-        padding: 0 0.7rem;
+        padding: 0 0.4375rem;
         content: '\00b7';
       }
       &:last-child:after {
@@ -365,21 +363,21 @@ export default defineComponent({
   transform: rotate(45deg);
 }
 .connected-wallet {
-  margin-top: -0.8rem;
+  margin-top: -0.5rem;
 }
 .settings-header {
   display: flex;
   align-items: center;
-  height: 6.4rem;
-  padding: 0.8rem;
+  height: 4rem;
+  padding: 0.5rem;
 }
 .settings-header__title {
   flex: 1;
   text-align: center;
 }
 .settings-header__action {
-  height: 4.8rem;
-  width: 4.8rem;
+  height: 3rem;
+  width: 3rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -390,29 +388,29 @@ export default defineComponent({
   z-index: 51;
 }
 .warning-modal__icon {
-  height: 6.4rem;
+  height: 4rem;
   display: flex;
   justify-content: center;
-  margin: 0.8rem 0 1.6rem;
+  margin: 0.5rem 0 1rem;
 }
 .warning-modal__title {
-  margin-bottom: 2.4rem;
+  margin-bottom: 1.5rem;
 }
 .warning-modal__title,
 .warning-modal__body {
   text-align: center;
-  margin-bottom: 1.6rem;
+  margin-bottom: 1rem;
 }
 .warning-modal__body p {
-  margin-bottom: 1.6rem;
+  margin-bottom: 1rem;
   line-height: 162.5%;
   color: var(--muted);
 }
 .warning-modal__actions {
   border-top: 1px solid var(--border);
-  height: 6.4rem;
+  height: 4rem;
   display: flex;
-  margin: 3.2rem -2.4rem -2.4rem;
+  margin: 2rem -1.5rem -1.5rem;
 }
 .warning-modal__action {
   flex: 1;

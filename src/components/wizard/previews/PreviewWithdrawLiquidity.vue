@@ -16,12 +16,12 @@
                 class="pool__item__symbols__symbol token-b"
               />
             </div>
-            <div class="pool__item__name w-bold">{{ pairName }}</div>
+            <div class="pool__item__name font-bold">{{ pairName }}</div>
           </div>
         </ListItem>
 
         <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-          <div class="s-minus">
+          <div class="-text-1">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
             <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
           </div>
@@ -33,7 +33,7 @@
       <div class="supply__item">
         <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
         <div class="supply__item__amount">
-          <AmountDisplay class="w-bold" :amount="data.poolCoin" />
+          <AmountDisplay class="font-bold" :amount="data.poolCoin" />
           <span class="supply__item__chain"><ChainName :name="chainName" /></span>
         </div>
       </div>
@@ -51,7 +51,7 @@
             size="sm"
             class="receive__item__symbol"
           />
-          <AmountDisplay class="w-bold" :amount="receiveAmount.coinA" />
+          <AmountDisplay class="font-bold" :amount="receiveAmount.coinA" />
         </div>
         <span class="receive__item__chain"><ChainName :name="chainName" /></span>
       </div>
@@ -64,7 +64,7 @@
             size="sm"
             class="receive__item__symbol"
           />
-          <AmountDisplay class="w-bold" :amount="receiveAmount.coinB" />
+          <AmountDisplay class="font-bold" :amount="receiveAmount.coinB" />
         </div>
         <span class="receive__item__chain"><ChainName :name="chainName" /></span>
       </div>
@@ -73,7 +73,7 @@
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
       <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
-          <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
+          <AmountDisplay class="-text-1" :amount="{ amount: amount, denom: denom }" />
         </template>
       </ListItem>
     </ListItem>
@@ -161,14 +161,14 @@ export default defineComponent({
 
   &__symbols {
     display: inline-flex;
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
 
     .token-a {
       z-index: 1;
     }
 
     .token-b {
-      margin-left: -0.6rem;
+      margin-left: -0.375rem;
     }
   }
 }
@@ -178,7 +178,7 @@ export default defineComponent({
   align-items: flex-start;
 
   &__symbol {
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
   }
 
   &__amount {
@@ -187,7 +187,7 @@ export default defineComponent({
   }
 
   &__chain {
-    font-size: 1.2rem;
+    font-size: 0.8125rem;
   }
 }
 .receive__item {
@@ -196,14 +196,14 @@ export default defineComponent({
     align-items: flex-start;
   }
   & + & {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
   }
   &__symbol {
-    margin-right: 0.8rem;
+    margin-right: 0.5rem;
   }
   &__chain {
     display: block;
-    font-size: 1.2rem;
+    font-size: 0.8125rem;
   }
 }
 

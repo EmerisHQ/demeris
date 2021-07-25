@@ -87,7 +87,7 @@
 
           <div
             class="border rounded-lg overflow-hidden elevation-card relative p-10"
-            :style="{ width: '30rem', height: '30rem' }"
+            :style="{ width: '18rem', height: '18rem' }"
           >
             <Button name="Send Transaction" @click="modalIsOpen = 'send'" />
 
@@ -279,7 +279,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .icons {
-  font-size: 1.6rem;
+  font-size: 1rem;
   color: red;
 }
 </style>

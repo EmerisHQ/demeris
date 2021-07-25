@@ -2,7 +2,7 @@
   <div class="withdraw-liquidity" :class="{ 'withdraw-liquidity--insufficient-funds': !hasSufficientFunds }">
     <header class="withdraw-liquidity__header">
       <button class="withdraw-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
+        <Icon name="ArrowLeftIcon" :icon-size="1" />
       </button>
 
       <nav class="withdraw-liquidity__steps">
@@ -17,13 +17,13 @@
       </nav>
 
       <button class="withdraw-liquidity__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+        <Icon name="CloseIcon" :icon-size="1" />
       </button>
     </header>
 
     <main class="withdraw-liquidity__wrapper">
       <template v-if="state.step === 'amount'">
-        <h2 class="withdraw-liquidity__title s-2">Withdraw liquidity</h2>
+        <h2 class="withdraw-liquidity__title text-2">Withdraw liquidity</h2>
 
         <div class="withdraw-liquidity__pool">
           <span class="withdraw-liquidity__pool__name">{{ pairName }}</span>
@@ -36,7 +36,7 @@
             :min-width="32"
             prefix="$"
             placeholder="0"
-            class="withdraw-liquidity__estimated__price s-2 w-bold"
+            class="withdraw-liquidity__estimated__price text-2 font-bold"
             @input="currencyAmountHandler"
           />
           <label class="withdraw-liquidity__estimated__max">
@@ -59,7 +59,7 @@
 
           <div class="withdraw-liquidity__input amount-input elevation-card">
             <div class="withdraw-liquidity__input__main">
-              <label class="withdraw-liquidity__input__label s-minus">Withdraw</label>
+              <label class="withdraw-liquidity__input__label -text-1">Withdraw</label>
               <div>
                 <DenomSelect
                   v-model:amount="state.amount"
@@ -73,7 +73,7 @@
 
             <div class="withdraw-liquidity__input__details">
               <button class="withdraw-liquidity__input__details__from" @click="toggleChainsModal()">
-                From <span class="w-bold"><ChainName :name="state.selectedAsset.on_chain" /></span>
+                From <span class="font-bold"><ChainName :name="state.selectedAsset.on_chain" /></span>
               </button>
 
               <div class="withdraw-liquidity__input__details__available">
@@ -87,7 +87,7 @@
 
           <div class="withdraw-liquidity__input receive-input elevation-card">
             <div class="withdraw-liquidity__input__main">
-              <label class="withdraw-liquidity__input__label s-minus">Receive</label>
+              <label class="withdraw-liquidity__input__label -text-1">Receive</label>
               <div class="withdraw-liquidity__input__select-wrapper token-a">
                 <DenomSelect
                   v-model:amount="state.receiveAmounts.coinA.amount"
@@ -537,7 +537,7 @@ export default {
 <style lang="scss">
 .withdraw-liquidity {
   position: relative;
-  padding-bottom: 2rem;
+  padding-bottom: 1.25rem;
 
   &--insufficient-funds &__input__details__available {
     color: var(--negative-text);
@@ -555,27 +555,27 @@ export default {
 
   &__transfer-info {
     width: 100%;
-    margin-top: 3.2rem;
+    margin-top: 2rem;
   }
 
   &__controls {
     width: 100%;
-    margin-top: 3.2rem;
+    margin-top: 2rem;
 
     &__fees {
-      margin-top: 2.4rem;
-      margin-left: -2.4rem;
-      margin-right: -2.4rem;
+      margin-top: 1.5rem;
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
     }
   }
 
   &__estimated {
-    margin-top: 3.2rem;
+    margin-top: 2rem;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 42rem;
+    max-width: 27rem;
     width: 100%;
     text-align: center;
     line-height: 1;
@@ -586,7 +586,7 @@ export default {
     }
 
     &__max {
-      margin-top: -0.6rem;
+      margin-top: -0.375rem;
       position: absolute;
       right: 0;
 
@@ -595,9 +595,9 @@ export default {
       }
 
       span {
-        border-radius: 2.4rem;
-        padding: 1rem 1.6rem;
-        font-size: 1.2rem;
+        border-radius: 1.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
         cursor: pointer;
       }
 
@@ -613,15 +613,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3rem 4rem;
+    padding: 2rem 2.5rem;
     background: var(--bg);
 
     &__button {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
+      border-radius: 0.5rem;
+      padding: 0.375rem;
 
       &:disabled {
         cursor: not-allowed;
@@ -638,7 +638,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3.1rem;
+    margin-top: 2rem;
   }
 
   &__steps {
@@ -654,7 +654,7 @@ export default {
       cursor: default;
 
       & + & {
-        margin-left: 4.8rem;
+        margin-left: 3rem;
       }
       &--active {
         color: var(--text);
@@ -664,7 +664,7 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 42rem;
+    max-width: 27rem;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -672,8 +672,8 @@ export default {
   }
 
   &__price {
-    font-size: 1.2rem;
-    margin-top: 3.2rem;
+    font-size: 0.8125rem;
+    margin-top: 2rem;
     width: 100%;
     display: flex;
     align-items: center;
@@ -685,21 +685,21 @@ export default {
   }
 
   &__pool {
-    margin-top: 1.6rem;
+    margin-top: 1rem;
 
     &__pair {
       display: inline-flex;
       align-items: center;
-      margin-right: 0.8rem;
+      margin-right: 0.5rem;
 
       &__avatar {
-        width: 1.4rem;
-        height: 1.4rem;
-        border-radius: 2.4rem;
+        width: 0.875rem;
+        height: 0.875rem;
+        border-radius: 1.5rem;
         background: #ddd;
 
         & + & {
-          margin-left: -0.4rem;
+          margin-left: -0.25rem;
           background: #aaa;
         }
       }
@@ -712,36 +712,36 @@ export default {
 
   &__input {
     width: 100%;
-    border-radius: 1rem;
+    border-radius: 0.625rem;
     background: var(--bg);
 
     &.amount-input {
-      margin-top: 3.2rem;
+      margin-top: 2rem;
     }
 
     &.receive-input {
-      margin-top: 1.6rem;
+      margin-top: 1rem;
     }
 
     &__divider {
-      margin: 1.2rem -1.6rem 1.2rem 3.6rem;
+      margin: 0.75rem -1rem 0.75rem 2.25rem;
       border-top: 1px solid var(--border);
     }
 
     &__main {
-      padding: 1.6rem;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
     }
 
     &__label {
       color: var(--muted);
-      margin-bottom: 1.6rem;
+      margin-bottom: 1rem;
     }
 
     &__details {
-      padding: 1.2rem 1.6rem;
-      font-size: 1.2rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.8125rem;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;

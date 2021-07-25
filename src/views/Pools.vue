@@ -33,9 +33,9 @@ export default {
 <style lang="scss" scoped>
 .pools {
   &__title {
-    font-size: 5.1rem;
+    font-size: 3.1875rem;
     font-weight: 700;
-    margin-bottom: 3.2rem;
+    margin-bottom: 2rem;
   }
 }
 </style>
