@@ -165,16 +165,16 @@ export async function transfer({
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
     const primaryChannel =
       store.getters['demeris/getPrimaryChannel']({
-        chain_name: verifyTrace.trace[0].counterparty_name,
-        destination_chain_name: destination_chain_name,
+        chain_name: chain_name,
+        destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
         'demeris/GET_PRIMARY_CHANNEL',
         {
           subscribe: true,
           params: {
-            chain_name: verifyTrace.trace[0].counterparty_name,
-            destination_chain_name: destination_chain_name,
+            chain_name: chain_name,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           },
         },
         { root: true },
@@ -357,16 +357,16 @@ export async function move({
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
     const primaryChannel =
       store.getters['demeris/getPrimaryChannel']({
-        chain_name: verifyTrace.trace[0].counterparty_name,
-        destination_chain_name: destination_chain_name,
+        chain_name: chain_name,
+        destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
         'demeris/GET_PRIMARY_CHANNEL',
         {
           subscribe: true,
           params: {
-            chain_name: verifyTrace.trace[0].counterparty_name,
-            destination_chain_name: destination_chain_name,
+            chain_name: chain_name,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           },
         },
         { root: true },
@@ -1164,14 +1164,14 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 
       const primaryChannel =
         store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: balance.on_chain,
+          chain_name: balance.on_chain,
+          destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
           'demeris/GET_PRIMARY_CHANNEL',
           {
             subscribe: true,
-            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: balance.on_chain },
+            params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
           },
           { root: true },
         ));
@@ -1214,14 +1214,14 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 
       const primaryChannel =
         store.getters['demeris/getPrimaryChannel']({
-          chain_name: verifyTrace.trace[0].counterparty_name,
-          destination_chain_name: balance.on_chain,
+          chain_name: balance.on_chain,
+          destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
           'demeris/GET_PRIMARY_CHANNEL',
           {
             subscribe: false,
-            params: { chain_name: verifyTrace.trace[0].counterparty_name, destination_chain_name: balance.on_chain },
+            params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
           },
           { root: true },
         ));
