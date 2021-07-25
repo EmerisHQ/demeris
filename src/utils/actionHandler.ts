@@ -1557,6 +1557,7 @@ export async function validateStepFeeBalances(
       }
     }
   }
+
   for (const chain_name in fees) {
     for (const denom in fees[chain_name]) {
       const feeBalance = balances.find((x) => {

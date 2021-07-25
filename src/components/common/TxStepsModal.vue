@@ -80,8 +80,6 @@
               })
             }}
           </div>
-          <Button :name="$t('generic_cta.cancel')" />
-          <Button :name="$t('generic_cta.proceed')" />
         </template>
         <template #buttons>
           <template v-if="feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom == 'uatom'">
