@@ -240,8 +240,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrimaryChannel: (state) => (params) => {
     return (
-      state.chains[(params as API.ChainReq).destination_chain_name]?.primary_channel[
-        (params as API.ChainReq).chain_name
+      state.chains[(params as API.ChainReq).chain_name]?.primary_channel[
+        (params as API.ChainReq).destination_chain_name
       ] ?? null
     );
   },
