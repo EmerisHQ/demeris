@@ -941,7 +941,7 @@ export default defineComponent({
     &-divider {
       width: 100%;
       height: 1px;
-      background-color: var(--border-trans);
+      background-color: var(--border);
     }
 
     &-wrapper {
@@ -1006,7 +1006,7 @@ export default defineComponent({
           height: 4.9rem;
           color: var(--text);
 
-          background-color: var(--fg-trans);
+          background-color: var(--fg);
 
           border-radius: 8px;
 

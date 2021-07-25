@@ -725,7 +725,7 @@ export default {
 
     &__divider {
       margin: 1.2rem -1.6rem 1.2rem 3.6rem;
-      border-top: 1px solid var(--border-trans);
+      border-top: 1px solid var(--border);
     }
 
     &__main {

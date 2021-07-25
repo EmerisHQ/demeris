@@ -105,7 +105,7 @@ export default defineComponent({
 
 .outline-theme {
   color: var(--text);
-  /* border: 1px solid var(--border-trans); */
+  /* border: 1px solid var(--border); */
   background-color: transparent;
 }
 </style>

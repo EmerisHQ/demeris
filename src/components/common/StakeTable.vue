@@ -77,7 +77,7 @@ export default defineComponent({
 .stake {
   &__banner {
     background: var(--bg);
-    border: 1px solid var(--border-trans);
+    border: 1px solid var(--border);
     border-radius: 1.6rem;
     padding: 2.4rem;
     display: flex;

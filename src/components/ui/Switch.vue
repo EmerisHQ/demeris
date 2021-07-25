@@ -57,7 +57,7 @@ export default defineComponent({
     height: 2.4rem;
     min-width: 4rem;
     border-radius: 1.2rem;
-    background: var(--fg-trans);
+    background: var(--fg);
     cursor: pointer;
     flex-shrink: 0;
     padding: 0.3rem;

@@ -325,7 +325,7 @@ export default defineComponent({
     text-align: center;
 
     &__placeholder {
-      background: var(--fg-trans);
+      background: var(--fg);
       width: 36rem;
       height: 15rem;
       margin-top: 3.4rem;

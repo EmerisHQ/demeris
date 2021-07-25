@@ -332,7 +332,7 @@ export default defineComponent({
 
   &__divider {
     margin: 0.4rem 0;
-    border-top: 1px solid var(--border-trans);
+    border-top: 1px solid var(--border);
   }
 
   &__list {
@@ -409,7 +409,7 @@ export default defineComponent({
   color: var(--muted);
 }
 .warning-modal__actions {
-  border-top: 1px solid var(--border-trans);
+  border-top: 1px solid var(--border);
   height: 6.4rem;
   display: flex;
   margin: 3.2rem -2.4rem -2.4rem;
@@ -425,6 +425,6 @@ export default defineComponent({
   cursor: pointer;
 }
 .warning-modal__action:not(:last-child) {
-  border-right: 1px solid var(--border-trans);
+  border-right: 1px solid var(--border);
 }
 </style>

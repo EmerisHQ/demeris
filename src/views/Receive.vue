@@ -202,7 +202,7 @@ export default {
       &__qr {
         width: 100%;
         height: 38rem;
-        background: var(--border-trans);
+        background: var(--border);
         border-radius: 1rem;
         margin: 3.2rem auto;
 

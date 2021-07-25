@@ -677,7 +677,7 @@ export default defineComponent({
       }
 
       & + & {
-        border-top: 1px solid var(--border-trans);
+        border-top: 1px solid var(--border);
       }
 
       &__asset {

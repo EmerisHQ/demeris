@@ -274,7 +274,7 @@ export default defineComponent({
         height: 4.9rem;
         color: var(--text);
 
-        background-color: var(--fg-trans);
+        background-color: var(--fg);
 
         border-radius: 8px;
 

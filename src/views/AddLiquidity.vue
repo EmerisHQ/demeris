@@ -1129,7 +1129,7 @@ export default {
   &__receive {
     width: 100%;
     border-radius: 1rem;
-    border: 1px solid var(--border-trans);
+    border: 1px solid var(--border);
     padding: 1.6rem;
     margin-top: 3rem;
 
@@ -1185,7 +1185,7 @@ export default {
     text-align: center;
 
     &__placeholder {
-      background: var(--fg-trans);
+      background: var(--fg);
       width: 36rem;
       height: 15rem;
       margin-top: 3.4rem;

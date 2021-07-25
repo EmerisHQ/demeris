@@ -111,11 +111,11 @@ export default defineComponent({
   padding: 0.4rem 0.8rem;
 
   &--open {
-    background: var(--fg-trans);
+    background: var(--fg);
   }
 
   &:hover {
-    background: var(--fg-trans);
+    background: var(--fg);
     cursor: pointer;
   }
 }

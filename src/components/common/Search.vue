@@ -57,7 +57,7 @@ export default defineComponent({
   position: relative;
   display: flex;
   overflow: hidden;
-  background-color: var(--fg-trans);
+  background-color: var(--fg);
   padding: 0.2rem;
   border-radius: 10px;
 
@@ -73,7 +73,7 @@ export default defineComponent({
     width: 100%;
     outline: none;
     padding: 0.95rem 1rem 0.95rem 3.9rem;
-    background-color: var(--fg-trans);
+    background-color: var(--fg);
     border-radius: 10px;
   }
 

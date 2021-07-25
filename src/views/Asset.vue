@@ -350,7 +350,7 @@ export default defineComponent({
       }
       &__card {
         margin-top: 2.6rem;
-        border: 1px solid var(--border-trans);
+        border: 1px solid var(--border);
         border-radius: 1.2rem;
         padding: 1.6rem;
         display: flex;
@@ -438,7 +438,7 @@ export default defineComponent({
         margin-top: 3rem;
         padding: 1.6rem 2.4rem;
         border-radius: 1.2rem;
-        background: var(--fg-trans);
+        background: var(--fg);
         display: flex;
         align-items: center;
 

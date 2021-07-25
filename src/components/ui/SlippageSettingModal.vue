@@ -305,7 +305,7 @@ export default defineComponent({
       &-block {
         width: 5.2rem;
         height: 4rem;
-        background-color: var(--fg-trans);
+        background-color: var(--fg);
 
         border-radius: 8px;
 

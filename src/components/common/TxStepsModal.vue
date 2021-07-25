@@ -693,7 +693,7 @@ export default defineComponent({
   .divider {
     margin: 0 2.4rem;
     height: 1px;
-    background-color: var(--border-trans);
+    background-color: var(--border);
   }
 
   .detail {
@@ -738,7 +738,7 @@ export default defineComponent({
   .warn {
     margin: 0 2.4rem;
     padding: 1.2rem;
-    border: 1px solid var(--border-trans);
+    border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 8px;
   }

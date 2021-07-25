@@ -22,7 +22,7 @@ export default defineComponent({
 .list {
   &--divided {
     & > .list-item:not(.list-item--inset) + .list-item {
-      border-top: 1px solid var(--border-trans);
+      border-top: 1px solid var(--border);
     }
   }
 }
