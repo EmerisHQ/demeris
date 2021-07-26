@@ -49,7 +49,7 @@
       <Modal
         v-if="feeWarning.feeWarning"
         class="fee-warning-modal"
-        :modal-variant="asWidget ? 'bottom' : 'full'"
+        :modal-variant="varaint == 'widget' ? 'bottom' : 'full'"
         @close="
           () => {
             feeWarning.feeWarning = false;
@@ -91,11 +91,11 @@
               :name="$t('generic_cta.cancel')"
               :click-function="
                 () => {
-                  emitHandler('close');
+                  feeWarning.feeWarning = false;
                 }
               "
             />
-            <ModalButton :name="$t('generic_cta.getAtom')" />
+            <ModalButton :name="$t('generic_cta.getAtom')" :click-function="() => {}" />
           </template>
           <template
             v-if="
@@ -107,7 +107,7 @@
               :name="$t('generic_cta.understand')"
               :click-function="
                 () => {
-                  emitHandler('close');
+                  feeWarning.feeWarning = false;
                 }
               "
             />
