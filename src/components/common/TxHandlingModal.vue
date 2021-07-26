@@ -1,6 +1,7 @@
 <template>
   <Modal
     :variant="modalVariant ?? 'full'"
+    :class="modalVariant === 'full' ? '!relative' : ''"
     :show-close-button="false"
     :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
     @close="emitClose"
@@ -127,9 +128,19 @@
               Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
               Hub.
             </template>
-            <Collapse v-if="error" label-open="Show details" label-hide="Hide details" class="status__error-collapse">
-              <Alert status="error" :show-icon="false">
-                <p>{{ error }}</p>
+            <Collapse
+              v-if="errorDetails"
+              label-open="Show details"
+              label-hide="Hide details"
+              class="status__error-collapse"
+            >
+              <Alert status="info" :show-icon="false">
+                <p class="status__error__item__key">Status</p>
+                <p class="status__error__item">{{ errorDetails.status }}</p>
+                <p class="status__error__item__key">Ticket</p>
+                <p class="status__error__item">{{ errorDetails.ticket }}</p>
+                <p v-if="errorDetails.message" class="status__error__item__key">Error</p>
+                <p v-if="errorDetails.message" class="status__error__item">{{ errorDetails.message }}</p>
               </Alert>
             </Collapse>
           </div>
@@ -241,8 +252,8 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
-    error: {
-      type: String,
+    errorDetails: {
+      type: Object,
       default: undefined,
     },
     txResult: {
@@ -487,6 +498,17 @@ export default defineComponent({
   &__error-collapse {
     align-items: center;
     margin-top: 2rem;
+  }
+
+  &__error__item {
+    & + &__key {
+      margin-top: 1.6rem;
+    }
+    &__key {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
   }
 
   &__title {

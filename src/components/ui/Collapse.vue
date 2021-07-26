@@ -4,7 +4,7 @@ import { nextTick, reactive, watch } from 'vue';
 import Icon from '@/components/ui/Icon.vue';
 
 const props = defineProps({
-  modelValue: {
+  isOpen: {
     type: Boolean,
     default: false,
   },
@@ -22,16 +22,16 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:isOpen']);
 
 const state = reactive({
   height: '0',
-  isOpen: props.modelValue,
+  isOpen: props.isOpen,
 });
 
 const toggle = () => {
   state.isOpen = !state.isOpen;
-  emit('update:modelValue', state.isOpen);
+  emit('update:isOpen', state.isOpen);
 };
 
 const enter = (el: Element) => {
@@ -50,7 +50,7 @@ const leave = (el: Element) => {
 };
 
 watch(props, () => {
-  state.isOpen = props.modelValue;
+  state.isOpen = props.isOpen;
 });
 </script>
 

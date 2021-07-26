@@ -1,5 +1,8 @@
 <template>
-  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }">
+  <div
+    class="tx-steps denom-select-modal-wrapper"
+    :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
+  >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('goback')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
@@ -10,36 +13,38 @@
     </template>
 
     <template v-else>
-      <div class="title s-2 w-bold">
-        {{ currentData.title }}
-      </div>
+      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
+        <div class="title s-2 w-bold">
+          {{ currentData.title }}
+        </div>
 
-      <div v-if="currentData && currentData.fees" class="detail">
-        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
-        <PreviewAddLiquidity
-          v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewWithdrawLiquidity
-          v-else-if="currentData.data.name === 'withdrawliquidity'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewRedeem
-          v-else-if="currentData.data.name === 'redeem'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
-      </div>
+        <div v-if="currentData && currentData.fees" class="detail">
+          <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+          <PreviewAddLiquidity
+            v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewWithdrawLiquidity
+            v-else-if="currentData.data.name === 'withdrawliquidity'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewRedeem
+            v-else-if="currentData.data.name === 'redeem'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+        </div>
 
-      <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
-        Non-revertable transactions. Prices not guaranteed etc.
-      </div>
+        <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+          Non-revertable transactions. Prices not guaranteed etc.
+        </div>
 
-      <div class="button-wrapper">
-        <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+        <div class="button-wrapper">
+          <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+        </div>
       </div>
     </template>
 
@@ -51,7 +56,7 @@
       :has-more="hasMore"
       :tx="transaction"
       :is-final="isFinal"
-      :error="errorMessage"
+      :error-details="errorDetails"
       @next="nextTx"
       @retry="
         () => {
@@ -181,7 +186,8 @@ export default defineComponent({
     };
     const currentStep = ref(0);
     const txstatus = ref('keplr-sign');
-    const errorMessage = ref(undefined);
+    const errorDetails = ref(undefined);
+
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
 
@@ -269,7 +275,7 @@ export default defineComponent({
               continue;
             }
             if (tx) {
-              errorMessage.value = undefined;
+              errorDetails.value = undefined;
               emit('transacting');
               txstatus.value = 'transacting';
               let result;
@@ -277,7 +283,10 @@ export default defineComponent({
                 result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
               } catch (e) {
                 console.error(e);
-                errorMessage.value = e.message;
+                errorDetails.value = {
+                  message: e.message,
+                  ticket: result.ticket,
+                };
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -305,16 +314,19 @@ export default defineComponent({
                 }
 
                 if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
-                  let errorMessage = `Demeris:Ticket - Status: "${txResultData.status}"; Ticket: "${
-                    result.ticket
-                  }"; Action: "${props.actionName}"; Transaction: "${JSON.stringify(stepTx)}"`;
+                  const details = {
+                    status: txResultData.status,
+                    ticket: result.ticket,
+                  };
+
                   if (txResultData.error) {
-                    errorMessage += `; Error: "${txResultData.error}"`;
+                    details['message'] = txResultData.error;
                   }
-                  throw new Error(errorMessage);
+                  errorDetails.value = details;
+                  throw new Error(txResultData.error || txResultData.status);
                 }
 
-                errorMessage.value = undefined;
+                errorDetails.value = undefined;
 
                 if (currentData.value.data.name === 'swap') {
                   const result = {
@@ -379,7 +391,9 @@ export default defineComponent({
                 await txToResolve.value['promise'];
               } catch (e) {
                 console.error(e);
-                errorMessage.value = e.message;
+                if (errorDetails.value === undefined) {
+                  errorDetails.value = e.message;
+                }
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -437,13 +451,20 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
-      errorMessage,
+      errorDetails,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
+.tx-steps {
+  &--widget &__content {
+    max-height: 50rem;
+    overflow: scroll;
+  }
+}
+
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;

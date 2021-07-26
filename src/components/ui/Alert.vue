@@ -95,6 +95,7 @@ export default defineComponent({
     font-size: 1.3rem;
     text-align: left;
     white-space: pre-wrap;
+    word-break: break-all;
   }
 }
 </style>
