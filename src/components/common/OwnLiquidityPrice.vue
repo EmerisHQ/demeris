@@ -1,9 +1,5 @@
 <template>
-  {{
-    showShare
-      ? toUSD(ownLiquidityPrice) + ' (' + ((100 * ownLiquidityPrice) / totalLiquidityPrice).toFixed(2) + '%)'
-      : toUSD(ownLiquidityPrice)
-  }}
+  {{ showShare ? toUSD(ownLiquidityPrice) + ' (' + ownShare + '%)' : toUSD(ownLiquidityPrice) }}
 </template>
 
 <script lang="ts">
@@ -49,14 +45,20 @@ export default defineComponent({
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       });
-      return formatter.format(value);
+      return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
     const { getReserveBaseDenoms } = usePools();
 
-    const totalLiquidityPrice = ref();
-
-    const ownLiquidityPrice = ref();
+    const totalLiquidityPrice = ref(0);
+    const ownShare = computed(() => {
+      let result = 0;
+      if (ownLiquidityPrice.value && totalLiquidityPrice.value) {
+        result = (100 * ownLiquidityPrice.value) / totalLiquidityPrice.value;
+      }
+      return Number.isFinite(result) ? result.toFixed(2) : '0.00';
+    });
+    const ownLiquidityPrice = ref(0);
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
         return;
@@ -180,7 +182,7 @@ export default defineComponent({
     watch(reserveBalances, updateTotalLiquidityPrice);
 
     watch(walletBalances, updateOwnLiquidityPrice);
-    return { totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { ownShare, totalLiquidityPrice, ownLiquidityPrice, toUSD };
   },
 });
 </script>

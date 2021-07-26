@@ -1,9 +1,9 @@
 <template>
-  {{ toUSD(totalLiquidityPrice) }}
+  {{ hasPrices ? toUSD(totalLiquidityPrice) : '-' }}
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import usePool from '@/composables/usePool';
@@ -26,7 +26,7 @@ export default defineComponent({
 
   setup(props) {
     const { pool, reserveBalances } = usePool((props.pool as Pool).id);
-
+    const denoms = ref(pool.value.reserve_coin_denoms);
     const store = useStore();
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
@@ -41,7 +41,18 @@ export default defineComponent({
     };
     const { getReserveBaseDenoms } = usePools();
 
-    const totalLiquidityPrice = ref();
+    const totalLiquidityPrice = ref(0);
+
+    const hasPrices = computed(() => {
+      const priceA = store.getters['demeris/getPrice']({ denom: denoms.value[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: denoms.value[1] });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
+    });
 
     const updateTotalLiquidityPrice = async () => {
       if (!pool.value) {
@@ -49,6 +60,7 @@ export default defineComponent({
       }
 
       const reserveDenoms = await getReserveBaseDenoms(pool.value);
+      denoms.value = reserveDenoms;
 
       let total = 0;
 
@@ -64,7 +76,7 @@ export default defineComponent({
 
     watch(reserveBalances, updateTotalLiquidityPrice);
 
-    return { totalLiquidityPrice, toUSD };
+    return { hasPrices, totalLiquidityPrice, toUSD };
   },
 });
 </script>

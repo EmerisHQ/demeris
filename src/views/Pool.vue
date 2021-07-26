@@ -11,7 +11,7 @@
             </div>
             <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
-          <h1 class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
+          <h1 v-if="hasPrices" class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
         </section>
 
         <section v-if="reserveBalances" class="pool__main__assets">
@@ -23,7 +23,7 @@
                 <th class="text-left">Asset</th>
                 <th class="text-right">Quantity</th>
                 <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th v-if="hasPrices" class="text-right">Allocation</th>
               </tr>
             </thead>
 
@@ -40,7 +40,7 @@
                 </td>
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
                 <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold"><Price :amount="balance" /></td>
+                <td v-if="hasPrices" class="text-right w-bold"><Price :amount="balance" /></td>
               </tr>
             </tbody>
           </table>
@@ -55,7 +55,7 @@
                 <th class="text-left">Asset</th>
                 <th class="text-right">Ticker</th>
                 <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th v-if="hasPrices" class="text-right">Allocation</th>
               </tr>
             </thead>
 
@@ -69,7 +69,7 @@
                   <Ticker :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="text-right"><Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold">{{ toUSD(totalLiquidityPrice) }}</td>
+                <td v-if="hasPrices" class="text-right w-bold">{{ toUSD(totalLiquidityPrice) }}</td>
               </tr>
             </tbody>
           </table>
@@ -104,7 +104,7 @@
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p class="pool-equity__stats__balance s-2 w-bold">
+                <p v-if="hasPrices" class="pool-equity__stats__balance s-2 w-bold">
                   {{ toUSD(ownLiquidityPrice) }}
                 </p>
                 <span class="pool-equity__stats__share s-minus"> {{ ownLiquidityShare }}% of pool </span>
@@ -123,7 +123,8 @@
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinA" />
                   </span>
-                  <span><Price :amount="walletBalances.coinA" /></span>
+                  <span v-if="hasPrices"><Price :amount="walletBalances.coinA" /></span>
+                  <span v-else>-</span>
                 </li>
                 <li class="pool-equity__assets__list__item">
                   <CircleSymbol
@@ -207,10 +208,26 @@ export default defineComponent({
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       });
-      return formatter.format(value);
+      return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
     const { formatPoolName, poolsByDenom, getReserveBaseDenoms } = usePools();
+
+    const hasPrices = computed(() => {
+      let baseDenoms = denoms.value;
+      if (!baseDenoms.length) {
+        baseDenoms = pool.value.reserve_coin_denoms;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
+    });
 
     const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool(
       computed(() => route.params.id as string),
@@ -402,6 +419,7 @@ export default defineComponent({
     watch(walletBalances, updateOwnLiquidityPrice);
 
     return {
+      hasPrices,
       pool,
       pairName,
       reserveBalances,
