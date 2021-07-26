@@ -82,15 +82,13 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      window.addEventListener('load', () => {
-        // detect chrome extension support
-        // @ts-ignore
-        isKeplrSupported.value = !!window.chrome;
+      // detect chrome extension support
+      // @ts-ignore
+      isKeplrSupported.value = !!window.chrome;
 
-        // detect keplr installed
-        // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
+      // detect keplr installed
+      // @ts-ignore
+      isKeplrInstalled.value = !!window.keplr;
     });
 
     return {
