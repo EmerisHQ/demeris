@@ -1281,10 +1281,6 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
     }
   }
 
-  for (const pool of validPools) {
-    console.log("validPoolCoins ", pool.reserve_coin_denoms[0], pool.reserve_coin_denoms[1]);
-  }
-
   return validPools;
 }
 
