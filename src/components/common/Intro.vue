@@ -17,7 +17,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .intro {
-  margin-bottom: 2.6rem;
+  margin-top: 2.6rem;
   position: relative;
 }
 .label {

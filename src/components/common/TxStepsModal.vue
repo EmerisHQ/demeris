@@ -1,7 +1,9 @@
 <template>
-  <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
-    <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
-
+  <div
+    class="tx-steps denom-select-modal-wrapper"
+    :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
+  >
+    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -11,46 +13,50 @@
     </template>
 
     <template v-else>
-      <div class="title s-2 w-bold">
-        {{ currentData.title }}
-      </div>
+      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
+        <div class="title s-2 w-bold">
+          {{ currentData.title }}
+        </div>
 
-      <div v-if="currentData && currentData.fees" class="detail">
-        <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
-        <PreviewAddLiquidity
-          v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewWithdrawLiquidity
-          v-else-if="currentData.data.name === 'withdrawliquidity'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewRedeem
-          v-else-if="currentData.data.name === 'redeem'"
-          :step="currentData.data"
-          :fees="currentData.fees"
-        />
-        <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
-      </div>
+        <div v-if="currentData && currentData.fees" class="detail">
+          <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+          <PreviewAddLiquidity
+            v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewWithdrawLiquidity
+            v-else-if="currentData.data.name === 'withdrawliquidity'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewRedeem
+            v-else-if="currentData.data.name === 'redeem'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+          />
+          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+        </div>
 
-      <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
-        Non-revertable transactions. Prices not guaranteed etc.
-      </div>
+        <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+          Non-revertable transactions. Prices not guaranteed etc.
+        </div>
 
-      <div class="button-wrapper">
-        <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+        <div class="button-wrapper">
+          <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+        </div>
       </div>
     </template>
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
-      :modal-variant="asWidget ? 'bottom' : 'full'"
+      :modal-variant="variant === 'widget' ? 'bottom' : 'full'"
       :status="txstatus"
+      :tx-result="txResult"
       :has-more="hasMore"
       :tx="transaction"
       :is-final="isFinal"
+      :error-details="errorDetails"
       @next="nextTx"
       @retry="
         () => {
@@ -66,12 +72,13 @@
       "
       @done="
         () => {
-          emitHandler('done');
           if (transaction.name == 'swap') {
             emitHandler('reset');
           } else {
             nextTx();
-            goBack();
+            if (!hasMore) {
+              goBack();
+            }
           }
         }
       "
@@ -97,7 +104,6 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { feeForStep, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
-
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -128,13 +134,13 @@ export default defineComponent({
       type: [Object, String] as PropType<RouteLocationRaw>,
       default: undefined,
     },
-    asWidget: {
-      type: Boolean,
-      default: false,
+    variant: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
     },
   },
-  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish', 'done'],
-  setup(props, { emit }) {
+  emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
+  setup(props: any, { emit }) {
     const router = useRouter();
     const goBack = () => {
       if (props.backRoute) {
@@ -149,6 +155,7 @@ export default defineComponent({
     const hasMore = ref(false);
     const isFinal = ref(false);
     const isTransferConfirmationOpen = ref(false);
+    const txResult = ref(null);
 
     onMounted(async () => {
       fees.value = await Promise.all(
@@ -179,6 +186,8 @@ export default defineComponent({
     };
     const currentStep = ref(0);
     const txstatus = ref('keplr-sign');
+    const errorDetails = ref(undefined);
+
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
 
@@ -217,8 +226,10 @@ export default defineComponent({
 
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
-          if (currentStep.value == (props.data as Step[]).length - 1) {
+          if (i == currentData.value.data.transactions.length - 1) {
             isFinal.value = true;
+          } else {
+            isFinal.value = false;
           }
           do {
             retry.value = false;
@@ -260,17 +271,24 @@ export default defineComponent({
                 memo: 'a memo',
               });
             } catch (e) {
+              console.error(e);
               txstatus.value = 'keplr-reject';
               await txToResolve.value['promise'];
               continue;
             }
             if (tx) {
+              errorDetails.value = undefined;
               emit('transacting');
               txstatus.value = 'transacting';
               let result;
               try {
                 result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
               } catch (e) {
+                console.error(e);
+                errorDetails.value = {
+                  message: e.message,
+                  ticket: result.ticket,
+                };
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -278,32 +296,106 @@ export default defineComponent({
                 continue;
               }
               try {
-                let status = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                let txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
                   subscribe: true,
                   params: { chain_name: res.chain_name, ticket: result.ticket },
                 });
 
                 while (
-                  status != 'complete' &&
-                  status != 'failed' &&
-                  status != 'IBC_receive_success' &&
-                  status != 'Tokens_unlocked_timeout' &&
-                  status != 'Tokens_unlocked_ack'
+                  txResultData.status != 'complete' &&
+                  txResultData.status != 'failed' &&
+                  txResultData.status != 'IBC_receive_success' &&
+                  txResultData.status != 'Tokens_unlocked_timeout' &&
+                  txResultData.status != 'Tokens_unlocked_ack'
                 ) {
-                  console.log(status);
-                  status = await store.getters['demeris/getTxStatus']({
+                  txResultData = await store.getters['demeris/getTxStatus']({
                     chain_name: res.chain_name,
                     ticket: result.ticket,
                   });
+                  console.log(txResultData.status);
                 }
+
+                if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
+                  const details = {
+                    status: txResultData.status,
+                    ticket: result.ticket,
+                  };
+
+                  if (txResultData.error) {
+                    details['message'] = txResultData.error;
+                  }
+                  errorDetails.value = details;
+                  throw new Error(txResultData.error || txResultData.status);
+                }
+
+                errorDetails.value = undefined;
+
+                if (!txResultData.error && currentData.value.data.name === 'swap') {
+                  const result = {
+                    swappedPercent: 0,
+                    demandCoinSwappedAmount: 0,
+                    demandCoinDenom: '',
+                    remainingOfferCoinAmount: 0,
+                    offerCoinDenom: '',
+                  };
+
+                  //Get end block events
+                  let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                    height: txResultData.height,
+                  });
+
+                  result.demandCoinDenom = endBlockEvent.demand_coin_denom;
+                  result.swappedPercent =
+                    (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                      (Number(endBlockEvent.remaining_offer_coin_amount) +
+                        Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                    100;
+                  result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
+                  result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
+                  result.offerCoinDenom = endBlockEvent.offer_coin_denom;
+                  txResult.value = result;
+                  console.log('swap result', result);
+                }
+                if (currentData.value.data.name === 'swap') {
+                  console.log('txResultData', txResultData);
+                  //Get end block events
+                  let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                    height: txResultData.height,
+                  });
+
+                  const result = {
+                    swappedPercent: 0,
+                    demandCoinSwappedAmount: 0,
+                    demandCoinDenom: '',
+                    remainingOfferCoinAmount: 0,
+                    offerCoinDenom: '',
+                  };
+
+                  console.log('endBlockEvent', endBlockEvent);
+
+                  result.demandCoinDenom = endBlockEvent.demand_coin_denom;
+                  result.swappedPercent =
+                    (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                      (Number(endBlockEvent.remaining_offer_coin_amount) +
+                        Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                    100;
+                  result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
+                  result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
+                  result.offerCoinDenom = endBlockEvent.offer_coin_denom;
+                  txResult.value = result;
+                  console.log('swap result', result);
+                }
+
                 // TODO: deal with status here
-                console.log(status);
                 emit('complete');
                 txstatus.value = 'complete';
 
                 await txToResolve.value['promise'];
               } catch (e) {
-                console.log(e);
+                console.error(e);
+                if (errorDetails.value === undefined) {
+                  errorDetails.value = e.message;
+                }
                 emit('failed');
                 txstatus.value = 'failed';
                 await txToResolve.value['promise'];
@@ -338,7 +430,7 @@ export default defineComponent({
             shouldOpenConfirmation = true;
           }
         } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-          shouldOpenConfirmation = props.data.length > 1;
+          shouldOpenConfirmation = props.data?.length > 1;
         }
 
         isTransferConfirmationOpen.value = shouldOpenConfirmation;
@@ -350,6 +442,7 @@ export default defineComponent({
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,
+      txResult,
       confirm,
       toggleTxHandlingModal,
       currentData,
@@ -360,12 +453,20 @@ export default defineComponent({
       retry,
       hasMore,
       isFinal,
+      errorDetails,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
+.tx-steps {
+  &--widget &__content {
+    max-height: 50rem;
+    overflow: scroll;
+  }
+}
+
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;

@@ -59,8 +59,8 @@
       </div>
 
       <div class="portfolio__aside">
-        <Intro />
         <LiquiditySwap class="portfolio__aside__swap" />
+        <Intro />
       </div>
     </div>
   </AppLayout>

@@ -164,6 +164,7 @@
       <fieldset class="form__field">
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
+          :status="isValid ? 'normal' : 'inactive'"
           :disabled="!isValid"
           @click="onSubmit"
         />

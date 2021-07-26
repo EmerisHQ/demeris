@@ -26,7 +26,7 @@ export type Getters = {
   ): {
     (params: { denom: string }): number;
   };
-  getDisplayDenom(
+  getTicker(
     state: State,
     getters,
     rootState,
@@ -123,12 +123,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getVerifiedDenoms: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
-  getDisplayDenom:
+  getTicker:
     (state, getters, rootState, rootGetters) =>
     ({ name }) => {
-      const displayName = state.verifiedDenoms.find((x) => x.name == name)?.display_name ?? null;
-      if (displayName) {
-        return displayName;
+      const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
+      if (ticker) {
+        return ticker;
       }
       const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']();
       if (pools && pools.pools) {
@@ -136,9 +136,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
         if (pool) {
           return (
             'GDEX ' +
-            getters['getDisplayDenom']({ name: pool.reserve_coin_denoms[0] }) +
+            getters['getTicker']({ name: pool.reserve_coin_denoms[0] }) +
             '/' +
-            getters['getDisplayDenom']({ name: pool.reserve_coin_denoms[1] }) +
+            getters['getTicker']({ name: pool.reserve_coin_denoms[1] }) +
             ' Pool'
           );
         } else {
@@ -166,8 +166,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
   getPrice: (state, getters) => (params) => {
-    const ticker = (getters['getDisplayDenom']({ name: params.denom }) + 'USDT').toUpperCase();
+    const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
     return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
+  },
+  getMarketCap: (state, getters) => (params) => {
+    const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
+    return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Supply ?? null;
   },
   getEndpoint: (state) => {
     return state.endpoint;

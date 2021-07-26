@@ -22,7 +22,7 @@
         </div>
       </template>
 
-      <template v-else>
+      <template v-else-if="state.selectedAsset && recipientAddress">
         <div class="receive__main__asset">
           <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
           <div class="receive__main__asset__qr" :style="gradientStyle">
@@ -41,8 +41,8 @@
 </template>
 
 <script lang="ts">
-import { reactive } from '@vue/reactivity';
-import { computed } from '@vue/runtime-core';
+import { reactive, ref, toRefs } from '@vue/reactivity';
+import { computed, watch } from '@vue/runtime-core';
 import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
@@ -54,7 +54,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
 import { Balance, Balances } from '@/types/api';
-import { hexToRGB } from '@/utils/basic';
+import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -99,10 +99,7 @@ export default {
 
     const state = reactive({
       selectedAsset: undefined,
-    });
-
-    const recipientAddress = computed(() => {
-      return store.getters['demeris/getOwnAddress']({ chain_name: state.selectedAsset.on_chain });
+      recipientAddress: undefined,
     });
 
     const generateBackground = (colors: Record<string, string>) => {
@@ -121,7 +118,7 @@ export default {
     };
 
     const gradientStyle = computed(() => {
-      const colors = symbolsData[state.selectedAsset.base_denom]?.colors;
+      const colors = symbolsData[state.selectedAsset?.base_denom]?.colors;
       return {
         background: generateBackground(colors || defaultColors),
         color: colors ? '#ffffff' : '#000000',
@@ -135,6 +132,15 @@ export default {
     const assetSelectHandler = (asset: Balance) => {
       state.selectedAsset = asset;
     };
+
+    const { selectedAsset, recipientAddress } = toRefs(state);
+    watch(selectedAsset, async (value) => {
+      if (value) {
+        state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain });
+      } else {
+        state.recipientAddress = undefined;
+      }
+    });
 
     return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
