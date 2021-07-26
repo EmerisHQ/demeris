@@ -1,6 +1,7 @@
 import Long from 'long';
 
 import * as Actions from '@/types/actions';
+import * as API from '@/types/api';
 import { Balances, Denom } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
@@ -1220,7 +1221,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
     const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress) {
+    if (balance.address !== hashAddress || !balance.verified) {
       continue;
     }
 
@@ -1262,4 +1263,106 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     }
   }
   return validBalances;
+}
+
+export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
+  const validPools = [];
+  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+  const dexChain = store.getters['demeris/getDexChain'];
+
+  for (const pool of pools) {
+    const firstDenom = pool.reserve_coin_denoms[0];
+    const secondDenom = pool.reserve_coin_denoms[1];
+
+    if (!firstDenom.includes('ibc')) {
+      if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+        // first denom is base denom and valid, check second denom
+        if (!secondDenom.includes('ibc')) {
+          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+            // first denom is base denom and valid, second denom is base denom and valid
+            
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        } else {
+          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+            // first denom is base and valid, second denom is IBC and valid
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        }
+      } else {
+        continue;
+      }
+    } else {
+      if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+        if (!secondDenom.includes('ibc')) {
+          // second denom is not IBC denom
+          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+            // first denom is IBC and valid, second denom is base and valid
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        } else {
+          // second denom is IBC denom, check if it goes through primary channel
+          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+
+  return validPools;
+}
+
+export async function isValidIBCReserveDenom(denom: string, dexChain: string, verifiedDenoms: API.VerifiedDenoms): Promise<boolean> {
+  let verifyTrace;
+
+  try {
+    verifyTrace =
+      store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
+      (await store.dispatch(
+        'demeris/GET_VERIFY_TRACE',
+        { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+        { root: true },
+      ));
+  } catch (e) {
+    return false; 
+  }
+
+  if (verifyTrace.path.split('/').length > 2) {
+    return false;
+  }
+
+  if (!verifiedDenoms.find((item) => item.name === verifyTrace.base_denom)) {
+    return false;
+  }
+
+  const primaryChannel =
+    store.getters['demeris/getPrimaryChannel']({
+      chain_name: dexChain,
+      destination_chain_name: verifyTrace.trace[0].counterparty_name,
+    }) ??
+    (await store.dispatch(
+      'demeris/GET_PRIMARY_CHANNEL',
+      {
+        subscribe: false,
+        params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+      },
+      { root: true },
+    ));
+
+  if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+    return true;
+  }
+
+  return false;
 }
