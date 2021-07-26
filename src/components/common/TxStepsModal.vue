@@ -460,13 +460,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.tx-steps {
-  &--widget &__content {
-    max-height: 50rem;
-    overflow: scroll;
-  }
-}
-
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;
