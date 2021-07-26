@@ -537,7 +537,7 @@ export default {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
           if (
-            reserveDenoms.join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+            reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
             pool.value = poolIterator;
