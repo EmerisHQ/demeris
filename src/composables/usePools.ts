@@ -1,16 +1,25 @@
 import { computed } from 'vue';
 
 import { Pool } from '@/types/actions';
-import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
 
 import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
   const stores = useAllStores();
 
-  const pools = computed<Pool[]>(() => {
+  const allPools = computed<Pool[]>(() => {
     return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
   });
+
+  const pools = ref(allPools.value);
+  watch(
+    () => allPools.value,
+    async (newPools) => {
+      pools.value = await validPools(newPools);
+    },
+    { immediate: true },
+  );
 
   const formatPoolName = async (pool: Pool) => {
     return (

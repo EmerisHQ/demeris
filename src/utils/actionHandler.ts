@@ -1181,7 +1181,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
     const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress) {
+    if (balance.address !== hashAddress || !balance.verified) {
       continue;
     }
 
@@ -1223,4 +1223,162 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     }
   }
   return validBalances;
+}
+
+export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
+  const validPools = [];
+  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+  const dexChain = store.getters['demeris/getDexChain'];
+
+  for (const pool of pools) {
+    const firstDenom = pool.reserve_coin_denoms[0];
+    const secondDenom = pool.reserve_coin_denoms[1];
+
+    if (!firstDenom.includes('ibc')) {
+      if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+        // first denom is base denom and valid, check second denom
+        if (!secondDenom.includes('ibc')) {
+          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+            // first denom is base denom and valid, second denom is base denom and valid
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        } else {
+          // second denom is IBC, check if it's valid
+          try {
+            verifyTrace =
+              store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: secondDenom.split('/')[1] }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                { subscribe: true, params: { chain_name: dexChain, hash: secondDenom.split('/')[1] } },
+                { root: true },
+              ));
+          } catch (e) {
+            continue;
+          }
+    
+          if (verifyTrace.path.split('/').length > 2) {
+            continue;
+          }
+    
+          if (!verifiedDenoms.find((item) => item.name === verifyTrace.base_denom)) {
+            continue;
+          }
+    
+          const primaryChannel =
+            store.getters['demeris/getPrimaryChannel']({
+              chain_name: dexChain,
+              destination_chain_name: verifyTrace.trace[0].counterparty_name,
+            }) ??
+            (await store.dispatch(
+              'demeris/GET_PRIMARY_CHANNEL',
+              {
+                subscribe: false,
+                params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+              },
+              { root: true },
+            ));
+    
+          if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+            // first denom is base and valid, second denom is IBC and valid
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        }
+      } else {
+        continue;
+      }
+    } else {
+      try {
+        verifyTrace1 =
+          store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: firstDenom.split('/')[1] }) ??
+          (await store.dispatch(
+            'demeris/GET_VERIFY_TRACE',
+            { subscribe: true, params: { chain_name: dexChain, hash: firstDenom.split('/')[1] } },
+            { root: true },
+          ));
+      } catch (e) {
+        continue;
+      }
+
+      if (verifyTrace1.path.split('/').length > 2) {
+        continue;
+      }
+
+      if (!verifiedDenoms.find((item) => item.name === verifyTrace1.base_denom)) {
+        continue;
+      }
+
+      const primaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: dexChain,
+          destination_chain_name: verifyTrace1.trace[0].counterparty_name,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: false,
+            params: { chain_name: dexChain, destination_chain_name: verifyTrace1.trace[0].counterparty_name },
+          },
+          { root: true },
+        ));
+
+      if (primaryChannel == getChannel(verifyTrace1.path, 0)) {
+        // first denom is IBC and valid, check second denom
+        if (!secondDenom.includes('ibc')) {
+          // second denom is not IBC denom
+          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+            // first denom is IBC and valid, second denom is base and valid
+            validPools.push(pool);
+          } else {
+            continue;
+          }
+        } else {
+          // second denom is IBC denom, check if it goes through primary channel
+          try {
+            verifyTrace2 =
+              store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: secondDenom.split('/')[1] }) ??
+              (await store.dispatch(
+                'demeris/GET_VERIFY_TRACE',
+                { subscribe: true, params: { chain_name: dexChain, hash: secondDenom.split('/')[1] } },
+                { root: true },
+              ));
+          } catch (e) {
+            continue;
+          }
+    
+          if (verifyTrace2.path.split('/').length > 2) {
+            continue;
+          }
+    
+          if (!verifiedDenoms.find((item) => item.name === verifyTrace2.base_denom)) {
+            continue;
+          }
+    
+          const primaryChannel =
+            store.getters['demeris/getPrimaryChannel']({
+              chain_name: dexChain,
+              destination_chain_name: verifyTrace2.trace[0].counterparty_name,
+            }) ??
+            (await store.dispatch(
+              'demeris/GET_PRIMARY_CHANNEL',
+              {
+                subscribe: false,
+                params: { chain_name: dexChain, destination_chain_name: verifyTrace2.trace[0].counterparty_name },
+              },
+              { root: true },
+            ));
+    
+          if (primaryChannel == getChannel(verifyTrace2.path, 0)) {
+            // first denom is IBC and valid, second denom is IBC and valid
+            validPools.push(pool);
+          } 
+        }
+      }
+    }
+  }
+
+  return validPools;
 }
