@@ -3,7 +3,7 @@
     class="tx-steps denom-select-modal-wrapper"
     :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
   >
-    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('goback')" @close="emitHandler('close')" />
+    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -330,7 +330,7 @@ export default defineComponent({
 
                 errorDetails.value = undefined;
 
-                if (currentData.value.data.name === 'swap') {
+                if (!txResultData.error && currentData.value.data.name === 'swap') {
                   const result = {
                     swappedPercent: 0,
                     demandCoinSwappedAmount: 0,
