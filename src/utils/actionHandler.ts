@@ -1483,7 +1483,7 @@ export async function validateStepFeeBalances(
               rcptBalance.amount = newIbcAmount + parseCoins(rcptBalance.amount)[0].denom;
             } else {
               const ibcDetails: IbcInfo = {};
-              if (ibcBalance.ibc.path.split('/').length > 2) {
+              if (ibcBalance.ibc.path?.split('/').length > 2) {
                 ibcDetails.path = 'transfer/' + data.through;
                 ibcDetails.hash = newDenom.replace('ibc/', '');
               }
@@ -1629,5 +1629,6 @@ export async function validateStepFeeBalances(
       }
     }
   }
+  console.log(feeWarning);
   return feeWarning;
 }
