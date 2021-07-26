@@ -330,7 +330,7 @@ export default defineComponent({
 
                 errorDetails.value = undefined;
 
-                if (currentData.value.data.name === 'swap') {
+                if (!txResultData.error && currentData.value.data.name === 'swap') {
                   const result = {
                     swappedPercent: 0,
                     demandCoinSwappedAmount: 0,
