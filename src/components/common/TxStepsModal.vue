@@ -71,7 +71,7 @@
             </div>
           </div>
         </template>
-        <template v-if="feeWarning.ibcWarning">
+        <template v-if="feeWarning.ibcWarning && feeWarning.missingFees.length == 0">
           <div class="fee-warning-modal__title">
             {{ $t('components.feeWarningModal.ibcWarning', { denom: feeWarning.ibcDetails.denom }) }}
           </div>
@@ -112,7 +112,7 @@
               "
             />
           </template>
-          <template v-if="feeWarning.ibcWarning">
+          <template v-if="feeWarning.ibcWarning && feeWarning.missingFees.length == 0">
             <ModalButton
               :name="$t('generic_cta.cancel')"
               :click-function="
