@@ -32,10 +32,12 @@ export default defineComponent({
     watch(
       () => props.amount,
       async () => {
-        displayDenom.value = await getDisplayName(
-          (props.amount as Amount).denom,
-          props.chain || store.getters['demeris/getDexChain'],
-        );
+        if ((props.amount as Amount).denom !== undefined) {
+          displayDenom.value = await getDisplayName(
+            (props.amount as Amount).denom,
+            props.chain || store.getters['demeris/getDexChain'],
+          );
+        }
       },
       { immediate: true },
     );
