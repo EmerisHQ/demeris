@@ -1246,6 +1246,8 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
           }
         } else {
           // second denom is IBC, check if it's valid
+          let verifyTrace;
+
           try {
             verifyTrace =
               store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: secondDenom.split('/')[1] }) ??
@@ -1257,15 +1259,15 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
           } catch (e) {
             continue;
           }
-    
+
           if (verifyTrace.path.split('/').length > 2) {
             continue;
           }
-    
+
           if (!verifiedDenoms.find((item) => item.name === verifyTrace.base_denom)) {
             continue;
           }
-    
+
           const primaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -1279,7 +1281,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
               },
               { root: true },
             ));
-    
+
           if (primaryChannel == getChannel(verifyTrace.path, 0)) {
             // first denom is base and valid, second denom is IBC and valid
             validPools.push(pool);
@@ -1291,6 +1293,8 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         continue;
       }
     } else {
+      let verifyTrace1;
+
       try {
         verifyTrace1 =
           store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: firstDenom.split('/')[1] }) ??
@@ -1337,6 +1341,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
           }
         } else {
           // second denom is IBC denom, check if it goes through primary channel
+          let verifyTrace2;
           try {
             verifyTrace2 =
               store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: secondDenom.split('/')[1] }) ??
@@ -1348,15 +1353,15 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
           } catch (e) {
             continue;
           }
-    
+
           if (verifyTrace2.path.split('/').length > 2) {
             continue;
           }
-    
+
           if (!verifiedDenoms.find((item) => item.name === verifyTrace2.base_denom)) {
             continue;
           }
-    
+
           const primaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -1370,11 +1375,11 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
               },
               { root: true },
             ));
-    
+
           if (primaryChannel == getChannel(verifyTrace2.path, 0)) {
             // first denom is IBC and valid, second denom is IBC and valid
             validPools.push(pool);
-          } 
+          }
         }
       }
     }
