@@ -1,12 +1,29 @@
 <template>
-  <div role="alert" class="alert" :class="`alert--${status}`">
-    <span v-if="showIcon" class="alert__icon">
+  <div
+    role="alert"
+    class="alert border border-solid rounded-lg flex items-start py-3 px-4"
+    :class="[
+      `alert--${status}`,
+      { 'border-warning': status === 'warning' },
+      { 'border-negative': status === 'error' },
+      { 'border-border': status === 'info' },
+    ]"
+  >
+    <span
+      v-if="showIcon"
+      class="alert__icon mt-0.5 mr-3"
+      :class="[
+        { 'text-inactive': status === 'info' },
+        { 'text-warning': status === 'warning' },
+        { 'text-negative': status === 'error' },
+      ]"
+    >
       <BanIcon v-if="status === 'error'" />
       <ExclamationIcon v-else-if="status === 'warning'" />
       <InformationIcon v-else-if="status === 'info'" />
     </span>
 
-    <div class="alert__content">
+    <div class="alert__content -text-1 leading-copy" :class="[status === 'info' ? 'text-muted' : 'text-text']">
       <slot>
         <p>{{ message }}</p>
       </slot>
@@ -49,52 +66,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.alert {
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  border: 1px solid transparent;
-  color: var(--text);
-
-  &--error {
-    background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
-  }
-
-  &--error &__icon {
-    color: rgba(202, 8, 101, 1);
-  }
-
-  &--info {
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: none;
-    color: rgba(0, 0, 0, 0.667);
-  }
-
-  &--info &__icon {
-    color: rgba(0, 0, 0, 0.33);
-  }
-
-  &--warning {
-    background: linear-gradient(135deg, #ffe3c1 0%, #fffac9 100%);
-  }
-
-  &--warning &__icon {
-    color: rgba(255, 125, 5, 1);
-  }
-
-  &__icon {
-    font-size: 1.125rem;
-    flex-shrink: 0;
-  }
-
-  &__content {
-    margin-left: 0.75rem;
-    font-size: 0.8125rem;
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

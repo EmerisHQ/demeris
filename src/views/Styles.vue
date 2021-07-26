@@ -94,6 +94,13 @@
         <li><Button variant="secondary" status="loading" /></li>
         <li><Button variant="link" status="loading" /></li>
       </ul>
+      <h2 class="text-4 font-bold mt-20">Alerts</h2>
+      <h3 class="text-3 font-bold mt-8">Inline</h3>
+      <ul class="mt-7 max-w-sm">
+        <li class="mt-4"><Alert status="error" message="Error alert" /></li>
+        <li class="mt-4"><Alert status="warning" message="Warning alert" /></li>
+        <li class="mt-4"><Alert status="info" message="Info alert" /></li>
+      </ul>
     </div>
   </AppLayout>
 </template>
@@ -101,12 +108,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default defineComponent({
   components: {
     AppLayout,
+    Alert,
     Button,
   },
 });
