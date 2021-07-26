@@ -504,7 +504,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });

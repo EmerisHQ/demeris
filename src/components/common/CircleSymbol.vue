@@ -17,7 +17,7 @@
     <template v-else-if="assetConfig">
       <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
       <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
-      <img v-else alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
+      <img v-if="glow" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
     </template>
 
     <template v-else>
@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -76,6 +76,10 @@ export default defineComponent({
     size: {
       type: String as PropType<CircleSymbolSize>,
       default: 'md',
+    },
+    glow: {
+      type: Boolean,
+      default: true,
     },
   },
 
@@ -309,7 +313,7 @@ export default defineComponent({
     &::before {
       position: absolute;
       content: '';
-      inset: 2px;
+      inset: 0.3rem;
       border-radius: 2.6rem;
       background: var(--bg);
     }
