@@ -27,7 +27,7 @@ export const messages = {
     },
     wallet: {
       connect: {
-        button: 'Connect my wallet',
+        button: 'Connect wallet',
         modal1: {
           title: 'Connect to Keplr',
           text: 'To use Emeris beta, please allow this web app to connect to the Keplr browser extension wallet.',
@@ -240,11 +240,11 @@ export const messages = {
       },
       assets: {
         title: 'Assets',
-        totalBalance: 'Total Balance',
+        totalBalance: 'Total balance',
         asset: 'Asset',
         ticker: 'Ticker',
         price: 'Price',
-        marketCap: 'Market Cap.',
+        marketCap: 'Market cap.',
         amount: 'Amount',
         balance: 'Balance',
         chains: 'chains',
@@ -254,9 +254,9 @@ export const messages = {
       pools: {
         title: 'Pools',
         equity: 'Equity',
-        mine: 'My Pools',
-        all: 'All Pools',
-        pair: 'Token Pair',
+        mine: 'My pools',
+        all: 'All pools',
+        pair: 'Token pair',
         share: 'Your share',
         liquidity: 'Liquidity',
         empty: 'Pools you add liquidity to will appear here.',

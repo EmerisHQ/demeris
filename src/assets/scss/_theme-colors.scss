@@ -10,9 +10,12 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --text: #000;
   --muted: rgba(0, 0, 0, 0.67);
   --inactive: rgba(0, 0, 0, 0.33);
-  --bg: #fff url('~@/assets/images/texture-grain.png') repeat 148px;
+  --inverse: #e4eee0;
+  --bg: #fff;
+  --bg-image: 148px repeat url('~@/assets/images/texture-grain.png'), #fff;
   --fg: rgba(0, 0, 0, 0.03);
   --surface: #fff;
+  --surface-image: var(--surface);
   --border: rgba(0, 0, 0, 0.07);
   --link: #094efd;
   --link-hover: var(--text);
@@ -24,12 +27,15 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
 }
 /* Dark mode custom properties */
 @mixin themeDark {
-  --text: #e4eee0;
+  --text: #fff;
   --muted: rgba(255, 255, 255, 0.67);
   --inactive: rgba(255, 255, 255, 0.44);
-  --bg: #000 url('~@/assets/images/bg-dark.jpg') repeat 148px;
+  --inverse: #000;
+  --bg: #000;
+  --bg-image: 148px repeat url('~@/assets/images/bg-dark.jpg'), #000;
   --fg: rgba(255, 255, 255, 0.1);
-  --surface: #171717 url('~@/assets/images/texture-grain.png') repeat 148px;
+  --surface: #181818;
+  --surface-image: 148px repeat url('~@/assets/images/texture-grain.png'), #171717;
   --border: rgba(255, 255, 255, 0.09);
   --link: var(--quaternary);
   --link-hover: #fff;
@@ -79,16 +85,16 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
 
 /* Custom color utilities */
 @layer utilities {
-  @variants dark {
+  @variants dark, focus {
     /* Background utilities */
     .bg-app {
-      background: var(--bg);
+      background: var(--bg-image);
     }
     .bg-surface {
-      background: var(--surface);
+      background: var(--surface-image);
     }
     .bg-brand {
-      background: var(--primary) url('~@/assets/images/gradient-primary.jpg') no-repeat cover center;
+      background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
     }
     .bg-brand-to-r {
       background: var(--primary) $brand-gradient-to-r;
@@ -97,7 +103,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
       background: var(--primary) $brand-gradient-to-br;
     }
     .bg-gold-circular {
-      background: var(--gold) url('~@/assets/images/texture-gold-circular.jpg') no-repeat cover center;
+      background: center / cover no-repeat url('~@/assets/images/texture-gold-circular.jpg'), var(--gold);
     }
     .bg-gold-to-r {
       background: var(--gold) $gold-to-r;
@@ -114,10 +120,12 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
     .border-brand {
       border-color: var(--primary);
       border-image: url('~@/assets/images/gradient-primary.jpg');
+      border-image-slice: 20%;
     }
     .border-gold-circular {
       border-color: var(--gold);
       border-image: url('~@/assets/images/texture-gold-circular.jpg');
+      border-image-slice: 20%;
     }
   }
 }

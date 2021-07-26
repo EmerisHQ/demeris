@@ -177,8 +177,8 @@
       <Button
         v-if="whiteButton && tx.name === 'swap' && status === 'complete'"
         :name="whiteButton"
-        class="send-another-button"
-        :status="'normal'"
+        class="send-another-button bg-surface rounded-lg"
+        variant="primary"
         :click-function="
           () => {
             router.push('/send');
@@ -189,7 +189,7 @@
       <Button
         v-if="blackButton"
         :name="blackButton"
-        :status="'normal'"
+        variant="primary"
         :click-function="
           () => {
             status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
@@ -207,7 +207,7 @@
       <Button
         v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
         :name="whiteButton"
-        :status="'normal'"
+        variant="primary"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
         :is-outline="true"
       />
@@ -701,10 +701,7 @@ export default defineComponent({
 }
 
 .send-another-button {
-  @import '@/assets/scss/_elevation.scss';
   margin-top: -1.5rem;
   margin-bottom: 0.75rem;
-  border-radius: $border-radius;
-  background-color: var(--surface);
 }
 </style>

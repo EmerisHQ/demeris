@@ -41,7 +41,7 @@
           />
           <label class="withdraw-liquidity__estimated__max">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="withdraw-liquidity__max" />
-            <span class="elevation-button">Max</span>
+            <span class="shadow-button rounded-xl">Max</span>
           </label>
         </div>
 
@@ -57,7 +57,7 @@
             />
           </div>
 
-          <div class="withdraw-liquidity__input amount-input elevation-card">
+          <div class="withdraw-liquidity__input amount-input shadow-card rounded-2xl">
             <div class="withdraw-liquidity__input__main">
               <label class="withdraw-liquidity__input__label -text-1">Withdraw</label>
               <div>
@@ -85,7 +85,7 @@
             </div>
           </div>
 
-          <div class="withdraw-liquidity__input receive-input elevation-card">
+          <div class="withdraw-liquidity__input receive-input shadow-card rounded-2xl">
             <div class="withdraw-liquidity__input__main">
               <label class="withdraw-liquidity__input__label -text-1">Receive</label>
               <div class="withdraw-liquidity__input__select-wrapper token-a">
@@ -603,7 +603,7 @@ export default {
 
       input:checked + span {
         background: var(--text);
-        color: var(--bg);
+        color: var(--inverse);
         font-weight: 500;
       }
     }

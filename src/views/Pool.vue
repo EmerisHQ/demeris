@@ -98,7 +98,7 @@
 
       <div class="pool__aside">
         <div class="pool__aside__widget">
-          <div v-if="walletBalances" class="pool-equity elevation-panel" :style="equityGradientStyle">
+          <div v-if="walletBalances" class="pool-equity shadow-panel rounded-2xl" :style="equityGradientStyle">
             <div class="pool-equity__header">
               <h2 class="text-2 font-bold">Equity</h2>
               <Icon name="ThreeDotsIcon" />
@@ -148,7 +148,7 @@
             </div>
 
             <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__withdraw">
-              <Button name="Withdraw" status="secondary" @click="withdrawLiquidityHandler" />
+              <Button name="Withdraw" variant="secondary" @click="withdrawLiquidityHandler" />
             </div>
           </div>
         </div>

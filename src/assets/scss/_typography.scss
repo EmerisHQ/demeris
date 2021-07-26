@@ -16,10 +16,10 @@
   @font-face {
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 300;
+    font-weight: 400;
     font-display: swap;
-    src: url('$font-path-inter/Inter-Light.woff2?v=3.19') format('woff2'),
-      url('$font-path-inter/Inter-Light.woff?v=3.19') format('woff');
+    src: url('$font-path-inter/Inter-Regular.woff2?v=3.19') format('woff2'),
+      url('$font-path-inter/Inter-Regular.woff?v=3.19') format('woff');
   }
 
   @font-face {
@@ -49,13 +49,5 @@
     font-display: swap;
     src: url('$font-path-inter/Inter-roman.var.woff2?v=3.19') format('woff2');
     font-named-instance: 'Regular';
-  }
-
-  @supports (font-variation-settings: normal) {
-    input,
-    textarea,
-    button {
-      font-variant: slashed-zero;
-    }
   }
 }

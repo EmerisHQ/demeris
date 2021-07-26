@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mb-6 elevation-panel">
+  <div class="relative mb-6 shadow-panel rounded-2xl">
     <a href="https://medium.com/emeris-blog" target="_blank" rel="noopener noreferrer">
       <div class="absolute bottom-6 left-6">
         <p class="-text-1">Introductory guide</p>

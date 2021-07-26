@@ -1,5 +1,5 @@
 <template>
-  <div class="chain-select-wrapper elevation-panel">
+  <div class="chain-select-wrapper bg-surface shadow-panel rounded-2xl">
     <TitleWithGoback :title="title" :func="func" />
 
     <div class="mb-6 -text-1 text-center font-normal">
@@ -89,8 +89,6 @@ export default defineComponent({
   left: 0;
 
   overflow: hidden;
-
-  background-color: var(--surface);
   z-index: 10;
 
   .sub-title {

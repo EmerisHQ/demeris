@@ -43,18 +43,18 @@
       </div>
     </div>
 
-    <div class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type -text-1">{{ inputHeader }}</div>
+    <label class="denom-select__coin-amount">
+      <div class="denom-select__coin-amount-type -text-1 text-muted">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
         :class="isOver ? 'over' : ''"
         :readonly="readonly"
-        class="denom-select__coin-amount-input text-1"
+        class="denom-select__coin-amount-input text-1 font-bold"
         placeholder="0"
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
       />
-    </div>
+    </label>
   </div>
 
   <DenomSelectModal
@@ -220,10 +220,6 @@ export default defineComponent({
     text-align: right;
     width: 100%;
     margin-left: 0.75rem;
-
-    &-type {
-      color: var(--muted);
-    }
 
     &-input {
       width: 100%;

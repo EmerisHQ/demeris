@@ -57,15 +57,15 @@
       <div class="send-form-amount__controls">
         <label v-if="hasPrice" class="send-form-amount__controls__button">
           <input v-model="state.isUSDInputChecked" type="checkbox" name="send-form-amount-usd" />
-          <span v-if="state.isUSDInputChecked" class="elevation-button">
+          <span v-if="state.isUSDInputChecked" class="shadow-button rounded-xl">
             <Denom :name="state.currentAsset?.base_denom" />
           </span>
-          <span v-else class="elevation-button">USD</span>
+          <span v-else class="shadow-button rounded-xl">USD</span>
         </label>
 
         <label class="send-form-amount__controls__button is-toggle">
           <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
-          <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
+          <span class="shadow-button rounded-xl">{{ $t('generic_cta.max') }}</span>
         </label>
       </div>
     </fieldset>
@@ -74,7 +74,7 @@
       <div class="send-form-amount__assets">
         <button
           v-if="state.currentAsset"
-          class="send-form-amount__assets__item elevation-button"
+          class="send-form-amount__assets__item shadow-button rounded-xl"
           @click="toggleSelectModal()"
         >
           <div class="send-form-amount__assets__item__asset">
@@ -428,7 +428,7 @@ export default defineComponent({
       &.is-toggle {
         input:checked + span {
           background: var(--text);
-          color: var(--bg);
+          color: var(--inverse);
           font-weight: 500;
         }
       }

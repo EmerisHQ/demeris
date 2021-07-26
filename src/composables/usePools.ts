@@ -28,7 +28,7 @@ export default function usePools() {
         pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
       )
     )
-      .join('/')
+      .join(' · ')
       .toUpperCase();
   };
 

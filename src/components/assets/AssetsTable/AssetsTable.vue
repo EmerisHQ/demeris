@@ -28,7 +28,7 @@
             </div>
           </td>
 
-          <td v-if="variant === 'full'" class="assets-table__row__ticker text-left">
+          <td v-if="variant === 'full'" class="assets-table__row__ticker text-left text-muted">
             <Ticker :name="asset.denom" />
           </td>
 
@@ -55,7 +55,7 @@
 
     <button
       v-if="balancesByAsset.length > balancesFiltered.length"
-      class="assets-table__view-all elevation-button"
+      class="assets-table__view-all shadow-button rounded-xl"
       @click="viewAllHandler"
     >
       <span class="assets-table__view-all__label">
@@ -267,17 +267,17 @@ export default defineComponent({
 
     &:hover {
       td {
-        background: rgba(0, 0, 0, 0.03);
+        background: var(--fg);
       }
 
       td:first-child {
-        border-top-left-radius: 0.5rem;
-        border-bottom-left-radius: 0.5rem;
+        border-top-left-radius: 0.75rem;
+        border-bottom-left-radius: 0.75rem;
       }
 
       td:last-child {
-        border-top-right-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
+        border-top-right-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
       }
     }
 

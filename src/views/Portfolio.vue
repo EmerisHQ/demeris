@@ -16,17 +16,7 @@
             </router-link>
           </div>
 
-<<<<<<< HEAD
           <div class="portfolio__assets__table>">
-=======
-          <MoonpayBanner
-            v-if="!balances.length"
-            title="Add crypto to your account"
-            size="large"
-            class="portfolio__assets__buy-banner"
-          />
-          <div v-else class="portfolio__assets__table>">
->>>>>>> style: convert 10px rem to 16px rem
             <AssetsTable
               :balances="balances"
               :hide-zero-assets="true"
@@ -40,19 +30,15 @@
 
           <MoonpayBanner
             v-if="!balances.length"
-            title="Add ATOM to your account"
+            title="Add crypto to your account"
             class="portfolio__assets__buy-banner"
+            size="large"
           />
         </div>
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
-<<<<<<< HEAD
-            <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
-            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/pools">
-=======
             <h2 class="portfolio__pools__header__text text-2 font-bold">{{ $t('context.pools.title') }}</h2>
-            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link font-medium" to="/assets">
->>>>>>> style: convert 10px rem to 16px rem
+            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link font-medium" to="/pools">
               {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
             </router-link>
           </div>

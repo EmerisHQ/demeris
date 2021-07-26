@@ -1,10 +1,10 @@
 <template>
   <div ref="menuRef" class="settings-menu" :class="{ 'settings-menu--open': isOpen }">
     <button class="settings-menu__button" @click="toggleOpen">
-      <Icon name="MenuIcon" :icon-size="1.5" class="settings-menu__button__icon" />
+      <Icon name="MenuIcon" :icon-size="1" class="settings-menu__button__icon" />
     </button>
 
-    <div v-show="isOpen" class="settings-menu__dropdown elevation-panel">
+    <div v-show="isOpen" class="settings-menu__dropdown shadow-panel rounded-2xl">
       <div class="settings-menu__dropdown__item">
         <span>{{ $t('components.settingsMenu.theme') }}</span>
 
@@ -37,17 +37,17 @@
       <div>
         <a href="https://cosmos.network" target="_blank" class="settings-menu__dropdown__button">
           <span>{{ $t('components.settingsMenu.support') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
         </a>
 
         <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-menu__dropdown__button">
           <span>{{ $t('components.settingsMenu.twitter') }}</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
         </a>
 
         <a href="https://emeris.com" target="_blank" class="settings-menu__dropdown__button">
           <span>emeris.com</span>
-          <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+          <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
         </a>
       </div>
 

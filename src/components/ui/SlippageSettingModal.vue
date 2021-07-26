@@ -1,5 +1,5 @@
 <template>
-  <div class="slippage-modal elevation-panel">
+  <div class="slippage-modal bg-surface shadow-panel rounded-2xl">
     <TitleWithGoback
       :title="'Price'"
       :func="
@@ -11,11 +11,11 @@
 
     <div class="setting">
       <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
-      <div class="setting__sections">
+      <div class="setting__sections gap-x-3">
         <button
-          class="setting__sections-block"
+          class="setting__sections-block text-text"
           :class="[
-            slippage === 0.1 && !isCustomSelected ? 'selected' : '',
+            slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
           ]"
           @click="setSlippage(0.1)"
@@ -23,9 +23,9 @@
           0.1%
         </button>
         <button
-          class="setting__sections-block"
+          class="setting__sections-block text-text"
           :class="[
-            slippage === 0.5 && !isCustomSelected ? 'selected' : '',
+            slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
           ]"
           @click="setSlippage(0.5)"
@@ -33,9 +33,9 @@
           0.5%
         </button>
         <button
-          class="setting__sections-block"
+          class="setting__sections-block text-text"
           :class="[
-            slippage === 1 && !isCustomSelected ? 'selected' : '',
+            slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
           ]"
           @click="setSlippage(1)"
@@ -44,8 +44,11 @@
         </button>
         <button
           v-if="allowCustomSlippage"
-          class="setting__sections-block"
-          :class="[isCustomSelected ? 'selected custom-selected' : '', Number(slippage) < 0 ? 'custom-error' : '']"
+          class="setting__sections-block text-text"
+          :class="[
+            isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium custom-selected' : '',
+            Number(slippage) < 0 ? 'custom-error' : '',
+          ]"
         >
           <div class="custom-slippage">
             <input
@@ -67,9 +70,8 @@
     <div class="details">
       <div class="details__row">
         <div class="details__row-left -text-1 font-medium">
-          {{ $t('components.slippageSettingsModal.limitPrice') }}
           <tippy :max-width="192">
-            <HintIcon />
+            {{ $t('components.slippageSettingsModal.limitPrice') }}
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
@@ -79,13 +81,12 @@
       </div>
       <div class="details__row">
         <div class="details__row-left -text-1 font-medium">
-          <div>
-            {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
-              $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
-            }}
-          </div>
           <tippy :max-width="192">
-            <HintIcon />
+            <div>
+              {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
+                $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
+              }}
+            </div>
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
@@ -98,7 +99,6 @@
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
 import { store } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -113,7 +113,6 @@ export default defineComponent({
   name: 'SlippageSettingModal',
   components: {
     TitleWithGoback,
-    HintIcon,
     Alert,
   },
 
@@ -278,8 +277,6 @@ export default defineComponent({
   left: 0;
 
   overflow: hidden;
-
-  background-color: var(--surface);
   z-index: 10;
 
   .setting {

@@ -1,15 +1,3 @@
-.white-overlay {
-  position: absolute;
-  bottom: 0;
-
-  width: 100%;
-  height: 85px;
-
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
-
-  transition: all 2s linear;
-}
-
 .transferred-bg {
   position: relative;
   background: linear-gradient(154.46deg, #64dafb 9.7%, #30ffdf 33.94%, #fffd38 69.44%) !important;

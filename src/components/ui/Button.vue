@@ -2,16 +2,29 @@
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
-      :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
+      :class="[
+        `button-${variant}`,
+        {
+          'h-12 py-2 px-8 bg-surface shadow-button focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
+            variant === 'primary' || variant === 'secondary',
+        },
+        { 'theme-inverse dark:theme-inverse': variant === 'primary' },
+        { inline: variant === 'link' },
+        { 'bg-brand-to-r': status === 'loading' && variant === 'primary' },
+        { 'loading flex justify-center items-center pointer-events-none cursor-default': status === 'loading' },
+        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-text cursor-pointer',
+      ]"
       :disabled="disabled"
-      class="button text-0 font-medium"
+      class="button text-0 font-medium rounded-xl border-none focus:outline-none transition select-none"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-if="status === 'loading'" class="spinner">
         <Spinner :size="1" :color="'black'" :variant="'circle'" />
       </div>
 
-      <span v-else>{{ name }}</span>
+      <span v-else class="inline-flex gap-x-3 items-center align-middle"
+        ><slot /><span>{{ name }}</span></span
+      >
     </button>
     <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
@@ -29,7 +42,8 @@ export default defineComponent({
   },
   props: {
     name: { type: String, required: true },
-    status: { type: String, required: false, default: 'normal' },
+    variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
+    status: { type: String, required: false, default: 'active' }, // 'loading'
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
@@ -55,57 +69,61 @@ export default defineComponent({
 <style lang="scss" scoped>
 .button {
   width: 100%;
-  padding: 1rem 2rem;
-  color: var(--bg);
-
-  border-radius: 8px;
   border: none;
-  outline: none;
   cursor: pointer;
+}
 
-  &:disabled {
-    cursor: not-allowed;
-    background-color: var(--text);
-    color: #ababab;
-    pointer-events: none;
+.button-primary,
+.button-secondary {
+  &:hover:not(:active),
+  &:focus:not(:active) {
+    --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
   }
 }
 
-.normal {
-  background-color: var(--text);
-  color: var(--bg);
+.button:active {
+  opacity: 0.7;
+  transform: none;
+  transition-duration: 0s;
 }
 
-.secondary {
-  background-color: var(--bg);
-  color: var(--text);
-}
+.button-link {
+  &,
+  > span,
+  .spinner {
+    position: relative;
+  }
 
-.muted {
-  background-color: var(--muted);
-}
+  &:before {
+    content: '';
+    position: absolute;
+    height: 3rem;
+    top: 50%;
+    margin-top: -1.5rem;
+    left: -1rem;
+    right: -1rem;
+    z-index: 0;
+    border-radius: 0.6125rem;
+    background: var(--fg);
+    opacity: 0;
+  }
 
-.inactive {
-  background-color: var(--text);
-  color: #ababab;
-  pointer-events: none;
-}
+  &:focus-visible:before {
+    opacity: 1;
+    @apply ring-2;
+    @apply ring-tertiary;
+    @apply ring-opacity-50;
+  }
 
-.loading {
-  background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
+  &:disabled:before,
+  &.loading:before {
+    opacity: 0;
+  }
 }
 
 .button-tooltip {
   display: block;
   height: 0;
-}
-
-.outline-theme {
-  color: var(--text);
-  /* border: 1px solid var(--border); */
-  background-color: transparent;
 }
 </style>

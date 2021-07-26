@@ -31,7 +31,10 @@
         <h2 class="send__title text-2">Who are you sending to?</h2>
 
         <div class="send__type">
-          <router-link :to="{ name: 'Send', params: { type: 'address' } }" class="send__type__button elevation-card">
+          <router-link
+            :to="{ name: 'Send', params: { type: 'address' } }"
+            class="send__type__button shadow-card rounded-2xl"
+          >
             <div class="send__type__button__icon">
               <Icon name="SendIcon" :icon-size="1" />
             </div>
@@ -43,7 +46,10 @@
             </p>
           </router-link>
 
-          <router-link :to="{ name: 'Send', params: { type: 'move' } }" class="send__type__button elevation-card">
+          <router-link
+            :to="{ name: 'Send', params: { type: 'move' } }"
+            class="send__type__button shadow-card rounded-2xl"
+          >
             <div class="send__type__button__icon">
               <Icon name="SwapLRIcon" :icon-size="1" />
             </div>

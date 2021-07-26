@@ -17,7 +17,7 @@
           <Button
             :name="$t('wallet.connect.modal2.button2')"
             class="get-keplr__controls__button"
-            :is-outline="true"
+            variant="link"
             @click="reloadApp"
           />
         </div>

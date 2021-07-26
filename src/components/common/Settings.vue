@@ -1,5 +1,5 @@
 <template>
-  <div ref="menuRef" class="settings-wrapper">
+  <div ref="menuRef" class="settings-wrapper h-12 pl-3">
     <div
       v-if="isSignedIn"
       class="settings"
@@ -100,11 +100,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.settings-wrapper {
-  height: 3rem;
-  padding: 0.25rem;
-}
-
 .settings {
   display: flex;
   align-items: center;

@@ -83,10 +83,10 @@
         <div class="move-form-amount__controls">
           <label v-if="hasPrice" class="move-form-amount__controls__button">
             <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
-            <span v-if="state.isUSDInputChecked" class="elevation-button"
+            <span v-if="state.isUSDInputChecked" class="shadow-button rounded-xl"
               ><Denom :name="state.currentAsset?.base_denom"
             /></span>
-            <span v-else class="elevation-button">USD</span>
+            <span v-else class="shadow-button rounded-xl">USD</span>
           </label>
           <label class="move-form-amount__controls__button is-toggle">
             <input
@@ -95,13 +95,13 @@
               name="move-form-amount-max"
               :disabled="!hasFunds"
             />
-            <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
+            <span class="shadow-button rounded-xl">{{ $t('generic_cta.max') }}</span>
           </label>
         </div>
       </fieldset>
 
       <fieldset class="form__field">
-        <div class="move-form-amount__assets elevation-card">
+        <div class="move-form-amount__assets shadow-card rounded-2xl">
           <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
             <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.action') }}</span>
 
@@ -644,7 +644,7 @@ export default defineComponent({
       &.is-toggle {
         input:checked + span {
           background: var(--text);
-          color: var(--bg);
+          color: var(--inverse);
           font-weight: 500;
         }
         input:disabled + span {

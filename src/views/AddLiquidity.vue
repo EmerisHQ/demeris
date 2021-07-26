@@ -62,7 +62,7 @@
             />
             <label class="add-liquidity__estimated__max">
               <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
-              <span class="elevation-button">Max</span>
+              <span class="shadow-button rounded-xl">Max</span>
             </label>
           </div>
 
@@ -79,10 +79,10 @@
             </div>
 
             <div
-              class="add-liquidity__input input-a elevation-card"
+              class="add-liquidity__input input-a shadow-card rounded-2xl"
               :class="{ 'input-invalid': !hasSufficientFunds.coinA }"
             >
-              <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
+              <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning shadow-card rounded-2xl">
                 <p class="add-liquidity__create-warning__title font-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
                   As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> /
@@ -149,7 +149,7 @@
             </div>
 
             <div
-              class="add-liquidity__input input-b elevation-card"
+              class="add-liquidity__input input-b shadow-card rounded-2xl"
               :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
             >
               <div class="add-liquidity__input__main">
@@ -263,7 +263,7 @@
 
             <div class="add-liquidity__confirmation__controls">
               <button
-                class="add-liquidity__confirmation__controls__button elevation-button"
+                class="add-liquidity__confirmation__controls__button shadow-button rounded-xl"
                 @click="state.isCreationConfirmationOpen = false"
               >
                 Cancel
@@ -974,7 +974,7 @@ export default {
 
       input:checked + span {
         background: var(--text);
-        color: var(--bg);
+        color: var(--inverse);
         font-weight: 500;
       }
     }
@@ -1217,7 +1217,7 @@ export default {
 
         &.confirmation-button {
           background: var(--text);
-          color: var(--bg);
+          color: var(--inverse);
         }
 
         & + & {

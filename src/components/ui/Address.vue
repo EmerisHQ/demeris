@@ -1,7 +1,7 @@
 <template>
   <div
     class="address"
-    :class="{ 'address--readonly': readonly, 'address--invalid': invalid, 'elevation-button': !readonly }"
+    :class="{ 'address--readonly': readonly, 'address--invalid': invalid, 'shadow-button rounded-xl': !readonly }"
   >
     <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" spellcheck="false" />
     <div class="address__controls">

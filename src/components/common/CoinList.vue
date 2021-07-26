@@ -38,7 +38,7 @@
         <div v-else class="coin-list__info-details-denom text-0 font-medium">
           <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="type === 'pay'" class="coin-list__info-details-data -text-1 font-normal">
+        <div v-if="type === 'pay'" class="coin-list__info-details-data -text-1 font-normal text-muted">
           <div v-if="type === 'pay'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <!-- <span
@@ -52,7 +52,7 @@
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
-        <div v-else class="coin-list__info-details-data -text-1 font-normal">
+        <div v-else class="coin-list__info-details-data -text-1 font-normal text-muted">
           <span v-if="type === 'pay' || type === 'chain'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             {{ $t('components.coinList.available') }}
@@ -65,7 +65,7 @@
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
       <Icon name="CaretRightIcon" :icon-size="1" :color="iconColor" />
     </div>
-    <div v-else-if="showBalance" class="coin-list__balance">
+    <div v-else-if="showBalance" class="coin-list__balance text-muted">
       <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
     </div>
   </div>
@@ -163,7 +163,6 @@ export default defineComponent({
   }
 
   &__balance {
-    color: var(--muted);
     white-space: nowrap;
   }
 
@@ -188,14 +187,6 @@ export default defineComponent({
 
     &-details {
       flex: 1 1 0%;
-
-      &-denom {
-        color: var(--text);
-      }
-
-      &-data {
-        color: var(--muted);
-      }
     }
   }
 

@@ -1,8 +1,26 @@
 <template>
-  <nav class="nav">
-    <router-link class="nav-link" to="/">{{ $t('navbar.portfolio') }}</router-link>
-    <router-link class="nav-link" to="/assets">{{ $t('navbar.assets') }}</router-link>
-    <router-link class="nav-link" to="/pools">{{ $t('navbar.pools') }}</router-link>
+  <nav class="nav ml-4 flex items-center text-muted">
+    <router-link
+      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      exact-active-class="text-text font-medium"
+      to="/"
+    >
+      {{ $t('navbar.portfolio') }}
+    </router-link>
+    <router-link
+      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      exact-active-class="text-text font-medium"
+      to="/assets"
+    >
+      {{ $t('navbar.assets') }}
+    </router-link>
+    <router-link
+      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      exact-active-class="text-text font-medium"
+      to="/pools"
+    >
+      {{ $t('navbar.pools') }}
+    </router-link>
     <div class="space"></div>
   </nav>
 </template>
@@ -14,23 +32,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.nav {
-  display: flex;
-  margin-left: 1rem;
-  align-items: center;
-
-  &-link {
-    padding: 0 1rem;
-    text-decoration: none;
-    line-height: 3rem;
-
-    &:visited {
-      color: inherit;
-    }
-  }
-}
-
 .router-link-exact-active {
-  font-weight: bold;
+  color: var(--text);
 }
 </style>

@@ -27,7 +27,7 @@
       @goback="gobackFunc"
     />
     <div
-      class="swap-widget elevation-panel"
+      class="swap-widget bg-surface shadow-panel rounded-2xl"
       :style="[
         !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
         isChildModalOpen ? 'box-shadow:none;' : '',
@@ -115,6 +115,7 @@
         <ActionButton
           :name="buttonName"
           :status="buttonStatus"
+          :disabled="buttonDisabled"
           :click-function="swap"
           :tooltip-text="buttonTooltipText"
         />
@@ -489,7 +490,7 @@ export default defineComponent({
             if (data.isPriceChanged) {
               return 'Update prices';
             } else {
-              if (data.buttonStatus === 'normal') {
+              if (data.buttonStatus === 'active' && !data.buttonDisabled) {
                 return 'Review';
               }
               return 'Swap';
@@ -509,12 +510,12 @@ export default defineComponent({
       buttonStatus: computed(() => {
         if (!isInit.value) {
           return 'loading';
-        }
-        if (data.isSwapReady) {
-          return 'normal';
         } else {
-          return 'inactive';
+          return 'active';
         }
+      }),
+      buttonDisabled: computed(() => {
+        return !data.isSwapReady;
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
@@ -916,7 +917,6 @@ export default defineComponent({
 
 .swap-widget {
   padding-bottom: 1.5rem;
-  background-color: var(--surface);
 
   &-header {
     display: flex;

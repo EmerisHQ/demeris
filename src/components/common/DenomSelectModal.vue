@@ -8,7 +8,7 @@
       :selected-denom="selectedDenom"
       @select="chainSelectHandler"
     />
-    <div v-else class="denom-select-modal-wrapper elevation-panel">
+    <div v-else class="denom-select-modal-wrapper bg-surface shadow-panel rounded-2xl">
       <TitleWithGoback :title="title" :func="func" />
 
       <div class="search-bar">
@@ -138,8 +138,6 @@ export default defineComponent({
   left: 0;
 
   overflow: hidden;
-
-  background-color: var(--surface);
   z-index: 10;
 
   .search-bar {

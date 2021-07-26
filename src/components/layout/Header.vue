@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <router-link to="/" class="header__logo">
-      <Logo />
+      <NavbarLogo />
     </router-link>
 
     <Navbar />
@@ -33,7 +33,6 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import Logo from '@/components/common/Logo.vue';
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
@@ -41,11 +40,12 @@ import { useStore } from '@/store';
 
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
+import NavbarLogo from '../common/NavbarLogo.vue';
 import IconButton from '../ui/IconButton.vue';
 export default defineComponent({
   name: 'Header',
   components: {
-    Logo,
+    NavbarLogo,
     Navbar,
     ReceiveIcon,
     SendIcon,

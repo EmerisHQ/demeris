@@ -86,7 +86,7 @@
           </Modal>
 
           <div
-            class="border rounded-lg overflow-hidden elevation-card relative p-10"
+            class="border rounded-lg overflow-hidden shadow-card rounded-2xl relative p-10"
             :style="{ width: '18rem', height: '18rem' }"
           >
             <Button name="Send Transaction" @click="modalIsOpen = 'send'" />

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="settings-modal elevation-panel">
+    <div class="settings-modal shadow-panel rounded-2xl">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
         <p class="settings-modal__label text-muted">
@@ -17,7 +17,7 @@
 
         <div class="settings-modal__button" @click="toggleAdvancedSettings">
           <span>{{ $t('components.settingsMenu.settings') }}</span>
-          <Icon name="CaretRightIcon" :icon-size="1.5" />
+          <Icon name="CaretRightIcon" :icon-size="1" />
         </div>
 
         <hr class="settings-modal__divider" />
@@ -25,17 +25,17 @@
         <div>
           <a href="https://t.me/EmerisHQ" target="_blank" class="settings-modal__button">
             <span>{{ $t('components.settingsMenu.support') }}</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
           </a>
 
           <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-modal__button">
             <span>{{ $t('components.settingsMenu.twitter') }}</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
           </a>
 
           <a href="https://emeris.com" target="_blank" class="settings-modal__button">
             <span>emeris.com</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <Icon name="ArrowUpIcon" :icon-size="1" class="external-icon" />
           </a>
         </div>
 
@@ -57,7 +57,7 @@
       <div v-else class="settings-modal-advanced">
         <div class="settings-header">
           <div class="settings-header__action" @click="toggleAdvancedSettings">
-            <Icon name="ArrowLeftIcon" :icon-size="2" />
+            <Icon name="ArrowLeftIcon" :icon-size="1.5" />
           </div>
           <div class="settings-header__title text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
           <div class="settings-header__action" />
@@ -103,7 +103,7 @@
       @close="toggleWarningCustomSlippage"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
       </div>
       <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.allowCustomSlippage') }}
@@ -129,7 +129,7 @@
       @close="toggleWarningViewUnverified"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
       </div>
       <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.viewAllAssets') }}
@@ -155,7 +155,7 @@
       @close="toggleWarningViewLPAssetPools"
     >
       <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="2" />
+        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
       </div>
       <div class="warning-modal__title text-1 font-bold">
         {{ $t('components.settingsMenu.viewLPAssetPools') }}

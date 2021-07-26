@@ -1,6 +1,6 @@
 <template>
   <button
-    class="moonpay-banner theme-inverse dark:theme-inverse bg-app text-left elevation-card"
+    class="moonpay-banner theme-inverse dark:theme-inverse bg-app text-left shadow-card rounded-2xl"
     :class="`moonpay-banner--${size}`"
     @click="goMoon"
   >

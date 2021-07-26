@@ -1,7 +1,7 @@
 <template>
   <div
     class="tx-steps denom-select-modal-wrapper"
-    :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
+    :class="{ 'bg-surface shadow-panel rounded-2xl tx-steps--widget': variant === 'widget' }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
@@ -43,7 +43,7 @@
         </div>
 
         <div class="button-wrapper">
-          <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+          <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
         </div>
       </div>
       <Modal
@@ -645,8 +645,6 @@ export default defineComponent({
   left: 0;
 
   overflow: hidden;
-
-  background-color: var(--surface);
   z-index: 10;
 
   &.tx-steps--widget > .title {

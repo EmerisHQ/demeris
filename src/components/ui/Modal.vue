@@ -1,7 +1,7 @@
 <template>
   <div v-if="open" class="modal" :class="[`modal--${variant}`]">
     <div class="modal__overlay" @click="onOverlayClick" />
-    <div class="modal__body elevation-card" :class="bodyClass" :style="bodyStyle">
+    <div class="modal__body shadow-card rounded-2xl" :class="bodyClass" :style="bodyStyle">
       <div class="modal__header">
         <slot name="header">
           <span />

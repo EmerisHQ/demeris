@@ -1,11 +1,10 @@
 <template>
   <section class="pools">
-    <div class="pools__subheader">
+    <div class="pools__subheader flex items-center justify-between">
       <Search v-model:keyword="keyword" class="pools__search" />
-      <button class="pools__add-button" @click="openAddLiqudityPage">
-        <Icon name="PlusIcon" :icon-size="2" />
-        <span class="pools__add-button__label">Add liquidity</span>
-      </button>
+      <Button name="Add liquidity" variant="link" @click="openAddLiqudityPage">
+        <Icon name="PlusIcon" :icon-size="1.5" />
+      </Button>
     </div>
 
     <table class="pools-table">
@@ -59,13 +58,14 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 
 export default {
   name: 'PoolsTable',
-  components: { Search, Icon, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
+  components: { Search, Icon, Button, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
 
   props: {
     pools: {
@@ -131,24 +131,6 @@ export default {
 
   &__search {
     width: 22.5rem;
-  }
-
-  &__add-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 1rem 0.75rem;
-    font-weight: 600;
-
-    &__label {
-      margin-left: 0.625rem;
-    }
-  }
-
-  &__subheader {
-    margin-top: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
 }
 

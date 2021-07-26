@@ -1,8 +1,8 @@
 <template>
   <AppLayout>
-    <section class="assets">
+    <section class="assets flex flex-col">
       <div class="assets__header">
-        <h1 class="assets__title">Assets</h1>
+        <h1 class="assets__title text-4 font-bold mb-8">Assets</h1>
       </div>
 
       <div class="assets__group">
@@ -40,20 +40,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.assets {
-  display: flex;
-  flex-direction: column;
-  font-size: 1rem;
-
-  &__title {
-    font-size: 3.1875rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-  }
-
-  &__table {
-    margin-top: 1.5rem;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

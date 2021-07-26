@@ -39,7 +39,7 @@ export default defineComponent({
         </div>
 
         <div class="stake__banner__controls">
-          <Button status="secondary" name="Coming soon" class="stake__banner__controls__button" />
+          <Button variant="secondary" name="Coming soon" class="stake__banner__controls__button" />
         </div>
 
         <div class="stake__banner__symbol">

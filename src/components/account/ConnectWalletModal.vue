@@ -4,7 +4,7 @@
       v-if="isKeplrInstalled"
       :open="open"
       class="connect-wallet-modal"
-      body-class="elevation-panel"
+      body-class="shadow-panel rounded-2xl"
       width="45rem"
       @close="closeConnectKeplr"
     >
@@ -15,7 +15,7 @@
       v-else-if="isKeplrSupported && !isKeplrInstalled"
       :open="open"
       class="connect-wallet-modal"
-      body-class="elevation-panel"
+      body-class="shadow-panel rounded-2xl"
       width="45rem"
       @close="closeGetKeplr"
     >
@@ -26,7 +26,7 @@
       v-else
       :open="open"
       class="connect-wallet-modal"
-      body-class="elevation-panel"
+      body-class="shadow-panel rounded-2xl"
       width="45rem"
       @close="closeGetBrowser"
     >

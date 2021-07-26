@@ -1,7 +1,7 @@
 <template>
   <!-- Icon button implementation. Same specs as button only displays Icon instead of text using ./Icon.vue //-->
   <button
-    :class="[type, status, type !== 'flat' ? 'elevation-button' : '', data?.isOver ? 'over' : '']"
+    :class="[type, status, type !== 'flat' ? 'bg-surface shadow-button rounded-xl' : '', data?.isOver ? 'over' : '']"
     class="icon-button"
     @click="clickFunction"
   >
@@ -77,7 +77,6 @@ export default defineComponent({
   position: relative;
   outline: none;
   border: none;
-  background-color: var(--surface);
   cursor: pointer;
   padding: 0;
 

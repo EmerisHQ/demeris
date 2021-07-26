@@ -86,7 +86,7 @@ export default defineComponent({
     .yes-button {
       border: transparent;
       background: var(--text);
-      color: var(--bg);
+      color: var(--inverse);
     }
   }
 

@@ -2,7 +2,7 @@
   <main class="welcome">
     <header class="welcome__header">
       <div class="welcome__header__logo">
-        <Logo />
+        <Brandmark />
       </div>
 
       <div class="welcome__header__controls">
@@ -18,14 +18,14 @@
 
     <div class="welcome__wrapper">
       <section class="welcome__main">
-        <h2 class="welcome__main__subtitle">A new world for defi</h2>
+        <h2 class="welcome__main__subtitle">A new world for DeFi</h2>
         <h1 class="welcome__main__title">
           Your one-stop app <br />
           for decentralized <br />
           financial services.
         </h1>
         <p class="welcome__main__description">
-          Demeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
+          Emeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
           of blockchains.
         </p>
       </section>
@@ -54,7 +54,7 @@ import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import Logo from '@/components/common/Logo.vue';
+import Brandmark from '@/components/common/Brandmark.vue';
 import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
@@ -63,7 +63,7 @@ export default defineComponent({
   components: {
     Button,
     ConnectKeplr,
-    Logo,
+    Brandmark,
   },
 
   setup() {

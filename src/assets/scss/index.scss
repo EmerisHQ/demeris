@@ -1,10 +1,10 @@
 @import './tailwind';
 
 // theme config
+@import '_base';
 @import '_typography';
 @import '_theme-colors';
 
 // todo
 @import '_animations';
-@import '_elevation';
 @import '_snippets';
