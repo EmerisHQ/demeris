@@ -433,6 +433,10 @@ export default {
         return false;
       }
 
+      if (!hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1)) {
+        return false;
+      }
+
       if (!hasSufficientFunds.value.total) {
         return false;
       }
