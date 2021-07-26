@@ -28,7 +28,12 @@
             </thead>
 
             <tbody>
-              <tr v-for="balance of reserveBalances" :key="balance.denom" class="assets-table__row">
+              <tr
+                v-for="balance of reserveBalances"
+                :key="balance.denom"
+                class="assets-table__row"
+                @click="openAssetPage(balance)"
+              >
                 <td class="assets-table__row__denom">
                   <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
                   <span class="w-bold"><Denom :name="balance.denom" /></span>
@@ -36,6 +41,35 @@
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
                 <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
                 <td class="text-right w-bold"><Price :amount="balance" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section v-if="reserveBalances" class="pool__main__assets">
+          <h2 class="pool__main__assets__title s-2">Liquidity pool token</h2>
+
+          <table class="pool__main__assets__table assets-table">
+            <thead>
+              <tr>
+                <th class="text-left">Asset</th>
+                <th class="text-right">Ticker</th>
+                <th class="text-right">Price</th>
+                <th class="text-right">Allocation</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr class="assets-table__row" @click="openAssetPage(walletBalances.poolCoin)">
+                <td class="assets-table__row__denom">
+                  <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
+                  <span class="w-bold"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                </td>
+                <td class="text-right">
+                  <Ticker :name="walletBalances.poolCoin.denom" />
+                </td>
+                <td class="text-right"><Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" /></td>
+                <td class="text-right w-bold">{{ toUSD(totalLiquidityPrice) }}</td>
               </tr>
             </tbody>
           </table>
@@ -70,8 +104,10 @@
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p class="pool-equity__stats__balance s-2 w-bold">{{ toUSD(ownLiquidityPrice) }}</p>
-                <span class="pool-equity__stats__share s-minus">{{ parseFloat((100 * ownLiquidityPrice) / totalLiquidityPrice).toFixed(2) }}% of pool</span>
+                <p class="pool-equity__stats__balance s-2 w-bold">
+                  {{ toUSD(ownLiquidityPrice) }}
+                </p>
+                <span class="pool-equity__stats__share s-minus"> {{ ownLiquidityShare }}% of pool </span>
               </div>
             </div>
 
@@ -122,6 +158,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -152,6 +189,7 @@ export default defineComponent({
     Button,
     Pools,
     Price,
+    Ticker,
   },
 
   setup() {
@@ -348,6 +386,18 @@ export default defineComponent({
       ownLiquidityPrice.value = total;
     };
 
+    const ownLiquidityShare = computed(() => {
+      let share = (100 * ownLiquidityPrice.value) / totalLiquidityPrice.value;
+      if (share > 100) {
+        return 100;
+      }
+      return share.toFixed(2);
+    });
+
+    const openAssetPage = (asset: Record<string, string>) => {
+      router.push({ name: 'Asset', params: { denom: asset.denom } });
+    };
+
     watch(reserveBalances, updateTotalLiquidityPrice);
     watch(walletBalances, updateOwnLiquidityPrice);
 
@@ -363,7 +413,9 @@ export default defineComponent({
       withdrawLiquidityHandler,
       formatPoolName,
       ownLiquidityPrice,
+      ownLiquidityShare,
       toUSD,
+      openAssetPage,
     };
   },
 });
@@ -480,8 +532,15 @@ export default defineComponent({
 }
 
 .assets-table {
-  width: 100%;
+  width: calc(100% + 4rem);
+  margin-inline: -2rem;
   table-layout: fixed;
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
 
   .text-right {
     text-align: right;
@@ -493,13 +552,48 @@ export default defineComponent({
 
   th {
     color: var(--muted);
+    background: var(--bg);
     vertical-align: middle;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 400;
-    padding-bottom: 1.2rem;
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  td,
+  th {
+    transition: all 100ms ease-in;
+
+    &:first-child {
+      padding-left: 2rem;
+    }
+
+    &:last-child {
+      padding-right: 2rem;
+    }
   }
 
   &__row {
+    cursor: pointer;
+
+    &:hover {
+      td {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      td:first-child {
+        border-top-left-radius: 0.8rem;
+        border-bottom-left-radius: 0.8rem;
+      }
+
+      td:last-child {
+        border-top-right-radius: 0.8rem;
+        border-bottom-right-radius: 0.8rem;
+      }
+    }
+
     &__denom {
       padding: 2.4rem 0;
       display: flex;
