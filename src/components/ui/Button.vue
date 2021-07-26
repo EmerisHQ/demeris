@@ -1,11 +1,11 @@
 <template>
-  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
+  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
       :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
       :disabled="disabled"
       class="button s-0 w-medium"
-      @click="clickFunction"
+      @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-if="status === 'loading'" class="spinner">
         <Spinner :size="1.5" :color="'black'" :variant="'circle'" />
@@ -35,7 +35,8 @@ export default defineComponent({
     isOutline: { type: Boolean, required: false, default: false },
     disabled: { type: Boolean, default: false },
   },
-  setup(props) {
+  emits: ['click'],
+  setup(props, { emit }) {
     const buttonTooltipRef = ref(null);
     function toggleToolTip(type) {
       if (props.tooltipText) {
@@ -47,7 +48,7 @@ export default defineComponent({
       }
     }
 
-    return { buttonTooltipRef, toggleToolTip };
+    return { buttonTooltipRef, toggleToolTip, emit };
   },
 });
 </script>
@@ -63,8 +64,10 @@ export default defineComponent({
   cursor: pointer;
 
   &:disabled {
-    background-color: var(--inactive);
     cursor: not-allowed;
+    background-color: var(--text);
+    color: #ababab;
+    pointer-events: none;
   }
 }
 

@@ -233,7 +233,7 @@ export type Ticket = {
   status: string;
   height?: number;
   newTicket?: string;
-  err?: string;
+  error?: string;
 };
 export type SeqNumber = {
   chain_name: string;
