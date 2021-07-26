@@ -21,8 +21,6 @@ export default function usePools() {
     { immediate: true },
   );
 
-
-
   const formatPoolName = async (pool: Pool) => {
     return (
       await Promise.all(
