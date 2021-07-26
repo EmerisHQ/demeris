@@ -95,7 +95,14 @@
                 }
               "
             />
-            <ModalButton :name="$t('generic_cta.getAtom')" :click-function="() => {}" />
+            <ModalButton
+              :name="$t('generic_cta.getAtom')"
+              :click-function="
+                () => {
+                  goMoon();
+                }
+              "
+            />
           </template>
           <template
             v-if="
@@ -193,6 +200,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
+import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
@@ -202,7 +210,6 @@ import {
   msgFromStepTransaction,
   validateStepFeeBalances,
 } from '@/utils/actionHandler';
-
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -245,6 +252,36 @@ export default defineComponent({
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props: any, { emit }) {
+    const emitter = useEmitter();
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
+
+    const mpDomain = ref('https://buy.moonpay.io');
+    const mpParams = computed(() => {
+      return {
+        // key currently from Cosmostation
+        apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
+        currencyCode: 'atom',
+        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+        baseCurrencyCode: 'usd',
+        // baseCurrencyAmount: '50',
+      };
+    });
+    const mpQuery = computed(() => {
+      return new URLSearchParams(mpParams.value).toString();
+    });
+    const mpUrl = computed(() => {
+      return mpDomain.value + '/?' + mpQuery.value;
+    });
+
+    const goMoon = () => {
+      if (isSignedIn.value) {
+        window.open(mpUrl.value, '', 'height=480,width=320');
+      } else {
+        emitter.emit('toggle-settings-modal');
+      }
+    };
     const router = useRouter();
     const goBack = () => {
       if (props.backRoute) {
@@ -587,6 +624,7 @@ export default defineComponent({
       feeWarning,
       errorDetails,
       acceptedWarning,
+      goMoon,
     };
   },
 });
