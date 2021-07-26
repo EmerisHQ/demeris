@@ -16,7 +16,7 @@
       :data="actionHandlerResult"
       :gas-price-level="gasPrice"
       action-name="swap"
-      as-widget
+      variant="widget"
       @close="reviewModalToggle"
       @reset="
         () => {

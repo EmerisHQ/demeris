@@ -131,10 +131,7 @@ export default defineComponent({
 
       const from = {
         address: '',
-        amount: transactions.reduce((acc, item) => {
-          const amount = (item.data as Actions.TransferData).amount.amount;
-          return acc + +amount;
-        }, 0),
+        amount: firstTransaction.data.amount.amount,
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
         denom: (firstTransaction.data.amount as Base.Amount).denom,
       };

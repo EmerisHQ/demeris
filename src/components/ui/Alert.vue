@@ -1,6 +1,6 @@
 <template>
   <div role="alert" class="alert" :class="`alert--${status}`">
-    <span class="alert__icon">
+    <span v-if="showIcon" class="alert__icon">
       <BanIcon v-if="status === 'error'" />
       <ExclamationIcon v-else-if="status === 'warning'" />
       <InformationIcon v-else-if="status === 'info'" />
@@ -41,6 +41,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    showIcon: {
+      type: Boolean,
+      default: true,
+    },
   },
 });
 </script>
@@ -52,6 +56,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   border: 1px solid transparent;
+  color: var(--text);
+  overflow: scroll;
 
   &--error {
     background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
@@ -81,11 +87,15 @@ export default defineComponent({
 
   &__icon {
     font-size: 1.8rem;
+    flex-shrink: 0;
   }
 
   &__content {
     margin-left: 1.2rem;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-all;
   }
 }
 </style>
