@@ -105,9 +105,9 @@
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
                 <p v-if="hasPrices" class="pool-equity__stats__balance s-2 w-bold">
-                  {{ toUSD(ownLiquidityPrice) }}
+                  {{ toUSD(ownSharePrice) }}
                 </p>
-                <span class="pool-equity__stats__share s-minus"> {{ ownLiquidityShare }}% of pool </span>
+                <span class="pool-equity__stats__share s-minus"> {{ ownShare }}% of pool </span>
               </div>
             </div>
 
@@ -151,6 +151,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -168,7 +169,6 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { hexToRGB, isNative } from '@/utils/basic';
 
@@ -229,12 +229,11 @@ export default defineComponent({
       return true;
     });
 
-    const { pool, reserveBalances, pairName, calculateWithdrawBalances } = usePool(
+    const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
       computed(() => route.params.id as string),
     );
-    const totalLiquidityPrice = ref();
+    const totalLiquidityPrice = ref(0);
 
-    const ownLiquidityPrice = ref();
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
         return;
@@ -321,94 +320,24 @@ export default defineComponent({
       totalLiquidityPrice.value = total;
     };
 
-    const updateOwnLiquidityPrice = async () => {
-      if (!pool.value) {
-        return;
+    const ownShare = computed(() => {
+      if (!pool.value || !totalSupply.value || !walletBalances.value.poolCoin.amount) {
+        return 0;
       }
 
-      let total = 0;
+      return new BigNumber(walletBalances.value.poolCoin.amount)
+        .dividedBy(totalSupply.value)
+        .multipliedBy(100)
+        .decimalPlaces(2)
+        .toNumber();
+    });
 
-      let denom;
-
-      if (isNative(walletBalances.value.coinA.denom)) {
-        denom = walletBalances.value.coinA.denom;
-      } else {
-        const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
-            hash: walletBalances.value.coinA.denom.split('/')[1],
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
-            {
-              subscribe: false,
-              params: {
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: walletBalances.value.coinA.denom.split('/')[1],
-              },
-            },
-            { root: true },
-          ));
-        denom = (verifyTrace as VerifyTrace).base_denom;
-      }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
-        total =
-          total +
-          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
-            Math.pow(
-              10,
-              parseInt(
-                store.getters['demeris/getDenomPrecision']({
-                  name: denom,
-                }),
-              ),
-            );
+    const ownSharePrice = computed(() => {
+      if (!ownShare.value || !totalLiquidityPrice.value) {
+        return '0.00';
       }
 
-      if (isNative(walletBalances.value.coinB.denom)) {
-        denom = walletBalances.value.coinB.denom;
-      } else {
-        const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
-            hash: walletBalances.value.coinB.denom.split('/')[1],
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
-            {
-              subscribe: false,
-              params: {
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: walletBalances.value.coinB.denom.split('/')[1],
-              },
-            },
-            { root: true },
-          ));
-        denom = (verifyTrace as VerifyTrace).base_denom;
-      }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
-        total =
-          total +
-          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
-            Math.pow(
-              10,
-              parseInt(
-                store.getters['demeris/getDenomPrecision']({
-                  name: denom,
-                }),
-              ),
-            );
-      }
-
-      ownLiquidityPrice.value = total;
-    };
-
-    const ownLiquidityShare = computed(() => {
-      let share = (100 * ownLiquidityPrice.value) / totalLiquidityPrice.value;
-      if (share > 100) {
-        return 100;
-      }
-      return share.toFixed(2);
+      return new BigNumber(ownShare.value).dividedBy(totalLiquidityPrice.value).toFixed(2);
     });
 
     const openAssetPage = (asset: Record<string, string>) => {
@@ -416,7 +345,6 @@ export default defineComponent({
     };
 
     watch(reserveBalances, updateTotalLiquidityPrice);
-    watch(walletBalances, updateOwnLiquidityPrice);
 
     return {
       hasPrices,
@@ -430,8 +358,8 @@ export default defineComponent({
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,
-      ownLiquidityPrice,
-      ownLiquidityShare,
+      ownShare,
+      ownSharePrice,
       toUSD,
       openAssetPage,
     };
