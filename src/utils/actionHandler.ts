@@ -322,10 +322,24 @@ export async function move({
           },
         });
 
+        const invPrimaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: destination_chain_name,
+            destination_chain_name: chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+            },
+            { root: true },
+          ));
+
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel, amount.denom),
+            denom: generateDenomHash(invPrimaryChannel, amount.denom),
           },
           chain_name: destination_chain_name,
         };
@@ -387,10 +401,25 @@ export async function move({
           through: primaryChannel,
         },
       });
+
+      const invPrimaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: destination_chain_name,
+            destination_chain_name: chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+            },
+            { root: true },
+          ));
+
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
+          denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
         },
         chain_name: destination_chain_name,
       };
@@ -440,10 +469,25 @@ export async function move({
             through: primaryChannel,
           },
         });
+
+        const invPrimaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: destination_chain_name,
+            destination_chain_name: chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+            },
+            { root: true },
+          ));
+
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
+            denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
           },
           chain_name: destination_chain_name,
         };
