@@ -201,7 +201,12 @@
                 @click="goToReview"
               />
               <div class="add-liquidity__controls__fees">
-                <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+                <FeeLevelSelector
+                  v-if="actionSteps.length > 0"
+                  v-model:gasPriceLevel="gasPrice"
+                  :steps="actionSteps"
+                  @update:fees="state.fees = $event"
+                />
               </div>
             </div>
           </div>
@@ -313,6 +318,7 @@ export default {
       totalEstimatedPrice: '',
       receiveAmount: '',
       poolBaseDenoms: [],
+      fees: {},
     });
 
     const gasPrice = computed(() => {
