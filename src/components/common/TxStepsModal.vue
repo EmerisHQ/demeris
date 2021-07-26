@@ -1,6 +1,6 @@
 <template>
   <div class="denom-select-modal-wrapper" :class="{ 'elevation-panel': asWidget, 'tx-steps--widget': asWidget }">
-    <GobackWithClose v-if="asWidget" @goback="emitHandler('goback')" @close="emitHandler('close')" />
+    <GobackWithClose v-if="asWidget" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -291,7 +291,6 @@ export default defineComponent({
                   txResultData.status != 'Tokens_unlocked_timeout' &&
                   txResultData.status != 'Tokens_unlocked_ack'
                 ) {
-                  console.log(status);
                   txResultData = await store.getters['demeris/getTxStatus']({
                     chain_name: res.chain_name,
                     ticket: result.ticket,
