@@ -1,4 +1,5 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
+import { sleep } from '@cosmjs/utils';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -34,6 +35,9 @@ export type DemerisConfig = {
 export type DemerisTxParams = {
   tx: string;
   chain_name: string;
+};
+export type DemerisTxResultParams = {
+  height: number;
 };
 export type GasFee = {
   amount: Array<Amount>;
@@ -140,6 +144,12 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { tx, chain_name }: DemerisTxParams,
   ): Promise<TicketResponse>;
+
+  [DemerisActionTypes.GET_END_BLOCK_EVENTS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { height }: DemerisTxResultParams,
+  ): Promise<unknown>;
+
   [DemerisActionTypes.SIGN_WITH_KEPLR](
     { commit, getters }: ActionContext<State, RootState>,
     { msgs, chain_name }: DemerisSignParams,
@@ -177,7 +187,6 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
-
   [GlobalDemerisActionTypes.GET_ALL_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_ALL_BALANCES]>;
@@ -229,6 +238,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.BROADCAST_TX](
     ...args: Parameters<Actions[DemerisActionTypes.BROADCAST_TX]>
   ): ReturnType<Actions[DemerisActionTypes.BROADCAST_TX]>;
+  [GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>;
   [GlobalDemerisActionTypes.SIGN_WITH_KEPLR](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>;
@@ -257,6 +269,7 @@ export interface GlobalActions {
     ...args: Parameters<Actions[DemerisActionTypes.STORE_UPDATE]>
   ): ReturnType<Actions[DemerisActionTypes.STORE_UPDATE]>;
 }
+//@ts-ignore
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
@@ -492,7 +505,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
@@ -683,6 +696,70 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
     }
   },
+
+  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
+    function sleep(ms) {
+      const wakeUpTime = Date.now() + ms;
+      while (Date.now() < wakeUpTime) {}
+    }
+
+    try {
+      sleep(800);
+      const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
+      const successData = {};
+
+      if (response.data.result?.end_block_events) {
+        let isMine = false;
+
+        const checks = getEndBlockChecks({
+          type: 'Swap',
+          requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
+        });
+        console.group('END BLOCK EVENTS');
+        response.data.result?.end_block_events?.forEach((item) => {
+          if (item.type === checks.type) {
+            item.attributes.forEach((result) => {
+              console.log(atob(result.key), atob(result.value));
+
+              if (atob(result.key) === checks.txAddress) {
+                if (atob(result.value) === checks.requesterAddress) {
+                  isMine = true;
+                } else {
+                  isMine = false;
+                }
+              }
+              if (isMine) {
+                successData[atob(result.key)] = atob(result.value);
+              }
+            });
+          }
+        });
+        console.groupEnd();
+        if (isMine) {
+          return successData;
+        } else {
+          return null;
+        }
+      }
+
+      function getEndBlockChecks(data) {
+        if (data.type === 'Swap') {
+          return { type: 'swap_transacted', txAddress: 'swap_requester', requesterAddress: data.requesterAddress };
+        }
+
+        if (data.type === 'Redeem') {
+          return { type: 'withdraw_from_pool', txAddress: 'withdrawer', requesterAddress: data.requesterAddress };
+        }
+
+        if (data.type === 'Add Liquidity') {
+          return { type: 'deposit_to_pool', txAddress: 'depositor', requesterAddress: data.requesterAddress };
+        }
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris: GET_END_BLOCK_EVENTS', 'Could not GET_END_BLOCK_EVENTS.' + e.message);
+    }
+  },
+
   // Internal module actions
 
   [DemerisActionTypes.INIT](

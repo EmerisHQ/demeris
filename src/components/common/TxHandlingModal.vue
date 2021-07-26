@@ -1,13 +1,14 @@
 <template>
   <Modal
-    :variant="'full'"
+    :variant="modalVariant ?? 'full'"
+    :class="modalVariant === 'full' ? '!relative' : ''"
     :show-close-button="false"
-    :body-class="status === 'complete' ? 'transferred-bg' : ''"
+    :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
     @close="emitClose"
   >
     <div class="status">
       <div v-if="iconType" class="status__icon">
-        <SpinnerIcon v-if="iconType === 'pending'" :size="3.2" />
+        <SpinnerIcon v-if="iconType === 'pending'" :size="4.2" :gradients="['#FFF1C3', '#9B7C3A']" />
         <div v-else-if="iconType === 'warning'" class="status__icon-warning">
           <WarningIcon />
         </div>
@@ -15,6 +16,7 @@
           <ErrorIcon />
         </div>
       </div>
+      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
       <div v-else class="status__icon-none" />
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
@@ -41,7 +43,8 @@
           {{ subTitle }}
         </template>
       </div>
-      <div v-if="status.startsWith('transfer')" class="transferred-image" />
+
+      <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
         <template v-if="status == 'transacting' || status == 'complete'">
@@ -57,6 +60,27 @@
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.chain_name" />
             </template>
           </div>
+
+          <!-- TEST -->
+          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
+            <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
+              You received
+              <span class="w-bold"><AmountDisplay
+                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
+              /></span>
+              <br />
+              on <ChainName :name="'cosmos-hub'" />.
+              <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+                <span class="w-bold">
+                  <AmountDisplay
+                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                  />
+                </span>
+                not swapped
+              </div>
+            </template>
+          </div>
+          <!-- TEST -->
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
@@ -70,7 +94,11 @@
           </div>
         </template>
         <template v-else>
+          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
+            Keplr troubleshooting ↗️
+          </a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
+          <div v-if="status === 'keplr-reject'" class="spacer-2" />
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               Your
@@ -100,28 +128,49 @@
               Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
               Hub.
             </template>
+            <Collapse
+              v-if="errorDetails"
+              label-open="Show details"
+              label-hide="Hide details"
+              class="status__error-collapse"
+            >
+              <Alert status="info" :show-icon="false">
+                <p class="status__error__item__key">Status</p>
+                <p class="status__error__item">{{ errorDetails.status }}</p>
+                <p class="status__error__item__key">Ticket</p>
+                <p class="status__error__item">{{ errorDetails.ticket }}</p>
+                <p v-if="errorDetails.message" class="status__error__item__key">Error</p>
+                <p v-if="errorDetails.message" class="status__error__item">{{ errorDetails.message }}</p>
+              </Alert>
+            </Collapse>
           </div>
         </template>
       </div>
+      <Button
+        v-if="whiteButton && tx.name === 'swap' && status === 'complete'"
+        :name="whiteButton"
+        class="send-another-button"
+        :status="'normal'"
+        :click-function="
+          () => {
+            router.push('/send');
+          }
+        "
+        :is-outline="true"
+      />
       <Button
         v-if="blackButton"
         :name="blackButton"
         :status="'normal'"
         :click-function="
           () => {
-            status == 'keplr-reject'
-              ? emitRetry()
-              : status == 'failed'
-                ? emitClose()
-                : isFinal
-                  ? emitDone()
-                  : emitNext();
+            status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
           }
         "
-        :style="{ marginBottom: `${blackButton && whiteButton ? '2.4rem' : ''}` }"
+        :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
       />
       <Button
-        v-if="whiteButton"
+        v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
         :name="whiteButton"
         :status="'normal'"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
@@ -134,6 +183,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -141,9 +191,12 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
+import Collapse from '@/components/ui/Collapse.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import { useStore } from '@/store';
 import {
   AddLiquidityData,
   CreatePoolData,
@@ -152,10 +205,17 @@ import {
   SwapData,
   WithdrawLiquidityData,
 } from '@/types/actions';
+import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
 type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
-
+type Result = {
+  demandCoinDenom: string;
+  swappedPercent: number;
+  demandCoinSwappedAmount: number;
+  offerCoinDenom: string;
+  remainingOfferCoinAmount: number;
+};
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
@@ -168,6 +228,8 @@ export default defineComponent({
     ChainName,
     Denom,
     CircleSymbol,
+    Alert,
+    Collapse,
   },
   props: {
     status: {
@@ -190,13 +252,31 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
+    errorDetails: {
+      type: Object,
+      default: undefined,
+    },
+    txResult: {
+      type: Object as PropType<Result>,
+      default: () => {
+        return {
+          swappedPercent: 0,
+          demandCoinSwappedAmount: 0,
+          demandCoinDenom: '',
+          offerCoinDenom: '',
+          remainingOfferCoinAmount: 0,
+        };
+      },
+    },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
-  setup(props, { emit }) {
+  setup(props: any, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
+    const router = useRouter();
+    const store = useStore();
     const iconType = computed(() => {
-      if (props.status == 'keplr-sign') {
+      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
         return 'pending';
       }
       if (props.status == 'keplr-reject') {
@@ -226,7 +306,7 @@ export default defineComponent({
     // Watch for status changes
     watch(
       () => props.status,
-      (newStatus) => {
+      async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
             subTitle.value = 'Opening Keplr';
@@ -241,7 +321,7 @@ export default defineComponent({
             blackButton.value = 'Try again';
             break;
           case 'transacting':
-            subTitle.value = 'Please wait';
+            subTitle.value = 'Transaction in progress';
             whiteButton.value = '';
             blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
@@ -256,7 +336,7 @@ export default defineComponent({
                 title.value = 'Transferring';
                 break;
               case 'swap':
-                title.value = 'Swapping';
+                title.value = 'Please Wait';
                 break;
               case 'addliquidity':
                 title.value = 'Adding liquidity';
@@ -271,9 +351,23 @@ export default defineComponent({
             break;
           case 'complete':
             subTitle.value = '';
-            if (props.isFinal) {
+            if (props.isFinal && !props.hasMore) {
               blackButton.value = 'Done';
-              whiteButton.value = 'Send another';
+              if (props.tx.name === 'swap') {
+                whiteButton.value = `Send ${
+                  Math.trunc(
+                    (Number(props.txResult.demandCoinSwappedAmount) * 100) /
+                      Math.pow(
+                        10,
+                        store.getters['demeris/getDenomPrecision']({
+                          name: await getBaseDenom(props.txResult.demandCoinDenom),
+                        }),
+                      ),
+                  ) / 100
+                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
+              } else {
+                whiteButton.value = 'Send another';
+              }
             } else {
               props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
               whiteButton.value = '';
@@ -290,7 +384,11 @@ export default defineComponent({
                 title.value = 'Transferred';
                 break;
               case 'swap':
-                title.value = 'Swapped';
+                if (props.txResult.swappedPercent !== 100) {
+                  title.value = `Assets partially swapped (${parseInt(props.txResult.swappedPercent)}%)`;
+                } else {
+                  title.value = 'Assets swapped';
+                }
                 break;
               case 'addliquidity':
                 title.value = 'Liquidity added';
@@ -305,9 +403,25 @@ export default defineComponent({
             break;
           case 'failed':
             title.value = 'Transaction failed';
-            whiteButton.value = '';
+            switch ((props.tx as StepTransaction).name) {
+              //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+              case 'swap':
+                title.value = 'Swap failed';
+                break;
+              case 'addliquidity':
+                title.value = 'Add liquidity failed';
+                break;
+              case 'withdrawliquidity':
+                title.value = 'Withdraw liquidity failed';
+                break;
+              case 'createpool':
+                title.value = 'Create pool failed';
+                break;
+            }
+
             subTitle.value = '';
-            blackButton.value = 'Cancel';
+            whiteButton.value = 'Cancel';
+            blackButton.value = 'Try again';
             break;
         }
       },
@@ -371,6 +485,7 @@ export default defineComponent({
       title,
       whiteButton,
       blackButton,
+      router,
     };
   },
 });
@@ -379,6 +494,26 @@ export default defineComponent({
 <style lang="scss" scoped>
 .status {
   text-align: center;
+
+  &__error-collapse {
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  &__error__item {
+    & + &__key {
+      margin-top: 1.6rem;
+    }
+    &__key {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+  }
+
+  &__title {
+    margin-top: 2rem;
+  }
 
   &__title-sub {
     color: var(--muted);
@@ -400,14 +535,30 @@ export default defineComponent({
       color: var(--negative-text);
     }
 
+    &-swap-result {
+      background-image: url('../../assets/images/swap-result.png');
+      height: 21rem;
+      transform: translate(-2.4rem, -2.4rem);
+      width: 32rem;
+    }
+
     &-none {
       height: 2.4rem;
     }
   }
 
   &__detail {
+    .link {
+      display: block;
+      margin-top: 1.6rem;
+    }
+
     .spacer {
       height: 8.8rem;
+    }
+
+    .spacer-2 {
+      height: 4.8rem;
     }
 
     &-transferring {
@@ -461,5 +612,13 @@ export default defineComponent({
   height: 17.7rem;
   display: block;
   margin: 0 auto;
+}
+
+.send-another-button {
+  @import '@/assets/scss/_elevation.scss';
+  margin-top: -2.4rem;
+  margin-bottom: 1.2rem;
+  border-radius: $border-radius;
+  background-color: var(--surface);
 }
 </style>

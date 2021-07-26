@@ -53,7 +53,7 @@ export const messages = {
       },
       coinList: {
         tooltip: '{asset} on {chain}',
-        available: 'available',
+        available: ' available',
       },
       denomSelect: {
         select: 'Select asset',
