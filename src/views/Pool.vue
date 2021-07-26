@@ -11,7 +11,7 @@
             </div>
             <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
           </div>
-          <h1 v-if="hasPrices" class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
+          <h1 v-if="hasPrices.all" class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
         </section>
 
         <section v-if="reserveBalances" class="pool__main__assets">
@@ -23,13 +23,13 @@
                 <th class="text-left">Asset</th>
                 <th class="text-right">Quantity</th>
                 <th class="text-right">Price</th>
-                <th v-if="hasPrices" class="text-right">Allocation</th>
+                <th class="text-right">Allocation</th>
               </tr>
             </thead>
 
             <tbody>
               <tr
-                v-for="balance of reserveBalances"
+                v-for="(balance, index) of reserveBalances"
                 :key="balance.denom"
                 class="assets-table__row"
                 @click="openAssetPage(balance)"
@@ -40,7 +40,10 @@
                 </td>
                 <td class="text-right"><AmountDisplay :amount="balance" /></td>
                 <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
-                <td v-if="hasPrices" class="text-right w-bold"><Price :amount="balance" /></td>
+                <td class="text-right w-bold">
+                  <Price v-if="hasPrices[index === 0 ? 'coinA' : 'coinB']" :amount="balance" />
+                  <span v-else>-</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -55,7 +58,7 @@
                 <th class="text-left">Asset</th>
                 <th class="text-right">Ticker</th>
                 <th class="text-right">Price</th>
-                <th v-if="hasPrices" class="text-right">Allocation</th>
+                <th class="text-right">Allocation</th>
               </tr>
             </thead>
 
@@ -69,7 +72,10 @@
                   <Ticker :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="text-right"><Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" /></td>
-                <td v-if="hasPrices" class="text-right w-bold">{{ toUSD(totalLiquidityPrice) }}</td>
+                <td class="text-right w-bold">
+                  <span v-if="hasPrices.all">{{ toUSD(totalLiquidityPrice) }}</span>
+                  <span v-else>-</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -104,7 +110,7 @@
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p v-if="hasPrices" class="pool-equity__stats__balance s-2 w-bold">
+                <p v-if="hasPrices.total" class="pool-equity__stats__balance s-2 w-bold">
                   {{ toUSD(ownSharePrice) }}
                 </p>
                 <span class="pool-equity__stats__share s-minus"> {{ ownShare }}% of pool </span>
@@ -123,7 +129,7 @@
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinA" />
                   </span>
-                  <span v-if="hasPrices"><Price :amount="walletBalances.coinA" /></span>
+                  <span v-if="hasPrices.coinA"><Price :amount="walletBalances.coinA" /></span>
                   <span v-else>-</span>
                 </li>
                 <li class="pool-equity__assets__list__item">
@@ -135,7 +141,8 @@
                   <span class="pool-equity__assets__list__item__denom w-bold">
                     <AmountDisplay :amount="walletBalances.coinB" />
                   </span>
-                  <span><Price :amount="walletBalances.coinB" /></span>
+                  <span v-if="hasPrices.coinB"><Price :amount="walletBalances.coinB" /></span>
+                  <span v-else>-</span>
                 </li>
               </ul>
             </div>
@@ -219,14 +226,16 @@ export default defineComponent({
         baseDenoms = pool.value.reserve_coin_denoms;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+      const coinA = !!store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
+      const coinB = !!store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
 
-      if (!priceA || !priceB) {
-        return false;
-      }
+      const all = coinA && coinB;
 
-      return true;
+      return {
+        coinA,
+        coinB,
+        all,
+      };
     });
 
     const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
