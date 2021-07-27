@@ -500,6 +500,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
+      console.error(e);
       return false;
     }
   },
