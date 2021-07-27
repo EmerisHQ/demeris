@@ -515,12 +515,21 @@ export default defineComponent({
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
+        //WIP
+        // const precision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+        //  Math.pow(10, parseInt(precision))
+        // console.log('maxAmount', parseInt(
+        //     allBalances.value.filter((coin) => {
+        //       return coin.denom === data.payCoinData?.denom;
+        //     })[0]?.amount,
+        //   ))
+        //   console.log('fees', data.fees)
         return (
           parseInt(
             allBalances.value.filter((coin) => {
               return coin.denom === data.payCoinData?.denom;
             })[0]?.amount,
-          ) ?? 0
+          ) - data.fees ?? 0
         );
       }),
       //conditional-text-end
@@ -540,8 +549,8 @@ export default defineComponent({
         const swapFeeRate =
           parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.03;
         const fee = data.payCoinAmount * swapFeeRate;
-
-        return Math.trunc(fee * 1000000) / 1000000;
+        console.log('fee', fee);
+        return Math.trunc(fee * 1000000) / 1000000 ?? 0;
       }),
 
       // for swap action
