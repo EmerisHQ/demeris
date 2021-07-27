@@ -1,6 +1,9 @@
 <template>
-  <div class="address" :class="{ 'address--readonly': readonly, 'elevation-button': !readonly }">
-    <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" />
+  <div
+    class="address"
+    :class="{ 'address--readonly': readonly, 'address--invalid': invalid, 'elevation-button': !readonly }"
+  >
+    <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" spellcheck="false" />
     <div class="address__controls">
       <span class="address__chain"><ChainName :name="chainName" /></span>
       <Clipboard v-if="readonly" :text="address" />
@@ -25,6 +28,10 @@ export default defineComponent({
   inheritAttrs: false,
 
   props: {
+    invalid: {
+      type: Boolean,
+      default: false,
+    },
     readonly: {
       type: Boolean,
       default: false,
@@ -58,6 +65,10 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   border-radius: 1rem;
+
+  &--invalid {
+    color: var(--negative-text);
+  }
 
   &--readonly {
     background: rgba(0, 0, 0, 0.03);

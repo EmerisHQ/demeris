@@ -1,7 +1,7 @@
 <template>
   <fieldset class="form__field">
     <label>{{ $t('components.sendForm.to') }}</label>
-    <Address v-model:address="form.recipient" />
+    <Address v-model:address.trim="form.recipient" :invalid="!!form.recipient && !isValidAddress" />
   </fieldset>
 
   <fieldset class="form__field">
@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts">
+import { bech32 } from 'bech32';
 import { computed, defineComponent, inject } from 'vue';
 
 import Address from '@/components/ui/Address.vue';
@@ -30,7 +31,7 @@ import Button from '@/components/ui/Button.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Input from '@/components/ui/Input.vue';
 import { SendAddressForm } from '@/types/actions';
-import { bech32 } from 'bech32';
+
 import { store } from '../../../store/index';
 
 export default defineComponent({
@@ -49,7 +50,7 @@ export default defineComponent({
     const form = inject<SendAddressForm>('transferForm');
 
     const isValid = computed(() => {
-      return (form.isTermChecked && isValidAddress.value);
+      return form.isTermChecked && isValidAddress.value;
     });
 
     const isValidAddress = computed(() => {
@@ -63,7 +64,6 @@ export default defineComponent({
         }
 
         return false;
-
       } catch (e) {
         console.log(e);
         return false;
@@ -74,7 +74,7 @@ export default defineComponent({
       emit('next');
     };
 
-    return { form, isValid, onSubmit };
+    return { form, isValid, isValidAddress, onSubmit };
   },
 });
 </script>
