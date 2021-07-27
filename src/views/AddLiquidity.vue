@@ -272,7 +272,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
-import { Balance } from '@/types/api';
+import { Balance, Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -357,7 +357,28 @@ export default {
 
     const { calculateSupplyTokenAmount, calculateWithdrawBalances } = usePool(computed(() => pool.value?.id));
 
-    const { balances } = useAccount();
+    const { balances: accountBalances } = useAccount();
+
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    const balances = computed(() => {
+      return verifiedDenoms.value.map((denom) => {
+        const amount =
+          accountBalances.value.find((item) => {
+            const denomName = parseCoins(item.amount)[0].denom;
+            return denomName === denom || item.base_denom === denom;
+          }) || 0;
+
+        return {
+          denom: denom.name,
+          base_denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: amount + denom.name,
+        };
+      });
+    });
 
     const balancesForSecond = computed(() => {
       return balances.value.filter((item) => item.base_denom !== form.coinA.asset?.base_denom);
