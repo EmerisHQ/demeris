@@ -13,8 +13,13 @@
         </div>
 
         <div class="get-keplr__controls">
-          <Button :name="$t('wallet.connect.modal2.button1')" @click="openUrl" />
-          <Button :name="$t('wallet.connect.modal2.button2')" :is-outline="true" @click="reloadApp" />
+          <Button :name="$t('wallet.connect.modal2.button1')" class="get-keplr__controls__button" @click="openUrl" />
+          <Button
+            :name="$t('wallet.connect.modal2.button2')"
+            class="get-keplr__controls__button"
+            :is-outline="true"
+            @click="reloadApp"
+          />
         </div>
       </div>
       <ConnectBanner />
@@ -77,6 +82,8 @@ export default defineComponent({
   }
 
   &__content {
+    display: flex;
+    flex-direction: column;
     width: 50%;
     min-height: inherit;
     padding: 4.8rem;
@@ -86,14 +93,16 @@ export default defineComponent({
   &__controls {
     display: flex;
     flex-direction: column;
-    margin-top: 5rem;
 
-    button {
-      margin-bottom: 1.6rem;
+    &__button {
+      & + & {
+        margin-top: 1.6rem;
+      }
     }
   }
 
   &__description {
+    flex: 1 1 0%;
     margin-top: 4rem;
     line-height: 1.8;
     color: var(--muted);

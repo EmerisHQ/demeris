@@ -313,7 +313,10 @@ export default defineComponent({
     &::before {
       position: absolute;
       content: '';
-      inset: 0.3rem;
+      top: 0.3rem;
+      bottom: 0.3rem;
+      left: 0.3rem;
+      right: 0.3rem;
       border-radius: 2.6rem;
       background: var(--bg);
     }
