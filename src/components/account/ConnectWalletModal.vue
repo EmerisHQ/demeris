@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
@@ -86,7 +86,7 @@ export default defineComponent({
       // @ts-ignore
       isKeplrSupported.value = !!window.chrome;
 
-      window.addEventListener('load', () => {
+      nextTick(() => {
         // detect keplr installed
         // @ts-ignore
         isKeplrInstalled.value = !!window.keplr;
