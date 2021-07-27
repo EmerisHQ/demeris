@@ -419,20 +419,16 @@ export default {
         return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
-        if (reserveBalances.value?.length) {
-          return new BigNumber(reserveBalances.value[1].amount)
-            .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(6)
-            .toNumber();
-        }
-        return undefined;
+      
+      if (reserveBalances.value?.length) {
+        return new BigNumber(reserveBalances.value[1].amount)
+          .dividedBy(reserveBalances.value[0].amount)
+          .shiftedBy(6)
+          .toNumber();
       }
-
-      return ((priceA / priceB) * 1e6).toFixed(6);
+      
+      return undefined;
+      
     });
 
     const hasSufficientFunds = computed(() => {
