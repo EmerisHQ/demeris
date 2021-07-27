@@ -272,7 +272,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
-import { Balance } from '@/types/api';
+import { Balance, Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -355,9 +355,32 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances } = usePool(computed(() => pool.value?.id));
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances } = usePool(
+      computed(() => pool.value?.id),
+    );
 
-    const { balances } = useAccount();
+    const { balances: accountBalances } = useAccount();
+
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    const balances = computed(() => {
+      return verifiedDenoms.value.map((denom) => {
+        const amount =
+          accountBalances.value.find((item) => {
+            const denomName = parseCoins(item.amount)[0].denom;
+            return denomName === denom || item.base_denom === denom;
+          }) || 0;
+
+        return {
+          denom: denom.name,
+          base_denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: amount + denom.name,
+        };
+      });
+    });
 
     const balancesForSecond = computed(() => {
       return balances.value.filter((item) => item.base_denom !== form.coinA.asset?.base_denom);
@@ -399,6 +422,12 @@ export default {
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
       if (!priceA || !priceB) {
+        if (reserveBalances.value?.length) {
+          return new BigNumber(reserveBalances.value[1].amount)
+            .dividedBy(reserveBalances.value[0].amount)
+            .shiftedBy(6)
+            .toNumber();
+        }
         return undefined;
       }
 
@@ -616,14 +645,11 @@ export default {
         return;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
+      if (!exchangeAmount.value) {
         return;
       }
 
-      const result = new BigNumber(form.coinA.amount).multipliedBy(priceA).dividedBy(priceB);
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(form.coinA.amount);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -638,14 +664,11 @@ export default {
         return;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
+      if (!exchangeAmount.value) {
         return;
       }
 
-      const result = new BigNumber(form.coinB.amount).multipliedBy(priceB).dividedBy(priceA);
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).dividedBy(form.coinB.amount);
 
       form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
