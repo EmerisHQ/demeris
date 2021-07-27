@@ -18,7 +18,7 @@
         @select="toggleChainsModal"
       />
     </div>
-    <template v-if="state.currentAsset">
+    <template v-if="true">
       <fieldset class="form__field move-form-amount">
         <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
           <div class="move-form-amount__input">

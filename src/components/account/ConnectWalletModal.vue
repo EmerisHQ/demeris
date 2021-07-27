@@ -30,19 +30,40 @@
       width="72rem"
       @close="closeGetBrowser"
     >
-      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" />
+      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
     </Modal>
   </teleport>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
 import ConnectKeplr from './ConnectKeplr.vue';
 import GetBrowser from './GetBrowser.vue';
 import GetKeplr from './GetKeplr.vue';
+
+async function getKeplrInstance() {
+  if (window.keplr) {
+    return window.keplr;
+  }
+
+  if (document.readyState === 'complete') {
+    return window.keplr;
+  }
+
+  return new Promise((resolve) => {
+    const documentStateChange = (event: Event) => {
+      if (event.target && (event.target as Document).readyState === 'complete') {
+        resolve(window.keplr);
+        document.removeEventListener('readystatechange', documentStateChange);
+      }
+    };
+
+    document.addEventListener('readystatechange', documentStateChange);
+  });
+}
 
 export default defineComponent({
   name: 'ConnectWalletModal',
@@ -69,6 +90,7 @@ export default defineComponent({
     const getBrowserRef = ref(null);
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
+    const isLoading = ref(true);
 
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
@@ -81,19 +103,18 @@ export default defineComponent({
       emit('close');
     };
 
-    onMounted(() => {
-      window.addEventListener('load', () => {
-        // detect chrome extension support
-        // @ts-ignore
-        isKeplrSupported.value = !!window.chrome;
+    onMounted(async () => {
+      const keplr = await getKeplrInstance();
+      await nextTick();
 
-        // detect keplr installed
-        // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
+      // @ts-ignore
+      isKeplrSupported.value = !!window.chrome;
+      isKeplrInstalled.value = !!keplr;
+      isLoading.value = false;
     });
 
     return {
+      isLoading,
       connectKeplrRef,
       getKeplrRef,
       getBrowserRef,

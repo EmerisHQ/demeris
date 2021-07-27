@@ -2,7 +2,7 @@
   <div class="connect-keplr">
     <div class="connect-keplr__wrapper">
       <div class="connect-keplr__content">
-        <div v-if="!isConnecting">
+        <template v-if="!isConnecting">
           <slot name="title">
             <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
@@ -25,7 +25,7 @@
               {{ $t('wallet.connect.modal1.needHelp') }}
             </a>
           </div>
-        </div>
+        </template>
 
         <div v-else class="connect-keplr__connecting">
           <div class="connect-keplr__connecting__main">
@@ -108,6 +108,8 @@ export default defineComponent({
   }
 
   &__content {
+    display: flex;
+    flex-direction: column;
     width: 50%;
     min-height: inherit;
     padding: 4.8rem;
@@ -159,6 +161,7 @@ export default defineComponent({
   }
 
   &__description {
+    flex: 1 1 0%;
     margin-top: 4rem;
     line-height: 1.8;
     color: var(--muted);
