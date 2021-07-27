@@ -160,10 +160,6 @@ export default defineComponent({
         to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
       }
 
-      if (stepType.value === 'transfer') {
-        to.amount = to.amount - totalFees;
-      }
-
       return {
         isIBC,
         from,

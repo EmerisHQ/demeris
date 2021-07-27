@@ -3,7 +3,7 @@
     class="tx-steps denom-select-modal-wrapper"
     :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
   >
-    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('goback')" @close="emitHandler('close')" />
+    <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
@@ -226,7 +226,7 @@ export default defineComponent({
 
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
-          if (i == currentData.value.data.transactions.length - 1) {
+          if (currentStep.value == (props.data as Step[]).length - 1) {
             isFinal.value = true;
           } else {
             isFinal.value = false;
@@ -330,7 +330,7 @@ export default defineComponent({
 
                 errorDetails.value = undefined;
 
-                if (currentData.value.data.name === 'swap') {
+                if (!txResultData.error && currentData.value.data.name === 'swap') {
                   const result = {
                     swappedPercent: 0,
                     demandCoinSwappedAmount: 0,
@@ -409,7 +409,7 @@ export default defineComponent({
       }
       if (currentStep.value == (props.data as Step[]).length - 1) {
         // At the end, emit completion
-        emit('finish');
+        emitHandler('finish');
       } else {
         currentStep.value = currentStep.value + 1;
       }
@@ -460,13 +460,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.tx-steps {
-  &--widget &__content {
-    max-height: 50rem;
-    overflow: scroll;
-  }
-}
-
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;

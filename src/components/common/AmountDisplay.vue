@@ -32,10 +32,12 @@ export default defineComponent({
     watch(
       () => props.amount,
       async () => {
-        ticker.value = await getTicker(
-          (props.amount as Amount).denom,
-          props.chain || store.getters['demeris/getDexChain'],
-        );
+        if ((props.amount as Amount).denom !== undefined) {
+          ticker.value = await getTicker(
+            (props.amount as Amount).denom,
+            props.chain || store.getters['demeris/getDexChain'],
+          );
+        }
       },
       { immediate: true },
     );

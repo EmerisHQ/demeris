@@ -537,12 +537,19 @@ export default {
 
     const findPoolByDenoms = async () => {
       if (hasPair.value) {
-        const denoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
+        const baseDenoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
+        const denoms = [
+          parseCoins(form.coinA.asset.amount)[0].denom,
+          parseCoins(form.coinB.asset.amount)[0].denom,
+        ].sort();
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
-          if (reserveDenoms.join().toLowerCase() === denoms.join().toLowerCase()) {
+          if (
+            reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+            poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
+          ) {
             pool.value = poolIterator;
             return;
           }
