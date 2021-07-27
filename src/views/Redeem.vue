@@ -179,26 +179,11 @@ export default defineComponent({
       },
       { immediate: true },
     );
-    const assets = computed(() => {
-      return [
-        {
-          address: 'cosmos14pmvh0d4fucylhawvcd0hxkrky99hwcnm0usr5',
-          amount: 230,
-          base_denom: 'uatom',
-          route: 'Terra → (3 chains) → Cosmos Hub',
-        },
-        {
-          address: 'cosmos16sh2ufmrds5zqmuxhzwhdssgau9h0p68dtgfm8',
-          amount: 400,
-          base_denom: 'ukava',
-          route: 'Kava → Terra → Cosmos Hub',
-        },
-      ];
-    });
 
     const onClose = () => {
       router.push('/pools');
     };
+
     const getRoute = (hash, chain_name) => {
       const verifyTrace = store.getters['demeris/getVerifyTrace']({
         chain_name,
@@ -242,7 +227,6 @@ export default defineComponent({
     };
 
     return {
-      assets,
       augmentedBalances,
       steps,
       state,

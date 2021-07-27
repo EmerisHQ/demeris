@@ -8,7 +8,7 @@
           <p class="asset__main__info__denom">
             <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
             <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
-            <span class="asset__main__info__denom__ticker title-0-normal"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"> <Ticker :name="denom" /></span>
           </p>
           <h1 class="asset__main__info__price title-2-bold">
             <Price :amount="{ amount: 0, denom }" />
@@ -66,6 +66,7 @@
                   :denom="denom"
                   :chain-name="asset.on_chain"
                   class="asset__main__chains__item__asset__avatar"
+                  :glow="false"
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
@@ -119,6 +120,7 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
+        <PoolBanner :name="denom" />
         <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
@@ -130,6 +132,7 @@ import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
+import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -138,6 +141,7 @@ import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
@@ -153,6 +157,7 @@ export default defineComponent({
     AmountDisplay,
     ChainName,
     Denom,
+    Ticker,
     CircleSymbol,
     StakeTable,
     AppLayout,
@@ -160,6 +165,7 @@ export default defineComponent({
     PlusIcon,
     LiquiditySwap,
     Pools,
+    PoolBanner,
     MoonpayBanner,
   },
 
@@ -237,6 +243,7 @@ export default defineComponent({
 
         &__symbol {
           margin-right: 1.2rem;
+          position: relative;
         }
         &__name {
           margin-right: 1.2rem;
@@ -287,6 +294,21 @@ export default defineComponent({
           display: flex;
           align-items: center;
 
+          &__avatar {
+            position: relative;
+            &:before {
+              display: block;
+              content: '';
+              width: 2.6rem;
+              height: 2.6rem;
+              position: absolute;
+              top: 0.3rem;
+              left: 0.3rem;
+              border-radius: 1.3rem;
+              background: var(--bg);
+              z-index: 5;
+            }
+          }
           &__denom {
             margin-left: 1.6rem;
             font-weight: 600;

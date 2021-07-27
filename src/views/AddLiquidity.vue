@@ -43,8 +43,8 @@
             </div>
 
             <span class="add-liquidity__pool__name">
-              <Denom :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" /> /
-              <Denom :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
+              <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" /> /
+              <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
             </span>
           </div>
 
@@ -83,8 +83,8 @@
               <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
                 <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
                 <p class="add-liquidity__create-warning__description">
-                  As the first liquidity provider to the <Denom :name="form.coinA.asset.base_denom" /> /
-                  <Denom :name="form.coinB.asset.base_denom" />
+                  As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> /
+                  <Ticker :name="form.coinB.asset.base_denom" />
                   pool, you will be creating the pool and setting the price. Proceed with caution.
                 </p>
               </Alert>
@@ -175,7 +175,7 @@
                     class="add-liquidity__receive__token__avatar"
                   />
                   <span v-if="hasPool" class="w-bold">
-                    <Denom :name="pool.pool_coin_denom" />
+                    <Ticker :name="pool.pool_coin_denom" />
                   </span>
                   <span v-else class="w-bold">G-LK-LP</span>
                 </div>
@@ -258,9 +258,9 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
@@ -286,7 +286,7 @@ export default {
     ChainName,
     ChainSelectModal,
     CircleSymbol,
-    Denom,
+    Ticker,
     DenomSelect,
     FeeLevelSelector,
     FlexibleAmountInput,
@@ -527,12 +527,19 @@ export default {
 
     const findPoolByDenoms = async () => {
       if (hasPair.value) {
-        const denoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
+        const baseDenoms = [form.coinA.asset.base_denom, form.coinB.asset.base_denom].sort();
+        const denoms = [
+          parseCoins(form.coinA.asset.amount)[0].denom,
+          parseCoins(form.coinB.asset.amount)[0].denom,
+        ].sort();
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
-          if (reserveDenoms.join().toLowerCase() === denoms.join().toLowerCase()) {
+          if (
+            reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+            poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
+          ) {
             pool.value = poolIterator;
             return;
           }

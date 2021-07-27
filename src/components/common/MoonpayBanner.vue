@@ -18,7 +18,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
+
+import useEmitter from '@/composables/useEmitter';
+import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'MoonpayBanner',
@@ -34,13 +37,39 @@ export default defineComponent({
     },
   },
   setup() {
+    const store = useStore();
+    const emitter = useEmitter();
+
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
+
+    const mpDomain = ref('https://buy.moonpay.io');
+    const mpParams = computed(() => {
+      return {
+        // key currently from Cosmostation
+        apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
+        currencyCode: 'atom',
+        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+        baseCurrencyCode: 'usd',
+        // baseCurrencyAmount: '50',
+      };
+    });
+    const mpQuery = computed(() => {
+      return new URLSearchParams(mpParams.value).toString();
+    });
+    const mpUrl = computed(() => {
+      return mpDomain.value + '/?' + mpQuery.value;
+    });
+
     const goMoon = () => {
-      window.open(
-        'https://buy-staging.moonpay.com?apiKey=pk_test_MTasyiRqybKigQFEo3ymUfrW7na5hz&currencyCode=atom',
-        '_blank',
-      );
+      if (isSignedIn.value) {
+        window.open(mpUrl.value, '', 'height=480,width=320');
+      } else {
+        emitter.emit('toggle-settings-modal');
+      }
     };
-    return { goMoon };
+    return { isSignedIn, goMoon };
   },
 });
 </script>

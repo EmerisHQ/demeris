@@ -22,7 +22,7 @@
         @transacting="goToStep('send')"
         @failed="goToStep('review')"
         @reset="resetHandler"
-        @done="resetHandler"
+        @finish="resetHandler"
       />
     </template>
   </div>

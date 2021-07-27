@@ -1,12 +1,12 @@
 <template>
-  <span>{{ displayValue }} {{ displayDenom }}</span>
+  <span>{{ displayValue }} {{ ticker }}</span>
 </template>
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
-import { getDisplayName } from '@/utils/actionHandler';
+import { getTicker } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'AmountDisplay',
   props: {
@@ -19,7 +19,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const displayDenom = ref('-');
+    const ticker = ref('-');
 
     const displayValue = computed(() => {
       const precision =
@@ -32,15 +32,17 @@ export default defineComponent({
     watch(
       () => props.amount,
       async () => {
-        displayDenom.value = await getDisplayName(
-          (props.amount as Amount).denom,
-          props.chain || store.getters['demeris/getDexChain'],
-        );
+        if ((props.amount as Amount).denom !== undefined) {
+          ticker.value = await getTicker(
+            (props.amount as Amount).denom,
+            props.chain || store.getters['demeris/getDexChain'],
+          );
+        }
       },
       { immediate: true },
     );
 
-    return { displayDenom, displayValue };
+    return { ticker, displayValue };
   },
 });
 </script>

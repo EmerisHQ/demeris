@@ -73,7 +73,7 @@ import { useStore } from 'vuex';
 import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, Step } from '@/types/actions';
+import { GasPriceLevel, Step, SwapData } from '@/types/actions';
 import { feeForSteps } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -91,7 +91,6 @@ export default defineComponent({
       type: String as PropType<GasPriceLevel>,
       required: true,
     },
-    swapDollarFee: { type: Number, required: false, default: 0 },
   },
   emits: ['update:gasPriceLevel'],
   setup(props, { emit }) {
@@ -170,6 +169,31 @@ export default defineComponent({
 
       return fees;
     });
+    const swapDollarFee = computed(() => {
+      if (props.steps[0]?.name === 'swap') {
+        let value = 0;
+        const tx = props.steps[0]?.transactions[0].data as SwapData;
+
+        const fromPrecision =
+          store.getters['demeris/getDenomPrecision']({
+            name: tx.from.denom,
+          }) ?? '6';
+        const fromPrice = store.getters['demeris/getPrice']({ denom: tx.from.denom });
+        const toPrecision =
+          store.getters['demeris/getDenomPrecision']({
+            name: tx.to.denom,
+          }) ?? '6';
+        const toPrice = store.getters['demeris/getPrice']({ denom: tx.to.denom });
+        const swapFeeRate = parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate);
+        value =
+          (fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) +
+          (toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision));
+
+        return value;
+      } else {
+        return null;
+      }
+    });
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
@@ -191,7 +215,7 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
-    return { ...toRefs(data), txCount, fees };
+    return { ...toRefs(data), txCount, fees, swapDollarFee };
   },
 });
 </script>
@@ -249,7 +273,7 @@ export default defineComponent({
       }
 
       .selected {
-        background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%);
+        background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
       }
     }
   }
