@@ -226,7 +226,7 @@ export default defineComponent({
 
       for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
         if (!abort) {
-          if (i == currentData.value.data.transactions.length - 1) {
+          if (currentStep.value == (props.data as Step[]).length - 1) {
             isFinal.value = true;
           } else {
             isFinal.value = false;
@@ -409,7 +409,7 @@ export default defineComponent({
       }
       if (currentStep.value == (props.data as Step[]).length - 1) {
         // At the end, emit completion
-        emit('finish');
+        emitHandler('finish');
       } else {
         currentStep.value = currentStep.value + 1;
       }
@@ -460,13 +460,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.tx-steps {
-  &--widget &__content {
-    max-height: 50rem;
-    overflow: scroll;
-  }
-}
-
 .denom-select-modal-wrapper {
   position: relative;
   width: 100%;
