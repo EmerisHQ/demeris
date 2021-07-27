@@ -133,7 +133,7 @@ export default defineComponent({
 .denom-select-modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 55.8rem;
+  height: 55.8rem !important;
   top: 0;
   left: 0;
 
