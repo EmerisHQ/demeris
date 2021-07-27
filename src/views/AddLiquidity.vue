@@ -177,7 +177,9 @@
                   <span v-if="hasPool" class="w-bold">
                     <Ticker :name="pool.pool_coin_denom" />
                   </span>
-                  <span v-else class="w-bold">G-LK-LP</span>
+                  <span v-else class="w-bold">
+                    <Ticker :name="preview_pool_coin_denom" />
+                  </span>
                 </div>
 
                 <AmountInput
@@ -367,7 +369,9 @@ export default {
       return result;
     });
 
-    const { pools, getReserveBaseDenoms } = usePools();
+    const { allPools, pools, getReserveBaseDenoms } = usePools();
+
+    const preview_pool_coin_denom = `G`+ (allPools.value.length+1);
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -839,6 +843,7 @@ export default {
       isValid,
       exchangeAmount,
       hasPrices,
+      preview_pool_coin_denom,
       coinAChangeHandler,
       coinBChangeHandler,
       coinPoolChangeHandler,

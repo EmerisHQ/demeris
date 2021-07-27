@@ -1029,19 +1029,10 @@ export async function getDisplayName(name, chain_name = null) {
     const displayName = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
     if (displayName) {
       return displayName;
-    }
-    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-    if (pools && pools.pools) {
-      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
-      if (pool) {
-        return (
-          'Gravity ' +
-          (pools.length+1)
-        );
-      } else {
-        return name + '(unverified)';
-      }
-    }
+    } 
+      
+    return name;
+    
   } else {
     let verifyTrace;
     try {
@@ -1066,18 +1057,7 @@ export async function getTicker(name, chain_name = null) {
     if (ticker) {
       return ticker;
     }
-    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-    if (pools && pools.pools) {
-      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
-      if (pool) {
-        return (
-          'G' +
-          (pools.length+1)
-        );
-      } else {
-        return name + '(unverified)';
-      }
-    }
+    return name;
   } else {
     let verifyTrace;
     try {
