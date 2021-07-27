@@ -764,27 +764,48 @@ export default {
       () => [state.isMaximumAmountChecked, form.coinA, form.coinB, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
-          if (form.coinA.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-            const amount = parseCoins(form.coinA.asset.amount)[0].amount;
+          if (form.coinA.asset && form.coinB.asset) {
+            const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+            const amountA = parseCoins(form.coinA.asset.amount)[0].amount;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            form.coinA.amount = new BigNumber(amount)
-              .minus(feeA)
-              .shiftedBy(-precision)
-              .decimalPlaces(precision)
-              .toString();
-          }
-
-          if (form.coinB.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
-            const amount = parseCoins(form.coinB.asset.amount)[0].amount;
+            const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+            const amountB = parseCoins(form.coinB.asset.amount)[0].amount;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
-            form.coinB.amount = new BigNumber(amount)
+
+            const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
+
+            const bigAmountA = new BigNumber(amountA)
+              .minus(feeA)
+            
+            const bigAmountB = new BigNumber(amountB)
               .minus(feeB)
-              .shiftedBy(-precision)
-              .decimalPlaces(precision)
-              .toString();
+            
+            const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
+            
+
+            if (minAmount.isEqualTo(bigAmountA)) {
+              form.coinA.amount = bigAmountA
+                .shiftedBy(-precisionA)
+                .decimalPlaces(precisionA)
+                .toString();
+
+              form.coinB.amount = bigAmountA.multipliedBy(bigExchangeAmount)
+                .shiftedBy(-precisionB)
+                .decimalPlaces(precisionB)
+                .toString();
+            } else {
+              form.coinB.amount = bigAmountB
+                .shiftedBy(-precisionB)
+                .decimalPlaces(precisionB)
+                .toString();
+                
+              form.coinA.amount = bigAmountB.dividedBy(bigExchangeAmount)
+                .shiftedBy(-precisionA)
+                .decimalPlaces(precisionA)
+                .toString();
+            }
+
           }
 
           updateReceiveAmount();
