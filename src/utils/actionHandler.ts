@@ -1217,16 +1217,20 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
+  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+
   for (const balance of balances) {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
     const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress || !balance.verified) {
+    if (balance.address !== hashAddress) {
       continue;
     }
 
     if (Object.keys(balance.ibc).length == 0) {
-      validBalances.push(balance);
+      if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+        validBalances.push(balance);
+      }    
     } else {
       if (balance.ibc.path.split('/').length > 2) {
         continue;
@@ -1241,6 +1245,10 @@ export async function validBalances(balances: Balances): Promise<Balances> {
             { root: true },
           ));
       } catch (e) {
+        continue;
+      }
+
+      if (!verifyTrace.verified) {
         continue;
       }
 
