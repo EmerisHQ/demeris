@@ -146,8 +146,8 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
-import { getTicker } from '@/utils/actionHandler';
-import { actionHandler } from '@/utils/actionHandler';
+import { feeForStepTransaction, getTicker } from '@/utils/actionHandler';
+import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
@@ -474,6 +474,9 @@ export default defineComponent({
     );
     // REFACTOR ENDS HERE
 
+    //fee info
+    const txFee = ref(0);
+
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
@@ -523,7 +526,12 @@ export default defineComponent({
         const swapFeeRate =
           parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
           0.0015;
-        return maxBalance - Math.ceil(maxBalance * swapFeeRate) ?? 0;
+
+        if (maxBalance > Math.ceil(maxBalance * swapFeeRate) + txFee.value) {
+          return maxBalance - Math.ceil(maxBalance * swapFeeRate) - txFee.value ?? 0;
+        } else {
+          return 0;
+        }
       }),
       //conditional-text-end
 
@@ -543,7 +551,6 @@ export default defineComponent({
           parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
           0.0015;
         const fee = data.payCoinAmount * swapFeeRate;
-        console.log('FEES', Math.ceil(fee * 1000000) / 1000000);
         return Math.ceil(fee * 1000000) / 1000000 ?? 0;
       }),
 
@@ -606,6 +613,23 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
+    //tx fee setting
+    watch(
+      () => data.payCoinData,
+      async () => {
+        const fees = await getFeeForChain(data.payCoinData.on_chain);
+        if (
+          data.payCoinData.denom === 'uatom' ||
+          (!data.payCoinData.denom.startsWith('ibc') &&
+            data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
+        ) {
+          txFee.value =
+            fees[0].amount[gasPrice.value] *
+            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+        }
+      },
+    );
+
     //max button text set
     watch(
       () => data.payCoinData,
@@ -644,7 +668,6 @@ export default defineComponent({
             data.payCoinAmount * minimalDecimal,
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
-          console.log(slippage.value * 100);
         }
       },
     );
