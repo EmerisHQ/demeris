@@ -107,7 +107,7 @@ export const mutations: MutationTree<State> & Mutations = {
     txPromise = state.transactions.get(JSON.stringify(payload.params));
     const oldStatus = txPromise.status;
     if (ticket.status != oldStatus.status) {
-      txPromise.resolve(ticket.status);
+      txPromise.resolve({ status: ticket.status, height: ticket.height, error: ticket.error });
       if (
         ticket.status == 'complete' ||
         ticket.status == 'failed' ||

@@ -37,7 +37,7 @@
         <div class="portfolio__pools">
           <div class="portfolio__pools__header">
             <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
-            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/assets">
+            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/pools">
               {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
             </router-link>
           </div>
@@ -59,8 +59,8 @@
       </div>
 
       <div class="portfolio__aside">
-        <Intro />
         <LiquiditySwap class="portfolio__aside__swap" />
+        <Intro />
       </div>
     </div>
   </AppLayout>

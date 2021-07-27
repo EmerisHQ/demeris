@@ -20,7 +20,7 @@ export default defineComponent({
     });
     watch(
       () => props.name,
-      async (newName, oldName) => {
+      async (newName) => {
         displayDenom.value = await getDisplayName(newName, store.getters['demeris/getDexChain']);
       },
     );
