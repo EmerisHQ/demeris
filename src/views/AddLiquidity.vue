@@ -377,35 +377,10 @@ export default {
       computed(() => pool.value?.id),
     );
 
-    const { balances: accountBalances } = useAccount();
+    const { balances } = useAccount();
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
-    });
-
-    const balances = computed(() => {
-      return verifiedDenoms.value.map((denom) => {
-        const asset = accountBalances.value.find((item) => {
-          const denomName = parseCoins(item.amount)[0].denom;
-          return item.on_chain === denom.chain_name && (denomName === denom.name || item.base_denom === denom.name);
-        });
-
-        let data = {
-          denom: denom.name,
-          base_denom: denom.name,
-          on_chain: denom.chain_name,
-          amount: 0 + denom.name,
-        };
-
-        if (asset) {
-          data = {
-            ...data,
-            ...asset,
-          };
-        }
-
-        return data;
-      });
     });
 
     const balancesForSecond = computed(() => {
