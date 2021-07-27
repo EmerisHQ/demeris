@@ -41,6 +41,7 @@ export async function addChain(chain_name: string): Promise<void> {
       y.coinDenom = x.display_name;
       y.coinMinimalDenom = x.name;
       y.coinDecimals = parseInt(x.precision);
+      console.log('[keplr:chain] ', y);
       return y;
     }),
     feeCurrencies: chain.denoms
