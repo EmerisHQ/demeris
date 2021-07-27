@@ -323,10 +323,24 @@ export async function move({
           },
         });
 
+        const invPrimaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: destination_chain_name,
+            destination_chain_name: chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+            },
+            { root: true },
+          ));
+
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel, amount.denom),
+            denom: generateDenomHash(invPrimaryChannel, amount.denom),
           },
           chain_name: destination_chain_name,
         };
@@ -388,10 +402,25 @@ export async function move({
           through: primaryChannel,
         },
       });
+
+      const invPrimaryChannel =
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: destination_chain_name,
+          destination_chain_name: chain_name,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: true,
+            params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+          },
+          { root: true },
+        ));
+
       result.output = {
         amount: {
           amount: amount.amount,
-          denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
+          denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
         },
         chain_name: destination_chain_name,
       };
@@ -441,10 +470,25 @@ export async function move({
             through: primaryChannel,
           },
         });
+
+        const invPrimaryChannel =
+          store.getters['demeris/getPrimaryChannel']({
+            chain_name: destination_chain_name,
+            destination_chain_name: chain_name,
+          }) ??
+          (await store.dispatch(
+            'demeris/GET_PRIMARY_CHANNEL',
+            {
+              subscribe: true,
+              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+            },
+            { root: true },
+          ));
+
         result.output = {
           amount: {
             amount: amount.amount,
-            denom: generateDenomHash(primaryChannel, verifyTrace.base_denom),
+            denom: generateDenomHash(invPrimaryChannel, verifyTrace.base_denom),
           },
           chain_name: destination_chain_name,
         };
@@ -1217,16 +1261,20 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
+  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+
   for (const balance of balances) {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
     const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress || !balance.verified) {
+    if (balance.address !== hashAddress) {
       continue;
     }
 
     if (Object.keys(balance.ibc).length == 0) {
-      validBalances.push(balance);
+      if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+        validBalances.push(balance);
+      }
     } else {
       if (balance.ibc.path.split('/').length > 2) {
         continue;
@@ -1241,6 +1289,10 @@ export async function validBalances(balances: Balances): Promise<Balances> {
             { root: true },
           ));
       } catch (e) {
+        continue;
+      }
+
+      if (!verifyTrace.verified) {
         continue;
       }
 
@@ -1280,7 +1332,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         if (!secondDenom.includes('ibc')) {
           if (verifiedDenoms.find((item) => item.name === secondDenom)) {
             // first denom is base denom and valid, second denom is base denom and valid
-            
+
             validPools.push(pool);
           } else {
             continue;
@@ -1323,7 +1375,11 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   return validPools;
 }
 
-export async function isValidIBCReserveDenom(denom: string, dexChain: string, verifiedDenoms: API.VerifiedDenoms): Promise<boolean> {
+export async function isValidIBCReserveDenom(
+  denom: string,
+  dexChain: string,
+  verifiedDenoms: API.VerifiedDenoms,
+): Promise<boolean> {
   let verifyTrace;
 
   try {
@@ -1335,7 +1391,7 @@ export async function isValidIBCReserveDenom(denom: string, dexChain: string, ve
         { root: true },
       ));
   } catch (e) {
-    return false; 
+    return false;
   }
 
   if (verifyTrace.path.split('/').length > 2) {

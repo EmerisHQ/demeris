@@ -7,13 +7,13 @@
       </div>
       <div class="pool__main__info">
         <p class="pool__main__info__name">{{ pairName }}</p>
-        <span class="pool__main__info__total">{{ toUSD(totalLiquidityPrice) }}</span>
+        <span v-if="hasPrices" class="pool__main__info__total">{{ toUSD(totalLiquidityPrice) }}</span>
       </div>
     </div>
 
     <div class="pool__footer">
       <p class="pool__footer__label">{{ $t('context.pools.equity') }}</p>
-      <span class="pool__footer__value">{{ toUSD(ownLiquidityPrice) }}</span>
+      <span class="pool__footer__value"><OwnLiquidityPrice :pool="pool" show-share /></span>
     </div>
   </router-link>
 </template>
@@ -23,6 +23,7 @@ import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -45,7 +46,7 @@ const findSymbolColors = (symbol: string) => {
 export default defineComponent({
   name: 'Pool',
 
-  components: { CircleSymbol },
+  components: { CircleSymbol, OwnLiquidityPrice },
 
   props: {
     pool: {
@@ -60,6 +61,23 @@ export default defineComponent({
     const pairName = ref('-/-');
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
+
+    const hasPrices = computed(() => {
+      let baseDenoms = denoms.value;
+      if (!baseDenoms.length) {
+        baseDenoms = props.pool.reserve_coin_denoms;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
+    });
+
     watch(
       () => truedenoms.value,
       async (newDenoms) => {
@@ -146,10 +164,10 @@ export default defineComponent({
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       });
-      return formatter.format(value);
+      return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
-    const { poolsByDenom, getReserveBaseDenoms } = usePools();
+    const { getReserveBaseDenoms } = usePools();
 
     const totalLiquidityPrice = ref(0);
 
@@ -277,7 +295,7 @@ export default defineComponent({
     watch(reserveBalances, updateTotalLiquidityPrice);
 
     watch(walletBalances, updateOwnLiquidityPrice);
-    return { cardStyle, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { hasPrices, cardStyle, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
   },
 });
 </script>
@@ -317,9 +335,13 @@ export default defineComponent({
     }
 
     &__info {
+      width: 100%;
       margin-top: 1.6rem;
       &__name {
+        width: 100%;
         font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       &__total {
         color: var(--muted);

@@ -41,7 +41,7 @@
           </td>
 
           <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
-            <Price :amount="{ denom: asset.denom, amount: null }" />
+            <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             <div class="assets-table__row__balance__amount s-minus">
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             </div>
