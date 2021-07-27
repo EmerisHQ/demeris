@@ -1440,7 +1440,7 @@ export async function validateStepFeeBalances(
         if (newAmount >= 0) {
           feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
         } else {
-          feeWarning.feeWarning = true;
+          feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
             chain_name: store.getters['demeris/getDexChain'],
@@ -1448,7 +1448,7 @@ export async function validateStepFeeBalances(
           });
         }
       } else {
-        feeWarning.feeWarning = true;
+        feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + creationFee.amount,
           chain_name: store.getters['demeris/getDexChain'],
@@ -1563,7 +1563,7 @@ export async function validateStepFeeBalances(
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
-      feeWarning.feeWarning = true;
+      feeWarning.feeWarning = false;
       feeWarning.ibcWarning = true;
       feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
       feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
@@ -1601,7 +1601,7 @@ export async function validateStepFeeBalances(
       if (newSwapAmount >= 0) {
         balance.amount = newSwapAmount + parseCoins(balance.amount)[0].denom;
       } else {
-        feeWarning.feeWarning = true;
+        feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + swapFee.amount,
           chain_name: store.getters['demeris/getDexChain'],
@@ -1669,7 +1669,7 @@ export async function validateStepFeeBalances(
         if (newAmount >= 0) {
           feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
         } else {
-          feeWarning.feeWarning = true;
+          feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + fees[chain_name][denom],
             chain_name: chain_name,
@@ -1677,7 +1677,7 @@ export async function validateStepFeeBalances(
           });
         }
       } else {
-        feeWarning.feeWarning = true;
+        feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + fees[chain_name][denom],
           chain_name: chain_name,
@@ -1686,7 +1686,6 @@ export async function validateStepFeeBalances(
       }
     }
   }
-  console.log(feeWarning);
   return feeWarning;
 }
 

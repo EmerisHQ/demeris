@@ -134,6 +134,7 @@
                 () => {
                   feeWarning.feeWarning = false;
                   acceptedWarning = true;
+                  confirm();
                 }
               "
             />
