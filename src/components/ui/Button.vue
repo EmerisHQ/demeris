@@ -4,9 +4,18 @@
     <button
       :class="[
         `button-${variant}`,
+        { 'text-0 leading-5 rounded-xl': size === 'md' },
+        { 'button-sm -text-1 leading-4 rounded-lg': size === 'sm' },
+        { 'flex items-center justify-center': !name },
+        { 'h-12': variant !== 'link' && size === 'md' },
+        { 'h-9': variant !== 'link' && size === 'sm' },
+        { 'w-12': !name && variant !== 'link' && size === 'md' },
+        { 'w-9': !name && variant !== 'link' && size === 'sm' },
+        { 'py-3.5 px-8': name && variant !== 'link' && size === 'md' },
+        { 'py-2.5 px-5': name && variant !== 'link' && size === 'sm' },
+        { 'w-full': fullWidth },
         {
-          'h-12 py-2 px-8 bg-surface shadow-button focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
-            variant === 'primary' || variant === 'secondary',
+          'bg-surface shadow-button focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50': variant !== 'link',
         },
         { 'theme-inverse dark:theme-inverse': variant === 'primary' },
         { inline: variant === 'link' },
@@ -15,16 +24,18 @@
         disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-text cursor-pointer',
       ]"
       :disabled="disabled"
-      class="button text-0 font-medium rounded-xl border-none focus:outline-none transition select-none"
+      class="button font-medium border-none focus:outline-none transition cursor-pointer select-none"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-if="status === 'loading'" class="spinner">
         <Spinner :size="1" :color="'black'" :variant="'circle'" />
       </div>
 
-      <span v-else class="inline-flex gap-x-3 items-center align-middle"
+      <span v-else-if="name" class="inline-flex gap-x-3 items-center"
         ><slot /><span>{{ name }}</span></span
       >
+
+      <span v-else><slot /></span>
     </button>
     <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
@@ -41,8 +52,10 @@ export default defineComponent({
     Spinner,
   },
   props: {
-    name: { type: String, required: true },
+    name: { type: String, required: false },
     variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
+    size: { type: String, required: false, default: 'md' }, // 'sm'
+    fullWidth: { type: Boolean, required: false, default: true },
     status: { type: String, required: false, default: 'active' }, // 'loading'
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
@@ -67,12 +80,6 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.button {
-  width: 100%;
-  border: none;
-  cursor: pointer;
-}
-
 .button-primary,
 .button-secondary {
   &:hover:not(:active),
@@ -107,6 +114,12 @@ export default defineComponent({
     border-radius: 0.6125rem;
     background: var(--fg);
     opacity: 0;
+  }
+
+  &.button-sm:before {
+    height: 2.25rem;
+    margin-top: -1.125rem;
+    border-radius: 0.5rem;
   }
 
   &:focus-visible:before {

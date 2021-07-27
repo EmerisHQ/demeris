@@ -77,23 +77,80 @@
       </ul>
       <h2 class="text-4 font-bold mt-20">Buttons</h2>
       <h3 class="text-3 font-bold mt-8">Variants</h3>
-      <ul class="flex mt-7 gap-8">
+      <ul class="flex items-center mt-7 gap-8">
         <li><Button variant="primary" name="Primary" /></li>
         <li><Button variant="secondary" name="Secondary" /></li>
         <li><Button variant="link" name="Link" /></li>
       </ul>
+      <h3 class="text-3 font-bold mt-8">Sizes</h3>
+      <ul class="flex items-center mt-7 gap-8">
+        <li><Button variant="primary" name="Medium" size="md" /></li>
+        <li><Button variant="secondary" name="Medium" size="md" /></li>
+        <li><Button variant="link" name="Medium" size="md" /></li>
+      </ul>
+      <ul class="flex items-center mt-4 gap-8">
+        <li><Button variant="primary" name="Small" size="sm" /></li>
+        <li><Button variant="secondary" name="Small" size="sm" /></li>
+        <li><Button variant="link" name="Small" size="sm" /></li>
+      </ul>
       <h3 class="text-3 font-bold mt-20">Disabled</h3>
-      <ul class="flex mt-7 gap-8">
+      <ul class="flex items-center mt-7 gap-8">
         <li><Button variant="primary" disabled name="Disabled" /></li>
         <li><Button variant="secondary" disabled name="Disabled" /></li>
         <li><Button variant="link" disabled name="Disabled" /></li>
       </ul>
       <h3 class="text-3 font-bold mt-20">Loading</h3>
-      <ul class="flex mt-7 gap-8">
+      <ul class="flex items-center mt-7 gap-8">
         <li><Button variant="primary" status="loading" /></li>
         <li><Button variant="secondary" status="loading" /></li>
         <li><Button variant="link" status="loading" /></li>
       </ul>
+      <h3 class="text-3 font-bold mt-20">Icons</h3>
+      <ul class="flex items-center mt-7 gap-8">
+        <li>
+          <Button variant="primary" name="Left icon"><AlertIcon /></Button>
+        </li>
+        <li>
+          <Button variant="secondary" name="Left icon"><AlertIcon /></Button>
+        </li>
+        <li>
+          <Button variant="link" name="Left icon"><AlertIcon /></Button>
+        </li>
+      </ul>
+      <h2 class="text-4 font-bold mt-20">Fields</h2>
+      <h3 class="text-3 font-bold mt-8">Inputs</h3>
+      <ul class="mt-7">
+        <li class="mt-4">
+          <Input placeholder="Default" />
+        </li>
+        <li class="mt-4">
+          <Input placeholder="Icon left">
+            <template #start>
+              <AlertIcon />
+            </template>
+          </Input>
+        </li>
+        <li class="mt-4">
+          <Input placeholder="Icon right">
+            <template #end>
+              <AlertIcon />
+            </template>
+          </Input>
+        </li>
+        <li class="mt-4">
+          <Input placeholder="Hint icon" hint="My hint message" />
+        </li>
+      </ul>
+      <h3 class="text-3 font-bold mt-8">Address field</h3>
+      <div class="mt-7 max-w-md">
+        <Address />
+      </div>
+      <div class="mt-7 max-w-md">
+        <Address address="cosmos1vy8r9tje0zpp3rs75ga0gv7743h57yud9tgw8f" chain-name="Cosmos Hub" />
+      </div>
+      <div class="mt-7 max-w-md">
+        <Address address="cosmos1vy8r9tje0zpp3rs75ga0gv7743h57yud9tgw8f" chain-name="Cosmos Hub" readonly />
+      </div>
       <h2 class="text-4 font-bold mt-20">Alerts</h2>
       <h3 class="text-3 font-bold mt-8">Inline</h3>
       <ul class="mt-7 max-w-sm">
@@ -108,15 +165,21 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
+import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
+import Input from '@/components/ui/Input.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default defineComponent({
   components: {
     AppLayout,
+    Address,
     Alert,
+    AlertIcon,
     Button,
+    Input,
   },
 });
 </script>

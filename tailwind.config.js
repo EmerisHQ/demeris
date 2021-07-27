@@ -6,6 +6,10 @@ module.exports = {
       borderRadius: {
         xl: '0.625rem',
       },
+      lineHeight: {
+        title: 1.25,
+        copy: 1.625,
+      },
     },
     backgroundImage: {
       grain: 'url(~@/assets/images/texture-grain.png)',
@@ -48,6 +52,7 @@ module.exports = {
       tertiary: 'var(--tertiary)',
       quaternary: 'var(--quaternary)',
       quinary: 'var(--quinary)',
+      gold: 'var(--gold)',
     },
     fontFamily: {
       sans: 'Inter var, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
@@ -115,15 +120,11 @@ module.exports = {
       medium: 560,
       bold: 730,
     },
-    lineHeight: {
-      none: 1,
-      title: 1.25,
-      copy: 1.625,
-    },
   },
   variants: {
     extend: {
       ringWidth: ['focus-visible'],
+      borderRadius: ['focus'],
     },
   },
   corePlugins: {

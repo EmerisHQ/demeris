@@ -43,13 +43,23 @@
       </div>
     </div>
 
-    <label class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type -text-1 text-muted">{{ inputHeader }}</div>
+    <label class="denom-select__coin-amount ml-3 w-100 text-right text-muted hover:text-text focus-within:text-text">
+      <div class="denom-select__coin-amount-type -text-1 select-none">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
         :class="isOver ? 'over' : ''"
         :readonly="readonly"
-        class="denom-select__coin-amount-input text-1 font-bold"
+        class="
+          denom-select__coin-amount-input
+          w-full
+          p-0
+          text-1 text-right
+          font-bold
+          text-text
+          bg-transparent
+          appearance-none
+          border-none
+        "
         placeholder="0"
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
@@ -217,18 +227,13 @@ export default defineComponent({
   }
 
   &__coin-amount {
-    text-align: right;
-    width: 100%;
-    margin-left: 0.75rem;
-
     &-input {
-      width: 100%;
-      text-align: inherit;
-      border: none;
       outline: none;
-      padding: 0;
 
-      color: var(--text);
+      &::placeholder {
+        color: var(--inactive);
+        transition: color 150ms ease-out;
+      }
 
       /* Chrome, Safari, Edge, Opera */
       &::-webkit-outer-spin-button,
@@ -236,11 +241,12 @@ export default defineComponent({
         -webkit-appearance: none;
         margin: 0;
       }
-
-      /* Firefox */
-      & {
-        -moz-appearance: textfield;
-      }
+    }
+    &:hover &-input::placeholder {
+      color: var(--muted);
+    }
+    &-input:focus::placeholder {
+      color: var(--inactive);
     }
   }
 

@@ -1,7 +1,21 @@
 <template>
-  <label class="checkbox">
-    <input v-model="model" class="checkbox__control" type="checkbox" />
-    <span v-if="label" class="checkbox__label -text-1">{{ label }}</span>
+  <label class="checkbox inline-flex items-start p-4 rounded-xl border border-solid border-border cursor-pointer">
+    <input
+      v-model="model"
+      class="
+        checkbox__control
+        appearance-none
+        border-2 border-solid border-inactive
+        flex-shrink-0
+        w-6
+        h-6
+        rounded-md
+        transition
+        select-none
+      "
+      type="checkbox"
+    />
+    <span v-if="label" class="checkbox__label ml-4 text-0 leading-copy">{{ label }}</span>
   </label>
 </template>
 
@@ -36,37 +50,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.checkbox {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-
-  &__label {
-    margin-left: 1rem;
-  }
-
-  &__control {
-    appearance: none;
-    user-select: none;
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 4px;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition-property: background, border-color;
-    transition-timing-function: linear;
-    transition-duration: 100ms;
-
-    &:checked {
-      background: var(--text);
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
-    }
-
-    &:not(:checked) {
-      background: var(--fg);
-      border-color: var(--inactive);
-    }
-  }
+.checkbox__control:checked {
+  border: none;
+  background: var(--primary);
+  background: center / contain no-repeat
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E"),
+    center / cover no-repeat url('~@/assets/images/gradient-primary.jpg');
 }
 </style>

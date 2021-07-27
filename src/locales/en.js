@@ -77,13 +77,14 @@ export const messages = {
         selectChain: 'Select chain',
       },
       sendForm: {
-        title: 'Send to an address',
+        title: 'Enter an address',
         amountSelect: 'Enter an amount',
         available: 'available',
         to: 'To',
+        toPlaceholder: 'Recipient address',
         memo: 'Reference (memo)',
         memoHint: 'Memo hint',
-        memoPlaceholder: 'Add reference/memo',
+        memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
       },
       clipBoard: {

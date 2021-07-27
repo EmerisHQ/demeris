@@ -1,14 +1,14 @@
 <template>
-  <div class="send-form">
+  <div class="w-full max-w-sm mx-auto">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title text-2">{{ $t('components.sendForm.title') }}</h2>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-else-if="step === 'amount'">
-      <h2 class="send-form__title text-2">{{ $t('components.sendForm.amountSelect') }}</h2>
+      <h2 class="send-form__title text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
       <SendFormAmount :balances="balances" :fees="state.fees" @next="goToStep('review')" />
-      <div class="send-form__fees">
+      <div class="mt-6 -mx-6">
         <FeeLevelSelector
           v-if="steps.length > 0"
           v-model:gasPriceLevel="state.gasPrice"
@@ -155,32 +155,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.send-form {
-  &__title {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  &__fees {
-    margin-top: 1.5rem;
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-  }
-}
-
-.form {
-  &__field {
-    & > label {
-      display: block;
-      font-size: 0.8125rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-
-    & + & {
-      margin-top: 2rem;
-    }
-  }
-}
-</style>
+<style lang="scss"></style>

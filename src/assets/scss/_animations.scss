@@ -1,3 +1,7 @@
+.animate-pop {
+  animation: pop 300ms ease-out 1;
+}
+
 .animate-wobble {
   animation: wobble 1s infinite;
 }
@@ -8,6 +12,12 @@
 
 .animate-none {
   animation: none;
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.2);
+  }
 }
 
 @keyframes spin {

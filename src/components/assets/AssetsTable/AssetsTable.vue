@@ -8,13 +8,13 @@
         <col width="10%" />
       </colgroup>
 
-      <thead v-if="showHeaders">
+      <thead v-if="showHeaders" class="text-muted">
         <tr>
-          <th class="text-left">{{ $t('context.assets.asset') }}</th>
-          <th v-if="variant === 'full'" class="text-left">{{ $t('context.assets.ticker') }}</th>
-          <th class="text-right">{{ $t('context.assets.price') }}</th>
-          <th v-if="variant === 'full'" class="text-right">{{ $t('context.assets.marketCap') }}</th>
-          <th v-if="variant === 'balance'" class="text-right">{{ $t('context.assets.balance') }}</th>
+          <th class="bg-app text-left">{{ $t('context.assets.asset') }}</th>
+          <th v-if="variant === 'full'" class="bg-app text-left">{{ $t('context.assets.ticker') }}</th>
+          <th class="bg-app text-right">{{ $t('context.assets.price') }}</th>
+          <th v-if="variant === 'full'" class="bg-app text-right">{{ $t('context.assets.marketCap') }}</th>
+          <th v-if="variant === 'balance'" class="bg-app text-right">{{ $t('context.assets.balance') }}</th>
         </tr>
       </thead>
 
@@ -238,8 +238,6 @@ export default defineComponent({
   }
 
   th {
-    color: var(--muted);
-    background: var(--bg);
     vertical-align: middle;
     font-size: 0.8125rem;
     font-weight: 400;
@@ -251,7 +249,7 @@ export default defineComponent({
 
   td,
   th {
-    transition: all 100ms ease-in;
+    transition: all 150ms ease-in;
 
     &:first-child {
       padding-left: 1.25rem;
