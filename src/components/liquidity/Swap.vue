@@ -535,7 +535,14 @@ export default defineComponent({
       //selectedPoolData for various calculation(pool price, swap price ...etc)
       selectedPoolData: null,
 
-      //tx fee level
+      //fees(swap + tx)
+      fees: computed(() => {
+        const swapFeeRate =
+          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.03;
+        const fee = data.payCoinAmount * swapFeeRate;
+
+        return Math.trunc(fee * 1000000) / 1000000;
+      }),
 
       // for swap action
       actionHandlerResult: null,
@@ -544,7 +551,7 @@ export default defineComponent({
       isOver: computed(() => {
         if (isSignedIn.value) {
           return data.isBothSelected &&
-            data.payCoinAmount >
+            data.payCoinAmount + data.fees >
               parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
                 Math.pow(
                   10,
