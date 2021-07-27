@@ -626,6 +626,8 @@ export default defineComponent({
           txFee.value =
             fees[0].amount[gasPrice.value] *
             10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+        } else {
+          return 0;
         }
       },
     );
@@ -635,10 +637,12 @@ export default defineComponent({
       () => data.payCoinData,
       async () => {
         if (data.payCoinData) {
-          const amount = getPrecisedAmount(data.payCoinData.base_denom, data.maxAmount);
+          const amount =
+            data.maxAmount / 10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+
           if (amount > 0) {
             const ticker = await getTicker(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
-            const formattedAmount = Math.floor(amount * 100) / 100;
+            const formattedAmount = Math.trunc(amount * 100) / 100;
             data.maxButtonText = `${formattedAmount} ${ticker} Max`;
           } else {
             data.maxButtonText = 'Max';
@@ -812,6 +816,7 @@ export default defineComponent({
           }),
         ),
       );
+
       data.payCoinAmount = data.maxAmount / precisionDecimal;
       setCounterPairCoinAmount('Pay');
     }
