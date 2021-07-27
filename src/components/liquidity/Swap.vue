@@ -515,22 +515,15 @@ export default defineComponent({
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
-        //WIP
-        // const precision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-        //  Math.pow(10, parseInt(precision))
-        // console.log('maxAmount', parseInt(
-        //     allBalances.value.filter((coin) => {
-        //       return coin.denom === data.payCoinData?.denom;
-        //     })[0]?.amount,
-        //   ))
-        //   console.log('fees', data.fees)
-        return (
-          parseInt(
-            allBalances.value.filter((coin) => {
-              return coin.denom === data.payCoinData?.denom;
-            })[0]?.amount,
-          ) - data.fees ?? 0
+        const maxBalance = parseInt(
+          allBalances.value.filter((coin) => {
+            return coin.denom === data.payCoinData?.denom;
+          })[0]?.amount,
         );
+        const swapFeeRate =
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
+        return maxBalance - Math.ceil(maxBalance * swapFeeRate) ?? 0;
       }),
       //conditional-text-end
 
@@ -547,10 +540,11 @@ export default defineComponent({
       //fees(swap + tx)
       fees: computed(() => {
         const swapFeeRate =
-          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.03;
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
         const fee = data.payCoinAmount * swapFeeRate;
-        console.log('fee', fee);
-        return Math.trunc(fee * 1000000) / 1000000 ?? 0;
+        console.log('FEES', Math.ceil(fee * 1000000) / 1000000);
+        return Math.ceil(fee * 1000000) / 1000000 ?? 0;
       }),
 
       // for swap action
@@ -559,13 +553,10 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value) {
-          return data.isBothSelected &&
-            data.payCoinAmount + data.fees >
-              parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
-                Math.pow(
-                  10,
-                  parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
-                )
+          // data.isBothSelected &&
+          return Number(data.payCoinAmount) + Number(data.fees) >
+            parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
+              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
         } else {
