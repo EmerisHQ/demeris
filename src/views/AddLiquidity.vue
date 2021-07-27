@@ -355,7 +355,9 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances } = usePool(computed(() => pool.value?.id));
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances } = usePool(
+      computed(() => pool.value?.id),
+    );
 
     const { balances: accountBalances } = useAccount();
 
@@ -420,6 +422,12 @@ export default {
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
       if (!priceA || !priceB) {
+        if (reserveBalances.value?.length) {
+          return new BigNumber(reserveBalances.value[1].amount)
+            .dividedBy(reserveBalances.value[0].amount)
+            .shiftedBy(6)
+            .toNumber();
+        }
         return undefined;
       }
 
