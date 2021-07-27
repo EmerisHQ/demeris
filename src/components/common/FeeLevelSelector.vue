@@ -92,7 +92,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:gasPriceLevel'],
+  emits: ['update:gasPriceLevel', 'update:fees'],
   setup(props, { emit }) {
     const lowFee = ref({});
     const avgFee = ref({});
@@ -213,6 +213,15 @@ export default defineComponent({
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       }),
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
+    });
+
+    watch([fees, props], () => {
+      const feeMap = {
+        [GasPriceLevel.LOW]: lowFee.value,
+        [GasPriceLevel.AVERAGE]: avgFee.value,
+        [GasPriceLevel.HIGH]: highFee.value,
+      };
+      emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
     return { ...toRefs(data), txCount, fees, swapDollarFee };

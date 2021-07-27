@@ -146,8 +146,8 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
-import { getTicker } from '@/utils/actionHandler';
-import { actionHandler } from '@/utils/actionHandler';
+import { feeForStepTransaction, getTicker } from '@/utils/actionHandler';
+import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
@@ -474,6 +474,9 @@ export default defineComponent({
     );
     // REFACTOR ENDS HERE
 
+    //fee info
+    const txFee = ref(0);
+
     const data = reactive({
       //conditional-text-start
       buttonName: computed(() => {
@@ -515,13 +518,20 @@ export default defineComponent({
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
-        return (
-          parseInt(
-            allBalances.value.filter((coin) => {
-              return coin.denom === data.payCoinData?.denom;
-            })[0]?.amount,
-          ) ?? 0
+        const maxBalance = parseInt(
+          allBalances.value.filter((coin) => {
+            return coin.denom === data.payCoinData?.denom;
+          })[0]?.amount,
         );
+        const swapFeeRate =
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
+
+        if (maxBalance > Math.ceil(maxBalance * swapFeeRate) + txFee.value) {
+          return maxBalance - Math.ceil(maxBalance * swapFeeRate) - txFee.value ?? 0;
+        } else {
+          return 0;
+        }
       }),
       //conditional-text-end
 
@@ -535,7 +545,14 @@ export default defineComponent({
       //selectedPoolData for various calculation(pool price, swap price ...etc)
       selectedPoolData: null,
 
-      //tx fee level
+      //fees(swap + tx)
+      fees: computed(() => {
+        const swapFeeRate =
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
+        const fee = data.payCoinAmount * swapFeeRate;
+        return Math.ceil(fee * 1000000) / 1000000 ?? 0;
+      }),
 
       // for swap action
       actionHandlerResult: null,
@@ -543,13 +560,10 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value) {
-          return data.isBothSelected &&
-            data.payCoinAmount >
-              parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
-                Math.pow(
-                  10,
-                  parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })),
-                )
+          // data.isBothSelected &&
+          return Number(data.payCoinAmount) + Number(data.fees) >
+            parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
+              Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
         } else {
@@ -599,15 +613,36 @@ export default defineComponent({
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
+    //tx fee setting
+    watch(
+      () => data.payCoinData,
+      async () => {
+        const fees = await getFeeForChain(data.payCoinData.on_chain);
+        if (
+          data.payCoinData.denom === 'uatom' ||
+          (!data.payCoinData.denom.startsWith('ibc') &&
+            data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
+        ) {
+          txFee.value =
+            fees[0].amount[gasPrice.value] *
+            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+        } else {
+          return 0;
+        }
+      },
+    );
+
     //max button text set
     watch(
       () => data.payCoinData,
       async () => {
         if (data.payCoinData) {
-          const amount = getPrecisedAmount(data.payCoinData.base_denom, data.maxAmount);
+          const amount =
+            data.maxAmount / 10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+
           if (amount > 0) {
             const ticker = await getTicker(data.payCoinData.base_denom, store.getters['demeris/getDexChain']);
-            const formattedAmount = Math.floor(amount * 100) / 100;
+            const formattedAmount = Math.trunc(amount * 100) / 100;
             data.maxButtonText = `${formattedAmount} ${ticker} Max`;
           } else {
             data.maxButtonText = 'Max';
@@ -637,7 +672,6 @@ export default defineComponent({
             data.payCoinAmount * minimalDecimal,
             data.selectedPoolData.reserveBalances[reserveCoin],
           );
-          console.log(slippage.value * 100);
         }
       },
     );
@@ -782,6 +816,7 @@ export default defineComponent({
           }),
         ),
       );
+
       data.payCoinAmount = data.maxAmount / precisionDecimal;
       setCounterPairCoinAmount('Pay');
     }

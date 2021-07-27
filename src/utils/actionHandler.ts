@@ -404,18 +404,18 @@ export async function move({
       });
 
       const invPrimaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
-            chain_name: destination_chain_name,
-            destination_chain_name: chain_name,
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
-            {
-              subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
-            },
-            { root: true },
-          ));
+        store.getters['demeris/getPrimaryChannel']({
+          chain_name: destination_chain_name,
+          destination_chain_name: chain_name,
+        }) ??
+        (await store.dispatch(
+          'demeris/GET_PRIMARY_CHANNEL',
+          {
+            subscribe: true,
+            params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+          },
+          { root: true },
+        ));
 
       result.output = {
         amount: {
@@ -1055,11 +1055,12 @@ export async function getDisplayName(name, chain_name = null) {
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
-      return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
       console.error(e);
       return name + '(unverified)';
     }
+
+    return await getDisplayName(verifyTrace.base_denom);
   }
 }
 export async function getTicker(name, chain_name = null) {
@@ -1274,7 +1275,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
     if (Object.keys(balance.ibc).length == 0) {
       if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
         validBalances.push(balance);
-      }    
+      }
     } else {
       if (balance.ibc.path.split('/').length > 2) {
         continue;
@@ -1332,7 +1333,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         if (!secondDenom.includes('ibc')) {
           if (verifiedDenoms.find((item) => item.name === secondDenom)) {
             // first denom is base denom and valid, second denom is base denom and valid
-            
+
             validPools.push(pool);
           } else {
             continue;
@@ -1372,10 +1373,18 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
     }
   }
 
+  for (const pool of validPools) {
+    console.log("valid pool denoms ", pool.reserve_coin_denoms[0], pool.reserve_coin_denoms[1]);
+  }
+
   return validPools;
 }
 
-export async function isValidIBCReserveDenom(denom: string, dexChain: string, verifiedDenoms: API.VerifiedDenoms): Promise<boolean> {
+export async function isValidIBCReserveDenom(
+  denom: string,
+  dexChain: string,
+  verifiedDenoms: API.VerifiedDenoms,
+): Promise<boolean> {
   let verifyTrace;
 
   try {
@@ -1387,7 +1396,7 @@ export async function isValidIBCReserveDenom(denom: string, dexChain: string, ve
         { root: true },
       ));
   } catch (e) {
-    return false; 
+    return false;
   }
 
   if (verifyTrace.path.split('/').length > 2) {

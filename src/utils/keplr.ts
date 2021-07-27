@@ -40,7 +40,7 @@ export async function addChain(chain_name: string): Promise<void> {
       };
       y.coinDenom = x.display_name;
       y.coinMinimalDenom = x.name;
-      y.coinDecimals = parseInt(x.precision);
+      y.coinDecimals = x.precision ? parseInt(x.precision) : 6;
       return y;
     }),
     feeCurrencies: chain.denoms

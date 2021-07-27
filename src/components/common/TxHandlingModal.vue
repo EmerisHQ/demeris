@@ -1,9 +1,10 @@
 <template>
   <Modal
     :variant="modalVariant ?? 'full'"
-    :class="modalVariant === 'full' ? '!relative' : ''"
+    :class="modalVariant === 'full' ? 'tx-handling--full' : ''"
     :show-close-button="false"
     :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
+    class="tx-handling"
     @close="emitClose"
   >
     <div class="status">
@@ -492,6 +493,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.tx-handling {
+  &--full {
+    position: relative !important;
+  }
+}
+
 .status {
   text-align: center;
 

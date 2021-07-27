@@ -20,6 +20,7 @@ import { useStore } from 'vuex';
 import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
+import usePools from '@/composables/usePools';
 import { useAllStores } from '@/store';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
@@ -50,10 +51,7 @@ export default defineComponent({
       return formatter.format(value);
     };
     const { balancesByDenom } = useAccount();
-    const pools = computed(() => {
-      let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-      return liquidityPools.pools;
-    });
+    const { pools } = usePools();
     const validPool = computed(() => {
       return pools.value.find((pool) => pool.pool_coin_denom == props.name);
     });

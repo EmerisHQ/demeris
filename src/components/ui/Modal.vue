@@ -97,7 +97,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .modal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   overflow-y: auto;
   display: flex;
@@ -108,7 +111,10 @@ export default defineComponent({
 
   &__overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: rgba(0, 0, 0, 0.4);
   }
 

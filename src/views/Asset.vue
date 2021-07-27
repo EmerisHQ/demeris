@@ -17,7 +17,7 @@
 
         <!-- Balance -->
 
-        <MoonpayBanner v-if="!assets.length" class="asset__main__buy-banner" variant="banner" />
+        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="asset__main__buy-banner" variant="banner" />
 
         <section v-else class="asset__main__balance">
           <p class="asset__main__balance__label title-0-normal">Balance</p>
@@ -90,6 +90,22 @@
           </ul>
         </section>
 
+        <!-- Pools -->
+
+        <section v-if="pools.length" class="asset__main__pools asset__list">
+          <div class="asset__list__header">
+            <p class="asset__list__header__title">Pools</p>
+            <router-link :to="{ name: 'Pools' }" class="asset__list__header__button">
+              See all
+              <Icon name="ArrowRightIcon" :icon-size="1.6" />
+            </router-link>
+          </div>
+
+          <div class="asset__main__pools__wrapper">
+            <Pools :pools="pools" />
+          </div>
+        </section>
+
         <!-- Staking -->
 
         <section v-if="assetConfig?.stakable" class="asset__main__staking asset__list">
@@ -98,21 +114,6 @@
           </div>
 
           <StakeTable class="asset__list__wrapper" :denom="denom" />
-        </section>
-
-        <!-- Pools -->
-
-        <section v-if="pools.length" class="asset__main__pools asset__list">
-          <div class="asset__list__header">
-            <p class="asset__list__header__title">Pools</p>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
-          </div>
-
-          <div class="asset__main__pools__wrapper">
-            <Pools :pools="pools" />
-          </div>
         </section>
       </div>
 
@@ -137,13 +138,13 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -162,7 +163,7 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    PlusIcon,
+    Icon,
     LiquiditySwap,
     Pools,
     PoolBanner,
@@ -468,6 +469,16 @@ export default defineComponent({
       align-items: center;
       justify-content: space-between;
 
+      &__button {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+
+        .icon {
+          margin-left: 0.6rem;
+        }
+      }
+
       &__title {
         font-size: 2.8rem;
         font-weight: 700;
@@ -476,6 +487,7 @@ export default defineComponent({
 
     &__wrapper {
       margin-top: 3.2rem;
+      margin-bottom: 1rem;
       width: 100%;
       display: flex;
       flex-direction: column;
