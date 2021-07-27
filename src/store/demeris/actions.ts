@@ -469,11 +469,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const chains = getters['getChains'];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
-        try {
-          await addChain(chain);
-        } catch (e) {
-          console.error(e);
-        }
+        await addChain(chain);
       }
       await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
       const paths = new Set();
