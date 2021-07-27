@@ -1055,11 +1055,12 @@ export async function getDisplayName(name, chain_name = null) {
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
-      return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
       console.error(e);
       return name + '(unverified)';
     }
+
+    return await getDisplayName(verifyTrace.base_denom);
   }
 }
 export async function getTicker(name, chain_name = null) {
@@ -1370,6 +1371,10 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         continue;
       }
     }
+  }
+
+  for (const pool of validPools) {
+    console.log("valid pool denoms ", pool.reserve_coin_denoms[0], pool.reserve_coin_denoms[1]);
   }
 
   return validPools;

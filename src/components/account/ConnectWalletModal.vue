@@ -109,8 +109,12 @@ export default defineComponent({
 
       // @ts-ignore
       isKeplrSupported.value = !!window.chrome;
-      isKeplrInstalled.value = !!keplr;
-      isLoading.value = false;
+
+      nextTick(() => {
+        // detect keplr installed
+        // @ts-ignore
+        isKeplrInstalled.value = !!window.keplr;
+      });
     });
 
     return {
