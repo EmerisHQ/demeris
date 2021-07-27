@@ -201,7 +201,12 @@
                 @click="goToReview"
               />
               <div class="add-liquidity__controls__fees">
-                <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+                <FeeLevelSelector
+                  v-if="actionSteps.length > 0"
+                  v-model:gasPriceLevel="gasPrice"
+                  :steps="actionSteps"
+                  @update:fees="state.fees = $event"
+                />
               </div>
             </div>
           </div>
@@ -313,6 +318,7 @@ export default {
       totalEstimatedPrice: '',
       receiveAmount: '',
       poolBaseDenoms: [],
+      fees: {},
     });
 
     const gasPrice = computed(() => {
@@ -349,6 +355,18 @@ export default {
       },
     });
 
+    const feesAmount = computed(() => {
+      const result = {};
+
+      for (const [, obj] of Object.entries(state.fees)) {
+        for (const [denom, value] of Object.entries(obj)) {
+          result[denom] = value;
+        }
+      }
+
+      return result;
+    });
+
     const { pools, getReserveBaseDenoms } = usePools();
 
     const hasPair = computed(() => {
@@ -367,18 +385,26 @@ export default {
 
     const balances = computed(() => {
       return verifiedDenoms.value.map((denom) => {
-        const amount =
-          accountBalances.value.find((item) => {
-            const denomName = parseCoins(item.amount)[0].denom;
-            return denomName === denom || item.base_denom === denom;
-          }) || 0;
+        const asset = accountBalances.value.find((item) => {
+          const denomName = parseCoins(item.amount)[0].denom;
+          return item.on_chain === denom.chain_name && (denomName === denom.name || item.base_denom === denom.name);
+        });
 
-        return {
+        let data = {
           denom: denom.name,
           base_denom: denom.name,
           on_chain: denom.chain_name,
-          amount: amount + denom.name,
+          amount: 0 + denom.name,
         };
+
+        if (asset) {
+          data = {
+            ...data,
+            ...asset,
+          };
+        }
+
+        return data;
       });
     });
 
@@ -441,13 +467,15 @@ export default {
       if (form.coinA.asset && form.coinA.amount) {
         const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
         const amountA = new BigNumber(form.coinA.amount).shiftedBy(precisionA);
-        coinA = amountA.isLessThanOrEqualTo(parseCoins(form.coinA.asset.amount)[0].amount);
+        const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
+        coinA = amountA.plus(feeA).isLessThanOrEqualTo(parseCoins(form.coinA.asset.amount)[0].amount);
       }
 
       if (form.coinB.asset && form.coinB.amount) {
         const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
         const amountB = new BigNumber(form.coinB.amount).shiftedBy(precisionB);
-        coinB = amountB.isLessThanOrEqualTo(parseCoins(form.coinB.asset.amount)[0].amount);
+        const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
+        coinB = amountB.plus(feeB).isLessThanOrEqualTo(parseCoins(form.coinB.asset.amount)[0].amount);
       }
 
       return {
@@ -459,6 +487,10 @@ export default {
 
     const isValid = computed(() => {
       if (+form.coinA.amount <= 0 || +form.coinB.amount <= 0) {
+        return false;
+      }
+
+      if (!hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1)) {
         return false;
       }
 
@@ -510,11 +542,11 @@ export default {
         store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6,
       ];
       let coinAdenom = form.coinA.asset.base_denom;
-      if (form.coinA.asset.ibc.hash) {
+      if (form.coinA.asset.ibc?.hash) {
         coinAdenom = 'ibc/' + form.coinA.asset.ibc.hash;
       }
       let coinBdenom = form.coinB.asset.base_denom;
-      if (form.coinB.asset.ibc.hash) {
+      if (form.coinB.asset.ibc?.hash) {
         coinBdenom = 'ibc/' + form.coinB.asset.ibc.hash;
       }
       const baseParams = {
@@ -758,19 +790,30 @@ export default {
     });
 
     watch(
-      () => [state.isMaximumAmountChecked, form.coinA, form.coinB],
+      () => [state.isMaximumAmountChecked, form.coinA, form.coinB, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
           if (form.coinA.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom });
+            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
             const amount = parseCoins(form.coinA.asset.amount)[0].amount;
-            form.coinA.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
+            const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
+
+            form.coinA.amount = new BigNumber(amount)
+              .minus(feeA)
+              .shiftedBy(-precision)
+              .decimalPlaces(precision)
+              .toString();
           }
 
           if (form.coinB.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom });
+            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
             const amount = parseCoins(form.coinB.asset.amount)[0].amount;
-            form.coinB.amount = new BigNumber(amount).shiftedBy(-precision).decimalPlaces(precision).toString();
+            const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
+            form.coinB.amount = new BigNumber(amount)
+              .minus(feeB)
+              .shiftedBy(-precision)
+              .decimalPlaces(precision)
+              .toString();
           }
 
           updateReceiveAmount();

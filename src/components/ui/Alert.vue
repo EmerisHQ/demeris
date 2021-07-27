@@ -57,7 +57,6 @@ export default defineComponent({
   align-items: center;
   border: 1px solid transparent;
   color: var(--text);
-  overflow: scroll;
 
   &--error {
     background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
