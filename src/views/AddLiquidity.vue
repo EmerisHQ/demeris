@@ -645,14 +645,11 @@ export default {
         return;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
+      if (!exchangeAmount.value) {
         return;
       }
 
-      const result = new BigNumber(form.coinA.amount).multipliedBy(priceA).dividedBy(priceB);
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(form.coinA.amount);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -667,14 +664,11 @@ export default {
         return;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
+      if (!exchangeAmount.value) {
         return;
       }
 
-      const result = new BigNumber(form.coinB.amount).multipliedBy(priceB).dividedBy(priceA);
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).dividedBy(form.coinB.amount);
 
       form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
