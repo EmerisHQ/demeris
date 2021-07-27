@@ -85,21 +85,27 @@ export default function usePool(id?: string | ComputedRef<string>) {
      * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
      */
 
+    const hasParams = totalSupply.value && reserveBalances.value;
+
     const withdrawCoins = [
       {
-        amount: new BigNumber(poolCoinAmount)
-          .multipliedBy(reserveBalances.value[0].amount)
-          .dividedBy(totalSupply.value)
-          .decimalPlaces(6)
-          .toNumber(),
+        amount: !hasParams
+          ? 0
+          : new BigNumber(poolCoinAmount)
+              .multipliedBy(reserveBalances.value[0].amount)
+              .dividedBy(totalSupply.value)
+              .decimalPlaces(6)
+              .toNumber(),
         denom: reserveBalances.value[0].denom,
       },
       {
-        amount: new BigNumber(poolCoinAmount)
-          .multipliedBy(reserveBalances.value[1].amount)
-          .dividedBy(totalSupply.value)
-          .decimalPlaces(6)
-          .toNumber(),
+        amount: !hasParams
+          ? 0
+          : new BigNumber(poolCoinAmount)
+              .multipliedBy(reserveBalances.value[1].amount)
+              .dividedBy(totalSupply.value)
+              .decimalPlaces(6)
+              .toNumber(),
         denom: reserveBalances.value[1].denom,
       },
     ];
