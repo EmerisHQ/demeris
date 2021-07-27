@@ -116,7 +116,7 @@ export default defineComponent({
     });
 
     const updateTotalLiquidityPrice = async () => {
-      if (!pool.value) {
+      if (!pool.value || !reserveBalances.value) {
         return;
       }
 
