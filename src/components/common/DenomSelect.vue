@@ -24,7 +24,7 @@
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         <tippy
-          v-if="displayName.startsWith('GDEX')"
+          v-if="displayName.startsWith('Gravity')"
           :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
           class="tippy-info"
         >
@@ -119,7 +119,7 @@ export default defineComponent({
       try {
         const denom = displayName.value;
         let denomIconName = 'empty';
-        if (denom.includes('GDEX')) {
+        if (denom.includes('Gravity')) {
           denomIconName = 'pool';
         } else {
           //TODO adjust url

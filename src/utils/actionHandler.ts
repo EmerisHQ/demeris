@@ -1035,11 +1035,8 @@ export async function getDisplayName(name, chain_name = null) {
       const pool = pools.pools.find((x) => x.pool_coin_denom == name);
       if (pool) {
         return (
-          'GDEX ' +
-          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
-          '/' +
-          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
-          ' Pool'
+          'Gravity ' +
+          (pools.length+1)
         );
       } else {
         return name + '(unverified)';
@@ -1074,11 +1071,8 @@ export async function getTicker(name, chain_name = null) {
       const pool = pools.pools.find((x) => x.pool_coin_denom == name);
       if (pool) {
         return (
-          'GDEX ' +
-          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
-          '/' +
-          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
-          ' Pool'
+          'G' +
+          (pools.length+1)
         );
       } else {
         return name + '(unverified)';
