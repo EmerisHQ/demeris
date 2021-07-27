@@ -30,6 +30,8 @@ import Button from '@/components/ui/Button.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Input from '@/components/ui/Input.vue';
 import { SendAddressForm } from '@/types/actions';
+import { bech32 } from 'bech32';
+import { store } from '../../../store/index';
 
 export default defineComponent({
   name: 'SendFormRecipient',
@@ -47,7 +49,25 @@ export default defineComponent({
     const form = inject<SendAddressForm>('transferForm');
 
     const isValid = computed(() => {
-      return form.isTermChecked;
+      return (form.isTermChecked && isValidAddress.value);
+    });
+
+    const isValidAddress = computed(() => {
+      const chains = Object.values(store.getters['demeris/getChains']);
+
+      try {
+        const prefix = bech32.decode(form.recipient).prefix;
+        //@ts-ignore
+        if (chains.find((item) => item.node_info.bech32_config.prefix_account == prefix)) {
+          return true;
+        }
+
+        return false;
+
+      } catch (e) {
+        console.log(e);
+        return false;
+      }
     });
 
     const onSubmit = () => {
