@@ -377,35 +377,10 @@ export default {
       computed(() => pool.value?.id),
     );
 
-    const { balances: accountBalances } = useAccount();
+    const { balances } = useAccount();
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
-    });
-
-    const balances = computed(() => {
-      return verifiedDenoms.value.map((denom) => {
-        const asset = accountBalances.value.find((item) => {
-          const denomName = parseCoins(item.amount)[0].denom;
-          return item.on_chain === denom.chain_name && (denomName === denom.name || item.base_denom === denom.name);
-        });
-
-        let data = {
-          denom: denom.name,
-          base_denom: denom.name,
-          on_chain: denom.chain_name,
-          amount: 0 + denom.name,
-        };
-
-        if (asset) {
-          data = {
-            ...data,
-            ...asset,
-          };
-        }
-
-        return data;
-      });
     });
 
     const balancesForSecond = computed(() => {
@@ -444,20 +419,16 @@ export default {
         return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      if (!priceA || !priceB) {
-        if (reserveBalances.value?.length) {
-          return new BigNumber(reserveBalances.value[1].amount)
-            .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(6)
-            .toNumber();
-        }
-        return undefined;
+      
+      if (reserveBalances.value?.length) {
+        return new BigNumber(reserveBalances.value[1].amount)
+          .dividedBy(reserveBalances.value[0].amount)
+          .shiftedBy(6)
+          .toNumber();
       }
-
-      return ((priceA / priceB) * 1e6).toFixed(6);
+      
+      return undefined;
+      
     });
 
     const hasSufficientFunds = computed(() => {
@@ -793,27 +764,48 @@ export default {
       () => [state.isMaximumAmountChecked, form.coinA, form.coinB, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
-          if (form.coinA.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-            const amount = parseCoins(form.coinA.asset.amount)[0].amount;
+          if (form.coinA.asset && form.coinB.asset) {
+            const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+            const amountA = parseCoins(form.coinA.asset.amount)[0].amount;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            form.coinA.amount = new BigNumber(amount)
-              .minus(feeA)
-              .shiftedBy(-precision)
-              .decimalPlaces(precision)
-              .toString();
-          }
-
-          if (form.coinB.asset) {
-            const precision = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
-            const amount = parseCoins(form.coinB.asset.amount)[0].amount;
+            const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+            const amountB = parseCoins(form.coinB.asset.amount)[0].amount;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
-            form.coinB.amount = new BigNumber(amount)
+
+            const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
+
+            const bigAmountA = new BigNumber(amountA)
+              .minus(feeA)
+            
+            const bigAmountB = new BigNumber(amountB)
               .minus(feeB)
-              .shiftedBy(-precision)
-              .decimalPlaces(precision)
-              .toString();
+            
+            const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
+            
+
+            if (minAmount.isEqualTo(bigAmountA)) {
+              form.coinA.amount = bigAmountA
+                .shiftedBy(-precisionA)
+                .decimalPlaces(precisionA)
+                .toString();
+
+              form.coinB.amount = bigAmountA.multipliedBy(bigExchangeAmount)
+                .shiftedBy(-precisionB)
+                .decimalPlaces(precisionB)
+                .toString();
+            } else {
+              form.coinB.amount = bigAmountB
+                .shiftedBy(-precisionB)
+                .decimalPlaces(precisionB)
+                .toString();
+                
+              form.coinA.amount = bigAmountB.dividedBy(bigExchangeAmount)
+                .shiftedBy(-precisionA)
+                .decimalPlaces(precisionA)
+                .toString();
+            }
+
           }
 
           updateReceiveAmount();
