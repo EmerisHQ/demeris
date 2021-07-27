@@ -1326,8 +1326,6 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
     const firstDenom = pool.reserve_coin_denoms[0];
     const secondDenom = pool.reserve_coin_denoms[1];
 
-    console.log("firstDenom ", firstDenom);
-
     if (!firstDenom.includes('ibc')) {
       if (verifiedDenoms.find((item) => item.name === firstDenom)) {
         // first denom is base denom and valid, check second denom
@@ -1351,9 +1349,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         continue;
       }
     } else {
-      console.log("passed first check ", firstDenom);
       if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
-        console.log("passed trace check ", firstDenom);
         if (!secondDenom.includes('ibc')) {
           // second denom is not IBC denom
           if (verifiedDenoms.find((item) => item.name === secondDenom)) {
@@ -1374,6 +1370,10 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
         continue;
       }
     }
+  }
+
+  for (const pool of validPools) {
+    console.log("valid pool denoms ", pool.reserve_coin_denoms[0], pool.reserve_coin_denoms[1]);
   }
 
   return validPools;
