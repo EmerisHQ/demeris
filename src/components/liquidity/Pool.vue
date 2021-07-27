@@ -169,7 +169,7 @@ export default defineComponent({
     const { balancesByDenom } = useAccount();
     const { getReserveBaseDenoms } = usePools();
 
-    const totalLiquidityPrice = ref();
+    const totalLiquidityPrice = ref(0);
 
     const ownLiquidityPrice = ref();
     const walletBalances = computed(() => {

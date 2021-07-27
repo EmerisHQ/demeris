@@ -77,7 +77,7 @@ export default defineComponent({
       memo: '',
       balance: {
         denom: '',
-        amount: undefined,
+        amount: '',
       },
       isTermChecked: false,
     });

@@ -2,22 +2,27 @@
   <div class="get-browser">
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
-        <slot name="title">
-          <h2 class="get-browser__title">{{ $t('wallet.connect.modal3.title') }}</h2>
-        </slot>
-
-        <div class="get-browser__description">
-          <slot name="description">
-            <p>
-              {{ $t('wallet.connect.modal3.text') }}
-            </p>
+        <div v-if="isLoading" class="get-browser__loading">
+          <Spinner :size="4.2" />
+        </div>
+        <template v-else>
+          <slot name="title">
+            <h2 class="get-browser__title">{{ $t('wallet.connect.modal3.title') }}</h2>
           </slot>
-        </div>
 
-        <div class="get-browser__controls">
-          <Button :name="$t('wallet.connect.modal3.button1')" @click="openUrlChrome" />
-          <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
-        </div>
+          <div class="get-browser__description">
+            <slot name="description">
+              <p>
+                {{ $t('wallet.connect.modal3.text') }}
+              </p>
+            </slot>
+          </div>
+
+          <div class="get-browser__controls">
+            <Button :name="$t('wallet.connect.modal3.button1')" @click="openUrlChrome" />
+            <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
+          </div>
+        </template>
       </div>
       <ConnectBanner />
     </div>
@@ -28,6 +33,7 @@
 import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
+import Spinner from '@/components/ui/Spinner.vue';
 
 import ConnectBanner from './ConnectBanner.vue';
 
@@ -37,6 +43,14 @@ export default defineComponent({
   components: {
     Button,
     ConnectBanner,
+    Spinner,
+  },
+
+  props: {
+    isLoading: {
+      type: Boolean,
+      required: false,
+    },
   },
 
   emits: ['cancel', 'connect'],
@@ -65,6 +79,13 @@ export default defineComponent({
   &__wrapper {
     display: flex;
     min-height: inherit;
+  }
+
+  &__loading {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__content {
