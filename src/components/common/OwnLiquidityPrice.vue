@@ -1,8 +1,11 @@
 <template>
-  {{ showShare ? toUSD(ownLiquidityPrice) + ' (' + ownShare + '%)' : toUSD(ownLiquidityPrice) }}
+  <span>
+    {{ showShare ? toUSD(ownSharePrice) + ' (' + ownShare.toFixed(2) + '%)' : toUSD(ownSharePrice) }}
+  </span>
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -10,9 +13,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
-import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
-import { isNative } from '@/utils/basic';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -33,10 +34,35 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pool, reserveBalances, calculateWithdrawBalances } = usePool((props.pool as Pool).id);
+    const { pool, reserveBalances, calculateWithdrawBalances, reserveBaseDenoms, totalSupply } = usePool(
+      (props.pool as Pool).id,
+    );
 
     const store = useStore();
+
+    const { balancesByDenom } = useAccount();
+    const { getReserveBaseDenoms } = usePools();
+
+    const hasPrices = computed(() => {
+      let baseDenoms = reserveBaseDenoms.value;
+      if (!baseDenoms) {
+        baseDenoms = props.pool.reserve_coin_denoms;
+      }
+      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
+    });
+
     const toUSD = (value) => {
+      if (!hasPrices.value) {
+        return '-';
+      }
+
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -47,18 +73,28 @@ export default defineComponent({
       });
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
-    const { balancesByDenom } = useAccount();
-    const { getReserveBaseDenoms } = usePools();
 
     const totalLiquidityPrice = ref(0);
+
     const ownShare = computed(() => {
-      let result = 0;
-      if (ownLiquidityPrice.value && totalLiquidityPrice.value) {
-        result = (100 * ownLiquidityPrice.value) / totalLiquidityPrice.value;
+      if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
+        return 0;
       }
-      return Number.isFinite(result) ? result.toFixed(2) : '0.00';
+
+      return new BigNumber(walletBalances.value.poolCoin.amount)
+        .dividedBy(totalSupply.value)
+        .multipliedBy(100)
+        .toNumber();
     });
-    const ownLiquidityPrice = ref(0);
+
+    const ownSharePrice = computed(() => {
+      if (!ownShare.value || !totalLiquidityPrice.value) {
+        return '0.00';
+      }
+
+      return new BigNumber(ownShare.value).dividedBy(100).multipliedBy(totalLiquidityPrice.value).toFixed(2);
+    });
+
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
         return;
@@ -98,91 +134,9 @@ export default defineComponent({
       totalLiquidityPrice.value = total;
     };
 
-    const updateOwnLiquidityPrice = async () => {
-      if (!pool.value) {
-        return;
-      }
+    watch(reserveBalances, updateTotalLiquidityPrice, { immediate: true });
 
-      let total = 0;
-
-      let denom;
-
-      if (isNative(walletBalances.value.coinA.denom)) {
-        denom = walletBalances.value.coinA.denom;
-      } else {
-        const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
-            hash: walletBalances.value.coinA.denom.split('/')[1],
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
-            {
-              subscribe: false,
-              params: {
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: walletBalances.value.coinA.denom.split('/')[1],
-              },
-            },
-            { root: true },
-          ));
-        denom = (verifyTrace as VerifyTrace).base_denom;
-      }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
-        total =
-          total +
-          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
-            Math.pow(
-              10,
-              parseInt(
-                store.getters['demeris/getDenomPrecision']({
-                  name: denom,
-                }),
-              ),
-            );
-      }
-
-      if (isNative(walletBalances.value.coinB.denom)) {
-        denom = walletBalances.value.coinB.denom;
-      } else {
-        const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
-            hash: walletBalances.value.coinB.denom.split('/')[1],
-          }) ??
-          (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
-            {
-              subscribe: false,
-              params: {
-                chain_name: store.getters['demeris/getDexChain'],
-                hash: walletBalances.value.coinB.denom.split('/')[1],
-              },
-            },
-            { root: true },
-          ));
-        denom = (verifyTrace as VerifyTrace).base_denom;
-      }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
-        total =
-          total +
-          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
-            Math.pow(
-              10,
-              parseInt(
-                store.getters['demeris/getDenomPrecision']({
-                  name: denom,
-                }),
-              ),
-            );
-      }
-
-      ownLiquidityPrice.value = total;
-    };
-    watch(reserveBalances, updateTotalLiquidityPrice);
-
-    watch(walletBalances, updateOwnLiquidityPrice);
-    return { ownShare, totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { ownShare, totalLiquidityPrice, ownSharePrice, toUSD };
   },
 });
 </script>

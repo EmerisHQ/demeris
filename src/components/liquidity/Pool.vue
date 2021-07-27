@@ -11,9 +11,9 @@
       </div>
     </div>
 
-    <div v-if="hasPrices" class="pool__footer">
+    <div class="pool__footer">
       <p class="pool__footer__label">{{ $t('context.pools.equity') }}</p>
-      <span class="pool__footer__value">{{ toUSD(ownLiquidityPrice) }}</span>
+      <span class="pool__footer__value"><OwnLiquidityPrice :pool="pool" show-share /></span>
     </div>
   </router-link>
 </template>
@@ -23,6 +23,7 @@ import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -45,7 +46,7 @@ const findSymbolColors = (symbol: string) => {
 export default defineComponent({
   name: 'Pool',
 
-  components: { CircleSymbol },
+  components: { CircleSymbol, OwnLiquidityPrice },
 
   props: {
     pool: {

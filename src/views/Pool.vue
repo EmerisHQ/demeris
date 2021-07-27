@@ -110,10 +110,10 @@
                 <p class="pool-equity__stats__amount w-bold">
                   <AmountDisplay :amount="walletBalances.poolCoin" />
                 </p>
-                <p v-if="hasPrices.total" class="pool-equity__stats__balance s-2 w-bold">
+                <p v-if="hasPrices.all" class="pool-equity__stats__balance s-2 w-bold">
                   {{ toUSD(ownSharePrice) }}
                 </p>
-                <span class="pool-equity__stats__share s-minus"> {{ ownShare }}% of pool </span>
+                <span class="pool-equity__stats__share s-minus"> {{ ownShare.toFixed(2) }}% of pool </span>
               </div>
             </div>
 
@@ -337,7 +337,6 @@ export default defineComponent({
       return new BigNumber(walletBalances.value.poolCoin.amount)
         .dividedBy(totalSupply.value)
         .multipliedBy(100)
-        .decimalPlaces(2)
         .toNumber();
     });
 
@@ -346,7 +345,7 @@ export default defineComponent({
         return '0.00';
       }
 
-      return new BigNumber(ownShare.value).dividedBy(totalLiquidityPrice.value).toFixed(2);
+      return new BigNumber(ownShare.value).dividedBy(100).multipliedBy(totalLiquidityPrice.value).toFixed(2);
     });
 
     const openAssetPage = (asset: Record<string, string>) => {
