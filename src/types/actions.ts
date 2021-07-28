@@ -165,3 +165,13 @@ export enum GasPriceLevel {
   HIGH = 'high',
 }
 export type FeeTotals = Record<string, Record<string, number>>;
+export type FeeWarning = {
+  missingFees: Array<{ amount: string; denom: string; chain_name: string }>;
+  ibcWarning: boolean;
+  feeWarning: boolean;
+  ibcDetails: {
+    ibcDenom: string;
+    chain_name: string;
+    denom: string;
+  };
+};
