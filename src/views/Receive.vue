@@ -86,12 +86,17 @@ export default {
       ];
     });
 
+    for (const testbalance of allBalances.value) {
+      console.log("allBalance ", testbalance);
+    }
+
+    
+
     const nativeBalances = computed(() => {
       const result = [];
-      // TODO: Check if denom is native to its chain
       for (const balance of allBalances.value) {
         if (!result.some((item) => item.base_denom === balance.base_denom)) {
-          console.log("balance before", balance);
+          // Check if denom is native to its chain
 
           if (!balance.ibc) {
             result.push(balance);
@@ -102,7 +107,7 @@ export default {
             result.push(balance);
           }
           
-        }
+        } 
       }
       return result;
     });
