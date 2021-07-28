@@ -91,7 +91,17 @@ export default {
       // TODO: Check if denom is native to its chain
       for (const balance of allBalances.value) {
         if (!result.some((item) => item.base_denom === balance.base_denom)) {
-          result.push(balance);
+          console.log("balance before", balance);
+
+          if (!balance.ibc) {
+            result.push(balance);
+            continue;
+          }
+
+          if (Object.keys(balance.ibc).length == 0) {
+            result.push(balance);
+          }
+          
         }
       }
       return result;
@@ -141,6 +151,8 @@ export default {
         state.recipientAddress = undefined;
       }
     });
+
+    console.log ("native balances ")
 
     return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
