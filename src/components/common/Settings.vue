@@ -26,6 +26,7 @@ import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import SettingsModal from '@/components/common/SettingsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
+import useEmitter from '@/composables/useEmitter';
 import { useStore } from '@/store';
 
 export default defineComponent({
@@ -39,6 +40,8 @@ export default defineComponent({
   },
 
   setup() {
+    const emitter = useEmitter();
+
     // wallet stuff
     const isWalletModalOpen = ref(false);
     const store = useStore();
@@ -52,6 +55,9 @@ export default defineComponent({
     const toggleWalletModal = () => {
       isWalletModalOpen.value = !isWalletModalOpen.value;
     };
+    emitter.on('toggle-settings-modal', () => {
+      toggleWalletModal();
+    });
 
     // settings menu stuff
     const menuRef = ref(null);
@@ -95,7 +101,6 @@ export default defineComponent({
 
 <style lang="scss">
 .settings-wrapper {
-  height: 4.8rem;
   padding: 0.4rem;
 }
 

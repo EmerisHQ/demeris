@@ -12,6 +12,7 @@
 import { computed } from '@vue/runtime-core';
 
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
+import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores } from '@/store';
 
@@ -21,10 +22,7 @@ export default {
 
   setup() {
     const stores = useAllStores();
-    const pools = computed(() => {
-      let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-      return liquidityPools.pools;
-    });
+    const { pools } = usePools();
     return {
       pools,
     };

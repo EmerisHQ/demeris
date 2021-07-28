@@ -1,9 +1,10 @@
 <template>
   <Modal
     :variant="modalVariant ?? 'full'"
-    :class="modalVariant === 'full' ? '!relative' : ''"
+    :class="modalVariant === 'full' ? 'tx-handling--full' : ''"
     :show-close-button="false"
     :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
+    class="tx-handling"
     @close="emitClose"
   >
     <div class="status">
@@ -50,14 +51,14 @@
         <template v-if="status == 'transacting' || status == 'complete'">
           <div v-if="status === 'transacting'" class="status__detail-transferring">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.from_chain" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
               <div class="arrow">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.to_chain" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
             </template>
             <template v-if="tx.name == 'transfer'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.chain_name" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
               <div class="arrow">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain="tx.data.chain_name" />
+              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
             </template>
           </div>
 
@@ -492,6 +493,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.tx-handling {
+  &--full {
+    position: relative !important;
+  }
+}
+
 .status {
   text-align: center;
 

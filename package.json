@@ -39,6 +39,7 @@
     "gradient-avatar": "^1.0.2",
     "lodash.groupby": "^4.6.0",
     "long": "^4.0.0",
+    "mitt": "^3.0.0",
     "qrcode": "^1.4.4",
     "vue": "3.2.0-beta.1",
     "vue-i18n": "^9.1.7",

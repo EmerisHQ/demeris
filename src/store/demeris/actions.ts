@@ -500,7 +500,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return false;
     }
   },
@@ -577,8 +577,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getVerifyTrace'](params);
     } else {
       let resolver;
-      const promise = new Promise((resolve) => {
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
         resolver = resolve;
+        rejecter = reject;
       });
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
@@ -594,6 +596,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
         }
       } catch (e) {
+        rejecter(e);
         throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
       }
       resolver();
