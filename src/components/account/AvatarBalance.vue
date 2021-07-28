@@ -19,11 +19,12 @@
 <script lang="ts">
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, watch } from 'vue';
 
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -46,6 +47,19 @@ export default defineComponent({
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });
+    const dexchain = computed(() => {
+      return store.getters['demeris/getChain']({ chain_name: store.getters['demeris/getDexChain'] });
+    });
+
+    watch(
+      async () => await window.keplr.getKey(dexchain.value?.node_info?.chain_id),
+      async (newAddress, oldAddress) => {
+        if ((await newAddress).bech32Address !== (await oldAddress).bech32Address) {
+          window.localStorage.setItem('lastEmerisSession', '');
+          await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+        }
+      },
+    );
 
     return {
       balances,
