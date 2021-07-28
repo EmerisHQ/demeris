@@ -101,7 +101,6 @@ export default defineComponent({
 
 <style lang="scss">
 .settings-wrapper {
-  height: 4.8rem;
   padding: 0.4rem;
 }
 
