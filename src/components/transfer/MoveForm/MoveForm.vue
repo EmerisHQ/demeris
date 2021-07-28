@@ -2,10 +2,15 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
-      <MoveFormAmount v-if="balances" :balances="balances" @next="generateSteps" />
+      <MoveFormAmount v-if="balances" :balances="balances" :fees="state.fees" @next="generateSteps" />
 
       <div class="move-form__fees">
-        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+        <FeeLevelSelector
+          v-if="steps.length > 0"
+          v-model:gasPriceLevel="state.gasPrice"
+          :steps="steps"
+          @update:fees="state.fees = $event"
+        />
       </div>
     </template>
 
@@ -66,6 +71,11 @@ export default defineComponent({
     const steps = ref([]);
     const store = useStore();
 
+    const state = reactive({
+      fees: {},
+      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
+    });
+
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',
@@ -78,10 +88,6 @@ export default defineComponent({
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
-    });
-
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     watch(form, async () => {
@@ -134,7 +140,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { steps, generateSteps, form, goToStep, gasPrice, resetHandler };
+    return { steps, state, generateSteps, form, goToStep, resetHandler };
   },
 });
 </script>
