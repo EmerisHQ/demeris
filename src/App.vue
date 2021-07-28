@@ -4,7 +4,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin } from './utils/basic';
