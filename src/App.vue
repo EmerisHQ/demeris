@@ -4,7 +4,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin } from './utils/basic';
@@ -80,9 +80,16 @@ export default defineComponent({
     }
     this.initialized = true;
   },
+
   errorCaptured(err) {
     console.error(err);
     return false;
+  },
+  mounted() {
+    window.addEventListener('keplr_keystorechange', async () => {
+      window.localStorage.setItem('lastEmerisSession', '');
+      this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+    });
   },
 });
 </script>
