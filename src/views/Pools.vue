@@ -12,9 +12,9 @@
 import { computed } from '@vue/runtime-core';
 
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
+import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useAllStores } from '@/store';
-import usePools from '@/composables/usePools';
 
 export default {
   name: 'Pools',

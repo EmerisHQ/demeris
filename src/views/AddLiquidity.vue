@@ -419,16 +419,14 @@ export default {
         return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
       }
 
-      
       if (reserveBalances.value?.length) {
         return new BigNumber(reserveBalances.value[1].amount)
           .dividedBy(reserveBalances.value[0].amount)
           .shiftedBy(6)
           .toNumber();
       }
-      
+
       return undefined;
-      
     });
 
     const hasSufficientFunds = computed(() => {
@@ -775,37 +773,29 @@ export default {
 
             const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
 
-            const bigAmountA = new BigNumber(amountA)
-              .minus(feeA)
-            
-            const bigAmountB = new BigNumber(amountB)
-              .minus(feeB)
-            
+            const bigAmountA = new BigNumber(amountA).minus(feeA);
+
+            const bigAmountB = new BigNumber(amountB).minus(feeB);
+
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
-            
 
             if (minAmount.isEqualTo(bigAmountA)) {
-              form.coinA.amount = bigAmountA
-                .shiftedBy(-precisionA)
-                .decimalPlaces(precisionA)
-                .toString();
+              form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
 
-              form.coinB.amount = bigAmountA.multipliedBy(bigExchangeAmount)
+              form.coinB.amount = bigAmountA
+                .multipliedBy(bigExchangeAmount)
                 .shiftedBy(-precisionB)
                 .decimalPlaces(precisionB)
                 .toString();
             } else {
-              form.coinB.amount = bigAmountB
-                .shiftedBy(-precisionB)
-                .decimalPlaces(precisionB)
-                .toString();
-                
-              form.coinA.amount = bigAmountB.dividedBy(bigExchangeAmount)
+              form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
+
+              form.coinA.amount = bigAmountB
+                .dividedBy(bigExchangeAmount)
                 .shiftedBy(-precisionA)
                 .decimalPlaces(precisionA)
                 .toString();
             }
-
           }
 
           updateReceiveAmount();
