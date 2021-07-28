@@ -1,6 +1,6 @@
 <template>
   <div class="total-price">
-    {{ displayPrice[0] }}<span :class="{ 'text-2': smallDecimals }">.{{ displayPrice[1] }}</span>
+    {{ displayPrice[0] }}<span :class="{ 'text-0 sm:text-1 lg:text-2': smallDecimals }">.{{ displayPrice[1] }}</span>
   </div>
 </template>
 <script lang="ts">

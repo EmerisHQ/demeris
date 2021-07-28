@@ -1,5 +1,5 @@
 <template>
-  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper">
+  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper w-full relative">
     <SlippageSettingModal
       v-show="isSlippageSettingModalOpen"
       :swap-data="{
@@ -27,7 +27,7 @@
       @goback="gobackFunc"
     />
     <div
-      class="swap-widget bg-surface shadow-panel rounded-2xl"
+      class="swap-widget bg-surface dark:bg-fg shadow-panel rounded-2xl"
       :style="[
         !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
         isChildModalOpen ? 'box-shadow:none;' : '',
@@ -36,15 +36,9 @@
       <div class="swap-widget-header">
         <div class="text-2 font-bold">{{ $t('components.swap.title') }}</div>
         <div class="swap-widget-header__dot-button">
-          <IconButton
-            :name="'ThreeDotsIcon'"
-            :type="'flat'"
-            :status="'normal'"
-            :data="{
-              type: 'custom',
-              function: slippageSettingModalToggle,
-            }"
-          />
+          <Button variant="link" :click-function="slippageSettingModalToggle">
+            <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+          </Button>
         </div>
       </div>
 
@@ -65,12 +59,14 @@
       />
 
       <!-- button-divider -->
-      <div class="swap-widget__controller">
-        <div class="swap-widget__controller-divider" />
-        <div class="swap-widget__controller-wrapper">
+      <div class="relative flex items-center h-12">
+        <div class="w-full border-t border-border" />
+        <div class="absolute flex justify-between w-full px-4">
           <IconButton
+            class="ml-0.5 text-text bg-surface"
             :name="'UpsideDownIcon'"
             :type="'circle'"
+            :icon-size="1"
             :status="'normal'"
             :data="{
               type: 'custom',
@@ -78,6 +74,7 @@
             }"
           />
           <IconButton
+            class="mr-0.5 bg-surface"
             :name="maxButtonText"
             :type="'text'"
             :status="'normal'"
@@ -112,7 +109,7 @@
 
       <!-- swap button -->
       <div class="button-wrapper">
-        <ActionButton
+        <Button
           :name="buttonName"
           :status="buttonStatus"
           :disabled="buttonDisabled"
@@ -136,7 +133,8 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-import ActionButton from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
@@ -153,9 +151,10 @@ import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
+    Button,
     DenomSelect,
+    Icon,
     IconButton,
-    ActionButton,
     ReviewModal,
     Alert,
     SlippageSettingModal,
@@ -910,8 +909,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .wrapper {
-  position: relative;
-  width: 20rem;
+  min-width: 20rem;
   /* min-height: 17rem; */
 }
 
@@ -929,29 +927,6 @@ export default defineComponent({
       width: 1.5rem;
       height: 1.5rem;
     } */
-  }
-
-  &__controller {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    height: 2.25rem;
-
-    &-divider {
-      width: 100%;
-      height: 1px;
-      background-color: var(--border);
-    }
-
-    &-wrapper {
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-
-      width: 100%;
-      padding: 0 18px;
-    }
   }
 
   .price-alert-wrapper {

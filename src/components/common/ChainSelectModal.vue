@@ -1,6 +1,6 @@
 <template>
   <div class="chain-select-wrapper bg-surface shadow-panel rounded-2xl">
-    <TitleWithGoback :title="title" :func="func" />
+    <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
 
     <div class="mb-6 -text-1 text-center font-normal">
       <template v-if="showSubtitle">
@@ -44,7 +44,11 @@ export default defineComponent({
     func: { type: Function, required: true },
     title: { type: String, required: true },
     selectedDenom: { type: String, required: true },
+<<<<<<< HEAD
     showSubtitle: { type: Boolean, default: true },
+=======
+    showBackButton: { type: Boolean, default: true },
+>>>>>>> style: various layouts and ui details
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -96,7 +100,6 @@ export default defineComponent({
   }
 
   .coin-list {
-    padding: 0 1rem 0 1.5rem;
     min-height: 17rem;
 
     overflow-y: scroll;

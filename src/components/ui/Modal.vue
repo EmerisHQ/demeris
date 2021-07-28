@@ -1,7 +1,7 @@
 <template>
   <div v-if="open" class="modal" :class="[`modal--${variant}`]">
     <div class="modal__overlay" @click="onOverlayClick" />
-    <div class="modal__body shadow-card rounded-2xl" :class="bodyClass" :style="bodyStyle">
+    <div class="modal__body bg-surface shadow-card rounded-2xl" :class="bodyClass" :style="bodyStyle">
       <div class="modal__header">
         <slot name="header">
           <span />
@@ -140,7 +140,6 @@ export default defineComponent({
   }
 
   &__body {
-    background: var(--bg);
     border-radius: 1rem;
     padding: 1.5rem;
     width: 100%;

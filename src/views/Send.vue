@@ -1,6 +1,6 @@
 <template>
   <div class="send relative flex flex-col w-full min-h-screen items-center">
-    <header class="send__header container mx-auto flex items-center justify-between py-4 px-8 w-100 h-20">
+    <header class="max-w-7xl mx-auto flex items-center justify-between py-4 px-8 w-full h-20">
       <Button
         v-if="showBackButton"
         variant="link"
@@ -27,7 +27,7 @@
       </Button>
     </header>
 
-    <main class="container mx-auto pt-8 px-8 pb-28 flex-1 w-full flex flex-col items-center justify-center">
+    <main class="max-w-7xl mx-auto pt-8 px-8 pb-28 flex-1 w-full flex flex-col items-center justify-center">
       <template v-if="!transferType">
         <div class="max-w-3xl">
           <h2 class="text-3 font-bold py-8 text-center">Who are you sending to?</h2>

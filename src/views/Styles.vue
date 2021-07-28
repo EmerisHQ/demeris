@@ -102,8 +102,11 @@
       <h3 class="text-3 font-bold mt-20">Loading</h3>
       <ul class="flex items-center mt-7 gap-8">
         <li><Button variant="primary" status="loading" /></li>
+        <li><Button variant="primary" status="loading" name="Loading" /></li>
         <li><Button variant="secondary" status="loading" /></li>
+        <li><Button variant="secondary" status="loading" name="Loading" /></li>
         <li><Button variant="link" status="loading" /></li>
+        <li><Button variant="link" status="loading" name="Loading" /></li>
       </ul>
       <h3 class="text-3 font-bold mt-20">Icons</h3>
       <ul class="flex items-center mt-7 gap-8">

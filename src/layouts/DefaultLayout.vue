@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <div class="layout-frame">
+  <div class="layout-frame pt-4 sm:pt-6 md:pt-12 px-5 md:px-8 pb-20 md:pb-32 max-w-7xl mx-auto">
     <slot />
   </div>
 </template>
@@ -20,11 +20,6 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .layout-frame {
-  padding: 3rem 2rem 8rem;
-  max-width: 1200px;
-
-  margin: 0 auto;
-  /* height: 100vh; */
-  min-height: calc(100vh - 6.25rem);
+  min-height: calc(100vh - 8rem); // minus navbar height and layout padding-top
 }
 </style>

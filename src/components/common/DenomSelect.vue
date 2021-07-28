@@ -1,5 +1,8 @@
 <template>
-  <div class="denom-select" :class="{ 'denom-select--readonly': readonly, 'denom-select--empty': !hasOptions }">
+  <div
+    class="denom-select flex items-center py-4 px-6"
+    :class="{ 'denom-select--readonly': readonly, 'denom-select--empty': !hasOptions }"
+  >
     <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
@@ -13,41 +16,44 @@
 		-->
     <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
     when it changed-->
-    <CircleSymbol
-      :denom="selectedDenom?.base_denom ?? 'empty'"
-      :chain-name="selectedDenom?.on_chain ?? undefined"
-      size="sm"
-      class="denom-select__coin-image"
-      @click="toggleDenomSelectModal"
-    />
 
-    <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom text-0 font-medium">
-        <tippy
-          v-if="displayName.startsWith('GDEX')"
-          :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
-          class="tippy-info"
-        >
-          <div class="max-display-width">{{ displayName }}</div>
-          <template #content> {{ displayName }} </template>
-        </tippy>
-        <Denom v-else :name="selectedDenom?.base_denom" />
-        <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" />
+    <div class="denom-select__coin self-stretch flex items-center flex-auto pr-3" @click="toggleDenomSelectModal">
+      <CircleSymbol
+        :denom="selectedDenom?.base_denom ?? 'empty'"
+        :chain-name="selectedDenom?.on_chain ?? undefined"
+        size="sm"
+        class="mr-3 cursor-pointer"
+        @click="toggleDenomSelectModal"
+      />
+      <div v-if="isSelected">
+        <div class="denom-select__coin-denom text-0 font-medium">
+          <tippy
+            v-if="displayName.startsWith('GDEX')"
+            :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
+            class="tippy-info"
+          >
+            <div class="max-display-width">{{ displayName }}</div>
+            <template #content> {{ displayName }} </template>
+          </tippy>
+          <Denom v-else :name="selectedDenom?.base_denom" />
+          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" />
+        </div>
+        <div class="denom-select__coin-from -text-1 overflow-hidden overflow-ellipsis white-space-nowrap">
+          <ChainName :name="selectedDenom.on_chain" />
+        </div>
       </div>
-      <div class="denom-select__coin-from -text-1"><ChainName :name="selectedDenom.on_chain" /></div>
+      <div v-else>
+        <div class="denom-select__coin-denom text-0 font-medium">
+          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" />
+        </div>
+      </div>
     </div>
 
-    <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom text-0 font-medium">
-        {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" />
-      </div>
-    </div>
-
-    <label class="denom-select__coin-amount ml-3 w-100 text-right text-muted hover:text-text focus-within:text-text">
+    <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
       <div class="denom-select__coin-amount-type -text-1 select-none">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
-        :class="isOver ? 'over' : ''"
+        :class="isOver ? 'text-negative-text' : 'text-text'"
         :readonly="readonly"
         class="
           denom-select__coin-amount-input
@@ -55,7 +61,6 @@
           p-0
           text-1 text-right
           font-bold
-          text-text
           bg-transparent
           appearance-none
           border-none
@@ -69,6 +74,7 @@
 
   <DenomSelectModal
     v-show="isOpen"
+    class="absolute h-full w-full top-0 left-0 overflow-hidden z-10 bg-surface shadow-panel rounded-2xl"
     :assets="assets"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
@@ -173,20 +179,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .denom-select {
-  display: flex;
-  align-items: center;
-
-  padding: 1rem 1.5rem;
-
-  &__coin-image {
-    cursor: pointer;
-    margin-right: 0.75rem;
-  }
-
-  &--empty &__coin {
-    cursor: default;
-  }
-
+  &--empty &__coin,
   &--empty &__coin-image {
     cursor: default;
   }

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tx-steps denom-select-modal-wrapper"
+    class="tx-steps denom-select-modal-wrapper relative w-full top-0 left-0 overflow-hidden z-10"
     :class="{ 'bg-surface shadow-panel rounded-2xl tx-steps--widget': variant === 'widget' }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
@@ -14,7 +14,7 @@
 
     <template v-else>
       <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
-        <div class="title text-2 font-bold">
+        <div class="tx-steps__title px-6 pb-6 text-2 font-bold text-center">
           {{ currentData.title }}
         </div>
 
@@ -38,11 +38,19 @@
           <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
         </div>
 
-        <div class="warn -text-1 font-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
+        <Alert
+          v-if="!currentData.isSwap"
+          class="mx-6"
+          status="info"
+          :show-icon="false"
+          message="Non-revertable transactions. Prices not guaranteed etc."
+        />
+
+        <div v-else class="my-2 mx-6 -text-1 font-normal text-muted text-center leading-copy">
           Non-revertable transactions. Prices not guaranteed etc.
         </div>
 
-        <div class="button-wrapper">
+        <div class="p-6">
           <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
         </div>
       </div>
@@ -107,7 +115,7 @@
           <template
             v-if="
               feeWarning.missingFees.length > 1 ||
-                (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
+              (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
             "
           >
             <ModalButton
@@ -191,6 +199,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
@@ -222,6 +231,7 @@ export default defineComponent({
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
     PreviewSwap,
+    Alert,
     Button,
     ModalButton,
     TxHandlingModal,
@@ -636,24 +646,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .denom-select-modal-wrapper {
-  position: relative;
-  width: 100%;
-  /* height: 35rem; */
-
-  margin-bottom: 3rem;
-  top: 0;
-  left: 0;
-
-  overflow: hidden;
-  z-index: 10;
-
-  &.tx-steps--widget > .title {
+  &.tx-steps--widget .tx-steps__title {
     text-align: left;
-  }
-
-  .title {
-    padding: 0 1.5rem 1.5rem;
-    text-align: center;
   }
 
   .amount-info {
@@ -733,19 +727,12 @@ export default defineComponent({
     }
   }
 
-  .warn {
-    margin: 0 1.5rem;
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-  }
-
   .warn-transfer {
     border: none;
     padding: 0;
   }
 
+  // todo: convert to 1rem@16px
   .button-wrapper {
     padding: 1.75rem 1.5rem 1.5rem;
   }

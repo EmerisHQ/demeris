@@ -1,8 +1,8 @@
 <template>
   <AppLayout>
-    <div class="pools__header">
-      <h1 class="pools__title text-4 font-bold mb-8">Pools</h1>
-    </div>
+    <header class="pb-3 sm:pb-6 md:pb-6">
+      <h1 class="text-2 sm:text-3 md:text-4 font-bold">Pools</h1>
+    </header>
 
     <PoolsTable :pools="pools" />
   </AppLayout>

@@ -9,7 +9,6 @@ export const messages = {
       noFunds: 'Insufficient funds',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try again with another search',
-      discoverMore: 'Discover more',
       max: 'Max',
       understand: 'I understand',
       getAtom: 'Get ATOM',

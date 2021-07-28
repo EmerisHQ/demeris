@@ -1,5 +1,5 @@
 <template>
-  <div class="denom-select-modal">
+  <div class="flex">
     <ChainSelectModal
       v-if="isModalOpen"
       :assets="assets"
@@ -8,13 +8,11 @@
       :selected-denom="selectedDenom"
       @select="chainSelectHandler"
     />
-    <div v-else class="denom-select-modal-wrapper bg-surface shadow-panel rounded-2xl">
-      <TitleWithGoback :title="title" :func="func" />
+    <div v-else class="denom-select-modal-wrapper flex-1 flex flex-col items-stretch">
+      <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
 
-      <div class="search-bar">
-        <Search v-model:keyword="keyword" />
-      </div>
-      <div class="coin-list">
+      <Search v-model:keyword="keyword" class="mx-6 mb-6" />
+      <div class="coin-list overflow-y-auto flex-1 pb-20">
         <CoinList
           :data="keywordFilteredAssets"
           :type="title === 'Receive' ? 'receive' : 'pay'"
@@ -24,7 +22,7 @@
         >
         </CoinList>
       </div>
-      <WhiteOverlay />
+      <WhiteOverlay class="coin-list-fade" />
     </div>
   </div>
 </template>
@@ -52,6 +50,7 @@ export default defineComponent({
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
+    showBackButton: { type: Boolean, default: true },
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -131,31 +130,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .denom-select-modal-wrapper {
-  position: absolute;
-  width: 100%;
-  height: 35rem !important; // is important needed?
-  top: 0;
-  left: 0;
+  // height: 35rem !important; // is important needed?
+}
 
-  overflow: hidden;
-  z-index: 10;
+.coin-list {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 
-  .search-bar {
-    padding: 0 1.5rem 1.5rem;
-  }
-
-  .coin-list {
-    padding: 0 1rem 0 1.5rem;
-    height: 24rem;
-
-    overflow-y: scroll;
-
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-
-    &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera*/
-    }
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
   }
 }
 </style>

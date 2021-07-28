@@ -237,7 +237,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .circle-symbol {
-  border-radius: 1.5rem;
+  border-radius: 9999px;
   position: relative;
   display: flex;
   align-items: center;

@@ -2,9 +2,9 @@
   <label
     class="address block relative w-full max-w-md"
     :class="{
-      'address--readonly border border-solid border-border': readonly,
-      'address--invalid': invalid,
+      'address--readonly border border-solid border-border rounded-xl': readonly,
       'address--editable': !readonly,
+      'address--invalid': invalid,
     }"
   >
     <textarea
@@ -22,12 +22,13 @@
         leading-copy
         font-normal
         text-text
+        border-none
         rounded-xl
         appearance-none
       "
       :class="[
-        { 'border-none bg-fg focus:bg-surface focus:rounded-lg': !readonly },
-        { 'border border-solid border-border': readonly },
+        { 'bg-fg focus:bg-surface focus:rounded-lg': !readonly },
+        { 'bg-transparent': readonly },
         { 'text-negative-text': invalid },
       ]"
       :placeholder="placeholder"

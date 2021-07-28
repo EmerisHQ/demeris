@@ -4,7 +4,7 @@
       <div>
         <AmountDisplay class="font-bold" :amount="step.transactions[0].data.amount" />
       </div>
-      <sub><ChainName :name="step.transactions[0].data.from_chain" /></sub>
+      <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="step.transactions[0].data.from_chain" /></sub>
     </ListItem>
 
     <ListItem
@@ -32,7 +32,7 @@
       <div>
         <AmountDisplay class="font-bold" :amount="step.transactions[step.transactions.length - 1].data.amount" />
       </div>
-      <sub><ChainName :name="step.transactions[step.transactions.length - 1].data.to_chain" /></sub>
+      <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="step.transactions[step.transactions.length - 1].data.to_chain" /></sub>
     </ListItem>
   </List>
 </template>

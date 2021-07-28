@@ -1,8 +1,8 @@
 <template>
-  <div ref="menuRef" class="settings-wrapper h-12 pl-3">
+  <div ref="menuRef" class="settings-wrapper sm:pl-3 relative">
     <div
       v-if="isSignedIn"
-      class="settings"
+      class="settings -mr-2 sm:mr-0 py-1 px-2 h-12 flex items-center rounded-lg cursor-pointer"
       :class="{ 'settings--open': isSettingsModalOpen }"
       @click="toggleSettingsModal"
     >
@@ -101,18 +101,8 @@ export default defineComponent({
 
 <style lang="scss">
 .settings {
-  display: flex;
-  align-items: center;
-  border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
-
   &--open {
     background: var(--fg);
-  }
-
-  &:hover {
-    background: var(--fg);
-    cursor: pointer;
   }
 }
 </style>

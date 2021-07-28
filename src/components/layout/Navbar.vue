@@ -1,27 +1,26 @@
 <template>
-  <nav class="nav ml-4 flex items-center text-muted">
+  <nav class="flex-1 max-w-7xl md:mx-auto lg:pl-4 xl:px-6 flex items-center text-muted">
     <router-link
-      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      class="h-12 py-4 px-2 md:px-3 leading-none hover:text-text"
       exact-active-class="text-text font-medium"
       to="/"
     >
       {{ $t('navbar.portfolio') }}
     </router-link>
     <router-link
-      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      class="h-12 py-4 px-2 md:px-3 leading-none hover:text-text"
       exact-active-class="text-text font-medium"
       to="/assets"
     >
       {{ $t('navbar.assets') }}
     </router-link>
     <router-link
-      class="nav-link h-12 py-4 px-3 leading-none hover:text-text"
+      class="h-12 py-4 px-2 md:px-3 leading-none hover:text-text"
       exact-active-class="text-text font-medium"
       to="/pools"
     >
       {{ $t('navbar.pools') }}
     </router-link>
-    <div class="space"></div>
   </nav>
 </template>
 <script lang="ts">

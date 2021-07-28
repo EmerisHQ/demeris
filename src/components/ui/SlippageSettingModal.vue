@@ -1,5 +1,5 @@
 <template>
-  <div class="slippage-modal bg-surface shadow-panel rounded-2xl">
+  <div class="slippage-modal relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl">
     <TitleWithGoback
       :title="'Price'"
       :func="
@@ -11,9 +11,9 @@
 
     <div class="setting">
       <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
-      <div class="setting__sections gap-x-3">
+      <div class="flex justify-between my-4 gap-x-3">
         <button
-          class="setting__sections-block text-text"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
           :class="[
             slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
@@ -23,7 +23,7 @@
           0.1%
         </button>
         <button
-          class="setting__sections-block text-text"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
           :class="[
             slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
@@ -33,7 +33,7 @@
           0.5%
         </button>
         <button
-          class="setting__sections-block text-text"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
           :class="[
             slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
             allowCustomSlippage ? '' : 'no-custom-slippage',
@@ -44,21 +44,24 @@
         </button>
         <button
           v-if="allowCustomSlippage"
-          class="setting__sections-block text-text"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
           :class="[
-            isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium custom-selected' : '',
-            Number(slippage) < 0 ? 'custom-error' : '',
+            isCustomSelected
+              ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium flex items-center justify-center text-center'
+              : '',
+            Number(slippage) < 0 ? 'justify-end text-negative border-negative' : '',
           ]"
         >
-          <div class="custom-slippage">
+          <div class="custom-slippage flex">
             <input
               ref="customSlippageInput"
               :value="customSlippage"
               type="number"
               placeholder="Custom"
+              class="w-full bg-transparent outline-none text-right"
               @input="setCustomSlippage"
             />
-            <span v-if="isCustomSelected" class="custom-slippage__percent">%</span>
+            <span v-if="isCustomSelected" class="text-text">%</span>
           </div>
         </button>
       </div>
@@ -268,26 +271,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .slippage-modal {
-  position: relative;
-  width: 25rem;
-  /* height: 35rem; */
-
-  margin-bottom: 3rem;
-  top: 0;
-  left: 0;
-
-  overflow: hidden;
-  z-index: 10;
-
   .setting {
     padding: 0 1.5rem;
 
     &__sections {
-      display: flex;
-      justify-content: space-between;
-
-      margin: 1rem 0;
-
       /* Chrome, Safari, Edge, Opera */
       input::-webkit-outer-spin-button,
       input::-webkit-inner-spin-button {
@@ -300,52 +287,15 @@ export default defineComponent({
         -moz-appearance: textfield;
       }
       &-block {
-        width: 3.25rem;
-        height: 2.5rem;
-        background-color: var(--fg);
-
-        border-radius: 8px;
-
-        outline: none;
-
         &:nth-child(4) {
-          width: 5.75rem;
-          padding: 0.375rem 0.75rem;
-          text-align: center;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .custom-slippage {
-            display: flex;
-
-            input {
-              background-color: transparent;
-              width: 3.75rem;
-              outline: none;
-            }
-
-            &__percent {
-              color: var(--text);
-            }
-          }
+          flex-grow: 2;
         }
       }
-      .custom-selected {
-        input {
-          width: 1.75rem !important;
-          text-align: right;
-          outline: none;
-          &::placeholder {
-            color: transparent;
-          }
+      .custom-selected input {
+        // width: 1.75rem !important;
+        &::placeholder {
+          color: transparent;
         }
-      }
-
-      .custom-error {
-        justify-content: flex-end;
-        background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
       }
     }
   }

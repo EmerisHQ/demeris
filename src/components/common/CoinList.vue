@@ -1,14 +1,12 @@
 <template>
-  <div v-if="modifiedData.length === 0" class="no-result">
-    <div class="no-result__board">
-      <div class="title text-1 font-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
-      <div class="sub-title text-0">{{ $t('generic_cta.filterRetry') }}</div>
-    </div>
+  <div v-if="modifiedData.length === 0" class="h-full text-center flex flex-col items-center justify-center">
+    <div class="text-1 text-text font-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
+    <div class="text-0 text-muted">{{ $t('generic_cta.filterRetry') }}</div>
   </div>
   <div
     v-for="coin in modifiedData"
     :key="coin.base_denom"
-    class="coin-list"
+    class="flex items-center justify-between py-4 px-3 mx-3 cursor-pointer hover:bg-fg rounded-xl"
     @mouseenter="
       showTooltip(
         `${type}/${coin.on_chain}/${coin.base_denom}`,
@@ -18,27 +16,27 @@
     @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
     @click="$emit('select', coin)"
   >
-    <div class="coin-list__info">
-      <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
+    <div class="flex items-center">
+      <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info mr-4">
         <CircleSymbol
           :variant="type === 'chain' ? 'chain' : 'asset'"
           :denom="coin.base_denom"
           :chain-name="coin.on_chain"
         />
       </tippy>
-      <div class="coin-list__info-details">
-        <div v-if="keyword" class="coin-list__info-details-denom text-0 font-medium">
+      <div class="flex-1">
+        <div v-if="keyword" class="text-0 font-medium">
           <span v-for="word in coin.display_name" :key="word" :class="setWordColorByKeyword(keyword, word)">
             {{ word }}
           </span>
         </div>
-        <div v-else-if="type === 'chain'" class="coin-list__info-details-denom text-0 font-medium">
+        <div v-else-if="type === 'chain'" class="text-0 font-medium">
           <ChainName :name="coin.on_chain" />
         </div>
-        <div v-else class="coin-list__info-details-denom text-0 font-medium">
+        <div v-else class="text-0 font-medium">
           <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="type === 'pay'" class="coin-list__info-details-data -text-1 font-normal text-muted">
+        <div v-if="type === 'pay'" class="-text-1 font-normal text-muted">
           <div v-if="type === 'pay'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <!-- <span
@@ -52,7 +50,7 @@
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
-        <div v-else class="coin-list__info-details-data -text-1 font-normal text-muted">
+        <div v-else class="-text-1 font-normal text-muted">
           <span v-if="type === 'pay' || type === 'chain'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             {{ $t('components.coinList.available') }}
@@ -61,11 +59,11 @@
         </div>
       </div>
     </div>
-    <div v-if="type === 'pay'" class="coin-list__select">
+    <div v-if="type === 'pay'" class="flex justify-between">
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
       <Icon name="CaretRightIcon" :icon-size="1" :color="iconColor" />
     </div>
-    <div v-else-if="showBalance" class="coin-list__balance text-muted">
+    <div v-else-if="showBalance" class="text-muted text-right">
       <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
     </div>
   </div>
@@ -102,7 +100,7 @@ export default defineComponent({
     const modifiedData = computed(() => getUniqueCoinList(props.data));
     const tooltipInstance = ref(null);
     function setWordColorByKeyword(keyword, word) {
-      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
+      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
     }
 
     function showTooltip(eleId, text) {
@@ -148,81 +146,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.coin-list {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 4rem;
-  padding: 0.75rem 0;
-
-  cursor: pointer;
-
-  .tippy-info {
-    margin-right: 1rem;
-  }
-
-  &__balance {
-    white-space: nowrap;
-  }
-
-  &__info {
-    display: flex;
-    align-items: center;
-    width: 100%;
-
-    &-image {
-      width: 1.5rem;
-      height: 1.5rem;
-
-      margin: 0.25rem;
-
-      border-radius: 50%;
-    }
-
-    .circle-border {
-      border: 1px solid transparent;
-      border-radius: 50%;
-    }
-
-    &-details {
-      flex: 1 1 0%;
-    }
-  }
-
-  &__select {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .search-not-included {
-    color: var(--inactive);
-  }
-
-  .search-included {
-    color: var(--text);
-  }
-}
-
-.no-result {
-  position: relative;
-  height: 100%;
-
-  text-align: center;
-
-  &__board {
-    position: absolute;
-    width: 100%;
-    top: 50%;
-
-    transform: translateY(-50%);
-    .title {
-      color: var(--text);
-    }
-
-    .sub-title {
-      color: var(--muted);
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

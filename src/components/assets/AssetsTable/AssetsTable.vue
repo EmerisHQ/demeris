@@ -1,6 +1,6 @@
 <template>
-  <div class="assets-table__wrapper">
-    <table class="assets-table">
+  <div class="relative flex flex-col">
+    <table class="assets-table table-fixed -ml-6">
       <colgroup v-if="variant === 'balance'">
         <col width="35%" />
         <col width="20%" />
@@ -8,61 +8,92 @@
         <col width="10%" />
       </colgroup>
 
-      <thead v-if="showHeaders" class="text-muted">
+      <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="bg-app text-left">{{ $t('context.assets.asset') }}</th>
-          <th v-if="variant === 'full'" class="bg-app text-left">{{ $t('context.assets.ticker') }}</th>
-          <th class="bg-app text-right">{{ $t('context.assets.price') }}</th>
-          <th v-if="variant === 'full'" class="bg-app text-right">{{ $t('context.assets.marketCap') }}</th>
-          <th v-if="variant === 'balance'" class="bg-app text-right">{{ $t('context.assets.balance') }}</th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left">
+            {{ $t('context.assets.asset') }}
+          </th>
+          <th
+            v-if="variant === 'full'"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left"
+          >
+            {{ $t('context.assets.ticker') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">
+            {{ $t('context.assets.price') }}
+          </th>
+          <th
+            v-if="variant === 'full'"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right"
+          >
+            {{ $t('context.assets.marketCap') }}
+          </th>
+          <th
+            v-if="variant === 'balance'"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right"
+          >
+            {{ $t('context.assets.balance') }}
+          </th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="asset in balancesFiltered" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
-          <td class="assets-table__row__asset">
-            <CircleSymbol :denom="asset.denom" />
-            <div class="assets-table__row__asset__denom">
-              <Denom :name="asset.denom" />
-              <LPAsset :name="asset.denom" />
+        <tr
+          v-for="asset in balancesFiltered"
+          :key="asset.denom"
+          class="assets-table__row group cursor-pointer"
+          @click="handleClick(asset)"
+        >
+          <td class="py-5 align-middle group-hover:bg-fg transition">
+            <div class="flex items-center">
+              <CircleSymbol :denom="asset.denom" />
+              <div class="ml-4 white-space-nowrap overflow-hidden overflow-ellipsis">
+                <span class="font-medium"><Denom :name="asset.denom" /></span>
+                <LPAsset :name="asset.denom" />
+              </div>
             </div>
           </td>
 
-          <td v-if="variant === 'full'" class="assets-table__row__ticker text-left text-muted">
+          <td v-if="variant === 'full'" class="py-5 align-middle text-left text-muted group-hover:bg-fg transition">
             <Ticker :name="asset.denom" />
           </td>
 
-          <td class="assets-table__row__price text-right">
+          <td class="py-5 align-middle text-right group-hover:bg-fg transition">
             <Price :amount="{ denom: asset.denom, amount: null }" />
           </td>
 
-          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">
+          <td v-if="variant === 'full'" class="py-5 align-middle text-right group-hover:bg-fg transition">
             {{ getFormattedMarketCap(asset.denom) }}
           </td>
 
-          <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
-            <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            <div class="assets-table__row__balance__amount -text-1">
+          <td v-if="variant === 'balance'" class="py-5 align-middle text-right group-hover:bg-fg transition">
+            <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+            <div class="text-muted mt-0.5 -text-1">
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             </div>
           </td>
-          <td v-if="variant === 'balance'" class="assets-table__row__chains mt-0.5">
+          <td v-if="variant === 'balance'" class="mt-0.5 ml-6 group-hover:bg-fg transition">
             <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" />
           </td>
         </tr>
       </tbody>
     </table>
 
-    <button
+    <Button
       v-if="balancesByAsset.length > balancesFiltered.length"
-      class="assets-table__view-all shadow-button rounded-xl"
-      @click="viewAllHandler"
+      size="sm"
+      variant="secondary"
+      :full-width="false"
+      class="view-all-assets mx-auto mt-6"
+      :click-function="
+        () => {
+          viewAllHandler();
+        }
+      "
+      :name="`${$t('context.assets.viewAll')} (${balancesByAsset.length})`"
     >
-      <span class="assets-table__view-all__label">
-        {{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})
-      </span>
-      <Icon name="CaretDownIcon" :icon-size="0.75" />
-    </button>
+      <template #right><Icon name="CaretDownIcon" :icon-size="1" /></template>
+    </Button>
   </div>
 </template>
 
@@ -77,6 +108,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
@@ -87,7 +119,7 @@ type TableStyleType = 'full' | 'balance';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Icon, LPAsset, Price, Ticker },
+  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Button, Icon, LPAsset, Price, Ticker },
 
   props: {
     variant: {
@@ -219,116 +251,24 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .assets-table {
-  width: calc(100% + 2.5rem);
-  margin-inline: -1.25rem;
-  table-layout: fixed;
-
-  &__wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .text-right {
-    text-align: right;
-  }
-
-  .text-left {
-    text-align: left;
-  }
-
-  th {
-    vertical-align: middle;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    padding: 0.9375rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  width: calc(100% + 3rem);
 
   td,
   th {
-    transition: all 150ms ease-in;
-
     &:first-child {
-      padding-left: 1.25rem;
+      padding-left: 1.5rem;
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
     }
 
     &:last-child {
-      padding-right: 1.25rem;
+      padding-right: 1.5rem;
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
     }
   }
-
-  &__row {
-    cursor: pointer;
-
-    &:hover {
-      td {
-        background: var(--fg);
-      }
-
-      td:first-child {
-        border-top-left-radius: 0.75rem;
-        border-bottom-left-radius: 0.75rem;
-      }
-
-      td:last-child {
-        border-top-right-radius: 0.75rem;
-        border-bottom-right-radius: 0.75rem;
-      }
-    }
-
-    &__asset {
-      padding: 1.25rem 0;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-
-      &__denom {
-        margin-left: 1rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-
-    &__price {
-      &__trending {
-        margin-top: 0.5rem;
-      }
-    }
-
-    &__amount {
-      text-transform: uppercase;
-      color: rgba(0, 0, 0, 0.66);
-    }
-
-    &__balance {
-      font-weight: 600;
-
-      &__amount {
-        color: var(--muted);
-        margin-top: 0.5rem;
-      }
-    }
-    &__chains {
-      padding-left: 1.6rem;
-    }
-  }
-
-  &__view-all {
-    margin: 1.5rem auto 0 auto;
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    align-items: center;
-    border-radius: 3.5rem;
-    font-weight: 600;
-    font-size: 0.8125rem;
-
-    &__label {
-      margin-right: 0.4375rem;
-    }
-  }
+}
+.view-all-assets::v-deep(button) {
+  border-radius: 999px;
 }
 </style>

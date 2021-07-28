@@ -102,7 +102,7 @@
 
       <fieldset class="form__field">
         <div class="move-form-amount__assets shadow-card rounded-2xl">
-          <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
+          <button class="move-form-amount__assets__item denom-item text-left" @click="toggleDenomModal()">
             <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.action') }}</span>
 
             <div class="move-form-amount__assets__item__asset">
@@ -124,7 +124,7 @@
 
           <button
             v-if="state.currentAsset"
-            class="move-form-amount__assets__item from-item"
+            class="move-form-amount__assets__item from-item text-left"
             @click="toggleChainsModal(null, 'from')"
           >
             <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.from') }}</span>

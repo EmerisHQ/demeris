@@ -1,68 +1,65 @@
 <template>
   <AppLayout>
-    <div class="wrapper">
-      <div class="portfolio">
-        <div class="portfolio__total">
-          <div class="portfolio__total__text text-muted">{{ $t('context.assets.totalBalance') }}</div>
-          <div class="portfolio__total__value text-5 font-bold">
+    <div class="md:flex justify-between">
+      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl mb-16">
+        <header>
+          <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
+          <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
             <TotalPrice :balances="balances" small-decimals />
           </div>
-        </div>
-        <div class="portfolio__assets">
-          <div class="portfolio__assets__header">
-            <h2 class="portfolio__assets__header__text text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <router-link class="portfolio__assets__header__link font-medium" to="/assets">
-              {{ balances.length ? $t('generic_cta.discoverMore') : $t('generic_cta.seeall') }} <ArrowRightIcon />
+        </header>
+        <section class="mt-16">
+          <header class="flex justify-between items-center mb-6">
+            <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
+            <router-link
+              v-if="!balances.length"
+              class="portfolio__assets__header__link flex items-center font-medium"
+              to="/assets"
+            >
+              {{ $t('generic_cta.seeall') }}
+              <ArrowRightIcon class="ml-3" />
             </router-link>
-          </div>
+          </header>
 
-          <div class="portfolio__assets__table>">
-            <AssetsTable
-              :balances="balances"
-              :hide-zero-assets="true"
-              variant="balance"
-              class="assets__table"
-              :show-headers="false"
-              :limit-rows="4"
-              @row-click="openAssetPage"
-            />
-          </div>
-
-          <MoonpayBanner
-            v-if="!balances.length"
-            title="Add crypto to your account"
-            class="portfolio__assets__buy-banner"
-            size="large"
+          <AssetsTable
+            :balances="balances"
+            :hide-zero-assets="true"
+            variant="balance"
+            class="assets__table"
+            :show-headers="false"
+            :limit-rows="4"
+            @row-click="openAssetPage"
           />
-        </div>
-        <div class="portfolio__pools">
-          <div class="portfolio__pools__header">
-            <h2 class="portfolio__pools__header__text text-2 font-bold">{{ $t('context.pools.title') }}</h2>
-            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link font-medium" to="/pools">
-              {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
-            </router-link>
-          </div>
 
-          <div v-if="poolsInvested.length" class="portfolio__pools__cards">
+          <MoonpayBanner v-if="!balances.length" title="Add crypto to your account" class="mt-6" size="large" />
+        </section>
+        <section class="mt-16">
+          <header class="flex justify-between items-center mb-6">
+            <h2 class="text-2 font-bold">{{ $t('context.pools.title') }}</h2>
+            <router-link
+              v-if="poolsInvested.length"
+              class="portfolio__pools__header__link flex items-center font-medium"
+              to="/pools"
+            >
+              {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon class="ml-3" />
+            </router-link>
+          </header>
+
+          <div v-if="poolsInvested.length">
             <Pools :pools="poolsInvested" />
           </div>
 
-          <div v-else class="portfolio__pools__empty">
-            <p class="portfolio__pools__empty__description text-muted">{{ $t('context.pools.empty') }}</p>
-            <Button
-              status="secondary"
-              class="portfolio__pools__empty__button"
-              :name="$t('context.pools.explore')"
-              @click="openPoolsPage"
-            />
+          <div v-else class="p-8 w-full flex flex-col items-center justify-center">
+            <p class="text-muted">{{ $t('context.pools.empty') }}</p>
+            <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
           </div>
-        </div>
+        </section>
       </div>
 
-      <div class="portfolio__aside">
+      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap class="portfolio__aside__swap" />
-        <Intro />
-      </div>
+        <Intro class="mt-4" />
+      </aside>
     </div>
   </AppLayout>
 </template>
@@ -120,84 +117,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.wrapper {
-  display: flex;
-  justify-content: space-between;
-
-  .portfolio {
-    display: flex;
-    flex-direction: column;
-    width: 60%;
-
-    &__total {
-      &__value {
-        margin-top: 0.5rem;
-      }
-      margin-bottom: 3.75rem;
-    }
-    &__assets {
-      &__buy-banner {
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      &__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.75rem;
-
-        &__link {
-          display: flex;
-          align-items: center;
-          svg {
-            margin-left: 0.625rem;
-          }
-        }
-      }
-      margin-bottom: 3.75rem;
-    }
-    &__pools {
-      &__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-
-        &__link {
-          display: flex;
-          align-items: center;
-          svg {
-            margin-left: 0.625rem;
-          }
-        }
-      }
-
-      &__empty {
-        padding: 2rem;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        &__button {
-          margin-top: 1.5rem;
-        }
-      }
-    }
-
-    &__aside {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      margin-left: 4rem;
-      width: 20rem;
-
-      &__buy {
-        margin-top: 1.5rem;
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

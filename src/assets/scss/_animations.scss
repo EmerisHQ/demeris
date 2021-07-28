@@ -3,7 +3,7 @@
 }
 
 .animate-wobble {
-  animation: wobble 1s infinite;
+  animation: wobble 500ms ease-out 1;
 }
 
 .animate-spin {
@@ -34,19 +34,19 @@
     transform: none;
   }
   15% {
-    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -2deg);
   }
   30% {
-    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 2deg);
   }
   45% {
-    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -1deg);
   }
   60% {
-    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 1deg);
   }
   75% {
-    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, 0deg);
   }
   100% {
     transform: none;

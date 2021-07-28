@@ -1,48 +1,48 @@
 <template>
-  <section class="pools">
-    <div class="pools__subheader flex items-center justify-between">
-      <Search v-model:keyword="keyword" class="pools__search" />
+  <section class="flex flex-col">
+    <div class="flex items-center justify-between md:mt-2 mb-3 sm:mb-4 md:mb-6">
+      <Search v-model:keyword="keyword" class="pools__search max-w-xs w-full" />
       <Button name="Add liquidity" variant="link" @click="openAddLiqudityPage">
         <Icon name="PlusIcon" :icon-size="1.5" />
       </Button>
     </div>
 
-    <table class="pools-table">
+    <table class="pools-table table-fixed -ml-6">
       <colgroup>
-        <col width="25%" />
-        <col width="25%" />
-        <col width="25%" />
+        <col width="34%" />
+        <col width="33%" />
+        <col width="33%" />
       </colgroup>
 
-      <thead>
+      <thead class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="text-left">{{ $t('context.pools.pair') }}</th>
-          <th class="text-right">{{ $t('context.pools.share') }}</th>
-          <th class="text-right">{{ $t('context.pools.liquidity') }}</th>
-          <!--<th class="text-right">APY</th>//-->
-          <th></th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left transition">
+            {{ $t('context.pools.pair') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">
+            {{ $t('context.pools.liquidity') }}
+          </th>
+          <!--<th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">APY</th>//-->
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">
+            {{ $t('context.pools.share') }}
+          </th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="pool of filteredPools" :key="pool.id" class="pools-table__row" @click="rowClickHandler(pool)">
-          <td class="pools-table__row__pair">
-            <div class="pools-table__row__pair__pool">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pools-table__row__pair__pool__avatar token-a" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pools-table__row__pair__pool__avatar token-b" />
+        <tr v-for="pool of filteredPools" :key="pool.id" class="group cursor-pointer" @click="rowClickHandler(pool)">
+          <td class="py-5 flex items-center group-hover:bg-fg transition">
+            <div class="inline-flex items-center mr-4">
+              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="w-8 h-8 rounded-full bg-fg z-1" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="w-8 h-8 rounded-full bg-fg z-0 -ml-1.5" />
             </div>
-            <span class="pools-table__row__pair__name font-bold">
+            <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-bold">
               {{ pool.displayName }}
             </span>
           </td>
-          <td class="text-right"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
-          <td class="text-right"><TotalLiquidityPrice :pool="pool" /></td>
+          <td class="text-right group-hover:bg-fg transition"><TotalLiquidityPrice :pool="pool" /></td>
           <!--<td class="text-right">10%</td>//-->
-          <td class="pools-table__row__controls text-right">
-            <button class="pools-table__row__controls__button" @click="rowClickHandler(pool)">
-              <Icon name="ChevronRightIcon" class="pools-table__row__controls__button__icon" />
-            </button>
-          </td>
+          <td class="text-right group-hover:bg-fg transition"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
         </tr>
       </tbody>
     </table>
@@ -124,120 +124,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.pools {
-  display: flex;
-  flex-direction: column;
-  font-size: 1rem;
-
-  &__search {
-    width: 22.5rem;
-  }
-}
-
 .pools-table {
-  margin: 2.5rem -1.25rem 0 -1.25rem;
-  width: calc(100% + 2.5rem);
-  table-layout: fixed;
-
-  .text-right {
-    text-align: right;
-  }
-
-  .text-left {
-    text-align: left;
-  }
-
-  th {
-    color: var(--muted);
-    background: var(--bg);
-    vertical-align: middle;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    padding: 0.9375rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  width: calc(100% + 3rem);
 
   td,
   th {
-    transition: all 100ms ease-in;
-
     &:first-child {
-      padding-left: 1.25rem;
+      padding-left: 1.5rem;
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
     }
 
     &:last-child {
-      padding-right: 1.25rem;
-    }
-  }
-
-  &__row {
-    cursor: pointer;
-
-    &:hover {
-      td {
-        background: rgba(0, 0, 0, 0.03);
-      }
-
-      td:first-child {
-        border-top-left-radius: 0.5rem;
-        border-bottom-left-radius: 0.5rem;
-      }
-
-      td:last-child {
-        border-top-right-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-      }
-    }
-
-    &__pair {
-      padding: 1.25rem 0;
-      display: flex;
-      align-items: center;
-
-      &__pool {
-        display: inline-flex;
-        align-items: center;
-        margin-right: 1rem;
-
-        &__avatar {
-          width: 2rem;
-          height: 2rem;
-          border-radius: 1.5rem;
-          background: #ddd;
-          z-index: 0;
-
-          &.token-a {
-            z-index: 1;
-          }
-
-          & + & {
-            margin-left: -0.375rem;
-            background: #aaa;
-          }
-        }
-      }
-
-      &__name {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: left;
-      }
-    }
-
-    &__controls {
-      &__button {
-        padding: 0.125rem;
-        color: var(--inactive);
-        margin-left: 0.625rem;
-
-        &__icon {
-          width: 1rem;
-          height: 1rem;
-        }
-      }
+      padding-right: 1.5rem;
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
     }
   }
 }

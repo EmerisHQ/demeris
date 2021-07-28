@@ -7,7 +7,7 @@
           <CircleSymbol :denom="data.from.denom" :chain-name="payCoinChainName" class="coin-info__image" :size="'xs'" />
           <AmountDisplay class="font-bold" :amount="data.from" />
         </div>
-        <sub class="chain-name"><ChainName :name="payCoinChainName" /></sub>
+        <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="payCoinChainName" /></sub>
       </ListItem>
       <ListItem
         :label="$t('components.previews.swap.receiveLbl')"
@@ -17,7 +17,7 @@
           <CircleSymbol :denom="data.to.denom" :chain-name="dexChainName" class="coin-info__image" :size="'xs'" />
           <AmountDisplay class="font-bold" :amount="data.to" />
         </div>
-        <sub class="chain-name"><ChainName :name="dexChainName" /></sub>
+        <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="dexChainName" /></sub>
       </ListItem>
     </ListItem>
 
@@ -271,9 +271,5 @@ export default defineComponent({
   &__image {
     margin-right: 0.5rem;
   }
-}
-
-.chain-name {
-  color: var(--muted);
 }
 </style>

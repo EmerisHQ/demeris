@@ -18,31 +18,31 @@
     <div class="fees-detail__selector -text-1">
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.LOW ? 'selected' : ''"
+        :class="gasPriceLevel === GasPriceLevel.LOW ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
         @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal">
           {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'selected' : ''"
+        :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
         @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal">
           {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
         class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.HIGH ? 'selected' : ''"
+        :class="gasPriceLevel === GasPriceLevel.HIGH ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
         @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal">
           {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>

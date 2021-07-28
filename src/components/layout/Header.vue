@@ -1,28 +1,25 @@
 <template>
-  <header class="header">
-    <router-link to="/" class="header__logo">
+  <header
+    class="relative flex items-center justify-between xl:justify-center px-5 md:px-8 xl:px-32 h-16 sm:h-20"
+    role="navigation"
+  >
+    <router-link to="/" class="xl:absolute xl:left-0 xl:top-0 xl:h-full xl:px-8 hidden sm:flex items-center">
       <NavbarLogo />
     </router-link>
 
     <Navbar />
-
-    <div class="space"></div>
-    <div class="header__wallet">
-      <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }">
+    <div class="xl:absolute xl:right-0 xl:top-0 xl:h-full xl:px-8 flex items-center">
+      <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }" class="hidden sm:inline">
         <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" :show-badge="showBadge" />
       </router-link>
 
-      <router-link class="header__wallet-button" to="/receive">
-        <div class="header__wallet-button__icon">
-          <ReceiveIcon />
-        </div>
+      <router-link class="text-0 font-medium leading-12 px-4 hidden sm:flex items-center justify-center" to="/receive">
+        <ReceiveIcon class="mr-3" />
         {{ $t('navbar.receive') }}
       </router-link>
 
-      <router-link class="header__wallet-button" to="/send">
-        <div class="header__wallet-button__icon">
-          <SendIcon />
-        </div>
+      <router-link class="text-0 font-medium leading-12 px-4 hidden sm:flex items-center justify-center" to="/send">
+        <SendIcon class="mr-3" />
         {{ $t('navbar.send') }}
       </router-link>
 
@@ -68,52 +65,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
-.space {
-  flex: 1;
-}
-
-.header {
-  padding: 0 2rem;
-  display: flex;
-  height: 5rem;
-  align-items: center;
-  justify-content: space-between;
-
-  &__wallet {
-    display: flex;
-    align-items: center;
-
-    &-button {
-      font-size: 1rem;
-      font-weight: 600;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0 1rem;
-      line-height: 3rem;
-
-      &__icon {
-        margin-right: 0.625rem;
-      }
-    }
-
-    &__account {
-      &-name {
-        margin-bottom: 4px;
-
-        font-size: 15px;
-        font-weight: 500;
-      }
-
-      &-value {
-        font-size: 12px;
-      }
-    }
-  }
-
-  &__settings-menu {
-    margin: 0 1rem 0 0.625rem;
-  }
-}
-</style>
+<style scoped lang="scss"></style>

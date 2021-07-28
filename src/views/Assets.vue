@@ -1,20 +1,10 @@
 <template>
   <AppLayout>
-    <section class="assets flex flex-col">
-      <div class="assets__header">
-        <h1 class="assets__title text-4 font-bold mb-8">Assets</h1>
-      </div>
+    <header class="pb-3 sm:pb-6 md:pb-6">
+      <h1 class="text-2 sm:text-3 md:text-4 font-bold">Assets</h1>
+    </header>
 
-      <div class="assets__group">
-        <AssetsTable
-          :balances="[]"
-          :show-all-assets="true"
-          :hide-lp-assets="true"
-          class="assets__table"
-          @row-click="openAssetPage"
-        />
-      </div>
-    </section>
+    <AssetsTable :balances="[]" :show-all-assets="true" :hide-lp-assets="true" @row-click="openAssetPage" />
   </AppLayout>
 </template>
 

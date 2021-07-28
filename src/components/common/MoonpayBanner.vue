@@ -1,7 +1,10 @@
 <template>
   <button
-    class="moonpay-banner theme-inverse dark:theme-inverse bg-app text-left shadow-card rounded-2xl"
-    :class="`moonpay-banner--${size}`"
+    class="moonpay-banner bg-app text-left shadow-card rounded-2xl"
+    :class="[
+      `moonpay-banner--${size}`,
+      size === 'small' ? 'theme-inverse dark:theme-inverse' : 'bg-surface dark:bg-fg',
+    ]"
     @click="goMoon"
   >
     <p class="moonpay-banner__title text-text text-1 font-bold">{{ title }}</p>

@@ -84,7 +84,7 @@ const inputProps = computed(() => {
 </script>
 
 <template>
-  <div class="flexible-input" :style="containerStyle" :class="{ 'flexible-input--empty': !model }">
+  <label class="flexible-input" :style="containerStyle" :class="{ 'flexible-input--empty': !model }">
     <div class="flexible-input__container">
       <span ref="prefixElementRef" class="flexible-input__prefix">{{ prefix }}</span>
       <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
@@ -105,7 +105,7 @@ const inputProps = computed(() => {
         {{ model }}
       </span>
     </div>
-  </div>
+  </label>
 </template>
 
 <style lang="scss">

@@ -9,7 +9,7 @@ type SymbolConfig = {
 const Cosmos: SymbolConfig = {
   colors: {
     primary: '#A4FAFF',
-    secondary: '#9EB0F7',
+    secondary: '#375DF1',
     tertiary: '#E88CFE',
   },
 };
