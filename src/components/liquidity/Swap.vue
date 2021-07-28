@@ -682,19 +682,28 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData, data.receiveCoinData];
+        return [data.payCoinData.denom, data.receiveCoinData];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
-          let payDenom = data.payCoinData.denom;
+          let payDenom = data.payCoinData.base_denom;
           const receiveDenom = data.receiveCoinData.denom;
-          //if payCoin denom is not uatom & ibc token
+
           if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+            /*  if payCoin denom is not uatom & ibc token
+                ex) denom: uakt base_denom: uakt and cosmos hub pool reserve denom: ibc/123ABC
+                find ibc/123ABC by base_denom  */
             const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
             }).pay.denom;
-
             payDenom = nativeDenomToIBCDenom;
+          } else if (data.payCoinData.denom.startsWith('ibc')) {
+            const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
+              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+            })?.pay?.denom;
+            if (isPoolReserveIBCCoin === undefined) {
+              payDenom = data.payCoinData.base_denom;
+            }
           }
 
           try {
@@ -719,6 +728,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+            console.log('POOL', data.selectedPoolData);
           } catch (e) {
             poolId.value = null;
             data.selectedPoolData = null;
@@ -845,6 +855,7 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
+        console.log('selectedPool setCounterPair', data.selectedPoolData);
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
