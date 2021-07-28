@@ -728,7 +728,6 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            console.log('POOL', data.selectedPoolData);
           } catch (e) {
             poolId.value = null;
             data.selectedPoolData = null;
@@ -855,7 +854,6 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
-        console.log('selectedPool setCounterPair', data.selectedPoolData);
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
