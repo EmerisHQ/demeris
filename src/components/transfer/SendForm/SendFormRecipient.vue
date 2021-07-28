@@ -3,7 +3,7 @@
     <label class="block mb-2 -text-1 text-muted">{{ $t('components.sendForm.to') }}</label>
     <Address
       v-model:address.trim="form.recipient"
-      invalid="!!form.recipient && !isValidAddress"
+      :invalid="!!form.recipient && !isValidAddress"
       :placeholder="$t('components.sendForm.toPlaceholder')"
     />
   </fieldset>

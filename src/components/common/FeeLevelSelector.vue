@@ -1,14 +1,21 @@
 <template>
-  <div v-if="steps" class="fees -text-1" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
+  <div
+    v-if="steps"
+    class="fees -text-1 flex justify-between px-6 text-muted hover:text-text cursor-pointer pb-6 group"
+    :class="isFeesOpen ? 'fees-detail-open' : ''"
+    @click="toggle"
+  >
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
     <div class="fees-total">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
-      <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1" :color="feeIconColor" />
-      <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1" :color="feeIconColor" />
+      <span class="text-inactive group-hover:text-current">
+        <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="0.75" />
+        <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="0.75" />
+      </span>
     </div>
   </div>
-  <div v-if="isFeesOpen" class="fees-detail">
-    <div class="fees-detail__info -text-1">
+  <div v-if="isFeesOpen" class="fees-detail px-6 pb-6">
+    <div class="fees-detail__info flex items-center justify-between -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(fees[gasPriceLevel]) }}
@@ -54,11 +61,11 @@
       :message="$t('components.feeLevelSelector.slowWarning')"
     />
 
-    <div v-if="swapDollarFee" class="fees-detail__info -text-1">
+    <div v-if="swapDollarFee" class="fees-detail__info flex items-center justify-between -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
       <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
     </div>
-    <div class="fees-detail__info -text-1">
+    <div class="fees-detail__info flex items-center justify-between -text-1">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
@@ -212,7 +219,6 @@ export default defineComponent({
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       }),
-      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     watch([fees, props], () => {
@@ -230,26 +236,13 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .fees {
-  display: flex;
-  padding: 0 1.5rem 0;
-  cursor: pointer;
-  justify-content: space-between;
-  color: var(--muted);
-
   &-total {
     display: flex;
     align-items: center;
   }
 
   &-detail {
-    padding: 0 1.5rem;
-    color: var(--text);
-
     &__info {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
       margin: 1rem 0;
 
       &:last-child {

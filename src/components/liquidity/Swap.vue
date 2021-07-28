@@ -914,8 +914,6 @@ export default defineComponent({
 }
 
 .swap-widget {
-  padding-bottom: 1.5rem;
-
   &-header {
     display: flex;
     justify-content: space-between;
