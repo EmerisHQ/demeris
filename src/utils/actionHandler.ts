@@ -704,9 +704,15 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         break;
       case 'swap':
         params = (action as Actions.SwapAction).params;
+
+        const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+        const swapFee = {
+          amount: Math.ceil((parseInt(params.from.amount.amount) * parseFloat(swapFeeRate)) / 2) + '',
+          denom: params.from.amount.denom,
+        };
         const transferToHubStep = await move({
           amount: {
-            amount: params.from.amount.amount,
+            amount: '' + (parseInt(params.from.amount.amount) + parseInt(swapFee.amount)),
             denom: params.from.amount.denom,
           },
           chain_name: params.from.chain_name,
@@ -721,7 +727,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         }
         const swapStep = await swap({
           from: {
-            amount: transferToHubStep.output.amount.amount,
+            amount: params.from.amount.amount,
             denom: transferToHubStep.output.amount.denom,
           },
           to: {
