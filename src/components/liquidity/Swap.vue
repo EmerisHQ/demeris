@@ -617,17 +617,19 @@ export default defineComponent({
     watch(
       () => data.payCoinData,
       async () => {
-        const fees = await getFeeForChain(data.payCoinData.on_chain);
-        if (
-          data.payCoinData.denom === 'uatom' ||
-          (!data.payCoinData.denom.startsWith('ibc') &&
-            data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
-        ) {
-          txFee.value =
-            fees[0].amount[gasPrice.value] *
-            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-        } else {
-          return 0;
+        if (data.payCoinData) {
+          const fees = await getFeeForChain(data.payCoinData.on_chain);
+          if (
+            data.payCoinData.denom === 'uatom' ||
+            (!data.payCoinData.denom.startsWith('ibc') &&
+              data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
+          ) {
+            txFee.value =
+              fees[0].amount[gasPrice.value] *
+              10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          } else {
+            return 0;
+          }
         }
       },
     );
