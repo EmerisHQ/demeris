@@ -18,7 +18,7 @@
       <TxStepsModal
         v-if="steps.length > 0"
         :data="steps"
-        :gas-price-level="gasPrice"
+        :gas-price-level="state.gasPrice"
         :back-route="{ name: 'Portfolio' }"
         action-name="move"
         @transacting="goToStep('move')"
