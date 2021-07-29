@@ -61,8 +61,6 @@
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
             </template>
           </div>
-
-          <!-- TEST -->
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
@@ -81,7 +79,6 @@
               </div>
             </template>
           </div>
-          <!-- TEST -->
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
@@ -322,7 +319,17 @@ export default defineComponent({
             blackButton.value = 'Try again';
             break;
           case 'transacting':
-            subTitle.value = 'Transaction in progress';
+            if ((props.tx as StepTransaction).name.startsWith('ibc')) {
+              subTitle.value = 'This can take up to 30 seconds';
+              setTimeout(() => {
+                if (props.status === 'transacting') {
+                  subTitle.value =
+                    'Transfer is taking longer than expected. If no further progress is made, please wait up to 4 minutes for transfer to be reverted';
+                }
+              }, 60000);
+            } else {
+              subTitle.value = 'Transaction in progress';
+            }
             whiteButton.value = '';
             blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
