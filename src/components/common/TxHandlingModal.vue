@@ -22,7 +22,8 @@
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
+            Something went wrong, reverting transfer...
+            <!-- <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" /> -->
           </template>
           <template v-if="tx.name == 'transfer'">
             <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
