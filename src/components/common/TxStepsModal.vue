@@ -443,6 +443,9 @@ export default defineComponent({
                 });
               } catch (e) {
                 console.error(e);
+                errorDetails.value = {
+                  message: e.message,
+                };
                 txstatus.value = 'keplr-reject';
                 await txToResolve.value['promise'];
                 continue;
