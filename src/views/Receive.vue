@@ -41,9 +41,8 @@
 </template>
 
 <script lang="ts">
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
-import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -53,9 +52,8 @@ import Address from '@/components/ui/Address.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
-import { Balance, Balances } from '@/types/api';
+import { Balance } from '@/types/api';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
-import { parseCoins }  from '@/utils/basic';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -68,87 +66,7 @@ export default {
   components: { Address, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
-    const { balances } = useAccount();
-
-    const store = useStore();
-
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'];
-    });
-
-    const allBalances = computed<Balances>(() => {
-      return [
-        ...(balances.value as Balances),
-        ...verifiedDenoms.value.map((denom) => ({
-          base_denom: denom.name,
-          on_chain: denom.chain_name,
-          amount: 0,
-        })),
-      ];
-    });
-
-    for (const testbalance of allBalances.value) {
-      console.log("allBalance ", testbalance);
-    }
-
-    
-
-    const nativeBalances = computed(() => {
-      const result = [];
-      const ibcBalances = [];
-
-      console.log("length", result.length);
-
-      
-        // we can prob improve complexity of this with maps 
-      for (const balance of allBalances.value) {
-        if (!result.some((item) => item.base_denom === balance.base_denom)) {
-          // Check if denom is native to its chain
-
-          if (!balance.ibc) {
-            result.push(balance);
-            continue;
-          }
-
-          if (Object.keys(balance.ibc).length == 0) {
-            result.push(balance);
-          }
-
-          if (Object.keys(balance.ibc).length > 0) {
-            ibcBalances.push(balance);
-          }
-          
-        } else {
-          if (balance.ibc) {
-            if (Object.keys(balance.ibc).length > 0) {
-              const index = ibcBalances.findIndex((item) => item.base_denom === balance.base_denom);
-              if (index != -1) {
-
-                ibcBalances[index].amount = (+parseCoins(ibcBalances[index].amount)[0].amount + +parseCoins(balance.amount)[0].amount) + parseCoins(ibcBalances[index].amount)[0].denom;
-              } else {
-                ibcBalances.push(balance);
-              }
-            }
-          } 
-        } 
-      }
-
-      console.log("ibcbalances length", ibcBalances.length);
-
-      for (const ibcBalance of ibcBalances) {
-        console.log("ibcBalanc", ibcBalance);
-        const index = result.findIndex((item) => item.base_denom === ibcBalance.base_denom);
-        if (index != -1) {
-          console.log("index", index);
-          
-          //result[index].amount = (+parseCoins(result[index].amount)[0].amount + +parseCoins(ibcBalance.amount)[0].amount) + parseCoins(result[index].amount)[0].denom;
-          console.log("infamount1", ibcBalances[index].amount);
-        }
-      }
-      
-
-      return result;
-    });
+    const { nativeBalances } = useAccount();
 
     const state = reactive({
       selectedAsset: undefined,
@@ -195,7 +113,7 @@ export default {
       }
     });
 
-    console.log ("native balances ")
+    console.log('native balances ');
 
     return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
@@ -215,6 +133,7 @@ export default {
   }
 
   .denom-select-modal-wrapper {
+    height: 100% !important;
     // Close icon
     .title-with-goback > .icon:first-child {
       visibility: hidden;
