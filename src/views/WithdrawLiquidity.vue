@@ -131,7 +131,12 @@
             />
 
             <div class="withdraw-liquidity__controls__fees">
-              <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+              <FeeLevelSelector
+                v-if="actionSteps.length > 0"
+                v-model:gasPriceLevel="state.gasPrice"
+                :steps="actionSteps"
+                @update:fees="state.fees = $event"
+              />
             </div>
           </div>
         </div>
@@ -141,7 +146,7 @@
         <div class="withdraw-liquidity__content">
           <TxStepsModal
             :data="actionSteps"
-            :gas-price-level="gasPrice"
+            :gas-price-level="state.gasPrice"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
             @reset="resetHandler"
@@ -154,6 +159,7 @@
 
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
+import BigNumber from 'bignumber.js';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -193,9 +199,6 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
-    });
 
     const poolId = computed(() => route.params.id);
 
@@ -210,6 +213,22 @@ export default {
       isChainsModalOpen: false,
       isMaximumAmountChecked: false,
       selectedAsset: undefined,
+      fees: {},
+      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
+    });
+
+    const feesAmount = computed(() => {
+      const result = {};
+
+      if (state.fees) {
+        for (const [, obj] of Object.entries(state.fees)) {
+          for (const [denom, value] of Object.entries(obj)) {
+            result[denom] = value;
+          }
+        }
+      }
+
+      return result;
     });
 
     const { pool, pairName, calculateWithdrawBalances, reserveBaseDenoms } = usePool(
@@ -238,9 +257,11 @@ export default {
         return false;
       }
 
-      const cryptoAmount = state.amount * 1e6;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
+      const amount = new BigNumber(state.amount || 0).shiftedBy(precision);
+      const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
-      return +parseCoins(state.selectedAsset.amount)[0].amount >= cryptoAmount;
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.selectedAsset.amount)[0].amount);
     });
 
     const isValid = computed(() => {
@@ -360,11 +381,14 @@ export default {
     );
 
     watch(
-      () => [state.isMaximumAmountChecked, state.selectedAsset],
+      () => [state.isMaximumAmountChecked, state.selectedAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked && state.selectedAsset) {
           const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
-          state.amount = +parseCoins(state.selectedAsset.amount)[0].amount / Math.pow(10, precision);
+          const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount);
+          const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
+
+          state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toNumber();
         }
       },
     );
@@ -377,7 +401,6 @@ export default {
       steps,
       balances,
       receiveAmounts,
-      gasPrice,
       actionSteps,
       totalEstimatedPrice,
       needsTransferToHub,
