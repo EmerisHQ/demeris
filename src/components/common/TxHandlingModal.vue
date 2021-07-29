@@ -179,7 +179,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -292,6 +292,7 @@ export default defineComponent({
     const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
     const baseDenoms = reactive({});
+    const alertTime = ref(null);
 
     const isIBC = computed(() => {
       return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
@@ -321,7 +322,7 @@ export default defineComponent({
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
               subTitle.value = 'This can take up to 30 seconds';
-              setTimeout(() => {
+              alertTime.value = setTimeout(() => {
                 if (props.status === 'transacting') {
                   subTitle.value =
                     'Transfer is taking longer than expected. If no further progress is made, please wait up to 4 minutes for transfer to be reverted';
@@ -463,6 +464,10 @@ export default defineComponent({
           baseDenoms[denom] = await getBaseDenom(denom, chain);
         }
       }
+    });
+
+    onUnmounted(() => {
+      clearTimeout(alertTime.value);
     });
 
     function emitClose() {
