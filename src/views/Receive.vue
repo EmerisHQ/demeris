@@ -55,6 +55,7 @@ import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
 import { Balance, Balances } from '@/types/api';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
+import { parseCoins }  from '@/utils/basic';
 
 const defaultColors = {
   primary: '#E1E1E1',
@@ -94,6 +95,12 @@ export default {
 
     const nativeBalances = computed(() => {
       const result = [];
+      const ibcBalances = [];
+
+      console.log("length", result.length);
+
+      
+        // we can prob improve complexity of this with maps 
       for (const balance of allBalances.value) {
         if (!result.some((item) => item.base_denom === balance.base_denom)) {
           // Check if denom is native to its chain
@@ -106,9 +113,40 @@ export default {
           if (Object.keys(balance.ibc).length == 0) {
             result.push(balance);
           }
+
+          if (Object.keys(balance.ibc).length > 0) {
+            ibcBalances.push(balance);
+          }
           
+        } else {
+          if (balance.ibc) {
+            if (Object.keys(balance.ibc).length > 0) {
+              const index = ibcBalances.findIndex((item) => item.base_denom === balance.base_denom);
+              if (index != -1) {
+
+                ibcBalances[index].amount = (+parseCoins(ibcBalances[index].amount)[0].amount + +parseCoins(balance.amount)[0].amount) + parseCoins(ibcBalances[index].amount)[0].denom;
+              } else {
+                ibcBalances.push(balance);
+              }
+            }
+          } 
         } 
       }
+
+      console.log("ibcbalances length", ibcBalances.length);
+
+      for (const ibcBalance of ibcBalances) {
+        console.log("ibcBalanc", ibcBalance);
+        const index = result.findIndex((item) => item.base_denom === ibcBalance.base_denom);
+        if (index != -1) {
+          console.log("index", index);
+          
+          //result[index].amount = (+parseCoins(result[index].amount)[0].amount + +parseCoins(ibcBalance.amount)[0].amount) + parseCoins(result[index].amount)[0].denom;
+          console.log("infamount1", ibcBalances[index].amount);
+        }
+      }
+      
+
       return result;
     });
 
