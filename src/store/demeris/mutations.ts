@@ -46,6 +46,7 @@ export type Mutations<S = State> = {
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
+  [MutationTypes.SIGN_OUT](state: S): void;
   [MutationTypes.RESET_STATE](state: S): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -194,6 +195,27 @@ export const mutations: MutationTree<State> & Mutations = {
     state.endpoint = payload.endpoint;
     state.hub_chain = payload.hub_chain;
     state.gas_limit = payload.gas_limit;
+  },
+  [MutationTypes.SIGN_OUT](state: State) {
+    for (const sub of state._Subscriptions.values()) {
+      const subObj = JSON.parse(sub);
+      if (
+        subObj.action == DemerisActionTypes.GET_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_NUMBERS ||
+        subObj.action == DemerisActionTypes.SET_SESSION_DATA
+      ) {
+        state._Subscriptions.delete(sub);
+      }
+    }
+    state.balances = {};
+    state.stakingBalances = {};
+    state.numbers = {};
+    state.keplr = null;
+    state.transactions = new Map();
+    state._InProgess = new Map();
+    state._Session = {};
+    window.localStorage.setItem('lastEmerisSession', '');
   },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
