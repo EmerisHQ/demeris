@@ -49,7 +49,7 @@
       <Modal
         v-if="feeWarning.feeWarning"
         class="fee-warning-modal"
-        :modal-variant="varaint == 'widget' ? 'bottom' : 'full'"
+        :modal-variant="variant == 'widget' ? 'bottom' : 'full'"
         @close="
           () => {
             feeWarning.feeWarning = false;
