@@ -1,5 +1,6 @@
 import Long from 'long';
 
+import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import * as API from '@/types/api';
@@ -488,7 +489,10 @@ export async function move({
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+              params: {
+                chain_name: destination_chain_name,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              },
             },
             { root: true },
           ));
@@ -1623,13 +1627,26 @@ export async function validateStepFeeBalances(
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
-      feeWarning.feeWarning = false;
-      feeWarning.ibcWarning = true;
-      feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
-      feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
-      feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
-        chain_name: data.to_chain,
-      }).denoms.find((x) => x.fee_token == true).display_name;
+      const chain = store.getters['demeris/getChain']({ chain_name: data.to_chain });
+      const chainFeeDenom = (chain as ChainData).denoms.find((x) => x.fee_token)?.name;
+
+      const ibcFeeBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == chainFeeDenom && x.on_chain == data.to_chain) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (!ibcFeeBalance || parseInt(parseCoins(ibcFeeBalance.amount)[0].amount) == 0) {
+        feeWarning.feeWarning = false;
+        feeWarning.ibcWarning = true;
+        feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+        feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
+        feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
+          chain_name: data.to_chain,
+        }).denoms.find((x) => x.fee_token == true).display_name;
+      }
     }
     if (stepTx.name == 'swap') {
       const data = stepTx.data as Actions.SwapData;
