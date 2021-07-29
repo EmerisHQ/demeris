@@ -329,6 +329,11 @@ export default {
         return;
       }
 
+      if (!+state.receiveAmounts.coinA.amount && !+state.receiveAmounts.coinB.amount) {
+        state.amount = '';
+        return;
+      }
+
       const result = calculateSupplyTokenAmount(+state.receiveAmounts.coinA.amount, +state.receiveAmounts.coinB.amount);
       state.amount = (+result.toFixed(6)).toString();
     };
@@ -368,9 +373,9 @@ export default {
       const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
       const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
-      const share = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = calculateWithdrawBalances(share.toNumber());
+      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();

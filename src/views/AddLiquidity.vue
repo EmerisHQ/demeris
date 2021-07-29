@@ -373,7 +373,7 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances } = usePool(
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
     );
 
@@ -695,19 +695,21 @@ export default {
         return;
       }
 
+      const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+      const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      form.coinA.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceA)
-        .decimalPlaces(6)
-        .toString();
-      form.coinB.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceB)
-        .decimalPlaces(6)
-        .toString();
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+
+      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+
+      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
       updateReceiveAmount();
     };
 
