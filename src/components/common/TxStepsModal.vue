@@ -394,7 +394,10 @@ export default defineComponent({
       } else {
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
-            if (currentStep.value == (props.data as Step[]).length - 1) {
+            const isLastTransaction = i === currentData.value.data.transactions.length - 1;
+            const isLastStep = currentStep.value === props.data.length - 1;
+
+            if (isLastTransaction && isLastStep) {
               isFinal.value = true;
             } else {
               isFinal.value = false;
