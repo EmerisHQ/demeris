@@ -3,10 +3,15 @@
     <TitleWithGoback :title="title" :func="func" />
 
     <div class="chain-info s-minus w-normal">
-      You have {{ $filters.getCoinName(selectedDenom) }} on {{ chainsNumber }}
-      {{ chainsNumber > 1 ? 'chains' : 'chain' }}.
+      {{
+        $t('components.chainSelect.text1', {
+          asset: selectedDenomDisplay,
+          chainNo: chainsNumber,
+          chains: chainsNumber > 1 ? 'chains' : 'chain',
+        })
+      }}
       <br />
-      Select the chain you wish to swap from.
+      {{ $t('components.chainSelect.text2') }}
     </div>
 
     <div class="coin-list">
@@ -16,11 +21,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -36,10 +43,21 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props, { emit }) {
+    const selectedDenomDisplay = ref(props.selectedDenom);
     const chainsNumber = ref(0);
+    const store = useStore();
+    onMounted(async () => {
+      selectedDenomDisplay.value = await getDisplayName(props.selectedDenom, store.getters['demeris/getDexChain']);
+    });
+    watch(
+      () => props.selectedDenom,
+      async (newName) => {
+        selectedDenomDisplay.value = await getDisplayName(newName, store.getters['demeris/getDexChain']);
+      },
+    );
     function filterAsset(assets, keyword) {
       const filteredList = assets.filter((asset) => {
-        return asset.base_denom.substr(1).indexOf(keyword.substr(1).toLowerCase()) !== -1;
+        return asset.base_denom == keyword;
       });
 
       chainsNumber.value = filteredList.length;
@@ -52,8 +70,7 @@ export default defineComponent({
       emit('select', payload);
     }
 
-    console.log('assets', props);
-    return { coinListselectHandler, filterAsset, chainsNumber };
+    return { coinListselectHandler, filterAsset, chainsNumber, selectedDenomDisplay };
   },
 });
 </script>

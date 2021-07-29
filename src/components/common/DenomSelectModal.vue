@@ -9,46 +9,35 @@
       @select="chainSelectHandler"
     />
     <div v-else class="denom-select-modal-wrapper elevation-panel">
-      <!--Displays a denom selection component:
-				input field (search box)
-				denom badge
-				denom name
-				denom chain name
-				denom balance  (uses ./Amount.vue)
-				denom balance in preferred currency equivalent (uses ./Amount.vue)
-			  Props:
-					denoms: [] of denoms
-					disabled: [] of denoms to display as disabled (fro parent DenomSelect.vue)
-				Dependencies:
-					vuex getter to get  chain name from chain id
-					vuex getter to get  base_denom -> currency pricing
-					vuex getter to get balance for denom (idf any-->
       <TitleWithGoback :title="title" :func="func" />
 
       <div class="search-bar">
         <Search v-model:keyword="keyword" />
       </div>
-
       <div class="coin-list">
         <CoinList
-          :data="filterKeyword(assets, keyword)"
+          :data="keywordFilteredAssets"
           :type="title === 'Receive' ? 'receive' : 'pay'"
+          :show-balance="showBalance"
           :keyword="keyword"
           @select="coinListselectHandler"
-        />
+        >
+        </CoinList>
       </div>
       <WhiteOverlay />
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
+import { store } from '@/store';
+import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -62,6 +51,7 @@ export default defineComponent({
     assets: { type: Object, required: true },
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
+    showBalance: { type: Boolean, default: false },
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -69,13 +59,49 @@ export default defineComponent({
     const keyword = ref('');
     const selectedDenom = ref(null);
 
+    const displayNameAddedList = ref([]);
+    watch(
+      () => props.assets,
+      async () => {
+        if (props.assets.length) {
+          displayNameAddedList.value = [
+            await Promise.all(
+              props.assets.map(async (asset) => {
+                return {
+                  ...asset,
+                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                };
+              }),
+            ),
+          ];
+        } else {
+          return [];
+        }
+      },
+      { immediate: true },
+    );
+
+    const keywordFilteredAssets = computed(() => {
+      const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+      });
+
+      return filteredAssets;
+    });
+
     function coinListselectHandler(payload) {
       if (props.title === 'Receive') {
         payload.type = props.title;
         emit('select', payload);
       } else {
         selectedDenom.value = payload.base_denom;
-        toggleChainSelectModal();
+
+        if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+          toggleChainSelectModal();
+          return;
+        }
+
+        emit('select', payload);
       }
     }
 
@@ -89,22 +115,14 @@ export default defineComponent({
       keyword.value = '';
     }
 
-    function filterKeyword(assets, keyword) {
-      const filteredAssets = assets.filter((asset) => {
-        return asset.base_denom.substr(1).indexOf(keyword.toLowerCase()) !== -1;
-      });
-
-      return filteredAssets;
-    }
-
-    console.log('assets', props);
     return {
       isModalOpen,
       toggleChainSelectModal,
       coinListselectHandler,
       chainSelectHandler,
       keyword,
-      filterKeyword,
+      keywordFilteredAssets,
+      displayNameAddedList,
       selectedDenom,
     };
   },
@@ -115,7 +133,7 @@ export default defineComponent({
 .denom-select-modal-wrapper {
   position: absolute;
   width: 100%;
-  height: 55.8rem;
+  height: 55.8rem !important;
   top: 0;
   left: 0;
 

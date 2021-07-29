@@ -1,53 +1,56 @@
 <template>
   <div class="send-form">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title s-2">Send to an address</h2>
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
-    <template v-if="step === 'amount'">
-      <h2 class="send-form__title s-2">Enter an amount</h2>
+    <template v-else-if="step === 'amount'">
+      <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
       <SendFormAmount :balances="balances" @next="goToStep('review')" />
+      <div class="send-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
-    <template v-if="step === 'review'">
-      <h2 class="send-form__title s-2">Review your transfer details</h2>
-
-      <dl>
-        <dt class="w-bold">Recipient</dt>
-        <dd>{{ form.recipient }}</dd>
-
-        <dt class="w-bold mt-10">Memo</dt>
-        <dd>{{ form.memo || '-' }}</dd>
-
-        <dt class="w-bold mt-10">Amount</dt>
-        <dd>{{ form.balance.amount }}{{ form.balance.denom }}</dd>
-      </dl>
-
-      <Button class="mt-10" name="Confirm and continue" @click="goToStep('send')" />
+    <template v-else>
+      <TxStepsModal
+        :data="steps"
+        :gas-price-level="gasPrice"
+        :back-route="{ name: 'Portfolio' }"
+        action-name="transfer"
+        @transacting="goToStep('send')"
+        @failed="goToStep('review')"
+        @reset="resetHandler"
+        @finish="resetHandler"
+      />
     </template>
-
-    <template v-if="step === 'send'"> TODO </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
-import { SendAddressForm } from '@/types/actions';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { useStore } from '@/store';
+import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { actionHandler } from '@/utils/actionHandler';
+import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
 import SendFormRecipient from './SendFormRecipient.vue';
 
-type Step = 'recipient' | 'amount' | 'review';
+type Step = 'recipient' | 'amount' | 'review' | 'send';
 
 export default defineComponent({
   name: 'SendForm',
 
   components: {
-    Button,
+    FeeLevelSelector,
+    TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
   },
@@ -66,14 +69,21 @@ export default defineComponent({
   emits: ['update:step'],
 
   setup(props, { emit }) {
+    const steps = ref([]);
+    const store = useStore();
     const form: SendAddressForm = reactive({
       recipient: '',
+      chain_name: '',
       memo: '',
       balance: {
         denom: '',
-        amount: undefined,
+        amount: '',
       },
       isTermChecked: false,
+    });
+
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const step = computed({
@@ -81,6 +91,49 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    watch(
+      () => [form.balance.amount, form.balance.denom, form.chain_name],
+      async () => {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
+          const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
+
+          const action: TransferAction = {
+            name: 'transfer',
+            params: {
+              from: {
+                amount: {
+                  amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+                  denom: form.balance.denom,
+                },
+                chain_name: form.chain_name,
+              },
+              to: {
+                chain_name: getChainFromRecipient(form.recipient),
+                address: form.recipient,
+              },
+            },
+          };
+          steps.value = await actionHandler(action);
+        }
+      },
+    );
+    const generateSteps = async () => {
+      goToStep('review');
+    };
+
+    const resetHandler = () => {
+      form.recipient = '';
+      form.chain_name = '';
+      form.memo = '';
+      form.balance = {
+        denom: '',
+        amount: undefined,
+      };
+      form.isTermChecked = false;
+      steps.value = [];
+
+      goToStep('recipient');
+    };
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -91,7 +144,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { form, goToStep };
+    return { steps, form, goToStep, generateSteps, resetHandler, gasPrice };
   },
 });
 </script>
@@ -101,6 +154,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 

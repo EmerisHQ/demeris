@@ -1,12 +1,17 @@
 <template>
-  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
+  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
     <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
-      :class="[status, isOutline ? 'outline-theme' : '']"
-      class="button s-0 w-medium elevation-button"
-      @click="clickFunction"
+      :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
+      :disabled="disabled"
+      class="button s-0 w-medium"
+      @click="clickFunction?.($event), emit('click', $event)"
     >
-      {{ name }}
+      <div v-if="status === 'loading'" class="spinner">
+        <Spinner :size="1.5" :color="'black'" :variant="'circle'" />
+      </div>
+
+      <span v-else>{{ name }}</span>
     </button>
     <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
@@ -16,16 +21,22 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
+import Spinner from '@/components/ui/Spinner.vue';
 export default defineComponent({
   name: 'Button',
+  components: {
+    Spinner,
+  },
   props: {
     name: { type: String, required: true },
     status: { type: String, required: false, default: 'normal' },
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
+    disabled: { type: Boolean, default: false },
   },
-  setup(props) {
+  emits: ['click'],
+  setup(props, { emit }) {
     const buttonTooltipRef = ref(null);
     function toggleToolTip(type) {
       if (props.tooltipText) {
@@ -37,24 +48,32 @@ export default defineComponent({
       }
     }
 
-    return { buttonTooltipRef, toggleToolTip };
+    return { buttonTooltipRef, toggleToolTip, emit };
   },
 });
 </script>
 <style lang="scss" scoped>
 .button {
   width: 100%;
-  padding: 1.6rem 2.4rem;
+  padding: 1.6rem 3.2rem;
   color: var(--bg);
 
   border-radius: 8px;
   border: none;
   outline: none;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--text);
+    color: #ababab;
+    pointer-events: none;
+  }
 }
 
 .normal {
   background-color: var(--text);
+  color: var(--bg);
 }
 
 .secondary {
@@ -67,7 +86,15 @@ export default defineComponent({
 }
 
 .inactive {
-  background-color: var(--inactive);
+  background-color: var(--text);
+  color: #ababab;
+  pointer-events: none;
+}
+
+.loading {
+  background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
+  display: flex;
+  justify-content: center;
   pointer-events: none;
 }
 
@@ -78,7 +105,7 @@ export default defineComponent({
 
 .outline-theme {
   color: var(--text);
-  border: 1px solid var(--border-trans);
+  /* border: 1px solid var(--border-trans); */
   background-color: transparent;
 }
 </style>

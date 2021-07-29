@@ -1,0 +1,92 @@
+type SymbolConfig = {
+  colors: {
+    primary: string;
+    secondary: string;
+    tertiary?: string;
+  };
+};
+
+const Cosmos: SymbolConfig = {
+  colors: {
+    primary: '#A4FAFF',
+    secondary: '#9EB0F7',
+    tertiary: '#E88CFE',
+  },
+};
+
+const Akash: SymbolConfig = {
+  colors: {
+    primary: '#EC4C4C',
+    secondary: '#FB8686',
+  },
+};
+
+const CryptoCom: SymbolConfig = {
+  colors: {
+    primary: '#5044E7',
+    secondary: '#5070FF',
+  },
+};
+
+const Iris: SymbolConfig = {
+  colors: {
+    primary: '#169DE4',
+    secondary: '#7F53BF',
+    tertiary: '#E1395D',
+  },
+};
+
+const Osmosis: SymbolConfig = {
+  colors: {
+    primary: '#0002E9',
+    secondary: '#FF00C7',
+  },
+};
+
+const Persistence: SymbolConfig = {
+  colors: {
+    primary: '#1A1A1A',
+    secondary: '#626262',
+  },
+};
+
+const Sentinel: SymbolConfig = {
+  colors: {
+    primary: '#02182F',
+    secondary: '#031D38',
+  },
+};
+
+const GravityDex: SymbolConfig = {
+  colors: {
+    primary: '#E88CFE',
+    secondary: '#A4FAFF',
+  },
+};
+
+const chains: Record<string, SymbolConfig> = {
+  'cosmos-hub': Cosmos,
+  akash: Akash,
+  'crypto.com': CryptoCom,
+};
+
+const denoms: Record<string, SymbolConfig> = {
+  udvpn: Sentinel,
+  uiris: Iris,
+  uosmo: Osmosis,
+  uxprt: Persistence,
+  uakt: Akash,
+  uatom: Cosmos,
+  ucro: CryptoCom,
+};
+
+const protocols: Record<string, SymbolConfig> = {
+  gdex: GravityDex,
+  osmosis: Osmosis,
+};
+
+export default {
+  ...chains,
+  ...denoms,
+  ...protocols,
+};

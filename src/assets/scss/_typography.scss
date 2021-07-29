@@ -1,16 +1,10 @@
-@font-face {
-  font-family: 'Inter var';
-  font-weight: normal;
-  font-display: swap;
-  src: local('Inter var'), url('/fonts/Inter.var.woff2') format('woff2');
-}
+@import url('https://rsms.me/inter/inter.css');
 
-html,
 input,
 textarea,
 button {
   font-family: 'Inter', sans-serif;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @supports (font-variation-settings: normal) {
@@ -18,13 +12,13 @@ button {
   input,
   textarea,
   button {
-    font-family: 'Inter var', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-variant: slashed-zero;
   }
 }
 
 .font-basic {
-  font-family: 'Inter var';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
 }
@@ -83,9 +77,66 @@ button {
 }
 
 .w-medium {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .w-bold {
-  font-weight: bold;
+  font-weight: 600;
+}
+.title-0-normal {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 130%;
+}
+.title-0-medium {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 130%;
+}
+.title-0-bold {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 130%;
+}
+.title-1-normal {
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 128.7%;
+  letter-spacing: -0.7%;
+}
+.title-1-medium {
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 128.7%;
+  letter-spacing: -0.7%;
+}
+.title-1-bold {
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 128.7%;
+  letter-spacing: -0.7%;
+}
+.title-2-bold {
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 127%;
+  letter-spacing: -1.6%;
+}
+.title-3-bold {
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 124.7%;
+  letter-spacing: -2.7%;
+}
+.title-4-bold {
+  font-weight: 700;
+  font-size: 51px;
+  line-height: 121.6%;
+  letter-spacing: -4.3%;
+}
+.title-5-bold {
+  font-weight: 700;
+  font-size: 67px;
+  line-height: 117.5%;
+  letter-spacing: -5.5%;
 }

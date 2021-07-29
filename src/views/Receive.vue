@@ -6,8 +6,8 @@
       </button>
 
       <div v-if="state.selectedAsset" class="receive__header__title">
-        <h2 class="s-2">Receive {{ $filters.getCoinName(state.selectedAsset.base_denom) }}</h2>
-        <p class="receive__header__title__label">on {{ state.selectedAsset.on_chain }}</p>
+        <h2 class="s-2">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
+        <p class="receive__header__title__label">on <ChainName :name="state.selectedAsset.on_chain" /></p>
       </div>
 
       <router-link to="/" class="receive__header__button close-button">
@@ -18,21 +18,21 @@
     <main class="receive__main">
       <template v-if="!state.selectedAsset">
         <div class="receive__main__select">
-          <DenomSelectModal :assets="balances" title="Select asset" @select="assetSelectHandler" />
+          <DenomSelectModal title="Receive" :assets="balances" :show-balance="true" @select="assetSelectHandler" />
         </div>
       </template>
 
-      <template v-else>
+      <template v-else-if="state.selectedAsset && recipientAddress">
         <div class="receive__main__asset">
           <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
-          <div class="receive__main__asset__qr">
+          <div class="receive__main__asset__qr" :style="gradientStyle">
             <div class="receive__main__asset__qr__code">
-              <QrCode :value="state.selectedAsset.address" width="160" />
+              <QrCode :value="recipientAddress" width="160" :color="gradientStyle.color" />
             </div>
           </div>
           <div>
             <p class="receive__main__asset__label s-minus w-bold">Your address</p>
-            <Address :address="state.selectedAsset.address" :chain-name="state.selectedAsset.on_chain" readonly />
+            <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
           </div>
         </div>
       </template>
@@ -41,24 +41,88 @@
 </template>
 
 <script lang="ts">
-import { reactive } from '@vue/reactivity';
+import { reactive, ref, toRefs } from '@vue/reactivity';
+import { computed, watch } from '@vue/runtime-core';
+import { useStore } from 'vuex';
 
+import ChainName from '@/components/common/ChainName.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import QrCode from '@/components/common/QrCode.vue';
 import Address from '@/components/ui/Address.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { Balance } from '@/types/api';
+import symbolsData from '@/data/symbols';
+import { Balance, Balances } from '@/types/api';
+import { getOwnAddress, hexToRGB } from '@/utils/basic';
+
+const defaultColors = {
+  primary: '#E1E1E1',
+  secondary: '#F4F4F4',
+  tertiary: '#F9F9F9',
+};
 
 export default {
   name: 'Receive',
-  components: { Address, Icon, DenomSelectModal, QrCode },
+  components: { Address, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
     const { balances } = useAccount();
 
+    const store = useStore();
+
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'];
+    });
+
+    const allBalances = computed<Balances>(() => {
+      return [
+        ...(balances.value as Balances),
+        ...verifiedDenoms.value.map((denom) => ({
+          base_denom: denom.name,
+          on_chain: denom.chain_name,
+          amount: 0,
+        })),
+      ];
+    });
+
+    const nativeBalances = computed(() => {
+      const result = [];
+      // TODO: Check if denom is native to its chain
+      for (const balance of allBalances.value) {
+        if (!result.some((item) => item.base_denom === balance.base_denom)) {
+          result.push(balance);
+        }
+      }
+      return result;
+    });
+
     const state = reactive({
       selectedAsset: undefined,
+      recipientAddress: undefined,
+    });
+
+    const generateBackground = (colors: Record<string, string>) => {
+      const hexArray = Object.values(colors).reverse();
+      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
+      const colorStops = [];
+
+      for (const [index, hex] of Object.entries(hexArray)) {
+        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+      }
+
+      return `radial-gradient(
+					ellipse farthest-corner at 16.67% 16.67%,
+					${colorStops.join(',')}
+				)`;
+    };
+
+    const gradientStyle = computed(() => {
+      const colors = symbolsData[state.selectedAsset?.base_denom]?.colors;
+      return {
+        background: generateBackground(colors || defaultColors),
+        color: colors ? '#ffffff' : '#000000',
+      };
     });
 
     const goBack = () => {
@@ -69,7 +133,16 @@ export default {
       state.selectedAsset = asset;
     };
 
-    return { balances, state, goBack, assetSelectHandler };
+    const { selectedAsset, recipientAddress } = toRefs(state);
+    watch(selectedAsset, async (value) => {
+      if (value) {
+        state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain });
+      } else {
+        state.recipientAddress = undefined;
+      }
+    });
+
+    return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
 </script>

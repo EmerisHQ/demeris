@@ -1,26 +1,40 @@
 <template>
   <div class="move-form">
     <template v-if="step === 'amount'">
-      <h2 class="move-form__title s-2">Move assets</h2>
-      <MoveFormAmount :balances="balances" @next="goToStep('review')" />
+      <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
+      <MoveFormAmount v-if="balances" :balances="balances" @next="generateSteps" />
+
+      <div class="move-form__fees">
+        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+      </div>
     </template>
 
-    <template v-if="step === 'review'">
-      <h2 class="move-form__title s-2">Review your transfer details</h2>
-
-      <Button class="mt-10" name="Confirm and continue" @click="goToStep('move')" />
+    <template v-else>
+      <TxStepsModal
+        v-if="steps.length > 0"
+        :data="steps"
+        :gas-price-level="gasPrice"
+        :back-route="{ name: 'Portfolio' }"
+        action-name="move"
+        @transacting="goToStep('move')"
+        @failed="goToStep('review')"
+        @reset="resetHandler"
+        @finish="resetHandler"
+      />
     </template>
-
-    <template v-if="step === 'move'"> TODO </template>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, reactive } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
-import { MoveAssetsForm } from '@/types/actions';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { useStore } from '@/store';
+import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { actionHandler } from '@/utils/actionHandler';
 
 import MoveFormAmount from './MoveFormAmount.vue';
 
@@ -30,8 +44,9 @@ export default defineComponent({
   name: 'MoveForm',
 
   components: {
-    Button,
     MoveFormAmount,
+    TxStepsModal,
+    FeeLevelSelector,
   },
 
   props: {
@@ -48,10 +63,13 @@ export default defineComponent({
   emits: ['update:step'],
 
   setup(props, { emit }) {
+    const steps = ref([]);
+    const store = useStore();
+
     const form: MoveAssetsForm = reactive({
       balance: {
         denom: '',
-        amount: undefined,
+        amount: '',
       },
       on_chain: '',
       to_chain: '',
@@ -62,8 +80,52 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
+    watch(form, async () => {
+      if (form.balance.amount != '0' && form.balance.denom != '' && form.on_chain != '' && form.to_chain != '') {
+        const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
+        const action: MoveAction = {
+          name: 'move',
+          params: {
+            from: {
+              amount: {
+                amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
+                denom: form.balance.denom,
+              },
+              chain_name: form.on_chain,
+            },
+            to: {
+              chain_name: form.to_chain,
+            },
+          },
+        };
+        steps.value = await actionHandler(action);
+      } else {
+        steps.value = [];
+      }
+    });
+
+    const generateSteps = async () => {
+      goToStep('review');
+    };
+
     const goToStep = (value: Step) => {
       step.value = value;
+    };
+
+    const resetHandler = () => {
+      form.balance = {
+        denom: '',
+        amount: '',
+      };
+      form.on_chain = '';
+      form.to_chain = '';
+      steps.value = [];
+
+      goToStep('amount');
     };
 
     if (!props.step) {
@@ -72,7 +134,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { form, goToStep };
+    return { steps, generateSteps, form, goToStep, gasPrice, resetHandler };
   },
 });
 </script>
@@ -82,6 +144,12 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+    margin-left: -2.4rem;
+    margin-right: -2.4rem;
   }
 }
 </style>

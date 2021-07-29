@@ -4,7 +4,13 @@ import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData } from './mutation-types';
+import {
+  APIPromise,
+  DemerisMutations,
+  DemerisMutationTypes as MutationTypes,
+  KeplrKeyData,
+  UserData,
+} from './mutation-types';
 import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
@@ -14,13 +20,14 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
+  [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
-  [MutationTypes.SET_PRICES](state: S, payload: { value: any }): void; // TODO: prices
+  [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
-
+  [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
@@ -37,6 +44,9 @@ export type Mutations<S = State> = {
   // Internal module mutations
 
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
+  [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
+  [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
+  [MutationTypes.SIGN_OUT](state: S): void;
   [MutationTypes.RESET_STATE](state: S): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -46,6 +56,9 @@ export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+  },
+  [MutationTypes.ADD_KEPLR_KEYHASH](state: State, payload: string) {
+    if (state.keplr) state.keplr.keyHashes.push(payload);
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
     state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
@@ -67,52 +80,81 @@ export const mutations: MutationTree<State> & Mutations = {
       state.chains[chain.chain_name] = chain;
     }
   },
+  [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
+    state._Session = { ...state._Session, ...(payload as UserData) };
+
+    window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+  },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
-    state.prices = payload.value as any; // TODO: prices
+    state.prices = payload.value as API.Prices;
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
-    console.log(ticket);
-    const txPromise = state.transactions.get(JSON.stringify(payload.params));
+    let txPromise = state.transactions.get(JSON.stringify(payload.params));
     if (txPromise == null) {
       let responseResolve, responseReject;
-      const responsePromise: Promise<void> = new Promise((res, rej) => {
+      const responsePromise: Promise<string> = new Promise((res, rej) => {
         responseResolve = res;
         responseReject = rej;
       });
-
       state.transactions.set(JSON.stringify(payload.params), {
         date: Date.now(),
+        status: { status: 'pending' },
         resolve: responseResolve,
         reject: responseReject,
         promise: responsePromise,
       });
-    } else {
-      if (ticket.status == 'complete') {
-        txPromise.resolve();
-        state.transactions.delete(JSON.stringify(payload.params));
-        console.log({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } });
+    }
+    txPromise = state.transactions.get(JSON.stringify(payload.params));
+    const oldStatus = txPromise.status;
+    if (ticket.status != oldStatus.status) {
+      txPromise.resolve({ status: ticket.status, height: ticket.height, error: ticket.error });
+      if (
+        ticket.status == 'complete' ||
+        ticket.status == 'failed' ||
+        ticket.status == 'IBC_receive_success' ||
+        ticket.status == 'Tokens_unlocked_timeout' ||
+        ticket.status == 'Tokens_unlocked_ack'
+      ) {
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
         );
-      } else if (ticket.status != 'pending' && ticket.status != 'transit') {
-        txPromise.reject();
-        state.transactions.delete(JSON.stringify(payload.params));
-        state._Subscriptions.delete(
-          JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
-        );
+      } else {
+        let responseResolve, responseReject;
+        const responsePromise: Promise<string> = new Promise((res, rej) => {
+          responseResolve = res;
+          responseReject = rej;
+        });
+        state.transactions.set(JSON.stringify(payload.params), {
+          date: Date.now(),
+          status: ticket,
+          resolve: responseResolve,
+          reject: responseReject,
+          promise: responsePromise,
+        });
       }
+    } else {
+      txPromise.date = Date.now();
+      state.transactions.set(JSON.stringify(payload.params), txPromise);
     }
   },
   [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
     state.keplr = payload;
+    state.keplr.keyHashes = [];
   },
 
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-      (payload.params as API.VerifyTraceReq).hash
-    ] = payload.value as API.VerifyTrace;
+    if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+        (payload.params as API.VerifyTraceReq).hash
+      ] = payload.value as API.VerifyTrace;
+    } else {
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
+      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+        (payload.params as API.VerifyTraceReq).hash
+      ] = payload.value as API.VerifyTrace;
+    }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].demeris_addresses = [payload.value as API.FeeAddress];
@@ -122,7 +164,16 @@ export const mutations: MutationTree<State> & Mutations = {
       payload.value as API.Bech32Config;
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name] = payload.value as API.Chain;
+    state.chains[(payload.params as API.ChainReq).chain_name] = {
+      ...state.chains[(payload.params as API.ChainReq).chain_name],
+      ...(payload.value as API.Chain),
+    };
+  },
+  [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
+    state._InProgess.set(payload.hash, payload.promise);
+  },
+  [MutationTypes.DELETE_IN_PROGRESS](state: State, payload: string) {
+    state._InProgess.delete(payload);
   },
   [MutationTypes.SET_PRIMARY_CHANNEL](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[
@@ -142,13 +193,35 @@ export const mutations: MutationTree<State> & Mutations = {
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
+    state.hub_chain = payload.hub_chain;
+    state.gas_limit = payload.gas_limit;
+  },
+  [MutationTypes.SIGN_OUT](state: State) {
+    for (const sub of state._Subscriptions.values()) {
+      const subObj = JSON.parse(sub);
+      if (
+        subObj.action == DemerisActionTypes.GET_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_NUMBERS ||
+        subObj.action == DemerisActionTypes.SET_SESSION_DATA
+      ) {
+        state._Subscriptions.delete(sub);
+      }
+    }
+    state.balances = {};
+    state.stakingBalances = {};
+    state.numbers = {};
+    state.keplr = null;
+    state.transactions = new Map();
+    state._InProgess = new Map();
+    state._Session = {};
+    window.localStorage.setItem('lastEmerisSession', '');
   },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
   },
   [MutationTypes.SUBSCRIBE](state: State, subscription) {
     state._Subscriptions.add(JSON.stringify(subscription));
-    console.log(state._Subscriptions);
   },
   [MutationTypes.UNSUBSCRIBE](state: State, subscription) {
     state._Subscriptions.delete(JSON.stringify(subscription));

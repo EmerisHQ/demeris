@@ -1,6 +1,13 @@
+import { Coin } from '@cosmjs/amino';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
+import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
+
+import { Chain } from '@/types/api';
+
+import { demoAddresses } from '../store/demeris/demo-account';
+import { store } from '../store/index';
 
 export function toHexString(byteArray) {
   return Array.prototype.map
@@ -8,6 +15,17 @@ export function toHexString(byteArray) {
       return ('0' + (byte & 0xff).toString(16)).slice(-2);
     })
     .join('');
+}
+export function getChainFromRecipient(recipient: string) {
+  const prefix = bech32.decode(recipient).prefix;
+  return (
+    (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
+      (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
+    )?.chain_name ?? null
+  );
+}
+export function hashObject(str: unknown): string {
+  return toHex(sha256(encodeUTF8(JSON.stringify(str)))).toUpperCase();
 }
 export function keyHashfromAddress(address: string): string {
   try {
@@ -19,6 +37,15 @@ export function keyHashfromAddress(address: string): string {
 export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
+export async function getOwnAddress({ chain_name }) {
+  if (store.getters['demeris/isDemoAccount']) {
+    return demoAddresses[chain_name];
+  } else {
+    const chain = store.getters['demeris/getChain']({ chain_name });
+    const key = await window.keplr.getKey(chain.node_info.chain_id);
+    return key.bech32Address;
+  }
+}
 export function isNative(denom: string) {
   return denom.indexOf('ibc/') != 0 ? true : false;
 }
@@ -26,6 +53,14 @@ export function isNative(denom: string) {
 export function getChannel(path, index) {
   const parts = path.split('/');
   return parts[index * 2 + 1];
+}
+export function autoLogin() {
+  const last = window.localStorage.getItem('lastEmerisSession');
+  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
+    return true;
+  } else {
+    return false;
+  }
 }
 export function encodeUTF8(s) {
   let i = 0;
@@ -61,12 +96,34 @@ export function getDenomHash(path, base_denom, hopsToRemove = 0) {
   const parts = path.split('/');
   parts.push(base_denom);
   const newPath = parts.slice(hopsToRemove * 2).join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
 }
 
 export function generateDenomHash(channel, base_denom) {
   const parts = ['transfer', channel];
   parts.push(base_denom);
   const newPath = parts.join('/');
-  return 'ibc/' + toHex(sha256(encodeUTF8(newPath)));
+  return 'ibc/' + toHex(sha256(encodeUTF8(newPath))).toUpperCase();
+}
+
+export const hexToRGB = (hex: string) => {
+  return hex
+    .replace('#', '')
+    .match(/[A-Za-z0-9]{2}/g)
+    .map((v) => parseInt(v, 16))
+    .join(',');
+};
+export function parseCoins(input: string): Coin[] {
+  return input
+    .replace(/\s/g, '')
+    .split(',')
+    .filter(Boolean)
+    .map((part) => {
+      const match = part.match(/^([0-9]+)([a-zA-Z0-9\/-]{2,127})$/);
+      if (!match) throw new Error('Got an invalid coin string');
+      return {
+        amount: Uint64.fromString(match[1]).toString(),
+        denom: match[2],
+      };
+    });
 }

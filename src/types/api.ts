@@ -19,8 +19,8 @@ export type VerifyTraceReq = {
 
 // Helper type to hold ibc information
 export type IbcInfo = {
-  path: string;
-  hash: string;
+  path?: string;
+  hash?: string;
 };
 
 // helper type to hold denom information
@@ -33,7 +33,7 @@ export type Denom = {
   verified: boolean;
   stakable: boolean;
   fee_token: boolean;
-  fee_levels: Fee;
+  gas_price_levels: Fee;
   ticker: string;
   fetch_price: boolean;
 };
@@ -120,7 +120,20 @@ export type FeeAddressesResponse = {
 };
 
 // /prices endpoint data types
-// TODO: /prices
+
+export type Price = {
+  Symbol: string;
+  Price: number;
+};
+export type Prices = {
+  Fiats: Price[];
+  Tokens: (Price & { Supply: number })[];
+};
+export type PricesResponse = {
+  data: Prices;
+  message: string | null;
+  status: number;
+};
 
 // CHAIN-SPECIFIC APIs
 
@@ -148,7 +161,6 @@ export type Chain = {
 export type ChainResponse = {
   chain: Chain;
 };
-
 // /chain/:chain/status endpoint data types
 export type ChainStatusResponse = {
   online: boolean;
@@ -219,7 +231,9 @@ export type FeeTokensResponse = {
 };
 export type Ticket = {
   status: string;
-  newTicket: string;
+  height?: number;
+  newTicket?: string;
+  error?: string;
 };
 export type SeqNumber = {
   chain_name: string;

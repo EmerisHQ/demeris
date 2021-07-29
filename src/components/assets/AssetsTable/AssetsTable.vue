@@ -1,73 +1,118 @@
 <template>
-  <table class="assets-table">
-    <thead>
-      <tr>
-        <th class="assets-table--u-text-left">Asset</th>
-        <th class="assets-table--u-text-right">Price</th>
-        <th class="assets-table--u-text-right">24h %</th>
-        <th v-if="!isCompact" class="assets-table--u-text-right">Balance</th>
-        <th class="assets-table--u-text-right">Balance</th>
-        <th>
-          <!-- Chains -->
-        </th>
-      </tr>
-    </thead>
+  <div class="assets-table__wrapper">
+    <table class="assets-table">
+      <colgroup v-if="variant === 'balance'">
+        <col width="35%" />
+        <col width="20%" />
+        <col width="35%" />
+        <col width="10%" />
+      </colgroup>
 
-    <tbody>
-      <tr v-for="asset in balancesByAsset" :key="asset.denom" class="assets-table__row">
-        <td class="assets-table__row__asset">
-          <div class="assets-table__row__asset__avatar" />
-          <span class="assets-table__row__asset__denom"><Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
-        </td>
+      <thead v-if="showHeaders">
+        <tr>
+          <th class="text-left">{{ $t('context.assets.asset') }}</th>
+          <th v-if="variant === 'full'" class="text-left">{{ $t('context.assets.ticker') }}</th>
+          <th class="text-right">{{ $t('context.assets.price') }}</th>
+          <th v-if="variant === 'full'" class="text-right">{{ $t('context.assets.marketCap') }}</th>
+          <th v-if="variant === 'balance'" class="text-right">{{ $t('context.assets.balance') }}</th>
+        </tr>
+      </thead>
 
-        <td class="assets-table__row__price assets-table--u-text-right">$20.50</td>
+      <tbody>
+        <tr v-for="asset in balancesFiltered" :key="asset.denom" class="assets-table__row" @click="handleClick(asset)">
+          <td class="assets-table__row__asset">
+            <CircleSymbol :denom="asset.denom" />
+            <div class="assets-table__row__asset__denom">
+              <Denom :name="asset.denom" />
+              <LPAsset :name="asset.denom" />
+            </div>
+          </td>
 
-        <td class="assets-table__row__trending">
-          <div class="assets-table__row__trending__wrapper">
-            <TrendingUpIcon class="assets-table__row__trending__icon" />
-            <span class="assets-table__row__trending__value">52.21%</span>
-          </div>
-        </td>
+          <td v-if="variant === 'full'" class="assets-table__row__ticker text-left">
+            <Ticker :name="asset.denom" />
+          </td>
 
-        <td v-if="!isCompact" class="assets-table__row__balance assets-table--u-text-right">
-          <span>{{ asset.totalAmount }} <Denom :name="asset.denom" chain-name="cosmos-hub" /></span>
-        </td>
+          <td class="assets-table__row__price text-right">
+            <Price :amount="{ denom: asset.denom, amount: null }" />
+          </td>
 
-        <td class="assets-table__row__equivalent-balance assets-table--u-text-right">$6,150.20</td>
+          <td v-if="variant === 'full'" class="assets-table__row__market-cap text-right">
+            {{ getFormattedMarketCap(asset.denom) }}
+          </td>
 
-        <td class="assets-table__row__chains">
-          <div class="assets-table__row__chains__wrapper">
-            <AssetChainsIndicator :denom="asset.denom" :balances="balances" />
+          <td v-if="variant === 'balance'" class="assets-table__row__balance text-right">
+            <Price :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+            <div class="assets-table__row__balance__amount s-minus">
+              <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+            </div>
+          </td>
+          <td v-if="variant === 'balance'" class="assets-table__row__chains">
+            <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-            <button class="assets-table__row__arrow-button" @click="handleClick(asset)">
-              <ChevronRightIcon class="assets-table__row__arrow-button__icon" />
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <button
+      v-if="balancesByAsset.length > balancesFiltered.length"
+      class="assets-table__view-all elevation-button"
+      @click="viewAllHandler"
+    >
+      <span class="assets-table__view-all__label">
+        {{ $t('context.assets.viewAll') }} ({{ balancesByAsset.length }})
+      </span>
+      <Icon name="CaretDownIcon" :icon-size="1.3" />
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
-import { parseCoins } from '@cosmjs/launchpad';
 import groupBy from 'lodash.groupby';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 
-import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator';
+import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
+import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import ChevronRightIcon from '@/components/common/Icons/ChevronRightIcon.vue';
-import TrendingUpIcon from '@/components/common/Icons/TrendingUpIcon.vue';
+import Price from '@/components/common/Price.vue';
+import Ticker from '@/components/common/Ticker.vue';
+import Icon from '@/components/ui/Icon.vue';
+import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
+
+type TableStyleType = 'full' | 'balance';
 
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AssetChainsIndicator, ChevronRightIcon, TrendingUpIcon, Denom },
+  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Icon, LPAsset, Price, Ticker },
 
   props: {
-    isCompact: {
+    variant: {
+      type: String as PropType<TableStyleType>,
+      default: 'full',
+    },
+    showHeaders: {
       type: Boolean,
+      default: true,
+    },
+    showAllAssets: {
+      type: Boolean,
+      default: true,
+    },
+    hideLpAssets: {
+      type: Boolean,
+      default: false,
+    },
+    hideZeroAssets: {
+      type: Boolean,
+      default: false,
+    },
+    limitRows: {
+      type: Number,
+      default: undefined,
     },
     balances: {
       type: Array as PropType<Balances>,
@@ -78,10 +123,50 @@ export default defineComponent({
   emits: ['row-click'],
 
   setup(props, { emit }) {
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
+    const store = useStore();
+    const currentLimit = ref(props.limitRows);
 
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    const allBalances = computed<Balances>(() => {
+      let balances = props.balances;
+      if (props.showAllAssets) {
+        balances = [
+          ...(props.balances as Balances),
+          ...verifiedDenoms.value.map((denom) => ({
+            base_denom: denom.name,
+            on_chain: denom.chain_name,
+            amount: '0' + denom.name,
+          })),
+        ];
+      }
+
+      if (props.hideLpAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.base_denom.substring(0, 4) !== 'pool') {
+            return balance;
+          }
+        });
+        return balances as Balances;
+      }
+
+      if (props.hideZeroAssets) {
+        balances = balances.filter((balance) => {
+          if (balance.amount.charAt(0) !== '0') {
+            return balance;
+          }
+        });
+      }
+
+      return balances as Balances;
+    });
+
+    const balancesByAsset = computed(() => {
+      const denomsAggregate = groupBy(allBalances.value, 'base_denom');
+
+      const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
         const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
 
@@ -91,104 +176,159 @@ export default defineComponent({
           chainsNames,
         };
       });
+
+      const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
+      return sortedSummary;
     });
+
+    const balancesFiltered = computed(() => {
+      return balancesByAsset.value.slice(0, currentLimit.value);
+    });
+
+    const getFormattedMarketCap = (denom: string) => {
+      const supply = store.getters['demeris/getMarketCap']({ denom });
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      return supply ? formatter.format(supply) : '-';
+    };
+
+    const viewAllHandler = () => {
+      currentLimit.value = undefined;
+    };
 
     const handleClick = (asset: Record<string, string>) => {
       emit('row-click', asset);
     };
 
-    return { balancesByAsset, handleClick };
+    return {
+      allBalances,
+      balancesByAsset,
+      balancesFiltered,
+      getFormattedMarketCap,
+      handleClick,
+      viewAllHandler,
+    };
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .assets-table {
-  width: 100%;
+  width: calc(100% + 4rem);
+  margin-inline: -2rem;
   table-layout: fixed;
 
-  &--u-text-right {
+  &__wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text-right {
     text-align: right;
   }
 
-  &--u-text-left {
+  .text-left {
     text-align: left;
   }
 
   th {
-    color: rgba(0, 0, 0, 0.66);
+    color: var(--muted);
+    background: var(--bg);
     vertical-align: middle;
     font-size: 1.3rem;
     font-weight: 400;
-    padding-bottom: 2rem;
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  td,
+  th {
+    transition: all 100ms ease-in;
+
+    &:first-child {
+      padding-left: 2rem;
+    }
+
+    &:last-child {
+      padding-right: 2rem;
+    }
   }
 
   &__row {
+    cursor: pointer;
+
+    &:hover {
+      td {
+        background: rgba(0, 0, 0, 0.03);
+      }
+
+      td:first-child {
+        border-top-left-radius: 0.8rem;
+        border-bottom-left-radius: 0.8rem;
+      }
+
+      td:last-child {
+        border-top-right-radius: 0.8rem;
+        border-bottom-right-radius: 0.8rem;
+      }
+    }
+
     &__asset {
       padding: 2rem 0;
-      min-width: 4rem;
       font-weight: 600;
-      text-transform: uppercase;
       display: flex;
       align-items: center;
 
-      &__avatar {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 2.4rem;
-        background: rgba(0, 0, 0, 0.1);
-        margin-right: 1.6rem;
+      &__denom {
+        margin-left: 1.6rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
-    &__trending {
-      &__wrapper {
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-end;
-        color: rgb(6, 126, 62);
-      }
-
-      &__icon {
-        width: 1.6rem;
-        height: 1.6rem;
-        margin-right: 0.4rem;
+    &__price {
+      &__trending {
+        margin-top: 0.8rem;
       }
     }
 
-    &__balance {
+    &__amount {
       text-transform: uppercase;
       color: rgba(0, 0, 0, 0.66);
     }
 
-    &__equivalent-balance {
+    &__balance {
       font-weight: 600;
-    }
 
+      &__amount {
+        color: var(--muted);
+        margin-top: 0.8rem;
+      }
+    }
     &__chains {
-      &__wrapper {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-      }
-    }
-
-    &__arrow-button {
-      padding: 0.2rem;
-      color: rgba(0, 0, 0, 0.4);
-      margin-left: 1rem;
-
-      &__icon {
-        width: 1.6rem;
-        height: 1.6rem;
-      }
+      padding-left: 1.6rem;
     }
   }
 
-  .asset-chains-indicator {
-    width: 100%;
-    justify-content: flex-end;
+  &__view-all {
+    margin: 2.4rem auto 0 auto;
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    border-radius: 5.6rem;
+    font-weight: 600;
+    font-size: 1.3rem;
+
+    &__label {
+      margin-right: 0.7rem;
+    }
   }
 }
 </style>

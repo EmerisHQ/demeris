@@ -1,13 +1,19 @@
 <template>
   <AppLayout>
     <section class="assets">
-      <nav class="assets__nav">
-        <router-link to="/assets" class="assets__nav__item">Assets</router-link>
-        <router-link to="/assets/chains" custom>
-          <span class="assets__nav__item assets__nav__item--inactive">Chains</span>
-        </router-link>
-      </nav>
-      <AssetsTable :balances="balances" class="assets__table" @row-click="openAssetPage" />
+      <div class="assets__header">
+        <h1 class="assets__title">Assets</h1>
+      </div>
+
+      <div class="assets__group">
+        <AssetsTable
+          :balances="[]"
+          :show-all-assets="true"
+          :hide-lp-assets="true"
+          class="assets__table"
+          @row-click="openAssetPage"
+        />
+      </div>
     </section>
   </AppLayout>
 </template>
@@ -16,7 +22,6 @@
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import useAccount from '@/composables/useAccount';
 import AppLayout from '@/layouts/AppLayout.vue';
 
 export default {
@@ -25,13 +30,12 @@ export default {
 
   setup() {
     const router = useRouter();
-    const { balances } = useAccount();
 
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    return { balances, openAssetPage };
+    return { openAssetPage };
   },
 };
 </script>
@@ -42,19 +46,10 @@ export default {
   flex-direction: column;
   font-size: 1.6rem;
 
-  &__nav {
-    display: flex;
-
-    &__item {
-      font-size: 2.8rem;
-      font-weight: 600;
-      margin-right: 2.4rem;
-
-      &--inactive {
-        color: rgba(0, 0, 0, 0.33);
-        cursor: not-allowed;
-      }
-    }
+  &__title {
+    font-size: 5.1rem;
+    font-weight: 700;
+    margin-bottom: 3.2rem;
   }
 
   &__table {

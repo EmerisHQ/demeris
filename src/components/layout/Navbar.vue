@@ -1,9 +1,8 @@
 <template>
   <nav class="nav">
-    <router-link class="nav-link" to="/">Portfolio</router-link>
-    <router-link class="nav-link" to="/assets">Assets</router-link>
-    <router-link class="nav-link" to="/pools">Pools</router-link>
-    <router-link class="nav-link" to="/playground">Playground</router-link>
+    <router-link class="nav-link" to="/">{{ $t('navbar.portfolio') }}</router-link>
+    <router-link class="nav-link" to="/assets">{{ $t('navbar.assets') }}</router-link>
+    <router-link class="nav-link" to="/pools">{{ $t('navbar.pools') }}</router-link>
     <div class="space"></div>
   </nav>
 </template>
@@ -17,16 +16,13 @@ export default defineComponent({
 <style scoped lang="scss">
 .nav {
   display: flex;
-  padding-left: 5.2rem;
-  font-size: 1.6rem;
+  margin-left: 1.6rem;
   align-items: center;
-  font-family: 'Inter', sans-serif;
+
   &-link {
-    width: 8rem;
-    margin-right: 2rem;
-    color: #000;
+    padding: 0 1.6rem;
     text-decoration: none;
-    text-align: center;
+    line-height: 4.8rem;
 
     &:visited {
       color: inherit;

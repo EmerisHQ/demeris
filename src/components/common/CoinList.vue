@@ -1,8 +1,8 @@
 <template>
   <div v-if="modifiedData.length === 0" class="no-result">
     <div class="no-result__board">
-      <div class="title s-1 w-bold">No results for '{{ keyword }}'</div>
-      <div class="sub-title s-0">Try again with another search</div>
+      <div class="title s-1 w-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
+      <div class="sub-title s-0">{{ $t('generic_cta.filterRetry') }}</div>
     </div>
   </div>
   <div
@@ -12,7 +12,7 @@
     @mouseenter="
       showTooltip(
         `${type}/${coin.on_chain}/${coin.base_denom}`,
-        `${$filters.getCoinName(coin.base_denom)} on ${coin.on_chain}`,
+        $t('components.coinList.tooltip', { asset: $filters.getCoinName(coin.base_denom), chain: coin.on_chain }),
       )
     "
     @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
@@ -20,56 +20,53 @@
   >
     <div class="coin-list__info">
       <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info">
-        <div :class="type === 'chain' ? 'circle-border' : ''" :style="{ borderColor: stringToColor(coin.on_chain) }">
-          <img
-            class="coin-list__info-image"
-            :src="require(`@/assets/coins/${coin.base_denom.substr(1)}.png`)"
-            :alt="`${coin.base_denom} coin`"
-          />
-        </div>
+        <CircleSymbol
+          :variant="type === 'chain' ? 'chain' : 'asset'"
+          :denom="coin.base_denom"
+          :chain-name="coin.on_chain"
+        />
       </tippy>
       <div class="coin-list__info-details">
         <div v-if="keyword" class="coin-list__info-details-denom s-0 w-medium">
-          <span
-            v-for="word in $filters.getCoinName(coin.base_denom)"
-            :key="word"
-            :class="setWordColorByKeyword(keyword, word)"
-          >
+          <span v-for="word in coin.display_name" :key="word" :class="setWordColorByKeyword(keyword, word)">
             {{ word }}
           </span>
         </div>
         <div v-else-if="type === 'chain'" class="coin-list__info-details-denom s-0 w-medium">
-          {{ coin.on_chain }}
+          <ChainName :name="coin.on_chain" />
         </div>
         <div v-else class="coin-list__info-details-denom s-0 w-medium">
-          {{ $filters.getCoinName(coin.base_denom) }}
+          <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="keyword" class="coin-list__info-details-data s-minus w-normal">
+        <div v-if="type === 'pay'" class="coin-list__info-details-data s-minus w-normal">
           <div v-if="type === 'pay'">
-            {{ coin.amount }}
-            <span
-              v-for="word in $filters.getCoinName(coin.base_denom)"
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <!-- <span
+              v-for="word in coin.display_name"
               :key="word + 'small'"
               :class="setWordColorByKeyword(keyword, word)"
             >
               {{ word }}
-            </span>
-            available
+            </span> -->
+            {{ $t('components.coinList.available') }}
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
         <div v-else class="coin-list__info-details-data s-minus w-normal">
-          {{
-            type === 'pay' || type === 'chain'
-              ? `${coin.amount} ${$filters.getCoinName(coin.base_denom)} available`
-              : coin.on_chain
-          }}
+          <span v-if="type === 'pay' || type === 'chain'">
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            {{ $t('components.coinList.available') }}
+          </span>
+          <ChainName v-else :name="coin.on_chain" />
         </div>
       </div>
     </div>
     <div v-if="type === 'pay'" class="coin-list__select">
-      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" />
+      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
       <Icon name="CaretRightIcon" :icon-size="1.6" :color="iconColor" />
+    </div>
+    <div v-else-if="showBalance" class="coin-list__balance">
+      <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
     </div>
   </div>
 </template>
@@ -78,24 +75,32 @@ import tippy from 'tippy.js';
 import { computed, defineComponent, ref } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
-  name: 'Button',
+  name: 'CoinList',
   components: {
     AssetChainsIndicator,
+    ChainName,
+    AmountDisplay,
     Icon,
+    Denom,
+    CircleSymbol,
   },
   props: {
     data: { type: Object, required: true },
     type: { type: String, required: false, default: 'chain' },
     keyword: { type: String, required: false, default: '' },
+    showBalance: { type: Boolean, default: false },
   },
   emits: ['select'],
   setup(props) {
     const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     const modifiedData = computed(() => getUniqueCoinList(props.data));
     const tooltipInstance = ref(null);
-
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'search-included' : 'search-not-included';
     }
@@ -125,7 +130,8 @@ export default defineComponent({
 
       newData.forEach((denom) => {
         if (denomNameObejct[denom.base_denom]) {
-          denomNameObejct[denom.base_denom].amount += denom.amount;
+          denomNameObejct[denom.base_denom].amount =
+            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
         } else {
           denomNameObejct[denom.base_denom] = denom;
         }
@@ -138,21 +144,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    //TEST
-    function stringToColor(str) {
-      var hash = 0;
-      for (var i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      var colour = '#';
-      for (var i = 0; i < 3; i++) {
-        var value = (hash >> (i * 8)) & 0xff;
-        colour += ('00' + value.toString(16)).substr(-2);
-      }
-      return colour;
-    }
-
-    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip, stringToColor };
+    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip };
   },
 });
 </script>
@@ -167,12 +159,18 @@ export default defineComponent({
   cursor: pointer;
 
   .tippy-info {
-    margin-right: 1.2rem;
+    margin-right: 1.6rem;
+  }
+
+  &__balance {
+    color: var(--muted);
+    white-space: nowrap;
   }
 
   &__info {
     display: flex;
     align-items: center;
+    width: 100%;
 
     &-image {
       width: 2.4rem;
@@ -189,6 +187,8 @@ export default defineComponent({
     }
 
     &-details {
+      flex: 1 1 0%;
+
       &-denom {
         color: var(--text);
       }
@@ -202,10 +202,6 @@ export default defineComponent({
   &__select {
     display: flex;
     justify-content: space-between;
-
-    .icon {
-      margin-left: 1rem;
-    }
   }
 
   .search-not-included {

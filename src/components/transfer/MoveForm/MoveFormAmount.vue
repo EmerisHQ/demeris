@@ -1,100 +1,214 @@
 <template>
   <div :class="{ 'move-form-amount--insufficient-funds': !hasSufficientFunds }">
-    <fieldset class="form__field move-form-amount">
-      <div class="move-form-amount__input">
-        <input v-model="form.balance.amount" class="move-form-amount__input__control" min="0" placeholder="0" />
-        <span class="move-form-amount__input__denom">{{ state.currentAsset?.denom }}</span>
-      </div>
+    <div class="move-form-amount__modal-wrapper">
+      <DenomSelectModal
+        v-if="state.isDenomModalOpen"
+        title="Select asset"
+        :assets="balances"
+        :func="() => toggleDenomModal()"
+        @select="toggleDenomModal"
+      />
 
-      <span class="move-form-amount__estimated"> $8,866.34 </span>
-
-      <div class="move-form-amount__controls">
-        <label class="move-form-amount__controls__button">
-          <input type="checkbox" name="move-form-amount-usd" />
-          <span class="elevation-button">USD</span>
-        </label>
-        <label class="move-form-amount__controls__button">
-          <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
-          <span class="elevation-button">Max</span>
-        </label>
-      </div>
-    </fieldset>
-
-    <fieldset class="form__field">
-      <div class="move-form-amount__assets elevation-card">
-        <button class="move-form-amount__assets__item denom-item" @click="openAssetsModal">
-          <span class="move-form-amount__assets__item__label s-minus">Move</span>
-
-          <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold">
-              {{ form.balance.denom }}
-            </span>
+      <ChainSelectModal
+        v-if="state.isChainsModalOpen"
+        title="Select chain"
+        :assets="state.chainsModalSource === 'to' ? availableRecipientsChains : balances"
+        :selected-denom="state.currentAsset.base_denom"
+        :func="() => toggleChainsModal()"
+        @select="toggleChainsModal"
+      />
+    </div>
+    <template v-if="true">
+      <fieldset class="form__field move-form-amount">
+        <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
+          <div class="move-form-amount__input">
+            <FlexibleAmountInput
+              v-model="state.usdValue"
+              :max-width="300"
+              :min-width="state.isUSDInputChecked ? 35 : 0"
+              prefix="$"
+            >
+              <template #default="inputProps">
+                <USDInput
+                  :model-value="form.balance.amount"
+                  :denom="state.currentAsset?.base_denom"
+                  :class="[inputProps.class]"
+                  :style="inputProps.style"
+                  placeholder="0"
+                  @update:price="state.usdValue = $event"
+                  @update:modelValue="
+                    ($event) => {
+                      if (state.isUSDInputChecked) {
+                        form.balance.amount = $event;
+                      }
+                    }
+                  "
+                />
+              </template>
+            </FlexibleAmountInput>
+          </div>
+          <span class="move-form-amount__estimated">
+            <AmountDisplay
+              :amount="{
+                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                denom: state.currentAsset?.base_denom,
+              }"
+            />
+          </span>
+        </div>
+        <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
+          <div class="move-form-amount__input">
+            <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+              <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+            </FlexibleAmountInput>
           </div>
 
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
+          <span v-if="hasPrice" class="move-form-amount__estimated">
+            {{ displayUSDValue }}
+          </span>
+        </div>
+        <div class="move-form-amount__controls">
+          <label v-if="hasPrice" class="move-form-amount__controls__button">
+            <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
+            <span v-if="state.isUSDInputChecked" class="elevation-button"><Denom :name="state.currentAsset?.base_denom" /></span>
+            <span v-else class="elevation-button">USD</span>
+          </label>
+          <label class="move-form-amount__controls__button is-toggle">
+            <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
+            <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
+          </label>
+        </div>
+      </fieldset>
 
-        <button class="move-form-amount__assets__item from-item" @click="openChainsModal">
-          <span class="move-form-amount__assets__item__label s-minus">From</span>
+      <fieldset class="form__field">
+        <div class="move-form-amount__assets elevation-card">
+          <button class="move-form-amount__assets__item denom-item" @click="toggleDenomModal()">
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.action') }}</span>
 
-          <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold">
-              {{ form.on_chain }}
-            </span>
-          </div>
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                :chain-name="form.on_chain"
+                :denom="form.balance.denom"
+                class="move-form-amount__assets__item__avatar"
+              />
+              <span class="move-form-amount__assets__item__name w-bold">
+                <Denom :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
+              </span>
+            </div>
 
-          <div class="move-form-amount__assets__item__amount">
-            <p class="move-form-amount__assets__item__amount__balance s-minus">$13,400</p>
-            <p class="move-form-amount__assets__item__amount__available s-minus">
-              {{ `${state.currentAsset.chains[0].amount} ${form.balance.denom}` }}
-            </p>
-          </div>
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
 
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
+          <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
 
-        <button class="move-form-amount__assets__item to-item" @click="openChainsModal">
-          <span class="move-form-amount__assets__item__label s-minus">To</span>
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                variant="chain"
+                :chain-name="form.on_chain"
+                class="move-form-amount__assets__item__avatar"
+              />
+              <span class="move-form-amount__assets__item__name w-bold">
+                <ChainName :name="form.on_chain" />
+              </span>
+            </div>
 
-          <div class="move-form-amount__assets__item__asset">
-            <span class="move-form-amount__assets__item__avatar" />
-            <span class="move-form-amount__assets__item__name w-bold"> Select chain </span>
-          </div>
+            <div class="move-form-amount__assets__item__amount">
+              <p class="move-form-amount__assets__item__amount__balance s-minus">
+                <Price
+                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                  :auto-update="false"
+                  show-zero
+                />
+              </p>
+              <p class="move-form-amount__assets__item__amount__available s-minus">
+                <AmountDisplay
+                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                />
+              </p>
+            </div>
 
-          <div class="move-form-amount__assets__item__button">
-            <Icon name="CaretRightIcon" :icon-size="1.2" />
-          </div>
-        </button>
-      </div>
-    </fieldset>
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
 
-    <fieldset class="form__field">
-      <Button :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'" :disabled="!isValid" @click="onSubmit" />
-    </fieldset>
+          <button
+            class="move-form-amount__assets__item to-item"
+            :class="{ 'chain-selected': !!form.to_chain }"
+            @click="toggleChainsModal(null, 'to')"
+          >
+            <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
+
+            <div class="move-form-amount__assets__item__asset">
+              <CircleSymbol
+                variant="chain"
+                :chain-name="form.to_chain"
+                class="move-form-amount__assets__item__avatar"
+              />
+              <span class="move-form-amount__assets__item__name w-bold">
+                <ChainName v-if="form.to_chain" :name="form.to_chain" />
+                <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
+              </span>
+            </div>
+
+            <div class="move-form-amount__assets__item__button">
+              <Icon name="CaretRightIcon" :icon-size="1.2" />
+            </div>
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset class="form__field">
+        <Button
+          :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
+          :status="isValid ? 'normal' : 'inactive'"
+          :disabled="!isValid"
+          @click="onSubmit"
+        />
+      </fieldset>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
-import groupBy from 'lodash.groupby';
-import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import Price from '@/components/common/Price.vue';
+import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { useStore } from '@/store';
+import { ChainData } from '@/store/demeris/state';
 import { MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
-  name: 'SendFormAmount',
+  name: 'MoveFormAmount',
 
   components: {
+    FlexibleAmountInput,
+    AmountDisplay,
     Button,
+    Denom,
+    DenomSelectModal,
+    ChainSelectModal,
+    ChainName,
+    CircleSymbol,
     Icon,
+    Price,
+    USDInput,
   },
 
   props: {
@@ -107,49 +221,112 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
+    const store = useStore();
     const form = inject<MoveAssetsForm>('moveForm');
 
     const state = reactive({
       currentAsset: undefined,
       isMaximumAmountChecked: false,
+      isUSDInputChecked: false,
+      isDenomModalOpen: false,
+      isChainsModalOpen: false,
+      chainsModalSource: 'from',
+      usdValue: '',
     });
 
-    const balancesByAsset = computed(() => {
-      const denomsAggregate = groupBy(props.balances as Balances, 'base_denom');
-
-      return Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +item.amount + acc, 0);
-        const chains = balances.map((item) => item);
-
-        return {
-          denom,
-          totalAmount,
-          chains,
-        };
+    const displayUSDValue = computed(() => {
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
       });
+
+      return formatter.format(+state.usdValue);
+    });
+
+    const hasPrice = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const price = store.getters['demeris/getPrice']({ denom: state.currentAsset.base_denom });
+
+      return !!price;
+    });
+
+    const denomDecimals = computed(() => {
+      if (state.currentAsset) {
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: state.currentAsset.base_denom,
+        });
+
+        return Math.pow(10, precision);
+      } else {
+        return 1;
+      }
+    });
+
+    const availableRecipientsChains = computed(() => {
+      const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
+
+      return Object.values(chains)
+        .map((item) => {
+          const balance = (props.balances as Balances).find((balance) => balance.on_chain === item.chain_name);
+
+          return {
+            amount: balance?.amount || 0,
+            base_denom: state.currentAsset.base_denom,
+            on_chain: item.chain_name,
+          };
+        })
+        .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
     });
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
         return false;
       }
-      return state.currentAsset.chains[0].amount >= +form.balance.amount;
+
+      const cryptoAmount = +form.balance.amount * denomDecimals.value;
+
+      return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
     });
 
-    const isValid = () => {
+    const isValid = computed(() => {
+      const value = new BigNumber(form.balance.amount);
+
+      if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
+        return false;
+      }
+
       if (!hasSufficientFunds.value) {
         return false;
       }
 
+      if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
+        return false;
+      }
+
       return true;
+    });
+
+    const toggleDenomModal = (asset?: Record<string, unknown>) => {
+      if (asset) {
+        setCurrentAsset(asset);
+      }
+      state.isDenomModalOpen = !state.isDenomModalOpen;
     };
 
-    const openAssetsModal = () => {
-      // TODO:
-    };
+    const toggleChainsModal = (asset?: Record<string, unknown>, source = 'from') => {
+      if (asset) {
+        if (state.chainsModalSource === 'to') {
+          form.to_chain = asset.on_chain as string;
+        } else {
+          setCurrentAsset(asset);
+        }
+      }
 
-    const openChainsModal = () => {
-      // TODO:
+      state.chainsModalSource = source;
+      state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
     const onSubmit = () => {
@@ -158,8 +335,8 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = asset.denom as string;
-      form.on_chain = asset.chains[0].on_chain;
+      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+      form.on_chain = asset.on_chain as string;
     };
 
     // TODO: Select chain based in user option
@@ -167,26 +344,55 @@ export default defineComponent({
       () => [state.isMaximumAmountChecked, state.currentAsset],
       () => {
         if (state.isMaximumAmountChecked) {
-          form.balance.amount = state.currentAsset.chains[0].amount;
+          const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
+          form.balance.amount = (assetAmount / denomDecimals.value).toString();
+          return;
         }
       },
     );
+    watch(
+      () => props.balances,
+      (newVal) => {
+        if (newVal.length > 0 && !state.currentAsset) {
+          let asset = props.balances[0];
 
-    // TODO: Select defaut asset based in specific conditions
-    if (!state.currentAsset) {
-      setCurrentAsset(balancesByAsset.value[0]);
-    }
+          if (form.balance.denom) {
+            asset = props.balances.find((item) => {
+              const balance = parseCoins(item.amount)[0];
+              return balance.denom === form.balance.denom;
+            });
+          }
+
+          setCurrentAsset(asset);
+        }
+      },
+      { immediate: true },
+    );
+
+    const { on_chain: onChain, to_chain: toChain } = toRefs(form);
+    watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
+      if (onChainNew === toChainNew) {
+        if (onChainOld !== onChainNew) {
+          form.to_chain = onChainOld;
+        } else {
+          form.to_chain = undefined;
+        }
+      }
+    });
 
     return {
+      displayUSDValue,
       form,
-      balancesByAsset,
       onSubmit,
+      hasPrice,
       state,
       setCurrentAsset,
       hasSufficientFunds,
       isValid,
-      openAssetsModal,
-      openChainsModal,
+      denomDecimals,
+      toggleDenomModal,
+      toggleChainsModal,
+      availableRecipientsChains,
     };
   },
 });
@@ -198,6 +404,18 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  &__modal-wrapper {
+    position: relative;
+    width: 100%;
+
+    .denom-select-modal-wrapper {
+      // Back icon
+      .title-with-goback > .icon:first-child {
+        visibility: hidden;
+      }
+    }
+  }
 
   &--insufficient-funds &__input {
     color: #ca0865;
@@ -211,8 +429,9 @@ export default defineComponent({
     font-size: 5.1rem;
     font-weight: 700;
     text-transform: uppercase;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     transition: color linear 100ms;
 
     &__control {
@@ -232,24 +451,27 @@ export default defineComponent({
   &__estimated {
     color: var(--muted);
     margin-top: 1.2rem;
+    text-align: center;
   }
 
   &__controls {
     display: flex;
     align-items: stretch;
-    margin-top: 1.4rem;
+    justify-content: center;
+    margin: 2.4rem 0 3.2rem 0;
 
     &__button {
+      line-height: 1;
       input {
         display: none;
       }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
+      &.is-toggle {
+        input:checked + span {
+          background: var(--text);
+          color: var(--bg);
+          font-weight: 500;
+        }
       }
-
       span {
         padding: 1rem 1.6rem;
         border-radius: 2.4rem;
@@ -268,18 +490,12 @@ export default defineComponent({
       align-items: stretch;
       width: 100%;
 
+      &:focus {
+        outline: none;
+      }
+
       &.denom-item &__name {
         text-transform: uppercase;
-      }
-
-      &.from-item &__avatar {
-        background: transparent;
-        border: 2px solid #7782ff;
-      }
-
-      &.to-item &__avatar {
-        background: transparent;
-        border: 2px solid var(--border-trans);
       }
 
       & + & {
@@ -299,13 +515,7 @@ export default defineComponent({
       }
 
       &__avatar {
-        position: relative;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 2.4rem;
-        background-color: rgba(0, 0, 0, 0.3);
         margin-right: 1.2rem;
-        border: 2px solid transparent;
       }
 
       &__label {

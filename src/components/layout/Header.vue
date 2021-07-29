@@ -1,44 +1,44 @@
 <template>
   <header class="header">
-    <Logo />
+    <router-link to="/" class="header__logo">
+      <Logo />
+    </router-link>
+
     <Navbar />
 
     <div class="space"></div>
     <div class="header__wallet">
-      <router-link :to="{ name: 'Redeem' }">
-        <IconButton v-tippy content="You have 4 assets to redeem" name="RedeemIcon" status="circle" show-badge />
+      <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }">
+        <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" :show-badge="showBadge" />
       </router-link>
 
       <router-link class="header__wallet-button" to="/receive">
         <div class="header__wallet-button__icon">
           <ReceiveIcon />
         </div>
-        Receive
+        {{ $t('navbar.receive') }}
       </router-link>
 
       <router-link class="header__wallet-button" to="/send">
         <div class="header__wallet-button__icon">
           <SendIcon />
         </div>
-        Send
+        {{ $t('navbar.send') }}
       </router-link>
-      <Wallet />
-      <div class="header__menu-button">
-        <div class="header__menu-button__icon">
-          <MenuIcon />
-        </div>
-      </div>
+
+      <Settings />
     </div>
   </header>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 
-import Wallet from '@/components/account/Wallet.vue';
-import Logo from '@/components/layout/Logo.vue';
+import Logo from '@/components/common/Logo.vue';
+import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
+import useAccount from '@/composables/useAccount';
+import { useStore } from '@/store';
 
-import MenuIcon from '../common/Icons/MenuIcon.vue';
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
 import IconButton from '../ui/IconButton.vue';
@@ -47,11 +47,23 @@ export default defineComponent({
   components: {
     Logo,
     Navbar,
-    Wallet,
     ReceiveIcon,
     SendIcon,
-    MenuIcon,
+    Settings,
     IconButton,
+  },
+  setup() {
+    const { redeemableBalances } = useAccount();
+    const store = useStore();
+    let tip = computed(() => {
+      return redeemableBalances.value.length == 1
+        ? (tip = 'You have 1 asset to redeem')
+        : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
+    });
+    const showBadge = computed(() => {
+      return store.getters['demeris/hasSeenReedem'] ? false : true;
+    });
+    return { redeemableBalances, tip, showBadge };
   },
 });
 </script>
@@ -62,72 +74,29 @@ export default defineComponent({
 }
 
 .header {
-  /* position: fixed; */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 10rem;
-  padding: 2rem;
-
+  padding: 0 3.2rem;
   display: flex;
+  height: 8rem;
   align-items: center;
-
-  /* padding: 20px; */
-
-  &__logo {
-    display: flex;
-
-    &_icon {
-      display: flex;
-      align-items: center;
-      margin-right: 12px;
-    }
-
-    &_text {
-      display: flex;
-      align-items: center;
-
-      &-title {
-        margin-right: 8px;
-
-        font-size: 2.4rem;
-        font-weight: bold;
-      }
-
-      &-status {
-        padding: 0.5rem 1.8rem;
-        font-size: 1.6rem;
-
-        color: #fff;
-        background-color: lightgrey;
-        border-radius: 20px;
-      }
-    }
-  }
+  justify-content: space-between;
 
   &__wallet {
     display: flex;
     align-items: center;
+
     &-button {
-      display: flex;
       font-size: 1.6rem;
+      font-weight: 600;
+      display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0rem 1.5rem;
+      padding: 0 1.6rem;
+      line-height: 4.8rem;
+
       &__icon {
         margin-right: 1rem;
       }
     }
-
-    /* &-image {
-      width: 26px;
-      height: 26px;
-
-      margin-right: 8px;
-
-      background-color: lightgray;
-      border-radius: 50%;
-    } */
 
     &__account {
       &-name {
@@ -142,12 +111,9 @@ export default defineComponent({
       }
     }
   }
-  &__menu-button {
-    margin-left: 2.5rem;
-    &__icon {
-      font-size: 2.2rem;
-      color: black;
-    }
+
+  &__settings-menu {
+    margin: 0 1.6rem 0 1rem;
   }
 }
 </style>

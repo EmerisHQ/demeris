@@ -6,8 +6,8 @@
       </button>
 
       <template #content>
-        <span v-if="hasCopied">Copied!</span>
-        <span v-else>Copy to clipboard</span>
+        <span v-if="hasCopied">{{ $t('components.clipBoard.copied') }}</span>
+        <span v-else>{{ $t('components.clipBoard.copy') }}</span>
       </template>
     </tippy>
   </div>

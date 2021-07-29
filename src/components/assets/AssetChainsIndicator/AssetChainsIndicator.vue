@@ -1,18 +1,30 @@
 <template>
-  <div class="asset-chains-indicator">
+  <div v-if="chainsCount > 1" class="asset-chains-indicator">
     <tippy class="asset-chains-indicator__wrapper">
-      <div class="asset-chains-indicator__list">
-        <span v-for="indicator of indicators" :key="indicator" class="asset-chains-indicator__list__item" />
+      <div v-if="showIndicators" class="asset-chains-indicator__list">
+        <CircleSymbol
+          v-for="indicator of indicators"
+          :key="indicator.on_chain"
+          :size="showDescription ? 'sm' : 'xs'"
+          :chain-name="indicator.on_chain"
+          variant="chain"
+          class="asset-chains-indicator__list__item"
+        />
       </div>
 
       <div class="asset-chains-indicator__count">
-        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template> </span>
-        chains
+        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
+        <span v-if="showDescription">&nbsp;{{ $t('context.assets.chains') }}</span>
       </div>
 
       <template #content>
         <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{ `${balance.amount} on ${balance.on_chain}` }}
+          {{
+            $t('context.assets.onchain', {
+              amount: formatPrecision(balance.amount),
+              chain: getChainName(balance.on_chain),
+            })
+          }}
         </p>
       </template>
     </tippy>
@@ -22,9 +34,16 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
+  name: 'AssetChainsIndicator',
+  components: {
+    CircleSymbol,
+  },
   props: {
     balances: {
       type: Object as PropType<Balances>,
@@ -33,6 +52,14 @@ export default defineComponent({
     denom: {
       type: String,
       required: true,
+    },
+    showDescription: {
+      type: Boolean,
+      default: true,
+    },
+    showIndicators: {
+      type: Boolean,
+      default: true,
     },
     maxIndicators: {
       type: Number,
@@ -45,15 +72,33 @@ export default defineComponent({
       default: 9,
     },
   },
-  setup(props: { maxChainsCount: number; maxIndicators: number; balances: Balances; denom: string }) {
+  setup(props) {
+    const store = useStore();
     const filteredBalances = computed(() => {
-      return props.balances
-        .filter((item) => item.base_denom === props.denom)
-        .sort((a, b) => (+b.amount > +a.amount ? 1 : -1));
+      return (
+        (props.balances as Balances)
+          ?.filter((item) => item.base_denom === props.denom)
+          .sort((a, b) => (+parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1)) ?? []
+      );
     });
-
+    const formatPrecision = (amount: string) => {
+      return (
+        parseInt(parseCoins(amount)[0].amount) /
+        Math.pow(
+          10,
+          store.getters['demeris/getDenomPrecision']({
+            name: props.denom,
+          }),
+        )
+      );
+    };
+    const getChainName = (chain_name) => {
+      return store.getters['demeris/getDisplayChain']({
+        name: chain_name,
+      });
+    };
     const chainsCount = computed(() => {
-      return Math.min(props.maxChainsCount, filteredBalances.value.length);
+      return Math.min(props.maxChainsCount as number, filteredBalances.value.length);
     });
 
     const hasMoreChains = computed(() => {
@@ -62,14 +107,22 @@ export default defineComponent({
 
     // TODO: Get indicator gradient color based in the chain name
     const indicators = computed(() => {
-      return filteredBalances.value.slice(0, props.maxIndicators);
+      return filteredBalances.value.slice(0, props.maxIndicators as number);
     });
 
     const hasMoreIndicators = computed(() => {
       return filteredBalances.value.length > indicators.value.length;
     });
 
-    return { chainsCount, hasMoreChains, indicators, hasMoreIndicators, filteredBalances };
+    return {
+      chainsCount,
+      hasMoreChains,
+      indicators,
+      hasMoreIndicators,
+      filteredBalances,
+      formatPrecision,
+      getChainName,
+    };
   },
 });
 </script>
@@ -84,28 +137,20 @@ export default defineComponent({
   }
 
   &__list {
-    // flex w-1/2 justify-end -space-x-5
     display: flex;
     justify-content: flex-end;
     width: 50%;
+    margin-right: 0.6rem;
 
     &__item {
-      width: 2.4rem;
-      height: 2.4rem;
-      background: white;
-      border-radius: 2.4rem;
-      border: 2px solid #9ffeed;
-
-      //  border-2 w-8 h-8 border-blue-300 bg-white
-
-      &:not(:first-child) {
-        margin-left: -1.6rem;
+      &:not(:last-child) {
+        margin-right: -1rem;
       }
     }
   }
 
   &__count {
-    margin-left: 0.8rem;
+    font-weight: 400;
     white-space: nowrap;
   }
 }

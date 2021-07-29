@@ -1,51 +1,44 @@
 <template>
-  <div class="connect-keplr" :class="{ 'connect-keplr--banner': showBanner }">
+  <div class="connect-keplr">
     <div class="connect-keplr__wrapper">
       <div class="connect-keplr__content">
-        <div v-if="!isConnecting">
+        <template v-if="!isConnecting">
           <slot name="title">
-            <h2 class="connect-keplr__title">Connect to Keplr</h2>
+            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
 
           <div class="connect-keplr__description">
             <slot name="description">
-              <p>Install Keplr in your browser and connect your wallet to start using Demeris.</p>
-              <p>Demeris will support other wallets in the near future.</p>
+              <p>{{ $t('wallet.connect.modal1.text') }}</p>
             </slot>
           </div>
 
           <div class="connect-keplr__controls">
-            <Button name="Connect to Keplr" @click="signIn" />
+            <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
 
             <a
-              href="https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en"
+              href="https://t.me/EmerisHQ"
               rel="noopener noreferrer"
               target="_blank"
               class="connect-keplr__controls__help s-minus"
             >
-              Don’t have Keplr installed?
+              {{ $t('wallet.connect.modal1.needHelp') }}
             </a>
           </div>
-        </div>
+        </template>
 
         <div v-else class="connect-keplr__connecting">
           <div class="connect-keplr__connecting__main">
             <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">Opening Keplr</span>
-            <p class="s-2">Connecting</p>
+            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
+            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
           </div>
 
-          <button class="connect-keplr__connecting__button" @click="cancel">Cancel</button>
+          <button class="connect-keplr__connecting__button" @click="cancel">
+            {{ $t('generic_cta.cancel') }}
+          </button>
         </div>
-      </div>
-
-      <div v-if="showBanner" class="connect-keplr__banner">
-        <img
-          class="connect-keplr__banner__logo"
-          :src="require('@/assets/images/keplr-wallet-logo.png')"
-          title="Keplr Wallet"
-        />
-        <div class="connect-keplr__banner__surfer" />
+        <ConnectBanner />
       </div>
     </div>
   </div>
@@ -59,20 +52,15 @@ import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
+import ConnectBanner from './ConnectBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
+    ConnectBanner,
     Spinner,
-  },
-
-  props: {
-    showBanner: {
-      type: Boolean,
-      default: true,
-    },
   },
 
   emits: ['cancel', 'connect'],
@@ -119,14 +107,13 @@ export default defineComponent({
     min-height: inherit;
   }
 
-  &--banner &__content {
-    width: 50%;
-  }
-
   &__content {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
     min-height: inherit;
     padding: 4.8rem;
+    text-align: center;
   }
 
   &__connecting {
@@ -173,37 +160,8 @@ export default defineComponent({
     }
   }
 
-  &__banner {
-    position: absolute;
-    background-image: url('~@/assets/images/gradient-light-2.png');
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: cover;
-    width: 50%;
-    height: 100%;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 4.8rem;
-
-    &__surfer {
-      content: '';
-      flex: 1 1 0%;
-      background-image: url('~@/assets/images/silver-surfer-1.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      width: 100%;
-      display: block;
-    }
-
-    &__logo {
-      width: 11rem;
-      margin: 0 auto;
-    }
-  }
-
   &__description {
+    flex: 1 1 0%;
     margin-top: 4rem;
     line-height: 1.8;
     color: var(--muted);

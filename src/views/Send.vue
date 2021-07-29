@@ -1,7 +1,12 @@
 <template>
   <div class="send">
     <header class="send__header">
-      <button v-if="showBackButton" class="send__header__button" @click="goBack">
+      <button
+        v-if="showBackButton"
+        :disabled="['move', 'send'].includes(step)"
+        class="send__header__button"
+        @click="goBack"
+      >
         <Icon name="ArrowLeftIcon" :icon-size="1.6" />
       </button>
 
@@ -67,9 +72,7 @@ import { useRoute, useRouter } from 'vue-router';
 import MoveForm from '@/components/transfer/MoveForm';
 import SendForm from '@/components/transfer/SendForm';
 import Icon from '@/components/ui/Icon.vue';
-import { Balances } from '@/types/api';
-
-import balancesFixture from '../../tests/fixtures/balances.json';
+import useAccount from '@/composables/useAccount';
 
 type TransferType = 'address' | 'move';
 
@@ -83,7 +86,7 @@ export default {
     const transferType = computed(() => route.params.type as TransferType);
     const step = ref(undefined);
 
-    const balances: Balances = balancesFixture;
+    const { balances } = useAccount();
 
     const showBackButton = computed(() => {
       return !!transferType.value;
@@ -132,6 +135,11 @@ export default {
       justify-content: center;
       border-radius: 0.8rem;
       padding: 0.6rem;
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--inactive);
+      }
     }
 
     .close-button {

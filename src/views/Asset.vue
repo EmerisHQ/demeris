@@ -2,97 +2,89 @@
   <AppLayout>
     <div class="asset">
       <div class="asset__main">
-        <div class="asset__main__back">
-          <router-link :to="{ name: 'Assets' }" class="asset__main__back__button">
-            <span class="asset__main__back__button__icon"><ArrowLeftIcon /></span>
-            <span>All assets</span>
-          </router-link>
-        </div>
+        <!-- Info -->
 
-        <!-- Stats -->
+        <section class="asset__main__info">
+          <p class="asset__main__info__denom">
+            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
+            <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
+            <span class="asset__main__info__denom__ticker title-0-normal"> <Ticker :name="denom" /></span>
+          </p>
+          <h1 class="asset__main__info__price title-2-bold">
+            <Price :amount="{ amount: 0, denom }" />
+          </h1>
+        </section>
 
-        <section class="asset__main__stats">
-          <div class="asset__main__stats__container">
-            <div class="asset__main__stats__container__left">
-              <p class="asset__main__stats__container__left__token">
-                {{ `${totalAmount}${$filters.getCoinName(denom)}` }}
-              </p>
-              <p class="asset__main__stats__container__left__balance">$13,184.45</p>
-              <span class="asset__main__stats__container__left__trending">
-                <span>15% (+$1,719.71)</span>
-              </span>
+        <!-- Balance -->
+
+        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="asset__main__buy-banner" variant="banner" />
+
+        <section v-else class="asset__main__balance">
+          <p class="asset__main__balance__label title-0-normal">Balance</p>
+          <h2 class="asset__main__balance__value title-3-bold">
+            <Price :amount="{ amount: totalAmount, denom }" />
+          </h2>
+          <span class="asset__main__balance__price title-0-normal">
+            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+          </span>
+
+          <dl class="asset__main__balance__card">
+            <div class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: availableAmount, denom }" />
+              </dd>
             </div>
 
-            <dl class="asset__main__stats__container__right">
-              <div class="asset__main__stats__container__right__available">
-                <dt>Available</dt>
-                <dd>$1,310.36</dd>
-              </div>
+            <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
+              </dd>
+            </div>
 
-              <div class="asset__main__stats__container__right__price">
-                <dt>Price</dt>
-                <dd>$20.50</dd>
-              </div>
-            </dl>
-          </div>
+            <div class="asset__main__balance__card__item">
+              <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
+              <dd class="asset__main__balance__card__value title-0-medium">
+                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+              </dd>
+            </div>
+          </dl>
         </section>
 
         <!-- Chains -->
 
-        <section class="asset__main__chains asset__list">
+        <section v-if="assets.length" class="asset__main__chains asset__list">
           <div class="asset__list__header">
             <h2 class="asset__list__header__title">Chains</h2>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
           </div>
 
           <ul class="asset__list__wrapper">
             <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
               <div class="asset__main__chains__item__asset">
-                <span class="asset__main__chains__item__asset__avatar" />
-                <span class="asset__main__chains__item__asset__denom">{{ asset.on_chain }}</span>
+                <CircleSymbol
+                  :denom="denom"
+                  :chain-name="asset.on_chain"
+                  class="asset__main__chains__item__asset__avatar"
+                  :glow="false"
+                />
+                <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
-              <span class="asset__main__chains__item__amount">{{ asset.amount }} {{ $filters.getCoinName(denom) }}</span>
+              <span class="asset__main__chains__item__amount">
+                <AmountDisplay
+                  v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
+                  :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                />
+                <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
+              </span>
               <div class="asset__main__chains__item__balance">
-                <span class="asset__main__chains__item__balance__value"> $3,690.50 </span>
-                <button class="asset__main__chains__item__more">
-                  <Icon name="SendIcon" :icon-size="1.2" />
-                </button>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        <!-- Staking -->
-
-        <section class="asset__main__staking asset__list">
-          <div class="asset__list__header">
-            <h2 class="asset__list__header__title">Staking</h2>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
-          </div>
-
-          <div class="asset__main__staking__rewards">
-            <span class="asset__main__staking__rewards__label">Rewards</span>
-            <span class="asset__main__staking__rewards__amount">0.495 ATOM</span>
-            <span class="asset__main__staking__rewards__balance">+$10.15</span>
-            <button class="asset__main__staking__rewards__button">Claim</button>
-          </div>
-
-          <ul class="asset__list__wrapper">
-            <li class="asset__list__item asset__main__staking__item">
-              <div class="asset__main__staking__item__validator">
-                <span class="asset__main__staking__item__validator__avatar"> N </span>
-                <span class="asset__main__staking__item__validator__name"> nylira </span>
-              </div>
-
-              <span class="asset__main__staking__item__amount"> 82.46 ATOM </span>
-
-              <div class="asset__main__staking__item__balance">
-                <span class="asset__main__staking__item__balance__value">$1,690.50</span>
-                <button class="asset__main__staking__item__more"><Icon name="CaretDownIcon" :icon-size="1.6" /></button>
+                <span class="asset__main__chains__item__balance__value">
+                  <Price
+                    v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
+                    :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
+                  />
+                  <Price v-else :amount="{ amount: asset.amount, denom }" />
+                </span>
               </div>
             </li>
           </ul>
@@ -103,14 +95,25 @@
         <section v-if="pools.length" class="asset__main__pools asset__list">
           <div class="asset__list__header">
             <p class="asset__list__header__title">Pools</p>
-            <button class="asset__list__header__button">
-              <PlusIcon class="asset__list__header__button__icon" />
-            </button>
+            <router-link :to="{ name: 'Pools' }" class="asset__list__header__button">
+              See all
+              <Icon name="ArrowRightIcon" :icon-size="1.6" />
+            </router-link>
           </div>
 
           <div class="asset__main__pools__wrapper">
             <Pools :pools="pools" />
           </div>
+        </section>
+
+        <!-- Staking -->
+
+        <section v-if="assetConfig?.stakable" class="asset__main__staking asset__list">
+          <div class="asset__list__header">
+            <h2 class="asset__list__header__title">Staking</h2>
+          </div>
+
+          <StakeTable class="asset__list__wrapper" :denom="denom" />
         </section>
       </div>
 
@@ -118,6 +121,8 @@
 
       <div class="asset__aside">
         <LiquiditySwap class="asset__aside__swap" />
+        <PoolBanner :name="denom" />
+        <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
       </div>
     </div>
   </AppLayout>
@@ -126,43 +131,90 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 
-import ArrowLeftIcon from '@/components/common/Icons/ArrowLeftIcon.vue';
-import PlusIcon from '@/components/common/Icons/PlusIcon.vue';
+import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
+import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
+import Price from '@/components/common/Price.vue';
+import StakeTable from '@/components/common/StakeTable.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { VerifiedDenoms } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Asset',
 
   components: {
+    AmountDisplay,
+    ChainName,
+    Denom,
+    Ticker,
+    CircleSymbol,
+    StakeTable,
     AppLayout,
+    Price,
     Icon,
-    PlusIcon,
-    ArrowLeftIcon,
     LiquiditySwap,
     Pools,
+    PoolBanner,
+    MoonpayBanner,
   },
 
   setup() {
+    const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
-    const { balancesByDenom } = useAccount();
+    const { balancesByDenom, stakingBalancesByChain } = useAccount();
     const { poolsByDenom } = usePools();
+
+    const assetConfig = computed(() => {
+      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
+      return verifiedDenoms.find((item) => item.name === denom.value);
+    });
 
     const assets = computed(() => balancesByDenom(denom.value));
     const pools = computed(() => poolsByDenom(denom.value));
 
-    const totalAmount = computed(() => {
-      return assets.value.reduce((acc, item) => acc + item.amount, 0);
+    const availableAmount = computed(() => {
+      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
-    return { denom, assets, pools, totalAmount };
+    const stakingBalance = computed(() => {
+      if (assetConfig.value && assetConfig.value.chain_name) {
+        return stakingBalancesByChain(assetConfig.value.chain_name);
+      }
+      return 0;
+    });
+
+    const stakedAmount = computed(() => {
+      let staked = stakingBalance.value;
+      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
+        return parseFloat(staked[0].amount);
+      }
+      return 0;
+    });
+
+    // TODO: get true pooled amount
+    const pooledAmount = computed(() => {
+      return 0;
+    });
+
+    const totalAmount = computed(() => {
+      return availableAmount.value + stakedAmount.value + pooledAmount.value;
+    });
+
+    return { assetConfig, denom, assets, pools, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });
 </script>
@@ -173,85 +225,70 @@ export default defineComponent({
   margin-bottom: 2rem;
   font-size: 1.6rem;
   padding-bottom: 4rem;
+  justify-content: space-between;
 
   &__main {
     display: flex;
     flex-direction: column;
     width: 60%;
 
-    &__back {
-      &__button {
-        display: flex;
+    &__info {
+      display: flex;
+      &__denom,
+      &__price {
+        flex: 1;
+      }
+      &__denom {
+        display: inline-flex;
         align-items: center;
-        font-weight: 600;
-        padding: 0.8rem 0;
 
-        &__icon {
-          margin-right: 0.4rem;
-
-          svg {
-            width: 2rem;
-            height: 2rem;
-          }
+        &__symbol {
+          margin-right: 1.2rem;
+          position: relative;
         }
+        &__name {
+          margin-right: 1.2rem;
+        }
+        &__ticker {
+          color: var(--muted);
+        }
+      }
+      &__price {
+        text-align: right;
       }
     }
 
-    &__stats {
-      margin-top: 3.2rem;
-      display: flex;
-      flex-direction: column;
-
-      &__container {
+    &__buy-banner {
+      margin-top: 6.4rem;
+    }
+    &__balance {
+      margin-top: 6.4rem;
+      &__label {
+        color: var(--muted);
+      }
+      &__price {
+        color: var(--muted);
+      }
+      &__card {
+        margin-top: 2.6rem;
+        border: 1px solid var(--border-trans);
+        border-radius: 1.2rem;
+        padding: 1.6rem;
         display: flex;
+        align-items: center;
+        justify-content: space-between;
 
-        &__left {
-          display: flex;
-          flex-direction: column;
-
-          &__token {
-            font-weight: 700;
-            font-size: 2.8rem;
-            line-height: 1;
-          }
-
-          &__balance {
-            margin-top: 0.8rem;
-            font-weight: 700;
-            font-size: 6.7rem;
-            line-height: 1.3;
-          }
-
-          &__trending {
-            margin-top: 0.8rem;
-            font-weight: 500;
-            color: rgb(6, 126, 62);
-          }
+        &__item {
+          flex: 1;
         }
-
-        &__right {
-          margin-left: 6rem;
-          display: flex;
-          flex-direction: column;
-
-          dt {
-            color: var(--muted);
-          }
-
-          dd {
-            margin-top: 0.3rem;
-            font-weight: 600;
-            font-size: 2.1rem;
-          }
-
-          &__price {
-            margin-top: 3.2rem;
-          }
+        &__label {
+          color: var(--muted);
         }
       }
     }
 
     &__chains {
+      margin-top: 6.4rem;
       &__item {
         &__asset {
           flex: 1 1 0%;
@@ -259,12 +296,20 @@ export default defineComponent({
           align-items: center;
 
           &__avatar {
-            width: 3.2rem;
-            height: 3.2rem;
-            border-radius: 2.4rem;
-            background-color: rgba(0, 0, 0, 0.1);
+            position: relative;
+            &:before {
+              display: block;
+              content: '';
+              width: 2.6rem;
+              height: 2.6rem;
+              position: absolute;
+              top: 0.3rem;
+              left: 0.3rem;
+              border-radius: 1.3rem;
+              background: var(--bg);
+              z-index: 5;
+            }
           }
-
           &__denom {
             margin-left: 1.6rem;
             font-weight: 600;
@@ -404,17 +449,18 @@ export default defineComponent({
 
   &__aside {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-left: 3.2rem;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: 6.4rem;
+    width: 32rem;
 
-    &__swap {
-      width: 80%;
+    &__buy {
+      margin-top: 2.6rem;
     }
   }
 
   &__list {
-    margin-top: 7rem;
+    margin-top: 6.4rem;
     display: flex;
     flex-direction: column;
 
@@ -423,23 +469,25 @@ export default defineComponent({
       align-items: center;
       justify-content: space-between;
 
+      &__button {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+
+        .icon {
+          margin-left: 0.6rem;
+        }
+      }
+
       &__title {
         font-size: 2.8rem;
         font-weight: 700;
-      }
-
-      &__button {
-        padding: 1rem;
-
-        &__icon {
-          width: 2.2rem;
-          height: 2.2rem;
-        }
       }
     }
 
     &__wrapper {
       margin-top: 3.2rem;
+      margin-bottom: 1rem;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -454,10 +502,6 @@ export default defineComponent({
     &__item + &__item {
       margin-top: 3.2rem;
     }
-  }
-
-  &__list + &__list {
-    margin-top: 7rem;
   }
 }
 </style>
