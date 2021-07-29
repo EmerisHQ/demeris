@@ -482,13 +482,13 @@ export async function move({
         const invPrimaryChannel =
           store.getters['demeris/getPrimaryChannel']({
             chain_name: destination_chain_name,
-            destination_chain_name: chain_name,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await store.dispatch(
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
+              params: { chain_name: destination_chain_name, destination_chain_name: verifyTrace.trace[0].counterparty_name },
             },
             { root: true },
           ));
