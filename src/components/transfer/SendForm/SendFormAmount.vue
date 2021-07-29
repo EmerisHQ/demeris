@@ -299,7 +299,7 @@ export default defineComponent({
           return;
         }
 
-        const avaiableAssets = [];
+        const availableAssets = [];
         for (const nativeDenom of chain.denoms) {
           let asset = sortedBalances.find(
             (item) => item.on_chain === chain.chain_name && item.base_denom === nativeDenom.name,
@@ -309,16 +309,16 @@ export default defineComponent({
             asset = sortedBalances.find((item) => item.base_denom === nativeDenom.name);
           }
           if (asset) {
-            avaiableAssets.push(asset);
+            availableAssets.push(asset);
           }
         }
 
-        if (!avaiableAssets.length) {
+        if (!availableAssets.length) {
           setCurrentAsset(sortedBalances[0]);
           return;
         }
 
-        setCurrentAsset(avaiableAssets[0]);
+        setCurrentAsset(availableAssets[0]);
       } catch (e) {
         setCurrentAsset(props.balances[0]);
       }
