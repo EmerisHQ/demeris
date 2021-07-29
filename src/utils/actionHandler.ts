@@ -488,7 +488,10 @@ export async function move({
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+              params: {
+                chain_name: destination_chain_name,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              },
             },
             { root: true },
           ));
@@ -1450,7 +1453,7 @@ export async function validateStepFeeBalances(
     }
     if (stepTx.name == 'createpool') {
       const data = stepTx.data as Actions.CreatePoolData;
-      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee;
+      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
       const feeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
@@ -1748,6 +1751,7 @@ export async function validateStepFeeBalances(
       }
     }
   }
+  console.log(feeWarning);
   return feeWarning;
 }
 
