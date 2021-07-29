@@ -22,7 +22,7 @@
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            Something went wrong, reverting transfer...
+            {{ $t('components.txHandlingModal.somethingWentWrong') }}
             <!-- <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" /> -->
           </template>
           <template v-if="tx.name == 'transfer'">

@@ -111,6 +111,7 @@ export const messages = {
         signError: 'Transaction not signed!',
         tryAgain: 'Try again',
         pleaseWait: 'Please wait',
+        somethingWentWrong: 'Something went wrong, reverting transfer...',
         genericAction: 'Transacting',
         transferAction: 'Transferring',
         swapAction: 'Swapping',
