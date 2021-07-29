@@ -113,8 +113,6 @@ export default {
       }
     });
 
-    console.log('native balances ');
-
     return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
