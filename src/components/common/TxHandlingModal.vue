@@ -274,7 +274,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const iconType = computed(() => {
-      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
+      if (props.status == 'keplr-sign') {
         return 'pending';
       }
       if (props.status == 'keplr-reject') {
@@ -321,10 +321,11 @@ export default defineComponent({
             break;
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
-              subTitle.value = t('components.txHandlingModal.ibcTransferInfo');
+              subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
               alertTime.value = setTimeout(() => {
                 if (props.status === 'transacting') {
-                  subTitle.value = t('components.txHandlingModal.delay');
+                  title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
+                  subTitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
                 }
               }, 60000);
             } else {

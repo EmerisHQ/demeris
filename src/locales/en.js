@@ -110,9 +110,10 @@ export const messages = {
         signTx: 'Signing transaction',
         signError: 'Transaction not signed!',
         tryAgain: 'Try again',
-        ibcTransferInfo: 'This can take up to 30 seconds',
-        delay:
-          'Transfer is taking longer than expected. If no further progress is made, please wait up to 4 minutes for transfer to be reverted',
+        ibcTransferSubtitle: 'This may take up to 1 minute',
+        ibcTransferDelayTitle: 'Still transferring…',
+        ibcTransferDelaySubtitle:
+          'Your transaction appears to be taking longer than expected. If the transfer is not complete in 4 minutes, it will be reverted.',
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong, reverting transfer...',

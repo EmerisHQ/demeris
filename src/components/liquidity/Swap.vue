@@ -682,7 +682,7 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData.denom, data.receiveCoinData];
+        return [data.payCoinData?.denom, data.receiveCoinData];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
