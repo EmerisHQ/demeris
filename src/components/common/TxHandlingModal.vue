@@ -310,13 +310,13 @@ export default defineComponent({
           case 'keplr-sign':
             subTitle.value = t('components.txHandlingModal.openKeplr');
             title.value = t('components.txHandlingModal.signTx');
-            whiteButton.value = t('components.txHandlingModal.cancel');
+            whiteButton.value = t('generic_cta.cancel');
             blackButton.value = '';
             break;
           case 'keplr-reject':
             subTitle.value = '';
             title.value = t('components.txHandlingModal.signError');
-            whiteButton.value = t('components.txHandlingModal.cancel');
+            whiteButton.value = t('generic_cta.cancel');
             blackButton.value = t('components.txHandlingModal.tryAgain');
             break;
           case 'transacting':
@@ -360,7 +360,7 @@ export default defineComponent({
           case 'complete':
             subTitle.value = '';
             if (props.isFinal && !props.hasMore) {
-              blackButton.value = t('components.txHandlingModal.done');
+              blackButton.value = t('generic_cta.done');
               if (props.tx.name === 'swap') {
                 whiteButton.value = `Send ${
                   Math.trunc(
@@ -377,7 +377,9 @@ export default defineComponent({
                 whiteButton.value = t('components.txHandlingModal.reset');
               }
             } else {
-              props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
+              props.hasMore
+                ? (blackButton.value = t('components.txHandlingModal.next'))
+                : (blackButton.value = t('generic_cta.continue'));
               whiteButton.value = '';
             }
             switch ((props.tx as StepTransaction).name) {
@@ -393,43 +395,45 @@ export default defineComponent({
                 break;
               case 'swap':
                 if (props.txResult.swappedPercent !== 100) {
-                  title.value = `Assets partially swapped (${parseInt(props.txResult.swappedPercent)}%)`;
+                  title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
+                    swappedPercent: parseInt(props.txResult.swappedPercent),
+                  });
                 } else {
-                  title.value = t('components.txHandlingModal.swapSuccess');
+                  title.value = t('components.txHandlingModal.swapActionComplete');
                 }
                 break;
               case 'addliquidity':
-                title.value = 'components.txHandlingModal.addLiqSuccess';
+                title.value = t('components.txHandlingModal.addLiqActionComplete');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Liquidity withdrawn';
+                title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
                 break;
               case 'createpool':
-                title.value = 'Pool created';
+                title.value = t('components.txHandlingModal.createPoolActionComplete');
                 break;
             }
             break;
           case 'failed':
-            title.value = 'Transaction failed';
+            title.value = t('components.txHandlingModal.txFail');
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'swap':
-                title.value = 'Swap failed';
+                title.value = t('components.txHandlingModal.swapActionFail');
                 break;
               case 'addliquidity':
-                title.value = 'Add liquidity failed';
+                title.value = t('components.txHandlingModal.addLiqActionFail');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Withdraw liquidity failed';
+                title.value = t('components.txHandlingModal.withdrawLiqActionFail');
                 break;
               case 'createpool':
-                title.value = 'Create pool failed';
+                title.value = t('components.txHandlingModal.createPoolActionFail');
                 break;
             }
 
             subTitle.value = '';
-            whiteButton.value = 'Cancel';
-            blackButton.value = 'Try again';
+            whiteButton.value = t('generic_cta.cancel');
+            blackButton.value = t('components.txHandlingModal.tryAgain');
             break;
         }
       },

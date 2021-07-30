@@ -108,7 +108,6 @@ export const messages = {
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
         signTx: 'Signing transaction',
-        cancel: 'Cancel',
         signError: 'Transaction not signed!',
         tryAgain: 'Try again',
         ibcTransferInfo: 'This can take up to 30 seconds',
@@ -120,21 +119,27 @@ export const messages = {
         genericAction: 'Transacting',
         transferAction: 'Transferring',
         swapAction: 'Swapping',
-        swapSuccess: 'Assets swapped',
         createPoolAction: 'Creating pool',
         addLiqAction: 'Adding liquidity',
         withdrawLiqAction: 'Withdrawing liquidity',
         withdrawing: 'Withdrawing',
-        done: 'Done',
         transferred: 'transferred',
+
         reset: 'Send another',
         next: 'Next transaction',
+
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
+        swapActionPartiallyComplete: `Assets partially swapped ({swappedPercent}%)`,
         createPoolActionComplete: 'Pool created',
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
+
+        swapActionFail: 'Swap failed',
+        createPoolActionFail: 'Create pool failed',
+        addLiqActionFail: 'Add liquidity failed',
+        withdrawLiqActionFail: 'Withdraw liquidity failed',
         txFail: 'Transaction failed',
       },
       swap: {
