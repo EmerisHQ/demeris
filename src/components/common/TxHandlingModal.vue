@@ -23,7 +23,6 @@
         <template v-if="status == 'failed'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
             {{ $t('components.txHandlingModal.somethingWentWrong') }}
-            <!-- <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" /> -->
           </template>
           <template v-if="tx.name == 'transfer'">
             <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
@@ -309,60 +308,59 @@ export default defineComponent({
       async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
-            subTitle.value = 'Opening Keplr';
-            title.value = 'Sign transaction';
-            whiteButton.value = 'Cancel';
+            subTitle.value = t('components.txHandlingModal.openKeplr');
+            title.value = t('components.txHandlingModal.signTx');
+            whiteButton.value = t('components.txHandlingModal.cancel');
             blackButton.value = '';
             break;
           case 'keplr-reject':
             subTitle.value = '';
-            title.value = 'Transaction not signed!';
-            whiteButton.value = 'Cancel';
-            blackButton.value = 'Try again';
+            title.value = t('components.txHandlingModal.signError');
+            whiteButton.value = t('components.txHandlingModal.cancel');
+            blackButton.value = t('components.txHandlingModal.tryAgain');
             break;
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
-              subTitle.value = 'This can take up to 30 seconds';
+              subTitle.value = t('components.txHandlingModal.ibcTransferInfo');
               alertTime.value = setTimeout(() => {
                 if (props.status === 'transacting') {
-                  subTitle.value =
-                    'Transfer is taking longer than expected. If no further progress is made, please wait up to 4 minutes for transfer to be reverted';
+                  subTitle.value = t('components.txHandlingModal.delay');
                 }
               }, 60000);
             } else {
-              subTitle.value = 'Transaction in progress';
+              subTitle.value = t('components.txHandlingModal.txProgress');
             }
             whiteButton.value = '';
             blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'ibc_backward':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'transfer':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'swap':
-                title.value = 'Please Wait';
+                title.value = t('components.txHandlingModal.pleaseWait');
                 break;
               case 'addliquidity':
-                title.value = 'Adding liquidity';
+                title.value = t('components.txHandlingModal.addLiqAction');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Withdrawing';
+                title.value = t('components.txHandlingModal.withdrawing');
                 break;
               case 'createpool':
-                title.value = 'Creating pool';
+                title.value = t('components.txHandlingModal.createPoolAction');
                 break;
             }
             break;
           case 'complete':
             subTitle.value = '';
             if (props.isFinal && !props.hasMore) {
-              blackButton.value = 'Done';
+              blackButton.value = t('components.txHandlingModal.done');
               if (props.tx.name === 'swap') {
                 whiteButton.value = `Send ${
                   Math.trunc(
@@ -376,7 +374,7 @@ export default defineComponent({
                   ) / 100
                 } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
               } else {
-                whiteButton.value = 'Send another';
+                whiteButton.value = t('components.txHandlingModal.reset');
               }
             } else {
               props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
@@ -385,23 +383,23 @@ export default defineComponent({
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'ibc_backward':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'transfer':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'swap':
                 if (props.txResult.swappedPercent !== 100) {
                   title.value = `Assets partially swapped (${parseInt(props.txResult.swappedPercent)}%)`;
                 } else {
-                  title.value = 'Assets swapped';
+                  title.value = t('components.txHandlingModal.swapSuccess');
                 }
                 break;
               case 'addliquidity':
-                title.value = 'Liquidity added';
+                title.value = 'components.txHandlingModal.addLiqSuccess';
                 break;
               case 'withdrawliquidity':
                 title.value = 'Liquidity withdrawn';
