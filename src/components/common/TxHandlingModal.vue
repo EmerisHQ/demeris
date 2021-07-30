@@ -22,7 +22,7 @@
       <div class="status__title-sub w-normal s-0">
         <template v-if="status == 'failed'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            {{ $t('components.txHandlingModal.somethingWentWrong') }}
+            <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
           </template>
           <template v-if="tx.name == 'transfer'">
             <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
@@ -49,18 +49,21 @@
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
         <template v-if="status == 'transacting' || status == 'complete'">
+          <div class="status__detail-subtitle-under w-normal s-0">{{ subTitleUnder }}</div>
           <div v-if="status === 'transacting'" class="status__detail-transferring">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
               <div class="arrow">-></div>
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
             </template>
+
             <template v-if="tx.name == 'transfer'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
               <div class="arrow">-></div>
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
             </template>
           </div>
+
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
@@ -274,7 +277,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const iconType = computed(() => {
-      if (props.status == 'keplr-sign') {
+      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
       }
       if (props.status == 'keplr-reject') {
@@ -289,6 +292,7 @@ export default defineComponent({
     //Set default texts
     const subTitle = ref(t('components.txHandlingModal.openKeplr'));
     const title = ref(t('components.txHandlingModal.signTx'));
+    const subTitleUnder = ref('');
     const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
     const baseDenoms = reactive({});
@@ -322,13 +326,16 @@ export default defineComponent({
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
               subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
+              subTitleUnder.value = '';
               alertTime.value = setTimeout(() => {
                 if (props.status === 'transacting') {
                   title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
-                  subTitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
+                  subTitle.value = '';
+                  subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
                 }
-              }, 60000);
+              }, 1000);
             } else {
+              subTitleUnder.value = '';
               subTitle.value = t('components.txHandlingModal.txProgress');
             }
             whiteButton.value = '';
@@ -439,7 +446,7 @@ export default defineComponent({
         }
       },
     );
-
+    //  {{ $t('components.txHandlingModal.somethingWentWrong') }}
     onMounted(async () => {
       let denoms = [];
       let chain = undefined;
@@ -500,6 +507,7 @@ export default defineComponent({
       iconType,
       subTitle,
       title,
+      subTitleUnder,
       whiteButton,
       blackButton,
       router,
@@ -565,9 +573,8 @@ export default defineComponent({
       width: 32rem;
     }
 
-    &-none {
-      height: 2.4rem;
-    }
+    /* &-none {
+    } */
   }
 
   &__detail {
@@ -596,6 +603,11 @@ export default defineComponent({
         color: var(--inactive);
         font-weight: bold;
       }
+    }
+
+    &-subtitle-under {
+      margin-top: 8px;
+      color: var(--muted);
     }
 
     &-text,
