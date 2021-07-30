@@ -259,7 +259,7 @@ export default defineComponent({
   }
 
   &--lg {
-    --symbol-size: 4rem;
+    --symbol-size: 4.2rem;
   }
 
   &--xl {

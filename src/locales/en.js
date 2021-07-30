@@ -15,6 +15,7 @@ export const messages = {
       getAtom: 'Get ATOM',
       proceed: 'Proceed',
       learnMore: 'Learn more',
+      get: 'Get',
     },
     navbar: {
       portfolio: 'Portfolio',
