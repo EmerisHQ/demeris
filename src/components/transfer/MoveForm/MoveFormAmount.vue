@@ -58,7 +58,13 @@
         </div>
         <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
           <div class="move-form-amount__input">
-            <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
+            <FlexibleAmountInput
+              v-model="form.balance.amount"
+              :max-width="250"
+              :min-width="35"
+              placeholder="0"
+              @input="state.isMaximumAmountChecked = false"
+            >
               <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
             </FlexibleAmountInput>
           </div>
@@ -216,6 +222,10 @@ export default defineComponent({
       type: Object as PropType<Balances>,
       required: true,
     },
+    fees: {
+      type: Object,
+      default: undefined,
+    },
   },
 
   emits: ['next'],
@@ -232,6 +242,20 @@ export default defineComponent({
       isChainsModalOpen: false,
       chainsModalSource: 'from',
       usdValue: '',
+    });
+
+    const feesAmount = computed(() => {
+      const result = {};
+
+      if (props.fees) {
+        for (const [, obj] of Object.entries(props.fees)) {
+          for (const [denom, value] of Object.entries(obj)) {
+            result[denom] = value;
+          }
+        }
+      }
+
+      return result;
     });
 
     const displayUSDValue = computed(() => {
@@ -286,9 +310,11 @@ export default defineComponent({
         return false;
       }
 
-      const cryptoAmount = +form.balance.amount * denomDecimals.value;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
+      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
-      return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
     });
 
     const isValid = computed(() => {
@@ -341,11 +367,14 @@ export default defineComponent({
 
     // TODO: Select chain based in user option
     watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset],
+      () => [state.isMaximumAmountChecked, state.currentAsset, props.fees],
       () => {
         if (state.isMaximumAmountChecked) {
-          const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
-          form.balance.amount = (assetAmount / denomDecimals.value).toString();
+          const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+          const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+
+          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
           return;
         }
       },

@@ -166,6 +166,7 @@ export interface Actions {
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
+  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
@@ -259,6 +260,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.INIT](
     ...args: Parameters<Actions[DemerisActionTypes.INIT]>
   ): ReturnType<Actions[DemerisActionTypes.INIT]>;
+  [GlobalDemerisActionTypes.SIGN_OUT](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_OUT]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_OUT]>;
   [GlobalDemerisActionTypes.RESET_STATE](
     ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
   ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
@@ -777,6 +781,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
+  },
+  [DemerisActionTypes.SIGN_OUT]({ commit }) {
+    commit(DemerisMutationTypes.SIGN_OUT);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach((subscription_json) => {

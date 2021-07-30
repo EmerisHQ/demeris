@@ -373,7 +373,7 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances } = usePool(
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
     );
 
@@ -419,16 +419,14 @@ export default {
         return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
       }
 
-      
       if (reserveBalances.value?.length) {
         return new BigNumber(reserveBalances.value[1].amount)
           .dividedBy(reserveBalances.value[0].amount)
           .shiftedBy(6)
           .toNumber();
       }
-      
+
       return undefined;
-      
     });
 
     const hasSufficientFunds = computed(() => {
@@ -697,19 +695,21 @@ export default {
         return;
       }
 
+      const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+      const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      form.coinA.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceA)
-        .decimalPlaces(6)
-        .toString();
-      form.coinB.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceB)
-        .decimalPlaces(6)
-        .toString();
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+
+      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+
+      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
       updateReceiveAmount();
     };
 
@@ -775,37 +775,29 @@ export default {
 
             const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
 
-            const bigAmountA = new BigNumber(amountA)
-              .minus(feeA)
-            
-            const bigAmountB = new BigNumber(amountB)
-              .minus(feeB)
-            
+            const bigAmountA = new BigNumber(amountA).minus(feeA);
+
+            const bigAmountB = new BigNumber(amountB).minus(feeB);
+
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
-            
 
             if (minAmount.isEqualTo(bigAmountA)) {
-              form.coinA.amount = bigAmountA
-                .shiftedBy(-precisionA)
-                .decimalPlaces(precisionA)
-                .toString();
+              form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
 
-              form.coinB.amount = bigAmountA.multipliedBy(bigExchangeAmount)
+              form.coinB.amount = bigAmountA
+                .multipliedBy(bigExchangeAmount)
                 .shiftedBy(-precisionB)
                 .decimalPlaces(precisionB)
                 .toString();
             } else {
-              form.coinB.amount = bigAmountB
-                .shiftedBy(-precisionB)
-                .decimalPlaces(precisionB)
-                .toString();
-                
-              form.coinA.amount = bigAmountB.dividedBy(bigExchangeAmount)
+              form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
+
+              form.coinA.amount = bigAmountB
+                .dividedBy(bigExchangeAmount)
                 .shiftedBy(-precisionA)
                 .decimalPlaces(precisionA)
                 .toString();
             }
-
           }
 
           updateReceiveAmount();
