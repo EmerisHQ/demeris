@@ -199,7 +199,7 @@
       </div>
 
       <div v-if="state.currentAsset && hasPrice && !hasFunds" class="move-form-amount__buy">
-        <button class="move-form-amount__buy__button elevation-button">
+        <button class="move-form-amount__buy__button elevation-button" @click="openAssetPage">
           <div class="inline-flex items-center">
             <span>{{ $t('generic_cta.get') }}&nbsp;</span>
             <Denom :name="state.currentAsset.base_denom" />
@@ -219,6 +219,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -273,6 +274,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const form = inject<MoveAssetsForm>('moveForm');
+    const router = useRouter();
+
     const { nativeBalances } = useAccount();
 
     const state = reactive({
@@ -426,6 +429,10 @@ export default defineComponent({
       emit('next');
     };
 
+    const openAssetPage = () => {
+      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+    };
+
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       const dexChain = store.getters['demeris/getDexChain'];
       const targetChains = Object.values(store.getters['demeris/getChains']).filter(
@@ -501,6 +508,7 @@ export default defineComponent({
       denomDecimals,
       toggleDenomModal,
       toggleChainsModal,
+      openAssetPage,
       availableRecipientsChains,
     };
   },
