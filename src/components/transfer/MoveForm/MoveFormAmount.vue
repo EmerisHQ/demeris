@@ -549,6 +549,7 @@ export default defineComponent({
         }
         input:disabled + span {
           color: var(--inactive);
+          cursor: not-allowed;
         }
       }
       span {

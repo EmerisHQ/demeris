@@ -6,7 +6,7 @@ export const messages = {
       cancel: 'Cancel',
       confirm: 'Confirm',
       continue: 'Continue',
-      noFunds: 'Insufficient Funds',
+      noFunds: 'Insufficient funds',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try again with another search',
       discoverMore: 'Discover more',
