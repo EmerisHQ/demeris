@@ -47,8 +47,7 @@ export default defineComponent({
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
-        // key currently from Cosmostation
-        apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
+        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
         walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
