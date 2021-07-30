@@ -26,16 +26,19 @@
         <h2 class="withdraw-liquidity__title s-2">Withdraw liquidity</h2>
 
         <div class="withdraw-liquidity__pool">
-          <div class="withdraw-liquidity__pool__pair">
-            <span class="withdraw-liquidity__pool__pair__avatar token-a" />
-            <span class="withdraw-liquidity__pool__pair__avatar token-b" />
-          </div>
-
           <span class="withdraw-liquidity__pool__name">{{ pairName }}</span>
         </div>
 
-        <div class="withdraw-liquidity__estimated">
-          <span class="withdraw-liquidity__estimated__price s-2 w-bold">{{ totalEstimatedPrice }}</span>
+        <div v-if="hasPrices" class="withdraw-liquidity__estimated">
+          <FlexibleAmountInput
+            v-model="state.totalEstimatedPrice"
+            :max-width="250"
+            :min-width="32"
+            prefix="$"
+            placeholder="0"
+            class="withdraw-liquidity__estimated__price s-2 w-bold"
+            @input="currencyAmountHandler"
+          />
           <label class="withdraw-liquidity__estimated__max">
             <input v-model="state.isMaximumAmountChecked" type="checkbox" name="withdraw-liquidity__max" />
             <span class="elevation-button">Max</span>
@@ -63,7 +66,7 @@
                   :input-header="``"
                   :selected-denom="state.selectedAsset"
                   :assets="[]"
-                  @change="denomChangeHandler"
+                  @change="coinPoolChangeHandler"
                 />
               </div>
             </div>
@@ -87,11 +90,11 @@
               <label class="withdraw-liquidity__input__label s-minus">Receive</label>
               <div class="withdraw-liquidity__input__select-wrapper token-a">
                 <DenomSelect
-                  :amount="receiveAmounts.coinA.amount"
+                  v-model:amount="state.receiveAmounts.coinA.amount"
                   :input-header="``"
                   :selected-denom="{ base_denom: reserveBaseDenoms[0], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
-                  :readonly="true"
+                  @change="coinAChangeHandler"
                   @select="() => void 0"
                 />
               </div>
@@ -100,22 +103,22 @@
 
               <div class="withdraw-liquidity__input__select-wrapper token-b">
                 <DenomSelect
-                  :amount="receiveAmounts.coinB.amount"
+                  v-model:amount="state.receiveAmounts.coinB.amount"
                   :input-header="``"
                   :selected-denom="{ base_denom: reserveBaseDenoms[1], on_chain: state.selectedAsset.on_chain }"
                   :assets="[]"
-                  :readonly="true"
+                  @change="coinBChangeHandler"
                   @select="() => void 0"
                 />
               </div>
             </div>
           </div>
 
-          <div class="withdraw-liquidity__price">
+          <div v-if="exchangeAmount" class="withdraw-liquidity__price">
             <span class="withdraw-liquidity__price__label">Pool price</span>
             <span class="withdraw-liquidity__price__label">
-              <AmountDisplay :amount="{ amount: 1e6, denom: receiveAmounts.coinB.denom }" /> =
-              <AmountDisplay :amount="{ amount: 1e6, denom: receiveAmounts.coinA.denom }" />
+              <AmountDisplay :amount="{ amount: 1e6, denom: reserveBaseDenoms[1] }" /> =
+              <AmountDisplay :amount="{ amount: exchangeAmount, denom: reserveBaseDenoms[0] }" />
             </span>
           </div>
 
@@ -131,7 +134,12 @@
             />
 
             <div class="withdraw-liquidity__controls__fees">
-              <FeeLevelSelector v-if="actionSteps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="actionSteps" />
+              <FeeLevelSelector
+                v-if="actionSteps.length > 0"
+                v-model:gasPriceLevel="state.gasPrice"
+                :steps="actionSteps"
+                @update:fees="state.fees = $event"
+              />
             </div>
           </div>
         </div>
@@ -141,7 +149,7 @@
         <div class="withdraw-liquidity__content">
           <TxStepsModal
             :data="actionSteps"
-            :gas-price-level="gasPrice"
+            :gas-price-level="state.gasPrice"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
             @reset="resetHandler"
@@ -154,6 +162,7 @@
 
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
+import BigNumber from 'bignumber.js';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -164,6 +173,7 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -185,6 +195,7 @@ export default {
     ChainSelectModal,
     FeeLevelSelector,
     TxStepsModal,
+    FlexibleAmountInput,
   },
 
   setup() {
@@ -193,9 +204,6 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
-    });
 
     const poolId = computed(() => route.params.id);
 
@@ -206,15 +214,59 @@ export default {
 
     const state = reactive({
       step: 'amount',
-      amount: 0,
+      amount: '',
       isChainsModalOpen: false,
       isMaximumAmountChecked: false,
       selectedAsset: undefined,
+      fees: {},
+      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
+      totalEstimatedPrice: '',
+      receiveAmounts: {
+        coinA: {
+          amount: '',
+          denom: '',
+        },
+        coinB: {
+          amount: '',
+          denom: '',
+        },
+      },
     });
 
-    const { pool, pairName, calculateWithdrawBalances, reserveBaseDenoms } = usePool(
-      computed(() => poolId.value as string),
-    );
+    const feesAmount = computed(() => {
+      const result = {};
+
+      if (state.fees) {
+        for (const [, obj] of Object.entries(state.fees)) {
+          for (const [denom, value] of Object.entries(obj)) {
+            result[denom] = value;
+          }
+        }
+      }
+
+      return result;
+    });
+
+    const {
+      pool,
+      pairName,
+      calculateWithdrawBalances,
+      calculateSupplyTokenAmount,
+      reserveBaseDenoms,
+      reserveBalances,
+      totalSupply,
+    } = usePool(computed(() => poolId.value as string));
+
+    const exchangeAmount = computed(() => {
+      if (reserveBalances.value?.length) {
+        return new BigNumber(reserveBalances.value[1].amount)
+          .dividedBy(reserveBalances.value[0].amount)
+          .shiftedBy(6)
+          .toNumber();
+      }
+
+      return undefined;
+    });
 
     const dexChain = computed(() => {
       return store.getters['demeris/getDexChain'];
@@ -238,13 +290,30 @@ export default {
         return false;
       }
 
-      const cryptoAmount = state.amount * 1e6;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
+      const amount = new BigNumber(state.amount || 0).shiftedBy(precision);
+      const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
-      return +parseCoins(state.selectedAsset.amount)[0].amount >= cryptoAmount;
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.selectedAsset.amount)[0].amount);
+    });
+
+    const hasPrices = computed(() => {
+      if (!reserveBaseDenoms.value.length) {
+        return false;
+      }
+
+      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+
+      if (!priceA || !priceB) {
+        return false;
+      }
+
+      return true;
     });
 
     const isValid = computed(() => {
-      if (state.amount <= 0) {
+      if (+state.amount <= 0) {
         return false;
       }
 
@@ -255,39 +324,102 @@ export default {
       return true;
     });
 
-    const receiveAmounts = computed(() => {
+    const updateReceiveAmount = () => {
       if (!pool.value) {
         return;
       }
 
-      const result = calculateWithdrawBalances(state.amount);
+      if (!+state.receiveAmounts.coinA.amount && !+state.receiveAmounts.coinB.amount) {
+        state.amount = '';
+        return;
+      }
 
-      return {
-        coinA: result[0],
-        coinB: result[1],
-      };
-    });
+      const result = calculateSupplyTokenAmount(+state.receiveAmounts.coinA.amount, +state.receiveAmounts.coinB.amount);
+      state.amount = (+result.toFixed(6)).toString();
+    };
 
-    const totalEstimatedPrice = computed(() => {
-      let total = 0;
+    const updateTotalCurrencyPrice = () => {
+      let total = new BigNumber(0);
 
-      if (!reserveBaseDenoms.value.length || !receiveAmounts.value) {
+      if (!hasPrices.value) {
         return;
       }
 
       const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
-      total += priceA * receiveAmounts.value.coinA.amount;
+      total = total.plus(new BigNumber(priceA).multipliedBy(state.receiveAmounts.coinA.amount));
 
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
-      total += priceB * receiveAmounts.value.coinB.amount;
+      total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
-      const displayTotal = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(total);
+      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+    };
 
-      return displayTotal;
-    });
+    const currencyAmountHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
+        state.amount = '';
+        state.receiveAmounts.coinA.amount = '';
+        state.receiveAmounts.coinB.amount = '';
+        return;
+      }
+
+      const precisionA = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
+      const precisionB = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
+
+      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+
+      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+
+      state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      updateReceiveAmount();
+    };
+
+    const coinAChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!exchangeAmount.value) {
+        return;
+      }
+
+      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(state.receiveAmounts.coinA.amount);
+      state.receiveAmounts.coinB.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      updateReceiveAmount();
+      updateTotalCurrencyPrice();
+    };
+
+    const coinBChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+
+      if (!exchangeAmount.value) {
+        return;
+      }
+
+      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
+      const result = new BigNumber(state.receiveAmounts.coinB.amount).dividedBy(
+        new BigNumber(exchangeAmount.value).shiftedBy(-6),
+      );
+      state.receiveAmounts.coinA.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      updateReceiveAmount();
+      updateTotalCurrencyPrice();
+    };
+
+    const coinPoolChangeHandler = () => {
+      state.isMaximumAmountChecked = false;
+      const result = calculateWithdrawBalances(+state.amount);
+
+      state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      updateTotalCurrencyPrice();
+    };
 
     const toggleChainsModal = () => {
       state.isChainsModalOpen = !state.isChainsModalOpen;
@@ -316,12 +448,6 @@ export default {
       state.step = step;
     };
 
-    const denomChangeHandler = () => {
-      if (state.isMaximumAmountChecked) {
-        state.isMaximumAmountChecked = false;
-      }
-    };
-
     const generateActionsSteps = async () => {
       const action: WithdrawLiquidityAction = {
         name: 'withdrawliquidity',
@@ -340,8 +466,9 @@ export default {
     };
 
     const resetHandler = () => {
-      state.amount = 0;
+      state.amount = '';
       actionSteps.value = [];
+      updateTotalCurrencyPrice();
 
       goToStep('amount');
     };
@@ -360,11 +487,19 @@ export default {
     );
 
     watch(
-      () => [state.isMaximumAmountChecked, state.selectedAsset],
+      () => [state.isMaximumAmountChecked, state.selectedAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked && state.selectedAsset) {
           const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
-          state.amount = +parseCoins(state.selectedAsset.amount)[0].amount / Math.pow(10, precision);
+          const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount);
+          const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
+
+          state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
+          const result = calculateWithdrawBalances(+state.amount);
+
+          state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+          state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+          updateTotalCurrencyPrice();
         }
       },
     );
@@ -376,15 +511,17 @@ export default {
       state,
       steps,
       balances,
-      receiveAmounts,
-      gasPrice,
       actionSteps,
-      totalEstimatedPrice,
+      hasPrices,
+      currencyAmountHandler,
+      coinAChangeHandler,
+      coinBChangeHandler,
+      coinPoolChangeHandler,
       needsTransferToHub,
       reserveBaseDenoms,
       isValid,
       hasSufficientFunds,
-      denomChangeHandler,
+      exchangeAmount,
       toggleChainsModal,
       goToReview,
       goToStep,
@@ -442,6 +579,11 @@ export default {
     width: 100%;
     text-align: center;
     line-height: 1;
+
+    &__price {
+      font-size: 5.1rem;
+      font-weight: 600;
+    }
 
     &__max {
       margin-top: -0.6rem;

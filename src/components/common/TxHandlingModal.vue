@@ -133,10 +133,10 @@
               class="status__error-collapse"
             >
               <Alert status="info" :show-icon="false">
-                <p class="status__error__item__key">Status</p>
-                <p class="status__error__item">{{ errorDetails.status }}</p>
-                <p class="status__error__item__key">Ticket</p>
-                <p class="status__error__item">{{ errorDetails.ticket }}</p>
+                <p v-if="errorDetails.status" class="status__error__item__key">Status</p>
+                <p v-if="errorDetails.status" class="status__error__item">{{ errorDetails.status }}</p>
+                <p v-if="errorDetails.ticket" class="status__error__item__key">Ticket</p>
+                <p v-if="errorDetails.ticket" class="status__error__item">{{ errorDetails.ticket }}</p>
                 <p v-if="errorDetails.message" class="status__error__item__key">Error</p>
                 <p v-if="errorDetails.message" class="status__error__item">{{ errorDetails.message }}</p>
               </Alert>

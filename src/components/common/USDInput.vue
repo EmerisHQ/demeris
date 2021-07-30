@@ -3,7 +3,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, nextTick, ref, toRefs, watch } from 'vue';
 
 import AmountInput from '@/components/ui/AmountInput.vue';
 import { useStore } from '@/store';
@@ -36,18 +36,27 @@ export default defineComponent({
       () => {
         const value = new BigNumber(props.modelValue);
 
-        if (value.isFinite()) {
-          usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
-          return;
-        }
+        nextTick(() => {
+          if (value.isFinite()) {
+            usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
+            return;
+          }
 
-        usdValue.value = '';
+          usdValue.value = '';
+        });
       },
       { immediate: true },
     );
 
     watch(trueValue, () => {
       emit('update:modelValue', new BigNumber(trueValue.value).isFinite() ? trueValue.value : '');
+    });
+
+    const { denom } = toRefs(props);
+    watch(denom, (newDenom, oldDenom) => {
+      if (newDenom !== oldDenom) {
+        price.value = store.getters['demeris/getPrice']({ denom: props.denom });
+      }
     });
 
     return { usdValue };

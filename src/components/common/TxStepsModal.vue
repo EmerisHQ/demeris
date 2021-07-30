@@ -49,7 +49,7 @@
       <Modal
         v-if="feeWarning.feeWarning"
         class="fee-warning-modal"
-        :modal-variant="varaint == 'widget' ? 'bottom' : 'full'"
+        :modal-variant="variant == 'widget' ? 'bottom' : 'full'"
         @close="
           () => {
             feeWarning.feeWarning = false;
@@ -394,7 +394,10 @@ export default defineComponent({
       } else {
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
-            if (currentStep.value == (props.data as Step[]).length - 1) {
+            const isLastTransaction = i === currentData.value.data.transactions.length - 1;
+            const isLastStep = currentStep.value === props.data.length - 1;
+
+            if (isLastTransaction && isLastStep) {
               isFinal.value = true;
             } else {
               isFinal.value = false;
@@ -440,6 +443,9 @@ export default defineComponent({
                 });
               } catch (e) {
                 console.error(e);
+                errorDetails.value = {
+                  message: e.message,
+                };
                 txstatus.value = 'keplr-reject';
                 await txToResolve.value['promise'];
                 continue;
