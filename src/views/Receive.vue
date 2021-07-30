@@ -136,6 +136,9 @@ export default {
     .title-with-goback > .icon:first-child {
       visibility: hidden;
     }
+    & > .coin-list {
+      height: 100% !important;
+    }
   }
 
   &__header {
