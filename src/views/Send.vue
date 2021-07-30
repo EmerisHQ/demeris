@@ -30,7 +30,7 @@
     <main class="max-w-7xl mx-auto pt-8 px-8 pb-28 flex-1 w-full flex flex-col items-center justify-center">
       <template v-if="!transferType">
         <div class="max-w-3xl">
-          <h2 class="text-3 font-bold py-8 text-center">Who are you sending to?</h2>
+          <h2 class="text-3 font-bold py-8 text-center">Where are you sending assets?</h2>
           <div class="mt-8 pb-8 flex space-x-8">
             <router-link
               :to="{ name: 'Send', params: { type: 'address' } }"
@@ -46,6 +46,7 @@
                 shadow-card
                 hover:shadow-panel
                 focus:shadow-panel
+                active:opacity-70
                 transition
                 rounded-2xl
                 text-center
@@ -87,6 +88,7 @@
                 shadow-card
                 hover:shadow-panel
                 focus:shadow-panel
+                active:opacity-70
                 transition
                 rounded-2xl
                 text-center

@@ -1,16 +1,19 @@
 <template>
-  <div :class="{ 'move-form-amount--insufficient-funds': !hasSufficientFunds }">
-    <div class="move-form-amount__modal-wrapper">
+  <div>
+    <div class="relative w-full">
       <DenomSelectModal
         v-if="state.isDenomModalOpen"
+        class="fixed inset-0 z-10 bg-bg"
         title="Select asset"
         :assets="availableBalances"
         :func="() => toggleDenomModal()"
+        :show-back-button="false"
         @select="toggleDenomModal"
       />
 
       <ChainSelectModal
         v-if="state.isChainsModalOpen"
+        class="fixed inset-0 z-10 bg-bg"
         title="Select chain"
         :assets="availableChains"
         :selected-denom="state.currentAsset.base_denom"
@@ -24,12 +27,15 @@
       </ChainSelectModal>
     </div>
     <template v-if="true">
-      <fieldset class="form__field move-form-amount">
-        <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
-          <div class="move-form-amount__input">
+      <fieldset class="py-8">
+        <div v-show="state.isUSDInputChecked" class="w-full max-w-lg mx-auto">
+          <div
+            class="text-4 font-bold uppercase w-full text-center transition-colors"
+            :class="{ 'text-negative': !hasSufficientFunds }"
+          >
             <FlexibleAmountInput
               v-model="state.usdValue"
-              :max-width="300"
+              :max-width="512"
               :min-width="state.isUSDInputChecked ? 35 : 0"
               prefix="$"
             >
@@ -52,142 +58,239 @@
               </template>
             </FlexibleAmountInput>
           </div>
-          <span class="move-form-amount__estimated">
+          <div class="text-muted mt-3 text-center">
             <AmountDisplay
               :amount="{
                 amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
                 denom: state.currentAsset?.base_denom,
               }"
             />
-          </span>
+          </div>
         </div>
-        <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
-          <div class="move-form-amount__input">
+        <div v-if="!state.isUSDInputChecked" class="w-full max-w-lg mx-auto">
+          <div
+            class="text-4 font-bold uppercase w-full text-center transition-colors"
+            :class="{ 'text-negative': !hasSufficientFunds }"
+          >
             <FlexibleAmountInput
               v-model="form.balance.amount"
-              :max-width="250"
+              :max-width="512"
               :min-width="35"
               placeholder="0"
               @input="state.isMaximumAmountChecked = false"
             >
               <template v-if="state.currentAsset" #suffix>
-                &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" />
+                <Denom :name="state.currentAsset?.base_denom || ''" />
               </template>
             </FlexibleAmountInput>
           </div>
 
-          <span v-if="hasPrice" class="move-form-amount__estimated">
+          <div v-if="hasPrice" class="text-muted mt-3 text-center">
             {{ displayUSDValue }}
-          </span>
+          </div>
         </div>
-        <div class="move-form-amount__controls">
-          <label v-if="hasPrice" class="move-form-amount__controls__button">
-            <input v-model="state.isUSDInputChecked" type="checkbox" name="move-form-amount-usd" />
-            <span v-if="state.isUSDInputChecked" class="shadow-button rounded-xl"
+        <div class="flex items-stretch justify-center mt-6 w-full flex-1 space-x-3">
+          <label v-if="hasPrice" class="-text-1">
+            <input v-model="state.isUSDInputChecked" class="hidden" type="checkbox" name="move-form-amount-usd" />
+            <span
+              v-if="state.isUSDInputChecked"
+              class="
+                btn
+                block
+                h-9
+                leading-4
+                py-2.5
+                px-5
+                cursor-pointer
+                select-none
+                bg-surface
+                shadow-button
+                font-medium
+                focus:outline-none
+                focus-visible:ring-2
+                focus:ring-tertiary focus:ring-opacity-50
+                rounded-full
+                transition
+              "
               ><Denom :name="state.currentAsset?.base_denom"
             /></span>
-            <span v-else class="shadow-button rounded-xl">USD</span>
+            <span
+              v-else
+              class="
+                btn
+                block
+                h-9
+                leading-4
+                py-2.5
+                px-5
+                cursor-pointer
+                select-none
+                bg-surface
+                shadow-button
+                font-medium
+                focus:outline-none
+                focus-visible:ring-2
+                focus:ring-tertiary focus:ring-opacity-50
+                rounded-full
+                transition
+              "
+              >USD</span
+            >
           </label>
-          <label class="move-form-amount__controls__button is-toggle">
+          <label class="input-max-toggle -text-1">
             <input
               v-model="state.isMaximumAmountChecked"
+              :disabled="!hasFunds"
+              class="hidden"
               type="checkbox"
               name="move-form-amount-max"
-              :disabled="!hasFunds"
             />
-            <span class="shadow-button rounded-xl">{{ $t('generic_cta.max') }}</span>
+            <span
+              class="
+                btn
+                block
+                h-9
+                leading-4
+                py-2.5
+                px-5
+                cursor-pointer
+                select-none
+                bg-surface
+                shadow-button
+                font-medium
+                focus:outline-none
+                focus-visible:ring-2
+                focus:ring-tertiary focus:ring-opacity-50
+                rounded-full
+                transition
+              "
+              >{{ $t('generic_cta.max') }}</span
+            >
           </label>
         </div>
       </fieldset>
 
-      <fieldset class="form__field">
-        <div class="move-form-amount__assets shadow-card rounded-2xl">
-          <button class="move-form-amount__assets__item denom-item text-left" @click="toggleDenomModal()">
-            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.action') }}</span>
+      <fieldset>
+        <div class="bg-surface shadow-card rounded-xl overflow-hidden">
+          <button
+            class="
+              py-5
+              px-4
+              flex
+              items-stretch
+              w-full
+              outline-none
+              text-left
+              hover:bg-fg
+              focus:opacity-70
+              transition-opacity
+            "
+            @click="toggleDenomModal()"
+          >
+            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{
+              $t('components.moveForm.action')
+            }}</span>
 
-            <div class="move-form-amount__assets__item__asset">
+            <div class="flex items-center flex-1">
               <CircleSymbol
                 :chain-name="state.currentAsset ? form.on_chain : undefined"
                 :denom="form.balance.denom"
-                class="move-form-amount__assets__item__avatar"
+                class="mr-3"
               />
-              <span class="move-form-amount__assets__item__name font-bold">
+              <span class="font-medium">
                 <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
-                <span v-else>Select asset</span>
               </span>
             </div>
 
-            <div class="move-form-amount__assets__item__button">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
           <button
             v-if="state.currentAsset"
-            class="move-form-amount__assets__item from-item text-left"
+            class="
+              py-5
+              px-4
+              flex
+              items-stretch
+              w-full
+              outline-none
+              text-left
+              hover:bg-fg
+              focus:opacity-70
+              transition-opacity
+              border-t border-border
+            "
             @click="toggleChainsModal(null, 'from')"
           >
-            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.from') }}</span>
+            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{
+              $t('components.moveForm.from')
+            }}</span>
 
-            <div class="move-form-amount__assets__item__asset">
-              <CircleSymbol
-                variant="chain"
-                :chain-name="form.on_chain"
-                class="move-form-amount__assets__item__avatar"
-              />
-              <span class="move-form-amount__assets__item__name font-bold">
+            <div class="flex items-center flex-1">
+              <CircleSymbol variant="chain" :chain-name="form.on_chain" class="mr-3" />
+              <span class="font-medium">
                 <ChainName :name="form.on_chain" />
               </span>
             </div>
 
-            <div class="move-form-amount__assets__item__amount">
-              <p class="move-form-amount__assets__item__amount__balance -text-1">
+            <div class="text-right flex flex-col justify-between">
+              <p>
                 <Price
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
                   :auto-update="false"
                   show-zero
                 />
               </p>
-              <p class="move-form-amount__assets__item__amount__available -text-1">
+              <p class="-text-1 mt-0.5" :class="hasSufficientFunds ? 'text-muted' : 'text-negative'">
                 <AmountDisplay
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
                 />
               </p>
             </div>
 
-            <div class="move-form-amount__assets__item__button">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
           <button
-            class="move-form-amount__assets__item to-item"
+            class="
+              py-5
+              px-4
+              flex
+              items-stretch
+              w-full
+              outline-none
+              text-left
+              hover:bg-fg
+              focus:opacity-70
+              transition-opacity
+              border-t border-border
+            "
             :class="{ 'chain-selected': !!form.to_chain }"
             :disabled="!state.currentAsset"
             @click="toggleChainsModal(null, 'to')"
           >
-            <span class="move-form-amount__assets__item__label -text-1">{{ $t('components.moveForm.to') }}</span>
+            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{ $t('components.moveForm.to') }}</span>
 
-            <div class="move-form-amount__assets__item__asset">
-              <CircleSymbol
-                variant="chain"
-                :chain-name="form.to_chain"
-                class="move-form-amount__assets__item__avatar"
-              />
-              <span class="move-form-amount__assets__item__name font-bold">
+            <div class="flex items-center flex-1">
+              <CircleSymbol variant="chain" :chain-name="form.to_chain" class="mr-3" />
+              <span class="font-medium">
                 <ChainName v-if="form.to_chain" :name="form.to_chain" />
                 <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
               </span>
             </div>
 
-            <div class="move-form-amount__assets__item__button">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
         </div>
       </fieldset>
 
-      <fieldset class="form__field">
+      <fieldset class="w-full max-w-sm mx-auto mt-8">
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
           :status="isValid ? 'normal' : 'inactive'"
@@ -547,185 +650,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.move-form-amount {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  &__modal-wrapper {
-    position: relative;
-    width: 100%;
-
-    .denom-select-modal-wrapper {
-      // Back icon
-      .title-with-goback > .icon:first-child {
-        visibility: hidden;
-      }
-    }
+.btn {
+  &:hover:not(:active),
+  &:focus:not(:active) {
+    --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
   }
-
-  &--insufficient-funds &__input {
-    color: #ca0865;
-  }
-
-  &--insufficient-funds &__assets__item__amount__available {
-    color: #ca0865;
-  }
-
-  &__fees {
-    margin-top: 2.4rem;
-  }
-
-  &__buy {
-    padding: 0 2.4rem 2.4rem;
-
-    &__button {
-      overflow: hidden;
-      margin-top: 4.8rem;
-      padding: 1.4rem 1.6rem;
-      width: 100%;
-      text-align: left;
-      font-weight: 600;
-      background-image: url('~@/assets/images/gold-rings-2.png');
-      background-repeat: no-repeat;
-      background-position: 19rem 85%;
-      position: relative;
-
-      &__symbol {
-        position: absolute;
-        top: -0.3rem;
-        right: 2.6rem;
-        transform: rotate(-7deg);
-      }
-    }
-  }
-
-  &__input {
-    font-size: 3.1875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color linear 100ms;
-
-    &__control {
-      text-align: right;
-      font-weight: 700;
-      width: 50%;
-      outline: none;
-      appearance: none;
-    }
-
-    &__denom {
-      flex: 1;
-      margin-left: 0.625rem;
-    }
-  }
-
-  &__estimated {
-    color: var(--muted);
-    margin-top: 0.75rem;
-    text-align: center;
-  }
-
-  &__controls {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    margin: 1.5rem 0 2rem 0;
-
-    &__button {
-      line-height: 1;
-      input {
-        display: none;
-      }
-      &.is-toggle {
-        input:checked + span {
-          background: var(--text);
-          color: var(--inverse);
-          font-weight: 500;
-        }
-        input:disabled + span {
-          color: var(--inactive);
-          cursor: not-allowed;
-        }
-      }
-      span {
-        padding: 0.625rem 1rem;
-        border-radius: 1.5rem;
-        margin-right: 1rem;
-        font-size: 12px;
-        cursor: pointer;
-        user-select: none;
-      }
-    }
-  }
-
-  &__assets {
-    &__item {
-      padding: 1rem;
-      display: flex;
-      align-items: stretch;
-      width: 100%;
-
-      &:focus {
-        outline: none;
-      }
-
-      &:disabled {
-        color: var(--inactive);
-      }
-
-      & + & {
-        border-top: 1px solid var(--border);
-      }
-
-      &__asset {
-        display: flex;
-        align-items: center;
-        flex: 1 1 0%;
-      }
-
-      &__chain {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-
-      &__avatar {
-        margin-right: 0.75rem;
-      }
-
-      &__label {
-        color: var(--muted);
-        text-align: left;
-        margin-right: 0.625rem;
-        width: 2.5rem;
-        align-self: center;
-      }
-
-      &__amount {
-        text-align: right;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-
-        &__available {
-          transition: color linear 100ms;
-          color: var(--muted);
-          margin-top: 0.0625rem;
-        }
-      }
-
-      &__button {
-        margin-left: 0.375rem;
-        padding: 0 0.375rem;
-        display: flex;
-        align-items: center;
-      }
-    }
+  &:active {
+    opacity: 0.7;
+    transform: none;
+    transition-duration: 0s;
   }
 }
 </style>

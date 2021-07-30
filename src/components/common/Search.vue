@@ -1,10 +1,15 @@
 <template>
-  <div class="search relative flex cursor-text" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
+  <div
+    class="search relative flex cursor-text text-inactive hover:text-muted focus-within:text-muted transition-colors"
+    :style="isFocused ? '' : 'background-image: none'"
+    @click="setFocus"
+  >
     <input
       ref="searchInput"
       :value="keyword"
       class="
         relative
+        z-10
         h-12
         w-full
         py-2
@@ -14,7 +19,7 @@
         font-normal
         text-text
         bg-fg
-        focus:bg-surface
+        focus:bg-surface focus:rounded-lg
         rounded-xl
         border-none
         appearance-none
@@ -24,13 +29,13 @@
       @input="$emit('update:keyword', $event.target.value)"
     />
     <Icon
-      class="icon-search absolute h-full px-3 text-muted pointer-events-none"
+      class="icon-search absolute z-10 h-full px-3 text-muted pointer-events-none"
       :name="'MagnifyingGlassIcon'"
       :icon-size="1"
     />
     <Icon
       v-show="keyword !== ''"
-      class="icon-reset absolute h-full px-3 right-0 text-muted cursor-pointer"
+      class="icon-reset absolute z-10 h-full px-3 right-0 text-muted hover:text-text focus:text-text cursor-pointer"
       :name="'CloseCircleIcon'"
       :icon-size="1"
       @click="
@@ -39,7 +44,7 @@
         }
       "
     />
-    <div class="focus-border absolute -inset-0.5 invisible bg-gold-circular" />
+    <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
   </div>
 </template>
 <script lang="ts">
@@ -71,31 +76,25 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.search {
-  input {
-    z-index: 8;
-    outline: none;
-  }
+input {
+  outline: none;
+}
 
-  input::placeholder {
-    color: var(--inactive);
-  }
+input::placeholder {
+  transition: color 150ms ease-out;
+}
 
-  .focus-border {
-    z-index: 7;
-    border-radius: 0.75rem;
-  }
+input:hover::placeholder {
+  color: var(--muted);
+}
 
-  input:focus ~ .focus-border {
-    visibility: visible;
-  }
+input::placeholder,
+input:focus::placeholder,
+input:focus ~ .icon {
+  color: var(--inactive);
+}
 
-  .icon {
-    z-index: 9;
-  }
-
-  input:focus ~ .icon {
-    color: var(--inactive);
-  }
+input:focus ~ .focus-border {
+  visibility: visible;
 }
 </style>

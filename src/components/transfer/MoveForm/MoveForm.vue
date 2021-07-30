@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-sm mx-auto">
+  <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.moveForm.title') }}</h2>
       <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />

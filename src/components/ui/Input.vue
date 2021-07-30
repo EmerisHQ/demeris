@@ -13,13 +13,14 @@
         transition-colors
       "
     >
-      <div v-if="hasStartSlot" class="input__icon absolute top-0 left-0 p-4 pointer-events-none">
+      <div v-if="hasStartSlot" class="input__icon absolute z-10 top-0 left-0 p-4 pointer-events-none">
         <slot name="start" />
       </div>
       <input
         v-model="model"
         class="
           relative
+          z-10
           h-12
           w-full
           py-2
@@ -36,11 +37,11 @@
         :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
         v-bind="$attrs"
       />
-      <div v-if="hasEndSlot" class="input__icon absolute top-0 right-0 p-4 pointer-events-none">
+      <div v-if="hasEndSlot" class="input__icon absolute z-10 top-0 right-0 p-4 pointer-events-none">
         <slot name="end" />
       </div>
 
-      <div class="focus-border absolute -inset-0.5 rounded-xl invisible bg-gold-circular" />
+      <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
     </div>
 
     <tippy v-if="hint" class="p-3 text-inactive hover:text-muted transition-colors">
@@ -96,31 +97,24 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 input {
-  z-index: 8;
   outline: none;
 }
 
 input::placeholder {
   transition: color 150ms ease-out;
 }
+
 input:hover::placeholder {
   color: var(--muted);
 }
+
 input::placeholder,
 input:focus::placeholder {
   color: var(--inactive);
 }
 
-.focus-border {
-  z-index: 7;
-}
-
 input:focus ~ .focus-border {
   visibility: visible;
-}
-
-.input__icon {
-  z-index: 9;
 }
 
 .input__hint {

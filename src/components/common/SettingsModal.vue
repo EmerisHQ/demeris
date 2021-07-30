@@ -9,7 +9,7 @@
           </p>
           <AvatarBalance wallet-name="Keplr" />
           <div
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="disconnectWallet"
           >
             <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
@@ -20,7 +20,7 @@
 
         <div class="py-2">
           <div
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="toggleAdvancedSettings"
           >
             <span>{{ $t('components.settingsMenu.settings') }}</span>
@@ -34,7 +34,7 @@
           <a
             href="https://t.me/EmerisHQ"
             target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
           >
             <span>{{ $t('components.settingsMenu.support') }}</span>
             <span>&#8599;</span>
@@ -43,7 +43,7 @@
           <a
             href="https://twitter.com/emerisHQ"
             target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
           >
             <span>{{ $t('components.settingsMenu.twitter') }}</span>
             <span>&#8599;</span>
@@ -52,7 +52,7 @@
           <a
             href="https://emeris.com"
             target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
           >
             <span>emeris.com</span>
             <span>&#8599;</span>
@@ -99,18 +99,18 @@
         <div class="py-2">
           <p class="py-3 px-6 -text-1 text-muted">{{ $t('components.settingsMenu.advancedSettings') }}</p>
           <button
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="confirmToggleSetting('allowCustomSlippage')"
           >
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="pointer-events-none" />
           </button>
           <!--
-          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors" @click="confirmToggleSetting('viewUnverified')">
+          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewUnverified')">
             <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
             <Switch v-model="settings.viewUnverified" class="pointer-events-none" />
           </button>
-          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg transition-colors" @click="confirmToggleSetting('viewLPAssetPools')">
+          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewLPAssetPools')">
             <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
             <Switch v-model="settings.viewLPAssetPools" class="pointer-events-none" />
           </button>

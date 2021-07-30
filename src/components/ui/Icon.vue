@@ -3,8 +3,8 @@
 		props:
 		  type: string (the icon to display)
 		//-->
-  <div class="icon" :style="`font-size:${iconSize}rem; color: ${color}`">
-    <component :is="currentIcon" v-if="isReady" />
+  <div class="icon" :style="`font-size:${iconSize}rem;`">
+    <component :is="currentIcon" v-if="isReady" :style="`color: ${color}`" />
   </div>
 </template>
 <script lang="ts">

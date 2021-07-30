@@ -8,21 +8,23 @@
       :selected-denom="selectedDenom"
       @select="chainSelectHandler"
     />
-    <div v-else class="denom-select-modal-wrapper flex-1 flex flex-col items-stretch">
+    <div v-else class="denom-select-modal-wrapper w-full max-w-7xl mx-auto flex-1 flex flex-col items-stretch">
       <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
 
-      <Search v-model:keyword="keyword" class="mx-6 mb-6" />
-      <div class="coin-list overflow-y-auto flex-1 pb-20">
-        <CoinList
-          :data="keywordFilteredAssets"
-          :type="title === 'Receive' ? 'receive' : 'pay'"
-          :show-balance="showBalance"
-          :keyword="keyword"
-          @select="coinListselectHandler"
-        >
-        </CoinList>
+      <div class="w-full mx-auto max-w-md">
+        <Search v-model:keyword="keyword" class="mx-6 mb-6" />
+        <div class="coin-list overflow-y-auto flex-1 pb-20">
+          <CoinList
+            :data="keywordFilteredAssets"
+            :type="title === 'Receive' ? 'receive' : 'pay'"
+            :show-balance="showBalance"
+            :keyword="keyword"
+            @select="coinListselectHandler"
+          >
+          </CoinList>
+        </div>
+        <WhiteOverlay class="coin-list-fade" />
       </div>
-      <WhiteOverlay class="coin-list-fade" />
     </div>
   </div>
 </template>

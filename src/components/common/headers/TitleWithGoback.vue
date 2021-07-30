@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center h-20 py-8 pl-6 pr-12">
+  <div class="flex items-center h-20 py-6 pl-6 pr-12">
     <Button
       :v-if="showBackButton"
       variant="link"
