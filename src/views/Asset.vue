@@ -210,35 +210,27 @@ export default defineComponent({
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-      return poolsCopy.filter(item => balancesCopy.find(item2 => item.pool_coin_denom == item2.base_denom));
+      
+      return poolsCopy.filter(item => balancesCopy.some(item2 => item.pool_coin_denom == item2.base_denom));
     });
 
     const poolsNotInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-      console.log("found", balancesCopy.find(item2 => item2.base_denom = "pool6AD4AA525D55410C606AE5A3EAD7D281153E4AF0B3C8D08EF46C4976904CA52E"));
-      for (const pool of poolsWithAsset.value) {
-        console.log("pooLcoin", pool.pool_coin_denom);
-      }
-      for (const balance of balancesCopy) {
-        console.log("balance", balance);
-      }
       
-      return poolsCopy.filter(item => !balancesCopy.find(item2 => item.pool_coin_denom = item2.base_denom));
+      return poolsCopy.filter(item => !balancesCopy.some(item2 => item.pool_coin_denom = item2.base_denom));
     });
     
 
     const poolsDisplay = computed(() => {
-      console.log("poolsNotInvest", poolsNotInvestedWithAsset.value);
 
-      /*
       const fillBy = 3 - poolsInvestedWithAsset.value.length;
       console.log("fillBy", fillBy);
       console.log("poolsInvested", poolsInvestedWithAsset.value);
       if (fillBy > 0) {
         return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0,fillBy));
       }
-      */
+
       return poolsInvestedWithAsset.value;
     });
     
