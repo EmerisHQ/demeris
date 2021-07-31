@@ -31,6 +31,7 @@ export enum DemerisActionTypes {
   SIGN_IN_WITH_WATCHER = 'SIGN_IN_WITH_WATCHER',
   // Internal module actions
   INIT = 'INIT',
+  SIGN_OUT = 'SIGN_OUT',
   RESET_STATE = 'RESET_STATE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
   STORE_UPDATE = 'STORE_UPDATE',
@@ -67,6 +68,7 @@ export enum GlobalDemerisActionTypes {
   SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
   // Internal module actions
   INIT = 'demeris/INIT',
+  SIGN_OUT = 'demeris/SIGN_OUT',
   RESET_STATE = 'demeris/RESET_STATE',
   UNSUBSCRIBE = 'demeris/UNSUBSCRIBE',
   STORE_UPDATE = 'demeris/STORE_UPDATE',
@@ -95,6 +97,7 @@ export type DemerisSubscriptions = {
   action: Exclude<
     DemerisActionTypes,
     | typeof DemerisActionTypes.INIT
+    | typeof DemerisActionTypes.SIGN_OUT
     | typeof DemerisActionTypes.RESET_STATE
     | typeof DemerisActionTypes.UNSUBSCRIBE
     | typeof DemerisActionTypes.STORE_UPDATE

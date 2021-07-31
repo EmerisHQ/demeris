@@ -7,16 +7,21 @@
 
     <template v-else-if="step === 'amount'">
       <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
-      <SendFormAmount :balances="balances" @next="goToStep('review')" />
+      <SendFormAmount :balances="balances" :fees="state.fees" @next="goToStep('review')" />
       <div class="send-form__fees">
-        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
+        <FeeLevelSelector
+          v-if="steps.length > 0"
+          v-model:gasPriceLevel="state.gasPrice"
+          :steps="steps"
+          @update:fees="state.fees = $event"
+        />
       </div>
     </template>
 
     <template v-else>
       <TxStepsModal
         :data="steps"
-        :gas-price-level="gasPrice"
+        :gas-price-level="state.gasPrice"
         :back-route="{ name: 'Portfolio' }"
         action-name="transfer"
         @transacting="goToStep('send')"
@@ -82,8 +87,9 @@ export default defineComponent({
       isTermChecked: false,
     });
 
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
+    const state = reactive({
+      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
+      fees: {},
     });
 
     const step = computed({
@@ -144,7 +150,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { steps, form, goToStep, generateSteps, resetHandler, gasPrice };
+    return { steps, form, goToStep, generateSteps, resetHandler, state };
   },
 });
 </script>

@@ -559,10 +559,10 @@ export default defineComponent({
 
       // booleans-start(for various status check)
       isOver: computed(() => {
-        if (isSignedIn.value) {
+        if (isSignedIn.value && data.payCoinData) {
           // data.isBothSelected &&
           return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(assetsToPay?.value.find((asset) => asset.denom === data.payCoinData.denom)?.amount) /
+            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount) /
               Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
@@ -617,17 +617,19 @@ export default defineComponent({
     watch(
       () => data.payCoinData,
       async () => {
-        const fees = await getFeeForChain(data.payCoinData.on_chain);
-        if (
-          data.payCoinData.denom === 'uatom' ||
-          (!data.payCoinData.denom.startsWith('ibc') &&
-            data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
-        ) {
-          txFee.value =
-            fees[0].amount[gasPrice.value] *
-            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-        } else {
-          return 0;
+        if (data.payCoinData) {
+          const fees = await getFeeForChain(data.payCoinData.on_chain);
+          if (
+            data.payCoinData.denom === 'uatom' ||
+            (!data.payCoinData.denom.startsWith('ibc') &&
+              data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
+          ) {
+            txFee.value =
+              fees[0].amount[gasPrice.value] *
+              10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          } else {
+            return 0;
+          }
         }
       },
     );
@@ -680,19 +682,28 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData, data.receiveCoinData];
+        return [data.payCoinData.denom, data.receiveCoinData];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
-          let payDenom = data.payCoinData.denom;
+          let payDenom = data.payCoinData.base_denom;
           const receiveDenom = data.receiveCoinData.denom;
-          //if payCoin denom is not uatom & ibc token
+
           if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+            /*  if payCoin denom is not uatom & ibc token
+                ex) denom: uakt base_denom: uakt and cosmos hub pool reserve denom: ibc/123ABC
+                find ibc/123ABC by base_denom  */
             const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
             }).pay.denom;
-
             payDenom = nativeDenomToIBCDenom;
+          } else if (data.payCoinData.denom.startsWith('ibc')) {
+            const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
+              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+            })?.pay?.denom;
+            if (isPoolReserveIBCCoin === undefined) {
+              payDenom = data.payCoinData.base_denom;
+            }
           }
 
           try {
