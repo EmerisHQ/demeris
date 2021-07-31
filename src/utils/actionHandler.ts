@@ -1452,7 +1452,7 @@ export async function validateStepFeeBalances(
     }
     if (stepTx.name == 'createpool') {
       const data = stepTx.data as Actions.CreatePoolData;
-      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee;
+      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
       const feeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
@@ -1504,6 +1504,7 @@ export async function validateStepFeeBalances(
         if (newAmount >= 0) {
           feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
         } else {
+          console.log('??');
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
