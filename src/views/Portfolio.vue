@@ -110,16 +110,7 @@ export default {
     };
 
     const poolsInvested = computed(() => {
-      const bals = [];
-      for (const balance of balances.value) {
-        if (pools.value.length > 0) {
-          let poolBalance = pools.value.find((x) => x.pool_coin_denom == balance.base_denom);
-          if (poolBalance) {
-            bals.push(poolBalance);
-          }
-        }
-      }
-      return bals;
+      return pools.value.filter(item => balances.value.some(item2 => item.pool_coin_denom == item2.base_denom));
     });
 
     return { balances, poolsInvested, openAssetPage, openPoolsPage };

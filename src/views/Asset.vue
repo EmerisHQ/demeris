@@ -92,7 +92,7 @@
 
         <!-- Pools -->
 
-        <section v-if="poolsWithAsset.length" class="asset__main__pools asset__list">
+        <section v-if="poolsDisplay.length" class="asset__main__pools asset__list">
           <div class="asset__list__header">
             <p class="asset__list__header__title">Pools</p>
             <router-link :to="{ name: 'Pools' }" class="asset__list__header__button">
@@ -102,7 +102,7 @@
           </div>
 
           <div class="asset__main__pools__wrapper">
-            <Pools :pools="poolsWithAsset" />
+            <Pools :pools="poolsDisplay" />
           </div>
         </section>
 
@@ -151,6 +151,7 @@ import usePool from '@/composables/usePool';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
+import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'Asset',
@@ -205,29 +206,49 @@ export default defineComponent({
       }
       return 0;
     });
-
-
-
     
-    const poolsInvested = computed(() => {
-      const bals = [];
-      for (const balance of balances.value) {
-        if (pools.value.length > 0) {
-          let poolBalance = pools.value.find((x) => x.pool_coin_denom == balance.base_denom);
-          if (poolBalance) {
-            bals.push(poolBalance);
-          }
-        }
+    const poolsInvestedWithAsset = computed(() => {
+      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
+      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+      return poolsCopy.filter(item => balancesCopy.find(item2 => item.pool_coin_denom == item2.base_denom));
+    });
+
+    const poolsNotInvestedWithAsset = computed(() => {
+      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
+      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+      console.log("found", balancesCopy.find(item2 => item2.base_denom = "pool6AD4AA525D55410C606AE5A3EAD7D281153E4AF0B3C8D08EF46C4976904CA52E"));
+      for (const pool of poolsWithAsset.value) {
+        console.log("pooLcoin", pool.pool_coin_denom);
       }
-      return bals;
+      for (const balance of balancesCopy) {
+        console.log("balance", balance);
+      }
+      
+      return poolsCopy.filter(item => !balancesCopy.find(item2 => item.pool_coin_denom = item2.base_denom));
     });
     
 
-    const pooledAmount = computed(() => {
-      const poolsInvestedWithAsset = poolsInvested.value.filter(item => poolsWithAsset.value.some(item2 => item.id === item2.id));
+    const poolsDisplay = computed(() => {
+      console.log("poolsNotInvest", poolsNotInvestedWithAsset.value);
+
+      /*
+      const fillBy = 3 - poolsInvestedWithAsset.value.length;
+      console.log("fillBy", fillBy);
+      console.log("poolsInvested", poolsInvestedWithAsset.value);
+      if (fillBy > 0) {
+        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0,fillBy));
+      }
+      */
+      return poolsInvestedWithAsset.value;
+    });
+    
+
+    const pooledAmount = computed(() => {;
       let assetPooledAmount = 0;
 
-      for (const pool of poolsInvestedWithAsset) {
+      /*
+
+      for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
         const {calculateWithdrawBalances} = usePool(computed(() => pool.id));
         const withdrawBalances = calculateWithdrawBalances(poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0));
@@ -236,14 +257,18 @@ export default defineComponent({
         assetPooledAmount += assetBalanceInPool.amount;
       }
 
+      */
+
       return assetPooledAmount;
     });
+
+    
 
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
 
-    return { assetConfig, denom, assets, poolsWithAsset, availableAmount, stakedAmount, pooledAmount, totalAmount };
+    return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });
 </script>
