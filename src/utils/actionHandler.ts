@@ -1114,7 +1114,7 @@ export async function getTicker(name, chain_name = null) {
         ));
       return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return name + '(unverified)';
     }
   }
@@ -1186,13 +1186,10 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
       feeTotals[fees[0].chain_name] = {};
     }
     used = getUsedFee(fees, gasPriceLevel);
-    console.log(used);
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
           feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
       : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
-    console.log('here');
-    console.log(feeTotals);
   }
   return feeTotals;
 }
@@ -1226,7 +1223,6 @@ export async function feeForSteps(
 
 export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
   const feeOption = fees[0];
-  console.log(gasPriceLevel);
   const used = {
     amount: {
       amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
@@ -1504,7 +1500,6 @@ export async function validateStepFeeBalances(
         if (newAmount >= 0) {
           feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
         } else {
-          console.log('??');
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
