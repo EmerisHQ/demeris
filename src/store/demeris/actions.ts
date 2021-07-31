@@ -721,7 +721,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           type: 'Swap',
           requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
         });
-        console.group('END BLOCK EVENTS');
+
         response.data.result?.end_block_events?.forEach((item) => {
           if (item.type === checks.type) {
             item.attributes.forEach((result) => {
@@ -738,7 +738,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
             });
           }
         });
-        console.groupEnd();
+
         if (isMine) {
           return successData;
         } else {
