@@ -690,19 +690,16 @@ export default defineComponent({
           const receiveDenom = data.receiveCoinData.denom;
 
           if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
-            /*  if payCoin denom is not uatom & ibc token
-                ex) denom: uakt base_denom: uakt and cosmos hub pool reserve denom: ibc/123ABC
-                find ibc/123ABC by base_denom  */
-            const nativeDenomToIBCDenom = availablePairs.value.find((pair) => {
+            // nativeDenomToIBCDenom
+            payDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
             }).pay.denom;
-            payDenom = nativeDenomToIBCDenom;
           } else if (data.payCoinData.denom.startsWith('ibc')) {
             const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
-              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
+              return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
             })?.pay?.denom;
-            if (isPoolReserveIBCCoin === undefined) {
-              payDenom = data.payCoinData.base_denom;
+            if (isPoolReserveIBCCoin) {
+              payDenom = data.payCoinData.denom;
             }
           }
 
@@ -793,6 +790,7 @@ export default defineComponent({
             },
           };
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
+          console.log('actionHandlerResult', data.actionHandlerResult);
         } else {
           data.actionHandlerResult = null;
         }
