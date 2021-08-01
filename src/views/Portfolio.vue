@@ -110,10 +110,8 @@ export default {
     };
 
     const poolsInvested = computed(() => {
-      for (const balance of balances.value) {
-        console.log("baalnce", balance);
-      }
-      return pools.value.filter(item => balances.value.some(item2 => item.pool_coin_denom == item2.base_denom));
+      const poolsCopy = JSON.parse(JSON.stringify(pools.value));
+      return poolsCopy.value.filter(item => balances.value.some(item2 => item.pool_coin_denom == item2.base_denom));
     });
 
     return { balances, poolsInvested, openAssetPage, openPoolsPage };
