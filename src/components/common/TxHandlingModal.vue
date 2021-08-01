@@ -271,7 +271,7 @@ export default defineComponent({
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
-  setup(props: any, { emit }) {
+  setup(props, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
@@ -404,7 +404,7 @@ export default defineComponent({
               case 'swap':
                 if (props.txResult.swappedPercent !== 100) {
                   title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
-                    swappedPercent: parseInt(props.txResult.swappedPercent),
+                    swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
                   });
                 } else {
                   title.value = t('components.txHandlingModal.swapActionComplete');

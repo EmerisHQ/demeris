@@ -252,7 +252,7 @@ export default defineComponent({
     },
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
-  setup(props: any, { emit }) {
+  setup(props, { emit }) {
     const emitter = useEmitter();
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
@@ -274,7 +274,6 @@ export default defineComponent({
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
     });
-
     const goMoon = () => {
       if (isSignedIn.value) {
         window.open(mpUrl.value, '', 'height=480,width=320');
@@ -308,7 +307,6 @@ export default defineComponent({
       },
     });
     const txResult = ref(null);
-
     onMounted(async () => {
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
@@ -386,6 +384,7 @@ export default defineComponent({
         feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
       },
     );
+
     const confirm = async () => {
       let abort = false;
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
@@ -485,6 +484,18 @@ export default defineComponent({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
+
+                    if (stepTx.name.startsWith('ibc')) {
+                      let delayAlert = null;
+                      if (txResultData.status === 'transit') {
+                        delayAlert = setTimeout(() => {
+                          alert('test');
+                        }, 3000);
+                      } else {
+                        clearTimeout(delayAlert);
+                      }
+                    }
+
                     console.log(txResultData.status);
                   }
 
@@ -529,35 +540,6 @@ export default defineComponent({
                     txResult.value = result;
                     console.log('swap result', result);
                   }
-                  if (currentData.value.data.name === 'swap') {
-                    console.log('txResultData', txResultData);
-                    //Get end block events
-                    let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                      height: txResultData.height,
-                    });
-
-                    const result = {
-                      swappedPercent: 0,
-                      demandCoinSwappedAmount: 0,
-                      demandCoinDenom: '',
-                      remainingOfferCoinAmount: 0,
-                      offerCoinDenom: '',
-                    };
-
-                    console.log('endBlockEvent', endBlockEvent);
-
-                    result.demandCoinDenom = endBlockEvent.demand_coin_denom;
-                    result.swappedPercent =
-                      (Number(endBlockEvent.exchanged_offer_coin_amount) /
-                        (Number(endBlockEvent.remaining_offer_coin_amount) +
-                          Number(endBlockEvent.exchanged_offer_coin_amount))) *
-                      100;
-                    result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
-                    result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
-                    result.offerCoinDenom = endBlockEvent.offer_coin_denom;
-                    txResult.value = result;
-                    console.log('swap result', result);
-                  }
 
                   // TODO: deal with status here
                   emit('complete');
@@ -588,6 +570,7 @@ export default defineComponent({
         }
       }
     };
+
     const emitHandler = (event) => {
       emit(event);
     };
@@ -611,6 +594,10 @@ export default defineComponent({
       },
       { immediate: true },
     );
+    //TEST
+    // setTimeout(()=> {
+    //   txstatus.value = 'failed'
+    // }, 10000)
 
     return {
       isTransferConfirmationOpen,

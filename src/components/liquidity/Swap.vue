@@ -146,7 +146,7 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
-import { feeForStepTransaction, getTicker } from '@/utils/actionHandler';
+import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
 export default defineComponent({
