@@ -111,7 +111,7 @@ export default {
 
     const poolsInvested = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(pools.value));
-      return poolsCopy.value.filter(item => balances.value.some(item2 => item.pool_coin_denom == item2.base_denom));
+      return poolsCopy.filter(item => balances.value.some(item2 => item.pool_coin_denom == item2.base_denom));
     });
 
     return { balances, poolsInvested, openAssetPage, openPoolsPage };
