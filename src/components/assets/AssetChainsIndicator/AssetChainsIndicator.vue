@@ -1,18 +1,17 @@
 <template>
-  <div v-if="chainsCount > 1" class="asset-chains-indicator">
-    <tippy class="asset-chains-indicator__wrapper">
-      <div v-if="showIndicators" class="asset-chains-indicator__list">
+  <div v-if="chainsCount > 1" class="flex">
+    <tippy class="inline-flex items-center">
+      <div v-if="showIndicators" class="flex justify-end w-1/2 mr-3 -space-x-2.5">
         <CircleSymbol
           v-for="indicator of indicators"
           :key="indicator.on_chain"
           :size="showDescription ? 'sm' : 'xs'"
           :chain-name="indicator.on_chain"
           variant="chain"
-          class="asset-chains-indicator__list__item"
         />
       </div>
 
-      <div class="asset-chains-indicator__count">
+      <div class="font-normal whitespace-nowrap">
         <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
         <span v-if="showDescription">&nbsp;{{ $t('context.assets.chains') }}</span>
       </div>
@@ -127,31 +126,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.asset-chains-indicator {
-  display: flex;
-
-  &__wrapper {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  &__list {
-    display: flex;
-    justify-content: flex-end;
-    width: 50%;
-    margin-right: 0.375rem;
-
-    &__item {
-      &:not(:last-child) {
-        margin-right: -0.625rem;
-      }
-    }
-  }
-
-  &__count {
-    font-weight: 400;
-    white-space: nowrap;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

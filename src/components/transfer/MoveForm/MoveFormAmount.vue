@@ -2,24 +2,21 @@
   <div>
     <DenomSelectModal
       v-if="state.isDenomModalOpen"
-      class="fixed inset-0 z-10 bg-bg"
+      class="fixed inset-0 z-30 bg-bg"
       title="Select asset"
       :assets="availableBalances"
       :func="() => toggleDenomModal()"
-      :asset-action="state.chainsModalSource === 'to' ? 'move to' : 'move from'"
-      :show-back-button="false"
       @select="toggleDenomModal"
     />
 
     <ChainSelectModal
       v-if="state.isChainsModalOpen"
-      class="fixed inset-0 z-10 bg-bg"
+      class="fixed inset-0 z-30 bg-bg"
       title="Select chain"
       :assets="availableChains"
       :selected-denom="state.currentAsset.base_denom"
       :func="() => toggleChainsModal()"
       :show-subtitle="false"
-      :asset-action="state.chainsModalSource === 'to' ? 'move to' : 'move from'"
       @select="toggleChainsModal"
     >
       <template #description>
@@ -125,8 +122,7 @@
           >
             <span
               class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-              >{{ $t('components.moveForm.action') }}</span
-            >
+            >{{ $t('components.moveForm.action') }}</span>
 
             <div class="flex items-center flex-1">
               <CircleSymbol
@@ -140,7 +136,7 @@
             </div>
 
             <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="0.75" />
+              <Icon name="CaretRightIcon" :icon-size="1" />
             </div>
           </button>
 
@@ -151,8 +147,7 @@
           >
             <span
               class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-              >{{ $t('components.moveForm.from') }}</span
-            >
+            >{{ $t('components.moveForm.from') }}</span>
 
             <div class="flex items-center flex-1">
               <CircleSymbol variant="chain" :chain-name="form.on_chain" class="mr-3" />
@@ -177,7 +172,7 @@
             </div>
 
             <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="0.75" />
+              <Icon name="CaretRightIcon" :icon-size="1" />
             </div>
           </button>
 
@@ -189,8 +184,7 @@
           >
             <span
               class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-              >{{ $t('components.moveForm.to') }}</span
-            >
+            >{{ $t('components.moveForm.to') }}</span>
 
             <div class="flex items-center flex-1">
               <CircleSymbol variant="chain" :chain-name="form.to_chain" class="mr-3" />
@@ -201,7 +195,7 @@
             </div>
 
             <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="0.75" />
+              <Icon name="CaretRightIcon" :icon-size="1" />
             </div>
           </button>
         </div>
@@ -226,7 +220,7 @@
       </div>
 
       <div v-if="state.currentAsset && hasPrice && !hasFunds" class="move-form-amount__buy">
-        <button class="move-form-amount__buy__button shadow-button" @click="openAssetPage">
+        <button class="shadow-button" @click="openAssetPage">
           <div class="inline-flex items-center">
             <span>{{ $t('generic_cta.get') }}&nbsp;</span>
             <Denom :name="state.currentAsset.base_denom" />

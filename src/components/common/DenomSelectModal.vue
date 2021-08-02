@@ -6,7 +6,6 @@
       :title="'Select chain'"
       :func="toggleChainSelectModal"
       :selected-denom="selectedDenom"
-      :asset-action="assetAction"
       @select="chainSelectHandler"
     />
     <div v-else class="denom-select-modal-wrapper w-full h-full flex-1 flex flex-col items-stretch">
@@ -57,7 +56,6 @@ export default defineComponent({
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
     showBackButton: { type: Boolean, required: false, default: true },
-    assetAction: { type: String, required: true, default: 'use' },
   },
   emits: ['select'],
   setup(props, { emit }) {

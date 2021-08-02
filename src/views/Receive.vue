@@ -34,7 +34,6 @@
             :assets="balances"
             :show-balance="true"
             :show-back-button="false"
-            asset-action="receive on"
             @select="assetSelectHandler"
           />
         </div>

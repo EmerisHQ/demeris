@@ -52,7 +52,6 @@
               title="Select chain"
               :assets="balances"
               :selected-denom="pool.pool_coin_denom"
-              asset-action="supply from"
               :func="() => toggleChainsModal()"
               @select="toggleChainsModal()"
             />

@@ -1,7 +1,7 @@
 <template>
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
     <!-- Basic button implementation. At minimum primary/secondary/link types, loading and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
-    <Button
+    <button
       :class="[
         `button-${variant}`,
         { 'text-0 leading-5 rounded-xl': size === 'md' },
@@ -52,7 +52,7 @@
       ><slot /><span>{{ name }}</span><slot name="right" /></span>
 
       <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
-    </Button>
+    </button>
     <tippy ref="buttonTooltipRef" class="h-0 block" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
     </tippy>

@@ -81,6 +81,7 @@
         <li><Button variant="primary" name="Primary" /></li>
         <li><Button variant="secondary" name="Secondary" /></li>
         <li><Button variant="link" name="Link" /></li>
+        <li><Button variant="link" href="emeris.com" name="External link" /></li>
       </ul>
       <h3 class="text-3 font-bold mt-8">Sizes</h3>
       <ul class="flex items-center mt-7 gap-8">

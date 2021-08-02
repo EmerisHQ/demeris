@@ -9,8 +9,8 @@
     <div class="flex items-center">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
       <span class="text-inactive group-hover:text-current ml-1">
-        <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="0.75" />
-        <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="0.75" />
+        <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1" />
+        <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1" />
       </span>
     </div>
   </div>

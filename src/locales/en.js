@@ -52,7 +52,7 @@ export const messages = {
     components: {
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
-        text2: 'Select the chain you wish to {action}.',
+        text2: 'Select the chain you wish to use.',
       },
       coinList: {
         tooltip: '{asset} on {chain}',

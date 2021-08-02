@@ -4,7 +4,7 @@
       <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
     </header>
 
-    <div class="relative flex-1 min-h-0 flex flex-col">
+    <div class="relative min-h-0 flex flex-col">
       <div class="w-full mx-auto max-w-sm px-6 mb-8 text-center text-muted">
         <template v-if="showSubtitle">
           {{
@@ -20,7 +20,6 @@
           {{ $t('components.chainSelect.text2') }}
         </slot>
       </div>
-    </div>
 
       <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
         <div class="mx-auto max-w-md mb-20">
@@ -53,7 +52,6 @@ export default defineComponent({
     selectedDenom: { type: String, required: true },
     showSubtitle: { type: Boolean, default: true },
     showBackButton: { type: Boolean, default: true },
-    assetAction: { type: String, required: true, default: 'use' },
   },
   emits: ['select'],
   setup(props, { emit }) {
