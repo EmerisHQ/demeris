@@ -409,6 +409,9 @@ export default defineComponent({
         return false;
       }
 
+      console.log("base_denom", state.currentAsset.base_denom);
+      console.log("precision", store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }));
+
       const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
       const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
       const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
