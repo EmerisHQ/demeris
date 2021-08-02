@@ -367,7 +367,18 @@ export default defineComponent({
           })
           .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
       } else {
-        results = props.balances;
+        if (props.balances.length) {
+          results = props.balances;
+        } else {
+          const dexChain = store.getters['demeris/getDexChain'];
+          results = [
+            {
+              amount: '0' + state.currentAsset.base_denom,
+              base_denom: state.currentAsset.base_denom,
+              on_chain: dexChain,
+            },
+          ];
+        }
       }
 
       results.sort((a, b) => {
