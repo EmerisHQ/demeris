@@ -1,40 +1,40 @@
 <template>
-  <div class="connect-keplr">
-    <div class="connect-keplr__wrapper">
-      <div class="connect-keplr__content">
+  <div class="connect-wallet">
+    <div class="connect-wallet__wrapper">
+      <div class="connect-wallet__content">
         <template v-if="!isConnecting">
           <slot name="title">
-            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
+            <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
 
-          <div class="connect-keplr__description">
+          <div class="connect-wallet__description">
             <slot name="description">
               <p>{{ $t('wallet.connect.modal1.text') }}</p>
             </slot>
           </div>
 
-          <div class="connect-keplr__controls">
+          <div class="connect-wallet__controls">
             <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
 
             <a
               href="https://t.me/EmerisHQ"
               rel="noopener noreferrer"
               target="_blank"
-              class="connect-keplr__controls__help s-minus"
+              class="connect-wallet__controls__help s-minus"
             >
               {{ $t('wallet.connect.modal1.needHelp') }}
             </a>
           </div>
         </template>
 
-        <div v-else class="connect-keplr__connecting">
-          <div class="connect-keplr__connecting__main">
+        <div v-else class="connect-wallet__connecting">
+          <div class="connect-wallet__connecting__main">
             <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
+            <span class="connect-wallet__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
             <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
           </div>
 
-          <button class="connect-keplr__connecting__button" @click="cancel">
+          <button class="connect-wallet__connecting__button" @click="cancel">
             {{ $t('generic_cta.cancel') }}
           </button>
         </div>
@@ -97,83 +97,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss">
-.connect-keplr {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
-    min-height: inherit;
-  }
-
-  &__content {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
-  &__connecting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-
-    &__main {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      &__label {
-        margin-top: 2.6rem;
-        color: var(--muted);
-      }
-    }
-
-    &__button {
-      width: 100%;
-      padding: 1.6rem 2rem;
-      border: 1px solid #e6e6e6;
-      border-radius: 0.8rem;
-      font-weight: 600;
-    }
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    margin-top: 5rem;
-
-    &__help {
-      margin-top: 1.6rem;
-      color: var(--muted);
-      display: block;
-      text-align: center;
-      padding: 0.6rem 0;
-    }
-  }
-
-  &__description {
-    flex: 1 1 0%;
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
-    }
-  }
-
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
-  }
-}
-</style>

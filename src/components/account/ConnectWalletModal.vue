@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <Modal
-      v-if="isKeplrInstalled"
+      v-if="isKeplrInstalled && isWarningAgreed"
       :open="open"
       class="connect-wallet-modal"
       body-class="elevation-panel"
@@ -9,6 +9,17 @@
       @close="closeConnectKeplr"
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
+    </Modal>
+
+    <Modal
+      v-else-if="isKeplrInstalled && !isWarningAgreed"
+      :open="open"
+      class="connect-wallet-modal"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeAgreeWarning"
+    >
+      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" />
     </Modal>
 
     <Modal
@@ -40,6 +51,7 @@ import { defineComponent, nextTick, onMounted, ref } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
+import AgreeWarning from './AgreeWarning.vue';
 import ConnectKeplr from './ConnectKeplr.vue';
 import GetBrowser from './GetBrowser.vue';
 import GetKeplr from './GetKeplr.vue';
@@ -71,6 +83,7 @@ export default defineComponent({
   components: {
     Modal,
     ConnectKeplr,
+    AgreeWarning,
     GetKeplr,
     GetBrowser,
   },
@@ -86,14 +99,19 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const connectKeplrRef = ref(null);
+    const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
     const getBrowserRef = ref(null);
+    const isWarningAgreed = ref(null);
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
 
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
+      emit('close');
+    };
+    const closeAgreeWarning = () => {
       emit('close');
     };
     const closeGetKeplr = () => {
@@ -104,7 +122,7 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      const keplr = await getKeplrInstance();
+      await getKeplrInstance();
       await nextTick();
 
       // @ts-ignore
@@ -120,10 +138,13 @@ export default defineComponent({
     return {
       isLoading,
       connectKeplrRef,
+      agreeWarningRef,
       getKeplrRef,
       getBrowserRef,
+      isWarningAgreed,
       isKeplrSupported,
       isKeplrInstalled,
+      closeAgreeWarning,
       closeConnectKeplr,
       closeGetKeplr,
       closeGetBrowser,
@@ -146,6 +167,51 @@ export default defineComponent({
     top: 2rem;
     right: 2rem;
     z-index: 40;
+  }
+}
+
+.connect-wallet {
+  min-height: inherit;
+
+  &__wrapper {
+    display: flex;
+    min-height: inherit;
+  }
+
+  &__loading {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__content {
+    width: 50%;
+    min-height: inherit;
+    padding: 4.8rem;
+    text-align: center;
+  }
+
+  &__controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 3.2rem;
+  }
+
+  &__description {
+    margin-top: 4rem;
+    line-height: 1.8;
+    color: var(--muted);
+
+    p:first-child {
+      margin-bottom: 1.8rem;
+    }
+  }
+
+  &__title {
+    font-size: 2.8rem;
+    font-weight: 600;
   }
 }
 </style>

@@ -48,6 +48,18 @@ export const messages = {
           button1: 'Get Chrome',
           button2: 'Get Brave',
         },
+        modal4: {
+          title: 'Emeris is in beta',
+          subtitle: 'Use at your own risk.',
+          text1:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi dapibus venenatis lacus, commodo ultrices ex placerat sit amet. Etiam nec est et lorem mattis fermentum non ac risus. Nam in faucibus justo. Vestibulum convallis placerat dolor nec facilisis. Donec scelerisque ligula sed aliquet pharetra. Duis accumsan feugiat elementum. Praesent rhoncus ipsum a turpis pulvinar scelerisque. Vivamus vitae eros vel dui cursus vehicula. Sed placerat at tortor a pellentesque.',
+          text2:
+            'Praesent vulputate finibus dolor, vitae tincidunt arcu aliquam nec. Curabitur fermentum nulla eget lorem efficitur placerat. Ut pellentesque vitae risus at vehicula. Aliquam ornare augue non nisl molestie, porttitor dignissim nunc congue. Integer erat nisl, varius a odio luctus, porta fermentum risus. Suspendisse at sodales eros. Aliquam in fringilla odio. Sed efficitur feugiat tincidunt. Nullam at mollis metus. Nulla accumsan nisi leo, bibendum lobortis est congue vitae. Aliquam et scelerisque lorem. Aliquam nec tellus nec lectus hendrerit pulvinar. Praesent at odio aliquet, lobortis ex eu, elementum odio. Proin nec dolor dictum, dapibus ex et, porta purus. Fusce ultricies lectus nibh, vitae lacinia augue feugiat eget. Maecenas sagittis sollicitudin quam a hendrerit.',
+          text3:
+            'Etiam vitae nibh mauris. Aliquam erat volutpat. Nunc eleifend nunc dolor, vel tincidunt sapien malesuada quis. Quisque imperdiet orci vel odio blandit suscipit. Etiam accumsan in tellus eget luctus. Proin in iaculis ligula. Donec in ex at odio scelerisque aliquam a id tortor. Pellentesque at bibendum justo, id faucibus sem. Mauris ac dui a elit sodales scelerisque. Proin facilisis libero ac neque scelerisque, vel cursus quam aliquet. In nec arcu fringilla, mattis lectus ac, sollicitudin nulla. In tincidunt nulla id mauris dignissim pulvinar. Mauris sem nibh, vestibulum sit amet lorem eget, porta tempus odio. Curabitur ut diam sed nisi maximus vestibulum. Aenean vel interdum velit, id efficitur quam.',
+          button1: 'Cancel',
+          button2: 'Agree',
+        },
       },
     },
     components: {

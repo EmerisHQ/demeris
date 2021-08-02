@@ -1,16 +1,16 @@
 <template>
-  <div class="get-browser">
-    <div class="get-browser__wrapper">
-      <div class="get-browser__content">
-        <div v-if="isLoading" class="get-browser__loading">
+  <div class="connect-wallet">
+    <div class="connect-wallet__wrapper">
+      <div class="connect-wallet__content">
+        <div v-if="isLoading" class="connect-wallet__loading">
           <Spinner :size="4.2" />
         </div>
         <template v-else>
           <slot name="title">
-            <h2 class="get-browser__title">{{ $t('wallet.connect.modal3.title') }}</h2>
+            <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal3.title') }}</h2>
           </slot>
 
-          <div class="get-browser__description">
+          <div class="connect-wallet__description">
             <slot name="description">
               <p>
                 {{ $t('wallet.connect.modal3.text') }}
@@ -18,7 +18,7 @@
             </slot>
           </div>
 
-          <div class="get-browser__controls">
+          <div class="connect-wallet__controls">
             <Button :name="$t('wallet.connect.modal3.button1')" @click="openUrlChrome" />
             <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
           </div>
@@ -71,53 +71,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss">
-.get-browser {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
-    min-height: inherit;
-  }
-
-  &__loading {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__content {
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    margin-top: 5rem;
-
-    div + div {
-      margin-top: 1.6rem;
-    }
-  }
-
-  &__description {
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
-    }
-  }
-
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
-  }
-}
-</style>
