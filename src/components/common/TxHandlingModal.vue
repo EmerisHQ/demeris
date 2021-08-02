@@ -48,9 +48,9 @@
       <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
-        <template v-if="status == 'transacting' || status == 'complete'">
-          <div class="status__detail-subtitle-under w-normal s-0">{{ subTitleUnder }}</div>
-          <div v-if="status === 'transacting'" class="status__detail-transferring">
+        <template v-if="status == 'transacting' || status == 'delay' || status == 'complete'">
+          <div v-if="status == 'delay'" class="status__detail-subtitle-under w-normal s-0">{{ subTitleUnder }}</div>
+          <div v-if="status === 'transacting' || status == 'delay'" class="status__detail-transferring">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
               <div class="arrow">-></div>
@@ -182,7 +182,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -209,7 +209,7 @@ import {
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
-type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
+type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'delay' | 'failed' | 'complete';
 type Result = {
   demandCoinDenom: string;
   swappedPercent: number;
@@ -296,7 +296,6 @@ export default defineComponent({
     const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
     const baseDenoms = reactive({});
-    const alertTime = ref(null);
 
     const isIBC = computed(() => {
       return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
@@ -323,19 +322,15 @@ export default defineComponent({
             whiteButton.value = t('generic_cta.cancel');
             blackButton.value = t('components.txHandlingModal.tryAgain');
             break;
+          case 'delay':
+            title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
+            subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
+            subTitle.value = '';
+            break;
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
               subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
-              subTitleUnder.value = '';
-              alertTime.value = setTimeout(() => {
-                if (props.status === 'transacting') {
-                  title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
-                  subTitle.value = '';
-                  subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
-                }
-              }, 1000);
             } else {
-              subTitleUnder.value = '';
               subTitle.value = t('components.txHandlingModal.txProgress');
             }
             whiteButton.value = '';
@@ -476,11 +471,6 @@ export default defineComponent({
         }
       }
     });
-
-    onUnmounted(() => {
-      clearTimeout(alertTime.value);
-    });
-
     function emitClose() {
       emit('close');
     }

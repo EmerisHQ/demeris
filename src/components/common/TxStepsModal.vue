@@ -487,9 +487,11 @@ export default defineComponent({
 
                     if (stepTx.name.startsWith('ibc')) {
                       let delayAlert = null;
+
                       if (txResultData.status === 'transit') {
                         delayAlert = setTimeout(() => {
-                          alert('test');
+                          console.log('TEST: delay status');
+                          txstatus.value = 'delay';
                         }, 3000);
                       } else {
                         clearTimeout(delayAlert);
