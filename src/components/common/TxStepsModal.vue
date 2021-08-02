@@ -458,8 +458,8 @@ export default defineComponent({
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
-                    message: e.message,
-                    ticket: result.ticket,
+                    message: e?.message,
+                    ticket: result?.ticket,
                   };
                   emit('failed');
                   txstatus.value = 'failed';

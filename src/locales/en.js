@@ -111,6 +111,7 @@ export const messages = {
         signTx: 'Signing transaction',
         signError: 'Transaction not signed!',
         tryAgain: 'Try again',
+        keplrSupport: 'Keplr troubleshooting ↗️',
         ibcTransferSubtitle: 'This may take up to 1 minute',
         ibcTransferDelayTitle: 'Still transferring…',
         ibcTransferDelaySubtitle:
