@@ -73,7 +73,7 @@ export default defineComponent({
       await this.$store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
       await this.$store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     if (autoLogin()) {
       await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);

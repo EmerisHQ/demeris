@@ -206,6 +206,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
+  ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
   msgFromStepTransaction,
@@ -455,12 +456,13 @@ export default defineComponent({
                 txstatus.value = 'transacting';
                 let result;
                 try {
+                  await ensureTraceChannel(stepTx);
                   result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
                     message: e.message,
-                    ticket: result.ticket,
+                    ticket: result?.ticket,
                   };
                   emit('failed');
                   txstatus.value = 'failed';
@@ -485,7 +487,6 @@ export default defineComponent({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
-                    console.log(txResultData.status);
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -527,10 +528,8 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
                   if (currentData.value.data.name === 'swap') {
-                    console.log('txResultData', txResultData);
                     //Get end block events
                     let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                       height: txResultData.height,
@@ -544,8 +543,6 @@ export default defineComponent({
                       offerCoinDenom: '',
                     };
 
-                    console.log('endBlockEvent', endBlockEvent);
-
                     result.demandCoinDenom = endBlockEvent.demand_coin_denom;
                     result.swappedPercent =
                       (Number(endBlockEvent.exchanged_offer_coin_amount) /
@@ -556,7 +553,6 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
 
                   // TODO: deal with status here
