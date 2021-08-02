@@ -19,7 +19,7 @@
       width="72rem"
       @close="closeAgreeWarning"
     >
-      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" />
+      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" @agree="agreeWarning" />
     </Modal>
 
     <Modal
@@ -121,7 +121,18 @@ export default defineComponent({
       emit('close');
     };
 
+    const agreeWarning = () => {
+      console.log('agreeing to warning');
+      isWarningAgreed.value = true;
+    };
+
     onMounted(async () => {
+      // dont load forever if not Chrome
+      // @ts-ignore
+      if (!window.chrome) {
+        isLoading.value = false;
+      }
+
       await getKeplrInstance();
       await nextTick();
 
@@ -137,6 +148,7 @@ export default defineComponent({
 
     return {
       isLoading,
+      agreeWarning,
       connectKeplrRef,
       agreeWarningRef,
       getKeplrRef,
@@ -194,9 +206,12 @@ export default defineComponent({
 
   &__controls {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 3.2rem;
+    flex-direction: column;
+    margin-top: 5rem;
+
+    div + div {
+      margin-top: 1.6rem;
+    }
   }
 
   &__description {

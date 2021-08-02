@@ -15,15 +15,7 @@
 
           <div class="connect-wallet__controls">
             <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
-
-            <a
-              href="https://t.me/EmerisHQ"
-              rel="noopener noreferrer"
-              target="_blank"
-              class="connect-wallet__controls__help s-minus"
-            >
-              {{ $t('wallet.connect.modal1.needHelp') }}
-            </a>
+            <Button :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
           </div>
         </template>
 

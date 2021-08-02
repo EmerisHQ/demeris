@@ -18,8 +18,8 @@
         </div>
 
         <div class="connect-wallet__controls">
-          <Button :name="$t('wallet.connect.modal4.button1')" :is-outline="true" @click="emitCancel" />
-          <Button :name="$t('wallet.connect.modal4.button2')" @click="emitAgree" />
+          <Button :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
+          <Button :name="$t('generic_cta.agree')" @click="emitAgree" />
         </div>
       </div>
       <ConnectBanner />
@@ -62,7 +62,7 @@ export default defineComponent({
   position: relative;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  padding: 2rem 2.4rem;
+  padding: 2rem 2.4rem 0;
   overflow-y: scroll;
   height: 22.5rem;
 
@@ -92,6 +92,10 @@ export default defineComponent({
     flex-direction: row;
     justify-content: space-between;
     margin-top: 3.2rem;
+
+    div + div {
+      margin-top: 0;
+    }
   }
 }
 </style>

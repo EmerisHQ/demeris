@@ -3,6 +3,7 @@ export const messages = {
     generic_cta: {
       seeall: 'See all',
       done: 'Done',
+      agree: 'Agree',
       cancel: 'Cancel',
       confirm: 'Confirm',
       continue: 'Continue',
@@ -27,12 +28,11 @@ export const messages = {
     },
     wallet: {
       connect: {
-        button: 'Connect my wallet',
+        button: 'Connect your wallet',
         modal1: {
-          title: 'Connect to Keplr',
-          text: 'To use Emeris beta, please allow this web app to connect to the Keplr browser extension wallet.',
-          button: 'Connect to Keplr',
-          needHelp: 'Need help?',
+          title: 'Connect your wallet',
+          text: 'Connect your Keplr wallet via the Keplr browser extension to use Emeris.',
+          button: 'Connect Keplr',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
         },
@@ -57,8 +57,6 @@ export const messages = {
             'Praesent vulputate finibus dolor, vitae tincidunt arcu aliquam nec. Curabitur fermentum nulla eget lorem efficitur placerat. Ut pellentesque vitae risus at vehicula. Aliquam ornare augue non nisl molestie, porttitor dignissim nunc congue. Integer erat nisl, varius a odio luctus, porta fermentum risus. Suspendisse at sodales eros. Aliquam in fringilla odio. Sed efficitur feugiat tincidunt. Nullam at mollis metus. Nulla accumsan nisi leo, bibendum lobortis est congue vitae. Aliquam et scelerisque lorem. Aliquam nec tellus nec lectus hendrerit pulvinar. Praesent at odio aliquet, lobortis ex eu, elementum odio. Proin nec dolor dictum, dapibus ex et, porta purus. Fusce ultricies lectus nibh, vitae lacinia augue feugiat eget. Maecenas sagittis sollicitudin quam a hendrerit.',
           text3:
             'Etiam vitae nibh mauris. Aliquam erat volutpat. Nunc eleifend nunc dolor, vel tincidunt sapien malesuada quis. Quisque imperdiet orci vel odio blandit suscipit. Etiam accumsan in tellus eget luctus. Proin in iaculis ligula. Donec in ex at odio scelerisque aliquam a id tortor. Pellentesque at bibendum justo, id faucibus sem. Mauris ac dui a elit sodales scelerisque. Proin facilisis libero ac neque scelerisque, vel cursus quam aliquet. In nec arcu fringilla, mattis lectus ac, sollicitudin nulla. In tincidunt nulla id mauris dignissim pulvinar. Mauris sem nibh, vestibulum sit amet lorem eget, porta tempus odio. Curabitur ut diam sed nisi maximus vestibulum. Aenean vel interdum velit, id efficitur quam.',
-          button1: 'Cancel',
-          button2: 'Agree',
         },
       },
     },

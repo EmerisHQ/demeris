@@ -9,7 +9,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .connect-banner {
   position: absolute;
   background-image: url('~@/assets/images/connect-banner.png');
