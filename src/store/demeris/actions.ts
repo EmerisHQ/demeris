@@ -456,11 +456,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
         accountNumber: parseInt(signerData.account_number),
         sequence: parseInt(signerData.sequence_number),
       };
-      console.log(msgs);
       const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
 
       const tx_data = Buffer.from(tx).toString('base64');
-      console.log(Buffer.from(tx).toString('hex'));
+      //console.log(Buffer.from(tx).toString('hex'));
       return { tx: tx_data, chain_name };
     } catch (e) {
       console.error(e);
@@ -554,7 +553,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TX_STATUS, payload: { params } });
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       throw new SpVuexError('Demeris:GetTXStatus', 'Could not perform API query.');
     }
     return 'pending';
@@ -722,12 +721,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
           type: 'Swap',
           requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
         });
-        console.group('END BLOCK EVENTS');
+
         response.data.result?.end_block_events?.forEach((item) => {
           if (item.type === checks.type) {
             item.attributes.forEach((result) => {
-              console.log(atob(result.key), atob(result.value));
-
               if (atob(result.key) === checks.txAddress) {
                 if (atob(result.value) === checks.requesterAddress) {
                   isMine = true;
@@ -741,7 +738,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
             });
           }
         });
-        console.groupEnd();
+
         if (isMine) {
           return successData;
         } else {

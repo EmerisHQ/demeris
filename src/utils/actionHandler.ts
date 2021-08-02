@@ -1,5 +1,6 @@
 import Long from 'long';
 
+import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import * as API from '@/types/api';
@@ -488,7 +489,10 @@ export async function move({
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+              params: {
+                chain_name: destination_chain_name,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              },
             },
             { root: true },
           ));
@@ -1110,7 +1114,7 @@ export async function getTicker(name, chain_name = null) {
         ));
       return await getDisplayName(verifyTrace.base_denom);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return name + '(unverified)';
     }
   }
@@ -1182,13 +1186,10 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
       feeTotals[fees[0].chain_name] = {};
     }
     used = getUsedFee(fees, gasPriceLevel);
-    console.log(used);
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
           feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
       : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
-    console.log('here');
-    console.log(feeTotals);
   }
   return feeTotals;
 }
@@ -1222,7 +1223,6 @@ export async function feeForSteps(
 
 export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
   const feeOption = fees[0];
-  console.log(gasPriceLevel);
   const used = {
     amount: {
       amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
@@ -1448,7 +1448,7 @@ export async function validateStepFeeBalances(
     }
     if (stepTx.name == 'createpool') {
       const data = stepTx.data as Actions.CreatePoolData;
-      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee;
+      const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
       const feeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
         if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
@@ -1623,13 +1623,26 @@ export async function validateStepFeeBalances(
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
-      feeWarning.feeWarning = false;
-      feeWarning.ibcWarning = true;
-      feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
-      feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
-      feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
-        chain_name: data.to_chain,
-      }).denoms.find((x) => x.fee_token == true).display_name;
+      const chain = store.getters['demeris/getChain']({ chain_name: data.to_chain });
+      const chainFeeDenom = (chain as ChainData).denoms.find((x) => x.fee_token)?.name;
+
+      const ibcFeeBalance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == chainFeeDenom && x.on_chain == data.to_chain) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (!ibcFeeBalance || parseInt(parseCoins(ibcFeeBalance.amount)[0].amount) == 0) {
+        feeWarning.feeWarning = false;
+        feeWarning.ibcWarning = true;
+        feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+        feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
+        feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
+          chain_name: data.to_chain,
+        }).denoms.find((x) => x.fee_token == true).display_name;
+      }
     }
     if (stepTx.name == 'swap') {
       const data = stepTx.data as Actions.SwapData;

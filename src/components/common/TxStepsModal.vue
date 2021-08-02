@@ -485,7 +485,6 @@ export default defineComponent({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
-                    console.log(txResultData.status);
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -527,10 +526,8 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
                   if (currentData.value.data.name === 'swap') {
-                    console.log('txResultData', txResultData);
                     //Get end block events
                     let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                       height: txResultData.height,
@@ -544,8 +541,6 @@ export default defineComponent({
                       offerCoinDenom: '',
                     };
 
-                    console.log('endBlockEvent', endBlockEvent);
-
                     result.demandCoinDenom = endBlockEvent.demand_coin_denom;
                     result.swappedPercent =
                       (Number(endBlockEvent.exchanged_offer_coin_amount) /
@@ -556,7 +551,6 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
 
                   // TODO: deal with status here
