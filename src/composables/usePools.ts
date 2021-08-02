@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue';
+import BigNumber from 'bignumber.js';
 
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
@@ -55,6 +56,54 @@ export default function usePools() {
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
   };
+
+
+  const withdrawBalancesById = (id: string, poolCoinAmount: number) => {
+    const pool = pools.value.find((item) => item.id === id);
+
+    if (!pool) {
+      return;
+    }
+
+    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+
+    const reserveBalances = store.getters['cosmos.bank.v1beta1/getAllBalances']({ params: { address: pool.reserve_account_address } })
+    ?.balances || [];
+
+    /**
+     * TODO: Consider fee proportion
+     * WithdrawAmount = ReserveAmount * PoolCoinAmount * WithdrawFeeProportion / TotalSupply
+     * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
+     */
+
+     const hasParams = totalSupply && reserveBalances;
+
+     const withdrawCoins = [
+       {
+         amount: !hasParams
+           ? 0
+           : new BigNumber(poolCoinAmount)
+               .multipliedBy(reserveBalances[0].amount)
+               .dividedBy(totalSupply)
+               .decimalPlaces(6)
+               .toNumber(),
+         denom: reserveBalances[0].denom,
+       },
+       {
+         amount: !hasParams
+           ? 0
+           : new BigNumber(poolCoinAmount)
+               .multipliedBy(reserveBalances[1].amount)
+               .dividedBy(totalSupply)
+               .decimalPlaces(6)
+               .toNumber(),
+         denom: reserveBalances[1].denom,
+       },
+     ];
+ 
+     return withdrawCoins;
+  }
 
   const denomListByPools = async (isPoolCoin = false) => {
     if (pools.value.length) {
@@ -151,6 +200,8 @@ export default function usePools() {
     }
   };
 
+  
+
   const reserveBalancesById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
     const balances = (
@@ -182,6 +233,7 @@ export default function usePools() {
     pools,
     getReserveBaseDenoms,
     poolsByDenom,
+    withdrawBalancesById,
     poolById,
     formatPoolName,
     poolPriceById,
