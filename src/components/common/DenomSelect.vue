@@ -207,9 +207,6 @@ export default defineComponent({
     }
 
     &-image {
-      width: 2.4rem;
-      height: 2.4rem;
-
       margin-right: 1.2rem;
 
       cursor: pointer;
