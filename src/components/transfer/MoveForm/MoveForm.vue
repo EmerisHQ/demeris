@@ -2,23 +2,14 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
-      <MoveFormAmount v-if="balances" :balances="balances" :fees="state.fees" @next="generateSteps" />
-
-      <div class="move-form__fees">
-        <FeeLevelSelector
-          v-if="steps.length > 0"
-          v-model:gasPriceLevel="state.gasPrice"
-          :steps="steps"
-          @update:fees="state.fees = $event"
-        />
-      </div>
+      <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
     </template>
 
     <template v-else>
       <TxStepsModal
         v-if="steps.length > 0"
         :data="steps"
-        :gas-price-level="state.gasPrice"
+        :gas-price-level="gasPrice"
         :back-route="{ name: 'Portfolio' }"
         action-name="move"
         @transacting="goToStep('move')"
@@ -34,7 +25,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
@@ -51,7 +41,6 @@ export default defineComponent({
   components: {
     MoveFormAmount,
     TxStepsModal,
-    FeeLevelSelector,
   },
 
   props: {
@@ -70,10 +59,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
-
-    const state = reactive({
-      fees: {},
-      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -140,7 +127,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { steps, state, generateSteps, form, goToStep, resetHandler };
+    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler };
   },
 });
 </script>
@@ -150,12 +137,6 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
-  }
-
-  &__fees {
-    margin-top: 2.4rem;
-    margin-left: -2.4rem;
-    margin-right: -2.4rem;
   }
 }
 </style>

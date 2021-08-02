@@ -98,7 +98,7 @@
 
       <div class="pool__aside">
         <div class="pool__aside__widget">
-          <div class="pool-equity elevation-panel" :style="equityGradientStyle">
+          <div v-if="walletBalances" class="pool-equity elevation-panel" :style="equityGradientStyle">
             <div class="pool-equity__header">
               <h2 class="s-2 w-bold">Equity</h2>
               <Icon name="ThreeDotsIcon" />
@@ -264,10 +264,12 @@ export default defineComponent({
     });
 
     const relatedPools = computed(() => {
+      // TODO: Order by descending  %ownership
       return [
         ...poolsByDenom(pool.value.reserve_coin_denoms[0]),
         ...poolsByDenom(pool.value.reserve_coin_denoms[1]),
-      ].filter((item) => item.id !== pool.value.id);
+      ].filter((item) => item.id !== pool.value.id)
+       .slice(0,3);
     });
 
     const generateBackground = (colors: Record<string, string>) => {
