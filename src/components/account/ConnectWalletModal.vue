@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
 
 import Modal from '@/components/ui/Modal.vue';
 
@@ -122,12 +122,13 @@ export default defineComponent({
     };
 
     const agreeWarning = () => {
-      console.log('agreeing to warning');
-      isWarningAgreed.value = true;
+      window.localStorage.setItem('isWarningAgreed', 'true');
     };
 
     onMounted(async () => {
-      // dont load forever if not Chrome
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+
+      // dont present spinner forever if not Chrome
       // @ts-ignore
       if (!window.chrome) {
         isLoading.value = false;
@@ -144,6 +145,10 @@ export default defineComponent({
         // @ts-ignore
         isKeplrInstalled.value = !!window.keplr;
       });
+    });
+
+    watch(isWarningAgreed, (bool) => {
+      localStorage.isWarningAgreed = bool;
     });
 
     return {
