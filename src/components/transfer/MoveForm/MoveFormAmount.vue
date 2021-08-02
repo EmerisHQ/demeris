@@ -4,7 +4,7 @@
       <DenomSelectModal
         v-if="state.isDenomModalOpen"
         title="Select asset"
-        :assets="balances"
+        :assets="availableBalances"
         :func="() => toggleDenomModal()"
         @select="toggleDenomModal"
       />
@@ -12,11 +12,16 @@
       <ChainSelectModal
         v-if="state.isChainsModalOpen"
         title="Select chain"
-        :assets="state.chainsModalSource === 'to' ? availableRecipientsChains : balances"
+        :assets="availableChains"
         :selected-denom="state.currentAsset.base_denom"
         :func="() => toggleChainsModal()"
+        :show-subtitle="false"
         @select="toggleChainsModal"
-      />
+      >
+        <template #description>
+          Select the Chain to swap {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
+        </template>
+      </ChainSelectModal>
     </div>
     <template v-if="true">
       <fieldset class="form__field move-form-amount">
@@ -31,7 +36,7 @@
               <template #default="inputProps">
                 <USDInput
                   :model-value="form.balance.amount"
-                  :denom="state.currentAsset?.base_denom"
+                  :denom="state.currentAsset?.base_denom || ''"
                   :class="[inputProps.class]"
                   :style="inputProps.style"
                   placeholder="0"
@@ -65,7 +70,9 @@
               placeholder="0"
               @input="state.isMaximumAmountChecked = false"
             >
-              <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+              <template v-if="state.currentAsset" #suffix>
+                &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" />
+              </template>
             </FlexibleAmountInput>
           </div>
 
@@ -80,7 +87,12 @@
             <span v-else class="elevation-button">USD</span>
           </label>
           <label class="move-form-amount__controls__button is-toggle">
-            <input v-model="state.isMaximumAmountChecked" type="checkbox" name="move-form-amount-max" />
+            <input
+              v-model="state.isMaximumAmountChecked"
+              type="checkbox"
+              name="move-form-amount-max"
+              :disabled="!hasFunds"
+            />
             <span class="elevation-button">{{ $t('generic_cta.max') }}</span>
           </label>
         </div>
@@ -93,12 +105,13 @@
 
             <div class="move-form-amount__assets__item__asset">
               <CircleSymbol
-                :chain-name="form.on_chain"
+                :chain-name="state.currentAsset ? form.on_chain : undefined"
                 :denom="form.balance.denom"
                 class="move-form-amount__assets__item__avatar"
               />
               <span class="move-form-amount__assets__item__name w-bold">
-                <Denom :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
+                <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
+                <span v-else>Select asset</span>
               </span>
             </div>
 
@@ -107,7 +120,11 @@
             </div>
           </button>
 
-          <button class="move-form-amount__assets__item from-item" @click="toggleChainsModal(null, 'from')">
+          <button
+            v-if="state.currentAsset"
+            class="move-form-amount__assets__item from-item"
+            @click="toggleChainsModal(null, 'from')"
+          >
             <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.from') }}</span>
 
             <div class="move-form-amount__assets__item__asset">
@@ -144,6 +161,7 @@
           <button
             class="move-form-amount__assets__item to-item"
             :class="{ 'chain-selected': !!form.to_chain }"
+            :disabled="!state.currentAsset"
             @click="toggleChainsModal(null, 'to')"
           >
             <span class="move-form-amount__assets__item__label s-minus">{{ $t('components.moveForm.to') }}</span>
@@ -175,13 +193,38 @@
           @click="onSubmit"
         />
       </fieldset>
+
+      <div class="move-form-amount__fees">
+        <FeeLevelSelector
+          v-if="steps.length > 0"
+          v-model:gasPriceLevel="state.gasPrice"
+          :steps="steps"
+          @update:fees="state.fees = $event"
+        />
+      </div>
+
+      <div v-if="state.currentAsset && hasPrice && !hasFunds" class="move-form-amount__buy">
+        <button class="move-form-amount__buy__button elevation-button" @click="openAssetPage">
+          <div class="inline-flex items-center">
+            <span>{{ $t('generic_cta.get') }}&nbsp;</span>
+            <Denom :name="state.currentAsset.base_denom" />
+            <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+          </div>
+          <CircleSymbol
+            size="lg"
+            :denom="state.currentAsset.base_denom"
+            class="move-form-amount__buy__button__symbol"
+          />
+        </button>
+      </div>
     </template>
   </div>
 </template>
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -189,15 +232,17 @@ import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
-import { MoveAssetsForm } from '@/types/actions';
-import { Balances } from '@/types/api';
+import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
+import { Balances, Chain } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -215,6 +260,7 @@ export default defineComponent({
     Icon,
     Price,
     USDInput,
+    FeeLevelSelector,
   },
 
   props: {
@@ -222,9 +268,9 @@ export default defineComponent({
       type: Object as PropType<Balances>,
       required: true,
     },
-    fees: {
-      type: Object,
-      default: undefined,
+    steps: {
+      type: Array,
+      default: () => [],
     },
   },
 
@@ -233,6 +279,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const form = inject<MoveAssetsForm>('moveForm');
+    const router = useRouter();
+
+    const { nativeBalances } = useAccount();
 
     const state = reactive({
       currentAsset: undefined,
@@ -242,13 +291,15 @@ export default defineComponent({
       isChainsModalOpen: false,
       chainsModalSource: 'from',
       usdValue: '',
+      fees: {},
+      gasPrice: undefined,
     });
 
     const feesAmount = computed(() => {
       const result = {};
 
-      if (props.fees) {
-        for (const [, obj] of Object.entries(props.fees)) {
+      if (state.fees) {
+        for (const [, obj] of Object.entries(state.fees)) {
           for (const [denom, value] of Object.entries(obj)) {
             result[denom] = value;
           }
@@ -289,24 +340,72 @@ export default defineComponent({
       }
     });
 
-    const availableRecipientsChains = computed(() => {
+    const availableBalances = computed(() => {
+      if (props.balances.length) {
+        return props.balances;
+      }
+
+      return nativeBalances.value;
+    });
+
+    const availableChains = computed(() => {
       const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
+      let results = [];
 
-      return Object.values(chains)
-        .map((item) => {
-          const balance = (props.balances as Balances).find((balance) => balance.on_chain === item.chain_name);
+      if (state.chainsModalSource === 'to') {
+        results = Object.values(chains)
+          .map((item) => {
+            const balance = props.balances.find(
+              (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
+            );
 
-          return {
-            amount: balance?.amount || 0,
-            base_denom: state.currentAsset.base_denom,
-            on_chain: item.chain_name,
-          };
-        })
-        .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+            return {
+              amount: balance?.amount || '0' + state.currentAsset.base_denom,
+              base_denom: state.currentAsset.base_denom,
+              on_chain: item.chain_name,
+            };
+          })
+          .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+      } else {
+        if (props.balances.length) {
+          results = props.balances;
+        } else {
+          const dexChain = store.getters['demeris/getDexChain'];
+          results = [
+            {
+              amount: '0' + state.currentAsset.base_denom,
+              base_denom: state.currentAsset.base_denom,
+              on_chain: dexChain,
+            },
+          ];
+        }
+      }
+
+      results.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
+
+      return results;
+    });
+
+    const hasFunds = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+
+      return +totalAmount > 0;
     });
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
+        return true;
+      }
+
+      if (!hasFunds.value) {
         return false;
       }
 
@@ -359,15 +458,29 @@ export default defineComponent({
       emit('next');
     };
 
+    const openAssetPage = () => {
+      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+    };
+
     const setCurrentAsset = (asset: Record<string, unknown>) => {
+      const dexChain = store.getters['demeris/getDexChain'];
+      const targetChains = Object.values(store.getters['demeris/getChains']).filter(
+        (chain: Chain) => chain.chain_name !== dexChain,
+      );
+
       state.currentAsset = asset;
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.on_chain = asset.on_chain as string;
+      form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
     };
+
+    onMounted(() => {
+      state.gasPrice = store.getters['demeris/getPreferredGasPriceLevel'] || GasPriceLevel.AVERAGE;
+    });
 
     // TODO: Select chain based in user option
     watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset, props.fees],
+      () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
           const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
@@ -379,6 +492,7 @@ export default defineComponent({
         }
       },
     );
+
     watch(
       () => props.balances,
       (newVal) => {
@@ -410,8 +524,10 @@ export default defineComponent({
     });
 
     return {
+      availableBalances,
       displayUSDValue,
       form,
+      hasFunds,
       onSubmit,
       hasPrice,
       state,
@@ -421,7 +537,8 @@ export default defineComponent({
       denomDecimals,
       toggleDenomModal,
       toggleChainsModal,
-      availableRecipientsChains,
+      openAssetPage,
+      availableChains,
     };
   },
 });
@@ -452,6 +569,34 @@ export default defineComponent({
 
   &--insufficient-funds &__assets__item__amount__available {
     color: #ca0865;
+  }
+
+  &__fees {
+    margin-top: 2.4rem;
+  }
+
+  &__buy {
+    padding: 0 2.4rem 2.4rem;
+
+    &__button {
+      overflow: hidden;
+      margin-top: 4.8rem;
+      padding: 1.4rem 1.6rem;
+      width: 100%;
+      text-align: left;
+      font-weight: 600;
+      background-image: url('~@/assets/images/gold-rings-2.png');
+      background-repeat: no-repeat;
+      background-position: 19rem 85%;
+      position: relative;
+
+      &__symbol {
+        position: absolute;
+        top: -0.3rem;
+        right: 2.6rem;
+        transform: rotate(-7deg);
+      }
+    }
   }
 
   &__input {
@@ -500,6 +645,10 @@ export default defineComponent({
           color: var(--bg);
           font-weight: 500;
         }
+        input:disabled + span {
+          color: var(--inactive);
+          cursor: not-allowed;
+        }
       }
       span {
         padding: 1rem 1.6rem;
@@ -523,8 +672,8 @@ export default defineComponent({
         outline: none;
       }
 
-      &.denom-item &__name {
-        text-transform: uppercase;
+      &:disabled {
+        color: var(--inactive);
       }
 
       & + & {

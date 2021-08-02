@@ -98,7 +98,7 @@
 
       <div class="pool__aside">
         <div class="pool__aside__widget">
-          <div class="pool-equity elevation-panel" :style="equityGradientStyle">
+          <div v-if="walletBalances" class="pool-equity elevation-panel" :style="equityGradientStyle">
             <div class="pool-equity__header">
               <h2 class="s-2 w-bold">Equity</h2>
               <Icon name="ThreeDotsIcon" />
