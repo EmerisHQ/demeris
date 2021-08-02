@@ -1,19 +1,34 @@
 <template>
-  <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="pool" :style="cardStyle">
-    <div class="pool__main">
-      <div class="pool__main__token-pair">
-        <CircleSymbol :denom="denoms[0]" class="pool__main__token-pair__token token-a" />
-        <CircleSymbol :denom="denoms[1]" class="pool__main__token-pair__token token-b" />
+  <router-link
+    :to="{ name: 'Pool', params: { id: pool.id } }"
+    class="
+      pool-card
+      relative
+      flex
+      transition
+      transform
+      hover:-translate-y-px
+      focus:-translate-y-px
+      active:transform-none active:opacity-70
+      focus-visible:ring-2
+      focus:ring-tertiary focus:ring-opacity-50
+      cursor-pointer
+    "
+  >
+    <div
+      class="flex-1 relative z-10 flex flex-col items-between justify-stretch rounded-2xl p-6 text-0 bg-surface h-40"
+    >
+      <div class="flex gap-x-3">
+        <h4 class="font-medium flex-1">{{ pairName }}</h4>
+        <div class="flex -space-x-0.5 mt-0.5">
+          <CircleSymbol :denom="denoms[0]" size="xs" :glow="false" class="z-10" />
+          <CircleSymbol :denom="denoms[1]" size="xs" :glow="false" />
+        </div>
       </div>
-      <div class="pool__main__info w-full mt-4">
-        <p class="pool__main__info__name">{{ pairName }}</p>
-        <span v-if="hasPrices" class="pool__main__info__total">{{ toUSD(totalLiquidityPrice) }}</span>
+      <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">
+        {{ toUSD(totalLiquidityPrice) }}
       </div>
-    </div>
-
-    <div class="pool__footer">
-      <p class="pool__footer__label">{{ $t('context.pools.equity') }}</p>
-      <span class="pool__footer__value"><OwnLiquidityPrice :pool="pool" show-share /></span>
+      <OwnLiquidityPrice :pool="pool" show-share class="block font-medium text-1 mt-auto" />
     </div>
   </router-link>
 </template>
@@ -32,16 +47,6 @@ import { Pool } from '@/types/actions';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
-
-const defaultColors = {
-  primary: '#E1E1E1',
-  secondary: '#F4F4F4',
-  tertiary: '#F9F9F9',
-};
-
-const findSymbolColors = (symbol: string) => {
-  return symbolsData[symbol]?.colors || defaultColors;
-};
 
 export default defineComponent({
   name: 'Pool',
@@ -138,19 +143,6 @@ export default defineComponent({
 
     onMounted(async () => {
       pairName.value = await formatPoolName(props.pool as Pool);
-    });
-
-    const cardStyle = computed(() => {
-      const colorA = findSymbolColors(denoms.value[0]).primary;
-      const colorB = findSymbolColors(denoms.value[1]).primary;
-
-      const background = `
-				linear-gradient(165.72deg, rgba(247, 248, 248, 0.9) 0%, #F8F8F7 39.71%),
-      	linear-gradient(67.04deg, ${colorA} 44.06%, ${colorB} 74.33%)`;
-
-      return {
-        background,
-      };
     });
 
     const { pool, reserveBalances, calculateWithdrawBalances } = usePool((props.pool as Pool).id);
@@ -295,72 +287,26 @@ export default defineComponent({
     watch(reserveBalances, updateTotalLiquidityPrice);
 
     watch(walletBalances, updateOwnLiquidityPrice);
-    return { hasPrices, cardStyle, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
+    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, ownLiquidityPrice, toUSD };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.pool {
-  display: flex;
-  flex-direction: column;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  font-size: 1rem;
-
-  &__main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-
-    &__token-pair {
-      display: inline-flex;
-      align-items: center;
-
-      &__token {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 9999px;
-        z-index: 0;
-
-        &.token-a {
-          z-index: 1;
-        }
-
-        & + & {
-          margin-left: -0.375rem;
-        }
-      }
-    }
-
-    &__info {
-      &__name {
-        width: 100%;
-        font-weight: 600;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      &__total {
-        color: var(--muted);
-        font-size: 0.8125rem;
-      }
-    }
+.pool-card {
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    @apply inset-0;
+    @apply rounded-2xl;
+    @apply shadow-card;
+    @apply transition-shadow;
   }
-
-  &__footer {
-    display: flex;
-    flex-direction: column;
-
-    &__label {
-      color: var(--muted);
-      margin-bottom: 0.125rem;
-      font-weight: 400;
-    }
-    &__value {
-      font-weight: 600;
-      text-transform: uppercase;
-    }
+  // not working for some reason?
+  &:hover:before,
+  &:focus:before {
+    --tw-shadow: 18px ​52px 128px -10px rgba(0, 0, 0, 0.1);
   }
 }
 </style>

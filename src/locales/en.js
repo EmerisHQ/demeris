@@ -253,7 +253,6 @@ export const messages = {
       },
       pools: {
         title: 'Pools',
-        equity: 'Equity',
         mine: 'My pools',
         all: 'All pools',
         pair: 'Token pair',

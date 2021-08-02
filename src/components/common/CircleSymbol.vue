@@ -24,6 +24,7 @@
 
     <template v-else-if="assetConfig && !isPoolCoin">
       <img
+        v-if="logo && size !== 'xs'"
         :src="assetConfig.logo"
         :alt="denom"
         class="w-full h-full rounded-full relative z-10"
@@ -120,6 +121,10 @@ export default defineComponent({
     size: {
       type: String as PropType<CircleSymbolSize>,
       default: 'md',
+    },
+    logo: {
+      type: Boolean,
+      default: true,
     },
     glow: {
       type: Boolean,
@@ -295,7 +300,7 @@ export default defineComponent({
   height: var(--symbol-size);
 
   &--xs {
-    --symbol-size: 1.25rem;
+    --symbol-size: 1rem;
   }
 
   &--sm {
