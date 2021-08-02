@@ -34,7 +34,7 @@ export function getDefaultState(): State {
   return {
     endpoint: '',
     hub_chain: 'cosmoshub-4',
-    gas_limit: 300000,
+    gas_limit: 400000,
     balances: {},
     stakingBalances: {},
     numbers: {},
