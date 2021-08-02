@@ -9,7 +9,7 @@
       <TxStepsModal
         v-if="steps.length > 0"
         :data="steps"
-        :gas-price-level="state.gasPrice"
+        :gas-price-level="gasPrice"
         :back-route="{ name: 'Portfolio' }"
         action-name="move"
         @transacting="goToStep('move')"
@@ -59,6 +59,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
 
     const form: MoveAssetsForm = reactive({
       balance: {
@@ -124,7 +127,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { steps, generateSteps, form, goToStep, resetHandler };
+    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler };
   },
 });
 </script>
