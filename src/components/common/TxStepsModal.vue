@@ -426,11 +426,11 @@ export default defineComponent({
               const fee = {
                 amount: [
                   {
-                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
+                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 400000,
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '300000',
+                gas: '400000',
               };
               let tx;
               try {
