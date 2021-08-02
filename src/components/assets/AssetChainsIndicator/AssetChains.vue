@@ -1,9 +1,9 @@
 <template>
-  <tippy v-if="chainsCount > 1" class="asset-chains">
-    <div class="asset-chains__count">
+  <tippy v-if="chainsCount > 1" class="block w-8 h-8 relative">
+    <CircleSymbol variant="chain" :chain-name="balances[0].on_chain" :glow="false" />
+    <div class="absolute inset-0.5 -text-1 font-normal z-10 flex items-center justify-center">
       <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
     </div>
-    <CircleSymbol :denom="denom" :glow="false" />
 
     <template #content>
       <p v-for="balance of filteredBalances" :key="balance.on_chain">
@@ -39,10 +39,6 @@ export default defineComponent({
     denom: {
       type: String,
       required: true,
-    },
-    showDescription: {
-      type: Boolean,
-      default: true,
     },
     maxChainsCount: {
       type: Number,
@@ -94,26 +90,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.asset-chains {
-  width: 3.2rem;
-  height: 3.2rem;
-  position: relative;
-
-  &__count {
-    position: absolute;
-    top: 0.3rem;
-    left: 0.3rem;
-    font-weight: 400;
-    font-size: 1.3rem;
-    background: var(--bg);
-    width: 2.6rem;
-    height: 2.6rem;
-    z-index: 10;
-    display: flex;
-    border-radius: 3.2rem;
-    justify-content: center;
-    align-items: center;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

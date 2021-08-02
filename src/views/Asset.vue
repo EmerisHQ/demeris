@@ -370,21 +370,6 @@ export default defineComponent({
           display: flex;
           align-items: center;
 
-          &__avatar {
-            position: relative;
-            &:before {
-              display: block;
-              content: '';
-              width: 2.6rem;
-              height: 2.6rem;
-              position: absolute;
-              top: 0.3rem;
-              left: 0.3rem;
-              border-radius: 1.3rem;
-              background: var(--bg);
-              z-index: 5;
-            }
-          }
           &__denom {
             margin-left: 1rem;
             font-weight: 600;

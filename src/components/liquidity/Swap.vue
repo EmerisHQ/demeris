@@ -33,7 +33,7 @@
         isChildModalOpen ? 'shadow-none' : 'shadow-panel',
       ]"
     >
-      <div class="flex justify-between items-center py-8 px-6">
+      <div class="flex justify-between items-center py-6 px-6 h-24">
         <div class="text-2 font-bold">{{ $t('components.swap.title') }}</div>
         <Button variant="link" rounded :click-function="slippageSettingModalToggle">
           <Icon name="ThreeDotsIcon" :icon-size="1.5" />

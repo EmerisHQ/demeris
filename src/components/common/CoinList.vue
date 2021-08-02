@@ -62,7 +62,7 @@
     </div>
     <div v-if="type === 'pay'" class="flex justify-between">
       <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
-      <Icon name="CaretRightIcon" :icon-size="1" :color="iconColor" />
+      <Icon name="CaretRightIcon" :icon-size="1" class="text-inactive ml-1.5" />
     </div>
     <div v-else-if="showBalance" class="text-muted text-right">
       <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
@@ -97,7 +97,6 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props) {
-    const iconColor = getComputedStyle(document.body).getPropertyValue('--inactive');
     const modifiedData = computed(() => getUniqueCoinList(props.data));
     const tooltipInstance = ref(null);
     function setWordColorByKeyword(keyword, word) {
@@ -143,7 +142,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    return { iconColor, setWordColorByKeyword, modifiedData, showTooltip, hideTooltip };
+    return { setWordColorByKeyword, modifiedData, showTooltip, hideTooltip };
   },
 });
 </script>

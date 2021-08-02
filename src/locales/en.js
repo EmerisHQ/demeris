@@ -108,7 +108,7 @@ export const messages = {
       },
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
-        signTx: 'Signing transaction',
+        signTx: 'Sign transaction',
         signError: 'Transaction not signed!',
         tryAgain: 'Try again',
         keplrSupport: 'Keplr troubleshooting ↗️',
@@ -248,7 +248,6 @@ export const messages = {
         marketCap: 'Market cap.',
         amount: 'Amount',
         balance: 'Balance',
-        chains: 'chains',
         onchain: '{amount} on {chain}',
         viewAll: 'View all',
       },

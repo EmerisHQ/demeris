@@ -86,20 +86,20 @@
       <Alert :status="alertStatus" :message="alertText" />
     </div>
 
-    <div class="px-6 pb-6 mt-8">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center -text-1 font-medium">
+    <div class="px-6 pb-6 mt-8 space-y-6">
+      <div class="flex justify-between">
+        <div class="flex-1 -text-1 font-medium">
           <tippy :max-width="192">
             {{ $t('components.slippageSettingsModal.limitPrice') }}
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
-        <div class="ml-1 -text-1 font-normal">
+        <div class="flex-shrink ml-1 -text-1 font-normal text-right">
           {{ limitPriceText }}
         </div>
       </div>
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center -text-1 font-medium">
+      <div class="flex justify-between">
+        <div class="flex-1 -text-1 font-medium">
           <tippy :max-width="192">
             <div>
               {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
@@ -109,7 +109,7 @@
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
-        <div class="ml-1 -text-1 font-normal">{{ minReceivedText }}</div>
+        <div class="flex-shrink ml-1 -text-1 font-normal text-right">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>

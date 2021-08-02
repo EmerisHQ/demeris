@@ -1,33 +1,21 @@
 <template>
-  <div v-if="chainsCount > 1" class="flex">
-    <tippy class="inline-flex items-center">
-      <div v-if="showIndicators" class="flex justify-end w-1/2 mr-3 -space-x-2.5">
-        <CircleSymbol
-          v-for="indicator of indicators"
-          :key="indicator.on_chain"
-          :size="showDescription ? 'sm' : 'xs'"
-          :chain-name="indicator.on_chain"
-          variant="chain"
-        />
-      </div>
+  <tippy v-if="chainsCount > 1" class="block w-8 h-8 relative">
+    <CircleSymbol variant="chain" :chain-name="indicators[0].on_chain" :glow="false" />
+    <div class="absolute inset-0.5 -text-1 font-normal z-10 flex items-center justify-center">
+      <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
+    </div>
 
-      <div class="font-normal whitespace-nowrap">
-        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
-        <span v-if="showDescription">&nbsp;{{ $t('context.assets.chains') }}</span>
-      </div>
-
-      <template #content>
-        <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{
-            $t('context.assets.onchain', {
-              amount: formatPrecision(balance.amount),
-              chain: getChainName(balance.on_chain),
-            })
-          }}
-        </p>
-      </template>
-    </tippy>
-  </div>
+    <template #content>
+      <p v-for="balance of filteredBalances" :key="balance.on_chain">
+        {{
+          $t('context.assets.onchain', {
+            amount: formatPrecision(balance.amount),
+            chain: getChainName(balance.on_chain),
+          })
+        }}
+      </p>
+    </template>
+  </tippy>
 </template>
 
 <script lang="ts">
@@ -51,14 +39,6 @@ export default defineComponent({
     denom: {
       type: String,
       required: true,
-    },
-    showDescription: {
-      type: Boolean,
-      default: true,
-    },
-    showIndicators: {
-      type: Boolean,
-      default: true,
     },
     maxIndicators: {
       type: Number,

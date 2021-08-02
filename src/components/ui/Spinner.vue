@@ -57,7 +57,7 @@ export default defineComponent({
     },
   },
 
-  data() {
+  setup() {
     const randomId = Math.random()
       .toString(36)
       .replace(/[^a-z]+/g, '')

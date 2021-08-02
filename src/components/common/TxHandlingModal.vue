@@ -7,7 +7,7 @@
     @close="emitClose"
   >
     <div class="text-center">
-      <div v-if="iconType" class="flex items-center justify-center mt-12 mb-6">
+      <div v-if="iconType" class="flex items-center justify-center my-6">
         <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
         <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
         <Icon v-else name="ErrorIcon" size="3" class="text-negative" />

@@ -1,6 +1,6 @@
 <template>
   <div class="receive relative flex flex-col w-full min-h-screen items-center">
-    <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-4 px-8 h-20">
+    <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
       <Button v-if="state.selectedAsset" variant="link" :full-width="false" :click-function="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.5" />
       </Button>

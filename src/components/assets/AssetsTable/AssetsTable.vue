@@ -10,7 +10,7 @@
 
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left">
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-10 bg-app text-left pl-6 rounded-l-3">
             {{ $t('context.assets.asset') }}
           </th>
           <th
@@ -30,7 +30,7 @@
           </th>
           <th
             v-if="variant === 'balance'"
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right"
+            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-10 bg-app text-right pr-6 rounded-r-3"
           >
             {{ $t('context.assets.balance') }}
           </th>
@@ -44,7 +44,7 @@
           class="assets-table__row group cursor-pointer"
           @click="handleClick(asset)"
         >
-          <td class="py-5 align-middle group-hover:bg-fg transition">
+          <td class="py-5 align-middle group-hover:bg-fg transition pl-6 rounded-l-3">
             <div class="flex items-center">
               <CircleSymbol :denom="asset.denom" />
               <div class="ml-4 white-space-nowrap overflow-hidden overflow-ellipsis">
@@ -72,7 +72,7 @@
               <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
             </div>
           </td>
-          <td v-if="variant === 'balance'" class="mt-0.5 ml-6 group-hover:bg-fg transition">
+          <td v-if="variant === 'balance'" class="mt-0.5 pl-4 group-hover:bg-fg transition pr-6 rounded-r-3">
             <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" />
           </td>
         </tr>
@@ -83,7 +83,7 @@
       v-if="balancesByAsset.length > balancesFiltered.length"
       size="sm"
       variant="secondary"
-      :full-width="false"
+      rounded
       class="view-all-assets mx-auto mt-6"
       :click-function="
         () => {
@@ -267,8 +267,5 @@ export default defineComponent({
       border-bottom-right-radius: 0.75rem;
     }
   }
-}
-.view-all-assets::v-deep(button) {
-  border-radius: 999px;
 }
 </style>

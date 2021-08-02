@@ -17,34 +17,34 @@
     <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
     when it changed-->
 
-    <div class="denom-select__coin self-stretch flex items-center flex-auto pr-3" @click="toggleDenomSelectModal">
+    <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer" @click="toggleDenomSelectModal">
       <CircleSymbol
         :denom="selectedDenom?.base_denom ?? 'empty'"
         :chain-name="selectedDenom?.on_chain ?? undefined"
         size="sm"
-        class="mr-3 cursor-pointer"
+        class="mr-3"
         @click="toggleDenomSelectModal"
       />
       <div v-if="isSelected">
-        <div class="denom-select__coin-denom text-0 font-medium">
+        <div class="flex items-center text-0 font-medium">
           <tippy
             v-if="displayName.startsWith('GDEX')"
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
             class="tippy-info"
           >
-            <div class="max-display-width">{{ displayName }}</div>
+            <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
             <template #content> {{ displayName }} </template>
           </tippy>
           <Denom v-else :name="selectedDenom?.base_denom" />
-          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" />
+          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
-        <div class="denom-select__coin-from -text-1 overflow-hidden overflow-ellipsis white-space-nowrap">
+        <div class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
         </div>
       </div>
       <div v-else>
-        <div class="denom-select__coin-denom text-0 font-medium">
-          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" />
+        <div class="flex items-center text-0 font-medium">
+          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
       </div>
     </div>
@@ -75,7 +75,7 @@
 
   <DenomSelectModal
     v-show="isOpen"
-    class="absolute h-full w-full top-0 left-0 overflow-hidden z-10 bg-surface shadow-panel rounded-2xl"
+    class="absolute h-full w-full top-0 left-0 overflow-hidden z-30 bg-surface shadow-panel rounded-2xl"
     :assets="assets"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
@@ -185,39 +185,8 @@ export default defineComponent({
     cursor: default;
   }
 
-  &__coin {
-    flex-shrink: 0;
-    cursor: pointer;
-
-    &-denom {
-      display: flex;
-      align-items: center;
-      color: var(--text);
-
-      .icon {
-        margin-left: 0.25rem;
-      }
-
-      .max-display-width {
-        max-width: 9.375rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    &-from {
-      color: var(--muted);
-    }
-
-    &-image {
-      width: 1.5rem;
-      height: 1.5rem;
-
-      margin-right: 0.75rem;
-
-      cursor: pointer;
-    }
+  .max-display-width {
+    max-width: 9.375rem;
   }
 
   &__coin-amount {
@@ -238,10 +207,6 @@ export default defineComponent({
     &:hover &-input:not(:focus)::placeholder {
       color: var(--muted);
     }
-  }
-
-  .over {
-    color: var(--negative-text);
   }
 }
 </style>

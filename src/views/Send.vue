@@ -1,7 +1,7 @@
 <template>
   <div class="send relative flex w-full min-h-screen justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
-      <header class="flex items-center justify-between py-4 h-20">
+      <header class="flex items-center justify-between py-6 h-24">
         <Button
           v-if="showBackButton"
           variant="link"
