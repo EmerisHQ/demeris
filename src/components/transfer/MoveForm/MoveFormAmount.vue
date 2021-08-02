@@ -12,11 +12,16 @@
       <ChainSelectModal
         v-if="state.isChainsModalOpen"
         title="Select chain"
-        :assets="state.chainsModalSource === 'to' ? availableRecipientsChains : balances"
+        :assets="availableChains"
         :selected-denom="state.currentAsset.base_denom"
         :func="() => toggleChainsModal()"
+        :show-subtitle="false"
         @select="toggleChainsModal"
-      />
+      >
+        <template #description>
+          Select the Chain to swap {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
+        </template>
+      </ChainSelectModal>
     </div>
     <template v-if="true">
       <fieldset class="form__field move-form-amount">
@@ -343,22 +348,35 @@ export default defineComponent({
       return nativeBalances.value;
     });
 
-    const availableRecipientsChains = computed(() => {
+    const availableChains = computed(() => {
       const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
+      let results = [];
 
-      return Object.values(chains)
-        .map((item) => {
-          const balance = (props.balances as Balances).find(
-            (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
-          );
+      if (state.chainsModalSource === 'to') {
+        results = Object.values(chains)
+          .map((item) => {
+            const balance = props.balances.find(
+              (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
+            );
 
-          return {
-            amount: balance?.amount || 0,
-            base_denom: state.currentAsset.base_denom,
-            on_chain: item.chain_name,
-          };
-        })
-        .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+            return {
+              amount: balance?.amount || '0' + state.currentAsset.base_denom,
+              base_denom: state.currentAsset.base_denom,
+              on_chain: item.chain_name,
+            };
+          })
+          .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+      } else {
+        results = props.balances;
+      }
+
+      results.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
+
+      return results;
     });
 
     const hasFunds = computed(() => {
@@ -509,7 +527,7 @@ export default defineComponent({
       toggleDenomModal,
       toggleChainsModal,
       openAssetPage,
-      availableRecipientsChains,
+      availableChains,
     };
   },
 });

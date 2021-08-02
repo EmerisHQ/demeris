@@ -34,7 +34,12 @@ export default function useAccount() {
   watch(
     () => allbalances.value,
     async (newBalances) => {
-      balances.value = await validBalances(newBalances);
+      const result = await validBalances(newBalances);
+      balances.value = result.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
     },
     { immediate: true },
   );
