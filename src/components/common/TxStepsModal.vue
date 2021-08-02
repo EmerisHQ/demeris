@@ -206,6 +206,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
+  ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
   msgFromStepTransaction,
@@ -455,12 +456,13 @@ export default defineComponent({
                 txstatus.value = 'transacting';
                 let result;
                 try {
+                  await ensureTraceChannel(stepTx);
                   result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
                     message: e.message,
-                    ticket: result.ticket,
+                    ticket: result?.ticket,
                   };
                   emit('failed');
                   txstatus.value = 'failed';

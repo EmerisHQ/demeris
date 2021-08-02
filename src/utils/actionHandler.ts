@@ -488,7 +488,10 @@ export async function move({
             'demeris/GET_PRIMARY_CHANNEL',
             {
               subscribe: true,
-              params: { chain_name: destination_chain_name, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+              params: {
+                chain_name: destination_chain_name,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              },
             },
             { root: true },
           ));
@@ -1038,6 +1041,80 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
   return denom;
 }
+export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
+  const timeout = 1000;
+  const limit = 3;
+
+  let retries = 0;
+  let error: Error;
+
+  let amounts = [];
+  let chain = store.getters['demeris/getDexChain'];
+
+  switch (transaction.name) {
+    case 'addliquidity':
+      const transferdata = transaction.data as Actions.AddLiquidityData;
+      amounts = [transferdata.coinA.amount, transferdata.coinB.amount];
+      break;
+    case 'createpool':
+      const createdata = transaction.data as Actions.CreatePoolData;
+      amounts = [createdata.coinA.amount, createdata.coinB.amount];
+      break;
+    case 'swap':
+      const swapdata = transaction.data as Actions.SwapData;
+      amounts = [swapdata.from.amount, swapdata.to.amount];
+      break;
+    case 'withdrawliquidity':
+      const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
+      amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
+      break;
+    case 'ibc_backward':
+      const ibcbackdata = transaction.data as Actions.IBCBackwardsData;
+      amounts = [ibcbackdata.amount.amount + ibcbackdata.amount.denom];
+      chain = ibcbackdata.from_chain;
+      break;
+    case 'ibc_forward':
+      const ibcforwarddata = transaction.data as Actions.IBCForwardsData;
+      amounts = [ibcforwarddata.amount.amount + ibcforwarddata.amount.denom];
+      chain = ibcforwarddata.from_chain;
+      break;
+  }
+
+  const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
+
+  if (!ibcDenoms.length) {
+    return;
+  }
+
+  while (limit > retries) {
+    try {
+      for (const denom of ibcDenoms) {
+        await store.dispatch(
+          'demeris/GET_VERIFY_TRACE',
+          {
+            subscribe: false,
+            params: {
+              chain_name: chain,
+              hash: denom.split('/')[1],
+            },
+          },
+          { root: true },
+        );
+      }
+      break;
+    } catch (e) {
+      error = e;
+      retries++;
+      // Sleep
+      await new Promise((resolve) => setTimeout(resolve, timeout));
+    }
+  }
+
+  if (error) {
+    throw new Error(`Failed to verify path of "${ibcDenoms.join(', ')}" on "${chain}."`);
+  }
+}
+
 export async function getDisplayName(name, chain_name = null) {
   if (isNative(name)) {
     const displayName = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
