@@ -22,6 +22,7 @@ export default function useAccount() {
 
   const redeemableBalances = ref([]);
   const balances = ref(allbalances.value);
+  /*
   watch(
     () => allbalances.value,
     async (newBalances, oldBalances) => {
@@ -31,6 +32,7 @@ export default function useAccount() {
     },
     { immediate: true },
   );
+  */
   watch(
     () => allbalances.value,
     async (newBalances) => {
