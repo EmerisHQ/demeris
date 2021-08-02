@@ -273,8 +273,11 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-      form.chain_name = asset.on_chain as string;
+
+      if (asset) {
+        form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+        form.chain_name = asset.on_chain as string;
+      }
     };
 
     const toggleSelectModal = (asset?: Record<string, unknown>) => {
