@@ -48,9 +48,19 @@
       <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
-        <template v-if="status == 'transacting' || status == 'delay' || status == 'complete'">
-          <div v-if="status == 'delay'" class="status__detail-subtitle-under w-normal s-0">{{ subTitleUnder }}</div>
-          <div v-if="status === 'transacting' || status == 'delay'" class="status__detail-transferring">
+        <template
+          v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
+        >
+          <div
+            v-if="status == 'delay' || status == 'IBC_receive_failed'"
+            class="status__detail-subtitle-under w-normal s-0"
+          >
+            {{ subTitleUnder }}
+          </div>
+          <div
+            v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
+            class="status__detail-transferring"
+          >
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
               <div class="arrow">-></div>
@@ -209,7 +219,7 @@ import {
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
-type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'delay' | 'failed' | 'complete';
+type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'delay' | 'IBC_receive_failed' | 'failed' | 'complete';
 type Result = {
   demandCoinDenom: string;
   swappedPercent: number;
@@ -327,6 +337,11 @@ export default defineComponent({
             subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
             subTitle.value = '';
             break;
+          case 'IBC_receive_failed':
+            title.value = t('components.txHandlingModal.somethingWentWrong');
+            subTitleUnder.value = t('components.txHandlingModal.revertTx');
+            subTitle.value = '';
+            break;
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
               subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
@@ -441,7 +456,6 @@ export default defineComponent({
         }
       },
     );
-    //  {{ $t('components.txHandlingModal.somethingWentWrong') }}
     onMounted(async () => {
       let denoms = [];
       let chain = undefined;

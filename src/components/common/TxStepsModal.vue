@@ -473,6 +473,9 @@ export default defineComponent({
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
+                  let delayStatus = null;
+                  let failStatus = null;
+
                   while (
                     txResultData.status != 'complete' &&
                     txResultData.status != 'failed' &&
@@ -486,15 +489,24 @@ export default defineComponent({
                     });
 
                     if (stepTx.name.startsWith('ibc')) {
-                      let delayAlert = null;
-
                       if (txResultData.status === 'transit') {
-                        delayAlert = setTimeout(() => {
-                          console.log('TEST: delay status');
+                        delayStatus = setTimeout(() => {
                           txstatus.value = 'delay';
-                        }, 3000);
+                        }, 60000);
+                        failStatus = setTimeout(async () => {
+                          emit('failed');
+                          txstatus.value = 'failed';
+                          await txToResolve.value['promise'];
+                          abort = true;
+                        }, 310000);
+                        console.log('setTimeOut', delayStatus);
+                      } else if (txResultData.status === 'IBC_receive_failed') {
+                        txstatus.value = 'IBC_receive_failed';
+                        console.log('clearTimeout', delayStatus);
+                        clearTimeout(delayStatus);
                       } else {
-                        clearTimeout(delayAlert);
+                        clearTimeout(delayStatus);
+                        clearTimeout(failStatus);
                       }
                     }
 
