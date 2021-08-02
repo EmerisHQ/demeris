@@ -34,7 +34,12 @@ export default function useAccount() {
   watch(
     () => allbalances.value,
     async (newBalances) => {
-      balances.value = await validBalances(newBalances);
+      const result = await validBalances(newBalances);
+      balances.value = result.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
     },
     { immediate: true },
   );
@@ -85,13 +90,14 @@ export default function useAccount() {
       result.push({
         ...asset,
         amount: '' + totalAmount + asset.denom,
+        displayName: verifiedDenom.display_name,
       });
     }
 
     result.sort((a, b) => {
       const coinA = parseCoins(a.amount)[0];
       const coinB = parseCoins(b.amount)[0];
-      return +coinB.amount - +coinA.amount || coinA.denom.localeCompare(coinB.denom);
+      return +coinB.amount - +coinA.amount || a.displayName.localeCompare(b.displayName);
     });
 
     return result;

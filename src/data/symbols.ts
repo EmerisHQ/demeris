@@ -57,6 +57,22 @@ const Sentinel: SymbolConfig = {
   },
 };
 
+const Regen: SymbolConfig = {
+  colors: {
+    primary: '#4CE16B',
+    secondary: '#87EB9C',
+    tertiary: '#D7F8DD',
+  },
+};
+
+const Ion: SymbolConfig = {
+  colors: {
+    primary: '#3F49D1',
+    secondary: '#4199FD',
+    tertiary: '#50CCC9',
+  },
+};
+
 const GravityDex: SymbolConfig = {
   colors: {
     primary: '#E88CFE',
@@ -67,7 +83,10 @@ const GravityDex: SymbolConfig = {
 const chains: Record<string, SymbolConfig> = {
   'cosmos-hub': Cosmos,
   akash: Akash,
-  'crypto.com': CryptoCom,
+  'crypto-com': CryptoCom,
+  persistence: Persistence,
+  sentinel: Sentinel,
+  regen: Regen,
 };
 
 const denoms: Record<string, SymbolConfig> = {
@@ -77,7 +96,9 @@ const denoms: Record<string, SymbolConfig> = {
   uxprt: Persistence,
   uakt: Akash,
   uatom: Cosmos,
-  ucro: CryptoCom,
+  basecro: CryptoCom,
+  uregen: Regen,
+  uion: Ion,
 };
 
 const protocols: Record<string, SymbolConfig> = {
