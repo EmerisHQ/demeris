@@ -351,7 +351,7 @@ export default defineComponent({
     const availableChains = computed(() => {
       const chains = store.getters['demeris/getChains'] as Record<string, ChainData>;
       let results = [];
-      console.log('== availableAssets ==', { balances: props.balances, currentAsset: state.currentAsset });
+
       if (state.chainsModalSource === 'to') {
         results = Object.values(chains)
           .map((item) => {
