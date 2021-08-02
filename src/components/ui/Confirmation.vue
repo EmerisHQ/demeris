@@ -2,7 +2,7 @@
   <Modal
     :open="open"
     variant="dialog"
-    width="20rem"
+    fullscreen
     class="confirmation"
     :class="{ 'confirmation--single': !showNoButton }"
     @close="emitClose"

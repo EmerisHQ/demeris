@@ -1,35 +1,47 @@
 <template>
   <svg
-    class="spinner animate-spin"
-    :class="`spinner--${variant}`"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    :style="{ fontSize: `${size}rem` }"
+    class="spinner"
+    x="0"
+    y="0"
+    :width="`${size * 16}px`"
+    :height="`${size * 16}px`"
+    :viewBox="`0 0 ${size * 16} ${size * 16}`"
+    :style="`--spinner-dashoffset-0: ${0.66 * size * 16}; --spinner-dashoffset-50: ${3.14 * size * 16};`"
   >
-    <defs>
-      <linearGradient id="gradient" gradientTransform="rotate(113)">
-        <stop offset="0%" :stop-color="gradients[0]" />
-        <stop offset="100%" :stop-color="gradients[1]" />
-      </linearGradient>
-    </defs>
     <circle
-      class="spinner__circle"
-      cx="12"
-      cy="12"
-      r="10"
-      :stroke="variant === 'gradient' ? 'url(#gradient)' : color"
+      :cx="(size * 16) / 2"
+      :cy="(size * 16) / 2"
+      r="18"
+      fill="transparent"
+      :stroke="variant === 'gold' ? `url(#${fillId})` : 'currentColor'"
       stroke-width="3"
-      stroke-dasharray="90 150"
-      stroke-dashoffset="-15"
+      stroke-linecap="round"
+      :style="`stroke-dasharray: ${3.14 * size * 16}; transform-origin: ${0.5 * size * 16}px ${0.5 * size * 16}px 0;`"
     ></circle>
+    <defs>
+      <pattern
+        :id="fillId"
+        height="100%"
+        width="100%"
+        patternContentUnits="objectBoundingBox"
+        viewBox="0 0 1 1"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <image
+          height="1"
+          width="1"
+          preserveAspectRatio="xMidYMid slice"
+          xlink:href="~@/assets/images/texture-gold-circular.jpg"
+        ></image>
+      </pattern>
+    </defs>
   </svg>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-type SpinnerVariant = 'solid' | 'gradient';
+type SpinnerVariant = 'solid' | 'gold';
 
 export default defineComponent({
   name: 'Spinner',
@@ -37,31 +49,44 @@ export default defineComponent({
   props: {
     size: {
       type: Number,
-      default: 1.6,
-    },
-    gradients: {
-      type: Array,
-      default: () => ['#DA9FFE', '#5E6BFF'],
-    },
-    color: {
-      type: [Number, String],
-      default: 'currentColor',
+      default: 2,
     },
     variant: {
       type: String as PropType<SpinnerVariant>,
-      default: 'gradient',
+      default: 'gold',
     },
+  },
+
+  data() {
+    const randomId = Math.random()
+      .toString(36)
+      .replace(/[^a-z]+/g, '')
+      .substr(2, 10);
+
+    return {
+      fillId: `spinner-fill-${randomId}`,
+    };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.spinner {
-  width: 1em;
-  height: 1em;
+.spinner circle {
+  animation: spinner 2s linear infinite;
+}
 
-  &--solid &__circle {
-    opacity: 0.25;
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+    stroke-dashoffset: var(--spinner-dashoffset-0);
+  }
+  50% {
+    transform: rotate(720deg);
+    stroke-dashoffset: var(--spinner-dashoffset-50);
+  }
+  100% {
+    transform: rotate(1080deg);
+    stroke-dashoffset: var(--spinner-dashoffset-0);
   }
 }
 </style>

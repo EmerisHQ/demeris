@@ -8,10 +8,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  maxWidth: {
-    type: Number,
-    required: true,
-  },
+  // maxWidth: {
+  //   type: Number,
+  //   required: false
+  // },
   minWidth: {
     type: Number,
     default: 30,
@@ -74,7 +74,7 @@ watch(
 const innerStyle = computed(() => {
   return {
     transform: `scale(${state.scale})`,
-    maxWidth: `512px`, // ${props.maxWidth}px`,
+    maxWidth: state.maxWidth,
   };
 });
 
@@ -83,7 +83,7 @@ const inputProps = computed(() => {
     style: { width: `${state.width}px` },
     width: state.width,
     placeholder: props.placeholder,
-    class: `flexible-input__input appearance-none overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
+    class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
   };
 });
 </script>
@@ -94,7 +94,11 @@ const inputProps = computed(() => {
     class="flexible-input relative flex items-center justify-center mx-auto w-full cursor-text"
     :class="{ 'text-inactive hover:text-muted': !model }"
   >
-    <div class="flex-1 relative flex justify-center" :style="innerStyle">
+    <div
+      class="flex-1 relative flex justify-center"
+      :class="{ 'focus-within:text-inactive': !model }"
+      :style="innerStyle"
+    >
       <div class="flex items-baseline">
         <span
           ref="prefixElementRef"
@@ -131,7 +135,7 @@ const inputProps = computed(() => {
     margin-left: 0.15em;
   }
 
-  &:hover &__input::placeholder {
+  &:hover &__input:not(:focus)::placeholder {
     color: var(--muted);
   }
 
@@ -140,11 +144,6 @@ const inputProps = computed(() => {
     font: inherit;
     letter-spacing: inherit;
     outline: none;
-
-    &::placeholder,
-    &:focus::placeholder {
-      color: var(--inactive);
-    }
   }
 }
 </style>

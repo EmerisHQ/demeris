@@ -1,41 +1,57 @@
 <template>
   <div>
-    <div class="relative w-full">
-      <DenomSelectModal
-        v-if="state.isDenomModalOpen"
-        class="fixed inset-0 z-10 bg-bg"
-        title="Select asset"
-        :assets="availableBalances"
-        :func="() => toggleDenomModal()"
-        :show-back-button="false"
-        @select="toggleDenomModal"
-      />
+    <DenomSelectModal
+      v-if="state.isDenomModalOpen"
+      class="fixed inset-0 z-10 bg-bg"
+      title="Select asset"
+      :assets="availableBalances"
+      :func="() => toggleDenomModal()"
+      :asset-action="state.chainsModalSource === 'to' ? 'move to' : 'move from'"
+      :show-back-button="false"
+      @select="toggleDenomModal"
+    />
 
-      <ChainSelectModal
-        v-if="state.isChainsModalOpen"
-        class="fixed inset-0 z-10 bg-bg"
-        title="Select chain"
-        :assets="availableChains"
-        :selected-denom="state.currentAsset.base_denom"
-        :func="() => toggleChainsModal()"
-        :show-subtitle="false"
-        @select="toggleChainsModal"
-      >
-        <template #description>
-          Select the Chain to swap {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
-        </template>
-      </ChainSelectModal>
-    </div>
+    <ChainSelectModal
+      v-if="state.isChainsModalOpen"
+      class="fixed inset-0 z-10 bg-bg"
+      title="Select chain"
+      :assets="availableChains"
+      :selected-denom="state.currentAsset.base_denom"
+      :func="() => toggleChainsModal()"
+      :show-subtitle="false"
+      :asset-action="state.chainsModalSource === 'to' ? 'move to' : 'move from'"
+      @select="toggleChainsModal"
+    >
+      <template #description>
+        Select the chain to swap {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
+      </template>
+    </ChainSelectModal>
     <template v-if="true">
       <fieldset class="py-8">
-        <div v-show="state.isUSDInputChecked" class="w-full max-w-lg mx-auto">
-          <div
-            class="text-4 font-bold uppercase w-full text-center transition-colors"
-            :class="{ 'text-negative': !hasSufficientFunds }"
-          >
+        <div class="w-full max-w-lg mx-auto">
+          <div class="relative text-4 font-bold px-20 w-full text-center transition-colors">
+            <div v-if="hasPrice" class="flex items-center absolute inset-y-0 left-0">
+              <Button
+                :click-function="
+                  () => {
+                    state.isUSDInputChecked = !state.isUSDInputChecked;
+                  }
+                "
+                size="sm"
+                variant="secondary"
+                rounded
+                :tooltip-text="`Enter amount in ${state.isUSDInputChecked ? 'crypto' : 'USD'}`"
+              >
+                <Icon
+                  name="SwapUDIcon"
+                  :icon-size="1"
+                  :class="['transform transition', { 'rotate-180': state.isUSDInputChecked }]"
+                />
+              </Button>
+            </div>
             <FlexibleAmountInput
+              v-if="state.isUSDInputChecked"
               v-model="state.usdValue"
-              :max-width="512"
               :min-width="state.isUSDInputChecked ? 35 : 0"
               prefix="$"
             >
@@ -57,139 +73,60 @@
                 />
               </template>
             </FlexibleAmountInput>
-          </div>
-          <div class="text-muted mt-3 text-center">
-            <AmountDisplay
-              :amount="{
-                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
-                denom: state.currentAsset?.base_denom,
-              }"
-            />
-          </div>
-        </div>
-        <div v-if="!state.isUSDInputChecked" class="w-full max-w-lg mx-auto">
-          <div
-            class="text-4 font-bold uppercase w-full text-center transition-colors"
-            :class="{ 'text-negative': !hasSufficientFunds }"
-          >
             <FlexibleAmountInput
+              v-else-if="!state.isUSDInputChecked"
               v-model="form.balance.amount"
-              :max-width="512"
               :min-width="35"
               placeholder="0"
+              class="uppercase"
               @input="state.isMaximumAmountChecked = false"
             >
               <template v-if="state.currentAsset" #suffix>
                 <Denom :name="state.currentAsset?.base_denom || ''" />
               </template>
             </FlexibleAmountInput>
+            <div class="flex items-center absolute inset-y-0 right-0">
+              <Button
+                :click-function="
+                  () => {
+                    state.isMaximumAmountChecked = true;
+                  }
+                "
+                :name="$t('generic_cta.max')"
+                class="flex"
+                :class="{ 'text-negative-text': !hasSufficientFunds }"
+                :disabled="!hasPrice"
+                size="sm"
+                variant="secondary"
+                rounded
+              />
+            </div>
           </div>
-
-          <div v-if="hasPrice" class="text-muted mt-3 text-center">
-            {{ displayUSDValue }}
-          </div>
-        </div>
-        <div class="flex items-stretch justify-center mt-6 w-full flex-1 space-x-3">
-          <label v-if="hasPrice" class="-text-1">
-            <input v-model="state.isUSDInputChecked" class="hidden" type="checkbox" name="move-form-amount-usd" />
-            <span
+          <div class="text-muted mt-3 text-center">
+            <AmountDisplay
               v-if="state.isUSDInputChecked"
-              class="
-                btn
-                block
-                h-9
-                leading-4
-                py-2.5
-                px-5
-                cursor-pointer
-                select-none
-                bg-surface
-                shadow-button
-                font-medium
-                focus:outline-none
-                focus-visible:ring-2
-                focus:ring-tertiary focus:ring-opacity-50
-                rounded-full
-                transition
-              "
-              ><Denom :name="state.currentAsset?.base_denom"
-            /></span>
-            <span
-              v-else
-              class="
-                btn
-                block
-                h-9
-                leading-4
-                py-2.5
-                px-5
-                cursor-pointer
-                select-none
-                bg-surface
-                shadow-button
-                font-medium
-                focus:outline-none
-                focus-visible:ring-2
-                focus:ring-tertiary focus:ring-opacity-50
-                rounded-full
-                transition
-              "
-              >USD</span
-            >
-          </label>
-          <label class="input-max-toggle -text-1">
-            <input
-              v-model="state.isMaximumAmountChecked"
-              :disabled="!hasFunds"
-              class="hidden"
-              type="checkbox"
-              name="move-form-amount-max"
+              :amount="{
+                amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+                denom: state.currentAsset?.base_denom,
+              }"
             />
-            <span
-              class="
-                btn
-                block
-                h-9
-                leading-4
-                py-2.5
-                px-5
-                cursor-pointer
-                select-none
-                bg-surface
-                shadow-button
-                font-medium
-                focus:outline-none
-                focus-visible:ring-2
-                focus:ring-tertiary focus:ring-opacity-50
-                rounded-full
-                transition
-              "
-              >{{ $t('generic_cta.max') }}</span
-            >
-          </label>
+            <div v-else-if="!state.isUSDInputChecked && hasPrice" class="text-muted mt-3 text-center">
+              {{ displayUSDValue }}
+            </div>
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
-        <div class="bg-surface shadow-card rounded-xl overflow-hidden">
+        <div class="bg-surface shadow-card rounded-xl overflow-hidden divide-y divide-border">
           <button
-            class="
-              py-5
-              px-4
-              flex
-              items-stretch
-              w-full
-              outline-none
-              text-left
-              hover:bg-fg
-              focus:opacity-70
-              transition-opacity
-            "
+            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
             @click="toggleDenomModal()"
           >
-            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{
-              $t('components.moveForm.action')
-            }}</span>
+            <span
+              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
+              >{{ $t('components.moveForm.action') }}</span
+            >
 
             <div class="flex items-center flex-1">
               <CircleSymbol
@@ -202,31 +139,20 @@
               </span>
             </div>
 
-            <div class="ml-1.5 px-1.5 flex items-center text-muted">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
           <button
             v-if="state.currentAsset"
-            class="
-              py-5
-              px-4
-              flex
-              items-stretch
-              w-full
-              outline-none
-              text-left
-              hover:bg-fg
-              focus:opacity-70
-              transition-opacity
-              border-t border-border
-            "
+            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
             @click="toggleChainsModal(null, 'from')"
           >
-            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{
-              $t('components.moveForm.from')
-            }}</span>
+            <span
+              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
+              >{{ $t('components.moveForm.from') }}</span
+            >
 
             <div class="flex items-center flex-1">
               <CircleSymbol variant="chain" :chain-name="form.on_chain" class="mr-3" />
@@ -243,37 +169,28 @@
                   show-zero
                 />
               </p>
-              <p class="-text-1 mt-0.5" :class="hasSufficientFunds ? 'text-muted' : 'text-negative'">
+              <p class="-text-1 mt-0.5" :class="hasSufficientFunds ? 'text-muted' : 'text-negative-text'">
                 <AmountDisplay
                   :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
                 />
               </p>
             </div>
 
-            <div class="ml-1.5 px-1.5 flex items-center text-muted">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
 
           <button
-            class="
-              py-5
-              px-4
-              flex
-              items-stretch
-              w-full
-              outline-none
-              text-left
-              hover:bg-fg
-              focus:opacity-70
-              transition-opacity
-              border-t border-border
-            "
+            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
             :class="{ 'chain-selected': !!form.to_chain }"
             :disabled="!state.currentAsset"
             @click="toggleChainsModal(null, 'to')"
           >
-            <span class="mr-2.5 w-10 self-center text-muted text-left -text-1">{{ $t('components.moveForm.to') }}</span>
+            <span
+              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
+              >{{ $t('components.moveForm.to') }}</span
+            >
 
             <div class="flex items-center flex-1">
               <CircleSymbol variant="chain" :chain-name="form.to_chain" class="mr-3" />
@@ -283,14 +200,14 @@
               </span>
             </div>
 
-            <div class="ml-1.5 px-1.5 flex items-center text-muted">
+            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
               <Icon name="CaretRightIcon" :icon-size="0.75" />
             </div>
           </button>
         </div>
       </fieldset>
 
-      <fieldset class="w-full max-w-sm mx-auto mt-8">
+      <fieldset class="w-full max-w-sm mx-auto mt-10">
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
           :status="isValid ? 'normal' : 'inactive'"
@@ -299,7 +216,7 @@
         />
       </fieldset>
 
-      <div class="move-form-amount__fees">
+      <div class="w-full max-w-sm mx-auto mt-6">
         <FeeLevelSelector
           v-if="steps.length > 0"
           v-model:gasPriceLevel="state.gasPrice"
@@ -309,11 +226,11 @@
       </div>
 
       <div v-if="state.currentAsset && hasPrice && !hasFunds" class="move-form-amount__buy">
-        <button class="move-form-amount__buy__button elevation-button" @click="openAssetPage">
+        <button class="move-form-amount__buy__button shadow-button" @click="openAssetPage">
           <div class="inline-flex items-center">
             <span>{{ $t('generic_cta.get') }}&nbsp;</span>
             <Denom :name="state.currentAsset.base_denom" />
-            <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+            <Icon name="ArrowRightIcon" :icon-size="1" class="ml-2" />
           </div>
           <CircleSymbol
             size="lg"
@@ -650,16 +567,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.btn {
-  &:hover:not(:active),
-  &:focus:not(:active) {
-    --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
-  }
-  &:active {
-    opacity: 0.7;
-    transform: none;
-    transition-duration: 0s;
-  }
-}
+// .btn {
+//   &:hover:not(:active),
+//   &:focus:not(:active) {
+//     --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
+//   }
+//   &:active {
+//     opacity: 0.7;
+//     transition-duration: 0s;
+//   }
+// }
 </style>

@@ -125,9 +125,10 @@
       v-show="isWarningCustomSlippageOpen"
       class="warning-modal"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
+      max-width-class="max-w-xs"
       @close="toggleWarningCustomSlippage"
     >
       <div class="warning-modal__icon">
@@ -151,9 +152,10 @@
       v-show="isWarningViewUnverifiedOpen"
       class="warning-modal"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
+      max-width-class="max-w-xs"
       @close="toggleWarningViewUnverified"
     >
       <div class="warning-modal__icon">
@@ -177,9 +179,10 @@
       v-show="isWarningViewLPAssetPoolsOpen"
       class="warning-modal"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
+      max-width-class="max-w-xs"
       @close="toggleWarningViewLPAssetPools"
     >
       <div class="warning-modal__icon">

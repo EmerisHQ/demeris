@@ -8,7 +8,7 @@ export const messages = {
       continue: 'Continue',
       noFunds: 'Insufficient funds',
       filterNoResults: "No results for '{keyword}'",
-      filterRetry: 'Try again with another search',
+      filterRetry: 'Try adjusting your search',
       max: 'Max',
       understand: 'I understand',
       getAtom: 'Get ATOM',
@@ -51,8 +51,8 @@ export const messages = {
     },
     components: {
       chainSelect: {
-        text1: 'You have {asset} on {chainNo} {chains}',
-        text2: 'Select the chain you wish to swap from.',
+        text1: 'You have {asset} on {chainNo} {chains}.',
+        text2: 'Select the chain you wish to {action}.',
       },
       coinList: {
         tooltip: '{asset} on {chain}',
@@ -94,7 +94,7 @@ export const messages = {
         title: 'Slippage tolerance',
         limitPrice: 'Limit price',
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
-        minReceivedLbl: 'Min. received/(if 100% swapped)',
+        minReceivedLbl: 'Min. received if 100% swapped',
         minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
       },
       feeWarningModal: {
@@ -157,12 +157,13 @@ export const messages = {
       transferToHub: {
         swap: 'Assets are swapped on the Cosmos Hub',
         swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
-        addLiquidity: 'Liquidity providing happens on the Cosmos Hub',
+        addLiquidity: 'Pools are on the Cosmos Hub',
         addLiquidityDescription:
-          'In order to add your liquidity, we need to transfer your {denom} to the Cosmos Hub before they can be add to the pool.',
+          'In order to add liquidity to a pool, your {denom} must be transferred to the Cosmos Hub.',
         addLiquidityDescriptionMultiple:
-          'In order to add your liquidity, we need to transfer your {denomA} and {denomB} to the Cosmos Hub before they can be add to the pool.',
-        transfer: 'Cross-chain transfers from {from} to {to}',
+          'In order to add liquidity to a pool, your {denomA} and {denomB} must be transferred to the Cosmos Hub.',
+        transfer: 'Cross-chain transfers',
+        transferSubtitle: '{from} to {to}',
         transferDescription:
           'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
       },
@@ -196,7 +197,7 @@ export const messages = {
           receiveLbl: 'Receive',
           receiveLblHint: '(estimated)',
           priceLbl: 'Price',
-          minReceivedLbl: 'Min. received',
+          minReceivedLbl: 'Min. received if 100% swapped',
           minReceivedLblHint: 'TODO',
           limitPriceLbl: 'Limit price',
           limitPriceLblHint: 'TODO',

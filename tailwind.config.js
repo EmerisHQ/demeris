@@ -125,8 +125,10 @@ module.exports = {
   variants: {
     extend: {
       borderRadius: ['focus'],
-      ringWidth: ['focus-visible'],
       opacity: ['active'],
+      placeholderColor: ['hover'],
+      ringWidth: ['focus-visible'],
+      transform: ['active'],
     },
   },
   corePlugins: {

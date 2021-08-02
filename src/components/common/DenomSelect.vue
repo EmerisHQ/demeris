@@ -53,15 +53,16 @@
       <div class="denom-select__coin-amount-type -text-1 select-none">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
-        :class="isOver ? 'text-negative-text' : 'text-text'"
         :readonly="readonly"
         class="
           denom-select__coin-amount-input
+          text-text
           w-full
           p-0
           text-1 text-right
           font-bold
           bg-transparent
+          placeholder-inactive
           appearance-none
           border-none
         "
@@ -224,7 +225,6 @@ export default defineComponent({
       outline: none;
 
       &::placeholder {
-        color: var(--inactive);
         transition: color 150ms ease-out;
       }
 
@@ -235,11 +235,8 @@ export default defineComponent({
         margin: 0;
       }
     }
-    &:hover &-input::placeholder {
+    &:hover &-input:not(:focus)::placeholder {
       color: var(--muted);
-    }
-    &-input:focus::placeholder {
-      color: var(--inactive);
     }
   }
 

@@ -1,90 +1,104 @@
 <template>
   <List>
     <!-- Pay/Receive -->
-    <ListItem direction="column">
-      <ListItem :label="$t('components.previews.swap.payLbl')">
-        <div class="coin-info">
-          <CircleSymbol :denom="data.from.denom" :chain-name="payCoinChainName" class="coin-info__image" :size="'xs'" />
-          <AmountDisplay class="font-bold" :amount="data.from" />
+    <div>
+      <ListItem :size="size" :label="$t('components.previews.swap.payLbl')">
+        <div class="flex justify-end">
+          <div>
+            <AmountDisplay
+              class="font-medium"
+              :class="context === 'widget' ? 'text-0' : 'text-1'"
+              :amount="data.from"
+            />
+            <sub class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+              <ChainName :name="payCoinChainName" />
+            </sub>
+          </div>
+          <CircleSymbol :denom="data.from.denom" :chain-name="payCoinChainName" class="ml-2" size="sm" />
         </div>
-        <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="payCoinChainName" /></sub>
       </ListItem>
       <ListItem
+        :size="size"
         :label="$t('components.previews.swap.receiveLbl')"
         :description="$t('components.previews.swap.receiveLblHint')"
       >
-        <div class="coin-info">
-          <CircleSymbol :denom="data.to.denom" :chain-name="dexChainName" class="coin-info__image" :size="'xs'" />
-          <AmountDisplay class="font-bold" :amount="data.to" />
+        <div class="flex justify-end">
+          <div>
+            <AmountDisplay class="font-medium" :class="context === 'widget' ? 'text-0' : 'text-1'" :amount="data.to" />
+            <sub class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+              <ChainName :name="dexChainName" />
+            </sub>
+          </div>
+          <CircleSymbol :denom="data.to.denom" :chain-name="dexChainName" class="ml-2" size="sm" />
         </div>
-        <sub class="-text-1 leading-title bottom-0 text-muted"><ChainName :name="dexChainName" /></sub>
       </ListItem>
-    </ListItem>
+    </div>
 
     <!-- Price  -->
-    <ListItem :label="$t('components.previews.swap.priceLbl')" direction="column">
+    <ListItem :size="size" :label="$t('components.previews.swap.priceLbl')" direction="col">
       <!-- minReceivedAmount -->
       <ListItem
+        :size="size"
         :description="$t('components.previews.swap.minReceivedLbl')"
         :hint="$t('components.previews.swap.minReceivedLblHint')"
         inset
       >
-        <AmountDisplay class="-text-1" :amount="minReceivedAmount" />
+        <AmountDisplay :amount="minReceivedAmount" />
       </ListItem>
 
       <!-- limit price -->
       <ListItem
+        :size="size"
         :description="$t('components.previews.swap.limitPriceLbl')"
         :hint="$t('components.previews.swap.limitPriceLblHint')"
         inset
       >
-        <span class="-text-1">
-          <AmountDisplay
-            class="-text-1"
-            :amount="{
-              amount:
-                10 **
-                store.getters['demeris/getDenomPrecision']({
-                  name: toCoinBaseDenom,
-                }),
-              denom: data.from.denom,
-            }"
-          />
-          =
-          <AmountDisplay class="-text-1" :amount="{ amount: limitPrice, denom: data.to.denom }" />
-        </span>
+        <AmountDisplay
+          :amount="{
+            amount:
+              10 **
+              store.getters['demeris/getDenomPrecision']({
+                name: toCoinBaseDenom,
+              }),
+            denom: data.from.denom,
+          }"
+        />
+        =
+        <AmountDisplay :amount="{ amount: limitPrice, denom: data.to.denom }" />
       </ListItem>
     </ListItem>
 
     <!-- Fee -->
-    <ListItem :label="$t('components.previews.swap.feesLbl')" direction="column">
+    <ListItem :size="size" :label="$t('components.previews.swap.feesLbl')" direction="col">
       <!-- tx fee -->
       <ListItem
+        :size="size"
         :description="$t('components.previews.swap.feeLbl')"
         :hint="$t('components.previews.swap.feeLblHint')"
         inset
       >
-        <AmountDisplay class="-text-1" :amount="{ amount: fee, denom: 'uatom' }" />
+        <AmountDisplay :amount="{ amount: fee, denom: 'uatom' }" />
       </ListItem>
 
       <!-- swap fee -->
       <ListItem
+        :size="size"
         :description="$t('components.previews.swap.swapFeeLbl')"
         :hint="$t('components.previews.swap.swapFeeLblHint')"
         inset
-        style="margin-bottom: 20px"
       >
-        <AmountDisplay
-          class="-text-1"
-          :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
-        />
-
-        <div style="margin-bottom: -1.5rem">
-          <AmountDisplay
-            class="-text-1"
-            :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
-          />
-        </div>
+        <ul>
+          <li>
+            <AmountDisplay
+              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.from.amount, denom: data.from.denom }"
+            />
+          </li>
+          <li class="mt-0.5">
+            <AmountDisplay
+              :amount="{ amount: ((10000 - swapFeeRate * 10000) / 10000) * data.to.amount, denom: data.to.denom }"
+            />
+          </li>
+        </ul>
       </ListItem>
     </ListItem>
   </List>
@@ -123,6 +137,10 @@ export default defineComponent({
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
+    },
+    context: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
     },
   },
 
@@ -248,6 +266,8 @@ export default defineComponent({
       return props.fees[store.getters['demeris/getDexChain']]['uatom'];
     });
 
+    const size = props.context === 'default' ? 'md' : 'sm';
+
     return {
       data,
       dexChainName,
@@ -258,18 +278,9 @@ export default defineComponent({
       store,
       swapFeeRate,
       fee,
+      size,
     };
   },
 });
 </script>
-<style lang="scss" scoped>
-.coin-info {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  &__image {
-    margin-right: 0.5rem;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

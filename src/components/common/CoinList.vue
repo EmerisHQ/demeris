@@ -1,7 +1,8 @@
 <template>
-  <div v-if="modifiedData.length === 0" class="h-full text-center flex flex-col items-center justify-center">
-    <div class="text-1 text-text font-bold">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
-    <div class="text-0 text-muted">{{ $t('generic_cta.filterRetry') }}</div>
+  <div v-if="modifiedData.length === 0" class="mt-12 text-center">
+    <Icon name="MagnifyingGlassIcon" :icon-size="2" class="text-inactive mb-8" />
+    <div class="text-1 text-text font-medium">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
+    <div class="text-0 text-muted mt-1">{{ $t('generic_cta.filterRetry') }}</div>
   </div>
   <div
     v-for="coin in modifiedData"

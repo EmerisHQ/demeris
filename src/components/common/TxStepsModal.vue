@@ -1,7 +1,7 @@
 <template>
   <div
     class="tx-steps denom-select-modal-wrapper relative w-full top-0 left-0 overflow-hidden z-10"
-    :class="{ 'bg-surface shadow-panel rounded-2xl tx-steps--widget': variant === 'widget' }"
+    :class="{ 'bg-surface shadow-panel rounded-2xl': variant === 'widget' }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
@@ -14,76 +14,87 @@
 
     <template v-else>
       <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
-        <div class="tx-steps__title px-6 pb-6 text-2 font-bold text-center">
+        <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
           {{ currentData.title }}
-        </div>
+        </h1>
 
-        <div v-if="currentData && currentData.fees" class="detail">
-          <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+        <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
+          <PreviewSwap
+            v-if="currentData.data.name === 'swap'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+            :context="variant"
+            :class="{ '-text-1': variant === 'widget' }"
+          />
           <PreviewAddLiquidity
             v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
           <PreviewWithdrawLiquidity
             v-else-if="currentData.data.name === 'withdrawliquidity'"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
           <PreviewRedeem
             v-else-if="currentData.data.name === 'redeem'"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
-          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+          <PreviewTransfer
+            v-else
+            :step="currentData.data"
+            :fees="currentData.fees"
+            :context="variant"
+            :class="{ '-text-1': variant === 'widget' }"
+          />
         </div>
 
-        <Alert
-          v-if="!currentData.isSwap"
-          class="mx-6"
-          status="info"
-          :show-icon="false"
-          message="Non-revertable transactions. Prices not guaranteed etc."
-        />
-
-        <div v-else class="my-2 mx-6 -text-1 font-normal text-muted text-center leading-copy">
+        <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy">
           Non-revertable transactions. Prices not guaranteed etc.
         </div>
 
-        <div class="p-6">
+        <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
           <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
         </div>
       </div>
       <Modal
         v-if="feeWarning.feeWarning"
-        class="fee-warning-modal"
-        :modal-variant="variant == 'widget' ? 'bottom' : 'full'"
+        class="text-center"
+        :variant="variant === 'widget' ? 'bottom' : 'dialog'"
+        :fullscreen="variant === 'default'"
         @close="
           () => {
             feeWarning.feeWarning = false;
           }
         "
       >
-        <div class="fee-warning-modal__icon-warning">
-          <WarningIcon />
-        </div>
         <template v-if="feeWarning.missingFees.length > 0">
-          <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
-          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
-          <div class="fee-warning-modal__list">
-            <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
-              <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
-              <div class="fee-warning-modal__list__item__amount">
+          <div class="text-1 font-bold mb-4">{{ $t('components.feeWarningModal.missingMany') }}</div>
+          <div class="text-muted leading-copy mb-4">{{ $t('components.feeWarningModal.missingManyText') }}</div>
+          <div class="mb-8 flex flex-col items-center">
+            <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="flex py-4 items-center">
+              <CircleSymbol
+                :chain-name="missing.chain_name"
+                :denom="missing.denom"
+                size="sm"
+                variant="asset"
+                class="mr-4"
+              />
+              <div class="font-bold">
                 <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
               </div>
             </div>
           </div>
         </template>
         <template v-if="feeWarning.ibcWarning && feeWarning.missingFees.length == 0">
-          <div class="fee-warning-modal__title">
+          <div class="text-1 font-bold mb-4">
             {{ $t('components.feeWarningModal.ibcWarning', { denom: feeWarning.ibcDetails.denom }) }}
           </div>
-          <div class="fee-warning-modal__content">
+          <div class="text-muted leading-copy mb-8">
             {{
               $t('components.feeWarningModal.ibcWarningText', {
                 ibcDenom: feeWarning.ibcDetails.ibcDenom,
@@ -115,7 +126,7 @@
           <template
             v-if="
               feeWarning.missingFees.length > 1 ||
-              (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
+                (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
             "
           >
             <ModalButton
@@ -153,7 +164,7 @@
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
-      :modal-variant="variant === 'widget' ? 'bottom' : 'full'"
+      :variant="variant === 'widget' ? 'modal' : 'step'"
       :status="txstatus"
       :tx-result="txResult"
       :has-more="hasMore"
@@ -197,9 +208,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
-import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
@@ -226,12 +235,10 @@ export default defineComponent({
   components: {
     GobackWithClose,
     PreviewTransfer,
-    WarningIcon,
     PreviewRedeem,
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
     PreviewSwap,
-    Alert,
     Button,
     ModalButton,
     TxHandlingModal,
@@ -644,143 +651,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.denom-select-modal-wrapper {
-  &.tx-steps--widget .tx-steps__title {
-    text-align: left;
-  }
-
-  .amount-info {
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--text);
-
-    padding: 0 1.5rem;
-    margin-bottom: 1rem;
-    &__type {
-      &-subtitle {
-        color: var(--muted);
-      }
-    }
-    &__detail {
-      color: var(--text);
-      &__coin {
-        display: flex;
-        align-items: center;
-        &-image {
-          width: 1.25rem;
-          height: 1.25rem;
-        }
-        &-amount {
-          padding: 0 0.5rem;
-        }
-      }
-      &-chain {
-        text-align: right;
-      }
-    }
-  }
-
-  .divider {
-    margin: 0 1.5rem;
-    height: 1px;
-    background-color: var(--border);
-  }
-
-  .detail {
-    padding: 0 1.5rem;
-    &__title {
-      color: var(--text);
-      padding: 1rem 0;
-    }
-
-    &__row {
-      display: flex;
-      justify-content: space-between;
-      padding-bottom: 1rem;
-
-      &-key {
-        display: flex;
-        align-items: center;
-        color: var(--muted);
-
-        div {
-          margin-right: 0.25rem;
-        }
-      }
-    }
-  }
-
-  .detail-transfer {
-    @extend .detail;
-
-    .detail__title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .icon {
-      font-size: 1rem;
-      color: var(--muted);
-    }
-  }
-
-  .warn-transfer {
-    border: none;
-    padding: 0;
-  }
-
-  // todo: convert to 1rem@16px
-  .button-wrapper {
-    padding: 1.75rem 1.5rem 1.5rem;
-  }
-  .fee-warning-modal {
-    text-align: center;
-    &__icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2.4rem 0;
-
-      &-warning {
-        font-size: 4.2rem;
-        display: flex;
-        justify-content: center;
-        color: var(--warning);
-      }
-    }
-    &__title {
-      font-size: 2.1rem;
-      font-weight: bold;
-      margin: 3rem 0rem;
-      padding: 0rem 2rem;
-    }
-    &__content {
-      opacity: 0.67;
-      margin-bottom: 3rem;
-      font-size: 1.6rem;
-      &__header {
-        text-align: center;
-      }
-    }
-    &__list {
-      margin-bottom: 3rem;
-      padding-left: 39%;
-      &__item {
-        display: flex;
-        margin: 1rem 0rem;
-        align-items: center;
-        .circle-symbol {
-          margin-right: 1rem;
-        }
-        &__amount {
-          font-weight: bold;
-          font-size: 1.6rem;
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

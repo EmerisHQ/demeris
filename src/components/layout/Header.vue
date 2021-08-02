@@ -13,14 +13,60 @@
         <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" :show-badge="showBadge" />
       </router-link>
 
-      <router-link class="text-0 font-medium leading-12 px-4 hidden sm:flex items-center justify-center" to="/receive">
-        <ReceiveIcon class="mr-3" />
-        {{ $t('navbar.receive') }}
+      <router-link
+        class="
+          text-0
+          font-medium
+          leading-5
+          h-12
+          px-4
+          ml-3
+          lg:ml-0
+          hidden
+          sm:flex
+          bg-fg
+          lg:bg-transparent
+          rounded-full
+          lg:rounded-none
+          items-center
+          justify-center
+          rounded-lg
+          group
+          active:opacity-70
+          transition
+        "
+        to="/receive"
+      >
+        <ReceiveIcon class="group-hover:text-secondary" />
+        <span class="ml-3 hidden lg:inline">{{ $t('navbar.receive') }}</span>
       </router-link>
 
-      <router-link class="text-0 font-medium leading-12 px-4 hidden sm:flex items-center justify-center" to="/send">
-        <SendIcon class="mr-3" />
-        {{ $t('navbar.send') }}
+      <router-link
+        class="
+          text-0
+          font-medium
+          leading-5
+          h-12
+          px-4
+          ml-3
+          lg:ml-0
+          hidden
+          sm:flex
+          bg-fg
+          lg:bg-transparent
+          rounded-full
+          lg:rounded-none
+          items-center
+          justify-center
+          rounded-lg
+          group
+          active:opacity-70
+          transition
+        "
+        to="/send"
+      >
+        <SendIcon class="group-hover:text-quinary" />
+        <span class="ml-3 hidden lg:inline">{{ $t('navbar.send') }}</span>
       </router-link>
 
       <Settings />

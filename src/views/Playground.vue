@@ -79,7 +79,7 @@
           />
 
           <Button name="Open Modal Fullscreen" @click="modalIsOpen = 'fullscreen'" />
-          <Modal :open="modalIsOpen === 'fullscreen'" variant="fullscreen" @close="modalIsOpen = false">
+          <Modal :open="modalIsOpen === 'fullscreen'" variant="full" fullscreen @close="modalIsOpen = false">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni placeat accusamus, quam repudiandae odio
             similique recusandae. Vitae aspernatur eos ad dignissimos, architecto odio quod optio reprehenderit, omnis
             nihil eveniet molestiae!

@@ -1,63 +1,82 @@
 <template>
   <List>
     <ListItem :label="$t('components.previews.transfer.sendLbl')">
-      <div class="send__item">
-        <CircleSymbol
-          :denom="denomName"
-          :chain-name="transactionInfo.from.chain"
-          size="sm"
-          class="send__item__symbol"
-        />
-        <AmountDisplay class="font-bold" :amount="{ amount: transactionInfo.from.amount, denom: denomName }" />
+      <div class="flex justify-end items-center">
+        <div>
+          <AmountDisplay
+            class="font-medium"
+            :class="context === 'widget' ? 'text-0' : 'text-1'"
+            :amount="{ amount: transactionInfo.from.amount, denom: denomName }"
+          />
+          <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+            <ChainName :name="transactionInfo.from.chain" />
+          </div>
+        </div>
+        <CircleSymbol :denom="denomName" :chain-name="transactionInfo.from.chain" size="md" class="ml-3" />
       </div>
-      <div class="preview-chain"><ChainName :name="transactionInfo.from.chain" /></div>
     </ListItem>
 
     <ListItem
       v-if="stepType !== 'transfer-to-hub'"
       :label="$t('components.previews.transfer.fromLbl')"
-      direction="column"
-      collapsable
+      :disclosure-show-text="truncateAddress(transactionInfo.from.address)"
+      direction="col"
+      collapsible
       collapsed
     >
-      <Address :address="transactionInfo.from.address" :chain-name="transactionInfo.from.chain" readonly />
+      <div class="mt-4">
+        <Address :address="transactionInfo.from.address" :chain-name="transactionInfo.from.chain" readonly />
+      </div>
     </ListItem>
 
     <ListItem
       v-if="hasMultipleTransactions"
       :label="$t('components.previews.transfer.txToSign', { txCount: step.transactions.length })"
-      direction="column"
+      direction="col"
       :hint="$t('components.previews.transfer.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
         </template>
       </ListItem>
     </ListItem>
 
-    <ListItem v-if="!hasMultipleTransactions" :description="$t('components.previews.transfer.feeLbl')">
+    <ListItem v-if="!hasMultipleTransactions" :label="$t('components.previews.transfer.feeLbl')">
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
         </template>
       </template>
     </ListItem>
 
     <ListItem label="Receive">
-      <div class="send__item">
-        <CircleSymbol :denom="denomName" :chain-name="transactionInfo.to.chain" size="sm" class="send__item__symbol" />
-        <AmountDisplay class="font-bold" :amount="{ amount: transactionInfo.to.amount, denom: denomName }" />
+      <div class="flex justify-end items-center">
+        <div>
+          <AmountDisplay
+            class="font-medium"
+            :class="context !== 'widget' ? 'text-1' : 'text-0'"
+            :amount="{ amount: transactionInfo.to.amount, denom: denomName }"
+          />
+          <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+            <ChainName :name="transactionInfo.to.chain" />
+          </div>
+        </div>
+        <CircleSymbol :denom="denomName" :chain-name="transactionInfo.to.chain" size="md" class="ml-3" />
       </div>
-      <div class="preview-chain"><ChainName :name="transactionInfo.to.chain" /></div>
     </ListItem>
 
     <ListItem
       v-if="stepType !== 'transfer-to-hub'"
       :label="$t('components.previews.transfer.toLbl')"
-      direction="column"
+      :disclosure-show-text="truncateAddress(transactionInfo.to.address)"
+      direction="col"
+      collapsible
+      collapsed
     >
-      <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
+      <div class="mt-4">
+        <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
+      </div>
     </ListItem>
   </List>
 </template>
@@ -95,6 +114,10 @@ export default defineComponent({
     fees: {
       type: Object as PropType<Actions.FeeTotals>,
       required: true,
+    },
+    context: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
     },
   },
 
@@ -177,6 +200,10 @@ export default defineComponent({
       return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
     };
 
+    const truncateAddress = (address: string) => {
+      return `${address.substring(0, 6)}…${address.substring(address.length - 6, address.length)}`;
+    };
+
     watch(
       transactionInfo,
       async (detail) => {
@@ -193,6 +220,7 @@ export default defineComponent({
       denomName,
       stepType,
       formatChain,
+      truncateAddress,
       transactionInfo,
       hasMultipleTransactions,
       formatMultipleChannel,
@@ -201,18 +229,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.send__item {
-  display: inline-flex;
-
-  &__symbol {
-    margin-right: 0.5rem;
-  }
-}
-
-.preview-chain {
-  display: block;
-  margin-top: -0.125rem;
-  font-size: 0.8125rem;
-}
-</style>
+<style lang="scss" scoped></style>

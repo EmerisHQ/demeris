@@ -1,6 +1,6 @@
 <template>
   <List>
-    <ListItem direction="column">
+    <ListItem direction="col">
       <List>
         <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
           <div class="pool__item">
@@ -70,7 +70,7 @@
       </div>
     </ListItem>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="col">
       <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
           <AmountDisplay class="-text-1" :amount="{ amount: amount, denom: denom }" />

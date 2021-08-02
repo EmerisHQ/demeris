@@ -6,24 +6,28 @@
       :title="'Select chain'"
       :func="toggleChainSelectModal"
       :selected-denom="selectedDenom"
+      :asset-action="assetAction"
       @select="chainSelectHandler"
     />
-    <div v-else class="denom-select-modal-wrapper w-full max-w-7xl mx-auto flex-1 flex flex-col items-stretch">
-      <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
+    <div v-else class="denom-select-modal-wrapper w-full h-full flex-1 flex flex-col items-stretch">
+      <header class="w-full max-w-7xl mx-auto px-2">
+        <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
+      </header>
 
-      <div class="w-full mx-auto max-w-md">
-        <Search v-model:keyword="keyword" class="mx-6 mb-6" />
-        <div class="coin-list overflow-y-auto flex-1 pb-20">
-          <CoinList
-            :data="keywordFilteredAssets"
-            :type="title === 'Receive' ? 'receive' : 'pay'"
-            :show-balance="showBalance"
-            :keyword="keyword"
-            @select="coinListselectHandler"
-          >
-          </CoinList>
+      <div class="relative flex-1 min-h-0 flex flex-col">
+        <Search v-model:keyword="keyword" class="w-full mx-auto max-w-md px-6 pb-3" />
+        <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
+          <div class="mx-auto max-w-md mb-20">
+            <CoinList
+              :data="keywordFilteredAssets"
+              :type="title === 'Receive' ? 'receive' : 'pay'"
+              :show-balance="showBalance"
+              :keyword="keyword"
+              @select="coinListselectHandler"
+            />
+          </div>
         </div>
-        <WhiteOverlay class="coin-list-fade" />
+        <WhiteOverlay />
       </div>
     </div>
   </div>
@@ -52,7 +56,8 @@ export default defineComponent({
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
-    showBackButton: { type: Boolean, default: true },
+    showBackButton: { type: Boolean, required: false, default: true },
+    assetAction: { type: String, required: true, default: 'use' },
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -131,11 +136,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.denom-select-modal-wrapper {
-  // height: 35rem !important; // is important needed?
-}
-
-.coin-list {
+.scroll-container {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 

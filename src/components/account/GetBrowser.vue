@@ -3,7 +3,7 @@
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
         <div v-if="isLoading" class="get-browser__loading">
-          <Spinner :size="4.2" />
+          <Spinner :size="3" />
         </div>
         <template v-else>
           <slot name="title">

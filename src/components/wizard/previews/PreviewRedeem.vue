@@ -10,7 +10,7 @@
     <ListItem
       v-if="hasMultipleTransactions"
       :label="$t('components.previews.redeem.txToSign', { txCount: step.transactions.length })"
-      direction="column"
+      direction="col"
       :hint="$t('components.previews.redeem.txToSignHint')"
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>

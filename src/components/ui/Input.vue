@@ -13,7 +13,7 @@
         transition-colors
       "
     >
-      <div v-if="hasStartSlot" class="input__icon absolute z-10 top-0 left-0 p-4 pointer-events-none">
+      <div v-if="hasStartSlot" class="input__icon absolute z-20 top-0 left-0 p-4 pointer-events-none">
         <slot name="start" />
       </div>
       <input
@@ -27,6 +27,9 @@
           text-0
           font-normal
           text-text
+          placeholder-inactive
+          hover:placeholder-muted
+          focus:placeholder-inactive
           bg-fg
           focus:bg-surface
           rounded-xl
@@ -37,14 +40,14 @@
         :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
         v-bind="$attrs"
       />
-      <div v-if="hasEndSlot" class="input__icon absolute z-10 top-0 right-0 p-4 pointer-events-none">
+      <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4 pointer-events-none">
         <slot name="end" />
       </div>
 
       <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
     </div>
 
-    <tippy v-if="hint" class="p-3 text-inactive hover:text-muted transition-colors">
+    <tippy v-if="hint" class="p-3 text-inactive hover:text-muted transition-colors" tabindex="0">
       <span class="input__hint h-6 w-6"><HintIcon /></span>
 
       <template #content>
@@ -102,15 +105,6 @@ input {
 
 input::placeholder {
   transition: color 150ms ease-out;
-}
-
-input:hover::placeholder {
-  color: var(--muted);
-}
-
-input::placeholder,
-input:focus::placeholder {
-  color: var(--inactive);
 }
 
 input:focus ~ .focus-border {

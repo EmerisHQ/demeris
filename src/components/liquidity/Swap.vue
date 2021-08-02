@@ -27,19 +27,17 @@
       @goback="gobackFunc"
     />
     <div
-      class="swap-widget bg-surface dark:bg-fg shadow-panel rounded-2xl"
-      :style="[
-        !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
-        isChildModalOpen ? 'box-shadow:none;' : '',
+      class="swap-widget bg-surface dark:bg-fg rounded-2xl"
+      :class="[
+        { hidden: !(!isSlippageSettingModalOpen && !isOpen) },
+        isChildModalOpen ? 'shadow-none' : 'shadow-panel',
       ]"
     >
-      <div class="swap-widget-header">
+      <div class="flex justify-between items-center py-8 px-6">
         <div class="text-2 font-bold">{{ $t('components.swap.title') }}</div>
-        <div class="swap-widget-header__dot-button">
-          <Button variant="link" :click-function="slippageSettingModalToggle">
-            <Icon name="ThreeDotsIcon" :icon-size="1.5" />
-          </Button>
-        </div>
+        <Button variant="link" rounded :click-function="slippageSettingModalToggle">
+          <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+        </Button>
       </div>
 
       <!-- pay coin selector -->
@@ -103,12 +101,12 @@
       />
 
       <!-- price change alert -->
-      <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
+      <div v-if="isPriceChanged && isBothSelected" class="mt-4 py-2 px-6">
         <Alert status="warning" :message="$t('components.swap.priceAlert')" />
       </div>
 
       <!-- swap button -->
-      <div class="button-wrapper">
+      <div class="pt-4 px-6 pb-6">
         <Button
           :name="buttonName"
           :status="buttonStatus"
@@ -118,11 +116,13 @@
         />
       </div>
 
-      <FeeLevelSelector
-        v-if="actionHandlerResult && actionHandlerResult.length > 0"
-        v-model:gasPriceLevel="gasPrice"
-        :steps="actionHandlerResult"
-      />
+      <div class="-text-1 px-6">
+        <FeeLevelSelector
+          v-if="actionHandlerResult && actionHandlerResult.length > 0"
+          v-model:gasPriceLevel="gasPrice"
+          :steps="actionHandlerResult"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -911,99 +911,5 @@ export default defineComponent({
 .wrapper {
   min-width: 20rem;
   /* min-height: 17rem; */
-}
-
-.swap-widget {
-  &-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem 1.5rem;
-
-    color: var(--text);
-    /* &__dot-button {
-      width: 1.5rem;
-      height: 1.5rem;
-    } */
-  }
-
-  .price-alert-wrapper {
-    padding: 0.5rem 1.5rem;
-  }
-
-  .button-wrapper {
-    padding: 1rem 1.5rem 1.5rem;
-  }
-
-  .fees {
-    display: flex;
-    padding: 0 1.5rem 1.5rem;
-    justify-content: space-between;
-    color: var(--muted);
-
-    &-total {
-      display: flex;
-      align-items: center;
-    }
-
-    &-detail {
-      padding: 0 1.5rem;
-      color: var(--text);
-
-      &__info {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        margin: 1rem 0;
-
-        &:last-child {
-          margin-bottom: 0;
-          .fees-detail__info-value {
-            font-weight: bold;
-          }
-        }
-
-        &:first-child {
-          margin-top: 0;
-        }
-      }
-
-      &__selector {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        &-block {
-          width: 5.25rem;
-          height: 3rem;
-          color: var(--text);
-
-          background-color: var(--fg);
-
-          border-radius: 8px;
-
-          outline: none;
-        }
-
-        .selected {
-          background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%);
-        }
-      }
-    }
-  }
-
-  .alert--warning {
-    margin-top: 1rem;
-  }
-
-  .fees-detail-open {
-    font-weight: bold;
-    color: var(--text);
-
-    .icon {
-      color: var(--text) !important;
-    }
-  }
 }
 </style>

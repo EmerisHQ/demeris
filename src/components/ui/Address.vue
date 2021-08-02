@@ -1,6 +1,6 @@
 <template>
   <label
-    class="address block relative w-full max-w-md"
+    class="address block relative w-full max-w-lg"
     :class="{
       'address--readonly border border-solid border-border rounded-xl': readonly,
       'address--editable': !readonly,
@@ -13,6 +13,7 @@
       class="
         address__field
         relative
+        z-10
         block
         w-full
         px-4
@@ -36,8 +37,8 @@
       v-bind="$attrs"
       spellcheck="false"
     />
-    <div v-if="!readonly" class="focus-border absolute -inset-0.5 rounded-xl invisible bg-gold-circular"></div>
-    <div class="address__controls absolute px-4 pb-4 left-0 bottom-0 w-full flex justify-between items-end">
+    <div v-if="!readonly" class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular"></div>
+    <div class="address__controls absolute z-10 px-4 pb-4 left-0 bottom-0 w-full flex justify-between items-end">
       <span class="text-muted -text-1"><ChainName :name="chainName" /></span>
       <Clipboard v-if="readonly" :text="address" />
       <Button v-else name="Paste" size="sm" variant="secondary" />
@@ -103,11 +104,6 @@ export default defineComponent({
 textarea {
   outline: none;
   resize: none;
-}
-
-textarea,
-.address__controls {
-  z-index: 8;
 }
 
 textarea::placeholder {

@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center h-20 py-6 pl-6 pr-12">
     <Button
-      :v-if="showBackButton"
+      v-if="showBackButton"
       variant="link"
       :click-function="
         () => {
@@ -24,7 +24,11 @@ export default defineComponent({
   name: 'TitleWithGoback',
   components: { Button, Icon },
   props: {
-    title: String,
+    title: {
+      type: String,
+      required: false,
+      default: null,
+    },
     showBackButton: {
       type: Boolean,
       required: false,

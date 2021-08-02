@@ -1,55 +1,67 @@
 <template>
   <div
     v-if="steps"
-    class="fees -text-1 flex justify-between px-6 text-muted hover:text-text cursor-pointer pb-6 group"
-    :class="isFeesOpen ? 'fees-detail-open' : ''"
+    class="fees flex justify-between cursor-pointer pb-6 group"
+    :class="isFeesOpen ? 'text-text font-bold' : 'text-muted hover:text-text'"
     @click="toggle"
   >
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
-    <div class="fees-total">
+    <div class="flex items-center">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
-      <span class="text-inactive group-hover:text-current">
+      <span class="text-inactive group-hover:text-current ml-1">
         <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="0.75" />
         <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="0.75" />
       </span>
     </div>
   </div>
-  <div v-if="isFeesOpen" class="fees-detail px-6 pb-6">
-    <div class="fees-detail__info flex items-center justify-between -text-1">
+  <div v-if="isFeesOpen" class="pb-6 space-y-6">
+    <div class="flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
-      <div class="fees-detail__info-value">
+      <div>
         {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
     </div>
 
-    <div class="fees-detail__selector -text-1">
+    <div class="flex items-center justify-stretch space-x-3">
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.LOW ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
+        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        :class="
+          gasPriceLevel === GasPriceLevel.LOW
+            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
-        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
-        <div class="fees-detail__selector-block-value font-normal">
+        <div>{{ $t('context.feeLevels.low') }}</div>
+        <div class="font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
+        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        :class="
+          gasPriceLevel === GasPriceLevel.AVERAGE
+            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
-        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
-        <div class="fees-detail__selector-block-value font-normal">
+        <div>{{ $t('context.feeLevels.average') }}</div>
+        <div class="font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.HIGH ? 'bg-brand dark:theme-inverse text-text font-medium' : ''"
+        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        :class="
+          gasPriceLevel === GasPriceLevel.HIGH
+            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
-        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
-        <div class="fees-detail__selector-block-value font-normal">
+        <div>{{ $t('context.feeLevels.high') }}</div>
+        <div class="font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>
@@ -59,15 +71,16 @@
       v-if="gasPriceLevel === GasPriceLevel.LOW"
       status="warning"
       :message="$t('components.feeLevelSelector.slowWarning')"
+      class="mt-4"
     />
 
-    <div v-if="swapDollarFee" class="fees-detail__info flex items-center justify-between -text-1">
+    <div v-if="swapDollarFee" class="flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
-      <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
+      <div>{{ formatter.format(swapDollarFee) }}</div>
     </div>
-    <div class="fees-detail__info flex items-center justify-between -text-1">
+    <div class="flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
-      <div class="fees-detail__info-value">
+      <div class="font-bold">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
       </div>
     </div>
@@ -234,64 +247,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.fees {
-  &-total {
-    display: flex;
-    align-items: center;
-  }
-
-  &-detail {
-    &__info {
-      margin: 1rem 0;
-
-      &:last-child {
-        margin-bottom: 0;
-        .fees-detail__info-value {
-          font-weight: bold;
-        }
-      }
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    &__selector {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      &-block {
-        width: 5.25rem;
-        height: 3rem;
-        color: var(--text);
-
-        background-color: var(--fg);
-
-        border-radius: 8px;
-
-        outline: none;
-      }
-
-      .selected {
-        background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-      }
-    }
-  }
-}
-
-.alert--warning {
-  margin-top: 1rem;
-}
-
-.fees-detail-open {
-  font-weight: bold;
-  padding-bottom: 1.5rem;
-  color: var(--text);
-
-  .icon {
-    color: var(--text) !important;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

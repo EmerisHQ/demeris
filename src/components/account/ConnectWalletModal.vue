@@ -3,9 +3,11 @@
     <Modal
       v-if="isKeplrInstalled"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="shadow-panel rounded-2xl"
-      width="45rem"
+      max-width-class="max-w-sm"
       @close="closeConnectKeplr"
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
@@ -14,9 +16,11 @@
     <Modal
       v-else-if="isKeplrSupported && !isKeplrInstalled"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="shadow-panel rounded-2xl"
-      width="45rem"
+      max-width-class="max-w-sm"
       @close="closeGetKeplr"
     >
       <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
@@ -25,9 +29,11 @@
     <Modal
       v-else
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="shadow-panel rounded-2xl"
-      width="45rem"
+      max-width-class="max-w-sm"
       @close="closeGetBrowser"
     >
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
@@ -132,20 +138,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.connect-wallet-modal {
-  .modal__body {
-    position: relative;
-    overflow: hidden;
-    padding: 0;
-    min-height: 30rem;
-  }
-
-  .modal__close {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    z-index: 40;
-  }
-}
-</style>
+<style lang="scss"></style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="slippage-modal relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl">
+  <div class="relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl">
     <TitleWithGoback
       :title="'Price'"
       :func="
@@ -9,81 +9,97 @@
       "
     />
 
-    <div class="setting">
+    <div class="px-6">
       <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
-      <div class="flex justify-between my-4 gap-x-3">
+      <div class="flex justify-between my-4 space-x-2">
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[
-            slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          :class="[slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[
-            slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          :class="[slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[
-            slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          :class="[slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(1)"
         >
           1%
         </button>
-        <button
+        <label
           v-if="allowCustomSlippage"
-          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          class="
+            custom-slippage
+            h-12
+            pr-3
+            flex-shrink flex
+            items-baseline
+            justify-center
+            text-center
+            focus-within:text-right
+            bg-fg
+            rounded-xl
+            outline-none
+            text-text
+          "
           :class="[
-            isCustomSelected
-              ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium flex items-center justify-center text-center'
-              : '',
-            Number(slippage) < 0 ? 'justify-end text-negative border-negative' : '',
+            isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
+            Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
           ]"
+          for=""
         >
-          <div class="custom-slippage flex">
-            <input
-              ref="customSlippageInput"
-              :value="customSlippage"
-              type="number"
-              placeholder="Custom"
-              class="w-full bg-transparent outline-none text-right"
-              @input="setCustomSlippage"
-            />
-            <span v-if="isCustomSelected" class="text-text">%</span>
-          </div>
-        </button>
+          <input
+            ref="customSlippageInput"
+            :value="customSlippage"
+            type="number"
+            placeholder="Custom"
+            class="
+              custom-slippage__input
+              h-12
+              appearance-none
+              overflow-hidden
+              py-0
+              pr-0
+              pl-3
+              m-0
+              flex-grow
+              border-none
+              outline-none
+              bg-transparent
+            "
+            :class="[isCustomSelected ? 'w-12' : 'w-20']"
+            required
+            @input="setCustomSlippage"
+          />
+          <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
+        </label>
       </div>
     </div>
-    <div v-if="alertStatus" class="alert-wrapper">
+    <div v-if="alertStatus" class="px-6">
       <Alert :status="alertStatus" :message="alertText" />
     </div>
 
-    <div class="details">
-      <div class="details__row">
-        <div class="details__row-left -text-1 font-medium">
+    <div class="px-6 pb-6 mt-8">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center -text-1 font-medium">
           <tippy :max-width="192">
             {{ $t('components.slippageSettingsModal.limitPrice') }}
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right -text-1 font-normal">
+        <div class="ml-1 -text-1 font-normal">
           {{ limitPriceText }}
         </div>
       </div>
-      <div class="details__row">
-        <div class="details__row-left -text-1 font-medium">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center -text-1 font-medium">
           <tippy :max-width="192">
             <div>
               {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
@@ -93,7 +109,7 @@
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right -text-1 font-normal">{{ minReceivedText }}</div>
+        <div class="ml-1 -text-1 font-normal">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
@@ -270,67 +286,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.slippage-modal {
-  .setting {
-    padding: 0 1.5rem;
+.custom-slippage {
+  &:hover &__input::placeholder {
+    color: var(--muted);
+  }
 
-    &__sections {
-      /* Chrome, Safari, Edge, Opera */
-      input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
+  &__input {
+    min-width: 0.66em;
+    font: inherit;
+    letter-spacing: inherit;
+    outline: none;
+    -moz-appearance: textfield;
 
-      /* Firefox */
-      input[type='number'] {
-        -moz-appearance: textfield;
-      }
-      &-block {
-        &:nth-child(4) {
-          flex-grow: 2;
-        }
-      }
-      .custom-selected input {
-        // width: 1.75rem !important;
-        &::placeholder {
-          color: transparent;
-        }
-      }
+    &:empty {
+      text-align: center;
+    }
+
+    &:focus,
+    &:valid {
+      text-align: right;
+    }
+
+    &::placeholder,
+    &:focus::placeholder {
+      color: var(--inactive);
+    }
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
     }
   }
-
-  .details {
-    padding: 0 1.5rem 1.5rem;
-    margin-top: 2rem;
-    &__row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      margin-bottom: 1rem;
-
-      &-left {
-        display: flex;
-        align-items: center;
-
-        span {
-          margin-left: 0.25rem;
-        }
-      }
-    }
-  }
-
-  .selected {
-    background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-  }
-
-  .alert-wrapper {
-    padding: 0 1.5rem;
-  }
-}
-
-.no-custom-slippage {
-  width: 5.75rem !important;
 }
 </style>

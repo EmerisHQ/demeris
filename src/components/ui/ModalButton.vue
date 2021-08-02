@@ -1,19 +1,25 @@
 <template>
-  <div class="modal__button" @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')">
-    <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
-    <button :class="[status, 'button']" :disabled="disabled" @click="clickFunction">
-      {{ name }}
-    </button>
-    <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
-      <template #content>{{ tooltipText }} </template>
-    </tippy>
-  </div>
+  <Button
+    :class="[status, 'btn flex-grow']"
+    :name="name"
+    :status="status"
+    variant="secondary"
+    full-width
+    :disabled="disabled"
+    :tooltip-text="tooltipText"
+    @click="clickFunction"
+  />
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
+import Button from './Button.vue';
+
 export default defineComponent({
   name: 'ModalButton',
+
+  components: { Button },
+
   props: {
     name: { type: String, required: true },
     status: { type: String, required: false, default: 'normal' },
@@ -21,58 +27,26 @@ export default defineComponent({
     tooltipText: { type: String, required: false, default: '' },
     disabled: { type: Boolean, default: false },
   },
-  setup(props) {
-    const buttonTooltipRef = ref(null);
-    function toggleToolTip(type) {
-      if (props.tooltipText) {
-        if (type === 'show') {
-          buttonTooltipRef.value.show();
-        } else {
-          buttonTooltipRef.value.hide();
-        }
-      }
-    }
-
-    return { buttonTooltipRef, toggleToolTip };
-  },
 });
 </script>
 <style lang="scss" scoped>
-.modal__button {
-  flex-grow: 1;
-  &:last-child {
-    .button {
-      border: none;
-    }
-  }
-}
-.button {
-  width: 100%;
+::v-deep(.button) {
+  --tw-shadow: none;
   background: none;
-  color: var(--text);
-  padding: 2.4rem;
-  border: none;
-  outline: none;
-  font-weight: bold;
-  cursor: pointer;
-  text-align: center;
-  border-right: 1px solid rgba(0, 0, 0, 0.17);
-  &::last-child {
-    border: none;
-  }
-  &:disabled {
-    background-color: var(--inactive);
-    cursor: not-allowed;
-  }
-}
+  height: 4rem;
+  transform: none;
+  border-radius: 0;
 
-.inactive {
-  background-color: var(--inactive);
-  pointer-events: none;
-}
+  &:hover:not(:active) {
+    background-color: var(--fg);
+  }
 
-.button-tooltip {
-  display: block;
-  height: 0;
+  .btn:first-child & {
+    @apply rounded-bl-2xl;
+  }
+
+  .btn:last-child & {
+    @apply rounded-br-2xl;
+  }
 }
 </style>

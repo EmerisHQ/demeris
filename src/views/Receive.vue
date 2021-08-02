@@ -5,9 +5,11 @@
         <Icon name="ArrowLeftIcon" :icon-size="1.5" />
       </Button>
 
-      <Button class="ml-auto" variant="link" :full-width="false" :click-function="onClose">
-        <Icon name="CloseIcon" :icon-size="1.5" />
-      </Button>
+      <router-link to="/" class="ml-auto">
+        <Button variant="link" :full-width="false">
+          <Icon name="CloseIcon" :icon-size="1.5" />
+        </Button>
+      </router-link>
     </header>
 
     <main
@@ -32,15 +34,32 @@
             :assets="balances"
             :show-balance="true"
             :show-back-button="false"
+            asset-action="receive on"
             @select="assetSelectHandler"
           />
         </div>
       </template>
 
       <template v-else-if="state.selectedAsset && recipientAddress">
-        <div class="md:flex items-center justify-center text-center flex-1 w-full">
-          <div class="self-stretch h-80 md:h-auto flex-1 flex items-center justify-end md:order-last mb-8 md:mb-0">
-            <div class="receive__portal relative h-full w-full max-w-md px-16 flex items-center justify-center">
+        <div class="md:flex items-center justify-end flex-1 w-full">
+          <div
+            class="
+              self-stretch
+              h-80
+              md:h-auto
+              w-full
+              md:w-1/2
+              flex
+              items-center
+              justify-center
+              md:justify-end md:order-last
+              mb-8
+              md:mb-0
+            "
+          >
+            <div
+              class="receive__portal relative h-full w-full max-w-md mx-auto md:px-16 flex items-center justify-center"
+            >
               <div
                 class="
                   receive__portal__glow
@@ -60,11 +79,11 @@
               <QrCode class="relative z-10" :value="recipientAddress" width="160" :color="gradientStyle.color" />
             </div>
           </div>
-          <div v-if="state.selectedAsset" class="flex-grow relative z-20">
+          <div v-if="state.selectedAsset" class="relative z-20 max-w-md w-full mx-auto">
             <h2 class="text-3 font-bold mb-1">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
             <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
-            <fieldset class="flex flex-col items-center mx-auto">
-              <div class="mt-16 mb-3 font-bold">Your address</div>
+            <fieldset class="mt-16">
+              <div class="mb-3 font-bold">Your address</div>
               <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
             </fieldset>
           </div>
@@ -135,10 +154,6 @@ export default {
       state.selectedAsset = undefined;
     };
 
-    const onClose = () => {
-      router.push('/');
-    };
-
     const assetSelectHandler = (asset: Balance) => {
       state.selectedAsset = asset;
     };
@@ -152,7 +167,7 @@ export default {
       }
     });
 
-    return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, onClose, assetSelectHandler };
+    return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
 </script>

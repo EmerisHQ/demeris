@@ -1,7 +1,7 @@
 <template>
   <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
-    <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
-    <button
+    <!-- Basic button implementation. At minimum primary/secondary/link types, loading and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
+    <Button
       :class="[
         `button-${variant}`,
         { 'text-0 leading-5 rounded-xl': size === 'md' },
@@ -14,28 +14,46 @@
         { 'py-3.5 px-8': name && variant !== 'link' && size === 'md' },
         { 'py-2.5 px-5': name && variant !== 'link' && size === 'sm' },
         { 'w-full': fullWidth },
+        { 'rounded-full': rounded },
         {
-          'bg-surface shadow-button focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50': variant !== 'link',
+          'bg-surface shadow-button transform hover:-translate-y-px focus:-translate-y-px active:transform-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
+            variant !== 'link',
         },
-        { 'theme-inverse dark:theme-inverse': variant === 'primary' },
-        { inline: variant === 'link' },
+        { 'theme-inverse dark:theme-inverse text-text': variant === 'primary' },
+        { 'relative inline': variant === 'link' },
         { 'bg-brand-to-r': status === 'loading' && variant === 'primary' },
         { 'loading pointer-events-none cursor-default': status === 'loading' },
-        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-text cursor-pointer',
+        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
       ]"
       :disabled="disabled"
-      class="button relative font-medium border-none focus:outline-none transition cursor-pointer select-none"
+      class="
+        button
+        relative
+        font-medium
+        border-none
+        focus:outline-none
+        active:opacity-70 active:transform-none
+        transition
+        cursor-pointer
+        select-none
+        overflow-ellipsis
+        whitespace-nowrap
+      "
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
-        <Spinner :size="1" :color="variant === 'primary' ? 'currentColor' : 'var(--gold)'" :variant="'circle'" />
+        <Spinner :size="1" :variant="variant === 'link' ? 'solid' : 'gold'" />
       </div>
 
-      <span v-if="name" class="inline-flex gap-x-3 items-center" :class="{ invisible: status === 'loading' }"><slot /><span>{{ name }}</span><slot name="right" /></span>
+      <span
+        v-if="name"
+        class="inline-flex gap-x-3 items-center"
+        :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
+      ><slot /><span>{{ name }}</span><slot name="right" /></span>
 
-      <span v-else :class="{ invisible: status === 'loading' }"><slot /></span>
-    </button>
-    <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
+      <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
+    </Button>
+    <tippy ref="buttonTooltipRef" class="h-0 block" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
     </tippy>
   </div>
@@ -50,10 +68,11 @@ export default defineComponent({
     Spinner,
   },
   props: {
-    name: { type: String, required: false },
+    name: { type: String, required: false, default: null },
     variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
     size: { type: String, required: false, default: 'md' }, // 'sm'
     fullWidth: { type: Boolean, required: false, default: true },
+    rounded: { type: Boolean, required: false },
     status: { type: String, required: false, default: 'active' }, // 'loading'
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
@@ -83,7 +102,6 @@ export default defineComponent({
   &:hover:not(:active),
   &:focus:not(:active) {
     --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
   }
 }
 
@@ -101,17 +119,10 @@ export default defineComponent({
 }
 
 .button:active {
-  opacity: 0.7;
-  transform: none;
   transition-duration: 0s;
 }
 
 .button-link {
-  &,
-  > span {
-    position: relative;
-  }
-
   &:before {
     content: '';
     position: absolute;
@@ -143,10 +154,5 @@ export default defineComponent({
   &.loading:before {
     opacity: 0;
   }
-}
-
-.button-tooltip {
-  display: block;
-  height: 0;
 }
 </style>

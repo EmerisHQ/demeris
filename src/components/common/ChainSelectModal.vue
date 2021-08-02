@@ -1,27 +1,34 @@
 <template>
-  <div class="chain-select-wrapper bg-surface shadow-panel rounded-2xl">
-    <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
+  <div class="chain-select-wrapper w-full h-full flex-1 flex flex-col items-stretch">
+    <header class="w-full max-w-7xl mx-auto px-2">
+      <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
+    </header>
 
-    <div class="mb-6 -text-1 text-center font-normal">
-      <template v-if="showSubtitle">
-        {{
-          $t('components.chainSelect.text1', {
-            asset: selectedDenomDisplay,
-            chainNo: chainsNumber,
-            chains: chainsNumber > 1 ? 'chains' : 'chain',
-          })
-        }}
-        <br />
-      </template>
-      <slot name="description">
-        {{ $t('components.chainSelect.text2') }}
-      </slot>
+    <div class="relative flex-1 min-h-0 flex flex-col">
+      <div class="w-full mx-auto max-w-sm px-6 mb-8 text-center text-muted">
+        <template v-if="showSubtitle">
+          {{
+            $t('components.chainSelect.text1', {
+              asset: selectedDenomDisplay,
+              chainNo: chainsNumber,
+              chains: chainsNumber > 1 ? 'chains' : 'chain',
+            })
+          }}
+          <br />
+        </template>
+        <slot name="description">
+          {{ $t('components.chainSelect.text2') }}
+        </slot>
+      </div>
     </div>
 
-    <div class="coin-list">
-      <CoinList :data="filterAsset(assets, selectedDenom)" :type="'chain'" @select="coinListselectHandler" />
+      <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
+        <div class="mx-auto max-w-md mb-20">
+          <CoinList :data="filterAsset(assets, selectedDenom)" :type="'chain'" @select="coinListselectHandler" />
+        </div>
+      </div>
+      <WhiteOverlay />
     </div>
-    <WhiteOverlay />
   </div>
 </template>
 <script lang="ts">
@@ -44,11 +51,9 @@ export default defineComponent({
     func: { type: Function, required: true },
     title: { type: String, required: true },
     selectedDenom: { type: String, required: true },
-<<<<<<< HEAD
     showSubtitle: { type: Boolean, default: true },
-=======
     showBackButton: { type: Boolean, default: true },
->>>>>>> style: various layouts and ui details
+    assetAction: { type: String, required: true, default: 'use' },
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -85,31 +90,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.chain-select-wrapper {
-  position: absolute;
-  width: 100%;
-  height: 27rem;
-  top: 0;
-  left: 0;
+.scroll-container {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 
-  overflow: hidden;
-  z-index: 10;
-
-  .sub-title {
-    padding: 0 1.5rem 1.5rem;
-  }
-
-  .coin-list {
-    min-height: 17rem;
-
-    overflow-y: scroll;
-
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-
-    &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera*/
-    }
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
   }
 }
 </style>

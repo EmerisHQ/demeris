@@ -5,6 +5,7 @@
         v-if="state.isSelectModalOpen"
         title="Select asset"
         :assets="balances"
+        asset-action="send from"
         @select="toggleSelectModal"
       />
     </div>
