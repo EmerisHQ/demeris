@@ -119,6 +119,8 @@ export const messages = {
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
         revertTx: 'reverting transfer...',
+        contactSupport: 'Contact support ↗️',
+        backToPortfolio: 'Back to portfolio',
         genericAction: 'Transacting',
         transferAction: 'Transferring',
         swapAction: 'Swapping',

@@ -493,16 +493,12 @@ export default defineComponent({
                         delayStatus = setTimeout(() => {
                           txstatus.value = 'delay';
                         }, 60000);
-                        failStatus = setTimeout(async () => {
-                          emit('failed');
-                          txstatus.value = 'failed';
-                          await txToResolve.value['promise'];
-                          abort = true;
+                        failStatus = setTimeout(() => {
+                          txstatus.value = 'unknown';
                         }, 310000);
                         console.log('setTimeOut', delayStatus);
                       } else if (txResultData.status === 'IBC_receive_failed') {
                         txstatus.value = 'IBC_receive_failed';
-                        console.log('clearTimeout', delayStatus);
                         clearTimeout(delayStatus);
                       } else {
                         clearTimeout(delayStatus);

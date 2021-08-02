@@ -20,7 +20,7 @@
       <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
       <div v-else class="status__icon-none" />
       <div class="status__title-sub w-normal s-0">
-        <template v-if="status == 'failed'">
+        <template v-if="status == 'failed' || status == 'unknown'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
             <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
           </template>
@@ -106,10 +106,15 @@
         </template>
         <template v-else>
           <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
-            Keplr troubleshooting ↗️
+            {{ $t('components.txHandlingModal.keplrSupport') }}
+          </a>
+          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link s-0 w-bold">
+            {{ $t('components.txHandlingModal.contactSupport') }}
           </a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
           <div v-if="status === 'keplr-reject'" class="spacer-2" />
+          <div v-if="status === 'unknown'" class="spacer-3" />
+
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               Your
@@ -180,6 +185,13 @@
         "
         :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
       />
+      {{ router?.pathname }}
+      <Button
+        v-if="status === 'unknown'"
+        :name="$t('components.txHandlingModal.backToPortfolio')"
+        :status="'normal'"
+        :click-function="unknownHandler"
+      />
       <Button
         v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
         :name="whiteButton"
@@ -219,7 +231,15 @@ import {
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
-type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'delay' | 'IBC_receive_failed' | 'failed' | 'complete';
+type Status =
+  | 'keplr-sign'
+  | 'keplr-reject'
+  | 'transacting'
+  | 'delay'
+  | 'unknown'
+  | 'IBC_receive_failed'
+  | 'failed'
+  | 'complete';
 type Result = {
   demandCoinDenom: string;
   swappedPercent: number;
@@ -293,7 +313,7 @@ export default defineComponent({
       if (props.status == 'keplr-reject') {
         return 'warning';
       }
-      if (props.status == 'failed') {
+      if (props.status == 'failed' || props.status == 'unknown') {
         return 'error';
       }
       return null;
@@ -337,9 +357,14 @@ export default defineComponent({
             subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
             subTitle.value = '';
             break;
+          case 'unknown':
+            title.value = t('components.txHandlingModal.somethingWentWrong');
+            subTitle.value = '';
+            break;
           case 'IBC_receive_failed':
             title.value = t('components.txHandlingModal.somethingWentWrong');
             subTitleUnder.value = t('components.txHandlingModal.revertTx');
+            blackButton.value = t('components.txHandlingModal.backToPortfolio');
             subTitle.value = '';
             break;
           case 'transacting':
@@ -501,6 +526,14 @@ export default defineComponent({
     function emitDone() {
       emit('done');
     }
+
+    function unknownHandler() {
+      if (location.pathname !== '/') {
+        router.push('/');
+      } else {
+        emitAnother();
+      }
+    }
     return {
       emitNext,
       emitRetry,
@@ -515,6 +548,7 @@ export default defineComponent({
       whiteButton,
       blackButton,
       router,
+      unknownHandler,
     };
   },
 });
@@ -593,6 +627,10 @@ export default defineComponent({
 
     .spacer-2 {
       height: 4.8rem;
+    }
+
+    .spacer-3 {
+      height: 2.4rem;
     }
 
     &-transferring {
