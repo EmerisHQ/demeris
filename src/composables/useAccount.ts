@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue';
+import { computed, Ref, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { Balances, StakingBalances } from '@/types/api';
@@ -64,7 +64,11 @@ export default function useAccount() {
     return sortedBalances;
   });
 
-  const nativeBalances = computed(() => {
+  const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
+
+  const getNativeBalances = (
+    { balances, aggregate }: { balances?: Balances | Ref<Balances>; aggregate?: boolean } = { balances: [] },
+  ) => {
     const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
     const result = [];
 
@@ -76,14 +80,16 @@ export default function useAccount() {
       };
 
       let totalAmount = 0;
-      const availableBalances = balances.value.filter((balance) => balance.base_denom === verifiedDenom.name);
+      if (aggregate) {
+        const availableBalances = unref(balances).filter((balance) => balance.base_denom === verifiedDenom.name);
 
-      for (const balance of availableBalances) {
-        totalAmount += +parseCoins(balance.amount)[0].amount;
-        // Native chain
-        if (balance.on_chain === verifiedDenom.chain_name) {
-          // @ts-ignore
-          asset = balance;
+        for (const balance of availableBalances) {
+          totalAmount += +parseCoins(balance.amount)[0].amount;
+          // Native chain
+          if (balance.on_chain === verifiedDenom.chain_name) {
+            // @ts-ignore
+            asset = balance;
+          }
         }
       }
 
@@ -101,7 +107,7 @@ export default function useAccount() {
     });
 
     return result;
-  });
+  };
 
   const stakingBalances = computed<StakingBalances>(() => {
     return store.getters['demeris/getAllStakingBalances'] || [];
@@ -118,6 +124,7 @@ export default function useAccount() {
   return {
     balances,
     nativeBalances,
+    getNativeBalances,
     allbalances,
     balancesByDenom,
     userAccountBalances,
