@@ -649,6 +649,7 @@ export default {
     };
 
     const coinSelectHandler = (key: 'coinA' | 'coinB', balance: Balance) => {
+      state.isMaximumAmountChecked = false;
       form[key].asset = balance;
     };
 
@@ -1263,10 +1264,10 @@ export default {
     }
 
     &__details {
-      padding: 1.6rem 2rem;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
 
       &__from {
+        padding: 1.6rem 2rem;
         color: var(--muted);
         display: flex;
         align-items: center;
