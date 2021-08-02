@@ -1049,7 +1049,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let error: Error;
 
   let amounts = [];
-  let chain = store.getters['demeris/getDexChain'];
+  const chain = store.getters['demeris/getDexChain'];
 
   switch (transaction.name) {
     case 'addliquidity':
@@ -1068,16 +1068,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
       const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
       amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
       break;
-    case 'ibc_backward':
-      const ibcbackdata = transaction.data as Actions.IBCBackwardsData;
-      amounts = [ibcbackdata.amount.amount + ibcbackdata.amount.denom];
-      chain = ibcbackdata.from_chain;
-      break;
-    case 'ibc_forward':
-      const ibcforwarddata = transaction.data as Actions.IBCForwardsData;
-      amounts = [ibcforwarddata.amount.amount + ibcforwarddata.amount.denom];
-      chain = ibcforwarddata.from_chain;
-      break;
+    default: return;
   }
 
   const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
