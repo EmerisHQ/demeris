@@ -1,4 +1,4 @@
-import { computed, ComputedRef, Ref, ref, unref, watch } from 'vue';
+import { computed, Ref, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { Balances, StakingBalances } from '@/types/api';
