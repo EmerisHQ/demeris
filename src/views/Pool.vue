@@ -264,6 +264,7 @@ export default defineComponent({
     });
 
     const relatedPools = computed(() => {
+      // TODO: Order by descending  %ownership
       return [
         ...poolsByDenom(pool.value.reserve_coin_denoms[0]),
         ...poolsByDenom(pool.value.reserve_coin_denoms[1]),

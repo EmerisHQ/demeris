@@ -129,7 +129,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -150,7 +150,7 @@ import usePools from '@/composables/usePools';
 import usePool from '@/composables/usePool';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
-import { parseCoins } from '@/utils/basic';
+import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -186,7 +186,35 @@ export default defineComponent({
     });
 
     const assets = computed(() => balancesByDenom(denom.value));
-    const poolsWithAsset = computed(() => poolsByDenom(denom.value));
+
+    const poolDenom = ref(denom.value);
+
+    watch(denom, async () => {
+      const dexChain = store.getters['demeris/getDexChain']
+
+      if (assetConfig.value.chain_name != dexChain) {
+          const invPrimaryChannel =
+            store.getters['demeris/getPrimaryChannel']({
+              chain_name: dexChain,
+              destination_chain_name: assetConfig.value.chain_name,
+            }) ??
+            (await store.dispatch(
+              'demeris/GET_PRIMARY_CHANNEL',
+              {
+                subscribe: true,
+                params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },
+              },
+              { root: true },
+            ));
+          
+          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value); 
+          console.log("poolDenom", poolDenom.value);    
+        }
+      },
+      { immediate: true }
+    );
+
+    const poolsWithAsset = computed(() => poolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);

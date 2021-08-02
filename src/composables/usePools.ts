@@ -35,6 +35,7 @@ export default function usePools() {
     return Promise.all(pool.reserve_coin_denoms.map((denom) => getBaseDenom(denom)));
   };
 
+  // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
   const poolsByDenom = (denom: string) => {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
   };
