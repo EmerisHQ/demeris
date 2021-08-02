@@ -25,7 +25,7 @@
       <template v-if="state.step === 'amount'">
         <template v-if="!state.isCreationConfirmationOpen">
           <h2 class="add-liquidity__title s-2">
-            {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
+            {{ hasPair && !hasPool ? 'Create Liquidity' : 'Add Liquidity' }}
           </h2>
 
           <div v-if="hasPair" class="add-liquidity__pool">
@@ -377,10 +377,28 @@ export default {
       computed(() => pool.value?.id),
     );
 
-    const { balances } = useAccount();
+    const { balances: userBalances, getNativeBalances } = useAccount();
 
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    const balances = computed(() => {
+      const nativeBalances = getNativeBalances();
+      const result = [...userBalances.value];
+
+      for (const nativeBalance of nativeBalances) {
+        const hasBalance = userBalances.value.some(
+          (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
+        );
+        if (!hasBalance) {
+          result.push(nativeBalance);
+        }
+      }
+
+      result.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
+
+      return result;
     });
 
     const balancesForSecond = computed(() => {
