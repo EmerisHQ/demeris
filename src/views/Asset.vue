@@ -67,6 +67,7 @@
                   :chain-name="asset.on_chain"
                   class="asset__main__chains__item__asset__avatar"
                   :glow="false"
+                  variant="chain"
                 />
                 <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
               </div>
