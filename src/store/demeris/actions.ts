@@ -726,17 +726,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
         response.data.result?.end_block_events?.forEach((item) => {
           if (item.type === checks.type) {
             item.attributes.forEach((result) => {
-              if (atob(result.key) === checks.txAddress) {
-                if (atob(result.value) === checks.requesterAddress) {
-                  isMine = true;
-                } else {
-                  isMine = false;
-                }
-              }
-              if (isMine) {
-                successData[atob(result.key)] = result.value ? atob(result.value) : null;
-              }
+              const key = atob(result.key);
+              const value = result.value ? atob(result.value) : null;
+              successData[key] = value;
             });
+
+            isMine = successData[checks.txAddress] === checks.requesterAddress;
           }
         });
 
@@ -752,7 +747,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           return { type: 'swap_transacted', txAddress: 'swap_requester', requesterAddress: data.requesterAddress };
         }
 
-        if (data.type === 'redeem') {
+        if (data.type === 'withdrawliquidity') {
           return { type: 'withdraw_from_pool', txAddress: 'withdrawer', requesterAddress: data.requesterAddress };
         }
 

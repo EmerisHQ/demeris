@@ -255,3 +255,13 @@ export type AddLiquidityEndBlockResponse = {
   refunded_coins: string;
   success: string;
 };
+
+export type WithdrawLiquidityEndBlockResponse = {
+  pool_id: string;
+  pool_coin_amount: string;
+  pool_coin_denom: string;
+  withdraw_coins: string;
+  withdraw_fee_coins: string;
+  withdrawer: string;
+  success: string;
+};
