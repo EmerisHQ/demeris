@@ -33,7 +33,7 @@
     <div v-else class="connect-wallet-panel" body-class="elevation-panel" width="72rem" @close="closeGetBrowser">
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
     </div>
-    <GraphicPortal />
+    <img class="portal" src="@/assets/svg/portal.svg" />
   </div>
 </template>
 
@@ -44,7 +44,6 @@ import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
 import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
-import GraphicPortal from '@/components/account/GraphicPortal.vue';
 
 async function getKeplrInstance() {
   if (window.keplr) {
@@ -75,7 +74,6 @@ export default defineComponent({
     AgreeWarning,
     GetKeplr,
     GetBrowser,
-    GraphicPortal,
   },
 
   props: {
@@ -164,6 +162,14 @@ export default defineComponent({
 #welcome {
   .connect-banner {
     display: none !important;
+  }
+  .portal {
+    position: absolute;
+    top: 4%;
+    right: -5%;
+    width: 100%;
+    max-width: 60vw;
+    max-height: 100vh;
   }
   .connect-wallet-panel {
     .modal__body {
