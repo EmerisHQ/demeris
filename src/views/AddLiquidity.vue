@@ -871,7 +871,7 @@ export default {
                 .toString();
             } else {
               form.coinA.amount = "0";
-              form.coinB.amount = "0"
+              form.coinB.amount = "0";
             }
           }
 
