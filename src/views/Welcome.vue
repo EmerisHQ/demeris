@@ -1,177 +1,232 @@
 <template>
-  <main class="welcome">
-    <header class="welcome__header">
-      <div class="welcome__header__logo">
-        <Logo />
-      </div>
-
-      <div class="welcome__header__controls">
-        <router-link to="/">
-          <Button name="Try demo version" />
-        </router-link>
-
-        <a title="Emeris" class="welcome__header__controls__link" href="https://emeris.com" target="_blank">
-          emeris.com ↗️
-        </a>
-      </div>
-    </header>
-
-    <div class="welcome__wrapper">
-      <section class="welcome__main">
-        <h2 class="welcome__main__subtitle">A new world for defi</h2>
-        <h1 class="welcome__main__title">
-          Your one-stop app <br />
-          for decentralized <br />
-          financial services.
-        </h1>
-        <p class="welcome__main__description">
-          Demeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
-          of blockchains.
-        </p>
-      </section>
-
-      <aside class="welcome__aside">
-        <div class="welcome__aside__connect">
-          <ConnectKeplr :show-banner="false" @connect="onConnect">
-            <template #title>
-              <h2 class="welcome__aside__connect__title">Connect to Emeris</h2>
-            </template>
-            <template #description>
-              Install Keplr in your browser and connect your wallet to start using Emeris. We will support other wallets
-              in the near future.
-            </template>
-          </ConnectKeplr>
-        </div>
-      </aside>
+  <div id="welcome">
+    <div
+      v-if="isKeplrInstalled"
+      class="connect-wallet-panel"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeConnectKeplr"
+    >
+      <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
     </div>
 
-    <div class="welcome__polygon" />
-  </main>
+    <div
+      v-else-if="!isWarningAgreed"
+      class="connect-wallet-panel"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeAgreeWarning"
+    >
+      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" @agree="agreeWarning" />
+    </div>
+
+    <div
+      v-else-if="isKeplrSupported && !isKeplrInstalled"
+      class="connect-wallet-panel"
+      body-class="elevation-panel"
+      width="72rem"
+      @close="closeGetKeplr"
+    >
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
+    </div>
+
+    <div v-else class="connect-wallet-panel" body-class="elevation-panel" width="72rem" @close="closeGetBrowser">
+      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
+    </div>
+    <GraphicPortal />
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
 
+import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import Logo from '@/components/common/Logo.vue';
-import Button from '@/components/ui/Button.vue';
+import GetBrowser from '@/components/account/GetBrowser.vue';
+import GetKeplr from '@/components/account/GetKeplr.vue';
+import GraphicPortal from '@/components/account/GraphicPortal.vue';
 
-export default defineComponent({
-  name: 'Welcome',
+async function getKeplrInstance() {
+  if (window.keplr) {
+    return window.keplr;
+  }
 
-  components: {
-    Button,
-    ConnectKeplr,
-    Logo,
-  },
+  if (document.readyState === 'complete') {
+    return window.keplr;
+  }
 
-  setup() {
-    const router = useRouter();
-
-    const onConnect = () => {
-      router.push('/');
+  return new Promise((resolve) => {
+    const documentStateChange = (event: Event) => {
+      if (event.target && (event.target as Document).readyState === 'complete') {
+        resolve(window.keplr);
+        document.removeEventListener('readystatechange', documentStateChange);
+      }
     };
 
+    document.addEventListener('readystatechange', documentStateChange);
+  });
+}
+
+export default defineComponent({
+  name: 'ConnectWalletModal',
+
+  components: {
+    ConnectKeplr,
+    AgreeWarning,
+    GetKeplr,
+    GetBrowser,
+    GraphicPortal,
+  },
+
+  props: {
+    open: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  emits: ['close'],
+
+  setup(_, { emit }) {
+    const connectKeplrRef = ref(null);
+    const agreeWarningRef = ref(null);
+    const getKeplrRef = ref(null);
+    const getBrowserRef = ref(null);
+    const isWarningAgreed = ref(null);
+    const isKeplrSupported = ref(null);
+    const isKeplrInstalled = ref(null);
+    const isLoading = ref(true);
+
+    const closeConnectKeplr = () => {
+      connectKeplrRef.value.cancel();
+      emit('close');
+    };
+    const closeAgreeWarning = () => {
+      emit('close');
+    };
+    const closeGetKeplr = () => {
+      emit('close');
+    };
+    const closeGetBrowser = () => {
+      emit('close');
+    };
+
+    const agreeWarning = () => {
+      isWarningAgreed.value = true;
+    };
+
+    onMounted(async () => {
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+
+      // dont present spinner forever if not Chrome
+      // @ts-ignore
+      if (!window.chrome) {
+        isLoading.value = false;
+      }
+
+      await getKeplrInstance();
+      await nextTick();
+
+      // @ts-ignore
+      isKeplrSupported.value = !!window.chrome;
+
+      nextTick(() => {
+        // detect keplr installed
+        // @ts-ignore
+        isKeplrInstalled.value = !!window.keplr;
+      });
+    });
+
+    watch(isWarningAgreed, () => {
+      window.localStorage.setItem('isWarningAgreed', 'true');
+    });
+
     return {
-      onConnect,
+      isLoading,
+      agreeWarning,
+      connectKeplrRef,
+      agreeWarningRef,
+      getKeplrRef,
+      getBrowserRef,
+      isWarningAgreed,
+      isKeplrSupported,
+      isKeplrInstalled,
+      closeAgreeWarning,
+      closeConnectKeplr,
+      closeGetKeplr,
+      closeGetBrowser,
     };
   },
 });
 </script>
 
-<style lang="scss" scoped>
-.welcome {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+<style lang="scss">
+#welcome {
+  .connect-banner {
+    display: none !important;
+  }
+  .connect-wallet-panel {
+    .modal__body {
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      min-height: 48rem;
+    }
 
-  &__header {
-    padding: 1.6rem 3.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    .modal__close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      z-index: 40;
+    }
+  }
+
+  .connect-wallet {
+    min-height: inherit;
+
+    &__wrapper {
+      display: flex;
+      min-height: inherit;
+    }
+
+    &__loading {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &__content {
+      min-height: inherit;
+      padding: 4.8rem;
+      text-align: center;
+    }
 
     &__controls {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      margin-top: 5rem;
 
-      &__link {
-        margin-left: 3.4rem;
+      div + div {
+        margin-top: 1.6rem;
       }
-    }
-  }
-
-  &__wrapper {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: center;
-    max-width: 1536px;
-    margin: 0 auto;
-    padding: 4.8rem 3.2rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  &__main {
-    flex: 1 1 0%;
-
-    &__subtitle {
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    &__title {
-      font-size: 5.1rem;
-      font-weight: 600;
-      margin-top: 2.6rem;
-      line-height: 1.21;
-      letter-spacing: -0.043em;
     }
 
     &__description {
-      margin-top: 5.6rem;
+      margin-top: 4rem;
+      line-height: 1.8;
       color: var(--muted);
-      line-height: 1.5;
-    }
-  }
+      font-size: 1.6rem;
 
-  &__aside {
-    flex: 1 1 0%;
-
-    &__connect {
-      width: 80%;
-      min-height: 32rem;
-      max-width: 44rem;
-      margin: 0 auto;
-      box-shadow: 32px 48px 96px -8px rgba(0, 0, 0, 0.14);
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 2rem;
-      backdrop-filter: blur(42px);
-
-      &__title {
-        text-align: center;
-        font-size: 3.2rem;
-        font-weight: 600;
-        line-height: 1;
+      p:first-child {
+        margin-bottom: 1.8rem;
       }
     }
-  }
 
-  &__polygon {
-    width: 36%;
-    height: 78%;
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-45%);
-    background-image: url('~@/assets/images/gradient-light-2.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    clip-path: polygon(0 10%, 100% 0, 100% 90%, 0% 100%);
+    &__title {
+      font-size: 2.8rem;
+      font-weight: 600;
+    }
   }
 }
 </style>

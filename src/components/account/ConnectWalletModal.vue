@@ -49,12 +49,11 @@
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
 
+import AgreeWarning from '@/components/account/AgreeWarning.vue';
+import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import GetBrowser from '@/components/account/GetBrowser.vue';
+import GetKeplr from '@/components/account/GetKeplr.vue';
 import Modal from '@/components/ui/Modal.vue';
-
-import AgreeWarning from './AgreeWarning.vue';
-import ConnectKeplr from './ConnectKeplr.vue';
-import GetBrowser from './GetBrowser.vue';
-import GetKeplr from './GetKeplr.vue';
 
 async function getKeplrInstance() {
   if (window.keplr) {
@@ -122,7 +121,7 @@ export default defineComponent({
     };
 
     const agreeWarning = () => {
-      window.localStorage.setItem('isWarningAgreed', 'true');
+      isWarningAgreed.value = true;
     };
 
     onMounted(async () => {
@@ -147,8 +146,8 @@ export default defineComponent({
       });
     });
 
-    watch(isWarningAgreed, (bool) => {
-      localStorage.isWarningAgreed = bool;
+    watch(isWarningAgreed, () => {
+      window.localStorage.setItem('isWarningAgreed', 'true');
     });
 
     return {
