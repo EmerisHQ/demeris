@@ -734,7 +734,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
                 }
               }
               if (isMine) {
-                successData[atob(result.key)] = atob(result.value);
+                successData[atob(result.key)] = result.value ? atob(result.value) : null;
               }
             });
           }
