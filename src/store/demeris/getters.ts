@@ -134,13 +134,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
       if (pools && pools.pools) {
         const pool = pools.pools.find((x) => x.pool_coin_denom == name);
         if (pool) {
-          return (
-            'GDEX ' +
-            getters['getTicker']({ name: pool.reserve_coin_denoms[0] }) +
-            '/' +
-            getters['getTicker']({ name: pool.reserve_coin_denoms[1] }) +
-            ' Pool'
-          );
+          return 'G' + (pools.length + 1);
         } else {
           return null;
         }
@@ -169,7 +163,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
     return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
   },
-  getMarketCap: (state, getters) => (params) => {
+  getSupply: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
     return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Supply ?? null;
   },

@@ -49,7 +49,7 @@
       <Modal
         v-if="feeWarning.feeWarning"
         class="fee-warning-modal"
-        :modal-variant="varaint == 'widget' ? 'bottom' : 'full'"
+        :modal-variant="variant == 'widget' ? 'bottom' : 'full'"
         @close="
           () => {
             feeWarning.feeWarning = false;
@@ -206,6 +206,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
+  ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
   msgFromStepTransaction,
@@ -261,8 +262,7 @@ export default defineComponent({
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
-        // key currently from Cosmostation
-        apiKey: 'pk_live_zbG1BOGMVTcfKibboIE2K3vduJBTuuCn',
+        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
         walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
@@ -394,7 +394,10 @@ export default defineComponent({
       } else {
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
-            if (currentStep.value == (props.data as Step[]).length - 1) {
+            const isLastTransaction = i === currentData.value.data.transactions.length - 1;
+            const isLastStep = currentStep.value === props.data.length - 1;
+
+            if (isLastTransaction && isLastStep) {
               isFinal.value = true;
             } else {
               isFinal.value = false;
@@ -423,11 +426,11 @@ export default defineComponent({
               const fee = {
                 amount: [
                   {
-                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 300000,
+                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 400000,
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '300000',
+                gas: '400000',
               };
               let tx;
               try {
@@ -440,6 +443,9 @@ export default defineComponent({
                 });
               } catch (e) {
                 console.error(e);
+                errorDetails.value = {
+                  message: e.message,
+                };
                 txstatus.value = 'keplr-reject';
                 await txToResolve.value['promise'];
                 continue;
@@ -450,12 +456,13 @@ export default defineComponent({
                 txstatus.value = 'transacting';
                 let result;
                 try {
+                  await ensureTraceChannel(stepTx);
                   result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
                     message: e.message,
-                    ticket: result.ticket,
+                    ticket: result?.ticket,
                   };
                   emit('failed');
                   txstatus.value = 'failed';
@@ -480,7 +487,6 @@ export default defineComponent({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
-                    console.log(txResultData.status);
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -522,10 +528,8 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
                   if (currentData.value.data.name === 'swap') {
-                    console.log('txResultData', txResultData);
                     //Get end block events
                     let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                       height: txResultData.height,
@@ -539,8 +543,6 @@ export default defineComponent({
                       offerCoinDenom: '',
                     };
 
-                    console.log('endBlockEvent', endBlockEvent);
-
                     result.demandCoinDenom = endBlockEvent.demand_coin_denom;
                     result.swappedPercent =
                       (Number(endBlockEvent.exchanged_offer_coin_amount) /
@@ -551,7 +553,6 @@ export default defineComponent({
                     result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
                     result.offerCoinDenom = endBlockEvent.offer_coin_denom;
                     txResult.value = result;
-                    console.log('swap result', result);
                   }
 
                   // TODO: deal with status here

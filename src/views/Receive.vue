@@ -41,9 +41,8 @@
 </template>
 
 <script lang="ts">
-import { reactive, ref, toRefs } from '@vue/reactivity';
+import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
-import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -53,7 +52,7 @@ import Address from '@/components/ui/Address.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
-import { Balance, Balances } from '@/types/api';
+import { Balance } from '@/types/api';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
@@ -67,35 +66,7 @@ export default {
   components: { Address, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
-    const { balances } = useAccount();
-
-    const store = useStore();
-
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'];
-    });
-
-    const allBalances = computed<Balances>(() => {
-      return [
-        ...(balances.value as Balances),
-        ...verifiedDenoms.value.map((denom) => ({
-          base_denom: denom.name,
-          on_chain: denom.chain_name,
-          amount: 0,
-        })),
-      ];
-    });
-
-    const nativeBalances = computed(() => {
-      const result = [];
-      // TODO: Check if denom is native to its chain
-      for (const balance of allBalances.value) {
-        if (!result.some((item) => item.base_denom === balance.base_denom)) {
-          result.push(balance);
-        }
-      }
-      return result;
-    });
+    const { nativeBalances } = useAccount();
 
     const state = reactive({
       selectedAsset: undefined,
@@ -160,9 +131,13 @@ export default {
   }
 
   .denom-select-modal-wrapper {
+    height: 100% !important;
     // Close icon
     .title-with-goback > .icon:first-child {
       visibility: hidden;
+    }
+    & > .coin-list {
+      height: 100% !important;
     }
   }
 

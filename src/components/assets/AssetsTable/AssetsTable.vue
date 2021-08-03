@@ -186,13 +186,15 @@ export default defineComponent({
     });
 
     const getFormattedMarketCap = (denom: string) => {
-      const supply = store.getters['demeris/getMarketCap']({ denom });
+      const price = store.getters['demeris/getPrice']({ denom });
+      const supply = store.getters['demeris/getSupply']({ denom });
+      const marketCap = price * supply;
       const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
       });
 
-      return supply ? formatter.format(supply) : '-';
+      return marketCap ? formatter.format(marketCap) : '-';
     };
 
     const viewAllHandler = () => {

@@ -3,15 +3,19 @@
     <TitleWithGoback :title="title" :func="func" />
 
     <div class="chain-info s-minus w-normal">
-      {{
-        $t('components.chainSelect.text1', {
-          asset: selectedDenomDisplay,
-          chainNo: chainsNumber,
-          chains: chainsNumber > 1 ? 'chains' : 'chain',
-        })
-      }}
-      <br />
-      {{ $t('components.chainSelect.text2') }}
+      <template v-if="showSubtitle">
+        {{
+          $t('components.chainSelect.text1', {
+            asset: selectedDenomDisplay,
+            chainNo: chainsNumber,
+            chains: chainsNumber > 1 ? 'chains' : 'chain',
+          })
+        }}
+        <br />
+      </template>
+      <slot name="description">
+        {{ $t('components.chainSelect.text2') }}
+      </slot>
     </div>
 
     <div class="coin-list">
@@ -40,6 +44,7 @@ export default defineComponent({
     func: { type: Function, required: true },
     title: { type: String, required: true },
     selectedDenom: { type: String, required: true },
+    showSubtitle: { type: Boolean, default: true },
   },
   emits: ['select'],
   setup(props, { emit }) {

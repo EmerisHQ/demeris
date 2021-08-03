@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
 import { Pool } from '@/types/actions';
@@ -35,6 +36,7 @@ export default function usePools() {
     return Promise.all(pool.reserve_coin_denoms.map((denom) => getBaseDenom(denom)));
   };
 
+  // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
   const poolsByDenom = (denom: string) => {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
   };
@@ -53,6 +55,54 @@ export default function usePools() {
     const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
+  };
+
+  const withdrawBalancesById = (id: string, poolCoinAmount: number) => {
+    const pool = pools.value.find((item) => item.id === id);
+
+    if (!pool) {
+      return;
+    }
+
+    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+
+    const reserveBalances =
+      store.getters['cosmos.bank.v1beta1/getAllBalances']({ params: { address: pool.reserve_account_address } })
+        ?.balances || [];
+
+    /**
+     * TODO: Consider fee proportion
+     * WithdrawAmount = ReserveAmount * PoolCoinAmount * WithdrawFeeProportion / TotalSupply
+     * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
+     */
+
+    const hasParams = totalSupply && reserveBalances;
+
+    const withdrawCoins = [
+      {
+        amount: !hasParams
+          ? 0
+          : new BigNumber(poolCoinAmount)
+              .multipliedBy(reserveBalances[0].amount)
+              .dividedBy(totalSupply)
+              .decimalPlaces(6)
+              .toNumber(),
+        denom: reserveBalances[0].denom,
+      },
+      {
+        amount: !hasParams
+          ? 0
+          : new BigNumber(poolCoinAmount)
+              .multipliedBy(reserveBalances[1].amount)
+              .dividedBy(totalSupply)
+              .decimalPlaces(6)
+              .toNumber(),
+        denom: reserveBalances[1].denom,
+      },
+    ];
+
+    return withdrawCoins;
   };
 
   const denomListByPools = async (isPoolCoin = false) => {
@@ -181,6 +231,7 @@ export default function usePools() {
     pools,
     getReserveBaseDenoms,
     poolsByDenom,
+    withdrawBalancesById,
     poolById,
     formatPoolName,
     poolPriceById,

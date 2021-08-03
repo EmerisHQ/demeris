@@ -25,10 +25,12 @@
       <template v-if="state.step === 'amount'">
         <template v-if="!state.isCreationConfirmationOpen">
           <h2 class="add-liquidity__title s-2">
-            {{ hasPool ? 'Add Liquidity' : 'Create Liquidity' }}
+            {{ hasPair && !hasPool ? 'Create Liquidity' : 'Add Liquidity' }}
           </h2>
 
-          <div v-if="hasPair" class="add-liquidity__pool">
+          <p v-if="!hasPair" class="add-liquidity__subtitle">Select two assets</p>
+
+          <div v-else class="add-liquidity__pool">
             <div class="add-liquidity__pool__pair">
               <CircleSymbol
                 :denom="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom"
@@ -90,8 +92,27 @@
               </Alert>
 
               <div class="add-liquidity__input__main">
-                <label class="add-liquidity__input__label s-minus">Supply</label>
-                <div>
+                <div class="add-liquidity__input__header">
+                  <span class="add-liquidity__input__header__label">Supply</span>
+                  <div v-if="form.coinA.asset && hasFunds.coinA" class="add-liquidity__input__header__available">
+                    <AmountDisplay
+                      :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
+                    />
+                    available
+                  </div>
+
+                  <router-link
+                    v-else-if="form.coinA.asset"
+                    :to="{ name: 'Asset', params: { denom: form.coinA.asset.base_denom } }"
+                    class="add-liquidity__input__header__buy inline-flex items-center"
+                  >
+                    <span>{{ $t('generic_cta.get') }}&nbsp;</span>
+                    <Denom :name="form.coinA.asset.base_denom" />
+                    <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+                  </router-link>
+                </div>
+
+                <div class="add-liquidity__input__container">
                   <DenomSelect
                     v-model:amount="form.coinA.amount"
                     :input-header="`Pay`"
@@ -105,15 +126,11 @@
 
               <div v-if="form.coinA.asset" class="add-liquidity__input__details">
                 <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinA')">
-                  From <span class="w-bold"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
+                  <div>
+                    From <span class="w-bold text-black"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
+                  </div>
+                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
                 </button>
-
-                <div class="add-liquidity__input__details__available">
-                  <AmountDisplay
-                    :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
-                  />
-                  available
-                </div>
               </div>
             </div>
 
@@ -133,8 +150,27 @@
               :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
             >
               <div class="add-liquidity__input__main">
-                <label class="add-liquidity__input__label s-minus">Supply</label>
-                <div>
+                <div class="add-liquidity__input__header">
+                  <span class="add-liquidity__input__header__label">Supply</span>
+                  <div v-if="form.coinB.asset && hasFunds.coinB" class="add-liquidity__input__header__available">
+                    <AmountDisplay
+                      :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
+                    />
+                    available
+                  </div>
+
+                  <router-link
+                    v-else-if="form.coinB.asset"
+                    :to="{ name: 'Asset', params: { denom: form.coinB.asset.base_denom } }"
+                    class="add-liquidity__input__header__buy inline-flex items-center"
+                  >
+                    <span>{{ $t('generic_cta.get') }}&nbsp;</span>
+                    <Denom :name="form.coinB.asset.base_denom" />
+                    <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+                  </router-link>
+                </div>
+
+                <div class="add-liquidity__input__container">
                   <DenomSelect
                     v-model:amount="form.coinB.amount"
                     :input-header="`Pay`"
@@ -148,15 +184,11 @@
 
               <div v-if="form.coinB.asset" class="add-liquidity__input__details">
                 <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinB')">
-                  From <span class="w-bold"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
+                  <div>
+                    From <span class="w-bold text-black"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
+                  </div>
+                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
                 </button>
-
-                <div class="add-liquidity__input__details__available">
-                  <AmountDisplay
-                    :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
-                  />
-                  available
-                </div>
               </div>
             </div>
 
@@ -263,6 +295,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -277,7 +310,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
-import { Balance, Balances } from '@/types/api';
+import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -292,6 +325,7 @@ export default {
     ChainSelectModal,
     CircleSymbol,
     Ticker,
+    Denom,
     DenomSelect,
     FeeLevelSelector,
     FlexibleAmountInput,
@@ -373,14 +407,32 @@ export default {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances } = usePool(
+    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
     );
 
-    const { balances } = useAccount();
+    const { balances: userBalances, getNativeBalances } = useAccount();
 
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    const balances = computed(() => {
+      const nativeBalances = getNativeBalances();
+      const result = [...userBalances.value];
+
+      for (const nativeBalance of nativeBalances) {
+        const hasBalance = userBalances.value.some(
+          (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
+        );
+        if (!hasBalance) {
+          result.push(nativeBalance);
+        }
+      }
+
+      result.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
+
+      return result;
     });
 
     const balancesForSecond = computed(() => {
@@ -429,7 +481,20 @@ export default {
       return undefined;
     });
 
+    const hasFunds = computed(() => {
+      const isEmpty = !form.coinA.asset && !form.coinB.asset;
+      const coinA = form.coinA.asset ? +parseCoins(form.coinA.asset.amount)[0].amount > 0 : false;
+      const coinB = form.coinB.asset ? +parseCoins(form.coinB.asset.amount)[0].amount > 0 : false;
+
+      return {
+        coinA,
+        coinB,
+        all: isEmpty ? true : coinA && coinB,
+      };
+    });
+
     const hasSufficientFunds = computed(() => {
+      let hasAssetFunds = hasFunds.value.all;
       let coinA = true;
       let coinB = true;
 
@@ -450,7 +515,7 @@ export default {
       return {
         coinA,
         coinB,
-        total: coinA && coinB,
+        total: coinA && coinB && hasAssetFunds,
       };
     });
 
@@ -584,6 +649,7 @@ export default {
     };
 
     const coinSelectHandler = (key: 'coinA' | 'coinB', balance: Balance) => {
+      state.isMaximumAmountChecked = false;
       form[key].asset = balance;
     };
 
@@ -695,19 +761,21 @@ export default {
         return;
       }
 
+      const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+      const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      form.coinA.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceA)
-        .decimalPlaces(6)
-        .toString();
-      form.coinB.amount = new BigNumber(state.totalEstimatedPrice)
-        .dividedBy(2)
-        .dividedBy(priceB)
-        .decimalPlaces(6)
-        .toString();
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+
+      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+
+      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
       updateReceiveAmount();
     };
 
@@ -821,6 +889,7 @@ export default {
       isValid,
       exchangeAmount,
       hasPrices,
+      hasFunds,
       coinAChangeHandler,
       coinBChangeHandler,
       coinPoolChangeHandler,
@@ -852,6 +921,11 @@ export default {
 
   .denom-select__coin-amount-type {
     display: none;
+  }
+
+  &__subtitle {
+    margin-top: 1.2rem;
+    color: var(--muted);
   }
 
   &__estimated {
@@ -1150,7 +1224,7 @@ export default {
     border-radius: 1rem;
     background: var(--bg);
 
-    &.input-invalid &__details__available {
+    &.input-invalid &__header__available {
       color: var(--negative-text);
     }
 
@@ -1158,26 +1232,52 @@ export default {
       margin-top: 3.2rem;
     }
 
+    &__container {
+      padding: 0.6rem 0;
+    }
+
     &__main {
-      padding: 1.6rem;
+      padding: 1.6rem 2rem;
       display: flex;
       flex-direction: column;
     }
 
-    &__label {
-      color: var(--muted);
-      margin-bottom: 1.6rem;
-    }
-
-    &__details {
-      padding: 1.2rem 1.6rem;
-      font-size: 1.2rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    &__header {
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      margin-bottom: 1.6rem;
+
+      &__label {
+        color: var(--muted);
+      }
 
       &__available {
         color: var(--muted);
+        font-size: 1.3rem;
+      }
+
+      &__buy {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+    }
+
+    &__details {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+      &__from {
+        padding: 1.6rem 2rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        &__icon {
+          width: 1.6rem;
+          height: 1.6rem;
+        }
       }
     }
   }
