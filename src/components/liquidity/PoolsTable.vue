@@ -33,7 +33,7 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pools-table__row__pair__pool__avatar token-b" />
             </div>
             <span class="pools-table__row__pair__name w-bold">
-              {{ pool.display_name }}
+              {{ pool.displayName }}
             </span>
           </td>
           <td class="text-right"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
@@ -79,14 +79,15 @@ export default {
     const keyword = ref<string>('');
     const renderedPools = ref([]);
 
-    const { formatPoolName } = usePools();
+    const { formatPoolName, getReserveBaseDenoms } = usePools();
     watch(
       () => props.pools,
       async (newVal) => {
         if (newVal.length > 0) {
           renderedPools.value = await Promise.all(
-            props.pools.map(async (pool) => {
-              pool.display_name = await formatPoolName(pool);
+            props.pools.map(async (pool: any) => {
+              pool.displayName = await formatPoolName(pool);
+              pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
               return pool;
             }),
           );
@@ -96,7 +97,11 @@ export default {
     );
 
     const filteredPools = computed(() => {
-      return renderedPools.value.filter((pool) => pool.reserve_coin_denoms.join().indexOf(keyword.value) !== -1);
+      const query = keyword.value.toLowerCase();
+      return renderedPools.value.filter(
+        (pool) =>
+          pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
+      );
     });
 
     const openAddLiqudityPage = () => {
