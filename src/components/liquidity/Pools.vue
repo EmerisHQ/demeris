@@ -43,6 +43,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .pools {
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 13rem));
 }
 </style>

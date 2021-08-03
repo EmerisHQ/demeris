@@ -96,10 +96,7 @@
         <section v-if="poolsDisplay.length" class="asset__main__pools asset__list">
           <div class="asset__list__header">
             <p class="asset__list__header__title">Pools</p>
-            <router-link :to="{ name: 'Pools' }" class="asset__list__header__button">
-              See all
-              <Icon name="ArrowRightIcon" :icon-size="1.6" />
-            </router-link>
+            <router-link :to="{ name: 'Pools' }" class="asset__list__header__button"> See all &rarr; </router-link>
           </div>
 
           <div class="asset__main__pools__wrapper">
@@ -145,7 +142,6 @@ import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -166,7 +162,6 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    Icon,
     LiquiditySwap,
     Pools,
     PoolBanner,

@@ -5,7 +5,7 @@
     </header>
 
     <div class="relative min-h-0 flex flex-col">
-      <div class="w-full mx-auto max-w-sm px-6 mb-8 text-center text-muted">
+      <div class="w-full mx-auto max-w-sm px-6 mb-6 text-center text-muted leading-copy">
         <template v-if="showSubtitle">
           {{
             $t('components.chainSelect.text1', {

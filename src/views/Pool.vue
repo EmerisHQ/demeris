@@ -50,7 +50,7 @@
         </section>
 
         <section v-if="reserveBalances" class="pool__main__assets">
-          <h2 class="pool__main__assets__title s-2">Liquidity pool token</h2>
+          <h2 class="pool__main__assets__title text-2 font-bold">Liquidity pool token</h2>
 
           <table class="pool__main__assets__table assets-table">
             <thead>
@@ -85,8 +85,7 @@
           <div class="pool__main__pools__header">
             <h2 class="text-2 font-bold">More pools</h2>
             <router-link :to="{ name: 'Pools' }" class="pool__main__pools__header__button">
-              See all
-              <Icon name="ArrowRightIcon" :icon-size="1" />
+              See all &rarr;
             </router-link>
           </div>
 

@@ -24,7 +24,6 @@
 
     <template v-else-if="assetConfig && !isPoolCoin">
       <img
-        v-if="logo && size !== 'xs'"
         :src="assetConfig.logo"
         :alt="denom"
         class="w-full h-full rounded-full relative z-10"

@@ -16,8 +16,7 @@
               class="portfolio__assets__header__link flex items-center font-medium"
               to="/assets"
             >
-              {{ $t('generic_cta.seeall') }}
-              <ArrowRightIcon class="ml-3" />
+              {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
           </header>
 

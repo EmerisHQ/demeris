@@ -304,9 +304,9 @@ export default defineComponent({
     @apply transition-shadow;
   }
   // not working for some reason?
-  &:hover:before,
-  &:focus:before {
-    --tw-shadow: 18px ​52px 128px -10px rgba(0, 0, 0, 0.1);
-  }
+  // &:hover:before,
+  // &:focus:before {
+  //   --tw-shadow: 18px ​52px 128px -10px rgba(0, 0, 0, 0.1);
+  // }
 }
 </style>
