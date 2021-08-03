@@ -43,12 +43,9 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
     const pubkey = encodePubkey(encodeSecp256k1Pubkey(accountFromSigner.pubkey));
     const signMode = SignMode.SIGN_MODE_LEGACY_AMINO_JSON;
     const msgs = messages.map((msg) => aminoTypes.toAmino(msg));
-    console.log(msgs);
-    console.log(messages);
 
     const signDoc = makeSignDocAmino(msgs, fee, chainId, memo, accountNumber, sequence);
     const { signature, signed } = await this.exposedSigner.signAmino(signerAddress, signDoc);
-    console.log(signed.msgs);
     const signedTxBody = {
       messages: signed.msgs.map((msg) => aminoTypes.fromAmino(msg)),
       memo: signed.memo,
@@ -58,7 +55,6 @@ export default class DemerisSigningClient extends SigningStargateClient implemen
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: signedTxBody,
     };
-    console.log(signedTxBodyEncodeObject);
     const signedTxBodyBytes = this.registry.encode(signedTxBodyEncodeObject);
     const signedGasLimit = Int53.fromString(signed.fee.gas).toNumber();
     const signedSequence = Int53.fromString(signed.sequence).toNumber();

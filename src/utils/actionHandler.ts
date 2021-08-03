@@ -1,3 +1,4 @@
+import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import Long from 'long';
 
 import { ChainData } from '@/store/demeris/state';
@@ -986,7 +987,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       return 0;
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
-      value: {
+      value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
         swapTypeId: data.pool.type_id,
@@ -997,7 +998,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
-      },
+      }),
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };

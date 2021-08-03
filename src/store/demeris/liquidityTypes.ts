@@ -91,15 +91,22 @@ export const liquidityTypes = {
       demandCoinDenom,
       offerCoinFee,
       orderPrice,
-    }: MsgSwapWithinBatch): AminoMsgSwapWithinBatch['value'] => ({
-      swap_requester_address: swapRequesterAddress,
-      pool_id: omitDefault(poolId)?.toString(),
-      swap_type_id: swapTypeId,
-      offer_coin: offerCoin,
-      demand_coin_denom: demandCoinDenom,
-      offer_coin_fee: offerCoinFee,
-      order_price: orderPrice,
-    }),
+    }: MsgSwapWithinBatch): AminoMsgSwapWithinBatch['value'] => {
+      const order_price = orderPrice.split('');
+      while (order_price.length < 19) {
+        order_price.unshift('0');
+      }
+      order_price.splice(order_price.length - 18, 0, '.');
+      return {
+        swap_requester_address: swapRequesterAddress,
+        pool_id: '' + omitDefault(poolId)?.toString(),
+        swap_type_id: swapTypeId,
+        offer_coin: offerCoin,
+        demand_coin_denom: demandCoinDenom,
+        offer_coin_fee: offerCoinFee,
+        order_price: order_price.join(''),
+      };
+    },
     fromAmino: ({
       swap_requester_address,
       pool_id,
@@ -115,7 +122,7 @@ export const liquidityTypes = {
       offerCoin: offer_coin,
       demandCoinDenom: demand_coin_denom,
       offerCoinFee: offer_coin_fee,
-      orderPrice: order_price,
+      orderPrice: parseFloat(order_price).toFixed(18).replace('.', '').replace(/(^0+)/, ''),
     }),
   },
   '/tendermint.liquidity.v1beta1.MsgDepositWithinBatch': {
