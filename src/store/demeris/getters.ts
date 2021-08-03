@@ -134,9 +134,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
       if (pools && pools.pools) {
         const pool = pools.pools.find((x) => x.pool_coin_denom == name);
         if (pool) {
-          return (
-            'G' + (pools.length+1)
-          );
+          return 'G' + (pools.length + 1);
         } else {
           return null;
         }
