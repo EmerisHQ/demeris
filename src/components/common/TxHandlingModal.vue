@@ -78,18 +78,21 @@
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
               <span class="w-bold"><AmountDisplay
-                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
+                :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
               /></span>
               <br />
               on <ChainName :name="'cosmos-hub'" />.
               <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
                 <span class="w-bold">
                   <AmountDisplay
-                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                    :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
                   />
                 </span>
                 not swapped
               </div>
+            </template>
+            <template v-else-if="tx.name === 'addliquidity'">
+              <PreviewAddLiquidity :response="txResult" :fees="{}" />
             </template>
           </div>
           <div class="status__detail-amount s-0 w-medium">
@@ -219,6 +222,7 @@ import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -250,6 +254,7 @@ type Result = {
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
+    PreviewAddLiquidity,
     Modal,
     SpinnerIcon,
     WarningIcon,
@@ -288,16 +293,8 @@ export default defineComponent({
       default: undefined,
     },
     txResult: {
-      type: Object as PropType<Result>,
-      default: () => {
-        return {
-          swappedPercent: 0,
-          demandCoinSwappedAmount: 0,
-          demandCoinDenom: '',
-          offerCoinDenom: '',
-          remainingOfferCoinAmount: 0,
-        };
-      },
+      type: Object as PropType<Result | any>,
+      default: undefined,
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
@@ -404,7 +401,7 @@ export default defineComponent({
             subTitle.value = '';
             if (props.isFinal && !props.hasMore) {
               blackButton.value = t('generic_cta.done');
-              if (props.tx.name === 'swap') {
+              if (props.tx.name === 'swap' && props.txResult) {
                 whiteButton.value = `Send ${
                   Math.trunc(
                     (Number(props.txResult.demandCoinSwappedAmount) * 100) /

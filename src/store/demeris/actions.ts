@@ -37,6 +37,7 @@ export type DemerisTxParams = {
 };
 export type DemerisTxResultParams = {
   height: number;
+  stepType: string;
 };
 export type GasFee = {
   amount: Array<Amount>;
@@ -703,7 +704,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
+  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
       const wakeUpTime = Date.now() + ms;
       while (Date.now() < wakeUpTime) {}
@@ -718,7 +719,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         let isMine = false;
 
         const checks = getEndBlockChecks({
-          type: 'Swap',
+          type: stepType,
           requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
         });
 
@@ -747,15 +748,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
 
       function getEndBlockChecks(data) {
-        if (data.type === 'Swap') {
+        if (data.type === 'swap') {
           return { type: 'swap_transacted', txAddress: 'swap_requester', requesterAddress: data.requesterAddress };
         }
 
-        if (data.type === 'Redeem') {
+        if (data.type === 'redeem') {
           return { type: 'withdraw_from_pool', txAddress: 'withdrawer', requesterAddress: data.requesterAddress };
         }
 
-        if (data.type === 'Add Liquidity') {
+        if (data.type === 'addliquidity') {
           return { type: 'deposit_to_pool', txAddress: 'depositor', requesterAddress: data.requesterAddress };
         }
       }

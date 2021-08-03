@@ -76,8 +76,10 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
+import { AddLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewAddLiquidity',
@@ -93,16 +95,21 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
     },
+    response: {
+      type: Object as PropType<AddLiquidityEndBlockResponse>,
+      default: undefined,
+    },
   },
 
   setup(props) {
     const store = useStore();
+    const { pools } = usePools();
     const poolInfo = reactive({
       exchangeAmountPrice: 1,
       pairName: '-/-',
@@ -111,6 +118,17 @@ export default defineComponent({
     });
 
     const data = computed(() => {
+      if (props.response) {
+        const [coinA, coinB] = parseCoins(props.response.accepted_coins);
+        const pool = pools.value.find((item) => item.pool_coin_denom === props.response.pool_coin_denom);
+
+        return {
+          coinA,
+          coinB,
+          pool,
+        };
+      }
+
       return (props.step as Actions.Step).transactions[0].data as Actions.CreatePoolData;
     });
 
@@ -148,6 +166,10 @@ export default defineComponent({
     };
 
     const receiveAmount = computed(() => {
+      if (props.response) {
+        return +props.response.pool_coin_amount;
+      }
+
       return calculateSupplyTokenAmount(+data.value.coinA.amount, +data.value.coinB.amount);
     });
 

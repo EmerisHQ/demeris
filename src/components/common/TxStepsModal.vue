@@ -526,30 +526,34 @@ export default defineComponent({
 
                   errorDetails.value = undefined;
 
-                  if (!txResultData.error && currentData.value.data.name === 'swap') {
-                    const result = {
-                      swappedPercent: 0,
-                      demandCoinSwappedAmount: 0,
-                      demandCoinDenom: '',
-                      remainingOfferCoinAmount: 0,
-                      offerCoinDenom: '',
-                    };
-
+                  if (!txResultData.error) {
                     //Get end block events
                     let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                       height: txResultData.height,
+                      stepType: currentData.value.data.name,
                     });
 
-                    result.demandCoinDenom = endBlockEvent.demand_coin_denom;
-                    result.swappedPercent =
-                      (Number(endBlockEvent.exchanged_offer_coin_amount) /
-                        (Number(endBlockEvent.remaining_offer_coin_amount) +
-                          Number(endBlockEvent.exchanged_offer_coin_amount))) *
-                      100;
-                    result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
-                    result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
-                    result.offerCoinDenom = endBlockEvent.offer_coin_denom;
-                    txResult.value = result;
+                    if (endBlockEvent) {
+                      let resultData = endBlockEvent;
+
+                      switch (currentData.value.data.name) {
+                        case 'swap':
+                          resultData = {
+                            swappedPercent:
+                              (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                                (Number(endBlockEvent.remaining_offer_coin_amount) +
+                                  Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                              100,
+                            demandCoinSwappedAmount: endBlockEvent.exchanged_demand_coin_amount,
+                            demandCoinDenom: endBlockEvent.demand_coin_denom,
+                            remainingOfferCoinAmount: endBlockEvent.remaining_offer_coin_amount,
+                            offerCoinDenom: endBlockEvent.offer_coin_denom,
+                          };
+                          break;
+                      }
+                      debugger;
+                      txResult.value = resultData;
+                    }
                   }
 
                   // TODO: deal with status here

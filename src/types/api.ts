@@ -246,3 +246,12 @@ export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
 export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq;
+
+export type AddLiquidityEndBlockResponse = {
+  accepted_coins: string;
+  depositor: string;
+  pool_coin_amount: string;
+  pool_coin_denom: string;
+  refunded_coins: string;
+  success: string;
+};
