@@ -9,11 +9,13 @@
 
         <div class="connect-wallet__description">
           <div class="scrollable">
-            <slot name="description">
-              <p>{{ $t('wallet.connect.modal4.text1') }}</p>
-              <p>{{ $t('wallet.connect.modal4.text2') }}</p>
-              <p>{{ $t('wallet.connect.modal4.text3') }}</p>
-            </slot>
+            <div class="scrollable-content">
+              <slot name="description">
+                <p>{{ $t('wallet.connect.modal4.text1') }}</p>
+                <p>{{ $t('wallet.connect.modal4.text2') }}</p>
+                <p>{{ $t('wallet.connect.modal4.text3') }}</p>
+              </slot>
+            </div>
           </div>
         </div>
 
@@ -62,12 +64,27 @@ export default defineComponent({
   position: relative;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  padding: 2rem 2.4rem 0;
-  overflow-y: scroll;
   height: 22.5rem;
+  overflow: hidden;
+
+  &:after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -2.4rem;
+    height: 6.4rem;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
+  }
+}
+
+.scrollable-content {
+  padding: 2rem 2.4rem 0;
+  height: 100%;
 
   text-align: left;
   line-height: 1.625;
+  overflow-y: scroll;
 
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -75,18 +92,8 @@ export default defineComponent({
   &::-webkit-scrollbar {
     display: none;
   }
-
-  &:after {
-    content: '';
-    display: block;
-    position: sticky;
-    bottom: -2.4rem;
-    left: -2.4rem;
-    right: -2.4rem;
-    height: 6.4rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
-  }
 }
+
 .connect-wallet {
   &__controls {
     flex-direction: row;

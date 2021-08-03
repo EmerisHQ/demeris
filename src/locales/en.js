@@ -32,9 +32,13 @@ export const messages = {
         modal1: {
           title: 'Connect your wallet',
           text: 'Connect your Keplr wallet via the Keplr browser extension to use Emeris.',
-          button: 'Connect Keplr',
+          button1: 'Connect Keplr',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
+        },
+        modal1welcome: {
+          title: 'Connect to Emeris',
+          button2: 'Try the demo',
         },
         modal2: {
           title: 'Keplr is required',

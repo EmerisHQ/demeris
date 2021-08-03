@@ -1,17 +1,24 @@
 <template>
   <div id="welcome">
+    <img class="portal" src="@/assets/svg/portal.svg" />
     <div
-      v-if="isKeplrInstalled"
+      v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed"
       class="connect-wallet-panel"
       body-class="elevation-panel"
       width="72rem"
       @close="closeConnectKeplr"
     >
-      <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
+      <ConnectKeplr
+        ref="connectKeplrRef"
+        type="welcome"
+        @cancel="closeConnectKeplr"
+        @connect="closeConnectKeplr"
+        @warning="showWarning"
+      />
     </div>
 
     <div
-      v-else-if="!isWarningAgreed"
+      v-else-if="isWarningNeeded && !isWarningAgreed"
       class="connect-wallet-panel"
       body-class="elevation-panel"
       width="72rem"
@@ -33,12 +40,12 @@
     <div v-else class="connect-wallet-panel" body-class="elevation-panel" width="72rem" @close="closeGetBrowser">
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
     </div>
-    <img class="portal" src="@/assets/svg/portal.svg" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
@@ -86,20 +93,24 @@ export default defineComponent({
   emits: ['close'],
 
   setup(_, { emit }) {
+    const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
     const getBrowserRef = ref(null);
-    const isWarningAgreed = ref(null);
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
+    const isReturnUser = ref(null);
+    const isWarningAgreed = ref(null);
+    const isWarningNeeded = ref(null);
 
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
       emit('close');
     };
     const closeAgreeWarning = () => {
+      isWarningNeeded.value = null;
       emit('close');
     };
     const closeGetKeplr = () => {
@@ -110,11 +121,21 @@ export default defineComponent({
     };
 
     const agreeWarning = () => {
+      isWarningNeeded.value = false;
       isWarningAgreed.value = true;
+    };
+    const showWarning = () => {
+      isWarningNeeded.value = true;
     };
 
     onMounted(async () => {
+      isReturnUser.value = window.localStorage.getItem('isReturnUser');
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+
+      if (isReturnUser.value) {
+        router.push('/');
+      }
 
       // dont present spinner forever if not Chrome
       // @ts-ignore
@@ -138,17 +159,23 @@ export default defineComponent({
     watch(isWarningAgreed, () => {
       window.localStorage.setItem('isWarningAgreed', 'true');
     });
+    watch(isWarningNeeded, (newVal: string) => {
+      window.localStorage.setItem('isWarningNeeded', newVal);
+    });
 
     return {
-      isLoading,
       agreeWarning,
+      showWarning,
       connectKeplrRef,
       agreeWarningRef,
       getKeplrRef,
       getBrowserRef,
-      isWarningAgreed,
+      isLoading,
       isKeplrSupported,
       isKeplrInstalled,
+      isReturnUser,
+      isWarningAgreed,
+      isWarningNeeded,
       closeAgreeWarning,
       closeConnectKeplr,
       closeGetKeplr,
@@ -160,18 +187,13 @@ export default defineComponent({
 
 <style lang="scss">
 #welcome {
-  .connect-banner {
-    display: none !important;
-  }
-  .portal {
-    position: absolute;
-    top: 4%;
-    right: -5%;
-    width: 100%;
-    max-width: 60vw;
-    max-height: 100vh;
-  }
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+
   .connect-wallet-panel {
+    position: relative;
+    z-index: 1;
     .modal__body {
       position: relative;
       overflow: hidden;
@@ -204,6 +226,7 @@ export default defineComponent({
 
     &__content {
       min-height: inherit;
+      background: transparent;
       padding: 4.8rem;
       text-align: center;
     }
@@ -233,6 +256,19 @@ export default defineComponent({
       font-size: 2.8rem;
       font-weight: 600;
     }
+  }
+
+  .connect-banner {
+    display: none !important;
+  }
+  .portal {
+    position: absolute;
+    top: 4%;
+    right: -5%;
+    width: 100%;
+    max-width: 60vw;
+    max-height: 100vh;
+    overflow: hidden;
   }
 }
 </style>

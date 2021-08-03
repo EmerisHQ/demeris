@@ -4,7 +4,10 @@
       <div class="connect-wallet__content">
         <template v-if="!isConnecting">
           <slot name="title">
-            <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal1.title') }}</h2>
+            <h2 v-if="type === 'welcome'" class="connect-wallet__title">
+              {{ $t('wallet.connect.modal1welcome.title') }}
+            </h2>
+            <h2 v-else class="connect-wallet__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
 
           <div class="connect-wallet__description">
@@ -14,8 +17,9 @@
           </div>
 
           <div class="connect-wallet__controls">
-            <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
-            <Button :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
+            <Button :name="$t('wallet.connect.modal1.button1')" @click="trySignIn" />
+            <Button v-if="type === 'welcome'" :name="$t('wallet.connect.modal1welcome.button2')" :is-outline="true" />
+            <Button v-else :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
           </div>
         </template>
 
@@ -37,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
@@ -55,11 +59,20 @@ export default defineComponent({
     Spinner,
   },
 
-  emits: ['cancel', 'connect'],
+  props: {
+    type: {
+      type: String,
+      default: undefined,
+    },
+  },
+
+  emits: ['cancel', 'connect', 'warning'],
 
   setup(_, { emit }) {
     const store = useStore();
     const isConnecting = ref(false);
+    const isWarningAgreed = ref(null);
+    const isWarningNeeded = ref(null);
 
     const emitCancel = () => {
       cancel();
@@ -74,10 +87,27 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
+    const trySignIn = () => {
+      if (isWarningAgreed.value) {
+        console.log('isWarningAgreed.value', isWarningAgreed.value);
+        signIn();
+      } else {
+        console.log('warning not agreed');
+        emit('warning');
+      }
+    };
+
     const signIn = () => {
       store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
       isConnecting.value = true;
     };
+
+    onMounted(() => {
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+      console.log('onMounted isWarningAgreed.value', isWarningAgreed.value);
+      console.log('onMounted isWarningNeeded.value', isWarningNeeded.value);
+    });
 
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
@@ -85,7 +115,7 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, signIn };
+    return { isConnecting, emitCancel, cancel, trySignIn };
   },
 });
 </script>

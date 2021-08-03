@@ -151,12 +151,12 @@ export default defineComponent({
     });
 
     return {
-      isLoading,
       agreeWarning,
       connectKeplrRef,
       agreeWarningRef,
       getKeplrRef,
       getBrowserRef,
+      isLoading,
       isWarningAgreed,
       isKeplrSupported,
       isKeplrInstalled,
@@ -184,53 +184,53 @@ export default defineComponent({
     right: 2rem;
     z-index: 40;
   }
-}
 
-.connect-wallet {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
+  .connect-wallet {
     min-height: inherit;
-  }
 
-  &__loading {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__content {
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    margin-top: 5rem;
-
-    div + div {
-      margin-top: 1.6rem;
+    &__wrapper {
+      display: flex;
+      min-height: inherit;
     }
-  }
 
-  &__description {
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
+    &__loading {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-  }
 
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
+    &__content {
+      width: 50%;
+      min-height: inherit;
+      padding: 4.8rem;
+      text-align: center;
+    }
+
+    &__controls {
+      display: flex;
+      flex-direction: column;
+      margin-top: 5rem;
+
+      div + div {
+        margin-top: 1.6rem;
+      }
+    }
+
+    &__description {
+      margin-top: 4rem;
+      line-height: 1.8;
+      color: var(--muted);
+
+      p:first-child {
+        margin-bottom: 1.8rem;
+      }
+    }
+
+    &__title {
+      font-size: 2.8rem;
+      font-weight: 600;
+    }
   }
 }
 </style>
