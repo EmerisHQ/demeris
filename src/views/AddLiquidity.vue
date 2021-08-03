@@ -820,6 +820,8 @@ export default {
       },
     );
 
+    watch(pools, findPoolByDenoms, { immediate: true });
+
     watch([form.coinA, form.coinB, pool, hasPair], async () => {
       if (hasPair.value) {
         await generateActionSteps();
