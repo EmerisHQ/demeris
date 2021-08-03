@@ -1,7 +1,7 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { sleep } from '@cosmjs/utils';
 import { SpVuexError } from '@starport/vuex';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
@@ -573,9 +573,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, cache = true, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
-    if (state._InProgess.get(reqHash)) {
+    if (state._InProgess.get(reqHash) && cache) {
       await state._InProgess.get(reqHash);
       return getters['getVerifyTrace'](params);
     } else {
@@ -699,7 +699,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx });
       return response.data;
     } catch (e) {
-      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
+      const cause = e.response?.data?.cause || e.message;
+      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
     }
   },
 

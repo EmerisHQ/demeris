@@ -1086,6 +1086,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
           'demeris/GET_VERIFY_TRACE',
           {
             subscribe: false,
+            cache: false,
             params: {
               chain_name: chain,
               hash: denom.split('/')[1],

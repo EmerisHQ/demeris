@@ -91,6 +91,7 @@ export type DemerisActionsByTicketParams = {
 };
 export type DemerisActionsTraceParams = {
   subscribe: boolean;
+  cache?: boolean;
   params?: API.VerifyTraceReq;
 };
 export type DemerisSubscriptions = {
