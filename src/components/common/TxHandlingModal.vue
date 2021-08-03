@@ -20,7 +20,7 @@
       <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
       <div v-else class="status__icon-none" />
       <div class="status__title-sub w-normal s-0">
-        <template v-if="status == 'failed'">
+        <template v-if="status == 'failed' || status == 'unknown'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
             <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
           </template>
@@ -48,13 +48,25 @@
       <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
       <div class="status__title s-2 w-bold">{{ title }}</div>
       <div class="status__detail">
-        <template v-if="status == 'transacting' || status == 'complete'">
-          <div v-if="status === 'transacting'" class="status__detail-transferring">
+        <template
+          v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
+        >
+          <div
+            v-if="status == 'delay' || status == 'IBC_receive_failed'"
+            class="status__detail-subtitle-under w-normal s-0"
+          >
+            {{ subTitleUnder }}
+          </div>
+          <div
+            v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
+            class="status__detail-transferring"
+          >
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
               <div class="arrow">-></div>
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
             </template>
+
             <template v-if="tx.name == 'transfer'">
               <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
               <div class="arrow">-></div>
@@ -62,7 +74,6 @@
             </template>
           </div>
 
-          <!-- TEST -->
           <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
@@ -81,7 +92,6 @@
               </div>
             </template>
           </div>
-          <!-- TEST -->
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
@@ -96,10 +106,15 @@
         </template>
         <template v-else>
           <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
-            Keplr troubleshooting ↗️
+            {{ $t('components.txHandlingModal.keplrSupport') }}
+          </a>
+          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link s-0 w-bold">
+            {{ $t('components.txHandlingModal.contactSupport') }}
           </a>
           <div v-if="status === 'keplr-sign'" class="spacer" />
           <div v-if="status === 'keplr-reject'" class="spacer-2" />
+          <div v-if="status === 'unknown'" class="spacer-3" />
+
           <div v-else-if="status === 'failed'" class="status__detail-text-weak">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
               Your
@@ -170,6 +185,13 @@
         "
         :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
       />
+      {{ router?.pathname }}
+      <Button
+        v-if="status === 'unknown'"
+        :name="$t('components.txHandlingModal.backToPortfolio')"
+        :status="'normal'"
+        :click-function="unknownHandler"
+      />
       <Button
         v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
         :name="whiteButton"
@@ -209,7 +231,15 @@ import {
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
 
-type Status = 'keplr-sign' | 'keplr-reject' | 'transacting' | 'failed' | 'complete';
+type Status =
+  | 'keplr-sign'
+  | 'keplr-reject'
+  | 'transacting'
+  | 'delay'
+  | 'unknown'
+  | 'IBC_receive_failed'
+  | 'failed'
+  | 'complete';
 type Result = {
   demandCoinDenom: string;
   swappedPercent: number;
@@ -271,19 +301,19 @@ export default defineComponent({
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
-  setup(props: any, { emit }) {
+  setup(props, { emit }) {
     // Set Icon from status
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
     const iconType = computed(() => {
-      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name)) {
+      if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
       }
       if (props.status == 'keplr-reject') {
         return 'warning';
       }
-      if (props.status == 'failed') {
+      if (props.status == 'failed' || props.status == 'unknown') {
         return 'error';
       }
       return null;
@@ -292,6 +322,7 @@ export default defineComponent({
     //Set default texts
     const subTitle = ref(t('components.txHandlingModal.openKeplr'));
     const title = ref(t('components.txHandlingModal.signTx'));
+    const subTitleUnder = ref('');
     const whiteButton = ref(t('generic_cta.cancel'));
     const blackButton = ref('');
     const baseDenoms = reactive({});
@@ -310,50 +341,69 @@ export default defineComponent({
       async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
-            subTitle.value = 'Opening Keplr';
-            title.value = 'Sign transaction';
-            whiteButton.value = 'Cancel';
+            subTitle.value = t('components.txHandlingModal.openKeplr');
+            title.value = t('components.txHandlingModal.signTx');
+            whiteButton.value = t('generic_cta.cancel');
             blackButton.value = '';
             break;
           case 'keplr-reject':
             subTitle.value = '';
-            title.value = 'Transaction not signed!';
-            whiteButton.value = 'Cancel';
-            blackButton.value = 'Try again';
+            title.value = t('components.txHandlingModal.signError');
+            whiteButton.value = t('generic_cta.cancel');
+            blackButton.value = t('components.txHandlingModal.tryAgain');
+            break;
+          case 'delay':
+            title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
+            subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
+            subTitle.value = '';
+            break;
+          case 'unknown':
+            title.value = t('components.txHandlingModal.somethingWentWrong');
+            subTitle.value = '';
+            break;
+          case 'IBC_receive_failed':
+            title.value = t('components.txHandlingModal.somethingWentWrong');
+            subTitleUnder.value = t('components.txHandlingModal.revertTx');
+            blackButton.value = t('components.txHandlingModal.backToPortfolio');
+            subTitle.value = '';
             break;
           case 'transacting':
-            subTitle.value = 'Transaction in progress';
+            if ((props.tx as StepTransaction).name.startsWith('ibc')) {
+              subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
+            } else {
+              subTitle.value = t('components.txHandlingModal.txProgress');
+            }
             whiteButton.value = '';
             blackButton.value = '';
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'ibc_backward':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'transfer':
-                title.value = 'Transferring';
+                title.value = t('components.txHandlingModal.transferAction');
                 break;
               case 'swap':
-                title.value = 'Please Wait';
+                title.value = t('components.txHandlingModal.pleaseWait');
                 break;
               case 'addliquidity':
-                title.value = 'Adding liquidity';
+                title.value = t('components.txHandlingModal.addLiqAction');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Withdrawing';
+                title.value = t('components.txHandlingModal.withdrawing');
                 break;
               case 'createpool':
-                title.value = 'Creating pool';
+                title.value = t('components.txHandlingModal.createPoolAction');
                 break;
             }
             break;
           case 'complete':
             subTitle.value = '';
             if (props.isFinal && !props.hasMore) {
-              blackButton.value = 'Done';
+              blackButton.value = t('generic_cta.done');
               if (props.tx.name === 'swap') {
                 whiteButton.value = `Send ${
                   Math.trunc(
@@ -367,67 +417,70 @@ export default defineComponent({
                   ) / 100
                 } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
               } else {
-                whiteButton.value = 'Send another';
+                whiteButton.value = t('components.txHandlingModal.reset');
               }
             } else {
-              props.hasMore ? (blackButton.value = 'Next transaction') : (blackButton.value = 'Continue');
+              props.hasMore
+                ? (blackButton.value = t('components.txHandlingModal.next'))
+                : (blackButton.value = t('generic_cta.continue'));
               whiteButton.value = '';
             }
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'ibc_backward':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'transfer':
-                title.value = 'Transferred';
+                title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'swap':
                 if (props.txResult.swappedPercent !== 100) {
-                  title.value = `Assets partially swapped (${parseInt(props.txResult.swappedPercent)}%)`;
+                  title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
+                    swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
+                  });
                 } else {
-                  title.value = 'Assets swapped';
+                  title.value = t('components.txHandlingModal.swapActionComplete');
                 }
                 break;
               case 'addliquidity':
-                title.value = 'Liquidity added';
+                title.value = t('components.txHandlingModal.addLiqActionComplete');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Liquidity withdrawn';
+                title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
                 break;
               case 'createpool':
-                title.value = 'Pool created';
+                title.value = t('components.txHandlingModal.createPoolActionComplete');
                 break;
             }
             break;
           case 'failed':
-            title.value = 'Transaction failed';
+            title.value = t('components.txHandlingModal.txFail');
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'swap':
-                title.value = 'Swap failed';
+                title.value = t('components.txHandlingModal.swapActionFail');
                 break;
               case 'addliquidity':
-                title.value = 'Add liquidity failed';
+                title.value = t('components.txHandlingModal.addLiqActionFail');
                 break;
               case 'withdrawliquidity':
-                title.value = 'Withdraw liquidity failed';
+                title.value = t('components.txHandlingModal.withdrawLiqActionFail');
                 break;
               case 'createpool':
-                title.value = 'Create pool failed';
+                title.value = t('components.txHandlingModal.createPoolActionFail');
                 break;
             }
 
             subTitle.value = '';
-            whiteButton.value = 'Cancel';
-            blackButton.value = 'Try again';
+            whiteButton.value = t('generic_cta.cancel');
+            blackButton.value = t('components.txHandlingModal.tryAgain');
             break;
         }
       },
     );
-
     onMounted(async () => {
       let denoms = [];
       let chain = undefined;
@@ -457,7 +510,6 @@ export default defineComponent({
         }
       }
     });
-
     function emitClose() {
       emit('close');
     }
@@ -474,6 +526,14 @@ export default defineComponent({
     function emitDone() {
       emit('done');
     }
+
+    function unknownHandler() {
+      if (location.pathname !== '/') {
+        router.push('/');
+      } else {
+        emitAnother();
+      }
+    }
     return {
       emitNext,
       emitRetry,
@@ -484,9 +544,11 @@ export default defineComponent({
       iconType,
       subTitle,
       title,
+      subTitleUnder,
       whiteButton,
       blackButton,
       router,
+      unknownHandler,
     };
   },
 });
@@ -549,9 +611,8 @@ export default defineComponent({
       width: 32rem;
     }
 
-    &-none {
-      height: 2.4rem;
-    }
+    /* &-none {
+    } */
   }
 
   &__detail {
@@ -568,6 +629,10 @@ export default defineComponent({
       height: 4.8rem;
     }
 
+    .spacer-3 {
+      height: 2.4rem;
+    }
+
     &-transferring {
       width: 9.6rem;
       margin: 3.2rem auto;
@@ -580,6 +645,11 @@ export default defineComponent({
         color: var(--inactive);
         font-weight: bold;
       }
+    }
+
+    &-subtitle-under {
+      margin-top: 8px;
+      color: var(--muted);
     }
 
     &-text,
