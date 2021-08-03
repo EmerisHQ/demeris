@@ -1,44 +1,20 @@
 <template>
   <div id="welcome">
     <img class="portal" src="@/assets/svg/portal.svg" />
-    <div
-      v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed"
-      class="connect-wallet-panel"
-      body-class="elevation-panel"
-      width="72rem"
-      @close="closeConnectKeplr"
-    >
-      <ConnectKeplr
-        ref="connectKeplrRef"
-        type="welcome"
-        @cancel="closeConnectKeplr"
-        @connect="closeConnectKeplr"
-        @warning="showWarning"
-      />
+    <div v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
+      <ConnectKeplr ref="connectKeplrRef" type="welcome" @connect="cancelConnectKeplr" @warning="showWarning" />
     </div>
 
-    <div
-      v-else-if="isWarningNeeded && !isWarningAgreed"
-      class="connect-wallet-panel"
-      body-class="elevation-panel"
-      width="72rem"
-      @close="closeAgreeWarning"
-    >
-      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" @agree="agreeWarning" />
+    <div v-else-if="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
+      <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
     </div>
 
-    <div
-      v-else-if="isKeplrSupported && !isKeplrInstalled"
-      class="connect-wallet-panel"
-      body-class="elevation-panel"
-      width="72rem"
-      @close="closeGetKeplr"
-    >
-      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
+    <div v-else-if="isKeplrSupported && !isKeplrInstalled" class="connect-wallet-panel">
+      <GetKeplr ref="getKeplrRef" />
     </div>
 
-    <div v-else class="connect-wallet-panel" body-class="elevation-panel" width="72rem" @close="closeGetBrowser">
-      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
+    <div v-else class="connect-wallet-panel">
+      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" />
     </div>
   </div>
 </template>
@@ -90,8 +66,6 @@ export default defineComponent({
     },
   },
 
-  emits: ['close'],
-
   setup(_, { emit }) {
     const router = useRouter();
     const connectKeplrRef = ref(null);
@@ -105,19 +79,13 @@ export default defineComponent({
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);
 
-    const closeConnectKeplr = () => {
+    const cancelConnectKeplr = () => {
       connectKeplrRef.value.cancel();
-      emit('close');
+      isReturnUser.value = true;
+      router.push('/');
     };
-    const closeAgreeWarning = () => {
+    const cancelAgreeWarning = () => {
       isWarningNeeded.value = null;
-      emit('close');
-    };
-    const closeGetKeplr = () => {
-      emit('close');
-    };
-    const closeGetBrowser = () => {
-      emit('close');
     };
 
     const agreeWarning = () => {
@@ -133,9 +101,12 @@ export default defineComponent({
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
 
+      /* TODO: re-add this before merging PR
       if (isReturnUser.value) {
+        console.log('isReturnUser.value', isReturnUser.value);
         router.push('/');
       }
+      */
 
       // dont present spinner forever if not Chrome
       // @ts-ignore
@@ -162,6 +133,9 @@ export default defineComponent({
     watch(isWarningNeeded, (newVal: string) => {
       window.localStorage.setItem('isWarningNeeded', newVal);
     });
+    watch(isReturnUser, (newVal: string) => {
+      window.localStorage.setItem('isReturnUser', newVal);
+    });
 
     return {
       agreeWarning,
@@ -176,10 +150,8 @@ export default defineComponent({
       isReturnUser,
       isWarningAgreed,
       isWarningNeeded,
-      closeAgreeWarning,
-      closeConnectKeplr,
-      closeGetKeplr,
-      closeGetBrowser,
+      cancelAgreeWarning,
+      cancelConnectKeplr,
     };
   },
 });
@@ -194,6 +166,7 @@ export default defineComponent({
   .connect-wallet-panel {
     position: relative;
     z-index: 1;
+
     .modal__body {
       position: relative;
       overflow: hidden;
@@ -202,31 +175,27 @@ export default defineComponent({
     }
 
     .modal__close {
-      position: absolute;
-      top: 2rem;
-      right: 2rem;
-      z-index: 40;
+      display: none;
     }
   }
 
   .connect-wallet {
-    min-height: inherit;
-
     &__wrapper {
+      height: 100vh;
+      width: 100vw;
       display: flex;
-      min-height: inherit;
+      align-items: center;
+      justify-content: center;
     }
 
     &__loading {
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     &__content {
-      min-height: inherit;
-      background: transparent;
+      max-width: 512px;
       padding: 4.8rem;
       text-align: center;
     }
@@ -235,6 +204,7 @@ export default defineComponent({
       display: flex;
       flex-direction: column;
       margin-top: 5rem;
+      align-items: center;
 
       div + div {
         margin-top: 1.6rem;
@@ -253,8 +223,29 @@ export default defineComponent({
     }
 
     &__title {
-      font-size: 2.8rem;
-      font-weight: 600;
+      font-size: 3.4rem;
+      line-height: 124.7%;
+      font-weight: 700;
+      margin-bottom: 1.6rem;
+    }
+
+    &.agree-warning {
+      .connect-wallet__content {
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .connect-wallet__controls {
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 3.2rem;
+
+        div + div {
+          margin-top: 0;
+        }
+      }
+      .scrollable {
+        height: 38.4rem;
+      }
     }
   }
 

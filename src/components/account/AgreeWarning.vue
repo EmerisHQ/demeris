@@ -1,5 +1,5 @@
 <template>
-  <div class="connect-wallet">
+  <div class="connect-wallet agree-warning">
     <div class="connect-wallet__wrapper">
       <div class="connect-wallet__content">
         <slot name="title">
@@ -79,7 +79,7 @@ export default defineComponent({
 }
 
 .scrollable-content {
-  padding: 2rem 2.4rem 0;
+  padding: 2rem 2.4rem;
   height: 100%;
 
   text-align: left;

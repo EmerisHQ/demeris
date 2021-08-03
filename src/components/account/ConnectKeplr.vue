@@ -18,7 +18,12 @@
 
           <div class="connect-wallet__controls">
             <Button :name="$t('wallet.connect.modal1.button1')" @click="trySignIn" />
-            <Button v-if="type === 'welcome'" :name="$t('wallet.connect.modal1welcome.button2')" :is-outline="true" />
+            <Button
+              v-if="type === 'welcome'"
+              :name="$t('wallet.connect.modal1welcome.button2')"
+              :is-outline="true"
+              @click="tryDemo"
+            />
             <Button v-else :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
           </div>
         </template>
@@ -102,6 +107,11 @@ export default defineComponent({
       isConnecting.value = true;
     };
 
+    // TODO: Implement demo account
+    const tryDemo = () => {
+      window.alert('An Emeris demo is coming soon!');
+    };
+
     onMounted(() => {
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
@@ -115,7 +125,7 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, trySignIn };
+    return { isConnecting, emitCancel, cancel, trySignIn, tryDemo };
   },
 });
 </script>
