@@ -1,6 +1,17 @@
 <template>
   <button
-    class="moonpay-banner bg-app text-left shadow-card rounded-2xl"
+    class="
+      moonpay-banner
+      bg-app
+      text-left
+      shadow-card
+      rounded-2xl
+      transition
+      transform
+      hover:-translate-y-px
+      focus:-translate-y-px
+      active:transform-none active:opacity-70
+    "
     :class="[
       `moonpay-banner--${size}`,
       size === 'small' ? 'theme-inverse dark:theme-inverse' : 'bg-surface dark:bg-fg',

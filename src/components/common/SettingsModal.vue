@@ -123,82 +123,119 @@
     <!-- warning modal - custom slippage -->
     <Modal
       v-show="isWarningCustomSlippageOpen"
-      class="warning-modal"
+      class="text-center"
       variant="dialog"
       fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      max-width-class="max-w-xs"
       @close="toggleWarningCustomSlippage"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
-      </div>
-      <div class="warning-modal__title text-1 font-bold">
+      <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+      <div class="text-1 font-bold">
         {{ $t('components.settingsMenu.allowCustomSlippage') }}
       </div>
-      <div class="warning-modal__body">
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
         <p>{{ $t('components.settingsMenu.warningCustomSlippage') }}</p>
         <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
       </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningCustomSlippage">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('allowCustomSlippage')">Proceed</div>
-      </div>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningCustomSlippage();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('allowCustomSlippage');
+            }
+          "
+        />
+      </template>
     </Modal>
 
     <!-- warning modal - view unverified assets -->
     <Modal
       v-show="isWarningViewUnverifiedOpen"
-      class="warning-modal"
+      class="text-center"
       variant="dialog"
       fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      max-width-class="max-w-xs"
       @close="toggleWarningViewUnverified"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
-      </div>
-      <div class="warning-modal__title text-1 font-bold">
-        {{ $t('components.settingsMenu.viewAllAssets') }}
-      </div>
-      <div class="warning-modal__body">
-        <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
-        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-      </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningViewUnverified">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('viewUnverified')">Proceed</div>
-      </div>
+      <template>
+        <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+        <div class="text-1 font-bold">
+          {{ $t('components.settingsMenu.viewAllAssets') }}
+        </div>
+        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+          <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
+          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+        </div>
+      </template>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningViewUnverified();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('viewUnverified');
+            }
+          "
+        />
+      </template>
     </Modal>
 
     <!-- warning modal - view lp asset pools -->
     <Modal
       v-show="isWarningViewLPAssetPoolsOpen"
-      class="warning-modal"
+      class="text-center"
       variant="dialog"
       fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      max-width-class="max-w-xs"
       @close="toggleWarningViewLPAssetPools"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="1.5" />
-      </div>
-      <div class="warning-modal__title text-1 font-bold">
-        {{ $t('components.settingsMenu.viewLPAssetPools') }}
-      </div>
-      <div class="warning-modal__body">
-        <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
-        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-      </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningViewLPAssetPools">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('viewLPAssetPools')">Proceed</div>
-      </div>
+      <template>
+        <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+        <div class="text-1 font-bold">
+          {{ $t('components.settingsMenu.viewLPAssetPools') }}
+        </div>
+        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+          <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
+          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+        </div>
+      </template>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningViewLPAssetPools();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('viewLPAssetPools');
+            }
+          "
+        />
+      </template>
     </Modal>
   </div>
 </template>
@@ -211,6 +248,7 @@ import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
+import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
@@ -220,6 +258,7 @@ export default defineComponent({
     Button,
     Icon,
     Modal,
+    ModalButton,
     Switch,
     AvatarBalance,
   },
@@ -322,46 +361,5 @@ export default defineComponent({
       content: none;
     }
   }
-}
-.modal.warning-modal {
-  z-index: 51;
-}
-.warning-modal__icon {
-  height: 4rem;
-  display: flex;
-  justify-content: center;
-  margin: 0.5rem 0 1rem;
-}
-.warning-modal__title {
-  margin-bottom: 1.5rem;
-}
-.warning-modal__title,
-.warning-modal__body {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-.warning-modal__body p {
-  margin-bottom: 1rem;
-  line-height: 162.5%;
-  color: var(--muted);
-}
-.warning-modal__actions {
-  border-top: 1px solid var(--border);
-  height: 4rem;
-  display: flex;
-  margin: 2rem -1.5rem -1.5rem;
-}
-.warning-modal__action {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-}
-.warning-modal__action:hover {
-  cursor: pointer;
-}
-.warning-modal__action:not(:last-child) {
-  border-right: 1px solid var(--border);
 }
 </style>
