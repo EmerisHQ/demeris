@@ -1,7 +1,6 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { sleep } from '@cosmjs/utils';
 import { SpVuexError } from '@starport/vuex';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
