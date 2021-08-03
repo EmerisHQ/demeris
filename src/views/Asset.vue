@@ -147,12 +147,12 @@ import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import usePools from '@/composables/usePools';
 import usePool from '@/composables/usePool';
+import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
-import { generateDenomHash, parseCoins } from '@/utils/basic';
 import { getBaseDenom } from '@/utils/actionHandler';
+import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Asset',
@@ -190,10 +190,12 @@ export default defineComponent({
 
     const poolDenom = ref(denom.value);
 
-    watch(denom, async () => {
-      const dexChain = store.getters['demeris/getDexChain']
+    watch(
+      denom,
+      async () => {
+        const dexChain = store.getters['demeris/getDexChain'];
 
-      if (assetConfig.value.chain_name != dexChain) {
+        if (assetConfig.value.chain_name != dexChain) {
           const invPrimaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -207,12 +209,12 @@ export default defineComponent({
               },
               { root: true },
             ));
-          
-          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value); 
-          console.log("poolDenom", poolDenom.value);    
+
+          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
+          console.log('poolDenom', poolDenom.value);
         }
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     const poolsWithAsset = computed(() => poolsByDenom(poolDenom.value));
@@ -235,41 +237,50 @@ export default defineComponent({
       }
       return 0;
     });
-    
+
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-      
-      return poolsCopy.filter(item => balancesCopy.some(item2 => (item.pool_coin_denom == item2.base_denom) && (+parseCoins(item2.amount)[0].amount > 0)));
+
+      return poolsCopy.filter((item) =>
+        balancesCopy.some(
+          (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount > 0,
+        ),
+      );
     });
 
     const poolsNotInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
-      
-      return poolsCopy.filter(item => (!balancesCopy.some(item2 => item.pool_coin_denom == item2.base_denom)) || (balancesCopy.some(item2 => (item.pool_coin_denom == item2.base_denom) && (+parseCoins(item2.amount)[0].amount == 0))));
+
+      return poolsCopy.filter(
+        (item) =>
+          !balancesCopy.some((item2) => item.pool_coin_denom == item2.base_denom) ||
+          balancesCopy.some(
+            (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount == 0,
+          ),
+      );
     });
-    
 
     const poolsDisplay = computed(() => {
       const fillBy = 3 - poolsInvestedWithAsset.value.length;
-      
+
       if (fillBy > 0) {
-        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0,fillBy));
+        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0, fillBy));
       }
 
       return poolsInvestedWithAsset.value;
     });
-    
 
-    const pooledAmount = computed(() => {;
+    const pooledAmount = computed(() => {
       let assetPooledAmount = 0;
-
-      
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-        const withdrawBalances = withdrawBalancesById(pool.id, poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0));
+        const withdrawBalances = withdrawBalancesById(
+          pool.id,
+          poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
+        );
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
         assetPooledAmount += assetBalanceInPool.amount;
@@ -277,8 +288,6 @@ export default defineComponent({
 
       return assetPooledAmount;
     });
-
-    
 
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;

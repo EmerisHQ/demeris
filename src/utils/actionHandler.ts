@@ -1,3 +1,4 @@
+import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import Long from 'long';
 
 import { ChainData } from '@/store/demeris/state';
@@ -897,7 +898,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        token: data.amount,
+        //timeoutHeight: { revisionHeight: "10000000000",revisionNumber:"0"},
+        token: { ...data.amount },
       },
     });
     const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
@@ -985,7 +987,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       return 0;
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
-      value: {
+      value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
         swapTypeId: data.pool.type_id,
@@ -996,7 +998,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
-      },
+      }),
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
@@ -1069,7 +1071,8 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
       const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
       amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
       break;
-    default: return;
+    default:
+      return;
   }
 
   const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
@@ -1824,6 +1827,7 @@ export async function validateStepFeeBalances(
       }
     }
   }
+  console.log(feeWarning);
   return feeWarning;
 }
 

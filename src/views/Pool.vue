@@ -265,11 +265,9 @@ export default defineComponent({
 
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
-      return [
-        ...poolsByDenom(pool.value.reserve_coin_denoms[0]),
-        ...poolsByDenom(pool.value.reserve_coin_denoms[1]),
-      ].filter((item) => item.id !== pool.value.id)
-       .slice(0,3);
+      return [...poolsByDenom(pool.value.reserve_coin_denoms[0]), ...poolsByDenom(pool.value.reserve_coin_denoms[1])]
+        .filter((item) => item.id !== pool.value.id)
+        .slice(0, 3);
     });
 
     const generateBackground = (colors: Record<string, string>) => {
