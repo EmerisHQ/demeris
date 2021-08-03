@@ -30,7 +30,7 @@
       width="72rem"
       @close="closeGetBrowser"
     >
-      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
+      <GetBrowser ref="getBrowserRef" @cancel="closeGetBrowser" />
     </Modal>
   </teleport>
 </template>
@@ -106,6 +106,11 @@ export default defineComponent({
     onMounted(async () => {
       const keplr = await getKeplrInstance();
       await nextTick();
+
+      // @ts-ignore
+      console.log("windowchrome", !!window.chrome);
+      // @ts-ignore
+      console.log("windowkeplr", !!window.chrome);
 
       // @ts-ignore
       isKeplrSupported.value = !!window.chrome;
