@@ -551,7 +551,7 @@ export default defineComponent({
                           };
                           break;
                       }
-                      debugger;
+
                       txResult.value = resultData;
                     }
                   }
