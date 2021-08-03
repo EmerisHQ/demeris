@@ -1049,31 +1049,31 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let retries = 0;
   let error: Error;
 
-  let amounts = [];
+  let denoms = [];
   const chain = store.getters['demeris/getDexChain'];
 
   switch (transaction.name) {
     case 'addliquidity':
       const transferdata = transaction.data as Actions.AddLiquidityData;
-      amounts = [transferdata.coinA.amount, transferdata.coinB.amount];
+      denoms = [transferdata.coinA.denom, transferdata.coinB.denom];
       break;
     case 'createpool':
       const createdata = transaction.data as Actions.CreatePoolData;
-      amounts = [createdata.coinA.amount, createdata.coinB.amount];
+      denoms = [createdata.coinA.denom, createdata.coinB.denom];
       break;
     case 'swap':
       const swapdata = transaction.data as Actions.SwapData;
-      amounts = [swapdata.from.amount, swapdata.to.amount];
+      denoms = [swapdata.from.denom, swapdata.to.denom];
       break;
     case 'withdrawliquidity':
       const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
-      amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
+      denoms = [withdrawdata.poolCoin.denom];
       break;
     default:
       return;
   }
 
-  const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
+  const ibcDenoms = denoms.filter((item) => !!item.split('/')[1]);
 
   if (!ibcDenoms.length) {
     return;
