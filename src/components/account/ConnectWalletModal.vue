@@ -108,11 +108,6 @@ export default defineComponent({
       await nextTick();
 
       // @ts-ignore
-      console.log("windowchrome", !!window.chrome);
-      // @ts-ignore
-      console.log("windowkeplr", !!window.chrome);
-
-      // @ts-ignore
       isKeplrSupported.value = !!window.chrome;
 
       nextTick(() => {
