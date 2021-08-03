@@ -849,7 +849,7 @@ export default {
             const bigAmountA = new BigNumber(amountA).minus(feeA);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
 
-            const amountsPositive = bigAmountA.isPositive && bigAmountB.isPositive;
+            const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
 
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
 
