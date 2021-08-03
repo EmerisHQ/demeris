@@ -1069,7 +1069,8 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
       const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
       amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
       break;
-    default: return;
+    default:
+      return;
   }
 
   const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
