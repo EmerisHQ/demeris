@@ -13,10 +13,10 @@
       v-if="state.isChainsModalOpen"
       class="fixed inset-0 z-30 bg-bg"
       title="Select chain"
+      :show-subtitle="false"
       :assets="availableChains"
       :selected-denom="state.currentAsset.base_denom"
       :func="() => toggleChainsModal()"
-      :show-subtitle="false"
       @select="toggleChainsModal"
     >
       <template #description>
@@ -114,107 +114,102 @@
         </div>
       </fieldset>
 
-      <fieldset>
-        <div class="bg-surface shadow-card rounded-xl overflow-hidden divide-y divide-border">
-          <button
-            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
-            @click="toggleDenomModal()"
-          >
-            <span
-              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-            >{{ $t('components.moveForm.action') }}</span>
+      <fieldset class="bg-surface shadow-card rounded-xl overflow-hidden divide-y divide-border">
+        <button
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          @click="toggleDenomModal()"
+        >
+          <span class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1">{{
+            $t('components.moveForm.action')
+          }}</span>
 
-            <div class="flex items-center flex-1">
-              <CircleSymbol
-                :chain-name="state.currentAsset ? form.on_chain : undefined"
-                :denom="form.balance.denom"
-                class="mr-3"
+          <div class="flex items-center flex-1">
+            <CircleSymbol
+              :chain-name="state.currentAsset ? form.on_chain : undefined"
+              :denom="form.balance.denom"
+              class="mr-3"
+            />
+            <span class="font-medium">
+              <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
+            </span>
+          </div>
+
+          <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
+            <Icon name="CaretRightIcon" :icon-size="1" />
+          </div>
+        </button>
+
+        <button
+          v-if="state.currentAsset"
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          @click="toggleChainsModal(null, 'from')"
+        >
+          <span class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1">{{
+            $t('components.moveForm.from')
+          }}</span>
+
+          <div class="flex items-center flex-1">
+            <CircleSymbol variant="chain" :chain-name="form.on_chain" class="mr-3" />
+            <span class="font-medium">
+              <ChainName :name="form.on_chain" />
+            </span>
+          </div>
+
+          <div class="text-right flex flex-col justify-between">
+            <p>
+              <Price
+                :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+                :auto-update="false"
+                show-zero
               />
-              <span class="font-medium">
-                <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
-              </span>
-            </div>
+            </p>
+            <p class="-text-1 mt-0.5" :class="hasSufficientFunds ? 'text-muted' : 'text-negative-text'">
+              <AmountDisplay
+                :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
+              />
+            </p>
+          </div>
 
-            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="1" />
-            </div>
-          </button>
+          <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
+            <Icon name="CaretRightIcon" :icon-size="1" />
+          </div>
+        </button>
 
-          <button
-            v-if="state.currentAsset"
-            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
-            @click="toggleChainsModal(null, 'from')"
-          >
-            <span
-              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-            >{{ $t('components.moveForm.from') }}</span>
+        <button
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          :class="{ 'chain-selected': !!form.to_chain }"
+          :disabled="!state.currentAsset"
+          @click="toggleChainsModal(null, 'to')"
+        >
+          <span class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1">{{
+            $t('components.moveForm.to')
+          }}</span>
 
-            <div class="flex items-center flex-1">
-              <CircleSymbol variant="chain" :chain-name="form.on_chain" class="mr-3" />
-              <span class="font-medium">
-                <ChainName :name="form.on_chain" />
-              </span>
-            </div>
+          <div class="flex items-center flex-1">
+            <CircleSymbol variant="chain" :chain-name="form.to_chain" class="mr-3" />
+            <span class="font-medium">
+              <ChainName v-if="form.to_chain" :name="form.to_chain" />
+              <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
+            </span>
+          </div>
 
-            <div class="text-right flex flex-col justify-between">
-              <p>
-                <Price
-                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
-                  :auto-update="false"
-                  show-zero
-                />
-              </p>
-              <p class="-text-1 mt-0.5" :class="hasSufficientFunds ? 'text-muted' : 'text-negative-text'">
-                <AmountDisplay
-                  :amount="{ amount: state.currentAsset?.amount || 0, denom: state.currentAsset?.base_denom }"
-                />
-              </p>
-            </div>
-
-            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="1" />
-            </div>
-          </button>
-
-          <button
-            class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
-            :class="{ 'chain-selected': !!form.to_chain }"
-            :disabled="!state.currentAsset"
-            @click="toggleChainsModal(null, 'to')"
-          >
-            <span
-              class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1"
-            >{{ $t('components.moveForm.to') }}</span>
-
-            <div class="flex items-center flex-1">
-              <CircleSymbol variant="chain" :chain-name="form.to_chain" class="mr-3" />
-              <span class="font-medium">
-                <ChainName v-if="form.to_chain" :name="form.to_chain" />
-                <span v-else>{{ $t('components.moveForm.selectChain') }}</span>
-              </span>
-            </div>
-
-            <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-              <Icon name="CaretRightIcon" :icon-size="1" />
-            </div>
-          </button>
-        </div>
+          <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
+            <Icon name="CaretRightIcon" :icon-size="1" />
+          </div>
+        </button>
       </fieldset>
 
-      <fieldset class="w-full max-w-sm mx-auto mt-10">
+      <div class="w-full max-w-sm mx-auto mt-10">
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
-          :status="isValid ? 'normal' : 'inactive'"
           :disabled="!isValid"
-          @click="onSubmit"
+          :click-function="onSubmit"
         />
-      </fieldset>
-
-      <div class="w-full max-w-sm mx-auto mt-6">
         <FeeLevelSelector
           v-if="steps.length > 0"
           v-model:gasPriceLevel="state.gasPrice"
           :steps="steps"
+          class="mt-6"
           @update:fees="state.fees = $event"
         />
       </div>

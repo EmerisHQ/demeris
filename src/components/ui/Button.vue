@@ -136,6 +136,10 @@ export default defineComponent({
     background: var(--fg);
     opacity: 0;
   }
+  &.w-full:before {
+    left: 0;
+    right: 0;
+  }
 
   &.button-sm:before {
     height: 2.25rem;

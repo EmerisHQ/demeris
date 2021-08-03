@@ -49,11 +49,22 @@
         :style="ringStyle"
       />
       <div
-        class="w-full h-full rounded-full flex items-center justify-center relative z-10 p-1.5"
+        class="
+          circle-symbol__logo-container
+          w-full
+          h-full
+          rounded-full
+          flex
+          items-center
+          justify-center
+          relative
+          z-10
+          m-auto
+        "
         :class="{ 'w-3/4 h-3/4': !isNativeChain }"
         :style="innerStyle"
       >
-        <img v-if="symbolImage" :src="symbolImage" />
+        <img v-if="symbolImage" :src="symbolImage" class="w-full h-full rounded-full relative z-10" />
       </div>
     </template>
 
@@ -321,6 +332,10 @@ export default defineComponent({
   &__logo-glow {
     filter: blur(calc(0.4 * var(--symbol-size)));
     top: 12.5%;
+  }
+
+  &__logo-container {
+    padding: 12.5%;
   }
 }
 </style>

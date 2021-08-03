@@ -7,7 +7,7 @@
           variant="link"
           :full-width="false"
           :disabled="['move', 'send'].includes(step)"
-          @click="goBack"
+          :click-function="goBack"
         >
           <Icon name="ArrowLeftIcon" :icon-size="1.5" />
         </Button>
@@ -23,7 +23,7 @@
           </span>
         </nav>
 
-        <Button class="ml-auto" variant="link" @click="onClose">
+        <Button class="ml-auto" variant="link" :click-function="onClose">
           <Icon name="CloseIcon" :icon-size="1.5" />
         </Button>
       </header>

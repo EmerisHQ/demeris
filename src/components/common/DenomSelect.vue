@@ -1,7 +1,12 @@
 <template>
   <div
-    class="denom-select flex items-center py-4 px-6"
-    :class="{ 'denom-select--readonly': readonly, 'denom-select--empty': !hasOptions }"
+    class="denom-select flex items-center"
+    :class="{
+      'denom-select--readonly': readonly,
+      'denom-select--empty': !hasOptions,
+      'py-4 px-6': size === 'sm',
+      'py-6 px-5': size === 'md',
+    }"
   >
     <!--Displays a denom selection component:
 				Selected denom badge
@@ -21,12 +26,12 @@
       <CircleSymbol
         :denom="selectedDenom?.base_denom ?? 'empty'"
         :chain-name="selectedDenom?.on_chain ?? undefined"
-        size="sm"
-        class="mr-3"
+        :size="size"
+        :class="showChain ? 'mr-3' : 'mr-4'"
         @click="toggleDenomSelectModal"
       />
       <div v-if="isSelected">
-        <div class="flex items-center text-0 font-medium">
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
           <tippy
             v-if="displayName.startsWith('GDEX')"
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
@@ -38,19 +43,21 @@
           <Denom v-else :name="selectedDenom?.base_denom" />
           <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
-        <div class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
         </div>
       </div>
       <div v-else>
-        <div class="flex items-center text-0 font-medium">
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
           {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
       </div>
     </div>
 
     <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
-      <div class="denom-select__coin-amount-type -text-1 select-none">{{ inputHeader }}</div>
+      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
+        {{ inputHeader }}
+      </div>
       <AmountInput
         :model-value="amount"
         :readonly="readonly"
@@ -59,13 +66,14 @@
           text-text
           w-full
           p-0
-          text-1 text-right
+          text-right
           font-bold
           bg-transparent
           placeholder-inactive
           appearance-none
           border-none
         "
+        :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
@@ -75,7 +83,11 @@
 
   <DenomSelectModal
     v-show="isOpen"
-    class="absolute h-full w-full top-0 left-0 overflow-hidden z-30 bg-surface shadow-panel rounded-2xl"
+    class="inset-0 z-30"
+    :class="{
+      'absolute overflow-hidden z-30 bg-surface shadow-panel rounded-2xl': size === 'sm',
+      'fixed bg-bg': size === 'md',
+    }"
     :assets="assets"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
@@ -103,6 +115,8 @@ export default defineComponent({
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
+    showChain: { type: Boolean, default: false },
+    size: { type: String, required: false, default: 'md' },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {

@@ -1,9 +1,9 @@
 <template>
   <component
     :is="variant === 'step' ? 'div' : 'Modal'"
-    :variant="variant === 'modal' ? bottom : null"
+    :variant="variant === 'modal' ? 'bottom' : null"
     :show-close-button="variant === 'modal' ? false : null"
-    :body-class="{ 'bg-brand': status === 'complete' && variant === 'modal' }"
+    :body-class="{ 'bg-brand': status === 'complete' && variant === 'modal', 'p-6': variant === 'modal' }"
     @close="emitClose"
   >
     <div class="text-center">
@@ -45,7 +45,9 @@
       />
       <div class="font-bold mt-2" :class="variant === 'modal' ? 'text-2' : 'text-3'">{{ title }}</div>
       <div>
-        <template v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'">
+        <template
+          v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
+        >
           <div v-if="status == 'delay' || status == 'IBC_receive_failed'">
             {{ subtitle }}
           </div>
@@ -69,12 +71,13 @@
           <div v-if="status === 'complete'" class="mt-4 leading-copy">
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
-              <span class="font-bold"><AmountDisplay
-                :amount="{
-                  denom: txResult.demandCoinDenom,
-                  amount: String(txResult.demandCoinSwappedAmount),
-                }"
-              /></span><br />
+              <span class="font-bold"
+                ><AmountDisplay
+                  :amount="{
+                    denom: txResult.demandCoinDenom,
+                    amount: String(txResult.demandCoinSwappedAmount),
+                  }" /></span
+              ><br />
               on <ChainName :name="'cosmos-hub'" />.
               <div v-if="txResult.swappedPercent < 100" class="my-4">
                 <span class="font-bold">
@@ -99,16 +102,17 @@
           </div>
         </template>
         <template v-else>
-          <a
-            v-if="status === 'keplr-reject'"
-            href="https://faq.keplr.app"
-            target="_blank"
-            class="mt-4 text-0 font-medium"
-          >
-            {{ $t('components.txHandlingModal.keplrSupport') }}
-          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link text-0 font-bold">
-            {{ $t('components.txHandlingModal.contactSupport') }}
-          </a>
+          <p v-if="status === 'keplr-reject'" class="mt-4">
+            <a href="https://faq.keplr.app" target="_blank" class="font-medium text-link hover:text-link-hover">
+              {{ $t('components.txHandlingModal.keplrSupport') }}
+            </a>
+          </p>
+
+          <p v-if="status === 'unknown'" class="mt-4">
+            <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
+              {{ $t('components.txHandlingModal.contactSupport') }}
+            </a>
+          </p>
           <div v-if="status === 'keplr-sign'" class="h-14" />
           <div v-if="status === 'keplr-reject'" class="h-8" />
           <div v-if="status === 'unknown'" class="h-6" />
@@ -154,7 +158,7 @@
           </div>
         </template>
       </div>
-      <div v-if="secondaryButton || primaryButton" class="max-w-sm mx-auto mt-8 space-y-6">
+      <div v-if="secondaryButton || primaryButton" class="max-w-sm mx-auto mt-12 space-y-6">
         <Button
           v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
           :name="secondaryButton"
@@ -174,7 +178,6 @@
               status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
             }
           "
-          :class="{ 'mb-6': primaryButton && secondaryButton }"
         />
         {{ router?.pathname }}
         <Button
@@ -183,10 +186,11 @@
           :click-function="unknownHandler"
         />
         <Button
-          v-if="secondaryButton && tx.name !== 'swap' && status !== 'complete'"
+          v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
           :name="secondaryButton"
           variant="link"
           :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
+          class="mb-4"
         />
       </div>
     </div>

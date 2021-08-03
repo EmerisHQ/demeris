@@ -24,7 +24,6 @@
             :balances="balances"
             :hide-zero-assets="true"
             variant="balance"
-            class="assets__table"
             :show-headers="false"
             :limit-rows="4"
             @row-click="openAssetPage"
@@ -56,7 +55,7 @@
       </div>
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <LiquiditySwap class="portfolio__aside__swap" />
+        <LiquiditySwap />
         <Intro class="mt-4" />
       </aside>
     </div>

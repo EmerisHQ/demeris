@@ -25,7 +25,7 @@
           appearance-none
         "
         type="text"
-        placeholder="Search assets"
+        :placeholder="placeholder"
         @input="$emit('update:keyword', $event.target.value)"
       />
       <Icon
@@ -69,6 +69,7 @@ export default defineComponent({
   components: { Icon },
   props: {
     keyword: { type: String, required: false, default: null },
+    placeholder: { type: String, required: false, default: 'Search' },
   },
   emits: ['update:keyword'],
   setup() {

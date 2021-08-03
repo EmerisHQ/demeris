@@ -10,7 +10,7 @@
               :class="context === 'widget' ? 'text-0' : 'text-1'"
               :amount="data.from"
             />
-            <sub class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+            <sub class="block text-muted -text-1 bottom-0" :class="{ 'mt-0.5': context !== 'widget' }">
               <ChainName :name="payCoinChainName" />
             </sub>
           </div>

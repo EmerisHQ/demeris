@@ -41,7 +41,10 @@
         </Button>
       </header>
 
-      <section class="modal__content" :class="{ 'pt-8 px-8': variant === 'dialog' }">
+      <section
+        class="modal__content"
+        :class="{ 'pt-8 px-8': variant === 'dialog', 'pb-8': variant === 'dialog' && !$slots.buttons }"
+      >
         <slot />
       </section>
 

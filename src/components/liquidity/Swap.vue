@@ -43,6 +43,8 @@
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
+        size="sm"
+        show-chain
         :input-header="
           $t('components.swap.payHeader', {
             amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
@@ -88,6 +90,8 @@
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="receiveCoinAmount"
+        size="sm"
+        show-chain
         :input-header="
           $t('components.swap.receiveHeader', {
             amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',

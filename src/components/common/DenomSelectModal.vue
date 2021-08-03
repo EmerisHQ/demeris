@@ -14,7 +14,7 @@
       </header>
 
       <div class="relative flex-1 min-h-0 flex flex-col">
-        <Search v-model:keyword="keyword" class="w-full mx-auto max-w-md px-6 pb-3" />
+        <Search v-model:keyword="keyword" placeholder="Search assets" class="w-full mx-auto max-w-md px-6 pb-3" />
         <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
           <div class="mx-auto max-w-md mb-20">
             <CoinList

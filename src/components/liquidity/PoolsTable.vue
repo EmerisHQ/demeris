@@ -1,8 +1,8 @@
 <template>
   <section class="flex flex-col">
     <div class="flex items-center justify-between md:mt-2 mb-3 sm:mb-4 md:mb-6">
-      <Search v-model:keyword="keyword" class="pools__search max-w-xs w-full" />
-      <Button name="Add liquidity" variant="link" @click="openAddLiqudityPage">
+      <Search v-model:keyword="keyword" placeholder="Search assets and pools" class="pools__search max-w-xs w-full" />
+      <Button name="Add liquidity" variant="link" :full-width="false" @click="openAddLiqudityPage">
         <Icon name="PlusIcon" :icon-size="1.5" />
       </Button>
     </div>
