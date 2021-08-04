@@ -29,7 +29,7 @@
       </List>
     </ListItem>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
       <div class="supply__item">
         <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
         <div class="supply__item__amount">
@@ -40,7 +40,7 @@
     </ListItem>
 
     <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)"
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
       <div class="receive__item">
