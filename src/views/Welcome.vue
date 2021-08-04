@@ -2,6 +2,20 @@
   <div id="welcome">
     <img class="portal" src="@/assets/svg/portal.svg" />
     <img class="surfer" src="@/assets/images/surfer.png" />
+
+    <div v-if="isMobile" class="connect-wallet-panel">
+      <GetDesktop ref="getDesktopRef" />
+    </div>
+
+    <div v-else-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
+      <ConnectKeplr
+        ref="connectKeplrRef"
+        type="welcome"
+        @connect="cancelConnectKeplr"
+        @warning="showWarning"
+        @try-demo="tryDemo"
+      />
+    </div>
     <div v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
       <ConnectKeplr
         ref="connectKeplrRef"
@@ -33,6 +47,7 @@ import { useRouter } from 'vue-router';
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
 import GetBrowser from '@/components/account/GetBrowser.vue';
+import GetDesktop from '@/components/account/GetDesktop.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
 
 async function getKeplrInstance() {
@@ -63,6 +78,7 @@ export default defineComponent({
     ConnectKeplr,
     AgreeWarning,
     GetKeplr,
+    GetDesktop,
     GetBrowser,
   },
 
@@ -82,6 +98,7 @@ export default defineComponent({
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
+    const isMobile = ref(null);
     const isReturnUser = ref(null);
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);
@@ -109,6 +126,7 @@ export default defineComponent({
     };
 
     onMounted(async () => {
+      isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches;
       isReturnUser.value = window.localStorage.getItem('isReturnUser');
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
@@ -152,6 +170,7 @@ export default defineComponent({
       isLoading,
       isKeplrSupported,
       isKeplrInstalled,
+      isMobile,
       isReturnUser,
       isWarningAgreed,
       isWarningNeeded,
@@ -171,18 +190,6 @@ export default defineComponent({
 
   .connect-wallet-panel {
     position: relative;
-    z-index: 1;
-
-    .modal__body {
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      min-height: 48rem;
-    }
-
-    .modal__close {
-      display: none;
-    }
   }
 
   .connect-wallet {
@@ -233,6 +240,7 @@ export default defineComponent({
       line-height: 124.7%;
       font-weight: 700;
       margin-bottom: 1.6rem;
+      white-space: normal;
     }
 
     &.agree-warning {
@@ -273,6 +281,33 @@ export default defineComponent({
     right: 0;
     width: 60vh;
     height: 100vh;
+  }
+}
+@media only screen and (max-width: 768px) {
+  #welcome {
+    .surfer {
+      right: -10vh;
+    }
+    .portal {
+      right: -20vh;
+    }
+  }
+}
+@media only screen and (max-width: 480px) {
+  #welcome {
+    .connect-wallet__content {
+      max-width: 100%;
+    }
+    .surfer {
+      margin-top: -3.5vh;
+      width: 35vh;
+      height: 35vh;
+      right: 5vh;
+    }
+    .portal {
+      top: -45vh;
+      right: -1vh;
+    }
   }
 }
 </style>
