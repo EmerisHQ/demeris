@@ -381,7 +381,6 @@ export default defineComponent({
     const availableReceiveSide = computed(() => {
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-
         return receiveSide;
       } else {
         return availablePairs.value;
@@ -454,12 +453,14 @@ export default defineComponent({
     });
 
     const otherAssetsToReceive = computed(() => {
-      console.log('availableReceiveSide.value', availableReceiveSide.value);
-      let assets = availablePairs.value.map((x) => {
-        const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
+      let receivalbePairs = availablePairs.value.filter(
+        (pair, index, self) => index === self.findIndex((p) => p.pay.denom === pair.pay.denom),
+      );
+
+      let assets = receivalbePairs.map((x) => {
         return {
-          denom: x.receive.denom,
-          base_denom: denomInfo.pay.base_denom,
+          denom: x.pay.denom,
+          base_denom: x.pay.base_denom,
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
