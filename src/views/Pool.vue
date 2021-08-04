@@ -4,13 +4,13 @@
       <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
           <div class="text-muted mb-4">Gravity DEX Pool</div>
-          <div class="sm:flex items-baseline flex-wrap">
-            <div class="flex -space-1.5 mr-3 self-center">
+          <div class="sm:flex items-center flex-wrap gap-y-2">
+            <div class="flex -space-x-1.5 mr-3 self-center">
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
-            <div class="text-muted mt-2">1 ATOM &asymp; 1.234567 REGEN</div>
+            <div class="text-muted mt-1.5">1 ATOM &asymp; 1.234567 REGEN</div>
           </div>
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>
@@ -101,7 +101,7 @@
         </section>
 
         <section v-if="relatedPools.length" class="mt-16">
-          <div class="flex items-baseline justify-between">
+          <header class="flex items-baseline justify-between">
             <h2 class="text-2 font-bold">More pools</h2>
             <router-link
               :to="{ name: 'Pools' }"
@@ -109,7 +109,7 @@
             >
               See all &rarr;
             </router-link>
-          </div>
+          </header>
 
           <Pools class="mt-8" :pools="relatedPools" />
         </section>
@@ -126,8 +126,7 @@
               {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
             </p>
             <p class="text-muted mt-1">
-              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span
-              ><span> {{ ownShare.toFixed(2) }}% of pool </span>
+              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
             </p>
 
             <div v-if="walletBalances.poolCoin?.amount > 0" class="mt-8">
