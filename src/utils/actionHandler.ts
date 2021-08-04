@@ -884,7 +884,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
   return steps;
 }
-export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.MsgMeta> {
+export async function msgFromStepTransaction(
+  stepTx: Actions.StepTransaction,
+  gasPriceLevel: Actions.GasPriceLevel,
+): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
     const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
@@ -929,6 +932,13 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
+    let fromAmount = data.amount.amount;
+    if (stepTx.addFee) {
+      fromAmount = (
+        parseInt(fromAmount) +
+        parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
+      ).toString();
+    }
     const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
@@ -936,7 +946,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        token: data.amount,
+        token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
     const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];

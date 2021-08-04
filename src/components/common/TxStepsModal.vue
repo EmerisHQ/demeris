@@ -35,7 +35,7 @@
             :step="currentData.data"
             :fees="currentData.fees"
           />
-          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" />
+          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" :gas-price-level="gasPriceLevel" />
         </div>
 
         <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
@@ -376,17 +376,6 @@ export default defineComponent({
       }
       modifiedData.fees = fees.value[currentStep.value];
 
-      for (const stepTx of modifiedData.data.transactions) {
-        if (stepTx.addFee) {
-          console.log(stepTx);
-          (stepTx.data as IBCBackwardsData).amount.amount = (
-            parseInt((stepTx.data as IBCBackwardsData).amount.amount) +
-            parseFloat(stepTx.feeToAdd[0].amount[props.gasPriceLevel]) * 300000
-          ).toString();
-          console.log(modifiedData);
-        }
-      }
-
       return modifiedData;
     });
 
@@ -432,12 +421,15 @@ export default defineComponent({
               };
 
               txToResolve.value = txToResolvePromise;
-              let res = await msgFromStepTransaction(stepTx);
+              let res = await msgFromStepTransaction(stepTx, props.gasPriceLevel);
               const feeOptions = await feeForStepTransaction(stepTx);
               const fee = {
                 amount: [
                   {
-                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 400000,
+                    amount:
+                      '' +
+                      parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) *
+                        store.getters['demeris/getGasLimit'],
                     denom: feeOptions[0].denom,
                   },
                 ],
