@@ -97,16 +97,19 @@ export default defineComponent({
               }),
             ),
           ];
-          displayNameAddedOtherList.value = [
-            await Promise.all(
-              props.otherAssets.map(async (asset) => {
-                return {
-                  ...asset,
-                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
-                };
-              }),
-            ),
-          ];
+          console.log(props.otherAssets);
+          if (props.otherAssets.length > 0) {
+            displayNameAddedOtherList.value = [
+              await Promise.all(
+                props.otherAssets.map(async (asset) => {
+                  return {
+                    ...asset,
+                    display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                  };
+                }),
+              ),
+            ];
+          }
         } else {
           return [];
         }
@@ -137,7 +140,10 @@ export default defineComponent({
           chainSelectModalData.value = props.assets;
           toggleChainSelectModal();
           return;
-        } else if (props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+        } else if (
+          props.otherAssets.length > 0 &&
+          props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1
+        ) {
           chainSelectModalData.value = props.otherAssets;
           toggleChainSelectModal();
           return;
