@@ -15,6 +15,7 @@ import {
   DemerisActionsByAddressParams,
   DemerisActionsByChainParams,
   DemerisActionsByTicketParams,
+  DemerisActionsGetTxsParams,
   DemerisActionsTraceParams,
   DemerisActionTypes,
   DemerisSubscriptions,
@@ -701,6 +702,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       const cause = e.response?.data?.cause || e.message;
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
+    }
+  },
+
+  async [DemerisActionTypes.GET_TXS]({ getters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/txs/' + txhash);
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetTicketTxs', 'Could not fetch ticket transactions.' + e.message);
     }
   },
 

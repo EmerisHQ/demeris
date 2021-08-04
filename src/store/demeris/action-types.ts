@@ -25,6 +25,7 @@ export enum DemerisActionTypes {
   GET_PRIMARY_CHANNEL = 'GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'GET_PRIMARY_CHANNELS',
   GET_CHAIN_STATUS = 'GET_CHAIN_STATUS',
+  GET_TXS = 'GET_TXS',
   BROADCAST_TX = 'BROADCAST_TX',
   SIGN_WITH_KEPLR = 'SIGN_WITH_KEPLR',
   SIGN_IN = 'SIGN_IN',
@@ -63,6 +64,7 @@ export enum GlobalDemerisActionTypes {
   GET_PRIMARY_CHANNELS = 'demeris/GET_PRIMARY_CHANNELS',
   GET_CHAIN_STATUS = 'demeris/GET_CHAIN_STATUS',
   BROADCAST_TX = 'demeris/BROADCAST_TX',
+  GET_TXS = 'demeris/GET_TXS',
   SIGN_WITH_KEPLR = 'demeris/SIGN_WITH_KEPLR',
   SIGN_IN = 'demeris/SIGN_IN',
   SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
@@ -88,6 +90,10 @@ export type DemerisActionsByChainParams = {
 export type DemerisActionsByTicketParams = {
   subscribe: boolean;
   params?: API.TicketReq;
+};
+export type DemerisActionsGetTxsParams = {
+  txhash: string;
+  chain_name: string;
 };
 export type DemerisActionsTraceParams = {
   subscribe: boolean;

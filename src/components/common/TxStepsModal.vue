@@ -209,6 +209,7 @@ import {
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
+  getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
   validateStepFeeBalances,
 } from '@/utils/actionHandler';
@@ -481,6 +482,7 @@ export default defineComponent({
                   while (
                     txResultData.status != 'complete' &&
                     txResultData.status != 'failed' &&
+                    txResultData.status != 'IBC_receive_failed' &&
                     txResultData.status != 'IBC_receive_success' &&
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
@@ -526,33 +528,64 @@ export default defineComponent({
 
                   errorDetails.value = undefined;
 
+                  let txhash: string;
+                  let chain_name: string;
+
+                  if (txResultData.status === 'IBC_receive_success') {
+                    const ticketData = txResultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
+                    txhash = ticketData.TxHash;
+                    chain_name = ticketData.Chain;
+                  } else {
+                    txhash = result.ticket;
+                    chain_name = res.chain_name;
+                  }
+
+                  const txsResponse = await store.dispatch(GlobalDemerisActionTypes.GET_TXS, { txhash, chain_name });
+
                   if (!txResultData.error) {
-                    //Get end block events
-                    let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                      height: txResultData.height,
-                      stepType: currentData.value.data.name,
-                    });
+                    if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
+                      //Get end block events
+                      let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                        height: txResultData.height,
+                        stepType: currentData.value.data.name,
+                      });
 
-                    if (endBlockEvent) {
-                      let resultData = endBlockEvent;
+                      if (endBlockEvent) {
+                        let resultData = endBlockEvent;
 
-                      switch (currentData.value.data.name) {
-                        case 'swap':
-                          resultData = {
-                            swappedPercent:
-                              (Number(endBlockEvent.exchanged_offer_coin_amount) /
-                                (Number(endBlockEvent.remaining_offer_coin_amount) +
-                                  Number(endBlockEvent.exchanged_offer_coin_amount))) *
-                              100,
-                            demandCoinSwappedAmount: endBlockEvent.exchanged_demand_coin_amount,
-                            demandCoinDenom: endBlockEvent.demand_coin_denom,
-                            remainingOfferCoinAmount: endBlockEvent.remaining_offer_coin_amount,
-                            offerCoinDenom: endBlockEvent.offer_coin_denom,
-                          };
-                          break;
+                        switch (currentData.value.data.name) {
+                          case 'swap':
+                            resultData = {
+                              swappedPercent:
+                                (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                                  (Number(endBlockEvent.remaining_offer_coin_amount) +
+                                    Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                                100,
+                              demandCoinSwappedAmount: endBlockEvent.exchanged_demand_coin_amount,
+                              demandCoinDenom: endBlockEvent.demand_coin_denom,
+                              remainingOfferCoinAmount: endBlockEvent.remaining_offer_coin_amount,
+                              offerCoinDenom: endBlockEvent.offer_coin_denom,
+                            };
+                            break;
+                        }
+
+                        txResult.value = resultData;
                       }
+                    } else if (txsResponse) {
+                      const txResponseDetail = getStepTransactionDetailFromResponse(txsResponse);
 
-                      txResult.value = resultData;
+                      if (txResponseDetail) {
+                        txResult.value = {
+                          name: currentData.value.data.name,
+                          transactions: [
+                            {
+                              data: txResponseDetail,
+                              //@ts-ignore
+                              name: transaction.value.name,
+                            },
+                          ],
+                        };
+                      }
                     }
                   }
 

@@ -97,6 +97,9 @@
             <template v-else-if="tx.name === 'withdrawliquidity'">
               <PreviewWithdrawLiquidity :response="txResult" :fees="{}" />
             </template>
+            <template v-else-if="tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer'">
+              <PreviewTransfer :response="txResult" :fees="{}" />
+            </template>
           </div>
           <div class="status__detail-amount s-0 w-medium">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
@@ -226,6 +229,7 @@ import Collapse from '@/components/ui/Collapse.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { useStore } from '@/store';
 import {
@@ -260,6 +264,7 @@ export default defineComponent({
   components: {
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
+    PreviewTransfer,
     Modal,
     SpinnerIcon,
     WarningIcon,

@@ -1,3 +1,4 @@
+import { bech32 } from 'bech32';
 import Long from 'long';
 
 import { ChainData } from '@/store/demeris/state';
@@ -1042,6 +1043,61 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
   return denom;
 }
+
+export function getStepTransactionDetailFromResponse(response: API.TransactionDetailResponse) {
+  const getChainFromAddress = (address: string): API.Chain => {
+    const chains = Object.values(store.getters['demeris/getChains']);
+    const prefix = bech32.decode(address).prefix;
+    // @ts-ignore
+    return chains.find((item) => item.node_info.bech32_config.prefix_account == prefix);
+  };
+
+  for (const message of response.tx_response.tx.body.messages) {
+    if (message['@type'] === '/ibc.core.channel.v1.MsgRecvPacket') {
+      const packetData: {
+        amount: string;
+        denom: string;
+        receiver: string;
+        sender: string;
+      } = JSON.parse(atob(message.packet.data));
+
+      const senderChain = getChainFromAddress(packetData.sender);
+      const receiverChain = getChainFromAddress(packetData.receiver);
+
+      const counterpartySource = Object.entries(senderChain.primary_channel).find(
+        (item) => item[1] === message.packet.source_channel,
+      )?.[0];
+      const counterpartyDestination = Object.entries(receiverChain.primary_channel).find(
+        (item) => item[1] === message.packet.destination_channel,
+      )?.[0];
+      const denoms = packetData.denom.split('/');
+
+      const data: Actions.IBCForwardsData = {
+        amount: {
+          amount: packetData.amount,
+          denom: denoms[denoms.length - 1],
+        },
+        from_chain: counterpartyDestination,
+        to_chain: counterpartySource,
+        to_address: packetData.receiver,
+        through: message.packet.source_channel,
+      };
+
+      return data;
+    }
+
+    if (message['@type'] === '/cosmos.bank.v1beta1.MsgSend') {
+      const data: Actions.TransferData = {
+        amount: message.amount,
+        to_address: message.to_address,
+        chain_name: getChainFromAddress(message.from_address).chain_name,
+      };
+
+      return data;
+    }
+  }
+}
+
 export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   const timeout = 1000;
   const limit = 3;
