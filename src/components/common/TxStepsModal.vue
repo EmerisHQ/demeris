@@ -204,7 +204,7 @@ import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
-import { Balances } from '@/types/api';
+import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
   ensureTraceChannel,
   feeForStep,
@@ -540,7 +540,17 @@ export default defineComponent({
                     chain_name = res.chain_name;
                   }
 
-                  const txsResponse = await store.dispatch(GlobalDemerisActionTypes.GET_TXS, { txhash, chain_name });
+                  const txsResponse: TransactionDetailResponse = await store.dispatch(
+                    GlobalDemerisActionTypes.GET_TXS,
+                    { txhash, chain_name },
+                  );
+
+                  const txsResponseFees = {
+                    [chain_name]: txsResponse?.tx.auth_info.fee.amount.reduce((acc, item) => {
+                      acc[item.denom] = item.amount;
+                      return acc;
+                    }, {}),
+                  };
 
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
@@ -587,6 +597,8 @@ export default defineComponent({
                         };
                       }
                     }
+
+                    txResult.value.fees = txsResponseFees;
                   }
 
                   // TODO: deal with status here
