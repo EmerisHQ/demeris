@@ -35,6 +35,7 @@ export type DemerisConfig = {
 export type DemerisTxParams = {
   tx: string;
   chain_name: string;
+  address: string;
 };
 export type DemerisTxResultParams = {
   height: number;
@@ -460,7 +461,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const tx_data = Buffer.from(tx).toString('base64');
       //console.log(Buffer.from(tx).toString('hex'));
-      return { tx: tx_data, chain_name };
+      return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
@@ -694,9 +695,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getChainStatus'](params);
   },
 
-  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name }: DemerisTxParams) {
+  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
     try {
-      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx });
+      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx, address });
       return response.data;
     } catch (e) {
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
