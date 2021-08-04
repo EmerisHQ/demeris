@@ -1095,6 +1095,15 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
 
       return data;
     }
+
+    if (message['@type'] === '/tendermint.liquidity.v1beta1.MsgCreatePool') {
+      const data: Actions.CreatePoolData = {
+        coinA: message.deposit_coins[0],
+        coinB: message.deposit_coins[1],
+      };
+
+      return data;
+    }
   }
 }
 

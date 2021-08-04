@@ -123,7 +123,7 @@ export default defineComponent({
     });
 
     const data = computed(() => {
-      if (props.response) {
+      if (props.response?.accepted_coins) {
         const [coinA, coinB] = parseCoins(props.response.accepted_coins);
         const pool = pools.value.find((item) => item.pool_coin_denom === props.response.pool_coin_denom);
 

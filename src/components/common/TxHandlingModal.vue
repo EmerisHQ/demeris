@@ -91,13 +91,15 @@
                 not swapped
               </div>
             </template>
-            <template v-else-if="tx.name === 'addliquidity'">
+            <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
               <PreviewAddLiquidity :response="txResult" :fees="{}" />
             </template>
             <template v-else-if="tx.name === 'withdrawliquidity'">
               <PreviewWithdrawLiquidity :response="txResult" :fees="{}" />
             </template>
-            <template v-else-if="tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer'">
+            <template
+              v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
+            >
               <PreviewTransfer :response="txResult" :fees="{}" />
             </template>
           </div>
