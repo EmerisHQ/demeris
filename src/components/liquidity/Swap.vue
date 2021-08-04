@@ -444,7 +444,7 @@ export default defineComponent({
 
       return assets.filter((asset) => {
         const isInPayAssets = assetsToPay.value.find((payAsset) => payAsset.denom === asset.denom);
-        if (isInPayAssets === undefined) {
+        if (isInPayAssets === undefined && asset.base_denom !== data.receiveCoinData?.base_denom) {
           return true;
         } else {
           return false;
@@ -464,7 +464,14 @@ export default defineComponent({
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
-      return assets;
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToReceive.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined && asset.base_denom !== data.payCoinData?.base_denom) {
+          return true;
+        } else {
+          return false;
+        }
+      });
     });
 
     // default pay coin set
@@ -512,7 +519,9 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
-          if (data.isNotEnoughLiquidity) {
+          if (data.selectedPoolData === null) {
+            return 'No pool for this pair';
+          } else if (data.isNotEnoughLiquidity) {
             return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
@@ -538,7 +547,7 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (!isInit.value) {
+        if (!isInit.value || data.isLoading) {
           return 'loading';
         }
         if (data.isSwapReady) {
@@ -584,6 +593,8 @@ export default defineComponent({
         const fee = data.payCoinAmount * swapFeeRate;
         return Math.ceil(fee * 1000000) / 1000000 ?? 0;
       }),
+      // pool search loading
+      isLoading: false,
 
       // for swap action
       actionHandlerResult: null,
@@ -624,7 +635,8 @@ export default defineComponent({
           !data.isBothSelected ||
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
-          !isSignedIn.value
+          !isSignedIn.value ||
+          data.selectedPoolData === null
         );
       }),
       isChildModalOpen: false,
@@ -733,7 +745,7 @@ export default defineComponent({
               payDenom = data.payCoinData.denom;
             }
           }
-
+          data.isLoading = true;
           try {
             const id = poolsByDenom(payDenom).find((pool) => {
               return (
@@ -756,9 +768,11 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+            data.isLoading = false;
           } catch (e) {
             poolId.value = null;
             data.selectedPoolData = null;
+            data.isLoading = false;
           }
         }
       },
