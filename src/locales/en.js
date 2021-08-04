@@ -55,9 +55,8 @@ export const messages = {
           title: 'Emeris is in beta',
           subtitle: 'Use at your own risk.',
           text1:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi dapibus venenatis lacus, commodo ultrices ex placerat sit amet. Etiam nec est et lorem mattis fermentum non ac risus. Nam in faucibus justo. Vestibulum convallis placerat dolor nec facilisis. Donec scelerisque ligula sed aliquet pharetra. Duis accumsan feugiat elementum. Praesent rhoncus ipsum a turpis pulvinar scelerisque. Vivamus vitae eros vel dui cursus vehicula. Sed placerat at tortor a pellentesque.',
-          text2:
-            'Praesent vulputate finibus dolor, vitae tincidunt arcu aliquam nec. Curabitur fermentum nulla eget lorem efficitur placerat. Ut pellentesque vitae risus at vehicula. Aliquam ornare augue non nisl molestie, porttitor dignissim nunc congue. Integer erat nisl, varius a odio luctus, porta fermentum risus. Suspendisse at sodales eros. Aliquam in fringilla odio. Sed efficitur feugiat tincidunt. Nullam at mollis metus. Nulla accumsan nisi leo, bibendum lobortis est congue vitae. Aliquam et scelerisque lorem. Aliquam nec tellus nec lectus hendrerit pulvinar. Praesent at odio aliquet, lobortis ex eu, elementum odio. Proin nec dolor dictum, dapibus ex et, porta purus. Fusce ultricies lectus nibh, vitae lacinia augue feugiat eget. Maecenas sagittis sollicitudin quam a hendrerit.',
+            'The current features available on the site are offered in "beta" form ("Beta Services").  By using the Beta Services, You understand and acknowledge that the Beta Services are being provided as a "Beta" version and made available on an "As Is" or "As Available" basis. The Beta Services may contain bugs, errors, and other problems. YOU ASSUME ALL RISKS AND ALL COSTS ASSOCIATED WITH YOUR USE OF THE BETA SERVICES.  By using this website, you also agree to these Terms of Service.',
+          tos: 'Terms of Service',
         },
         modal5: {
           title: 'Unsupported device',
@@ -234,8 +233,8 @@ export const messages = {
         support: 'Support',
         twitter: 'Twitter',
         privacy: 'Privacy',
-        termsOfUse: 'Terms of use',
-        cookiesPolicy: 'Cookies policy',
+        tos: 'Terms of Service',
+        cookiesPolicy: 'Cookies Policy',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',

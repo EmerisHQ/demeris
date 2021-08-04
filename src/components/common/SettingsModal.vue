@@ -44,7 +44,7 @@
             {{ $t('components.settingsMenu.privacy') }}
           </router-link>
           <router-link to="/" class="settings-modal__list__item">
-            {{ $t('components.settingsMenu.termsOfUse') }}
+            {{ $t('components.settingsMenu.tos') }}
           </router-link>
           <router-link to="/" class="settings-modal__list__item">
             {{ $t('components.settingsMenu.cookiesPolicy') }}

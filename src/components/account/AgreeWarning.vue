@@ -12,7 +12,9 @@
             <div class="scrollable-content">
               <slot name="description">
                 <p>{{ $t('wallet.connect.modal4.text1') }}</p>
-                <p>{{ $t('wallet.connect.modal4.text2') }}</p>
+                <a href="/" rel="noopener noreferral" target="_blank">
+                  {{ $t('components.settingsMenu.tos') }}
+                </a>
               </slot>
             </div>
           </div>
@@ -90,6 +92,10 @@ export default defineComponent({
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  a {
+    text-decoration: underline;
   }
 }
 
