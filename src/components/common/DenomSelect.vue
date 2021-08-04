@@ -59,6 +59,8 @@
 
   <DenomSelectModal
     v-show="isOpen"
+    v-bind="$attrs"
+    :other-assets="otherAssets"
     :assets="assets"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
@@ -83,6 +85,12 @@ export default defineComponent({
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },

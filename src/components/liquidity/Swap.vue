@@ -56,6 +56,7 @@
             amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToPay"
         :selected-denom="payCoinData"
         :assets="assetsToPay"
         :is-over="isOver"
@@ -98,6 +99,7 @@
             amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToReceive"
         :selected-denom="receiveCoinData"
         :assets="assetsToReceive"
         @change="setCounterPairCoinAmount"
@@ -425,6 +427,26 @@ export default defineComponent({
       return payAssets;
     });
     const assetsToReceive = computed(() => {
+      let assets = availableReceiveSide.value.map((x) => {
+        const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
+        return {
+          denom: x.receive.denom,
+          base_denom: denomInfo.pay.base_denom,
+          on_chain: store.getters['demeris/getDexChain'],
+        };
+      });
+      return assets;
+    });
+
+    const otherAssetsToPay = computed(() => {
+      let assets = allBalances.value.filter((x) => {
+        return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
+      });
+      return assets;
+    });
+
+    const otherAssetsToReceive = computed(() => {
+      console.log('availableReceiveSide.value', availableReceiveSide.value);
       let assets = availableReceiveSide.value.map((x) => {
         const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
         return {
@@ -902,6 +924,9 @@ export default defineComponent({
       slippageSettingModalToggle,
       getDisplayPrice,
       gasPrice,
+      availablePaySide,
+      otherAssetsToPay,
+      otherAssetsToReceive,
     };
   },
 });

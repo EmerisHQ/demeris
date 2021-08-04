@@ -16,7 +16,7 @@
       </div>
       <div class="coin-list">
         <CoinList
-          :data="keywordFilteredAssets"
+          :data="keywordFilteredAssets[0]"
           :type="title === 'Receive' ? 'receive' : 'pay'"
           :show-balance="showBalance"
           :keyword="keyword"
@@ -28,7 +28,7 @@
           <div class="other-assets__title s-1 w-bold">Other assets</div>
           <div class="other-assets__subtitle s-minus w-normal">Unvailable to swap with ATOM</div>
           <CoinList
-            :data="keywordFilteredAssets"
+            :data="keywordFilteredAssets[1]"
             :type="title === 'Receive' ? 'receive' : 'pay'"
             :show-balance="showBalance"
             :keyword="keyword"
@@ -63,6 +63,12 @@ export default defineComponent({
   },
   props: {
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
@@ -74,6 +80,7 @@ export default defineComponent({
     const selectedDenom = ref(null);
 
     const displayNameAddedList = ref([]);
+    const displayNameAddedOtherList = ref([]);
     watch(
       () => props.assets,
       async () => {
@@ -81,6 +88,16 @@ export default defineComponent({
           displayNameAddedList.value = [
             await Promise.all(
               props.assets.map(async (asset) => {
+                return {
+                  ...asset,
+                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                };
+              }),
+            ),
+          ];
+          displayNameAddedOtherList.value = [
+            await Promise.all(
+              props.otherAssets.map(async (asset) => {
                 return {
                   ...asset,
                   display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
@@ -99,8 +116,11 @@ export default defineComponent({
       const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
         return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
       });
+      const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+      });
 
-      return filteredAssets;
+      return [filteredAssets, filteredOtherAssets];
     });
 
     function coinListselectHandler(payload) {
