@@ -8,10 +8,12 @@
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
     <div class="flex items-center">
       <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
-      <span class="text-inactive group-hover:text-current ml-1">
-        <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1" />
-        <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1" />
-      </span>
+      <Icon
+        name="CaretDownIcon"
+        :icon-size="1"
+        class="text-inactive group-hover:text-current ml-1 transform transition-transform"
+        :class="{ 'rotate-180 text-current': isFeesOpen }"
+      />
     </div>
   </div>
   <div v-if="isFeesOpen" class="pb-6 space-y-6">
@@ -27,7 +29,7 @@
         class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
           gasPriceLevel === GasPriceLevel.LOW
-            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
             : 'bg-fg font-normal'
         "
         @click="setGasPriceLevel(GasPriceLevel.LOW)"

@@ -116,7 +116,7 @@
 
       <fieldset class="bg-surface shadow-card rounded-xl overflow-hidden divide-y divide-border">
         <button
-          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group active:opacity-70 transition-opacity"
           @click="toggleDenomModal()"
         >
           <span class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1">{{
@@ -134,14 +134,16 @@
             </span>
           </div>
 
-          <div class="ml-1.5 px-1.5 flex items-center text-muted group-hover:text-text transition-colors">
-            <Icon name="CaretRightIcon" :icon-size="1" />
-          </div>
+          <Icon
+            name="CaretRightIcon"
+            :icon-size="1"
+            class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+          />
         </button>
 
         <button
           v-if="state.currentAsset"
-          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group active:opacity-70 transition-opacity"
           @click="toggleChainsModal(null, 'from')"
         >
           <span class="mr-2.5 w-10 self-center text-muted text-left group-hover:text-text transition-colors -text-1">{{
@@ -176,7 +178,7 @@
         </button>
 
         <button
-          class="py-5 px-4 flex items-stretch w-full outline-none text-left group focus:opacity-70 transition-opacity"
+          class="py-5 px-4 flex items-stretch w-full outline-none text-left group active:opacity-70 transition-opacity"
           :class="{ 'chain-selected': !!form.to_chain }"
           :disabled="!state.currentAsset"
           @click="toggleChainsModal(null, 'to')"
@@ -199,18 +201,19 @@
         </button>
       </fieldset>
 
-      <div class="w-full max-w-sm mx-auto mt-10">
+      <div class="w-full max-w-sm mx-auto mt-8">
+        <div class="mb-2">
+          <FeeLevelSelector
+            v-if="steps.length > 0"
+            v-model:gasPriceLevel="state.gasPrice"
+            :steps="steps"
+            @update:fees="state.fees = $event"
+          />
+        </div>
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
           :disabled="!isValid"
           :click-function="onSubmit"
-        />
-        <FeeLevelSelector
-          v-if="steps.length > 0"
-          v-model:gasPriceLevel="state.gasPrice"
-          :steps="steps"
-          class="mt-6"
-          @update:fees="state.fees = $event"
         />
       </div>
 

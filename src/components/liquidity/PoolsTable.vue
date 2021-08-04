@@ -16,14 +16,14 @@
 
       <thead class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left transition">
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-left transition">
             {{ $t('context.pools.pair') }}
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
             {{ $t('context.pools.liquidity') }}
           </th>
-          <!--<th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">APY</th>//-->
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right transition">
+          <!--<th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">APY</th>//-->
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
             {{ $t('context.pools.share') }}
           </th>
         </tr>

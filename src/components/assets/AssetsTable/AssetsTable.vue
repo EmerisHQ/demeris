@@ -10,27 +10,27 @@
 
       <thead v-if="showHeaders" class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-10 bg-app text-left">
+          <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-20 bg-app text-left">
             {{ $t('context.assets.asset') }}
           </th>
           <th
             v-if="variant === 'full'"
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-left"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-left"
           >
             {{ $t('context.assets.ticker') }}
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right">
             {{ $t('context.assets.price') }}
           </th>
           <th
             v-if="variant === 'full'"
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right"
           >
             {{ $t('context.assets.marketCap') }}
           </th>
           <th
             v-if="variant === 'balance'"
-            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-10 bg-app text-right"
+            class="align-middle -text-1 font-normal py-4 pl-0 sticky top-0 z-20 bg-app text-right"
           >
             {{ $t('context.assets.balance') }}
           </th>

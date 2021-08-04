@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div class="md:flex justify-between">
-      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl mb-16">
+      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
           <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
           <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">

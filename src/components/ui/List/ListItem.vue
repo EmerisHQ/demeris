@@ -15,10 +15,10 @@
   >
     <template v-if="label || description">
       <div class="w-full" :class="{ 'flex items-start justify-between gap-x-3': direction === 'col' }">
-        <div v-if="label" class="font-medium text-left">
-          <span class="list-item__label__text">{{ label }}</span>
-          <span v-if="hint" class="list-item__label__hint">
-            <Icon name="HintIcon" :icon-size="1.5" />
+        <div v-if="label" class="font-medium text-left flex items-center">
+          <span>{{ label }}</span>
+          <span v-if="hint" v-tippy :content="hint" class="text-muted hover:text-current ml-2">
+            <Icon name="HintIcon" :icon-size="1" />
           </span>
         </div>
 

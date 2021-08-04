@@ -9,6 +9,9 @@
       transform
       hover:-translate-y-px
       focus:-translate-y-px
+      shadow-card
+      hover:shadow-panel
+      rounded-2xl
       active:transform-none active:opacity-70
       focus-visible:ring-2
       focus:ring-tertiary focus:ring-opacity-50
@@ -28,7 +31,7 @@
       <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">
         {{ toUSD(totalLiquidityPrice) }}
       </div>
-      <OwnLiquidityPrice :pool="pool" show-share class="block font-medium text-1 mt-auto" />
+      <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
     </div>
   </router-link>
 </template>
@@ -294,15 +297,16 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .pool-card {
-  &:before {
-    content: '';
-    position: absolute;
-    z-index: 0;
-    @apply inset-0;
-    @apply rounded-2xl;
-    @apply shadow-card;
-    @apply transition-shadow;
-  }
+  // &:before {
+  //   content: '';
+  //   position: absolute;
+  //   z-index: 0;
+  //   @apply inset-0;
+  //   @apply rounded-2xl;
+  //   @apply shadow-card;
+  //   @apply transition-shadow;
+  // }
+
   // not working for some reason?
   // &:hover:before,
   // &:focus:before {

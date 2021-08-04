@@ -28,7 +28,7 @@
             <template v-if="!state.isCreationConfirmationOpen">
               <div class="pt-8 mb-8 text-center">
                 <h1 class="text-3 font-bold">
-                  {{ hasPair && !hasPool ? 'Create Liquidity' : 'Add Liquidity' }}
+                  {{ hasPair && !hasPool ? 'Create new pool' : 'Add liquidity' }}
                 </h1>
 
                 <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
@@ -77,7 +77,7 @@
                 @select="toggleChainsModal($event, state.chainsModalSource)"
               />
 
-              <Alert v-if="hasPair && !hasPool" status="warning" class="my-6">
+              <Alert v-if="hasPair && !hasPool" status="warning" class="my-6 max-w-sm mx-auto">
                 <p class="font-bold">You are the first liquidity provider</p>
                 <p class="mt-0.5">
                   As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> &middot;
@@ -226,13 +226,13 @@
                 </button>
               </fieldset>
 
-              <div class="mt-8 max-w-sm mx-auto">
+              <div class="mt-2 max-w-sm mx-auto">
                 <ListItem inset size="md" label="Price">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> &asymp;
                   <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
                 </ListItem>
-                <ListItem v-if="hasPair" v-tippy content="TODO" inset size="md" label="Receive LP asset">
-                  <div class="flex items-center justify-end text-left">
+                <ListItem v-if="hasPair" inset size="md" label="Receive LP asset">
+                  <div v-tippy="{ placement: 'right' }" class="flex items-center justify-end text-left" content="TODO">
                     <CircleSymbol
                       :denom="hasPool ? pool.pool_coin_denom : ''"
                       :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
@@ -257,17 +257,8 @@
                 </ListItem>
               </div>
 
-              <Alert v-if="hasPair && needsTransferToHub" status="info" class="w-full max-w-sm mx-auto mt-8">
-                Your assets will be transferred to Cosmos Hub
-              </Alert>
-
-              <div class="w-full max-w-sm mx-auto mt-8">
-                <Button
-                  :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
-                  :disabled="!isValid"
-                  :click-function="goToReview"
-                />
-                <div class="mt-6">
+              <div class="w-full max-w-sm mx-auto mt-6">
+                <div class="mb-2">
                   <FeeLevelSelector
                     v-if="actionSteps.length > 0"
                     v-model:gasPriceLevel="gasPrice"
@@ -275,32 +266,38 @@
                     @update:fees="state.fees = $event"
                   />
                 </div>
+                <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
+                  Your assets will be transferred to Cosmos Hub
+                </Alert>
+                <Button
+                  :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
+                  :disabled="!isValid"
+                  :click-function="goToReview"
+                />
               </div>
             </template>
 
             <template v-else-if="state.isCreationConfirmationOpen">
-              <section class="add-liquidity__content add-liquidity__confirmation">
-                <h2 class="add-liquidity__title text-2">Creating a pool is risky business</h2>
+              <article class="flex flex-col items-center">
+                <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line">Creating a pool is risky business</h2>
 
-                <div class="add-liquidity__confirmation__placeholder" />
+                <img src="@/assets/images/transfer-interstitial.png" name="Create liquidity pool" class="-mb-10" />
 
-                <p class="add-liquidity__confirmation__description">
+                <p class="text-muted leading-copy max-w-md mx-auto">
                   As the first liquidity provider, you are setting the pool price. This means that if you don’t know
                   what you are doing, you may risk significant loss as a result of arbitrage.
                 </p>
 
-                <div class="add-liquidity__confirmation__controls">
-                  <button
-                    class="add-liquidity__confirmation__controls__button shadow-button rounded-xl"
-                    @click="state.isCreationConfirmationOpen = false"
-                  >
-                    Cancel
-                  </button>
-                  <button class="add-liquidity__confirmation__controls__button confirmation-button" @click="goToReview">
-                    I understand
-                  </button>
-                </div>
-              </section>
+                <footer class="w-full max-w-md mx-auto flex justify-stretch mt-12 mb-8 gap-6">
+                  <Button
+                    name="Cancel"
+                    variant="secondary"
+                    class="flex-1"
+                    :click-function="(state.isCreationConfirmationOpen = false)"
+                  />
+                  <Button name="I understand" class="flex-1" :click-function="goToReview" />
+                </footer>
+              </article>
             </template>
           </div>
         </template>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tx-steps denom-select-modal-wrapper relative w-full top-0 left-0 overflow-hidden z-10"
+    class="relative w-full top-0 left-0 overflow-hidden z-10"
     :class="{ 'bg-surface shadow-panel rounded-2xl': variant === 'widget' }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />

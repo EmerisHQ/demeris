@@ -1,15 +1,16 @@
 <template>
   <AppLayout>
     <div class="md:flex justify-between">
-      <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl mb-16">
+      <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
-          <div class="md:flex items-baseline flex-wrap">
-            <div class="flex -space-1.5 mr-3">
+          <div class="text-muted mb-4">Gravity DEX Pool</div>
+          <div class="sm:flex items-baseline flex-wrap">
+            <div class="flex -space-1.5 mr-3 self-center">
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
             </div>
-            <h1 class="text-2 font-bold md:mr-3">{{ pairName }}</h1>
-            <div class="text-muted mt-2">Gravity DEX Pool</div>
+            <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
+            <div class="text-muted mt-2">1 ATOM &asymp; 1.234567 REGEN</div>
           </div>
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>
@@ -17,7 +18,7 @@
         <section v-if="reserveBalances" class="mt-16">
           <h2 class="text-2 font-bold">Underlying assets</h2>
 
-          <table class="assets-table table-fixed -ml-6 mt-6">
+          <table class="assets-table table-fixed -ml-6 mt-4">
             <thead class="hidden md:table-header-group text-muted">
               <tr>
                 <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-10 bg-app text-left">Asset</th>
@@ -186,7 +187,7 @@ import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
-import { hexToRGB, isNative } from '@/utils/basic';
+import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',

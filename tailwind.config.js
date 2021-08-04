@@ -18,11 +18,10 @@ module.exports = {
     boxShadow: {
       button: '3px 9px 32px -4px rgba(0, 0, 0, 0.07)',
       DEFAULT: '16px 32px 128px -8px rgba(0, 0, 0, 0.05)',
-      card: '16px 32px 128px -8px rgba(0, 0, 0, 0.05)',
+      card: '16px 32px 128px -8px rgba(0, 0, 0, 0.07)',
       panel: '24px 48px 104px -8px rgba(0, 0, 0, 0.09)',
       dropdown: '24px 64px 128px -8px rgba(0, 0, 0, 0.14)',
       'sheet-b': '0px -8px 48px -8px rgba(0, 0, 0, 0.07)',
-      inner: 'inset 0 3px 12px -2px rgba(0, 0, 0, 0.06)',
       none: 'none',
     },
     colors: {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-50 shadow-panel">
+    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-30 shadow-panel">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
         <div class="py-2">
@@ -123,14 +123,14 @@
     <!-- warning modal - custom slippage -->
     <Modal
       v-show="isWarningCustomSlippageOpen"
-      class="text-center"
+      class="text-center z-40"
       variant="dialog"
       fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
       @close="toggleWarningCustomSlippage"
     >
-      <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
       <div class="text-1 font-bold">
         {{ $t('components.settingsMenu.allowCustomSlippage') }}
       </div>
@@ -161,7 +161,7 @@
     <!-- warning modal - view unverified assets -->
     <Modal
       v-show="isWarningViewUnverifiedOpen"
-      class="text-center"
+      class="text-center z-40"
       variant="dialog"
       fullscreen
       :show-close-button="false"
@@ -169,7 +169,7 @@
       @close="toggleWarningViewUnverified"
     >
       <template>
-        <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
         <div class="text-1 font-bold">
           {{ $t('components.settingsMenu.viewAllAssets') }}
         </div>
@@ -201,7 +201,7 @@
     <!-- warning modal - view lp asset pools -->
     <Modal
       v-show="isWarningViewLPAssetPoolsOpen"
-      class="text-center"
+      class="text-center z-40"
       variant="dialog"
       fullscreen
       :show-close-button="false"
@@ -209,7 +209,7 @@
       @close="toggleWarningViewLPAssetPools"
     >
       <template>
-        <Icon name="ExclamationDiskIcon" :icon-size="2" class="mb-8" />
+        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
         <div class="text-1 font-bold">
           {{ $t('components.settingsMenu.viewLPAssetPools') }}
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div ref="menuRef" class="settings-wrapper sm:pl-3 relative">
+  <div ref="menuRef" class="settings-wrapper sm:pl-3 sm:relative">
     <div
       v-if="isSignedIn"
       class="settings -mr-2 sm:mr-0 py-1 px-2 h-12 flex items-center rounded-lg cursor-pointer"

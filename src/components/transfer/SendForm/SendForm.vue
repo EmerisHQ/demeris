@@ -1,21 +1,13 @@
 <template>
-  <div class="w-full max-w-sm mx-auto">
+  <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'recipient'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-else-if="step === 'amount'">
-      <h2 class="send-form__title text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
-      <SendFormAmount :balances="balances" :fees="state.fees" @next="goToStep('review')" />
-      <div class="mt-6 -mx-6">
-        <FeeLevelSelector
-          v-if="steps.length > 0"
-          v-model:gasPriceLevel="state.gasPrice"
-          :steps="steps"
-          @update:fees="state.fees = $event"
-        />
-      </div>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
+      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="goToStep('review')" />
     </template>
 
     <template v-else>
@@ -37,7 +29,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
@@ -54,7 +45,6 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    FeeLevelSelector,
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,

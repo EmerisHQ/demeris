@@ -24,7 +24,7 @@
     </p>
 
     <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': action === 'swap' }">
-      <Button :name="$t('generic_cta.continue')" class="mt-12 mb-8" :full-width="true" @click="emitContinue" />
+      <Button :name="$t('generic_cta.continue')" class="mt-12 mb-8" :click-function="emitContinue" />
     </div>
   </div>
 </template>

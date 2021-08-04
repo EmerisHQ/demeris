@@ -5,24 +5,23 @@
     </header>
 
     <div class="relative min-h-0 flex flex-col">
-      <div class="w-full mx-auto max-w-sm px-6 mb-6 text-center text-muted leading-copy">
-        <template v-if="showSubtitle">
-          {{
-            $t('components.chainSelect.text1', {
-              asset: selectedDenomDisplay,
-              chainNo: chainsNumber,
-              chains: chainsNumber > 1 ? 'chains' : 'chain',
-            })
-          }}
-          <br />
-        </template>
-        <slot name="description">
-          {{ $t('components.chainSelect.text2') }}
-        </slot>
-      </div>
-
       <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
         <div class="mx-auto max-w-md mb-20">
+          <div class="w-full mx-auto max-w-sm px-6 mb-6 text-center text-muted leading-copy">
+            <template v-if="showSubtitle">
+              {{
+                $t('components.chainSelect.text1', {
+                  asset: selectedDenomDisplay,
+                  chainNo: chainsNumber,
+                  chains: chainsNumber > 1 ? 'chains' : 'chain',
+                })
+              }}
+              <br />
+            </template>
+            <slot name="description">
+              {{ $t('components.chainSelect.text2') }}
+            </slot>
+          </div>
           <CoinList :data="filterAsset(assets, selectedDenom)" :type="'chain'" @select="coinListselectHandler" />
         </div>
       </div>

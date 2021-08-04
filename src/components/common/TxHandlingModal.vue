@@ -12,17 +12,17 @@
         <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
         <Icon v-else name="ErrorIcon" size="3" class="text-negative" />
       </div>
-      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result -mt-6 -ml-6 w-5" />
+      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="swapped-image -mt-6 -mx-6" />
       <div class="text-muted">
         <template v-if="status == 'failed' || status == 'unknown'">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
+            <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
           </template>
           <template v-if="tx.name == 'transfer'">
             <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
           </template>
           <template v-if="tx.name == 'swap'">
-            <Denom :name="getDenom(tx.data.from.denom)" /> -> <Denom :name="getDenom(tx.data.to.denom)" />
+            <Denom :name="getDenom(tx.data.from.denom)" /> &rarr; <Denom :name="getDenom(tx.data.to.denom)" />
           </template>
           <template v-if="tx.name == 'addliquidity'">
             <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
@@ -41,7 +41,7 @@
 
       <div
         v-if="status.startsWith('complete') && tx.name !== 'swap'"
-        class="transferred-image block mx-auto bg-no-repeat bg-center mb-8"
+        class="transferred-image block mx-auto bg-no-repeat bg-center bg-contain bg w-60 h-60 mb-8 mt-4"
       />
       <div class="font-bold mt-2" :class="variant === 'modal' ? 'text-2' : 'text-3'">{{ title }}</div>
       <div>
@@ -53,18 +53,18 @@
           </div>
           <div
             v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
-            class="w-24 my-8 mx-auto flex items-center justify-between"
+            class="w-full flex items-center justify-center"
           >
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
-              <div class="text-inactive font-bold">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
+              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
+              <EphemerisSpinner class="w-1/2" />
+              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
             </template>
 
             <template v-if="tx.name == 'transfer'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
-              <div class="text-inactive font-bold">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+              <EphemerisSpinner class="w-1/2" />
+              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
             </template>
           </div>
 
@@ -89,14 +89,14 @@
               </div>
             </template>
           </div>
-          <div class="mt-2 font-medium">
+          <div class="mt-6 font-medium text-1">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
             </template>
           </div>
-          <div class="mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
+          <div class="mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
             <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" />
+              <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" />
             </template>
             <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /></template>
           </div>
@@ -209,6 +209,7 @@ import Denom from '@/components/common/Denom.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
@@ -245,6 +246,7 @@ export default defineComponent({
   components: {
     Modal,
     SpinnerIcon,
+    EphemerisSpinner,
     Button,
     Icon,
     AmountDisplay,
@@ -407,7 +409,7 @@ export default defineComponent({
                         }),
                       ),
                   ) / 100
-                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
+                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} &rarr;`;
               } else {
                 secondaryButton.value = t('components.txHandlingModal.reset');
               }
@@ -547,18 +549,18 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.status {
-  &__icon {
-    &-swap-result {
-      background-image: url('../../assets/images/swap-result.png');
-      height: 13.125rem;
-    }
-  }
+.swapped-image {
+  background-image: url('~@/assets/images/swap-result.png');
+  height: 13.125rem;
 }
 
 .transferred-image {
-  background-image: url('~@/assets/images/blue-surfer-1.png');
-  width: 188px;
-  height: 177px;
+  background-image: url('~@/assets/images/silver-surfer-1-light.png');
+}
+
+@media (prefers-color-scheme: dark) {
+  .transferred-image {
+    background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+  }
 }
 </style>

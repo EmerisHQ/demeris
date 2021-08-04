@@ -167,7 +167,7 @@ export default defineComponent({
     right: 0;
     top: 50%;
     transform: translateY(-45%);
-    background-image: url('~@/assets/images/gradient-light-2.png');
+    background-image: url('~@/assets/images/gradient-primary.jpg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;

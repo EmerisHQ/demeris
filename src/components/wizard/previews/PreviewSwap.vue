@@ -1,8 +1,8 @@
 <template>
   <List>
     <!-- Pay/Receive -->
-    <div>
-      <ListItem :size="size" :label="$t('components.previews.swap.payLbl')">
+    <div class="space-y-2 pt-2 pb-6">
+      <ListItem :size="size" inset :label="$t('components.previews.swap.payLbl')">
         <div class="flex justify-end">
           <div>
             <AmountDisplay
@@ -19,6 +19,7 @@
       </ListItem>
       <ListItem
         :size="size"
+        inset
         :label="$t('components.previews.swap.receiveLbl')"
         :description="$t('components.previews.swap.receiveLblHint')"
       >

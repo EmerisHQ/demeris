@@ -23,7 +23,7 @@
           </span>
         </nav>
 
-        <Button class="ml-auto" variant="link" :click-function="onClose">
+        <Button class="ml-auto" variant="link" :full-width="false" :click-function="onClose">
           <Icon name="CloseIcon" :icon-size="1.5" />
         </Button>
       </header>

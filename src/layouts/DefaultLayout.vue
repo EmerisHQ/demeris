@@ -20,6 +20,6 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .layout-frame {
-  min-height: calc(100vh - 8rem); // minus navbar height and layout padding-top
+  min-height: calc(100vh - 16rem); // minus navbar] height and layout padding
 }
 </style>

@@ -1,27 +1,46 @@
 <template>
-  <div :class="{ 'send-form-amount--insufficient-funds': !hasSufficientFunds }">
-    <div class="send-form-amount__select-wrapper">
-      <DenomSelectModal
-        v-if="state.isSelectModalOpen"
-        title="Select asset"
-        :assets="balances"
-        @select="toggleSelectModal"
-      />
-    </div>
+  <div>
+    <DenomSelectModal
+      v-if="state.isSelectModalOpen"
+      class="fixed inset-0 z-30 bg-bg"
+      title="Select asset"
+      :assets="balances"
+      :func="() => toggleSelectModal()"
+      @select="toggleSelectModal"
+    />
 
-    <fieldset class="form__field send-form-amount">
-      <div v-show="state.isUSDInputChecked" class="flex flex-col items-center">
-        <div class="send-form-amount__input">
+    <fieldset class="py-8">
+      <div class="w-full max-w-lg mx-auto">
+        <div class="relative text-4 font-bold px-20 w-full text-center transition-colors">
+          <div v-if="hasPrice" class="flex items-center absolute inset-y-0 left-0">
+            <Button
+              :click-function="
+                () => {
+                  state.isUSDInputChecked = !state.isUSDInputChecked;
+                }
+              "
+              size="sm"
+              variant="secondary"
+              rounded
+              :tooltip-text="`Enter amount in ${state.isUSDInputChecked ? 'crypto' : 'USD'}`"
+            >
+              <Icon
+                name="SwapUDIcon"
+                :icon-size="1"
+                :class="['transform transition', { 'rotate-180': state.isUSDInputChecked }]"
+              />
+            </Button>
+          </div>
           <FlexibleAmountInput
+            v-if="state.isUSDInputChecked"
             v-model="state.usdValue"
-            :max-width="300"
             :min-width="state.isUSDInputChecked ? 35 : 0"
             prefix="$"
           >
             <template #default="inputProps">
               <USDInput
                 :model-value="form.balance.amount"
-                :denom="state.currentAsset?.base_denom"
+                :denom="state.currentAsset?.base_denom || ''"
                 :class="[inputProps.class]"
                 :style="inputProps.style"
                 placeholder="0"
@@ -36,92 +55,128 @@
               />
             </template>
           </FlexibleAmountInput>
-        </div>
-        <span class="send-form-amount__estimated">
-          <AmountDisplay
-            :amount="{ amount: form.balance.amount * denomDecimals, denom: state.currentAsset?.base_denom }"
-          />
-        </span>
-      </div>
-      <div v-if="!state.isUSDInputChecked" class="flex flex-col items-center">
-        <div class="send-form-amount__input">
-          <FlexibleAmountInput v-model="form.balance.amount" :max-width="250" :min-width="35" placeholder="0">
-            <template #suffix> &nbsp;<Denom :name="state.currentAsset?.base_denom || ''" /> </template>
+          <FlexibleAmountInput
+            v-else-if="!state.isUSDInputChecked"
+            v-model="form.balance.amount"
+            :min-width="35"
+            placeholder="0"
+            class="uppercase"
+            @input="state.isMaximumAmountChecked = false"
+          >
+            <template v-if="state.currentAsset" #suffix>
+              <Denom :name="state.currentAsset?.base_denom || ''" />
+            </template>
           </FlexibleAmountInput>
-        </div>
-
-        <span v-if="hasPrice" class="send-form-amount__estimated">
-          {{ displayUSDValue }}
-        </span>
-      </div>
-      <div class="send-form-amount__controls">
-        <label v-if="hasPrice" class="send-form-amount__controls__button">
-          <input v-model="state.isUSDInputChecked" type="checkbox" name="send-form-amount-usd" />
-          <span v-if="state.isUSDInputChecked" class="shadow-button rounded-xl">
-            <Denom :name="state.currentAsset?.base_denom" />
-          </span>
-          <span v-else class="shadow-button rounded-xl">USD</span>
-        </label>
-
-        <label class="send-form-amount__controls__button is-toggle">
-          <input v-model="state.isMaximumAmountChecked" type="checkbox" name="send-form-amount-max" />
-          <span class="shadow-button rounded-xl">{{ $t('generic_cta.max') }}</span>
-        </label>
-      </div>
-    </fieldset>
-
-    <fieldset class="form__field">
-      <div class="send-form-amount__assets">
-        <button
-          v-if="state.currentAsset"
-          class="send-form-amount__assets__item shadow-button rounded-xl"
-          @click="toggleSelectModal()"
-        >
-          <div class="send-form-amount__assets__item__asset">
-            <CircleSymbol
-              :chain-name="state.currentAsset.on_chain"
-              :denom="state.currentAsset.base_denom"
-              class="send-form-amount__assets__item__avatar"
+          <div class="flex items-center absolute inset-y-0 right-0">
+            <Button
+              :click-function="
+                () => {
+                  state.isMaximumAmountChecked = true;
+                }
+              "
+              :name="$t('generic_cta.max')"
+              class="flex"
+              :class="{ 'text-negative-text': !hasSufficientFunds }"
+              :disabled="!hasPrice"
+              size="sm"
+              variant="secondary"
+              rounded
             />
-
-            <div class="send-form-amount__assets__item__chain">
-              <p class="send-form-amount__assets__item__denom font-bold">
-                <Denom :name="state.currentAsset.base_denom" />
-              </p>
-              <p class="send-form-amount__assets__item__name -text-1">
-                <ChainName :name="state.currentAsset.on_chain" />
-              </p>
-            </div>
           </div>
-
-          <div class="send-form-amount__assets__item__amount">
-            <p class="send-form-amount__assets__item__amount__balance">
-              <Price
-                :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }"
-                :auto-update="false"
-                show-zero
-              />
-            </p>
-            <p class="send-form-amount__assets__item__amount__available -text-1">
-              <span>
-                <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
-                {{ $t('components.sendForm.available') }}
-              </span>
-            </p>
+        </div>
+        <div class="text-muted mt-3 text-center">
+          <AmountDisplay
+            v-if="state.isUSDInputChecked"
+            :amount="{
+              amount: +form.balance.amount ? form.balance.amount * denomDecimals : 0,
+              denom: state.currentAsset?.base_denom,
+            }"
+          />
+          <div v-else-if="!state.isUSDInputChecked && hasPrice" class="text-muted mt-3 text-center">
+            {{ displayUSDValue }}
           </div>
-
-          <button class="send-form-amount__assets__item__button" @click.prevent.stop="">
-            <Icon name="CaretRightIcon" :icon-size="0.75" />
-          </button>
-        </button>
+        </div>
       </div>
     </fieldset>
 
-    <fieldset class="form__field">
+    <button
+      v-if="state.currentAsset"
+      class="
+        bg-surface
+        shadow-button
+        rounded-xl
+        overflow-hidden
+        py-4
+        pl-5
+        pr-3
+        flex
+        justify-between
+        w-full
+        max-w-md
+        mx-auto
+        outline-none
+        text-left
+        group
+        focus:outline-none
+        active:opacity-70 active:transform-none
+        transform
+        hover:-translate-y-px
+        focus:-translate-y-px
+        transition
+      "
+      @click="toggleSelectModal()"
+    >
+      <div class="flex items-center flex-1">
+        <CircleSymbol
+          :chain-name="state.currentAsset.on_chain"
+          :denom="state.currentAsset.base_denom"
+          class="relative mr-4"
+        />
+        <div class="flex-grow">
+          <p class="font-medium">
+            <Denom :name="state.currentAsset.base_denom" />
+          </p>
+          <p class="-text-1 text-muted mt-0.5">
+            <ChainName :name="state.currentAsset.on_chain" />
+          </p>
+        </div>
+      </div>
+
+      <div class="text-right">
+        <p>
+          <Price
+            :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }"
+            :auto-update="false"
+            show-zero
+          />
+        </p>
+        <p class="-text-1 mt-0.5 transition-colors" :class="hasSufficientFunds ? 'text-muted' : 'text-negative-text'">
+          <span>
+            <AmountDisplay :amount="{ amount: state.currentAsset.amount, denom: state.currentAsset.base_denom }" />
+            {{ $t('components.sendForm.available') }}
+          </span>
+        </p>
+      </div>
+      <Icon
+        name="CaretRightIcon"
+        :icon-size="1"
+        class="ml-2 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+      />
+    </button>
+
+    <fieldset class="w-full max-w-sm mx-auto mt-8">
+      <div class="mb-2">
+        <FeeLevelSelector
+          v-if="steps.length > 0"
+          v-model:gasPriceLevel="state.gasPrice"
+          :steps="steps"
+          @update:fees="state.fees = $event"
+        />
+      </div>
       <Button
         :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
         :disabled="!isValid"
-        @click="onSubmit"
+        :click-function="onSubmit"
       />
     </fieldset>
   </div>
@@ -130,7 +185,7 @@
 <script lang="ts">
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -138,12 +193,13 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { SendAddressForm } from '@/types/actions';
+import { GasPriceLevel, SendAddressForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
@@ -155,6 +211,7 @@ export default defineComponent({
     ChainName,
     CircleSymbol,
     Denom,
+    FeeLevelSelector,
     Button,
     Icon,
     DenomSelectModal,
@@ -172,6 +229,10 @@ export default defineComponent({
       type: Object,
       default: undefined,
     },
+    steps: {
+      type: Array,
+      default: () => [],
+    },
   },
 
   emits: ['next'],
@@ -186,6 +247,7 @@ export default defineComponent({
       isUSDInputChecked: false,
       isSelectModalOpen: false,
       usdValue: '',
+      gasPrice: undefined,
     });
 
     const displayUSDValue = computed(() => {
@@ -327,6 +389,10 @@ export default defineComponent({
       }
     };
 
+    onMounted(() => {
+      state.gasPrice = store.getters['demeris/getPreferredGasPriceLevel'] || GasPriceLevel.AVERAGE;
+    });
+
     // TODO: Select chain based in user option
     watch(
       () => [state.isMaximumAmountChecked, state.currentAsset, props.fees],
@@ -363,149 +429,11 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.send-form-amount {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  &--insufficient-funds &__input {
-    color: var(--negative-text);
-  }
-  &--insufficient-funds &__assets__item__amount__available {
-    color: var(--negative-text);
-  }
-
-  &__select-wrapper {
-    position: relative;
-    width: 100%;
-
-    .denom-select-modal-wrapper {
-      // Back icon
-      .title-with-goback > .icon:first-child {
-        visibility: hidden;
-      }
-    }
-  }
-
-  &__input {
-    font-size: 3.1875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: inline-flex;
-    align-items: center;
-    transition: color linear 100ms;
-
-    &__control {
-      text-align: right;
-      font-weight: 700;
-      width: 50%;
-      outline: none;
-      appearance: none;
-    }
-
-    &__denom {
-      flex: 1;
-      margin-left: 0.625rem;
-    }
-  }
-
-  &__estimated {
-    color: var(--muted);
-    margin-top: 0.75rem;
-  }
-
-  &__controls {
-    display: flex;
-    align-items: stretch;
-    margin-top: 0.875rem;
-
-    &__button {
-      input {
-        display: none;
-      }
-      &.is-toggle {
-        input:checked + span {
-          background: var(--text);
-          color: var(--inverse);
-          font-weight: 500;
-        }
-      }
-      span {
-        padding: 0.625rem 1rem;
-        border-radius: 1.5rem;
-        margin-right: 1rem;
-        font-size: 12px;
-        cursor: pointer;
-        user-select: none;
-      }
-    }
-  }
-
-  &__assets {
-    &__item {
-      border-radius: 0.625rem;
-      padding: 1rem;
-      display: flex;
-      align-items: stretch;
-      width: 100%;
-
-      &:focus {
-        outline: none;
-      }
-
-      & + & {
-        margin-top: 1rem;
-      }
-
-      &__asset {
-        display: flex;
-        align-items: center;
-        flex: 1 1 0%;
-      }
-
-      &__chain {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-
-      &__avatar {
-        position: relative;
-        margin-right: 1rem;
-      }
-
-      &__denom {
-        margin-bottom: 0.125rem;
-        text-transform: uppercase;
-        text-align: left;
-      }
-
-      &__name {
-        color: var(--muted);
-        text-align: left;
-      }
-
-      &__amount {
-        text-align: right;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-
-        &__available {
-          transition: color linear 100ms;
-          color: var(--muted);
-        }
-      }
-
-      &__button {
-        margin-left: 0.375rem;
-        padding: 0 0.375rem;
-        display: flex;
-        align-items: center;
-      }
-    }
+<style lang="scss" scoped>
+.shadow-card {
+  &:hover:not(:active),
+  &:focus:not(:active) {
+    --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
   }
 }
 </style>

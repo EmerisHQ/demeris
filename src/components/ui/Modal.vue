@@ -27,7 +27,7 @@
           'min-w-full min-h-full': variant === 'full',
           'mx-auto overflow-hidden sm:mx-6 sm:my-6 min-h-full sm:min-h-0 sm:rounded-2xl shadow-card':
             variant === 'center',
-          'max-w-xs rounded-2xl shadow-card': variant === 'dialog',
+          'max-w-xs mx-5 rounded-2xl shadow-card': variant === 'dialog',
           'rounded-t-2xl shadow-dropdown': variant === 'bottom',
         },
       ]"
@@ -43,7 +43,10 @@
 
       <section
         class="modal__content"
-        :class="{ 'pt-8 px-8': variant === 'dialog', 'pb-8': variant === 'dialog' && !$slots.buttons }"
+        :class="{
+          'pt-6 px-5 sm:pt-8 sm:px-8': variant === 'dialog',
+          'pb-6 sm:pb-8': variant === 'dialog' && !$slots.buttons,
+        }"
       >
         <slot />
       </section>

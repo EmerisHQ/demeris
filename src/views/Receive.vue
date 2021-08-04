@@ -83,7 +83,7 @@
             <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
             <fieldset class="mt-16">
               <div class="mb-3 font-bold">Your address</div>
-              <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
+              <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly class="bg-fg" />
             </fieldset>
           </div>
         </div>
