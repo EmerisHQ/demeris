@@ -258,7 +258,12 @@ export default defineComponent({
         }
       }
       .scrollable {
-        height: 38.4rem;
+        height: auto;
+        border: none;
+        padding: 0;
+        &:after {
+          display: none;
+        }
       }
     }
   }
