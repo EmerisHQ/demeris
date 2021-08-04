@@ -383,7 +383,12 @@ export default defineComponent({
       () => currentData.value,
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
-        feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
+        feeWarning.value = await validateStepFeeBalances(
+          newData.data,
+          toCheckBalances,
+          newData.fees,
+          props.gasPriceLevel,
+        );
       },
     );
 

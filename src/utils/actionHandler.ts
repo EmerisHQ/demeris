@@ -1487,6 +1487,7 @@ export async function validateStepFeeBalances(
   step: Actions.Step,
   balances: Balances,
   fees: Actions.FeeTotals,
+  gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.FeeWarning> {
   const feeWarning: Actions.FeeWarning = {
     missingFees: [],
@@ -1638,8 +1639,14 @@ export async function validateStepFeeBalances(
                 return false;
               }
             });
+            let additionalFee = 0;
+            if (stepTx.addFee) {
+              additionalFee =
+                parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
+            }
             if (rcptBalance) {
-              const newIbcAmount = parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount);
+              const newIbcAmount =
+                parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount) + additionalFee;
               rcptBalance.amount = newIbcAmount + parseCoins(rcptBalance.amount)[0].denom;
             } else {
               const ibcDetails: IbcInfo = {};
