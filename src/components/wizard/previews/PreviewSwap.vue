@@ -2,7 +2,13 @@
   <List>
     <!-- Pay/Receive -->
     <div class="space-y-2 pt-2 pb-6">
-      <ListItem :size="size" inset :label="$t('components.previews.swap.payLbl')">
+      <ListItem
+        :size="size"
+        first-cell-class="flex-shrink"
+        second-cell-class="flex-grow"
+        inset
+        :label="$t('components.previews.swap.payLbl')"
+      >
         <div class="flex justify-end">
           <div>
             <AmountDisplay
@@ -19,6 +25,8 @@
       </ListItem>
       <ListItem
         :size="size"
+        first-cell-class="flex-shrink"
+        second-cell-class="flex-grow"
         inset
         :label="$t('components.previews.swap.receiveLbl')"
         :description="$t('components.previews.swap.receiveLblHint')"

@@ -1,9 +1,18 @@
 <template>
-  <div v-if="pool" class="elevation-panel" @click="openPoolPage">
-    <p class="title-1-bold">What is <Ticker :name="name" />?</p>
-    <p><Denom :name="name" /> is a liquidity pool asset. LP assets represents shares of a particular liquidity pool.</p>
-    <ArrowRightIcon />
-  </div>
+  <Alert v-if="pool" status="info" class="mt-4" size="md" :show-icon="false">
+    <h5 class="font-bold text-text">What is <Denom :name="name" />?</h5>
+    <p class="mt-3 text-muted -text-1 leading-copy">
+      <Denom :name="name" /> (<Ticker :name="name" />) is a liquidity pool (LP) asset. LP assets represent shares of a
+      particular liquidity pool.
+    </p>
+    <p class="mt-3">
+      <a
+        class="font-medium cursor-pointer text-link hover:text-link-hover active:opacity-70 transition"
+        href="#"
+        @click="openPoolPage"
+      >View pool &rarr;</a>
+    </p>
+  </Alert>
 </template>
 
 <script lang="ts">
@@ -11,14 +20,14 @@ import { computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Denom from '@/components/common/Denom.vue';
-import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Alert from '@/components/ui/Alert.vue';
 import { useAllStores } from '@/store';
 
 export default defineComponent({
   name: 'PoolBanner',
   components: {
-    ArrowRightIcon,
+    Alert,
     Denom,
     Ticker,
   },
@@ -52,18 +61,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.elevation-panel {
-  position: relative;
-  cursor: pointer;
-  margin-top: 2.4rem;
-  padding: 2.4rem;
-  width: 32rem;
-  .title-1-bold {
-    margin-bottom: 1.6rem;
-  }
-  svg {
-    float: right;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

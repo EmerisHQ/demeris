@@ -61,15 +61,19 @@
         class="w-full max-w-lg flex items-center justify-center -space-x-8"
       >
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
+          <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.from_chain" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" />
+          </div>
+          <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.to_chain" />
         </template>
 
         <template v-if="tx.name == 'transfer'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+          </div>
         </template>
 
         <template v-if="tx.name == 'addliquidity'">
@@ -169,12 +173,20 @@
           class="mt-8 items-center text-left"
         >
           <Alert status="info" :show-icon="false">
-            <h5 v-if="errorDetails.status" class="font-medium text-text">Status</h5>
-            <p v-if="errorDetails.status" class="mt-0.5">{{ errorDetails.status }}</p>
-            <h5 v-if="errorDetails.ticket" class="font-medium text-text">Ticket</h5>
-            <p v-if="errorDetails.ticket" class="mt-0.5">{{ errorDetails.ticket }}</p>
-            <h5 v-if="errorDetails.message" class="font-medium text-text">Error</h5>
-            <p v-if="errorDetails.message" class="mt-0.5">{{ errorDetails.message }}</p>
+            <ul class="space-y-3">
+              <li v-if="errorDetails.status">
+                <h5 class="font-medium text-text">Status</h5>
+                <p class="mt-0.5">{{ errorDetails.status }}</p>
+              </li>
+              <li v-if="errorDetails.ticket">
+                <h5 class="font-medium text-text">Ticket</h5>
+                <p class="mt-0.5">{{ errorDetails.ticket }}</p>
+              </li>
+              <li v-if="errorDetails.message">
+                <h5 class="font-medium text-text">Error</h5>
+                <p class="mt-0.5">{{ errorDetails.message }}</p>
+              </li>
+            </ul>
           </Alert>
         </Collapse>
       </div>
@@ -587,6 +599,25 @@ export default defineComponent({
 @media (prefers-color-scheme: dark) {
   .transferred-image {
     background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+  }
+}
+
+.animate-lr {
+  animation: animate-lr 2s infinite cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@keyframes animate-lr {
+  0% {
+    transform: translateX(-300%) rotate(0deg);
+    opacity: 0;
+  }
+  40%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(350%) rotate(360deg);
+    opacity: 0;
   }
 }
 </style>

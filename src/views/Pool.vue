@@ -10,7 +10,7 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
-            <div class="text-muted mt-1.5">1 ATOM &asymp; 1.234567 REGEN</div>
+            <div class="text-muted mt-1.5">1 TICKER &asymp; 1.234567 TICKER</div>
           </div>
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>

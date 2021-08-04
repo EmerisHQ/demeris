@@ -1,17 +1,44 @@
 <template>
-  <div class="relative rounded-2xl dark:theme-inverse">
-    <a href="https://medium.com/emeris-blog" target="_blank" rel="noopener noreferrer">
-      <div class="absolute bottom-6 left-6 text-text">
-        <p class="-text-1">Introductory guide</p>
-      </div>
-      <img class="w-auto block" src="@/assets/images/intro-panel.png" />
-    </a>
-  </div>
+  <a
+    href="https://medium.com/emeris-blog"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="
+      intro-panel
+      w-full
+      flex flex-col
+      items-stretch
+      p-6
+      relative
+      rounded-2xl
+      dark:theme-inverse
+      bg-cover
+      transform
+      hover:-translate-y-px
+      active:transform-none active:opacity-70
+      transition
+      text-text
+    "
+  >
+    <h5 class="font-medium">Welcome to</h5>
+    <LogoWordmark class="w-32 h-auto mt-1.5" alt="Emeris" />
+    <p class="-text-1 mt-16">Introductory guide</p>
+  </a>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import LogoWordmark from '@/components/common/LogoWordmark.vue';
+
 export default defineComponent({
   name: 'Intro',
+  components: {
+    LogoWordmark,
+  },
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.intro-panel {
+  background-image: url('~@/assets/images/intro-panel.jpg');
+}
+</style>

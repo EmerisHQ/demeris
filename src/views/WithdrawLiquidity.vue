@@ -22,7 +22,7 @@
         </Button>
       </header>
 
-      <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
+      <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
         <template v-if="state.step === 'amount'">
           <div class="w-full max-w-lg mx-auto">
             <div class="pt-8 mb-8 text-center">
