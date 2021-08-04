@@ -246,7 +246,7 @@
                 </ListItem>
                 <div class="mt-6 mb-2">
                   <FeeLevelSelector
-                    v-if="actionSteps.length > 0"
+                    v-if="actionSteps.length > 0 && gasPrice"
                     v-model:gasPriceLevel="gasPrice"
                     :steps="actionSteps"
                     @update:fees="state.fees = $event"
