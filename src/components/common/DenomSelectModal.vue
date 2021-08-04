@@ -23,7 +23,21 @@
           @select="coinListselectHandler"
         >
         </CoinList>
+
+        <div class="other-assets">
+          <div class="other-assets__title s-1 w-bold">Other assets</div>
+          <div class="other-assets__subtitle s-minus w-normal">Unvailable to swap with ATOM</div>
+          <CoinList
+            :data="keywordFilteredAssets"
+            :type="title === 'Receive' ? 'receive' : 'pay'"
+            :show-balance="showBalance"
+            :keyword="keyword"
+            @select="coinListselectHandler"
+          >
+          </CoinList>
+        </div>
       </div>
+
       <WhiteOverlay />
     </div>
   </div>
@@ -157,6 +171,18 @@ export default defineComponent({
 
     &::-webkit-scrollbar {
       display: none; /* Chrome, Safari, Opera*/
+    }
+
+    .other-assets {
+      &__title {
+        padding-top: 2.4rem;
+        color: var(--text);
+      }
+
+      &__subtitle {
+        padding-bottom: 0.8rem;
+        color: var(--muted);
+      }
     }
   }
 }
