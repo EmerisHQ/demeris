@@ -3,7 +3,13 @@
     <img class="portal" src="@/assets/svg/portal.svg" />
     <img class="surfer" src="@/assets/images/surfer.png" />
     <div v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
-      <ConnectKeplr ref="connectKeplrRef" type="welcome" @connect="cancelConnectKeplr" @warning="showWarning" />
+      <ConnectKeplr
+        ref="connectKeplrRef"
+        type="welcome"
+        @connect="cancelConnectKeplr"
+        @warning="showWarning"
+        @try-demo="tryDemo"
+      />
     </div>
 
     <div v-else-if="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
@@ -11,7 +17,7 @@
     </div>
 
     <div v-else-if="isKeplrSupported && !isKeplrInstalled" class="connect-wallet-panel">
-      <GetKeplr ref="getKeplrRef" />
+      <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
     </div>
 
     <div v-else class="connect-wallet-panel">
@@ -67,7 +73,7 @@ export default defineComponent({
     },
   },
 
-  setup(_, { emit }) {
+  setup() {
     const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);
@@ -97,17 +103,15 @@ export default defineComponent({
       isWarningNeeded.value = true;
     };
 
+    // TODO: Implement demo account
+    const tryDemo = () => {
+      window.alert('An Emeris demo is coming soon!');
+    };
+
     onMounted(async () => {
       isReturnUser.value = window.localStorage.getItem('isReturnUser');
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
-
-      /* TODO: re-add this before merging PR
-      if (isReturnUser.value) {
-        console.log('isReturnUser.value', isReturnUser.value);
-        router.push('/');
-      }
-      */
 
       // dont present spinner forever if not Chrome
       // @ts-ignore
@@ -153,6 +157,7 @@ export default defineComponent({
       isWarningNeeded,
       cancelAgreeWarning,
       cancelConnectKeplr,
+      tryDemo,
     };
   },
 });
@@ -228,17 +233,6 @@ export default defineComponent({
       line-height: 124.7%;
       font-weight: 700;
       margin-bottom: 1.6rem;
-    }
-
-    &__connecting__main {
-      display: flex;
-      flex-flow: column;
-      justify-content: center;
-      align-items: center;
-      .spinner {
-        margin-top: 1.6rem;
-        margin-bottom: 3.2rem;
-      }
     }
 
     &.agree-warning {

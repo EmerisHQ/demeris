@@ -7,10 +7,7 @@
         </div>
         <template v-else>
           <slot name="title">
-            <h2 v-if="type === 'welcome'" class="connect-wallet__title">
-              {{ $t('generic_cta.connectToEmeris') }}
-            </h2>
-            <h2 v-else class="connect-wallet__title">{{ $t('wallet.connect.modal3.title') }}</h2>
+            <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal3.title') }}</h2>
           </slot>
 
           <div class="connect-wallet__description">
@@ -23,7 +20,7 @@
 
           <div class="connect-wallet__controls">
             <Button :name="$t('wallet.connect.modal3.button1')" @click="openUrlChrome" />
-            <Button :name="$t('generic_cta.connect.modal3.button2')" @click="openUrlBrave" />
+            <Button :name="$t('wallet.connect.modal3.button2')" @click="openUrlBrave" />
           </div>
         </template>
       </div>
@@ -56,7 +53,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['cancel', 'connect'],
+  emits: ['cancel'],
 
   setup(_, { emit }) {
     const emitCancel = () => {

@@ -3,7 +3,10 @@
     <div class="connect-wallet__wrapper">
       <div class="connect-wallet__content">
         <slot name="title">
-          <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal2.title') }}</h2>
+          <h2 v-if="type === 'welcome'" class="connect-wallet__title">
+            {{ $t('generic_cta.connectToEmeris') }}
+          </h2>
+          <h2 v-else class="connect-wallet__title">{{ $t('wallet.connect.modal2.title') }}</h2>
         </slot>
 
         <div class="connect-wallet__description">
@@ -19,6 +22,13 @@
             @click="openUrl"
           />
           <Button
+            v-if="type === 'welcome'"
+            :name="$t('generic_cta.tryTheDemo')"
+            :is-outline="true"
+            @click="emitTryDemo"
+          />
+          <Button
+            v-else
             :name="$t('wallet.connect.modal2.button2')"
             class="connect-wallet__controls__button"
             :is-outline="true"
@@ -47,17 +57,21 @@ export default defineComponent({
   },
 
   props: {
-    showBanner: {
-      type: Boolean,
-      default: true,
+    type: {
+      type: String,
+      default: undefined,
     },
   },
 
-  emits: ['cancel', 'connect'],
+  emits: ['cancel', 'try-demo'],
 
   setup(_, { emit }) {
     const emitCancel = () => {
       emit('cancel');
+    };
+
+    const emitTryDemo = () => {
+      emit('try-demo');
     };
 
     const openUrl = () => {
@@ -71,7 +85,7 @@ export default defineComponent({
       location.reload();
     };
 
-    return { emitCancel, openUrl, reloadApp };
+    return { emitCancel, openUrl, reloadApp, emitTryDemo };
   },
 });
 </script>

@@ -37,6 +37,7 @@ export const messages = {
           button1: 'Connect Keplr',
           opening: 'Opening Keplr',
           connecting: 'Connecting',
+          connectingHelp: 'Stuck connecting? Make sure you have created an account in Keplr first.',
         },
         modal2: {
           title: 'Keplr is required',

@@ -22,7 +22,7 @@
               v-if="type === 'welcome'"
               :name="$t('generic_cta.tryTheDemo')"
               :is-outline="true"
-              @click="tryDemo"
+              @click="emitTryDemo"
             />
             <Button v-else :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
           </div>
@@ -33,11 +33,10 @@
             <span class="connect-wallet__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
             <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal1.connecting') }}</h2>
             <Spinner :size="3.2" />
+            <p>{{ $t('wallet.connect.modal1.connectingHelp') }}</p>
           </div>
 
-          <button class="connect-wallet__connecting__button" @click="cancel">
-            {{ $t('generic_cta.cancel') }}
-          </button>
+          <Button :name="$t('generic_cta.cancel')" :is-outline="true" @click="cancel"> </Button>
         </div>
         <ConnectBanner />
       </div>
@@ -71,7 +70,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['cancel', 'connect', 'warning'],
+  emits: ['cancel', 'connect', 'warning', 'try-demo'],
 
   setup(_, { emit }) {
     const store = useStore();
@@ -84,6 +83,10 @@ export default defineComponent({
       emit('cancel');
     };
 
+    const emitTryDemo = () => {
+      emit('try-demo');
+    };
+
     const cancel = () => {
       isConnecting.value = false;
     };
@@ -94,10 +97,8 @@ export default defineComponent({
 
     const trySignIn = () => {
       if (isWarningAgreed.value) {
-        console.log('isWarningAgreed.value', isWarningAgreed.value);
         signIn();
       } else {
-        console.log('warning not agreed');
         emit('warning');
       }
     };
@@ -107,16 +108,9 @@ export default defineComponent({
       isConnecting.value = true;
     };
 
-    // TODO: Implement demo account
-    const tryDemo = () => {
-      window.alert('An Emeris demo is coming soon!');
-    };
-
     onMounted(() => {
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
-      console.log('onMounted isWarningAgreed.value', isWarningAgreed.value);
-      console.log('onMounted isWarningNeeded.value', isWarningNeeded.value);
     });
 
     watch(isSignedIn, () => {
@@ -125,7 +119,24 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, trySignIn, tryDemo };
+    return { isConnecting, emitCancel, cancel, trySignIn, emitTryDemo };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.connect-wallet__connecting__main {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  .spinner {
+    margin-top: 1.6rem;
+    margin-bottom: 3.2rem;
+  }
+  p {
+    margin-bottom: 1.6rem;
+    color: var(--muted);
+  }
+}
+</style>
