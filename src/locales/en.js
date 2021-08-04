@@ -129,7 +129,7 @@ export const messages = {
         addLiqAction: 'Adding liquidity',
         withdrawLiqAction: 'Withdrawing liquidity',
         withdrawing: 'Withdrawing',
-        transferred: 'transferred',
+        transferred: 'Transferred',
 
         reset: 'Send another',
         next: 'Next transaction',

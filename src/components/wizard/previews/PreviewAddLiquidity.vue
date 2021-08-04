@@ -187,18 +187,18 @@ export default defineComponent({
 
     const receiveAmount = computed(() => {
       if (props.response) {
-        return +props.response.pool_coin_amount;
+        return +(props.response as AddLiquidityEndBlockResponse).pool_coin_amount;
       }
 
       return calculateSupplyTokenAmount(+data.value.coinA.amount, +data.value.coinB.amount);
     });
 
     const refundedAmount = computed(() => {
-      if (!props.response?.refunded_coins) {
+      if (!(props.response as AddLiquidityEndBlockResponse)?.refunded_coins) {
         return;
       }
 
-      return parseCoins(props.response.refunded_coins)[0];
+      return parseCoins((props.response as AddLiquidityEndBlockResponse).refunded_coins)[0];
     });
 
     watch(data, updatePoolInfo, { immediate: true });

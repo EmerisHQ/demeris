@@ -182,7 +182,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -623,8 +623,10 @@ export default defineComponent({
       emit(event);
     };
 
+    const refProps = toRefs(props);
+
     watch(
-      props,
+      [refProps.data, refProps.actionName],
       () => {
         let shouldOpenConfirmation = false;
 

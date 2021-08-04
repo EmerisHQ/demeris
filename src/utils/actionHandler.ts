@@ -1088,7 +1088,7 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
 
     if (message['@type'] === '/cosmos.bank.v1beta1.MsgSend') {
       const data: Actions.TransferData = {
-        amount: message.amount,
+        amount: Array.isArray(message.amount) ? message.amount[0] : message.amount,
         to_address: message.to_address,
         chain_name: getChainFromAddress(message.from_address).chain_name,
       };
