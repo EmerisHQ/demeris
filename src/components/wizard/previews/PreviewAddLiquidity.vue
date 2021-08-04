@@ -107,7 +107,7 @@ export default defineComponent({
       required: true,
     },
     response: {
-      type: Object as PropType<AddLiquidityEndBlockResponse>,
+      type: Object as PropType<AddLiquidityEndBlockResponse | Actions.Step>,
       default: undefined,
     },
   },
@@ -123,9 +123,11 @@ export default defineComponent({
     });
 
     const data = computed(() => {
-      if (props.response?.accepted_coins) {
-        const [coinA, coinB] = parseCoins(props.response.accepted_coins);
-        const pool = pools.value.find((item) => item.pool_coin_denom === props.response.pool_coin_denom);
+      if ((props.response as AddLiquidityEndBlockResponse)?.accepted_coins) {
+        const [coinA, coinB] = parseCoins((props.response as AddLiquidityEndBlockResponse).accepted_coins);
+        const pool = pools.value.find(
+          (item) => item.pool_coin_denom === (props.response as AddLiquidityEndBlockResponse).pool_coin_denom,
+        );
 
         return {
           coinA,
@@ -134,7 +136,9 @@ export default defineComponent({
         };
       }
 
-      return (props.step as Actions.Step).transactions[0].data as Actions.CreatePoolData;
+      const step = (props.response as Actions.Step) || props.step;
+
+      return step.transactions[0].data as Actions.CreatePoolData;
     });
 
     const chainName = computed(() => {
