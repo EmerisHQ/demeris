@@ -25,8 +25,10 @@
         </CoinList>
 
         <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
-          <div class="other-assets__title s-1 w-bold">Other assets</div>
-          <div class="other-assets__subtitle s-minus w-normal">Unvailable to swap with ATOM</div>
+          <div class="other-assets__title s-1 w-bold">{{ $t('components.denomSelect.otherAssets') }}</div>
+          <div class="other-assets__subtitle s-minus w-normal">
+            {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+          </div>
           <CoinList
             :data="keywordFilteredAssets[1]"
             :type="title === 'Receive' ? 'receive' : 'pay'"
@@ -69,6 +71,7 @@ export default defineComponent({
         return {};
       },
     },
+    counterDenom: { type: Object, required: false, default: null },
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
@@ -83,6 +86,7 @@ export default defineComponent({
 
     const displayNameAddedList = ref([]);
     const displayNameAddedOtherList = ref([]);
+
     watch(
       () => props.assets,
       async () => {
@@ -97,7 +101,7 @@ export default defineComponent({
               }),
             ),
           ];
-          console.log(props.otherAssets);
+
           if (props.otherAssets.length > 0) {
             displayNameAddedOtherList.value = [
               await Promise.all(
@@ -117,6 +121,17 @@ export default defineComponent({
       { immediate: true },
     );
 
+    const displaySeletedPair = ref('');
+    watch(
+      () => props.counterDenom,
+      async () => {
+        displaySeletedPair.value = await getDisplayName(
+          props.counterDenom.base_denom,
+          store.getters['demeris/getDexChain'],
+        );
+      },
+    );
+
     const keywordFilteredAssets = computed(() => {
       const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
         return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
@@ -133,7 +148,6 @@ export default defineComponent({
         payload.type = props.title;
         emit('select', payload);
       } else {
-        console.log('payload', payload);
         selectedDenom.value = payload.base_denom;
 
         if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
@@ -173,6 +187,7 @@ export default defineComponent({
       keywordFilteredAssets,
       displayNameAddedList,
       selectedDenom,
+      displaySeletedPair,
     };
   },
 });
