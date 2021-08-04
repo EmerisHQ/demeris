@@ -753,7 +753,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            setCounterPairCoinAmount('Pay');
+            // setCounterPairCoinAmount('Pay');
           }, priceUpdateTerm * 1000);
         }
       },
