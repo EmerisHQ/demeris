@@ -119,7 +119,7 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
-        revertTx: 'reverting transfer...',
+        revertTx: 'Reverting transfer...',
         contactSupport: 'Contact support ↗️',
         backToPortfolio: 'Back to portfolio',
         genericAction: 'Transacting',
@@ -129,7 +129,7 @@ export const messages = {
         addLiqAction: 'Adding liquidity',
         withdrawLiqAction: 'Withdrawing liquidity',
         withdrawing: 'Withdrawing',
-        transferred: 'transferred',
+        transferred: 'Transferred',
 
         reset: 'Send another',
         next: 'Next transaction',
@@ -145,7 +145,7 @@ export const messages = {
         swapActionFail: 'Swap failed',
         createPoolActionFail: 'Create pool failed',
         addLiqActionFail: 'Add liquidity failed',
-        withdrawLiqActionFail: 'Withdraw liquidity failed',
+        withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
       },
       swap: {

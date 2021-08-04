@@ -130,7 +130,11 @@
               class="mr-3"
             />
             <span class="font-medium">
-              <Denom v-if="state.currentAsset" :name="state.currentAsset?.base_denom || form.balance.denom || ''" />
+              <Denom
+                v-if="state.currentAsset"
+                :name="state.currentAsset?.base_denom || form.balance.denom || 'Select asset'"
+              />
+              <template v-else>Select asset</template>
             </span>
           </div>
 
@@ -215,20 +219,36 @@
           :disabled="!isValid"
           :click-function="onSubmit"
         />
-      </div>
-
-      <div v-if="state.currentAsset && hasPrice && !hasFunds" class="move-form-amount__buy">
-        <button class="shadow-button" @click="openAssetPage">
-          <div class="inline-flex items-center">
-            <span>{{ $t('generic_cta.get') }}&nbsp;</span>
-            <Denom :name="state.currentAsset.base_denom" />
-            <Icon name="ArrowRightIcon" :icon-size="1" class="ml-2" />
+        <button
+          v-if="state.currentAsset && hasPrice && !hasFunds"
+          class="
+            get-asset-cta
+            mt-6
+            relative
+            h-12
+            py-3
+            px-4
+            flex
+            items-center
+            w-full
+            bg-surface
+            shadow-button
+            rounded-xl
+            overflow-hidden
+            outline-none
+            text-left
+            font-medium
+            transition
+            transform
+            hover:-translate-y-px
+            active:opacity-70 active:transform-none
+          "
+          @click="openAssetPage"
+        >
+          <span> {{ $t('generic_cta.get') }} <Denom :name="state.currentAsset?.base_denom" /> &rarr; </span>
+          <div class="absolute right-4 -mt-4 transform -rotate-6">
+            <CircleSymbol size="lg" :denom="state.currentAsset?.base_denom" />
           </div>
-          <CircleSymbol
-            size="lg"
-            :denom="state.currentAsset.base_denom"
-            class="move-form-amount__buy__button__symbol"
-          />
         </button>
       </div>
     </template>
@@ -559,14 +579,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-// .btn {
-//   &:hover:not(:active),
-//   &:focus:not(:active) {
-//     --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
-//   }
-//   &:active {
-//     opacity: 0.7;
-//     transition-duration: 0s;
-//   }
-// }
+.get-asset-cta {
+  background-image: url('~@/assets/images/gold-rings-2.png');
+  background-position: 121% 70%;
+  background-repeat: no-repeat;
+  background-size: 52%;
+}
 </style>

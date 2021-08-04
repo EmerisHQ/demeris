@@ -22,7 +22,11 @@
     <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
     when it changed-->
 
-    <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer" @click="toggleDenomSelectModal">
+    <div
+      class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
+      :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
+      @click="toggleDenomSelectModal"
+    >
       <CircleSymbol
         :denom="selectedDenom?.base_denom ?? 'empty'"
         :chain-name="selectedDenom?.on_chain ?? undefined"
@@ -54,7 +58,10 @@
       </div>
     </div>
 
-    <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
+    <label
+      v-if="isSelected"
+      class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text"
+    >
       <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
         {{ inputHeader }}
       </div>

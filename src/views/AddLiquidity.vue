@@ -1,5 +1,5 @@
 <template>
-  <div class="add-liquidity relative flex w-full min-h-screen justify-center">
+  <div class="flex w-full min-h-screen justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <header class="flex items-center justify-between py-6 h-24">
         <Button variant="link" :full-width="false" :disabled="state.step === 'send'" :click-function="goBack">
@@ -57,7 +57,6 @@
                       :name="$t('generic_cta.max')"
                       class="flex"
                       :class="{ 'text-negative-text': !hasSufficientFunds }"
-                      :disabled="hasPrice"
                       size="sm"
                       variant="secondary"
                       rounded
@@ -86,7 +85,7 @@
                 </p>
               </Alert>
 
-              <fieldset class="add-liquidity__input bg-surface shadow-card rounded-2xl">
+              <fieldset class="bg-surface shadow-card rounded-2xl">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
                   <span>Supply</span>
 
@@ -117,11 +116,10 @@
                 </div>
                 <DenomSelect
                   v-model:amount="form.coinA.amount"
-                  :input-header="`Pay`"
+                  :input-header="``"
                   :selected-denom="form.coinA.asset"
                   :assets="balances"
                   :show-chain="false"
-                  class="w-full"
                   @select="coinSelectHandler('coinA', $event)"
                   @change="coinAChangeHandler"
                 />
@@ -156,7 +154,7 @@
                 </button>
               </fieldset>
 
-              <fieldset class="add-liquidity__input bg-surface shadow-card rounded-2xl mt-4">
+              <fieldset class="bg-surface shadow-card rounded-2xl mt-4">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
                   <span>Supply</span>
 
@@ -187,11 +185,10 @@
                 </div>
                 <DenomSelect
                   v-model:amount="form.coinB.amount"
-                  :input-header="`Pay`"
+                  :input-header="``"
                   :selected-denom="form.coinB.asset"
                   :assets="balancesForSecond"
                   :show-chain="false"
-                  class="w-full"
                   @select="coinSelectHandler('coinB', $event)"
                   @change="coinBChangeHandler"
                 />
@@ -226,7 +223,7 @@
                 </button>
               </fieldset>
 
-              <div class="mt-2 max-w-sm mx-auto">
+              <div class="mt-2 w-full max-w-sm mx-auto">
                 <ListItem inset size="md" label="Price">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> &asymp;
                   <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
@@ -255,10 +252,7 @@
                     /> /-->
                   </div>
                 </ListItem>
-              </div>
-
-              <div class="w-full max-w-sm mx-auto mt-6">
-                <div class="mb-2">
+                <div class="mt-6 mb-2">
                   <FeeLevelSelector
                     v-if="actionSteps.length > 0"
                     v-model:gasPriceLevel="gasPrice"
@@ -303,16 +297,14 @@
         </template>
 
         <template v-else>
-          <section class="add-liquidity__content add-liquidity__review">
-            <TxStepsModal
-              :data="actionSteps"
-              :gas-price-level="gasPrice"
-              action-name="addliquidity"
-              @transacting="goToStep('send')"
-              @failed="goToStep('review')"
-              @reset="resetHandler"
-            />
-          </section>
+          <TxStepsModal
+            :data="actionSteps"
+            :gas-price-level="gasPrice"
+            action-name="addliquidity"
+            @transacting="goToStep('send')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+          />
         </template>
       </main>
     </div>

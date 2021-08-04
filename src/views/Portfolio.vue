@@ -11,11 +11,7 @@
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <router-link
-              v-if="!balances.length"
-              class="portfolio__assets__header__link flex items-center font-medium"
-              to="/assets"
-            >
+            <router-link v-if="!balances.length" class="font-medium" to="/assets">
               {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
           </header>
@@ -34,13 +30,6 @@
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.pools.title') }}</h2>
-            <router-link
-              v-if="poolsInvested.length"
-              class="portfolio__pools__header__link flex items-center font-medium"
-              to="/pools"
-            >
-              {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon class="ml-3" />
-            </router-link>
           </header>
 
           <div v-if="poolsInvested.length">
@@ -67,7 +56,6 @@ import { computed } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -87,7 +75,6 @@ export default {
     LiquiditySwap,
     TotalPrice,
     AssetsTable,
-    ArrowRightIcon,
     Pools,
     Intro,
   },

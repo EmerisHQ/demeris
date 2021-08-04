@@ -2,7 +2,6 @@
   <button
     class="
       moonpay-banner
-      bg-app
       text-left
       shadow-card
       rounded-2xl
@@ -14,7 +13,7 @@
     "
     :class="[
       `moonpay-banner--${size}`,
-      size === 'small' ? 'theme-inverse dark:theme-inverse' : 'bg-surface dark:bg-fg',
+      size === 'small' ? 'theme-inverse dark:theme-inverse bg-app' : 'bg-surface dark:bg-fg',
     ]"
     @click="goMoon"
   >

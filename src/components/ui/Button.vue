@@ -1,5 +1,10 @@
 <template>
-  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
+  <div
+    :class="{ 'inline-flex': !fullWidth }"
+    @mouseenter="toggleToolTip('show')"
+    @mouseleave="toggleToolTip('hide')"
+    @click="void 0"
+  >
     <!-- Basic button implementation. At minimum primary/secondary/link types, loading and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
       :class="[

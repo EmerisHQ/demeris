@@ -3,196 +3,219 @@
     :is="variant === 'step' ? 'div' : 'Modal'"
     :variant="variant === 'modal' ? 'bottom' : null"
     :show-close-button="variant === 'modal' ? false : null"
-    :body-class="{ 'bg-brand': status === 'complete' && variant === 'modal', 'p-6': variant === 'modal' }"
+    class="text-center m-auto w-full max-w-lg"
+    :body-class="
+      variant === 'modal'
+        ? { 'bg-brand': status === 'complete' && variant === 'modal', 'p-6': variant === 'modal' }
+        : null
+    "
     @close="emitClose"
   >
-    <div class="text-center">
-      <div v-if="iconType" class="flex items-center justify-center my-6">
-        <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
-        <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
-        <Icon v-else name="ErrorIcon" size="3" class="text-negative" />
-      </div>
-      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="swapped-image -mt-6 -mx-6" />
-      <div class="text-muted">
-        <template v-if="status == 'failed' || status == 'unknown'">
+    <div v-if="iconType" class="flex items-center justify-center my-6">
+      <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
+      <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+      <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
+    </div>
+    <div v-else-if="status === 'complete' && tx.name === 'swap'" class="swapped-image -mt-6 -mx-6" />
+    <div class="text-muted">
+      <template v-if="status == 'failed' || status == 'unknown'">
+        <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+          <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
+        </template>
+        <template v-if="tx.name == 'transfer'">
+          <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
+        </template>
+        <template v-if="tx.name == 'swap'">
+          <Denom :name="getDenom(tx.data.from.denom)" /> &rarr; <Denom :name="getDenom(tx.data.to.denom)" />
+        </template>
+        <template v-if="tx.name == 'addliquidity'">
+          <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; <Denom :name="getDenom(tx.data.coinB.denom)" /> pool
+        </template>
+        <template v-if="tx.name == 'createpool'">
+          <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; <Denom :name="getDenom(tx.data.coinB.denom)" /> pool
+        </template>
+        <template v-if="tx.name == 'withdrawliquidity'">
+          <Denom :name="getDenom(tx.data.poolCoin.denom)" />
+        </template>
+      </template>
+      <template v-else>
+        {{ overline }}
+      </template>
+    </div>
+
+    <div
+      v-if="status.startsWith('complete') && tx.name !== 'swap'"
+      class="transferred-image block mx-auto bg-no-repeat bg-center bg-contain bg w-60 h-60 mb-8 mt-4"
+    />
+    <div class="font-bold mt-2" :class="variant === 'modal' ? 'text-2' : 'text-3'">{{ title }}</div>
+    <div>
+      <template
+        v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
+      >
+        <div
+          v-if="status == 'delay' || status == 'IBC_receive_failed'"
+          class="mx-auto max-w-sm leading-copy text-muted mt-2"
+        >
+          {{ subtitle }}
+        </div>
+        <div
+          v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
+          class="w-full max-w-lg flex items-center justify-center -space-x-8 -my-6"
+        >
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
+          </template>
+
+          <template v-if="tx.name == 'transfer'">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+          </template>
+
+          <template v-if="tx.name == 'addliquidity'">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
+          </template>
+
+          <template v-if="tx.name == 'withdrawliquidity'">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
+          </template>
+        </div>
+
+        <div v-if="status === 'complete'" class="mt-4 leading-copy">
+          <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
+            You received
+            <span class="font-bold"><AmountDisplay
+              :amount="{
+                denom: txResult.demandCoinDenom,
+                amount: String(txResult.demandCoinSwappedAmount),
+              }"
+            /></span><br />
+            on <ChainName :name="'cosmos-hub'" />.
+            <div v-if="txResult.swappedPercent < 100" class="my-4">
+              <span class="font-bold">
+                <AmountDisplay
+                  :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                />
+              </span>
+              not swapped
+            </div>
+          </template>
+        </div>
+        <div
+          v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'"
+          class="mt-6 font-medium text-1"
+        >
+          <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+        </div>
+        <div
+          v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'"
+          class="mt-0.5 mb-6 text-muted"
+          :class="{ 'mb-12': status === 'complete' }"
+        >
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" />
+          </template>
+          <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /></template>
+        </div>
+      </template>
+      <template v-else>
+        <p v-if="status === 'keplr-reject'" class="mt-4">
+          <a href="https://faq.keplr.app" target="_blank" class="font-medium text-link hover:text-link-hover">
+            {{ $t('components.txHandlingModal.keplrSupport') }}
+          </a>
+        </p>
+
+        <p v-if="status === 'unknown'" class="mt-4">
+          <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
+            {{ $t('components.txHandlingModal.contactSupport') }}
+          </a>
+        </p>
+        <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+            Your
+            <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+            <ChainName :name="tx.data.from_chain" /> could not be transferred to
+            <ChainName :name="tx.data.to_chain" />
           </template>
           <template v-if="tx.name == 'transfer'">
-            <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
+            Your
+            <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+            <ChainName :name="tx.data.chain_name" /> could not be transferred.
           </template>
           <template v-if="tx.name == 'swap'">
-            <Denom :name="getDenom(tx.data.from.denom)" /> &rarr; <Denom :name="getDenom(tx.data.to.denom)" />
+            Your
+            <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not
+            be swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
           </template>
           <template v-if="tx.name == 'addliquidity'">
-            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
+            Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot;
+            <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
           </template>
           <template v-if="tx.name == 'createpool'">
-            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
+            Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
+            <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
           </template>
           <template v-if="tx.name == 'withdrawliquidity'">
-            <Denom :name="getDenom(tx.data.poolCoin.denom)" />
+            Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos Hub.
           </template>
-        </template>
-        <template v-else>
-          {{ overline }}
-        </template>
-      </div>
-
-      <div
-        v-if="status.startsWith('complete') && tx.name !== 'swap'"
-        class="transferred-image block mx-auto bg-no-repeat bg-center bg-contain bg w-60 h-60 mb-8 mt-4"
+          <Collapse v-if="errorDetails" label-open="Show details" label-hide="Hide details" class="mt-8 items-center">
+            <Alert status="info" :show-icon="false">
+              <p v-if="errorDetails.status" class="font-medium block mb-1">Status</p>
+              <p v-if="errorDetails.status">{{ errorDetails.status }}</p>
+              <p v-if="errorDetails.ticket" class="font-medium block mb-1 mt-4">Ticket</p>
+              <p v-if="errorDetails.ticket">{{ errorDetails.ticket }}</p>
+              <p v-if="errorDetails.message" class="font-medium block mb-1 mt-4">Error</p>
+              <p v-if="errorDetails.message">{{ errorDetails.message }}</p>
+            </Alert>
+          </Collapse>
+        </div>
+      </template>
+    </div>
+    <div v-if="secondaryButton || primaryButton" class="max-w-sm mx-auto mt-12 space-y-6 flex flex-col items-center">
+      <Button
+        v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
+        :name="secondaryButton"
+        variant="link"
+        :full-width="false"
+        :click-function="
+          () => {
+            router.push('/send');
+          }
+        "
       />
-      <div class="font-bold mt-2" :class="variant === 'modal' ? 'text-2' : 'text-3'">{{ title }}</div>
-      <div>
-        <template
-          v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
-        >
-          <div v-if="status == 'delay' || status == 'IBC_receive_failed'">
-            {{ subtitle }}
-          </div>
-          <div
-            v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
-            class="w-full flex items-center justify-center"
-          >
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
-              <EphemerisSpinner class="w-1/2" />
-              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
-            </template>
-
-            <template v-if="tx.name == 'transfer'">
-              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
-              <EphemerisSpinner class="w-1/2" />
-              <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
-            </template>
-          </div>
-
-          <div v-if="status === 'complete'" class="mt-4 leading-copy">
-            <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
-              You received
-              <span class="font-bold"
-                ><AmountDisplay
-                  :amount="{
-                    denom: txResult.demandCoinDenom,
-                    amount: String(txResult.demandCoinSwappedAmount),
-                  }" /></span
-              ><br />
-              on <ChainName :name="'cosmos-hub'" />.
-              <div v-if="txResult.swappedPercent < 100" class="my-4">
-                <span class="font-bold">
-                  <AmountDisplay
-                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
-                  />
-                </span>
-                not swapped
-              </div>
-            </template>
-          </div>
-          <div class="mt-6 font-medium text-1">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
-            </template>
-          </div>
-          <div class="mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" />
-            </template>
-            <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /></template>
-          </div>
-        </template>
-        <template v-else>
-          <p v-if="status === 'keplr-reject'" class="mt-4">
-            <a href="https://faq.keplr.app" target="_blank" class="font-medium text-link hover:text-link-hover">
-              {{ $t('components.txHandlingModal.keplrSupport') }}
-            </a>
-          </p>
-
-          <p v-if="status === 'unknown'" class="mt-4">
-            <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
-              {{ $t('components.txHandlingModal.contactSupport') }}
-            </a>
-          </p>
-          <div v-if="status === 'keplr-sign'" class="h-14" />
-          <div v-if="status === 'keplr-reject'" class="h-8" />
-          <div v-if="status === 'unknown'" class="h-6" />
-          <div v-else-if="status === 'failed'" class="text-muted mt-4 mb-8">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-              <ChainName :name="tx.data.from_chain" /> could not be transferred to
-              <ChainName :name="tx.data.to_chain" />
-            </template>
-            <template v-if="tx.name == 'transfer'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-              <ChainName :name="tx.data.chain_name" /> could not be transferred.
-            </template>
-            <template v-if="tx.name == 'swap'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not
-              be swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'addliquidity'">
-              Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> /
-              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'createpool'">
-              Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
-              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'withdrawliquidity'">
-              Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
-              Hub.
-            </template>
-            <Collapse v-if="errorDetails" label-open="Show details" label-hide="Hide details" class="mt-8 items-center">
-              <Alert status="info" :show-icon="false">
-                <p v-if="errorDetails.status" class="font-medium block mb-1">Status</p>
-                <p v-if="errorDetails.status">{{ errorDetails.status }}</p>
-                <p v-if="errorDetails.ticket" class="font-medium block mb-1 mt-4">Ticket</p>
-                <p v-if="errorDetails.ticket">{{ errorDetails.ticket }}</p>
-                <p v-if="errorDetails.message" class="font-medium block mb-1 mt-4">Error</p>
-                <p v-if="errorDetails.message">{{ errorDetails.message }}</p>
-              </Alert>
-            </Collapse>
-          </div>
-        </template>
-      </div>
-      <div v-if="secondaryButton || primaryButton" class="max-w-sm mx-auto mt-12 space-y-6">
-        <Button
-          v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
-          :name="secondaryButton"
-          variant="link"
-          :click-function="
-            () => {
-              router.push('/send');
-            }
-          "
-        />
-        <Button
-          v-if="primaryButton"
-          :name="primaryButton"
-          variant="primary"
-          :click-function="
-            () => {
-              status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
-            }
-          "
-        />
-        {{ router?.pathname }}
-        <Button
-          v-if="status === 'unknown'"
-          :name="$t('components.txHandlingModal.backToPortfolio')"
-          :click-function="unknownHandler"
-        />
-        <Button
-          v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
-          :name="secondaryButton"
-          variant="link"
-          :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
-          class="mb-4"
-        />
-      </div>
+      <Button
+        v-if="primaryButton"
+        :name="primaryButton"
+        variant="primary"
+        :full-width="false"
+        :click-function="
+          () => {
+            status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
+          }
+        "
+      />
+      {{ router?.pathname }}
+      <Button
+        v-if="status === 'unknown'"
+        variant="link"
+        :full-width="false"
+        :name="$t('components.txHandlingModal.backToPortfolio')"
+        :click-function="unknownHandler"
+      />
+      <Button
+        v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
+        :name="secondaryButton"
+        variant="link"
+        :full-width="false"
+        :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
+        class="mb-4"
+      />
     </div>
   </component>
 </template>
@@ -350,6 +373,8 @@ export default defineComponent({
             title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
             subtitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
             overline.value = '';
+            primaryButton.value = '';
+            secondaryButton.value = '';
             break;
           case 'unknown':
             title.value = t('components.txHandlingModal.somethingWentWrong');

@@ -2,7 +2,7 @@
   <List>
     <ListItem :label="$t('components.previews.transfer.sendLbl')">
       <div class="flex justify-end items-center">
-        <div>
+        <div class="text-right">
           <AmountDisplay
             class="font-medium"
             :class="context === 'widget' ? 'text-0' : 'text-1'"

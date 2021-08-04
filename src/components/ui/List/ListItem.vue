@@ -22,7 +22,7 @@
           </span>
         </div>
 
-        <div class="text-muted">
+        <div class="text-muted mt-0.5">
           <slot name="description">
             <p v-if="description" class="list-item__description__text">{{ description }}</p>
           </slot>

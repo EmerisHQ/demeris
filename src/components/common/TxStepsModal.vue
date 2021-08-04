@@ -1,7 +1,10 @@
 <template>
   <div
-    class="relative w-full top-0 left-0 overflow-hidden z-10"
-    :class="{ 'bg-surface shadow-panel rounded-2xl': variant === 'widget' }"
+    class="w-full top-0 left-0 z-10"
+    :class="{
+      'relative overflow-hidden bg-surface shadow-panel rounded-2xl': variant === 'widget',
+      'flex-1 flex flex-col items-stretch': variant !== 'widget',
+    }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
     <template v-if="isTransferConfirmationOpen">
@@ -13,7 +16,7 @@
     </template>
 
     <template v-else>
-      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
+      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="w-full max-w-lg mx-auto">
         <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
           {{ currentData.title }}
         </h1>
@@ -381,13 +384,13 @@ export default defineComponent({
         case 'redeem':
           break;
         case 'addliquidity':
-          modifiedData.title = 'Review your pool liquidity details';
+          modifiedData.title = 'Review your pool liquidity provision';
           break;
         case 'withdrawliquidity':
-          modifiedData.title = 'Review your withdraw liquidity details';
+          modifiedData.title = 'Review your liquidity withdrawal';
           break;
         case 'createpool':
-          modifiedData.title = 'Review your pool liquidity details';
+          modifiedData.title = 'Review your liquidity pool provision';
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
