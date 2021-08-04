@@ -742,7 +742,8 @@ export default {
         return;
       }
 
-      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(form.coinA.amount);
+      const bigAmountA = new BigNumber(+(form.coinA.amount));
+      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(bigAmountA);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -761,7 +762,9 @@ export default {
         return;
       }
 
-      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).dividedBy(form.coinB.amount);
+      const bigAmountB = new BigNumber(+(form.coinB.amount));
+      const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
+      const result = bigAmountB.dividedBy(bigExchangeAmount);
 
       form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -860,22 +863,25 @@ export default {
         if (state.isMaximumAmountChecked) {
           if (form.coinA.asset && form.coinB.asset) {
             const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-            const amountA = parseCoins(form.coinA.asset.amount)[0].amount;
+            const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
+            console.log("fee", feeA);
+
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
-            const amountB = parseCoins(form.coinB.asset.amount)[0].amount;
+            const amountB = parseCoins(form.coinB.asset.amount)[0].amount  || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
             const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
 
             const bigAmountA = new BigNumber(amountA).minus(feeA);
-
             const bigAmountB = new BigNumber(amountB).minus(feeB);
+
+            const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
 
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
 
-            if (minAmount.isEqualTo(bigAmountA)) {
+            if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
               form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
 
               form.coinB.amount = bigAmountA
@@ -883,7 +889,7 @@ export default {
                 .shiftedBy(-precisionB)
                 .decimalPlaces(precisionB)
                 .toString();
-            } else {
+            } else if (minAmount.isEqualTo(bigAmountB) && amountsPositive) {
               form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
 
               form.coinA.amount = bigAmountB
@@ -891,6 +897,9 @@ export default {
                 .shiftedBy(-precisionA)
                 .decimalPlaces(precisionA)
                 .toString();
+            } else {
+              form.coinA.amount = "0";
+              form.coinB.amount = "0";
             }
           }
 
