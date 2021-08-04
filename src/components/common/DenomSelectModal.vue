@@ -2,7 +2,7 @@
   <div class="denom-select-modal">
     <ChainSelectModal
       v-if="isModalOpen"
-      :assets="assets"
+      :assets="chainSelectModalData"
       :title="'Select chain'"
       :func="toggleChainSelectModal"
       :selected-denom="selectedDenom"
@@ -79,6 +79,8 @@ export default defineComponent({
     const keyword = ref('');
     const selectedDenom = ref(null);
 
+    const chainSelectModalData = ref(props.assets);
+
     const displayNameAddedList = ref([]);
     const displayNameAddedOtherList = ref([]);
     watch(
@@ -128,9 +130,15 @@ export default defineComponent({
         payload.type = props.title;
         emit('select', payload);
       } else {
+        console.log('payload', payload);
         selectedDenom.value = payload.base_denom;
 
         if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+          chainSelectModalData.value = props.assets;
+          toggleChainSelectModal();
+          return;
+        } else if (props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+          chainSelectModalData.value = props.otherAssets;
           toggleChainSelectModal();
           return;
         }
@@ -153,6 +161,7 @@ export default defineComponent({
       isModalOpen,
       toggleChainSelectModal,
       coinListselectHandler,
+      chainSelectModalData,
       chainSelectHandler,
       keyword,
       keywordFilteredAssets,
