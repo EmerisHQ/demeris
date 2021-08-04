@@ -65,7 +65,7 @@ export default defineComponent({
 
         return false;
       } catch (e) {
-        console.log(e);
+        console.error(e);
         return false;
       }
     });

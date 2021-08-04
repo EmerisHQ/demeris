@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
@@ -58,7 +58,7 @@ export default defineComponent({
           ? formatter
               .format((price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
               .split('.')
-          : parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
+          : '-';
       } else if (!props.showZero) {
         value = price.value ? formatter.format(price.value).split('.') : '-';
       } else {
@@ -81,10 +81,13 @@ export default defineComponent({
     );
 
     watch(
-      () => [props.autoUpdate, priceObserver, props.amount],
-      ([autoUpdate]) => {
-        if (autoUpdate) {
-          price.value = priceObserver.value;
+      () => [props.autoUpdate, props.amount, priceObserver],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([autoUpdate, amount], [_, oldAmount]) => {
+        if (autoUpdate || (amount as Amount).denom !== (oldAmount as Amount).denom) {
+          nextTick(() => {
+            price.value = priceObserver.value;
+          });
         }
       },
     );

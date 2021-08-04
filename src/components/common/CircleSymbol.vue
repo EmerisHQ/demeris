@@ -14,7 +14,7 @@
       </div>
     </template>
 
-    <template v-else-if="assetConfig">
+    <template v-else-if="assetConfig && !isPoolCoin">
       <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
       <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
       <img v-if="glow" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
@@ -99,25 +99,19 @@ export default defineComponent({
     });
 
     const assetConfig = computed(() => {
-      if (isPoolCoin.value) {
-        return;
-      }
-
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
       const chains: Chains = store.getters['demeris/getChains'] || [];
 
-      const denomConfig = verifiedDenoms.find((item) => item.name === denoms.value[0]);
+      const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
 
       if (!denomConfig) {
         return;
       }
 
       const chainConfig = chains[denomConfig.chain_name];
+      denomConfig.logo = denomConfig.logo || chainConfig?.logo;
 
-      return {
-        ...denomConfig,
-        logo: denomConfig.logo || chainConfig?.logo,
-      };
+      return { ...denomConfig };
     });
 
     const isVerified = computed(() => {
@@ -141,7 +135,7 @@ export default defineComponent({
         return true;
       }
 
-      if (props.variant === 'asset' && !isPoolCoin.value) {
+      if (props.variant === 'asset') {
         return assetConfig.value?.chain_name === props.chainName;
       }
 
@@ -230,6 +224,7 @@ export default defineComponent({
       assetConfig,
       denoms,
       innerStyle,
+      isPoolCoin,
       isLoaded,
       isNativeChain,
       isVerified,
@@ -264,7 +259,7 @@ export default defineComponent({
   }
 
   &--lg {
-    --symbol-size: 4rem;
+    --symbol-size: 4.2rem;
   }
 
   &--xl {

@@ -156,7 +156,7 @@ export default defineComponent({
 
       from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
 
-      if (to.chain) {
+      if (to.chain && !to.address) {
         to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
       }
 

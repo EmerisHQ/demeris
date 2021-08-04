@@ -2,11 +2,7 @@
   <div class="move-form">
     <template v-if="step === 'amount'">
       <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
-      <MoveFormAmount v-if="balances" :balances="balances" @next="generateSteps" />
-
-      <div class="move-form__fees">
-        <FeeLevelSelector v-if="steps.length > 0" v-model:gasPriceLevel="gasPrice" :steps="steps" />
-      </div>
+      <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
     </template>
 
     <template v-else>
@@ -29,7 +25,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
@@ -46,7 +41,6 @@ export default defineComponent({
   components: {
     MoveFormAmount,
     TxStepsModal,
-    FeeLevelSelector,
   },
 
   props: {
@@ -65,6 +59,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
+    const gasPrice = computed(() => {
+      return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
 
     const form: MoveAssetsForm = reactive({
       balance: {
@@ -78,10 +75,6 @@ export default defineComponent({
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
-    });
-
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     watch(form, async () => {
@@ -134,7 +127,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { steps, generateSteps, form, goToStep, gasPrice, resetHandler };
+    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler };
   },
 });
 </script>
@@ -144,12 +137,6 @@ export default defineComponent({
   &__title {
     text-align: center;
     margin-bottom: 3.2rem;
-  }
-
-  &__fees {
-    margin-top: 2.4rem;
-    margin-left: -2.4rem;
-    margin-right: -2.4rem;
   }
 }
 </style>

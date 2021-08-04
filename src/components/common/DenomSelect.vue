@@ -59,7 +59,10 @@
 
   <DenomSelectModal
     v-show="isOpen"
+    v-bind="$attrs"
+    :other-assets="otherAssets"
     :assets="assets"
+    :counter-denom="counterDenom"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
     @select="denomSelectHandler"
@@ -82,7 +85,14 @@ export default defineComponent({
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
+    counterDenom: { type: Object, required: false, default: null },
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
@@ -207,9 +217,6 @@ export default defineComponent({
     }
 
     &-image {
-      width: 2.4rem;
-      height: 2.4rem;
-
       margin-right: 1.2rem;
 
       cursor: pointer;

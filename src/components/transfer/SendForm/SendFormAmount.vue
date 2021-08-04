@@ -128,6 +128,7 @@
 </template>
 
 <script lang="ts">
+import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -143,7 +144,7 @@ import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { SendAddressForm } from '@/types/actions';
-import { Balances } from '@/types/api';
+import { Balances, Chain } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -166,6 +167,10 @@ export default defineComponent({
     balances: {
       type: Object as PropType<Balances>,
       required: true,
+    },
+    fees: {
+      type: Object,
+      default: undefined,
     },
   },
 
@@ -190,6 +195,20 @@ export default defineComponent({
       });
 
       return formatter.format(+state.usdValue);
+    });
+
+    const feesAmount = computed(() => {
+      const result = {};
+
+      if (props.fees) {
+        for (const [, obj] of Object.entries(props.fees)) {
+          for (const [denom, value] of Object.entries(obj)) {
+            result[denom] = value;
+          }
+        }
+      }
+
+      return result;
     });
 
     const denomDecimals = computed(() => {
@@ -219,9 +238,11 @@ export default defineComponent({
         return false;
       }
 
-      const cryptoAmount = +form.balance.amount * denomDecimals.value;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
+      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
-      return +parseCoins(state.currentAsset.amount)[0].amount >= cryptoAmount;
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
     });
 
     const isValid = computed(() => {
@@ -252,8 +273,11 @@ export default defineComponent({
 
     const setCurrentAsset = (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
-      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-      form.chain_name = asset.on_chain as string;
+
+      if (asset) {
+        form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+        form.chain_name = asset.on_chain as string;
+      }
     };
 
     const toggleSelectModal = (asset?: Record<string, unknown>) => {
@@ -263,20 +287,64 @@ export default defineComponent({
       state.isSelectModalOpen = !state.isSelectModalOpen;
     };
 
+    const findDefaultAsset = () => {
+      const sortedBalances = [...props.balances].sort((a, b) =>
+        +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
+      );
+      const chains: Chain[] = Object.values(store.getters['demeris/getChains']);
+
+      try {
+        const prefix = bech32.decode(form.recipient).prefix;
+        const chain = chains.find((item) => item.node_info.bech32_config.prefix_account === prefix);
+
+        if (!chain) {
+          setCurrentAsset(sortedBalances[0]);
+          return;
+        }
+
+        const availableAssets = [];
+        for (const nativeDenom of chain.denoms) {
+          let asset = sortedBalances.find(
+            (item) => item.on_chain === chain.chain_name && item.base_denom === nativeDenom.name,
+          );
+          // Find native denom from current chain in another
+          if (!asset) {
+            asset = sortedBalances.find((item) => item.base_denom === nativeDenom.name);
+          }
+          if (asset) {
+            availableAssets.push(asset);
+          }
+        }
+
+        if (!availableAssets.length) {
+          setCurrentAsset(sortedBalances[0]);
+          return;
+        }
+
+        setCurrentAsset(availableAssets[0]);
+      } catch (e) {
+        setCurrentAsset(props.balances[0]);
+      }
+    };
+
     // TODO: Select chain based in user option
     watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset],
+      () => [state.isMaximumAmountChecked, state.currentAsset, props.fees],
       () => {
         if (state.isMaximumAmountChecked) {
-          const assetAmount = +parseCoins(state.currentAsset.amount)[0].amount;
-          form.balance.amount = (assetAmount / denomDecimals.value).toString();
+          const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
+          const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+
+          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
+          return;
         }
       },
     );
 
-    // TODO: Select defaut asset based in specific conditions
+    // Select defaut asset based in address prefix
     if (!state.currentAsset) {
-      setCurrentAsset(props.balances[0]);
+      findDefaultAsset();
     }
 
     return {
@@ -303,7 +371,10 @@ export default defineComponent({
   justify-content: center;
 
   &--insufficient-funds &__input {
-    color: #ca0865;
+    color: var(--negative-text);
+  }
+  &--insufficient-funds &__assets__item__amount__available {
+    color: var(--negative-text);
   }
 
   &__select-wrapper {

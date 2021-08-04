@@ -56,7 +56,7 @@ export function getChannel(path, index) {
 }
 export function autoLogin() {
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (last && Date.now() < parseInt(last) + 60000) {
+  if (last && last != '' && Date.now() < parseInt(last) + 60000) {
     return true;
   } else {
     return false;
