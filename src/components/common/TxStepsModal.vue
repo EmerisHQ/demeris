@@ -203,12 +203,13 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
+import { FeeTotals, GasPriceLevel, IBCBackwardsData, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
+  getFeeForChain,
   msgFromStepTransaction,
   validateStepFeeBalances,
 } from '@/utils/actionHandler';
@@ -340,7 +341,7 @@ export default defineComponent({
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
-
+      console.log(currentStepData);
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -374,6 +375,17 @@ export default defineComponent({
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
+
+      for (const stepTx of modifiedData.data.transactions) {
+        if (stepTx.addFee) {
+          console.log(stepTx);
+          (stepTx.data as IBCBackwardsData).amount.amount = (
+            parseInt((stepTx.data as IBCBackwardsData).amount.amount) +
+            parseFloat(stepTx.feeToAdd[0].amount[props.gasPriceLevel]) * 300000
+          ).toString();
+          console.log(modifiedData);
+        }
+      }
 
       return modifiedData;
     });

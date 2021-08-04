@@ -99,6 +99,7 @@ export async function transfer({
 }) {
   const result = {
     steps: [],
+    mustAddFee: false,
     output: {
       amount: {
         denom: '',
@@ -194,9 +195,13 @@ export async function transfer({
       });
       return result;
     } else {
+      result.mustAddFee = true;
+
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
@@ -236,9 +241,12 @@ export async function transfer({
           },
         });
       } else {
+        result.mustAddFee = true;
         result.steps.push({
           name: 'ibc_backward',
           status: 'pending',
+          feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+          addFee: true,
           data: {
             amount: amount,
             from_chain: chain_name,
@@ -299,6 +307,7 @@ export async function move({
       },
       chain_name: '',
     },
+    mustAddFee: false,
   };
   if (isNative(amount.denom)) {
     // If NOT an IBC denom
@@ -395,6 +404,8 @@ export async function move({
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
@@ -402,6 +413,7 @@ export async function move({
           through: verifyTrace.trace[0].channel,
         },
       });
+      result.mustAddFee = true;
       result.steps.push({
         name: 'ibc_forward',
         status: 'pending',
@@ -442,9 +454,12 @@ export async function move({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
+      result.mustAddFee = true;
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
