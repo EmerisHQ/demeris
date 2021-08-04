@@ -818,9 +818,9 @@ export default defineComponent({
       () => data.payCoinAmount,
       async () => {
         if (data.isSwapReady) {
-          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
-
+          // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
+          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom }) || 6;
           const swapParams = {
             name: 'swap',
             params: {
