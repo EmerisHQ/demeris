@@ -1,8 +1,15 @@
 <template>
-  <div v-if="pool" class="elevation-panel" @click="openPoolPage">
-    <p class="title-1-bold">What is <Ticker :name="name" />?</p>
-    <p><Denom :name="name" /> is a liquidity pool asset. LP assets represents shares of a particular liquidity pool.</p>
-    <ArrowRightIcon />
+  <div v-if="pool" class="pool-banner bg-surface dark:bg-fg rounded-2xl shadow-panel">
+    <div class="py-6 px-6">
+      <p class="font-bold">About <Ticker :name="name" /></p>
+    </div>
+    <div class="pb-6 px-6">
+      <p class="pb-6">
+        <Ticker :name="name" /> is a Gravity DEX liquidity pool token. This token represents a share of the
+        <strong>{{ pairName }}</strong> liquidity pool.
+      </p>
+      <Button name="View pool" @click="openPoolPage" />
+    </div>
   </div>
 </template>
 
@@ -10,16 +17,15 @@
 import { computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
-import Denom from '@/components/common/Denom.vue';
-import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Button from '@/components/ui/Button.vue';
+import usePool from '@/composables/usePool';
 import { useAllStores } from '@/store';
 
 export default defineComponent({
   name: 'PoolBanner',
   components: {
-    ArrowRightIcon,
-    Denom,
+    Button,
     Ticker,
   },
   props: {
@@ -41,27 +47,26 @@ export default defineComponent({
       return pools.value.find((pool) => pool.pool_coin_denom == props.name);
     });
 
+    const { pairName } = usePool(computed(() => pool.value.id as string));
+
     const openPoolPage = () => {
       router.push({ name: 'Pool', params: { id: pool.value.id } });
     };
 
     return {
       pool,
+      pairName,
       openPoolPage,
     };
   },
 });
 </script>
 <style lang="scss" scoped>
-.elevation-panel {
+.pool-banner {
   position: relative;
-  cursor: pointer;
-  margin-top: 2.4rem;
-  padding: 2.4rem;
-  width: 32rem;
-  .title-1-bold {
-    margin-bottom: 1.6rem;
-  }
+  z-index: 10;
+  margin-top: 2rem;
+  min-width: 20rem;
   svg {
     float: right;
   }
