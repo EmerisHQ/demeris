@@ -99,6 +99,8 @@ export type WithdrawLiquidityData = {
 export type StepTransaction = {
   name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
   status: 'pending' | 'active' | 'completed';
+  addFee?: boolean;
+  feeToAdd?: FeeWDenom;
   data:
     | IBCBackwardsData
     | IBCForwardsData
@@ -118,6 +120,7 @@ export type Step = {
     };
     chain_name: string;
   };
+  mustAddFee?: boolean;
   transactions: Array<StepTransaction>;
 };
 

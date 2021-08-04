@@ -184,6 +184,7 @@ export const messages = {
           fromLbl: 'Send address',
           txToSign: '{txCount} transactions to sign',
           txToSignHint: 'TODO',
+          includedFee: 'included',
           feeLbl: 'Transaction fee',
           toLbl: 'Recipient address',
         },
