@@ -195,11 +195,13 @@ export default defineComponent({
 
     const poolCoinSwapFee = computed(() => {
       if (isPoolCoin.value) {
-        const swapFeeRate = parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate);
+        const swapFeeRate =
+          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
         const tx = props.steps[0]?.transactions[0].data as SwapData;
-        const precision = store.getters['demeris/getDenomPrecision']({
-          name: tx.from.denom,
-        });
+        const precision =
+          store.getters['demeris/getDenomPrecision']({
+            name: tx.from.denom,
+          }) ?? 6;
         return (Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision);
       } else {
         return null;
