@@ -23,7 +23,7 @@
       <InformationIcon v-else-if="status === 'info'" />
     </span>
 
-    <div class="alert__content -text-1 leading-copy" :class="[status === 'info' ? 'text-muted' : 'text-text']">
+    <div class="flex-grow -text-1 leading-copy" :class="[status === 'info' ? 'text-muted' : 'text-text']">
       <slot>
         <p>{{ message }}</p>
       </slot>

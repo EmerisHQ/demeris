@@ -107,7 +107,7 @@
                 denom: state.currentAsset?.base_denom,
               }"
             />
-            <div v-else-if="!state.isUSDInputChecked && hasPrice" class="text-muted mt-3 text-center">
+            <div v-else-if="hasPrice" class="text-muted mt-3 text-center">
               {{ displayUSDValue }}
             </div>
           </div>
