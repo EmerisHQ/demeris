@@ -10,7 +10,10 @@
               <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
-            <div class="text-muted mt-2">1 ATOM &asymp; 1.234567 REGEN</div>
+            <div class="text-muted mt-2">
+              1 <Ticker :name="walletBalances.coinA.denom" /> &asymp; {{ exchangeAmount }}
+              <Ticker :name="walletBalances.coinB.denom" />
+            </div>
           </div>
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>
@@ -126,8 +129,7 @@
               {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
             </p>
             <p class="text-muted mt-1">
-              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span
-              ><span> {{ ownShare.toFixed(2) }}% of pool </span>
+              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
             </p>
 
             <div v-if="walletBalances.poolCoin?.amount > 0" class="mt-8">
@@ -266,6 +268,15 @@ export default defineComponent({
       };
     });
 
+    const exchangeAmount = computed(() => {
+      let balanceA = walletBalances.value.coinA.amount;
+      let balanceB = walletBalances.value.coinB.amount;
+      if (balanceA && balanceB) {
+        return Math.round((balanceA / balanceB) * 100) / 100;
+      }
+      return undefined;
+    });
+
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
       return [...poolsByDenom(pool.value.reserve_coin_denoms[0]), ...poolsByDenom(pool.value.reserve_coin_denoms[1])]
@@ -341,6 +352,7 @@ export default defineComponent({
       ownSharePrice,
       toUSD,
       openAssetPage,
+      exchangeAmount,
     };
   },
 });
