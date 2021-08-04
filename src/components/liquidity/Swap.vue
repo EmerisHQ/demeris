@@ -442,12 +442,20 @@ export default defineComponent({
       let assets = allBalances.value.filter((x) => {
         return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
       });
-      return assets;
+
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToPay.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined) {
+          return true;
+        } else {
+          return false;
+        }
+      });
     });
 
     const otherAssetsToReceive = computed(() => {
       console.log('availableReceiveSide.value', availableReceiveSide.value);
-      let assets = availableReceiveSide.value.map((x) => {
+      let assets = availablePairs.value.map((x) => {
         const denomInfo = availablePairs.value.find((pair) => pair.pay.denom === x.receive.denom);
         return {
           denom: x.receive.denom,

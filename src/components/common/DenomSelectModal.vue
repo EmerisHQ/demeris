@@ -24,7 +24,7 @@
         >
         </CoinList>
 
-        <div class="other-assets">
+        <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
           <div class="other-assets__title s-1 w-bold">Other assets</div>
           <div class="other-assets__subtitle s-minus w-normal">Unvailable to swap with ATOM</div>
           <CoinList
