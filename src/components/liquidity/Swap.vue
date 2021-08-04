@@ -255,7 +255,7 @@ export default defineComponent({
         };
 
         // TODO: get isAdvanced from local storage
-        const isAdvanced = false;
+        const isAdvanced = true;
 
         //Pool coin included(advanced) or excluded
         if (isAdvanced) {
@@ -344,7 +344,7 @@ export default defineComponent({
             };
 
             // TODO: get isAdvanced from local storage
-            const isAdvanced = false;
+            const isAdvanced = true;
 
             //Pool coin included(advanced) or excluded
             if (isAdvanced) {
@@ -417,7 +417,7 @@ export default defineComponent({
           }
         });
       }
-      return verifiedBalances;
+      return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
@@ -434,7 +434,7 @@ export default defineComponent({
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
-      return assets;
+      return sortAssetList(assets);
     });
 
     const otherAssetsToPay = computed(() => {
@@ -732,7 +732,11 @@ export default defineComponent({
           let payDenom = data.payCoinData.base_denom;
           const receiveDenom = data.receiveCoinData.denom;
 
-          if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+          if (
+            !data.payCoinData.denom.startsWith('ibc') &&
+            data.payCoinData.denom !== 'uatom' &&
+            !data.payCoinData.denom.startsWith('pool')
+          ) {
             // nativeDenomToIBCDenom
             payDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
@@ -926,6 +930,20 @@ export default defineComponent({
 
     async function swap() {
       reviewModalToggle();
+    }
+
+    //helper
+    function sortAssetList(list) {
+      const poolCoinPairList = [];
+      const coinPairList = [];
+      list.forEach((pair) => {
+        if (pair.denom.startsWith('pool')) {
+          poolCoinPairList.push(pair);
+        } else {
+          coinPairList.push(pair);
+        }
+      });
+      return [...coinPairList, ...poolCoinPairList];
     }
 
     return {
