@@ -24,7 +24,7 @@
     <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
       <div class="denom-select__coin-denom s-0 w-medium">
         <tippy
-          v-if="displayName.startsWith('GDEX')"
+          v-if="displayName.startsWith('Gravity')"
           :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
           class="tippy-info"
         >
@@ -59,7 +59,10 @@
 
   <DenomSelectModal
     v-show="isOpen"
+    v-bind="$attrs"
+    :other-assets="otherAssets"
     :assets="assets"
+    :counter-denom="counterDenom"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
     @select="denomSelectHandler"
@@ -82,7 +85,14 @@ export default defineComponent({
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
+    counterDenom: { type: Object, required: false, default: null },
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
@@ -119,7 +129,7 @@ export default defineComponent({
       try {
         const denom = displayName.value;
         let denomIconName = 'empty';
-        if (denom.includes('GDEX')) {
+        if (denom.includes('Gravity')) {
           denomIconName = 'pool';
         } else {
           //TODO adjust url

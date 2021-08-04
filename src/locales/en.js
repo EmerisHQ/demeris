@@ -61,6 +61,8 @@ export const messages = {
       },
       denomSelect: {
         select: 'Select asset',
+        otherAssets: 'Other assets',
+        unavailableSwapPair: 'Unvailable to swap with {pair}',
       },
       feeLevelSelector: {
         feesIncl: 'Fees (included)',
@@ -185,6 +187,7 @@ export const messages = {
           fromLbl: 'Send address',
           txToSign: '{txCount} transactions to sign',
           txToSignHint: 'TODO',
+          includedFee: 'included',
           feeLbl: 'Transaction fee',
           toLbl: 'Recipient address',
         },

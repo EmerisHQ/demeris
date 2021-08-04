@@ -151,7 +151,8 @@ export default defineComponent({
 
     // Add liquidity to a existing pool
     const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
-    const { formatPoolName } = usePools();
+    const { formatPoolName, allPools } = usePools();
+
 
     const exchangeAmount = computed(() => {
       if (!hasPool.value) {
@@ -181,7 +182,7 @@ export default defineComponent({
       const denomB = await getDisplayName(denoms[1], chainName.value);
 
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
-      poolInfo.denom = `GDEX ${denomA}/${denomB}`;
+      poolInfo.denom = `Gravity  ` + allPools.value.length;
       poolInfo.denoms = denoms;
     };
 

@@ -1,4 +1,5 @@
 import { bech32 } from 'bech32';
+import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import Long from 'long';
 
 import { ChainData } from '@/store/demeris/state';
@@ -99,6 +100,7 @@ export async function transfer({
 }) {
   const result = {
     steps: [],
+    mustAddFee: false,
     output: {
       amount: {
         denom: '',
@@ -194,9 +196,13 @@ export async function transfer({
       });
       return result;
     } else {
+      result.mustAddFee = true;
+
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
@@ -236,9 +242,12 @@ export async function transfer({
           },
         });
       } else {
+        result.mustAddFee = true;
         result.steps.push({
           name: 'ibc_backward',
           status: 'pending',
+          feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+          addFee: true,
           data: {
             amount: amount,
             from_chain: chain_name,
@@ -299,6 +308,7 @@ export async function move({
       },
       chain_name: '',
     },
+    mustAddFee: false,
   };
   if (isNative(amount.denom)) {
     // If NOT an IBC denom
@@ -395,6 +405,8 @@ export async function move({
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
@@ -402,6 +414,7 @@ export async function move({
           through: verifyTrace.trace[0].channel,
         },
       });
+      result.mustAddFee = true;
       result.steps.push({
         name: 'ibc_forward',
         status: 'pending',
@@ -442,9 +455,12 @@ export async function move({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
+      result.mustAddFee = true;
       result.steps.push({
         name: 'ibc_backward',
         status: 'pending',
+        addFee: true,
+        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
         data: {
           amount: amount,
           from_chain: chain_name,
@@ -869,7 +885,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
 
   return steps;
 }
-export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): Promise<Actions.MsgMeta> {
+export async function msgFromStepTransaction(
+  stepTx: Actions.StepTransaction,
+  gasPriceLevel: Actions.GasPriceLevel,
+): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
     const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
@@ -898,7 +917,8 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        token: data.amount,
+        //timeoutHeight: { revisionHeight: "10000000000",revisionNumber:"0"},
+        token: { ...data.amount },
       },
     });
     const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
@@ -913,6 +933,13 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
+    let fromAmount = data.amount.amount;
+    if (stepTx.addFee) {
+      fromAmount = (
+        parseInt(fromAmount) +
+        parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
+      ).toString();
+    }
     const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
@@ -920,7 +947,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
         sender: await getOwnAddress({ chain_name: data.from_chain }),
         receiver,
         timeoutTimestamp: Long.fromString(new Date().getTime() + 300000 + '000000'),
-        token: data.amount,
+        token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
     const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
@@ -986,7 +1013,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
       return 0;
     });
     const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
-      value: {
+      value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
         swapTypeId: data.pool.type_id,
@@ -997,7 +1024,7 @@ export async function msgFromStepTransaction(stepTx: Actions.StepTransaction): P
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
-      },
+      }),
     });
     const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
@@ -1179,22 +1206,10 @@ export async function getDisplayName(name, chain_name = null) {
     const displayName = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
     if (displayName) {
       return displayName;
-    }
-    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-    if (pools && pools.pools) {
-      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
-      if (pool) {
-        return (
-          'GDEX ' +
-          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
-          '/' +
-          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
-          ' Pool'
-        );
-      } else {
-        return name + '(unverified)';
-      }
-    }
+    } 
+      
+    return name;
+    
   } else {
     let verifyTrace;
     try {
@@ -1219,21 +1234,7 @@ export async function getTicker(name, chain_name = null) {
     if (ticker) {
       return ticker;
     }
-    const pools = store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-    if (pools && pools.pools) {
-      const pool = pools.pools.find((x) => x.pool_coin_denom == name);
-      if (pool) {
-        return (
-          'GDEX ' +
-          (await getDisplayName(pool.reserve_coin_denoms[0], chain_name)) +
-          '/' +
-          (await getDisplayName(pool.reserve_coin_denoms[1], chain_name)) +
-          ' Pool'
-        );
-      } else {
-        return name + '(unverified)';
-      }
-    }
+    return name;
   } else {
     let verifyTrace;
     try {
@@ -1526,6 +1527,7 @@ export async function validateStepFeeBalances(
   step: Actions.Step,
   balances: Balances,
   fees: Actions.FeeTotals,
+  gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.FeeWarning> {
   const feeWarning: Actions.FeeWarning = {
     missingFees: [],
@@ -1677,8 +1679,14 @@ export async function validateStepFeeBalances(
                 return false;
               }
             });
+            let additionalFee = 0;
+            if (stepTx.addFee) {
+              additionalFee =
+                parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
+            }
             if (rcptBalance) {
-              const newIbcAmount = parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount);
+              const newIbcAmount =
+                parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount) + additionalFee;
               rcptBalance.amount = newIbcAmount + parseCoins(rcptBalance.amount)[0].denom;
             } else {
               const ibcDetails: IbcInfo = {};
@@ -1891,6 +1899,7 @@ export async function validateStepFeeBalances(
       }
     }
   }
+  console.log(feeWarning);
   return feeWarning;
 }
 
