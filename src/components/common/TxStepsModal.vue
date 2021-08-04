@@ -406,6 +406,7 @@ export default defineComponent({
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
         feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
+        interstitialProceed.value = false;
       },
     );
 
