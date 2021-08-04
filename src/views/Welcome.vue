@@ -1,6 +1,7 @@
 <template>
   <div id="welcome">
     <img class="portal" src="@/assets/svg/portal.svg" />
+    <img class="surfer" src="@/assets/images/surfer.png" />
     <div v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
       <ConnectKeplr ref="connectKeplrRef" type="welcome" @connect="cancelConnectKeplr" @warning="showWarning" />
     </div>
@@ -229,6 +230,17 @@ export default defineComponent({
       margin-bottom: 1.6rem;
     }
 
+    &__connecting__main {
+      display: flex;
+      flex-flow: column;
+      justify-content: center;
+      align-items: center;
+      .spinner {
+        margin-top: 1.6rem;
+        margin-bottom: 3.2rem;
+      }
+    }
+
     &.agree-warning {
       .connect-wallet__content {
         padding-left: 0;
@@ -252,14 +264,21 @@ export default defineComponent({
   .connect-banner {
     display: none !important;
   }
+  .surfer {
+    position: absolute;
+    top: 0;
+    margin-top: 30vh;
+    right: 5vh;
+    width: 40vh;
+    height: 40vh;
+  }
+
   .portal {
     position: absolute;
-    top: 4%;
-    right: -5%;
-    width: 100%;
-    max-width: 60vw;
-    max-height: 100vh;
-    overflow: hidden;
+    top: 2vh;
+    right: 0;
+    width: 60vh;
+    height: 100vh;
   }
 }
 </style>

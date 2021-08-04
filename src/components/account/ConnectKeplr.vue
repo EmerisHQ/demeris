@@ -1,11 +1,11 @@
 <template>
-  <div class="connect-wallet">
+  <div class="connect-wallet connect-keplr">
     <div class="connect-wallet__wrapper">
       <div class="connect-wallet__content">
         <template v-if="!isConnecting">
           <slot name="title">
             <h2 v-if="type === 'welcome'" class="connect-wallet__title">
-              {{ $t('wallet.connect.modal1welcome.title') }}
+              {{ $t('generic_cta.connectToEmeris') }}
             </h2>
             <h2 v-else class="connect-wallet__title">{{ $t('wallet.connect.modal1.title') }}</h2>
           </slot>
@@ -20,7 +20,7 @@
             <Button :name="$t('wallet.connect.modal1.button1')" @click="trySignIn" />
             <Button
               v-if="type === 'welcome'"
-              :name="$t('wallet.connect.modal1welcome.button2')"
+              :name="$t('generic_cta.tryTheDemo')"
               :is-outline="true"
               @click="tryDemo"
             />
@@ -30,9 +30,9 @@
 
         <div v-else class="connect-wallet__connecting">
           <div class="connect-wallet__connecting__main">
-            <Spinner :size="3.2" />
             <span class="connect-wallet__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
-            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
+            <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal1.connecting') }}</h2>
+            <Spinner :size="3.2" />
           </div>
 
           <button class="connect-wallet__connecting__button" @click="cancel">

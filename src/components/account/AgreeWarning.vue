@@ -13,7 +13,6 @@
               <slot name="description">
                 <p>{{ $t('wallet.connect.modal4.text1') }}</p>
                 <p>{{ $t('wallet.connect.modal4.text2') }}</p>
-                <p>{{ $t('wallet.connect.modal4.text3') }}</p>
               </slot>
             </div>
           </div>
