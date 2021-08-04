@@ -32,7 +32,8 @@
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="s-minus" />
-          <template v-if="includedFees && includedFees.includes(denom)"> (included)</template>
+          <span v-if="includedFees && includedFees.includes(denom)" class="s-minus">
+            ({{ $t('components.previews.transfer.includedFee') }})</span>
         </template>
       </ListItem>
     </ListItem>
