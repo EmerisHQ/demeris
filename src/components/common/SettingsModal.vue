@@ -40,15 +40,30 @@
         </div>
 
         <div class="settings-modal__list">
-          <router-link to="/" class="settings-modal__list__item">
+          <a
+            href="https://emeris.com/privacy"
+            class="settings-modal__list__item"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             {{ $t('components.settingsMenu.privacy') }}
-          </router-link>
-          <router-link to="/" class="settings-modal__list__item">
+          </a>
+          <a
+            href="https://emeris.com/terms"
+            class="settings-modal__list__item"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             {{ $t('components.settingsMenu.tos') }}
-          </router-link>
-          <router-link to="/" class="settings-modal__list__item">
+          </a>
+          <a
+            href="https://www.cookiesandyou.com/"
+            class="settings-modal__list__item"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             {{ $t('components.settingsMenu.cookiesPolicy') }}
-          </router-link>
+          </a>
         </div>
       </div>
       <!-- end settings-basic-->

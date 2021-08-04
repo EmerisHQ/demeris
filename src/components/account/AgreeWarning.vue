@@ -12,7 +12,7 @@
             <div class="scrollable-content">
               <slot name="description">
                 <p>{{ $t('wallet.connect.modal4.text1') }}</p>
-                <a href="/" rel="noopener noreferral" target="_blank">
+                <a href="https://emeris.com/terms" rel="noopener noreferral" target="_blank">
                   {{ $t('components.settingsMenu.tos') }}
                 </a>
               </slot>
