@@ -254,7 +254,7 @@
                 </ListItem>
                 <div class="mt-6 mb-2">
                   <FeeLevelSelector
-                    v-if="actionSteps.length > 0"
+                    v-if="actionSteps.length > 0 && gasPrice"
                     v-model:gasPriceLevel="gasPrice"
                     :steps="actionSteps"
                     @update:fees="state.fees = $event"
@@ -742,7 +742,7 @@ export default {
         return;
       }
 
-      const bigAmountA = new BigNumber(+(form.coinA.amount));
+      const bigAmountA = new BigNumber(+form.coinA.amount);
       const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(bigAmountA);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
@@ -762,7 +762,7 @@ export default {
         return;
       }
 
-      const bigAmountB = new BigNumber(+(form.coinB.amount));
+      const bigAmountB = new BigNumber(+form.coinB.amount);
       const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
       const result = bigAmountB.dividedBy(bigExchangeAmount);
 
@@ -866,10 +866,10 @@ export default {
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            console.log("fee", feeA);
+            console.log('fee', feeA);
 
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
-            const amountB = parseCoins(form.coinB.asset.amount)[0].amount  || 0;
+            const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
             const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
@@ -898,8 +898,8 @@ export default {
                 .decimalPlaces(precisionA)
                 .toString();
             } else {
-              form.coinA.amount = "0";
-              form.coinB.amount = "0";
+              form.coinA.amount = '0';
+              form.coinB.amount = '0';
             }
           }
 
