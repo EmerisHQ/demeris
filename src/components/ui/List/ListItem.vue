@@ -146,6 +146,7 @@ export default defineComponent({
 
   &__info {
     width: 100%;
+    text-align: left;
 
     &__label {
       text-align: left;

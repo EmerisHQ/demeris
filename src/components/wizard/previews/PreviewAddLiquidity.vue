@@ -16,13 +16,13 @@
         <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
           <div class="s-minus">
             <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: poolInfo.exchangeAmountPrice * 1e6, denom: data.coinB.denom }" />
+            <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
           </div>
         </ListItem>
       </List>
     </ListItem>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
       <div class="supply__item">
         <div class="pool__item">
           <CircleSymbol :denom="data.coinA.denom" size="sm" class="pool__item__symbol" />
@@ -40,8 +40,12 @@
       </div>
     </ListItem>
 
+    <ListItem v-if="refundedAmount" :label="$t('components.previews.addWithdrawLiquidity.refundedLbl')">
+      <AmountDisplay :amount="refundedAmount" />
+    </ListItem>
+
     <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)"
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
       <div class="pool__item">
@@ -66,6 +70,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, reactive, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -76,8 +81,10 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
+import { AddLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewAddLiquidity',
@@ -93,16 +100,21 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
     },
+    response: {
+      type: Object as PropType<AddLiquidityEndBlockResponse | Actions.Step>,
+      default: undefined,
+    },
   },
 
   setup(props) {
     const store = useStore();
+    const { pools } = usePools();
     const poolInfo = reactive({
       exchangeAmountPrice: 1,
       pairName: '-/-',
@@ -111,7 +123,22 @@ export default defineComponent({
     });
 
     const data = computed(() => {
-      return (props.step as Actions.Step).transactions[0].data as Actions.CreatePoolData;
+      if ((props.response as AddLiquidityEndBlockResponse)?.accepted_coins) {
+        const [coinA, coinB] = parseCoins((props.response as AddLiquidityEndBlockResponse).accepted_coins);
+        const pool = pools.value.find(
+          (item) => item.pool_coin_denom === (props.response as AddLiquidityEndBlockResponse).pool_coin_denom,
+        );
+
+        return {
+          coinA,
+          coinB,
+          pool,
+        };
+      }
+
+      const step = (props.response as Actions.Step) || props.step;
+
+      return step.transactions[0].data as Actions.CreatePoolData;
     });
 
     const chainName = computed(() => {
@@ -123,8 +150,24 @@ export default defineComponent({
     });
 
     // Add liquidity to a existing pool
-    const { calculateSupplyTokenAmount } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+    const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
     const { formatPoolName, allPools } = usePools();
+
+
+    const exchangeAmount = computed(() => {
+      if (!hasPool.value) {
+        return ((+data.value.coinB.amount || 1) / (+data.value.coinA.amount || 1)) * 1e6;
+      }
+
+      if (reserveBalances.value?.length) {
+        return new BigNumber(reserveBalances.value[1].amount)
+          .dividedBy(reserveBalances.value[0].amount)
+          .shiftedBy(6)
+          .toNumber();
+      }
+
+      return undefined;
+    });
 
     const updatePoolInfo = async () => {
       if (hasPool.value) {
@@ -138,22 +181,32 @@ export default defineComponent({
       const denomA = await getDisplayName(denoms[0], chainName.value);
       const denomB = await getDisplayName(denoms[1], chainName.value);
 
-      const priceA = store.getters['demeris/getPrice']({ denom: denoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: denoms[1] });
-
-      poolInfo.exchangeAmountPrice = !priceA || !priceB ? 1 : priceA / priceB;
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
       poolInfo.denom = `Gravity  ` + allPools.value.length;
       poolInfo.denoms = denoms;
     };
 
     const receiveAmount = computed(() => {
+      if (props.response) {
+        return +(props.response as AddLiquidityEndBlockResponse).pool_coin_amount;
+      }
+
       return calculateSupplyTokenAmount(+data.value.coinA.amount, +data.value.coinB.amount);
+    });
+
+    const refundedAmount = computed(() => {
+      if (!(props.response as AddLiquidityEndBlockResponse)?.refunded_coins) {
+        return;
+      }
+
+      return parseCoins((props.response as AddLiquidityEndBlockResponse).refunded_coins)[0];
     });
 
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      refundedAmount,
+      exchangeAmount,
       hasPool,
       poolInfo,
       chainName,

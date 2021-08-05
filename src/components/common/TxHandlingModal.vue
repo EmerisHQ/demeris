@@ -78,31 +78,44 @@
             <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
               You received
               <span class="w-bold"><AmountDisplay
-                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
+                :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
               /></span>
               <br />
               on <ChainName :name="'cosmos-hub'" />.
               <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
                 <span class="w-bold">
                   <AmountDisplay
-                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                    :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
                   />
                 </span>
                 not swapped
               </div>
             </template>
-          </div>
-          <div class="status__detail-amount s-0 w-medium">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+            <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
+              <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
+            </template>
+            <template v-else-if="tx.name === 'withdrawliquidity'">
+              <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
+            </template>
+            <template
+              v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
+            >
+              <PreviewTransfer :response="txResult" :fees="txResult.fees" />
             </template>
           </div>
-          <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" /> chain
-            </template>
-            <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
-          </div>
+          <template v-if="status !== 'complete' || !isFinal">
+            <div class="status__detail-amount s-0 w-medium">
+              <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
+                <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+              </template>
+            </div>
+            <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
+              <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+                <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" /> chain
+              </template>
+              <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
+            </div>
+          </template>
         </template>
         <template v-else>
           <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
@@ -219,6 +232,9 @@ import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -250,6 +266,9 @@ type Result = {
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
+    PreviewAddLiquidity,
+    PreviewWithdrawLiquidity,
+    PreviewTransfer,
     Modal,
     SpinnerIcon,
     WarningIcon,
@@ -288,16 +307,8 @@ export default defineComponent({
       default: undefined,
     },
     txResult: {
-      type: Object as PropType<Result>,
-      default: () => {
-        return {
-          swappedPercent: 0,
-          demandCoinSwappedAmount: 0,
-          demandCoinDenom: '',
-          offerCoinDenom: '',
-          remainingOfferCoinAmount: 0,
-        };
-      },
+      type: Object as PropType<Result | any>,
+      default: undefined,
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
@@ -404,7 +415,7 @@ export default defineComponent({
             subTitle.value = '';
             if (props.isFinal && !props.hasMore) {
               blackButton.value = t('generic_cta.done');
-              if (props.tx.name === 'swap') {
+              if (props.tx.name === 'swap' && props.txResult) {
                 whiteButton.value = `Send ${
                   Math.trunc(
                     (Number(props.txResult.demandCoinSwappedAmount) * 100) /

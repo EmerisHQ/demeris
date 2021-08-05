@@ -1,3 +1,4 @@
+import { bech32 } from 'bech32';
 import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import Long from 'long';
 
@@ -1069,6 +1070,70 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
   return denom;
 }
+
+export function getStepTransactionDetailFromResponse(response: API.TransactionDetailResponse) {
+  const getChainFromAddress = (address: string): API.Chain => {
+    const chains = Object.values(store.getters['demeris/getChains']);
+    const prefix = bech32.decode(address).prefix;
+    // @ts-ignore
+    return chains.find((item) => item.node_info.bech32_config.prefix_account == prefix);
+  };
+
+  for (const message of response.tx_response.tx.body.messages) {
+    if (message['@type'] === '/ibc.core.channel.v1.MsgRecvPacket') {
+      const packetData: {
+        amount: string;
+        denom: string;
+        receiver: string;
+        sender: string;
+      } = JSON.parse(atob(message.packet.data));
+
+      const senderChain = getChainFromAddress(packetData.sender);
+      const receiverChain = getChainFromAddress(packetData.receiver);
+
+      const counterpartySource = Object.entries(senderChain.primary_channel).find(
+        (item) => item[1] === message.packet.source_channel,
+      )?.[0];
+      const counterpartyDestination = Object.entries(receiverChain.primary_channel).find(
+        (item) => item[1] === message.packet.destination_channel,
+      )?.[0];
+      const denoms = packetData.denom.split('/');
+
+      const data: Actions.IBCForwardsData = {
+        amount: {
+          amount: packetData.amount,
+          denom: denoms[denoms.length - 1],
+        },
+        from_chain: counterpartyDestination,
+        to_chain: counterpartySource,
+        to_address: packetData.receiver,
+        through: message.packet.source_channel,
+      };
+
+      return data;
+    }
+
+    if (message['@type'] === '/cosmos.bank.v1beta1.MsgSend') {
+      const data: Actions.TransferData = {
+        amount: Array.isArray(message.amount) ? message.amount[0] : message.amount,
+        to_address: message.to_address,
+        chain_name: getChainFromAddress(message.from_address).chain_name,
+      };
+
+      return data;
+    }
+
+    if (message['@type'] === '/tendermint.liquidity.v1beta1.MsgCreatePool') {
+      const data: Actions.CreatePoolData = {
+        coinA: message.deposit_coins[0],
+        coinB: message.deposit_coins[1],
+      };
+
+      return data;
+    }
+  }
+}
+
 export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   const timeout = 1000;
   const limit = 3;
@@ -1076,31 +1141,31 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let retries = 0;
   let error: Error;
 
-  let amounts = [];
+  let denoms = [];
   const chain = store.getters['demeris/getDexChain'];
 
   switch (transaction.name) {
     case 'addliquidity':
       const transferdata = transaction.data as Actions.AddLiquidityData;
-      amounts = [transferdata.coinA.amount, transferdata.coinB.amount];
+      denoms = [transferdata.coinA.denom, transferdata.coinB.denom];
       break;
     case 'createpool':
       const createdata = transaction.data as Actions.CreatePoolData;
-      amounts = [createdata.coinA.amount, createdata.coinB.amount];
+      denoms = [createdata.coinA.denom, createdata.coinB.denom];
       break;
     case 'swap':
       const swapdata = transaction.data as Actions.SwapData;
-      amounts = [swapdata.from.amount, swapdata.to.amount];
+      denoms = [swapdata.from.denom, swapdata.to.denom];
       break;
     case 'withdrawliquidity':
       const withdrawdata = transaction.data as Actions.WithdrawLiquidityData;
-      amounts = [withdrawdata.poolCoin.amount + withdrawdata.poolCoin.denom];
+      denoms = [withdrawdata.poolCoin.denom];
       break;
     default:
       return;
   }
 
-  const ibcDenoms = amounts.map((coin) => parseCoins(coin)[0].denom).filter((item) => !!item.split('/')[1]);
+  const ibcDenoms = denoms.filter((item) => !!item.split('/')[1]);
 
   if (!ibcDenoms.length) {
     return;
@@ -1113,6 +1178,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
           'demeris/GET_VERIFY_TRACE',
           {
             subscribe: false,
+            cache: false,
             params: {
               chain_name: chain,
               hash: denom.split('/')[1],
