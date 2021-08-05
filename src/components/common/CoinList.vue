@@ -8,22 +8,26 @@
     v-for="coin in modifiedData"
     :key="coin.base_denom"
     class="flex items-center justify-between py-4 px-3 mx-3 cursor-pointer hover:bg-fg rounded-xl"
-    @mouseenter="
-      showTooltip(
-        `${type}/${coin.on_chain}/${coin.base_denom}`,
-        $t('components.coinList.tooltip', { asset: $filters.getCoinName(coin.base_denom), chain: coin.on_chain }),
-      )
-    "
-    @mouseleave="hideTooltip(`${type}/${coin.on_chain}/${coin.base_denom}`)"
     @click="$emit('select', coin)"
   >
     <div class="flex items-center">
-      <tippy :id="`${type}/${coin.on_chain}/${coin.base_denom}`" class="tippy-info mr-4">
+      <tippy class="tippy-info mr-4">
         <CircleSymbol
           :variant="type === 'chain' ? 'chain' : 'asset'"
           :denom="coin.base_denom"
           :chain-name="coin.on_chain"
         />
+
+        <template #content>
+          <i18n-t keypath="components.coinList.tooltip">
+            <template #asset>
+              <Denom :name="coin.base_denom" />
+            </template>
+            <template #chain>
+              <ChainName :name="coin.on_chain" />
+            </template>
+          </i18n-t>
+        </template>
       </tippy>
       <div class="flex-1">
         <div v-if="keyword" class="text-0 font-medium">
@@ -70,8 +74,7 @@
   </div>
 </template>
 <script lang="ts">
-import tippy from 'tippy.js';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -79,6 +82,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
+
 export default defineComponent({
   name: 'CoinList',
   components: {
@@ -98,23 +102,9 @@ export default defineComponent({
   emits: ['select'],
   setup(props) {
     const modifiedData = computed(() => getUniqueCoinList(props.data));
-    const tooltipInstance = ref(null);
+
     function setWordColorByKeyword(keyword, word) {
       return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
-    }
-
-    function showTooltip(eleId, text) {
-      if (props.type === 'chain') {
-        tooltipInstance.value = tippy(document.getElementById(eleId));
-        tooltipInstance.value.setContent(text);
-        tooltipInstance.value.show();
-      }
-    }
-
-    function hideTooltip() {
-      if (props.type === 'chain') {
-        tooltipInstance.value.hide();
-      }
     }
 
     function getUniqueCoinList(data) {
@@ -142,7 +132,7 @@ export default defineComponent({
       return modifiedData;
     }
 
-    return { setWordColorByKeyword, modifiedData, showTooltip, hideTooltip };
+    return { setWordColorByKeyword, modifiedData };
   },
 });
 </script>
