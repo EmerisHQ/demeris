@@ -7,7 +7,7 @@
     }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
-    <template v-if="isTransferConfirmationOpen">
+    <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
         :step="data[0]"
@@ -672,7 +672,7 @@ export default defineComponent({
     const refProps = toRefs(props);
 
     watch(
-      [refProps.data, refProps.actionName],
+      refProps,
       () => {
         if (!interstitialProceed.value) {
           let shouldOpenConfirmation = false;
