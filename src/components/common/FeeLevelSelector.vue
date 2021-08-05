@@ -5,7 +5,7 @@
       <span v-show="!isFeesOpen">
         ~{{
           isPoolCoin
-            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFee} ${poolCoinDisplayDenom}`
+            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFees[0]} ${poolCoinDisplayDenom}`
             : formatter.format(swapDollarFee + fees[gasPriceLevel])
         }}
       </span>
@@ -63,7 +63,7 @@
     <div v-if="swapDollarFee || poolCoinSwapFee" class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
       <div class="fees-detail__info-value">
-        {{ isPoolCoin ? `${poolCoinSwapFee} ${poolCoinDisplayDenom}` : formatter.format(swapDollarFee) }}
+        {{ isPoolCoin ? `${poolCoinSwapFees[0]} ${poolCoinDisplayDenom}` : formatter.format(swapDollarFee) }}
       </div>
     </div>
     <div class="fees-detail__info s-minus">
@@ -71,7 +71,7 @@
       <div class="fees-detail__info-value">
         {{
           isPoolCoin
-            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFee} ${poolCoinDisplayDenom}`
+            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFees[0]} ${poolCoinDisplayDenom}`
             : formatter.format(swapDollarFee + fees[gasPriceLevel])
         }}
       </div>
@@ -184,7 +184,7 @@ export default defineComponent({
 
     const isPoolCoin = computed(() => {
       const tx = props.steps[0]?.transactions[0].data as SwapData;
-      return tx.from.denom.startsWith('pool');
+      return tx.from.denom.startsWith('pool') || tx.to.denom.startsWith('pool');
     });
 
     const poolCoinDisplayDenom = ref('');
@@ -197,16 +197,23 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const poolCoinSwapFee = computed(() => {
+    const poolCoinSwapFees = computed(() => {
       if (isPoolCoin.value) {
+        const swapFees = [];
         const swapFeeRate =
           parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
         const tx = props.steps[0]?.transactions[0].data as SwapData;
         const precision =
           store.getters['demeris/getDenomPrecision']({
-            name: tx.from.denom,
+            name: tx.from.denom, //pool coin precision is same
           }) ?? 6;
-        return (Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision);
+        if (tx.from.denom.startsWith('pool')) {
+          swapFees.push((Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision));
+        }
+        if (tx.to.denom.startsWith('pool')) {
+          swapFees.push((Number(tx.to.amount) * swapFeeRate) / Math.pow(10, precision));
+        }
+        return swapFees;
       } else {
         return null;
       }
@@ -270,7 +277,7 @@ export default defineComponent({
       emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
-    return { ...toRefs(data), txCount, fees, swapDollarFee, isPoolCoin, poolCoinSwapFee, poolCoinDisplayDenom };
+    return { ...toRefs(data), txCount, fees, swapDollarFee, isPoolCoin, poolCoinSwapFees, poolCoinDisplayDenom };
   },
 });
 </script>
