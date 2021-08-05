@@ -1,6 +1,6 @@
 <template>
   <div class="get-browser">
-    <div class="flex flex-col pb-8 px-8 text-center">
+    <div class="flex flex-col py-8 px-8 text-center">
       <div v-if="isLoading" class="connect-wallet__loading">
         <Spinner :size="3" />
       </div>
