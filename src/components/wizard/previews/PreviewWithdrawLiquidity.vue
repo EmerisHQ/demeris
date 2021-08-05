@@ -19,10 +19,8 @@
 
     <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
       <div class="supply__item flex justify-end items-center">
-        <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
         <div class="supply__item__amount text-right">
           <AmountDisplay class="text-1 font-medium" :amount="data.poolCoin" />
-          <span class="supply__item__chain"><ChainName :name="chainName" /></span>
           <span class="supply__item__chain block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></span>
         </div>
         <CircleSymbol :denom="data.poolCoin.denom" size="md" class="ml-3" />
