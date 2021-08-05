@@ -11,7 +11,7 @@
 
     <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
 
-    <SettingsModal v-show="isSettingsModalOpen" />
+    <SettingsModal v-show="isSettingsModalOpen" @disconnect="toggleSettingsModal" />
     <ConnectWalletModal :open="isWalletModalOpen" @close="toggleWalletModal" />
   </div>
 </template>

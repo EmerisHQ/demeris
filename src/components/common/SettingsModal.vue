@@ -262,7 +262,8 @@ export default defineComponent({
     Switch,
     AvatarBalance,
   },
-  setup() {
+  emits: ['disconnect'],
+  setup(_, { emit }) {
     const store = useStore();
     const isAdvancedSettingsOpen = ref(false);
     const isWarningCustomSlippageOpen = ref(false);
@@ -325,6 +326,7 @@ export default defineComponent({
     };
 
     const disconnectWallet = () => {
+      emit('disconnect');
       window.localStorage.setItem('lastEmerisSession', '');
       store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
     };
