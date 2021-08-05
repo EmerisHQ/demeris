@@ -521,7 +521,6 @@ export async function move({
           chain_name: destination_chain_name,
         };
       } else {
-        result.mustAddFee = true;
         result.steps.push({
           name: 'ibc_backward',
           status: 'pending',
