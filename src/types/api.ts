@@ -1,3 +1,5 @@
+import * as Base from './base';
+
 // Params object for actions requiring a BECH32 decoded address as param
 export type AddrReq = {
   address: string;
@@ -151,7 +153,7 @@ export type Chain = {
   logo?: string;
   denoms?: Array<Denom>;
   counterparty_names?: Record<string, string>;
-  primary_channel?: Record<string, string>;
+  primary_channel?: Record<string, any>;
   demeris_addresses?: Array<string>;
   price_modifier?: number;
   genesis_hash?: string;
@@ -246,3 +248,53 @@ export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
 export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq;
+
+export type AddLiquidityEndBlockResponse = {
+  accepted_coins: string;
+  depositor: string;
+  pool_coin_amount: string;
+  pool_coin_denom: string;
+  refunded_coins: string;
+  success: string;
+};
+
+export type WithdrawLiquidityEndBlockResponse = {
+  pool_id: string;
+  pool_coin_amount: string;
+  pool_coin_denom: string;
+  withdraw_coins: string;
+  withdraw_fee_coins: string;
+  withdrawer: string;
+  success: string;
+};
+
+export type TransactionDetailResponse = {
+  tx: {
+    body: {
+      messages: { '@type': string; [key: string]: any }[];
+      memo: string;
+    };
+    auth_info: {
+      fee: { amount: Base.Amount[]; gas_limit: string };
+    };
+    signatures: string[];
+  };
+  tx_response: {
+    height: string;
+    txhash: string;
+    gas_wanted: string;
+    gas_used: string;
+    tx: {
+      '@type': string;
+      body: {
+        messages: { '@type': string; [key: string]: any }[];
+        memo: string;
+      };
+      auth_info: {
+        fee: { amount: Base.Amount[]; gas_limit: string };
+      };
+      signatures: [];
+    };
+    timestamp: string;
+  };
+};
