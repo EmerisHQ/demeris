@@ -100,7 +100,7 @@ export default defineComponent({
       default: 'max-w-4xl',
     },
     bodyClass: {
-      type: String,
+      type: [String, Array, Object],
       default: undefined,
     },
     closeOnOverlayClick: {
