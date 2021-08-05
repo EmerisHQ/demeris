@@ -55,6 +55,7 @@ export type Getters = {
   viewLPAssetPools(state: State): boolean;
   allowCustomSlippage(state: State): boolean;
   getSlippagePerc(state: State): number;
+  theme(state: State): string;
   getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
@@ -96,6 +97,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   hasSeenReedem: (state) => {
     return state._Session.hasSeenRedeem;
+  },
+  theme: (state) => {
+    return state._Session.theme;
   },
   getPreferredGasPriceLevel: (state) => {
     return state._Session.gasPriceLevel;
