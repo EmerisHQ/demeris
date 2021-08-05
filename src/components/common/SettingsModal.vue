@@ -326,7 +326,7 @@ export default defineComponent({
 
     const disconnectWallet = () => {
       window.localStorage.setItem('lastEmerisSession', '');
-      location.reload();
+      store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
     };
 
     return {
