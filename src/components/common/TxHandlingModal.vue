@@ -60,6 +60,18 @@
         v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
         class="w-full max-w-lg flex items-center justify-center -space-x-8"
       >
+        <template v-if="tx.name == 'addliquidity'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
+        </template>
+
+        <template v-if="tx.name == 'withdrawliquidity'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
+          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
+        </template>
+
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.from_chain" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
@@ -94,15 +106,9 @@
           </div>
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
         </template>
         <template v-else-if="tx.name === 'withdrawliquidity'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
-          <EphemerisSpinner class="flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
         </template>
         <template
