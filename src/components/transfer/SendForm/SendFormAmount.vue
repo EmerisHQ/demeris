@@ -4,7 +4,7 @@
       v-if="state.isSelectModalOpen"
       class="fixed inset-0 z-30 bg-bg"
       title="Select asset"
-      :assets="balances"
+      :assets="availableBalances"
       :func="() => toggleSelectModal()"
       @select="toggleSelectModal"
     />
@@ -66,11 +66,6 @@
           />
           <div class="flex items-center absolute inset-y-0 right-0">
             <Button
-              :click-function="
-                () => {
-                  state.isMaximumAmountChecked = true;
-                }
-              "
               :name="$t('generic_cta.max')"
               class="flex"
               :class="{ 'text-negative-text': !hasSufficientFunds }"
@@ -78,6 +73,7 @@
               size="sm"
               variant="secondary"
               rounded
+              @click="state.isMaximumAmountChecked = true"
             />
           </div>
         </div>
@@ -196,6 +192,7 @@ import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import { GasPriceLevel, SendAddressForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
@@ -238,6 +235,15 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const form = inject<SendAddressForm>('transferForm');
+    const { nativeBalances } = useAccount();
+
+    const availableBalances = computed(() => {
+      if (props.balances.length) {
+        return props.balances;
+      }
+
+      return nativeBalances.value;
+    });
 
     const state = reactive({
       currentAsset: undefined,
@@ -350,7 +356,7 @@ export default defineComponent({
     };
 
     const findDefaultAsset = () => {
-      const sortedBalances = [...props.balances].sort((a, b) =>
+      const sortedBalances = [...availableBalances.value].sort((a, b) =>
         +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
       );
       const chains: Chain[] = Object.values(store.getters['demeris/getChains']);
@@ -385,7 +391,7 @@ export default defineComponent({
 
         setCurrentAsset(availableAssets[0]);
       } catch (e) {
-        setCurrentAsset(props.balances[0]);
+        setCurrentAsset(sortedBalances[0]);
       }
     };
 
@@ -414,6 +420,7 @@ export default defineComponent({
     }
 
     return {
+      availableBalances,
       state,
       form,
       hasPrice,
