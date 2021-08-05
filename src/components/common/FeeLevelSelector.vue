@@ -69,7 +69,11 @@
     <div class="fees-detail__info s-minus">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
       <div class="fees-detail__info-value">
-        {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
+        {{
+          isPoolCoin
+            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFee} ${poolCoinDisplayDenom}`
+            : formatter.format(swapDollarFee + fees[gasPriceLevel])
+        }}
       </div>
     </div>
   </div>
@@ -212,7 +216,7 @@ export default defineComponent({
       if (props.steps[0]?.name === 'swap') {
         let value = 0;
         const tx = props.steps[0]?.transactions[0].data as SwapData;
-        if (isPoolCoin.value) {
+        if (!isPoolCoin.value) {
           const fromPrecision =
             store.getters['demeris/getDenomPrecision']({
               name: tx.from.denom,
@@ -229,6 +233,7 @@ export default defineComponent({
           value =
             (fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) +
             (toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision));
+          console.log('VALUE', value);
         }
         return value;
       } else {
