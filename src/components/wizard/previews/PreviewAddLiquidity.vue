@@ -11,9 +11,18 @@
         </div>
       </ListItem>
 
-      <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-        <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-        <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
+      <ListItem inset>
+        <div class="flex justify-end items-center">
+          <div class="text-right">
+            <div>
+              <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
+              <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
+            </div>
+            <div class="block text-muted -text-1 mt-0.5">
+              {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
+            </div>
+          </div>
+        </div>
       </ListItem>
     </div>
 
@@ -64,10 +73,11 @@
       <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
         <div class="flex justify-end items-center">
           <div class="text-right">
-            <AmountDisplay class="text-1 font-medium" :amount="{ amount: amount, denom: denom }" />
-            <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
+            <AmountDisplay :amount="{ amount: amount, denom: denom }" />
+            <div class="block text-muted -text-1 mt-0.5">
+              {{ $t('components.previews.addWithdrawLiquidity.feeLbl') }}
+            </div>
           </div>
-          <CircleSymbol :denom="denom" size="md" class="ml-3" />
         </div>
       </template>
     </ListItem>
