@@ -1,5 +1,5 @@
 <template>
-  <div class="list" :class="`list--${variant}`">
+  <div class="list" :class="{ 'border-t border-b border-border divide-y divide-border': variant === 'divided' }">
     <slot />
   </div>
 </template>
@@ -18,12 +18,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.list {
-  &--divided {
-    & > .list-item:not(.list-item--inset) + .list-item {
-      border-top: 1px solid var(--border-trans);
-    }
-  }
-}
-</style>
+<style lang="scss"></style>

@@ -1,19 +1,64 @@
 <template>
-  <div @mouseenter="toggleToolTip('show')" @mouseleave="toggleToolTip('hide')" @click="void 0">
-    <!-- Basic button implementation. At minimum primary/secondary types, busy and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
+  <div
+    :class="{ 'inline-flex': !fullWidth }"
+    @mouseenter="toggleToolTip('show')"
+    @mouseleave="toggleToolTip('hide')"
+    @click="void 0"
+  >
+    <!-- Basic button implementation. At minimum primary/secondary/link types, loading and disabled states, can be a link,router_link or trigger a custom clickHandler //-->
     <button
-      :class="[status, isOutline ? 'outline-theme' : 'elevation-button']"
+      :class="[
+        `button-${variant}`,
+        { 'text-0 leading-5 rounded-xl': size === 'md' },
+        { 'button-sm -text-1 leading-4 rounded-lg': size === 'sm' },
+        { 'flex items-center justify-center': !name },
+        { 'h-12': variant !== 'link' && size === 'md' },
+        { 'h-9': variant !== 'link' && size === 'sm' },
+        { 'w-12': !name && variant !== 'link' && size === 'md' },
+        { 'w-9': !name && variant !== 'link' && size === 'sm' },
+        { 'py-3.5 px-8': name && variant !== 'link' && size === 'md' },
+        { 'py-2.5 px-5': name && variant !== 'link' && size === 'sm' },
+        { 'w-full': fullWidth },
+        { 'rounded-full': rounded },
+        {
+          'bg-surface shadow-button transform hover:-translate-y-px focus:-translate-y-px focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
+            variant !== 'link',
+        },
+        { 'theme-inverse dark:theme-inverse text-text': variant === 'primary' },
+        { 'relative inline': variant === 'link' },
+        { 'bg-brand-to-r': status === 'loading' && variant === 'primary' },
+        { 'loading pointer-events-none cursor-default': status === 'loading' },
+        disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
+      ]"
       :disabled="disabled"
-      class="button s-0 w-medium"
+      class="
+        button
+        relative
+        font-medium
+        border-none
+        focus:outline-none
+        active:opacity-70 active:transform-none
+        transition
+        cursor-pointer
+        select-none
+        overflow-ellipsis
+        whitespace-nowrap
+      "
       @click="clickFunction?.($event), emit('click', $event)"
     >
-      <div v-if="status === 'loading'" class="spinner">
-        <Spinner :size="1.5" :color="'black'" :variant="'circle'" />
+      <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
+        <Spinner :size="1" :variant="variant === 'link' ? 'solid' : 'gold'" />
       </div>
 
-      <span v-else>{{ name }}</span>
+      <span
+        v-if="name"
+        class="inline-flex gap-x-3 items-center"
+        :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
+      ><slot /><span>{{ name }}</span><slot name="right" /></span>
+
+      <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
     </button>
-    <tippy ref="buttonTooltipRef" class="button-tooltip" placement="bottom" :max-width="240">
+    <tippy ref="buttonTooltipRef" class="h-0 block" placement="bottom" :max-width="240">
       <template #content>{{ tooltipText }} </template>
     </tippy>
   </div>
@@ -28,8 +73,12 @@ export default defineComponent({
     Spinner,
   },
   props: {
-    name: { type: String, required: true },
-    status: { type: String, required: false, default: 'normal' },
+    name: { type: String, required: false, default: null },
+    variant: { type: String, required: false, default: 'primary' }, // 'secondary' | 'link'
+    size: { type: String, required: false, default: 'md' }, // 'sm'
+    fullWidth: { type: Boolean, required: false, default: true },
+    rounded: { type: Boolean, required: false },
+    status: { type: String, required: false, default: 'active' }, // 'loading'
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
@@ -53,59 +102,66 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.button {
-  width: 100%;
-  padding: 1.35rem 3.2rem;
-  color: var(--bg);
-
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: not-allowed;
-    background-color: var(--text);
-    color: #ababab;
-    pointer-events: none;
+.button-primary,
+.button-secondary {
+  &:hover:not(:active),
+  &:focus:not(:active) {
+    --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
   }
 }
 
-.normal {
-  background-color: var(--text);
-  color: var(--bg);
+.button {
+  min-width: 3rem;
+  &.button-link {
+    min-width: 1rem;
+  }
+}
+.button-sm {
+  min-width: 2.25rem;
+  &.button-link {
+    min-width: 0.75rem;
+  }
 }
 
-.secondary {
-  background-color: var(--bg);
-  color: var(--text);
+.button:active {
+  transition-duration: 0s;
 }
 
-.muted {
-  background-color: var(--muted);
-}
+.button-link {
+  &:before {
+    content: '';
+    position: absolute;
+    height: 3rem;
+    top: 50%;
+    margin-top: -1.5rem;
+    left: -1rem;
+    right: -1rem;
+    z-index: 0;
+    border-radius: 0.6125rem;
+    background: var(--fg);
+    opacity: 0;
+  }
+  &.w-full:before {
+    left: 0;
+    right: 0;
+  }
 
-.inactive {
-  background-color: var(--text);
-  color: #ababab;
-  pointer-events: none;
-}
+  &.button-sm:before {
+    height: 2.25rem;
+    margin-top: -1.125rem;
+    border-radius: 0.5rem;
+  }
 
-.loading {
-  background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
+  &:focus-visible:before {
+    opacity: 1;
+    @apply ring-2;
+    @apply ring-tertiary;
+    @apply ring-opacity-50;
+  }
 
-.button-tooltip {
-  display: block;
-  height: 0;
-}
-
-.outline-theme {
-  color: var(--text);
-  /* border: 1px solid var(--border-trans); */
-  background-color: transparent;
+  &:disabled:before,
+  &.loading:before {
+    opacity: 0;
+  }
 }
 </style>

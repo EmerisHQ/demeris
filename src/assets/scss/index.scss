@@ -1,22 +1,14 @@
-@import '@starport/vue/src/styles/_normalize';
-@import '@starport/vue/src/styles/_colors';
-
-@import '@starport/vue/src/styles/_fonts';
-
-@import '_animations';
-@import '_responsive';
-@import '_elevation';
-@import '_responsive';
-@import '_theme-colors';
-@import '_typography';
-@import '_snippets';
 @import './tailwind';
 
-#app {
-  background: var(--bg);
-  color: var(--text);
+// theme config
+@import '_base';
+@import '_typography';
+@import '_theme-colors';
+@import '_shadows';
 
-  * {
-    box-sizing: border-box;
-  }
-}
+// third-party components
+@import '_tippy';
+
+// todo
+@import '_animations';
+@import '_snippets';

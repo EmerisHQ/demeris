@@ -1,24 +1,18 @@
 <template>
-  <div class="connect-wallet">
-    <div class="connect-wallet__wrapper">
-      <div class="connect-wallet__content">
-        <slot name="title">
-          <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal5.title') }}</h2>
+  <div class="get-desktop">
+    <div class="flex flex-col py-8 px-8 text-center">
+      <slot name="title">
+        <h2 class="text-3 font-bold">{{ $t('wallet.connect.modal5.title') }}</h2>
+      </slot>
+
+      <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+        <slot name="description">
+          <p>{{ $t('wallet.connect.modal5.text') }}</p>
         </slot>
+      </div>
 
-        <div class="connect-wallet__description">
-          <slot name="description">
-            <p>{{ $t('wallet.connect.modal5.text') }}</p>
-          </slot>
-        </div>
-
-        <div class="connect-wallet__controls">
-          <Button
-            :name="$t('wallet.connect.modal5.button')"
-            class="connect-wallet__controls__button"
-            @click="openUrl"
-          />
-        </div>
+      <div class="flex items-center flex-col mt-12">
+        <Button :name="$t('wallet.connect.modal5.button')" class="connect-wallet__controls__button" @click="openUrl" />
       </div>
     </div>
   </div>

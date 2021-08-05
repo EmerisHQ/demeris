@@ -1,34 +1,21 @@
 <template>
-  <div v-if="chainsCount > 1" class="asset-chains-indicator">
-    <tippy class="asset-chains-indicator__wrapper">
-      <div v-if="showIndicators" class="asset-chains-indicator__list">
-        <CircleSymbol
-          v-for="indicator of indicators"
-          :key="indicator.on_chain"
-          :size="showDescription ? 'sm' : 'xs'"
-          :chain-name="indicator.on_chain"
-          variant="chain"
-          class="asset-chains-indicator__list__item"
-        />
-      </div>
+  <tippy v-if="chainsCount > 1" class="block w-8 h-8 relative">
+    <CircleSymbol variant="chain" :chain-name="indicators[0].on_chain" :glow="false" />
+    <div class="absolute inset-0.5 -text-1 font-normal z-10 flex items-center justify-center">
+      <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
+    </div>
 
-      <div class="asset-chains-indicator__count">
-        <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
-        <span v-if="showDescription">&nbsp;{{ $t('context.assets.chains') }}</span>
-      </div>
-
-      <template #content>
-        <p v-for="balance of filteredBalances" :key="balance.on_chain">
-          {{
-            $t('context.assets.onchain', {
-              amount: formatPrecision(balance.amount),
-              chain: getChainName(balance.on_chain),
-            })
-          }}
-        </p>
-      </template>
-    </tippy>
-  </div>
+    <template #content>
+      <p v-for="balance of filteredBalances" :key="balance.on_chain">
+        {{
+          $t('context.assets.onchain', {
+            amount: formatPrecision(balance.amount),
+            chain: getChainName(balance.on_chain),
+          })
+        }}
+      </p>
+    </template>
+  </tippy>
 </template>
 
 <script lang="ts">
@@ -52,14 +39,6 @@ export default defineComponent({
     denom: {
       type: String,
       required: true,
-    },
-    showDescription: {
-      type: Boolean,
-      default: true,
-    },
-    showIndicators: {
-      type: Boolean,
-      default: true,
     },
     maxIndicators: {
       type: Number,
@@ -127,31 +106,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.asset-chains-indicator {
-  display: flex;
-
-  &__wrapper {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  &__list {
-    display: flex;
-    justify-content: flex-end;
-    width: 50%;
-    margin-right: 0.6rem;
-
-    &__item {
-      &:not(:last-child) {
-        margin-right: -1rem;
-      }
-    }
-  }
-
-  &__count {
-    font-weight: 400;
-    white-space: nowrap;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

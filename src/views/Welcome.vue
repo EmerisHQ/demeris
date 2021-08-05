@@ -1,34 +1,63 @@
 <template>
-  <div id="welcome">
-    <img class="portal" src="@/assets/svg/portal.svg" />
-    <img class="surfer" src="@/assets/images/surfer.png" />
+  <main class="welcome">
+    <header class="welcome__header">
+      <div class="welcome__header__logo">
+        <Brandmark />
+      </div>
 
-    <div v-show="isMobile" class="connect-wallet-panel">
-      <GetDesktop ref="getDesktopRef" />
+      <div class="welcome__header__controls">
+        <a title="Emeris" class="welcome__header__controls__link" href="https://emeris.com" target="_blank">
+          emeris.com ↗️
+        </a>
+      </div>
+    </header>
+
+    <div v-show="isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetDesktop ref="getDesktopRef" />
+      </div>
     </div>
 
-    <div v-show="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
-      <ConnectKeplr
-        ref="connectKeplrRef"
-        type="welcome"
-        @connect="cancelConnectKeplr"
-        @warning="showWarning"
-        @try-demo="tryDemo"
-      />
+    <div v-show="((isKeplrInstalled && !isWarningNeeded) || isWarningAgreed) && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <ConnectKeplr
+          ref="connectKeplrRef"
+          type="welcome"
+          @connect="cancelConnectKeplr"
+          @warning="showWarning"
+          @try-demo="tryDemo"
+        />
+      </div>
     </div>
 
-    <div v-show="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
-      <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
+    <div v-show="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
+      </div>
     </div>
 
-    <div v-show="isKeplrSupported && !isKeplrInstalled" class="connect-wallet-panel">
-      <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
+    <div v-show="isKeplrSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
+      </div>
     </div>
 
-    <div class="connect-wallet-panel">
-      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" />
+    <div v-show="!isKeplrSupported && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetBrowser ref="getBrowserRef" type="welcome" :is-loading="isLoading" @try-demo="tryDemo" />
+      </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts">
@@ -40,6 +69,7 @@ import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
 import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetDesktop from '@/components/account/GetDesktop.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
+import Brandmark from '@/components/common/Brandmark.vue';
 
 async function getKeplrInstance() {
   if (window.keplr) {
@@ -67,6 +97,7 @@ export default defineComponent({
 
   components: {
     ConnectKeplr,
+    Brandmark,
     AgreeWarning,
     GetKeplr,
     GetDesktop,
@@ -108,6 +139,7 @@ export default defineComponent({
       isWarningAgreed.value = true;
       connectKeplrRef.value.signIn();
     };
+
     const showWarning = () => {
       isWarningNeeded.value = true;
     };
@@ -177,94 +209,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-#welcome {
+.welcome {
   position: relative;
-  overflow: hidden;
-  height: 100vh;
 
-  .connect-wallet-panel {
-    position: relative;
-  }
-
-  .connect-wallet {
-    &__wrapper {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    &__loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    &__content {
-      max-width: 512px;
-      padding: 4.8rem;
-      text-align: center;
-    }
-
-    &__controls {
-      display: flex;
-      flex-direction: column;
-      margin-top: 5rem;
-      align-items: center;
-
-      div + div {
-        margin-top: 1.6rem;
-      }
-    }
-
-    &__description {
-      margin-top: 4rem;
-      line-height: 1.8;
-      color: var(--muted);
-      font-size: 1.6rem;
-
-      p:first-child {
-        margin-bottom: 1.8rem;
-      }
-    }
-
-    &__title {
-      font-size: 3.4rem;
-      line-height: 124.7%;
-      font-weight: 700;
-      margin-bottom: 1.6rem;
-      white-space: normal;
-    }
-
-    &.agree-warning {
-      .connect-wallet__content {
-        padding-left: 0;
-        padding-right: 0;
-      }
-      .connect-wallet__controls {
-        flex-direction: row;
-        justify-content: space-between;
-        margin-top: 3.2rem;
-
-        div + div {
-          margin-top: 0;
-        }
-      }
-      .scrollable {
-        height: auto;
-        border: none;
-        padding: 0;
-        &:after {
-          display: none;
-        }
-      }
-    }
-  }
-
-  .connect-banner {
-    display: none !important;
-  }
   .surfer {
     position: absolute;
     top: 0;
@@ -281,9 +228,63 @@ export default defineComponent({
     width: 60vh;
     height: 100vh;
   }
+
+  &__header {
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+
+    &__controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .welcome-modal__bg {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .welcome-modal__fg {
+    max-width: 34rem;
+    position: relative;
+    z-index: 11;
+    background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.5));
+
+    .agree-warning {
+      .scrollable {
+        height: auto;
+        border: none;
+        padding: 0;
+        &:after {
+          display: none;
+        }
+        .scrollable-content {
+          padding: 0;
+        }
+      }
+    }
+  }
 }
+
 @media only screen and (max-width: 768px) {
-  #welcome {
+  .welcome {
     .surfer {
       right: -10vh;
     }
@@ -292,8 +293,9 @@ export default defineComponent({
     }
   }
 }
+
 @media only screen and (max-width: 480px) {
-  #welcome {
+  .welcome {
     .connect-wallet__content {
       max-width: 100%;
     }

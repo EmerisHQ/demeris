@@ -1,5 +1,10 @@
 <template>
-  <div v-show="!isMouseOver" class="white-overlay" @mouseenter="toggleVisibilitiy" @mouseleave="toggleVisibilitiy" />
+  <div
+    v-show="!isMouseOver"
+    class="white-overlay absolute w-full bottom-0 h-20 transition-all duration-200"
+    @mouseenter="toggleVisibilitiy"
+    @mouseleave="toggleVisibilitiy"
+  />
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
@@ -21,3 +26,10 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+.white-overlay {
+  // Todo: fix this on big assets selection modals
+  // background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
+  pointer-events: none;
+}
+</style>

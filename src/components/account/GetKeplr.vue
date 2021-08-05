@@ -1,42 +1,25 @@
 <template>
-  <div class="connect-wallet">
-    <div class="connect-wallet__wrapper">
-      <div class="connect-wallet__content">
-        <slot name="title">
-          <h2 v-if="type === 'welcome'" class="connect-wallet__title">
-            {{ $t('generic_cta.connectToEmeris') }}
-          </h2>
-          <h2 v-else class="connect-wallet__title">{{ $t('wallet.connect.modal2.title') }}</h2>
+  <div class="get-keplr">
+    <div class="flex flex-col py-8 px-8 text-center">
+      <slot name="title">
+        <h2 v-if="type === 'welcome'" class="text-3 font-bold">
+          {{ $t('generic_cta.connectToEmeris') }}
+        </h2>
+        <h2 v-else class="text-3 font-bold">{{ $t('wallet.connect.modal2.title') }}</h2>
+      </slot>
+
+      <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+        <slot name="description">
+          <p>{{ $t('wallet.connect.modal2.text') }}</p>
         </slot>
-
-        <div class="connect-wallet__description">
-          <slot name="description">
-            <p>{{ $t('wallet.connect.modal2.text') }}</p>
-          </slot>
-        </div>
-
-        <div class="connect-wallet__controls">
-          <Button
-            :name="$t('wallet.connect.modal2.button1')"
-            class="connect-wallet__controls__button"
-            @click="openUrl"
-          />
-          <Button
-            v-if="type === 'welcome'"
-            :name="$t('generic_cta.tryTheDemo')"
-            :is-outline="true"
-            @click="emitTryDemo"
-          />
-          <Button
-            v-else
-            :name="$t('wallet.connect.modal2.button2')"
-            class="connect-wallet__controls__button"
-            :is-outline="true"
-            @click="reloadApp"
-          />
-        </div>
       </div>
-      <ConnectBanner />
+
+      <div class="flex flex-col mt-12">
+        <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
+        <a class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitTryDemo">
+          {{ $t('generic_cta.tryTheDemo') }}
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -46,14 +29,11 @@ import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
-import ConnectBanner from './ConnectBanner.vue';
-
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    ConnectBanner,
   },
 
   props: {
@@ -91,14 +71,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.connect-wallet {
+.get-keplr {
   &__controls {
     display: flex;
     flex-direction: column;
+    margin-top: 3rem;
 
     &__button {
       & + & {
-        margin-top: 1.6rem;
+        margin-top: 1rem;
       }
     }
   }

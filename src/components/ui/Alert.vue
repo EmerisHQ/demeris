@@ -1,12 +1,32 @@
 <template>
-  <div role="alert" class="alert" :class="`alert--${status}`">
-    <span v-if="showIcon" class="alert__icon">
-      <BanIcon v-if="status === 'error'" />
-      <ExclamationIcon v-else-if="status === 'warning'" />
-      <InformationIcon v-else-if="status === 'info'" />
+  <div
+    role="alert"
+    class="alert border border-solid flex items-start break-words"
+    :class="[
+      `alert--${status}`,
+      { 'border-warning': status === 'warning' },
+      { 'border-negative': status === 'error' },
+      { 'border-border': status === 'info' },
+      { 'py-3 px-4 rounded-lg': size === 'sm' },
+      { 'py-5 px-6 rounded-xl': size === 'md' },
+    ]"
+  >
+    <span
+      v-if="showIcon"
+      class="mt-0.5 mr-3"
+      :class="[
+        { 'text-inactive': status === 'info' },
+        { 'text-warning': status === 'warning' },
+        { 'text-negative': status === 'error' },
+      ]"
+    >
+      <Icon :name="iconName" :icon-size="size === 'sm' ? 1 : 1.5" />
     </span>
 
-    <div class="alert__content">
+    <div
+      class="max-w-full flex-grow leading-copy"
+      :class="[status === 'info' ? 'text-muted' : 'text-text', { '-text-1': size === 'sm' }]"
+    >
       <slot>
         <p>{{ message }}</p>
       </slot>
@@ -15,21 +35,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
-import BanIcon from '@/components/common/Icons/BanIcon.vue';
-import ExclamationIcon from '@/components/common/Icons/ExclamationIcon.vue';
-import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
+import Icon from '@/components/ui/Icon.vue';
 
 type AlertStatus = 'error' | 'info' | 'warning';
+type AlertSize = 'sm' | 'md';
 
 export default defineComponent({
   name: 'Alert',
 
   components: {
-    BanIcon,
-    ExclamationIcon,
-    InformationIcon,
+    Icon,
   },
 
   props: {
@@ -45,56 +62,35 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    size: {
+      type: String as PropType<AlertSize>,
+      default: 'sm',
+    },
+  },
+
+  setup(props) {
+    const iconName = computed(() => {
+      switch (props.status) {
+        case 'error':
+          return 'WarningTriangleIcon';
+          break;
+        case 'warning':
+          return 'ExclamationIcon';
+          break;
+        case 'info':
+          return 'InformationIcon';
+          break;
+        default:
+          return null;
+          break;
+      }
+    });
+
+    return {
+      iconName,
+    };
   },
 });
 </script>
 
-<style lang="scss" scoped>
-.alert {
-  padding: 1.4rem 1.6rem;
-  border-radius: 0.8rem;
-  display: flex;
-  align-items: center;
-  border: 1px solid transparent;
-  color: var(--text);
-
-  &--error {
-    background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
-  }
-
-  &--error &__icon {
-    color: rgba(202, 8, 101, 1);
-  }
-
-  &--info {
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: none;
-    color: rgba(0, 0, 0, 0.667);
-  }
-
-  &--info &__icon {
-    color: rgba(0, 0, 0, 0.33);
-  }
-
-  &--warning {
-    background: linear-gradient(135deg, #ffe3c1 0%, #fffac9 100%);
-  }
-
-  &--warning &__icon {
-    color: rgba(255, 125, 5, 1);
-  }
-
-  &__icon {
-    font-size: 1.8rem;
-    flex-shrink: 0;
-  }
-
-  &__content {
-    margin-left: 1.2rem;
-    font-size: 1.3rem;
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

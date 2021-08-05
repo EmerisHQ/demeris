@@ -3,9 +3,11 @@
     <Modal
       v-if="isKeplrInstalled && isWarningAgreed"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
       @close="closeConnectKeplr"
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
@@ -14,9 +16,11 @@
     <Modal
       v-else-if="isKeplrInstalled && !isWarningAgreed"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
       @close="closeAgreeWarning"
     >
       <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" @agree="agreeWarning" />
@@ -25,9 +29,11 @@
     <Modal
       v-else-if="isKeplrSupported && !isKeplrInstalled"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
       @close="closeGetKeplr"
     >
       <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
@@ -36,9 +42,11 @@
     <Modal
       v-else
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
       @close="closeGetBrowser"
     >
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
@@ -122,6 +130,7 @@ export default defineComponent({
 
     const agreeWarning = () => {
       isWarningAgreed.value = true;
+      connectKeplrRef.value.signIn();
     };
 
     onMounted(async () => {
@@ -203,32 +212,32 @@ export default defineComponent({
     &__content {
       width: 50%;
       min-height: inherit;
-      padding: 4.8rem;
+      padding: 3rem;
       text-align: center;
     }
 
     &__controls {
       display: flex;
       flex-direction: column;
-      margin-top: 5rem;
+      margin-top: 3rem;
 
       div + div {
-        margin-top: 1.6rem;
+        margin-top: 1rem;
       }
     }
 
     &__description {
-      margin-top: 4rem;
+      margin-top: 2.5rem;
       line-height: 1.8;
       color: var(--muted);
 
       p:first-child {
-        margin-bottom: 1.8rem;
+        margin-bottom: 1.125rem;
       }
     }
 
     &__title {
-      font-size: 2.8rem;
+      font-size: 1.75rem;
       font-weight: 600;
     }
   }

@@ -27,22 +27,31 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="stake">
+  <div>
     <template v-if="!stakingBalances.length">
-      <div class="stake__banner">
-        <div class="stake__banner__wrapper">
-          <p class="stake__banner__title">Earn rewards by staking <Denom :name="denom" /></p>
-          <p class="stake__banner__subtitle">
+      <div
+        class="
+          stake__banner
+          relative
+          border border-border
+          rounded-2xl
+          p-6
+          flex flex-col
+          justify-between
+          bg-right bg-no-repeat
+        "
+      >
+        <div class="flex-1 max-w-xs">
+          <h3 class="text-1 font-bold">Earn rewards by staking <Denom :name="denom" /></h3>
+          <p class="text-muted leading-copy mt-3">
             Lock up your <Denom :name="denom" /> and earn passive income with an average
-            <span class="w-bold">9.7% APY</span>.
+            <span class="font-bold">9.7% APY</span>.
           </p>
         </div>
 
-        <div class="stake__banner__controls">
-          <Button status="secondary" name="Coming soon" class="stake__banner__controls__button" />
-        </div>
+        <Button variant="secondary" name="Coming soon" class="mt-8" disabled :full-width="false" />
 
-        <div class="stake__banner__symbol">
+        <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
           <CircleSymbol :denom="denom" size="xl" />
         </div>
       </div>
@@ -76,49 +85,94 @@ export default defineComponent({
 <style lang="scss">
 .stake {
   &__banner {
-    background: var(--bg);
-    border: 1px solid var(--border-trans);
-    border-radius: 1.6rem;
-    padding: 2.4rem;
+    background-image: url('~@/assets/images/gold-ephemeris-ring-1.png'),
+      url('~@/assets/images/gold-ephemeris-ring-2.png');
+    background-size: 230px, 290px;
+    background-position: 88%, 93%;
+  }
+
+  // Moved from old styles in Asset.vue
+  &__rewards {
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    background: var(--fg);
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 23.5rem;
-    width: 100%;
-    background-image: url('~@/assets/images/stake-rings.png');
-    background-repeat: no-repeat;
-    background-position: center right;
-    position: relative;
+    align-items: center;
 
-    &__wrapper {
-      flex: 1 1 0%;
-      width: 60%;
+    &__label {
+      flex: 1;
+      font-weight: 600;
     }
 
-    &__title {
-      font-size: 2.1rem;
-      font-weight: 700;
-    }
-
-    &__subtitle {
+    &__amount {
+      margin-left: 1rem;
       color: var(--muted);
-      margin-top: 1.2rem;
     }
 
-    &__controls {
-      display: inline-flex;
+    &__balance {
+      margin-left: 1rem;
+      font-weight: 600;
+      text-align: right;
+    }
 
-      .button {
-        color: var(--inactive);
-        cursor: not-allowed;
+    &__button {
+      margin-left: 1rem;
+      padding: 0.75rem 1.5rem;
+      background-color: black;
+      color: white;
+      font-weight: 600;
+      border-radius: 1.25rem;
+    }
+  }
+
+  &__item {
+    &__validator {
+      flex: 1 1 0%;
+      display: flex;
+      align-items: center;
+
+      &__avatar {
+        border-radius: 0.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        background-color: rgba(0, 0, 0, 0.1);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &__name {
+        margin-left: 1rem;
+        flex: 1 1 0%;
+        font-weight: bold;
       }
     }
 
-    &__symbol {
-      position: absolute;
-      top: 50%;
-      right: 0;
-      transform: translate(-95%, -50%);
+    &__amount {
+      margin-left: 1rem;
+      width: 33.33%;
+      text-align: right;
+      color: var(--muted);
+    }
+
+    &__balance {
+      margin-left: 1rem;
+      width: 33.33%;
+      display: flex;
+      align-items: center;
+
+      &__value {
+        flex: 1 1 0%;
+        text-align: right;
+        font-weight: 600;
+      }
+    }
+
+    &__more {
+      margin-left: 1rem;
+      padding: 0.25rem;
     }
   }
 }

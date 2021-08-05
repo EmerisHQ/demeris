@@ -1,21 +1,13 @@
 <template>
-  <div class="send-form">
+  <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'recipient'">
-      <h2 class="send-form__title s-2">{{ $t('components.sendForm.title') }}</h2>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.title') }}</h2>
       <SendFormRecipient @next="goToStep('amount')" />
     </template>
 
     <template v-else-if="step === 'amount'">
-      <h2 class="send-form__title s-2">{{ $t('components.sendForm.amountSelect') }}</h2>
-      <SendFormAmount :balances="balances" :fees="state.fees" @next="goToStep('review')" />
-      <div class="send-form__fees">
-        <FeeLevelSelector
-          v-if="steps.length > 0"
-          v-model:gasPriceLevel="state.gasPrice"
-          :steps="steps"
-          @update:fees="state.fees = $event"
-        />
-      </div>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
+      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="goToStep('review')" />
     </template>
 
     <template v-else>
@@ -37,7 +29,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
 
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
@@ -54,7 +45,6 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    FeeLevelSelector,
     TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
@@ -155,32 +145,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.send-form {
-  &__title {
-    text-align: center;
-    margin-bottom: 3.2rem;
-  }
-
-  &__fees {
-    margin-top: 2.4rem;
-    margin-left: -2.4rem;
-    margin-right: -2.4rem;
-  }
-}
-
-.form {
-  &__field {
-    & > label {
-      display: block;
-      font-size: 1.2rem;
-      color: var(--muted);
-      margin-bottom: 0.8rem;
-    }
-
-    & + & {
-      margin-top: 3.2rem;
-    }
-  }
-}
-</style>
+<style lang="scss"></style>

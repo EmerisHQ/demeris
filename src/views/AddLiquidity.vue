@@ -1,279 +1,299 @@
 <template>
-  <div class="add-liquidity">
-    <header class="add-liquidity__header">
-      <button class="add-liquidity__header__button" :disabled="state.step === 'send'" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
-      </button>
+  <div class="flex w-full min-h-screen justify-center">
+    <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
+      <header class="flex items-center justify-between py-6 h-24">
+        <Button variant="link" :full-width="false" :disabled="state.step === 'send'" @click="goBack">
+          <Icon name="ArrowLeftIcon" :icon-size="1.5" />
+        </Button>
 
-      <nav class="add-liquidity__steps">
-        <span
-          v-for="label of steps"
-          :key="label"
-          class="add-liquidity__steps__item"
-          :class="{ 'add-liquidity__steps__item--active': state.step === label }"
-        >
-          {{ label }}
-        </span>
-      </nav>
+        <nav class="flex-1 flex items-center justify-center space-x-12">
+          <span
+            v-for="label of steps"
+            :key="label"
+            class="capitalize font-medium cursor-default"
+            :class="state.step === label ? 'text-text' : 'text-inactive'"
+          >
+            {{ label }}
+          </span>
+        </nav>
 
-      <button class="add-liquidity__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
-      </button>
-    </header>
+        <Button class="ml-auto" variant="link" @click="onClose">
+          <Icon name="CloseIcon" :icon-size="1.5" />
+        </Button>
+      </header>
 
-    <main class="add-liquidity__wrapper">
-      <template v-if="state.step === 'amount'">
-        <template v-if="!state.isCreationConfirmationOpen">
-          <h2 class="add-liquidity__title s-2">
-            {{ hasPair && !hasPool ? 'Create Liquidity' : 'Add Liquidity' }}
-          </h2>
+      <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
+        <template v-if="state.step === 'amount'">
+          <div class="w-full max-w-lg mx-auto">
+            <template v-if="!state.isCreationConfirmationOpen">
+              <div class="pt-8 mb-8 text-center">
+                <h1 class="text-3 font-bold">
+                  {{ hasPair && !hasPool ? 'Create new pool' : 'Add liquidity' }}
+                </h1>
 
-          <p v-if="!hasPair" class="add-liquidity__subtitle">Select two assets</p>
+                <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
+                <div v-else class="mt-3 text-muted">
+                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" />
+                  <span class="mx-1">&middot;</span>
+                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" /> pool
+                </div>
+              </div>
 
-          <div v-else class="add-liquidity__pool">
-            <div class="add-liquidity__pool__pair">
-              <CircleSymbol
-                :denom="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom"
-                size="sm"
-                class="add-liquidity__pool__pair__avatar token-a"
-              />
-              <CircleSymbol
-                :denom="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom"
-                size="sm"
-                class="add-liquidity__pool__pair__avatar token-b"
-              />
-            </div>
+              <fieldset v-if="hasPrices" class="mt-8 pb-8 min-w-0">
+                <div class="relative text-4 font-bold px-20 w-full text-center transition-colors">
+                  <FlexibleAmountInput
+                    v-model="state.totalEstimatedPrice"
+                    prefix="$"
+                    placeholder="0"
+                    @input="currencyAmountHandler"
+                  />
+                  <div class="flex items-center absolute inset-y-0 right-0">
+                    <Button
+                      :click-function="
+                        () => {
+                          state.isMaximumAmountChecked = true;
+                        }
+                      "
+                      :name="$t('generic_cta.max')"
+                      class="flex"
+                      :class="{ 'text-negative-text': !hasSufficientFunds }"
+                      size="sm"
+                      variant="secondary"
+                      rounded
+                    />
+                  </div>
+                </div>
+              </fieldset>
 
-            <span class="add-liquidity__pool__name">
-              <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" /> /
-              <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
-            </span>
-          </div>
-
-          <div v-if="hasPrices" class="add-liquidity__estimated">
-            <FlexibleAmountInput
-              v-model="state.totalEstimatedPrice"
-              :max-width="250"
-              :min-width="32"
-              prefix="$"
-              placeholder="0"
-              class="add-liquidity__estimated__price s-2 w-bold"
-              @input="currencyAmountHandler"
-            />
-            <label class="add-liquidity__estimated__max">
-              <input v-model="state.isMaximumAmountChecked" type="checkbox" name="add-liquidity__max" />
-              <span class="elevation-button">Max</span>
-            </label>
-          </div>
-
-          <div class="add-liquidity__content">
-            <div class="add-liquidity__modal-wrapper">
               <ChainSelectModal
                 v-if="state.isChainsModalOpen"
+                class="fixed inset-0 z-30 bg-bg"
                 title="Select chain"
+                :show-subtitle="false"
                 :assets="balances"
                 :selected-denom="form[state.chainsModalSource].asset.base_denom"
                 :func="() => toggleChainsModal()"
                 @select="toggleChainsModal($event, state.chainsModalSource)"
               />
-            </div>
 
-            <div
-              class="add-liquidity__input input-a elevation-card"
-              :class="{ 'input-invalid': !hasSufficientFunds.coinA }"
-            >
-              <Alert v-if="hasPair && !hasPool" class="add-liquidity__create-warning elevation-card">
-                <p class="add-liquidity__create-warning__title w-bold">Your are the first liquidity provider</p>
-                <p class="add-liquidity__create-warning__description">
-                  As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> /
+              <Alert v-if="hasPair && !hasPool" status="warning" class="my-6 max-w-sm mx-auto">
+                <p class="font-bold">You are the first liquidity provider</p>
+                <p class="mt-0.5">
+                  As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> &middot;
                   <Ticker :name="form.coinB.asset.base_denom" />
                   pool, you will be creating the pool and setting the price. Proceed with caution.
                 </p>
               </Alert>
 
-              <div class="add-liquidity__input__main">
-                <div class="add-liquidity__input__header">
-                  <span class="add-liquidity__input__header__label">Supply</span>
-                  <div v-if="form.coinA.asset && hasFunds.coinA" class="add-liquidity__input__header__available">
+              <fieldset class="bg-surface shadow-card rounded-2xl">
+                <div class="w-full flex justify-between text-muted pt-6 px-5">
+                  <span>Supply</span>
+
+                  <span
+                    v-if="form.coinA.asset && hasFunds.coinA"
+                    :class="{ 'text-negative-text': !hasSufficientFunds.coinA }"
+                  >
                     <AmountDisplay
                       :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                     />
                     available
-                  </div>
-
+                  </span>
                   <router-link
                     v-else-if="form.coinA.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinA.asset.base_denom } }"
-                    class="add-liquidity__input__header__buy inline-flex items-center"
+                    class="
+                      font-medium
+                      text-link
+                      hover:text-link-hover
+                      focus:text-link-hover
+                      active:opacity-70
+                      transition
+                    "
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
-                    <Denom :name="form.coinA.asset.base_denom" />
-                    <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+                    <Denom :name="form.coinA.asset.base_denom" /> &rarr;
                   </router-link>
                 </div>
+                <DenomSelect
+                  v-model:amount="form.coinA.amount"
+                  :input-header="`Pay`"
+                  :selected-denom="form.coinA.asset"
+                  :assets="balances"
+                  :show-chain="false"
+                  @select="coinSelectHandler('coinA', $event)"
+                  @change="coinAChangeHandler"
+                />
 
-                <div class="add-liquidity__input__container">
-                  <DenomSelect
-                    v-model:amount="form.coinA.amount"
-                    :input-header="`Pay`"
-                    :selected-denom="form.coinA.asset"
-                    :assets="balances"
-                    @select="coinSelectHandler('coinA', $event)"
-                    @change="coinAChangeHandler"
-                  />
-                </div>
-              </div>
-
-              <div v-if="form.coinA.asset" class="add-liquidity__input__details">
-                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinA')">
+                <button
+                  v-if="form.coinA.asset"
+                  class="
+                    py-4
+                    px-5
+                    flex
+                    items-center
+                    justify-between
+                    w-full
+                    outline-none
+                    text-left
+                    group
+                    active:opacity-70
+                    transition-opacity
+                    text-muted
+                    hover:text-text
+                    focus:text-text
+                    border-t border-border
+                    rounded-b-2xl
+                  "
+                  @click="toggleChainsModal(null, 'coinA')"
+                >
                   <div>
-                    From <span class="w-bold text-black"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
+                    From
+                    <span class="font-medium text-text"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
                   </div>
-                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
+                  <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
                 </button>
-              </div>
-            </div>
+              </fieldset>
 
-            <div class="add-liquidity__price">
-              <span class="add-liquidity__price__divider" />
-              <div class="add-liquidity__price__container">
-                <template v-if="exchangeAmount">
-                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> :
-                  <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
-                </template>
-                <span v-else>Price</span>
-              </div>
-            </div>
+              <fieldset class="bg-surface shadow-card rounded-2xl mt-4">
+                <div class="w-full flex justify-between text-muted pt-6 px-5">
+                  <span>Supply</span>
 
-            <div
-              class="add-liquidity__input input-b elevation-card"
-              :class="{ 'input-invalid': !hasSufficientFunds.coinB }"
-            >
-              <div class="add-liquidity__input__main">
-                <div class="add-liquidity__input__header">
-                  <span class="add-liquidity__input__header__label">Supply</span>
-                  <div v-if="form.coinB.asset && hasFunds.coinB" class="add-liquidity__input__header__available">
+                  <span
+                    v-if="form.coinB.asset && hasFunds.coinB"
+                    :class="{ 'text-negative-text': !hasSufficientFunds.coinB }"
+                  >
                     <AmountDisplay
                       :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                     />
                     available
-                  </div>
-
+                  </span>
                   <router-link
                     v-else-if="form.coinB.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinB.asset.base_denom } }"
-                    class="add-liquidity__input__header__buy inline-flex items-center"
+                    class="
+                      font-medium
+                      text-link
+                      hover:text-link-hover
+                      focus:text-link-hover
+                      active:opacity-70
+                      transition
+                    "
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
-                    <Denom :name="form.coinB.asset.base_denom" />
-                    <Icon name="ArrowRightIcon" :icon-size="1.6" class="ml-2" />
+                    <Denom :name="form.coinB.asset.base_denom" /> &rarr;
                   </router-link>
                 </div>
+                <DenomSelect
+                  v-model:amount="form.coinB.amount"
+                  :input-header="`Pay`"
+                  :selected-denom="form.coinB.asset"
+                  :assets="balancesForSecond"
+                  :show-chain="false"
+                  @select="coinSelectHandler('coinB', $event)"
+                  @change="coinBChangeHandler"
+                />
 
-                <div class="add-liquidity__input__container">
-                  <DenomSelect
-                    v-model:amount="form.coinB.amount"
-                    :input-header="`Pay`"
-                    :selected-denom="form.coinB.asset"
-                    :assets="balancesForSecond"
-                    @select="coinSelectHandler('coinB', $event)"
-                    @change="coinBChangeHandler"
-                  />
-                </div>
-              </div>
-
-              <div v-if="form.coinB.asset" class="add-liquidity__input__details">
-                <button class="add-liquidity__input__details__from" @click="toggleChainsModal(null, 'coinB')">
+                <button
+                  v-if="form.coinB.asset"
+                  class="
+                    py-4
+                    px-5
+                    flex
+                    items-center
+                    justify-between
+                    w-full
+                    outline-none
+                    text-left
+                    group
+                    active:opacity-70
+                    transition-opacity
+                    text-muted
+                    hover:text-text
+                    focus:text-text
+                    border-t border-border
+                    rounded-b-2xl
+                  "
+                  @click="toggleChainsModal(null, 'coinB')"
+                >
                   <div>
-                    From <span class="w-bold text-black"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
+                    From
+                    <span class="font-medium text-text"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
                   </div>
-                  <Icon name="ChevronRightIcon" :icon-size="1.2" class="add-liquidity__input__details__from__icon" />
+                  <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
                 </button>
-              </div>
-            </div>
+              </fieldset>
 
-            <div v-if="hasPair" class="add-liquidity__receive">
-              <div class="add-liquidity__receive__header">
-                <label class="add-liquidity__receive__label s-minus">Receive</label>
-                <Icon v-tippy content="TODO" name="HintIcon" :icon-size="1.6" />
-              </div>
-
-              <div class="add-liquidity__receive__wrapper">
-                <div class="add-liquidity__receive__token">
-                  <CircleSymbol
-                    :denom="hasPool ? pool.pool_coin_denom : ''"
-                    :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
-                    size="sm"
-                    class="add-liquidity__receive__token__avatar"
+              <div class="mt-2 w-full max-w-sm mx-auto">
+                <ListItem v-if="exchangeAmount" inset size="md" label="Price">
+                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> &asymp;
+                  <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
+                </ListItem>
+                <ListItem v-if="hasPair" inset size="md" label="Receive LP asset">
+                  <div v-tippy="{ placement: 'right' }" class="flex items-center justify-end text-left" content="TODO">
+                    <CircleSymbol
+                      :denom="hasPool ? pool.pool_coin_denom : ''"
+                      :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
+                      size="sm"
+                      class="mr-3"
+                    />
+                    <span class="font-medium">{{ state.receiveAmount }}
+                      <span class="font-bold">
+                        <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
+                      </span>
+                    </span>
+                  </div>
+                </ListItem>
+                <div class="mt-6 mb-2">
+                  <FeeLevelSelector
+                    v-if="actionSteps.length > 0 && gasPrice"
+                    v-model:gasPriceLevel="gasPrice"
+                    :steps="actionSteps"
+                    @update:fees="state.fees = $event"
                   />
-                  <span v-if="hasPool" class="w-bold">
-                    <Ticker :name="pool.pool_coin_denom" />
-                  </span>
-                  <span v-else class="w-bold">
-                    <Ticker :name="preview_pool_coin_denom" />
-                  </span>
                 </div>
-
-                <AmountInput
-                  v-model="state.receiveAmount"
-                  :readonly="!hasPool"
-                  placeholder="0"
-                  class="add-liquidity__receive__amount w-bold"
-                  @input="coinPoolChangeHandler"
+                <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
+                  Your assets will be transferred to Cosmos Hub
+                </Alert>
+                <Button
+                  :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
+                  :disabled="!isValid"
+                  @click="goToReview"
                 />
               </div>
-            </div>
+            </template>
 
-            <Alert v-if="hasPair && needsTransferToHub" status="info" class="add-liquidity__transfer-info">
-              Your assets will be transferred to Cosmos Hub
-            </Alert>
+            <template v-else-if="state.isCreationConfirmationOpen">
+              <article class="flex flex-col items-center">
+                <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line text-center">
+                  Creating a pool is risky business
+                </h2>
 
-            <div class="add-liquidity__controls">
-              <Button
-                :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
-                :disabled="!isValid"
-                @click="goToReview"
-              />
-              <div class="add-liquidity__controls__fees">
-                <FeeLevelSelector
-                  v-if="actionSteps.length > 0"
-                  v-model:gasPriceLevel="gasPrice"
-                  :steps="actionSteps"
-                  @update:fees="state.fees = $event"
+                <img
+                  src="@/assets/images/transfer-interstitial.png"
+                  name="Create liquidity pool"
+                  class="-mt-8 -mb-10 max-w-sm"
                 />
-              </div>
-            </div>
+
+                <p class="text-muted leading-copy max-w-md mx-auto">
+                  As the first liquidity provider, you are setting the pool price. This means that if you don’t know
+                  what you are doing, you may risk significant loss as a result of arbitrage.
+                </p>
+
+                <footer class="w-full max-w-md mx-auto flex justify-stretch mt-12 mb-8 gap-6">
+                  <Button
+                    name="Cancel"
+                    variant="secondary"
+                    class="flex-1"
+                    @click="state.isCreationConfirmationOpen = false"
+                  />
+                  <Button name="I understand" class="flex-1" @click="goToReview" />
+                </footer>
+              </article>
+            </template>
           </div>
         </template>
 
-        <template v-else-if="state.isCreationConfirmationOpen">
-          <section class="add-liquidity__content add-liquidity__confirmation">
-            <h2 class="add-liquidity__title s-2">Creating a pool is risky business</h2>
-
-            <div class="add-liquidity__confirmation__placeholder" />
-
-            <p class="add-liquidity__confirmation__description">
-              As the first liquidity provider, you are setting the pool price. This means that if you don’t know what
-              you are doing, you may risk significant loss as a result of arbitrage.
-            </p>
-
-            <div class="add-liquidity__confirmation__controls">
-              <button
-                class="add-liquidity__confirmation__controls__button elevation-button"
-                @click="state.isCreationConfirmationOpen = false"
-              >
-                Cancel
-              </button>
-              <button class="add-liquidity__confirmation__controls__button confirmation-button" @click="goToReview">
-                I understand
-              </button>
-            </div>
-          </section>
-        </template>
-      </template>
-
-      <template v-else>
-        <section class="add-liquidity__content add-liquidity__review">
+        <template v-else>
           <TxStepsModal
             :data="actionSteps"
             :gas-price-level="gasPrice"
@@ -282,9 +302,9 @@
             @failed="goToStep('review')"
             @reset="resetHandler"
           />
-        </section>
-      </template>
-    </main>
+        </template>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -303,10 +323,11 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
+/* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -321,7 +342,6 @@ export default {
   components: {
     Alert,
     AmountDisplay,
-    AmountInput,
     Button,
     ChainName,
     ChainSelectModal,
@@ -332,6 +352,7 @@ export default {
     FeeLevelSelector,
     FlexibleAmountInput,
     Icon,
+    ListItem,
     TxStepsModal,
   },
 
@@ -405,7 +426,9 @@ export default {
 
     const { allPools, pools, getReserveBaseDenoms } = usePools();
 
-    const preview_pool_coin_denom = `G`+ (allPools.value.length+1);
+    const previewPoolCoinDenom = computed(() => {
+      return `G` + (allPools.value.length + 1);
+    });
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -720,7 +743,7 @@ export default {
         return;
       }
 
-      const bigAmountA = new BigNumber(+(form.coinA.amount));
+      const bigAmountA = new BigNumber(+form.coinA.amount);
       const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(bigAmountA);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
@@ -740,7 +763,7 @@ export default {
         return;
       }
 
-      const bigAmountB = new BigNumber(+(form.coinB.amount));
+      const bigAmountB = new BigNumber(+form.coinB.amount);
       const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
       const result = bigAmountB.dividedBy(bigExchangeAmount);
 
@@ -844,10 +867,10 @@ export default {
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            console.log("fee", feeA);
+            console.log('fee', feeA);
 
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
-            const amountB = parseCoins(form.coinB.asset.amount)[0].amount  || 0;
+            const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
             const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
@@ -876,8 +899,8 @@ export default {
                 .decimalPlaces(precisionA)
                 .toString();
             } else {
-              form.coinA.amount = "0";
-              form.coinB.amount = "0";
+              form.coinA.amount = '0';
+              form.coinB.amount = '0';
             }
           }
 
@@ -904,7 +927,7 @@ export default {
       isValid,
       exchangeAmount,
       hasPrices,
-      preview_pool_coin_denom,
+      previewPoolCoinDenom,
       hasFunds,
       coinAChangeHandler,
       coinBChangeHandler,
@@ -923,379 +946,7 @@ export default {
 </script>
 
 <style lang="scss">
-.add-liquidity {
-  position: relative;
-  padding-bottom: 2rem;
-
-  .denom-select {
-    padding: 0;
-  }
-
-  .denom-select__coin-from {
-    display: none;
-  }
-
-  .denom-select__coin-amount-type {
-    display: none;
-  }
-
-  &__subtitle {
-    margin-top: 1.2rem;
-    color: var(--muted);
-  }
-
-  &__estimated {
-    margin-top: 3.2rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 42rem;
-    width: 100%;
-    text-align: center;
-    line-height: 1;
-
-    &__price {
-      font-size: 5.1rem;
-      font-weight: 600;
-
-      &::placeholder {
-        color: red;
-      }
-    }
-
-    &__max {
-      margin-top: -0.6rem;
-      position: absolute;
-      right: 0;
-
-      input {
-        display: none;
-      }
-
-      span {
-        border-radius: 2.4rem;
-        padding: 1rem 1.6rem;
-        font-size: 1.2rem;
-        cursor: pointer;
-      }
-
-      input:checked + span {
-        background: var(--text);
-        color: var(--bg);
-        font-weight: 500;
-      }
-    }
-  }
-
-  &__create-warning {
-    width: 20rem;
-    position: absolute;
-    right: 0;
-    transform: translateX(26rem);
-    flex-direction: column;
-    align-items: flex-start !important;
-
-    .alert__content {
-      margin-left: 0;
-    }
-
-    &__title {
-      margin-top: 1.2rem;
-      text-align: left;
-    }
-
-    &__description {
-      margin-top: 1.2rem;
-    }
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3rem 4rem;
-    background: var(--bg);
-
-    &__button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
-
-      &:disabled {
-        cursor: not-allowed;
-        color: var(--inactive);
-      }
-    }
-
-    .close-button {
-      margin-left: auto;
-    }
-  }
-
-  &__wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 3.1rem;
-  }
-
-  &__steps {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &__item {
-      text-transform: capitalize;
-      color: var(--inactive);
-      font-weight: 600;
-      cursor: default;
-
-      & + & {
-        margin-left: 4.8rem;
-      }
-      &--active {
-        color: var(--text);
-      }
-    }
-  }
-
-  &__content {
-    width: 100%;
-    max-width: 42rem;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  &__review {
-    max-width: 44rem;
-  }
-
-  &__pool {
-    margin-top: 1.6rem;
-    display: flex;
-    align-items: center;
-
-    &__pair {
-      display: inline-flex;
-      align-items: center;
-      margin-right: 0.8rem;
-
-      &__avatar {
-        &.token-a {
-          z-index: 1;
-        }
-
-        & + & {
-          margin-left: -0.6rem;
-        }
-      }
-    }
-
-    &__name {
-      color: var(--muted);
-    }
-  }
-
-  &__price {
-    position: relative;
-    overflow: hidden;
-
-    &__container {
-      padding: 0.8rem 1.2rem;
-      font-size: 1.2rem;
-      color: var(--muted);
-      border-radius: 2.4rem;
-      background: #e6e6e6;
-      display: inline-block;
-      margin: 1.5rem auto;
-      position: relative;
-    }
-
-    &__divider {
-      position: absolute;
-      content: '';
-      display: block;
-      height: 100%;
-      width: 1px;
-      background: #e6e6e6;
-      top: 0;
-      left: 50%;
-    }
-  }
-
-  &__controls {
-    margin-top: 3.2rem;
-    width: 100%;
-
-    &__fees {
-      margin-top: 2.4rem;
-      margin-left: -2.4rem;
-      margin-right: -2.4rem;
-    }
-  }
-
-  &__receive {
-    width: 100%;
-    border-radius: 1rem;
-    border: 1px solid var(--border-trans);
-    padding: 1.6rem;
-    margin-top: 3rem;
-
-    &__header {
-      font-size: 1.2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.6rem;
-    }
-
-    &__wrapper {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    &__token {
-      display: flex;
-      align-items: center;
-
-      &__avatar {
-        margin-right: 1.2rem;
-      }
-    }
-
-    &__label {
-      color: var(--muted);
-    }
-
-    &__amount {
-      text-align: right;
-      appearance: none;
-
-      &:read-only {
-        &::-webkit-inner-spin-button {
-          appearance: none;
-        }
-
-        &:focus {
-          outline: none;
-        }
-      }
-    }
-  }
-
-  &__transfer-info {
-    width: 100%;
-    margin-top: 3rem;
-  }
-
-  &__confirmation {
-    text-align: center;
-
-    &__placeholder {
-      background: var(--fg-trans);
-      width: 36rem;
-      height: 15rem;
-      margin-top: 3.4rem;
-      border-radius: 1rem;
-    }
-
-    &__description {
-      color: var(--muted);
-      line-height: 1.8;
-      margin-top: 3.4rem;
-    }
-
-    &__controls {
-      width: 100%;
-      display: flex;
-
-      &__button {
-        margin-top: 4rem;
-        font-weight: 600;
-        padding: 1.6rem 2rem;
-        flex: 1 1 0%;
-        border-radius: 0.8rem;
-
-        &.confirmation-button {
-          background: var(--text);
-          color: var(--bg);
-        }
-
-        & + & {
-          margin-left: 2.4rem;
-        }
-      }
-    }
-  }
-
-  &__input {
-    width: 100%;
-    border-radius: 1rem;
-    background: var(--bg);
-
-    &.input-invalid &__header__available {
-      color: var(--negative-text);
-    }
-
-    &.input-a {
-      margin-top: 3.2rem;
-    }
-
-    &__container {
-      padding: 0.6rem 0;
-    }
-
-    &__main {
-      padding: 1.6rem 2rem;
-      display: flex;
-      flex-direction: column;
-    }
-
-    &__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.6rem;
-
-      &__label {
-        color: var(--muted);
-      }
-
-      &__available {
-        color: var(--muted);
-        font-size: 1.3rem;
-      }
-
-      &__buy {
-        font-size: 1.3rem;
-        font-weight: 600;
-      }
-    }
-
-    &__details {
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-
-      &__from {
-        padding: 1.6rem 2rem;
-        color: var(--muted);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-
-        &__icon {
-          width: 1.6rem;
-          height: 1.6rem;
-        }
-      }
-    }
-  }
+.denom-select__coin-amount-type {
+  display: none;
 }
 </style>

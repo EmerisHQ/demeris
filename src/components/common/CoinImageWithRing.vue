@@ -9,8 +9,8 @@ export default defineComponent({
   name: 'CoinImageWithRing',
   props: {
     coinData: { type: Object, required: true },
-    normalSize: { type: Number, default: 3.2 },
-    withRingImageSize: { type: Number, default: 2.4 },
+    normalSize: { type: Number, default: 2 },
+    withRingImageSize: { type: Number, default: 1.5 },
   },
   setup(props: { coinData: Record<string, unknown>; normalSize: number; withRingImageSize: number }) {
     let outer = '';

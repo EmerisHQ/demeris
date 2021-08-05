@@ -1,67 +1,131 @@
 <template>
-  <div class="send">
-    <header class="send__header">
-      <button
-        v-if="showBackButton"
-        :disabled="['move', 'send'].includes(step)"
-        class="send__header__button"
-        @click="goBack"
-      >
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
-      </button>
-
-      <nav v-if="transferType" class="send__steps">
-        <span
-          v-for="label of allSteps[transferType]"
-          :key="label"
-          class="send__steps__item"
-          :class="{ 'send__steps__item--active': step === label }"
+  <div class="send relative flex w-full min-h-screen justify-center">
+    <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
+      <header class="flex items-center justify-between py-6 h-24">
+        <Button
+          v-if="showBackButton"
+          variant="link"
+          :full-width="false"
+          :disabled="['move', 'send'].includes(step)"
+          :click-function="goBack"
         >
-          {{ label }}
-        </span>
-      </nav>
+          <Icon name="ArrowLeftIcon" :icon-size="1.5" />
+        </Button>
 
-      <button class="send__header__button close-button" @click="onClose">
-        <Icon name="CloseIcon" :icon-size="1.6" />
-      </button>
-    </header>
+        <nav v-if="transferType" class="flex-1 flex items-center justify-center space-x-12">
+          <span
+            v-for="label of allSteps[transferType]"
+            :key="label"
+            class="capitalize font-medium cursor-default"
+            :class="step === label ? 'text-text' : 'text-inactive'"
+          >
+            {{ label }}
+          </span>
+        </nav>
 
-    <main class="send__wrapper">
-      <template v-if="!transferType">
-        <h2 class="send__title s-2">Who are you sending to?</h2>
+        <Button class="ml-auto" variant="link" :full-width="false" :click-function="onClose">
+          <Icon name="CloseIcon" :icon-size="1.5" />
+        </Button>
+      </header>
 
-        <div class="send__type">
-          <router-link :to="{ name: 'Send', params: { type: 'address' } }" class="send__type__button elevation-card">
-            <div class="send__type__button__icon">
-              <Icon name="SendIcon" :icon-size="1.6" />
+      <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
+        <template v-if="!transferType">
+          <div class="max-w-3xl">
+            <h1 class="text-3 font-bold py-8 text-center">Where are you sending assets?</h1>
+            <div class="mt-8 pb-8 flex space-x-8">
+              <router-link
+                :to="{ name: 'Send', params: { type: 'address' } }"
+                class="
+                  send__type
+                  flex-1 flex flex-col
+                  items-center
+                  justify-center
+                  p-8
+                  bg-surface
+                  group
+                  dark:hover:text-inverse
+                  shadow-card
+                  hover:shadow-panel
+                  focus:shadow-panel
+                  active:opacity-70
+                  transition
+                  rounded-2xl
+                  text-center
+                  overflow-hidden
+                "
+              >
+                <h4 class="relative z-10 text-1 font-medium mb-8">Send to address</h4>
+                <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
+                  <span
+                    class="
+                      send__type__circle
+                      absolute
+                      z-0
+                      inset-0
+                      bg-brand
+                      rounded-full
+                      transition-transform
+                      duration-300
+                    "
+                  ></span>
+                  <Icon class="relative" name="SendIcon" :icon-size="1.5" />
+                </div>
+                <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
+                  Send assets to someone else or another account with a crypto address.
+                </p>
+              </router-link>
+
+              <router-link
+                :to="{ name: 'Send', params: { type: 'move' } }"
+                class="
+                  send__type
+                  flex-1 flex flex-col
+                  items-center
+                  justify-center
+                  p-8
+                  bg-surface
+                  group
+                  dark:hover:text-inverse
+                  shadow-card
+                  hover:shadow-panel
+                  focus:shadow-panel
+                  active:opacity-70
+                  transition
+                  rounded-2xl
+                  text-center
+                  overflow-hidden
+                "
+              >
+                <h4 class="relative z-10 text-1 font-medium mb-8">Move assets</h4>
+                <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
+                  <span
+                    class="
+                      send__type__circle
+                      absolute
+                      z-0
+                      inset-0
+                      bg-brand
+                      rounded-full
+                      transition-transform
+                      duration-300
+                    "
+                  ></span>
+                  <Icon class="relative" name="SwapLRIcon" :icon-size="1.5" />
+                </div>
+                <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
+                  Move assets between your addresses on different chains.
+                </p>
+              </router-link>
             </div>
+          </div>
+        </template>
 
-            <h4 class="send__type__button__title w-bold">Send to address</h4>
-
-            <p class="send__type__button__description s-minus">
-              Send assets to someone else or another account with a crypto address.
-            </p>
-          </router-link>
-
-          <router-link :to="{ name: 'Send', params: { type: 'move' } }" class="send__type__button elevation-card">
-            <div class="send__type__button__icon">
-              <Icon name="SwapLRIcon" :icon-size="1.6" />
-            </div>
-
-            <h4 class="send__type__button__title w-bold">Move assets</h4>
-
-            <p class="send__type__button__description s-minus">
-              Move assets between your addresses on different chains.
-            </p>
-          </router-link>
+        <div v-else class="w-full max-w-lg">
+          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
+          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
         </div>
-      </template>
-
-      <div v-else class="send__content">
-        <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
-        <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -71,6 +135,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import MoveForm from '@/components/transfer/MoveForm';
 import SendForm from '@/components/transfer/SendForm';
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 
@@ -78,7 +143,7 @@ type TransferType = 'address' | 'move';
 
 export default {
   name: 'Send',
-  components: { SendForm, MoveForm, Icon },
+  components: { Button, SendForm, MoveForm, Icon },
 
   setup() {
     const router = useRouter();
@@ -119,101 +184,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.send {
-  position: relative;
+.send__type:hover {
+  transform: translateY(-2px);
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3rem 4rem;
-    background: var(--bg);
-
-    &__button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
-
-      &:disabled {
-        cursor: not-allowed;
-        color: var(--inactive);
-      }
-    }
-
-    .close-button {
-      margin-left: auto;
-    }
-  }
-
-  &__steps {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &__item {
-      margin-right: 4.8rem;
-      text-transform: capitalize;
-      color: var(--inactive);
-      font-weight: 600;
-      cursor: default;
-
-      &--active {
-        color: var(--text);
-      }
-    }
-  }
-
-  &__wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 3.1rem;
-  }
-
-  &__content {
-    width: 100%;
-    max-width: 44rem;
-  }
-
-  &__type {
-    display: flex;
-    margin-top: 4.8rem;
-
-    &__button {
-      width: 27rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3.2rem;
-
-      & + & {
-        margin-left: 1.2rem;
-      }
-
-      &__icon {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 2rem;
-        background: var(--fg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      &__title {
-        margin-top: 2.4rem;
-        margin-bottom: 0.8rem;
-      }
-
-      &__description {
-        text-align: center;
-        color: var(--muted);
-      }
-    }
+  .send__type__circle {
+    transform: scale(8);
+    transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
   }
 }
 </style>

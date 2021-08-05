@@ -8,10 +8,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  maxWidth: {
-    type: Number,
-    required: true,
-  },
+  // maxWidth: {
+  //   type: Number,
+  //   required: false
+  // },
   minWidth: {
     type: Number,
     default: 30,
@@ -32,6 +32,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const containerElementRef = ref(null);
 const sizeElementRef = ref(null);
 const prefixElementRef = ref(null);
 const suffixElementRef = ref(null);
@@ -43,12 +44,13 @@ const model = computed({
 
 const state = reactive({
   width: 0,
-  scale: 0,
+  maxWidth: '100%',
+  scale: 1,
 });
 
 watch(
-  [sizeElementRef, prefixElementRef, suffixElementRef, model, props],
-  ([sizeEl, prefixEl, suffixEl]) => {
+  [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
+  ([containerEl, sizeEl, prefixEl, suffixEl]) => {
     if (!sizeEl) {
       return;
     }
@@ -57,114 +59,91 @@ watch(
       const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
       const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
       const fullWidth = width + extraWidth;
+      const maxWidth = containerEl?.offsetWidth;
 
-      const scale = fullWidth >= props.maxWidth ? props.maxWidth / fullWidth : 1;
+      const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
 
       state.width = width;
+      state.maxWidth = maxWidth;
       state.scale = scale;
     });
   },
   { immediate: true },
 );
 
-const containerStyle = computed(() => {
+const innerStyle = computed(() => {
   return {
     transform: `scale(${state.scale})`,
-    maxWidth: `${props.maxWidth}px`,
+    maxWidth: state.maxWidth,
   };
 });
 
 const inputProps = computed(() => {
   return {
     style: { width: `${state.width}px` },
+    width: state.width,
     placeholder: props.placeholder,
-    class: 'flexible-input__input',
+    class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
   };
 });
 </script>
 
 <template>
-  <div class="flexible-input" :style="containerStyle" :class="{ 'flexible-input--empty': !model }">
-    <div class="flexible-input__container">
-      <span ref="prefixElementRef" class="flexible-input__prefix">{{ prefix }}</span>
-      <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
-        <AmountInput
-          v-model="model"
-          :placeholder="inputProps.placeholder"
-          :style="inputProps.style"
-          :class="inputProps.class"
-          type="text"
-        />
-      </slot>
-      <span ref="suffixElementRef" class="flexible-input__suffix">
-        <slot name="suffix">
-          {{ suffix }}
+  <label
+    ref="containerElementRef"
+    class="flexible-input relative flex items-center justify-center mx-auto w-full cursor-text"
+    :class="{ 'text-inactive hover:text-muted': !model }"
+  >
+    <div
+      class="flex-1 relative flex justify-center"
+      :class="{ 'focus-within:text-inactive': !model }"
+      :style="innerStyle"
+    >
+      <div class="flex items-baseline">
+        <span
+          ref="prefixElementRef"
+          class="flexible-input__prefix self-start whitespace-nowrap leading-copy mt-1 mr-1"
+        >{{ prefix }}</span>
+        <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
+          <AmountInput
+            v-model="model"
+            :placeholder="inputProps.placeholder"
+            :style="inputProps.style"
+            :class="inputProps.class"
+            :width="inputProps.width"
+            type="text"
+          />
         </slot>
-      </span>
-      <span ref="sizeElementRef" class="flexible-input__size-reference">
-        {{ model }}
-      </span>
+        <span ref="suffixElementRef" class="flexible-input__suffix whitespace-nowrap">
+          <slot name="suffix">
+            {{ suffix }}
+          </slot>
+        </span>
+        <span ref="sizeElementRef" class="invisible absolute right-0 bottom-0">{{ model }}</span>
+      </div>
     </div>
-  </div>
+  </label>
 </template>
 
 <style lang="scss">
 .flexible-input {
-  position: relative;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 0%;
-
-  &--empty &__prefix {
-    color: var(--inactive);
-  }
-
-  &--empty &__suffix {
-    color: var(--inactive);
-  }
-
-  &__container {
-    display: flex;
-    align-items: center;
-    text-align: left;
-  }
-
   &__prefix {
-    color: inherit;
     font-size: 0.56em;
-    align-self: flex-start;
-    line-height: 1.8;
-    white-space: nowrap;
   }
 
   &__suffix {
-    white-space: nowrap;
+    margin-left: 0.15em;
+  }
+
+  &:hover &__input:not(:focus)::placeholder {
+    color: var(--muted);
   }
 
   &__input {
-    overflow: hidden;
-    font-size: inherit;
-    font-weight: inherit;
-    font-family: inherit;
-    padding: 0;
-    margin: 0;
-    border: 0;
+    min-width: 0.66em;
+    font: inherit;
+    letter-spacing: inherit;
     outline: none;
-    text-align: left;
-    background: transparent;
-
-    &::placeholder {
-      color: var(--inactive);
-    }
-  }
-
-  &__size-reference {
-    visibility: hidden;
-    position: absolute;
-    right: 0;
-    bottom: 0;
   }
 }
 </style>

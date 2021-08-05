@@ -1,31 +1,29 @@
 <template>
-  <div class="connect-wallet agree-warning">
-    <div class="connect-wallet__wrapper">
-      <div class="connect-wallet__content">
-        <slot name="title">
-          <h2 class="connect-wallet__title">{{ $t('wallet.connect.modal4.title') }}</h2>
-          <h3 class="connect-wallet__subtitle title-1-normal">{{ $t('wallet.connect.modal4.subtitle') }}</h3>
-        </slot>
+  <div class="agree-warning">
+    <div class="flex flex-col py-8 px-8 text-center">
+      <slot name="title">
+        <h2 class="text-3 font-bold">{{ $t('wallet.connect.modal4.title') }}</h2>
+      </slot>
 
-        <div class="connect-wallet__description">
-          <div class="scrollable">
-            <div class="scrollable-content">
-              <slot name="description">
-                <p>{{ $t('wallet.connect.modal4.text1') }}</p>
-                <a href="https://emeris.com/terms" rel="noopener noreferral" target="_blank">
-                  {{ $t('components.settingsMenu.tos') }}
-                </a>
-              </slot>
-            </div>
+      <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+        <div class="scrollable">
+          <div class="scrollable-content">
+            <slot name="description">
+              <p>{{ $t('wallet.connect.modal4.text1') }}</p>
+              <a href="https://emeris.com/terms" rel="noopener noreferral" target="_blank">
+                {{ $t('components.settingsMenu.tos') }}
+              </a>
+            </slot>
           </div>
         </div>
-
-        <div class="connect-wallet__controls">
-          <Button :name="$t('generic_cta.cancel')" :is-outline="true" @click="emitCancel" />
-          <Button :name="$t('generic_cta.agree')" @click="emitAgree" />
-        </div>
       </div>
-      <ConnectBanner />
+
+      <div class="flex justify-between mt-12">
+        <a class="mt-2 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitCancel">
+          {{ $t('generic_cta.cancel') }}
+        </a>
+        <Button :name="$t('generic_cta.agree')" @click="emitAgree" />
+      </div>
     </div>
   </div>
 </template>
@@ -35,14 +33,11 @@ import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
-import ConnectBanner from './ConnectBanner.vue';
-
 export default defineComponent({
   name: 'AgreeWarning',
 
   components: {
     Button,
-    ConnectBanner,
   },
 
   emits: ['cancel', 'agree'],
@@ -65,22 +60,23 @@ export default defineComponent({
   position: relative;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  height: 22.5rem;
+  height: 14rem;
   overflow: hidden;
 
   &:after {
     content: '';
     display: block;
     position: absolute;
-    bottom: -2.4rem;
-    height: 6.4rem;
+    bottom: -2rem;
+    height: 4rem;
     width: 100%;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
+    pointer-events: none;
   }
 }
 
 .scrollable-content {
-  padding: 2rem 2.4rem;
+  padding: 1rem 1.5rem;
   height: 100%;
 
   text-align: left;
@@ -94,20 +90,12 @@ export default defineComponent({
     display: none;
   }
 
+  p {
+    margin-bottom: 1rem;
+  }
+
   a {
     text-decoration: underline;
-  }
-}
-
-.connect-wallet {
-  &__controls {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 3.2rem;
-
-    div + div {
-      margin-top: 0;
-    }
   }
 }
 </style>

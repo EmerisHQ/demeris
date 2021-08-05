@@ -1,31 +1,137 @@
-:root[color-theme='light'] {
+/* Brand gradients */
+$brand-gradient-to-r: linear-gradient(102deg, var(--quinary) -2%, var(--tertiary) 34%, var(--primary) 93%);
+$brand-gradient-to-br: linear-gradient(154deg, var(--quinary) 9.7%, var(--tertiary) 34%, var(--primary) 69%);
+$gold-color-stops: #fff0ca 13%, #d3ad5f 33%, #ffecc4 42%, #997736 59%, #fff2c0 78%, #cea851 97%;
+$gold-to-r: linear-gradient(90deg, $gold-color-stops);
+$gold-to-b: linear-gradient(180deg, $gold-color-stops);
+$gold-to-br: linear-gradient(135deg, $gold-color-stops);
+/* Light mode custom properties */
+@mixin themeLight {
   --text: #000;
   --muted: rgba(0, 0, 0, 0.67);
-  --inactive: rgba(0, 0, 0, 0.44);
-  --bg: rgba(255, 255, 255, 1);
-  --fg: rgba(247, 247, 247, 1);
-  --fg-trans: rgba(0, 0, 0, 0.03);
-  --surface: rgba(255, 255, 255, 1);
-  --border: rgba(229, 229, 229, 1);
-  --border-trans: rgba(0, 0, 0, 0.1);
-  --positive-text: #008d52;
-  --negative-text: #ec0047;
-  --warning: #ff7d05;
-  --danger: #ffe5e6;
+  --inactive: rgba(0, 0, 0, 0.33);
+  --inverse: #fff;
+  --transparent: rgba(255, 255, 255, 0);
+  --bg: #fff;
+  // --bg-image: 148px repeat url('~@/assets/images/texture-grain.png'), #fff;
+  --bg-image: var(--bg); // Gautier doesn't like the grain
+  --fg: rgba(0, 0, 0, 0.03);
+  --surface: #fff;
+  --surface-image: var(--surface);
+  --border: rgba(0, 0, 0, 0.07);
+  --link: #094efd;
+  --link-hover: var(--text);
+  --positive: #54f21b;
+  --positive-text: #018516;
+  --negative: #ff1b44;
+  --negative-text: #ca0842;
+  --warning: #fb7c07;
 }
-
-:root[color-theme='dark'] {
+/* Dark mode custom properties */
+@mixin themeDark {
   --text: #fff;
   --muted: rgba(255, 255, 255, 0.67);
   --inactive: rgba(255, 255, 255, 0.44);
-  --bg: rgba(0, 0, 0, 1);
-  --fg: rgba(25, 25, 25, 1);
-  --fg-trans: rgba(255, 255, 255, 0.1);
-  --surface: rgba(255, 255, 255, 0.1);
-  --border: rgba(41, 41, 41, 1);
-  --border-trans: rgba(255, 255, 255, 0.16);
-  --positive-text: #3ef9aa;
-  --negative-text: #ff588a;
-  --warning: #ffa34e;
-  --danger: #ffe5e6;
+  --inverse: #000;
+  --transparent: rgba(0, 0, 0, 0);
+  --bg: #000;
+  --bg-image: 148px repeat url('~@/assets/images/bg-dark.jpg'), #000;
+  --fg: rgba(255, 255, 255, 0.1);
+  --surface: #181818;
+  --surface-image: 148px repeat url('~@/assets/images/texture-grain.png'), #171717;
+  --border: rgba(255, 255, 255, 0.09);
+  --link: var(--quinary);
+  --link-hover: #fff;
+  --positive: #54f21b;
+  --positive-text: #a8ff89;
+  --negative: #ff1b44;
+  --negative-text: #ff6c87;
+  --warning: #fb7c07;
+}
+
+@layer base {
+  /* Brand colors */
+  :root {
+    --primary: #fffd38;
+    --secondary: #a8ff89;
+    --tertiary: #30ffdf;
+    --quaternary: #4ef2e4;
+    --quinary: #64dafb;
+    --gold: #d5bc83;
+  }
+  /*
+    Currently only `prefers-color-scheme` is supported.
+    Later, we'll have a setting to set the theme manually.
+    This will require careful attention to specificity for inverse theme classes.
+  */
+  /* Light theme */
+  :root {
+    @include themeLight;
+  }
+  /* + Elements with inverse theme in light mode */
+  @media (prefers-color-scheme: light) {
+    .theme-inverse {
+      @include themeDark;
+    }
+  }
+  /* Dark theme */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      @include themeDark;
+    }
+    /* Elements with inverse theme in dark mode */
+    .dark\:theme-inverse {
+      @include themeLight;
+    }
+  }
+}
+
+/* Custom color utilities */
+@layer utilities {
+  @variants dark, focus {
+    /* Background utilities */
+    .bg-app {
+      background: var(--bg-image);
+    }
+    .bg-fg {
+      background: var(--fg);
+    }
+    .bg-surface {
+      background: var(--surface-image);
+    }
+    .bg-brand {
+      background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
+    }
+    .bg-brand-to-r {
+      background: var(--primary) $brand-gradient-to-r;
+    }
+    .bg-brand-to-br {
+      background: var(--primary) $brand-gradient-to-br;
+    }
+    .bg-gold-circular {
+      background: center / cover no-repeat url('~@/assets/images/texture-gold-circular.jpg'), var(--gold);
+    }
+    .bg-gold-to-r {
+      background: var(--gold) $gold-to-r;
+    }
+    .bg-gold-to-b {
+      background: var(--gold) $gold-to-b;
+    }
+    .bg-gold-to-br {
+      background: var(--gold) $gold-to-br;
+    }
+  }
+  /* Border utilities */
+  @variants dark, group-hover, focus-within, hover, focus {
+    .border-brand {
+      border-color: var(--primary);
+      border-image: url('~@/assets/images/gradient-primary.jpg');
+      border-image-slice: 20%;
+    }
+    .border-gold-circular {
+      border-color: var(--gold);
+      border-image: url('~@/assets/images/texture-gold-circular.jpg');
+      border-image-slice: 20%;
+    }
+  }
 }
