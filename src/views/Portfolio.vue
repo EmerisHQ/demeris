@@ -25,7 +25,7 @@
             @row-click="openAssetPage"
           />
 
-          <MoonpayBanner v-if="!balances.length" title="Add crypto to your account" class="mt-6" size="large" />
+          <MoonpayBanner v-if="!balances.length" title="Add crypto to your account" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">

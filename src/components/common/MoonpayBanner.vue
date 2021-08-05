@@ -3,10 +3,15 @@
     class="
       moonpay-banner
       text-left
+      w-full
+      flex flex-col
+      justify-between
       shadow-card
       rounded-2xl
+      p-6
       transition
       transform
+      overflow-hidden
       hover:-translate-y-px
       focus:-translate-y-px
       active:transform-none active:opacity-70
@@ -17,8 +22,8 @@
     ]"
     @click="goMoon"
   >
-    <p class="moonpay-banner__title text-text text-1 font-bold">{{ title }}</p>
-    <p class="moonpay-banner__info text-muted -text-1 mt-14">Powered by Moonpay</p>
+    <p class="text-text text-1 font-bold">{{ title }}</p>
+    <p class="text-muted -text-1 mt-14">Powered by Moonpay</p>
   </button>
 </template>
 
@@ -80,21 +85,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .moonpay-banner {
-  border-radius: 1rem;
-  overflow: hidden;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   min-height: 5rem;
-  width: 100%;
   background-image: url('~@/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;
-  background-position: top 30% left 100%;
+  background-position: top 30% left 120%;
   background-size: 70% auto;
 
-  &--widget {
-    background-position: left 13rem top 0%;
+  &--small {
+    background-position: left 6rem top 0%;
     background-size: 95% auto;
     border: none;
   }
