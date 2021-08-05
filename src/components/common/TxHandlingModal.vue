@@ -94,9 +94,15 @@
           </div>
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
         </template>
         <template v-else-if="tx.name === 'withdrawliquidity'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
+          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
         </template>
         <template
