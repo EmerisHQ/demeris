@@ -1,67 +1,52 @@
 <template>
   <AppLayout>
-    <div class="wrapper">
-      <div class="portfolio">
-        <div class="portfolio__total">
-          <div class="portfolio__total__text">{{ $t('context.assets.totalBalance') }}</div>
-          <div class="portfolio__total__value">
-            <TotalPrice :balances="balances" />
+    <div class="md:flex justify-between">
+      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
+        <header>
+          <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
+          <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
+            <TotalPrice :balances="balances" small-decimals />
           </div>
-        </div>
-        <div class="portfolio__assets">
-          <div class="portfolio__assets__header">
-            <h2 class="portfolio__assets__header__text">{{ $t('context.assets.title') }}</h2>
-            <router-link class="portfolio__assets__header__link" to="/assets">
-              {{ balances.length ? $t('generic_cta.discoverMore') : $t('generic_cta.seeall') }} <ArrowRightIcon />
+        </header>
+        <section class="mt-16">
+          <header class="flex justify-between items-center mb-6">
+            <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
+            <router-link v-if="!balances.length" class="font-medium" to="/assets">
+              {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
-          </div>
+          </header>
 
-          <div class="portfolio__assets__table>">
-            <AssetsTable
-              :balances="balances"
-              :hide-zero-assets="true"
-              variant="balance"
-              class="assets__table"
-              :show-headers="false"
-              :limit-rows="4"
-              @row-click="openAssetPage"
-            />
-          </div>
-
-          <MoonpayBanner
-            v-if="!balances.length"
-            title="Add ATOM to your account"
-            class="portfolio__assets__buy-banner"
+          <AssetsTable
+            :balances="balances"
+            :hide-zero-assets="true"
+            variant="balance"
+            :show-headers="false"
+            :limit-rows="4"
+            @row-click="openAssetPage"
           />
-        </div>
-        <div class="portfolio__pools">
-          <div class="portfolio__pools__header">
-            <h2 class="portfolio__pools__header__text">{{ $t('context.pools.title') }}</h2>
-            <router-link v-if="poolsInvested.length" class="portfolio__pools__header__link" to="/pools">
-              {{ $t('generic_cta.discoverMore') }} <ArrowRightIcon />
-            </router-link>
-          </div>
 
-          <div v-if="poolsInvested.length" class="portfolio__pools__cards">
+          <MoonpayBanner v-if="!balances.length" title="Add crypto to your account" size="large" />
+        </section>
+        <section class="mt-16">
+          <header class="flex justify-between items-center mb-6">
+            <h2 class="text-2 font-bold">{{ $t('context.pools.title') }}</h2>
+          </header>
+
+          <div v-if="poolsInvested.length">
             <Pools :pools="poolsInvested" />
           </div>
 
-          <div v-else class="portfolio__pools__empty">
-            <p class="portfolio__pools__empty__description">{{ $t('context.pools.empty') }}</p>
-            <Button
-              status="secondary"
-              class="portfolio__pools__empty__button"
-              :name="$t('context.pools.explore')"
-              @click="openPoolsPage"
-            />
+          <div v-else class="p-8 w-full flex flex-col items-center justify-center">
+            <p class="text-muted">{{ $t('context.pools.empty') }}</p>
+            <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
           </div>
-        </div>
+        </section>
       </div>
 
-      <div class="portfolio__aside">
-        <LiquiditySwap class="portfolio__aside__swap" />
-        <Intro />
-      </div>
+      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
+        <LiquiditySwap />
+        <Intro class="mt-4" />
+      </aside>
     </div>
   </AppLayout>
 </template>
@@ -71,7 +56,6 @@ import { computed } from '@vue/runtime-core';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
-import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
 import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -91,7 +75,6 @@ export default {
     LiquiditySwap,
     TotalPrice,
     AssetsTable,
-    ArrowRightIcon,
     Pools,
     Intro,
   },
@@ -119,103 +102,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.wrapper {
-  display: flex;
-  justify-content: space-between;
-
-  .portfolio {
-    display: flex;
-    flex-direction: column;
-    width: 60%;
-
-    &__total {
-      &__text {
-        opacity: 0.67;
-        font-size: 1.6rem;
-      }
-      &__value {
-        margin-top: 0.8rem;
-        font-weight: 700;
-        font-size: 6.7rem;
-        line-height: 1.3;
-      }
-      margin-bottom: 6rem;
-    }
-    &__assets {
-      &__buy-banner {
-        margin-top: 2.6rem;
-        margin-bottom: 2.6rem;
-      }
-      &__header {
-        font-size: 2.8rem;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.8rem;
-
-        &__link {
-          font-size: 1.6rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          svg {
-            margin-left: 1rem;
-          }
-        }
-      }
-      margin-bottom: 6rem;
-    }
-    &__pools {
-      &__header {
-        font-size: 2.8rem;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.6rem;
-
-        &__link {
-          font-size: 1.6rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          svg {
-            margin-left: 1rem;
-          }
-        }
-      }
-
-      &__empty {
-        padding: 3.2rem;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        &__description {
-          color: var(--muted);
-        }
-
-        &__button {
-          margin-top: 2.4rem;
-        }
-      }
-    }
-
-    &__aside {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      margin-left: 6.4rem;
-      width: 32rem;
-
-      &__buy {
-        margin-top: 2.6rem;
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

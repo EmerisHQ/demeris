@@ -1,81 +1,108 @@
 <template>
   <div
-    class="tx-steps denom-select-modal-wrapper"
-    :class="{ 'elevation-panel tx-steps--widget': variant === 'widget' }"
+    class="w-full top-0 left-0 z-10"
+    :class="{
+      'relative overflow-hidden bg-surface shadow-panel rounded-2xl': variant === 'widget',
+      'flex-1 flex flex-col items-stretch': variant !== 'widget',
+    }"
   >
     <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
-    <template v-if="isTransferConfirmationOpen">
+    <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
       <TransferInterstitialConfirmation
         :action="actionName"
         :step="data[0]"
-        @continue="isTransferConfirmationOpen = false"
+        @continue="
+          isTransferConfirmationOpen = false;
+          interstitialProceed = true;
+        "
       />
     </template>
 
     <template v-else>
-      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="tx-steps__content">
-        <div class="title s-2 w-bold">
+      <div v-show="!isTxHandlingModalOpen || variant === 'widget'" class="w-full max-w-lg mx-auto">
+        <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
           {{ currentData.title }}
-        </div>
+        </h1>
 
-        <div v-if="currentData && currentData.fees" class="detail">
-          <PreviewSwap v-if="currentData.data.name === 'swap'" :step="currentData.data" :fees="currentData.fees" />
+        <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
+          <PreviewSwap
+            v-if="currentData.data.name === 'swap'"
+            :step="currentData.data"
+            :fees="currentData.fees"
+            :context="variant"
+            :class="{ '-text-1': variant === 'widget' }"
+          />
           <PreviewAddLiquidity
             v-else-if="['addliquidity', 'createpool'].includes(currentData.data.name)"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
           <PreviewWithdrawLiquidity
             v-else-if="currentData.data.name === 'withdrawliquidity'"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
           <PreviewRedeem
             v-else-if="currentData.data.name === 'redeem'"
             :step="currentData.data"
             :fees="currentData.fees"
+            :context="variant"
           />
-          <PreviewTransfer v-else :step="currentData.data" :fees="currentData.fees" :gas-price-level="gasPriceLevel" />
+          <PreviewTransfer
+            v-else
+            :step="currentData.data"
+            :fees="currentData.fees"
+            :gas-price-level="gasPriceLevel"
+            :context="variant"
+            :class="{ '-text-1': variant === 'widget' }"
+          />
         </div>
 
-        <div class="warn s-minus w-normal" :class="currentData.isSwap ? '' : 'warn-transfer'">
-          Non-revertable transactions. Prices not guaranteed etc.
+        <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
+          Once executed, transactions cannot be reverted. By continuing, you agree to our
+          <a href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
         </div>
 
-        <div class="button-wrapper">
-          <Button :name="'Confirm and continue'" :status="'normal'" :click-function="confirm" />
+        <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
+          <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
         </div>
       </div>
       <Modal
         v-if="feeWarning.feeWarning"
-        class="fee-warning-modal"
-        :modal-variant="variant == 'widget' ? 'bottom' : 'full'"
+        class="text-center"
+        :variant="variant === 'widget' ? 'bottom' : 'dialog'"
+        :fullscreen="variant === 'default'"
         @close="
           () => {
             feeWarning.feeWarning = false;
           }
         "
       >
-        <div class="fee-warning-modal__icon-warning">
-          <WarningIcon />
-        </div>
         <template v-if="feeWarning.missingFees.length > 0">
-          <div class="fee-warning-modal__title">{{ $t('components.feeWarningModal.missingMany') }}</div>
-          <div class="fee-warning-modal__content">{{ $t('components.feeWarningModal.missingManyText') }}</div>
-          <div class="fee-warning-modal__list">
-            <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="fee-warning-modal__list__item">
-              <CircleSymbol :chain-name="missing.chain_name" :denom="missing.denom" size="sm" variant="asset" />
-              <div class="fee-warning-modal__list__item__amount">
+          <div class="text-1 font-bold mb-4">{{ $t('components.feeWarningModal.missingMany') }}</div>
+          <div class="text-muted leading-copy mb-4">{{ $t('components.feeWarningModal.missingManyText') }}</div>
+          <div class="mb-8 flex flex-col items-center">
+            <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="flex py-4 items-center">
+              <CircleSymbol
+                :chain-name="missing.chain_name"
+                :denom="missing.denom"
+                size="sm"
+                variant="asset"
+                class="mr-4"
+              />
+              <div class="font-bold">
                 <AmountDisplay :amount="{ denom: missing.denom, amount: missing.amount }" />
               </div>
             </div>
           </div>
         </template>
         <template v-if="feeWarning.ibcWarning && feeWarning.missingFees.length == 0">
-          <div class="fee-warning-modal__title">
+          <div class="text-1 font-bold mb-4">
             {{ $t('components.feeWarningModal.ibcWarning', { denom: feeWarning.ibcDetails.denom }) }}
           </div>
-          <div class="fee-warning-modal__content">
+          <div class="text-muted leading-copy mb-8">
             {{
               $t('components.feeWarningModal.ibcWarningText', {
                 ibcDenom: feeWarning.ibcDetails.ibcDenom,
@@ -145,7 +172,7 @@
 
     <TxHandlingModal
       v-if="isTxHandlingModalOpen"
-      :modal-variant="variant === 'widget' ? 'bottom' : 'full'"
+      :variant="variant === 'widget' ? 'modal' : 'step'"
       :status="txstatus"
       :tx-result="txResult"
       :has-more="hasMore"
@@ -189,7 +216,6 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -203,8 +229,8 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { Balances, TransactionDetailResponse } from '@/types/api';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
+import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
   ensureTraceChannel,
   feeForStep,
@@ -218,7 +244,6 @@ export default defineComponent({
   components: {
     GobackWithClose,
     PreviewTransfer,
-    WarningIcon,
     PreviewRedeem,
     PreviewAddLiquidity,
     PreviewWithdrawLiquidity,
@@ -259,7 +284,7 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-
+    const interstitialProceed = ref(false);
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
@@ -365,13 +390,13 @@ export default defineComponent({
         case 'redeem':
           break;
         case 'addliquidity':
-          modifiedData.title = 'Review your pool liquidity details';
+          modifiedData.title = 'Review your pool liquidity provision';
           break;
         case 'withdrawliquidity':
-          modifiedData.title = 'Review your withdraw liquidity details';
+          modifiedData.title = 'Review your liquidity withdrawal';
           break;
         case 'createpool':
-          modifiedData.title = 'Review your pool liquidity details';
+          modifiedData.title = 'Review your liquidity pool provision';
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
@@ -389,6 +414,7 @@ export default defineComponent({
           newData.fees,
           props.gasPriceLevel,
         );
+        interstitialProceed.value = false;
       },
     );
 
@@ -646,21 +672,23 @@ export default defineComponent({
     const refProps = toRefs(props);
 
     watch(
-      [refProps.data, refProps.actionName],
+      refProps,
       () => {
-        let shouldOpenConfirmation = false;
+        if (!interstitialProceed.value) {
+          let shouldOpenConfirmation = false;
 
-        if (props.actionName === 'move') {
-          shouldOpenConfirmation = true;
-        } else if (props.actionName === 'transfer') {
-          if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+          if (props.actionName === 'move') {
             shouldOpenConfirmation = true;
+          } else if (props.actionName === 'transfer') {
+            if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+              shouldOpenConfirmation = true;
+            }
+          } else if (['swap', 'addliquidity'].includes(props.actionName)) {
+            shouldOpenConfirmation = props.data?.length > 1;
           }
-        } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-          shouldOpenConfirmation = props.data?.length > 1;
-        }
 
-        isTransferConfirmationOpen.value = shouldOpenConfirmation;
+          isTransferConfirmationOpen.value = shouldOpenConfirmation;
+        }
       },
       { immediate: true },
     );
@@ -673,6 +701,7 @@ export default defineComponent({
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,
+      interstitialProceed,
       txResult,
       confirm,
       toggleTxHandlingModal,
@@ -693,168 +722,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.denom-select-modal-wrapper {
-  position: relative;
-  width: 100%;
-  /* height: 55.8rem; */
-
-  margin-bottom: 5rem;
-  top: 0;
-  left: 0;
-
-  overflow: hidden;
-
-  background-color: var(--surface);
-  z-index: 10;
-
-  &.tx-steps--widget > .title {
-    text-align: left;
-  }
-
-  .title {
-    padding: 0 2.4rem 2.4rem;
-    text-align: center;
-  }
-
-  .amount-info {
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--text);
-
-    padding: 0 2.4rem;
-    margin-bottom: 1.6rem;
-    &__type {
-      &-subtitle {
-        color: var(--muted);
-      }
-    }
-    &__detail {
-      color: var(--text);
-      &__coin {
-        display: flex;
-        align-items: center;
-        &-image {
-          width: 2rem;
-          height: 2rem;
-        }
-        &-amount {
-          padding: 0 0.8rem;
-        }
-      }
-      &-chain {
-        text-align: right;
-      }
-    }
-  }
-
-  .divider {
-    margin: 0 2.4rem;
-    height: 1px;
-    background-color: var(--border-trans);
-  }
-
-  .detail {
-    padding: 0 2.4rem;
-    &__title {
-      color: var(--text);
-      padding: 1.6rem 0;
-    }
-
-    &__row {
-      display: flex;
-      justify-content: space-between;
-      padding-bottom: 1.6rem;
-
-      &-key {
-        display: flex;
-        align-items: center;
-        color: var(--muted);
-
-        div {
-          margin-right: 0.4rem;
-        }
-      }
-    }
-  }
-
-  .detail-transfer {
-    @extend .detail;
-
-    .detail__title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .icon {
-      font-size: 1.6rem;
-      color: var(--muted);
-    }
-  }
-
-  .warn {
-    margin: 0 2.4rem;
-    padding: 1.2rem;
-    border: 1px solid var(--border-trans);
-    color: var(--muted);
-    border-radius: 8px;
-  }
-
-  .warn-transfer {
-    border: none;
-    padding: 0;
-  }
-
-  .button-wrapper {
-    padding: 2.8rem 2.4rem 2.4rem;
-  }
-  .fee-warning-modal {
-    text-align: center;
-    &__icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2.4rem 0;
-
-      &-warning {
-        font-size: 4.2rem;
-        display: flex;
-        justify-content: center;
-        color: var(--warning);
-      }
-    }
-    &__title {
-      font-size: 2.1rem;
-      font-weight: bold;
-      margin: 3rem 0rem;
-      padding: 0rem 2rem;
-    }
-    &__content {
-      opacity: 0.67;
-      margin-bottom: 3rem;
-      font-size: 1.6rem;
-      &__header {
-        text-align: center;
-      }
-    }
-    &__list {
-      margin-bottom: 3rem;
-      padding-left: 39%;
-      &__item {
-        display: flex;
-        margin: 1rem 0rem;
-        align-items: center;
-        .circle-symbol {
-          margin-right: 1rem;
-        }
-        &__amount {
-          font-weight: bold;
-          font-size: 1.6rem;
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

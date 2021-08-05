@@ -1,23 +1,62 @@
 <template>
-  <div v-if="open" class="modal" :class="[`modal--${variant}`]">
-    <div class="modal__overlay" @click="onOverlayClick" />
-    <div class="modal__body elevation-card" :class="bodyClass" :style="bodyStyle">
-      <div class="modal__header">
-        <slot name="header">
-          <span />
-        </slot>
+  <div
+    v-if="open"
+    class="inset-0 z-40 overflow-y-auto flex justify-center text-0"
+    :class="[
+      {
+        'items-end': variant === 'bottom',
+        'items-center': variant === 'center' || variant === 'dialog',
+        'items-stretch': variant === 'full',
+      },
+      fullscreen ? 'fixed' : 'absolute',
+    ]"
+  >
+    <div
+      v-show="variant !== 'takeover'"
+      class="inset-0 bg-inactive dark:theme-inverse dark:bg-muted"
+      :class="fullscreen ? 'fixed' : 'absolute'"
+      @click="onOverlayClick"
+    />
+    <div
+      class="relative z-40 bg-surface"
+      :class="[
+        bodyClass,
+        variant === 'center' && maxWidthClass,
+        {
+          'w-full': variant !== 'dialog',
+          'min-w-full min-h-full': variant === 'full',
+          'mx-auto overflow-hidden sm:mx-6 sm:my-6 min-h-full sm:min-h-0 sm:rounded-2xl shadow-card':
+            variant === 'center',
+          'max-w-xs mx-5 rounded-2xl shadow-card': variant === 'dialog',
+          'rounded-t-2xl shadow-dropdown': variant === 'bottom',
+        },
+      ]"
+      :style="bodyStyle"
+    >
+      <header v-if="$slots.header || showCloseButton" class="relative z-10 flex items-center justify-between p-8">
+        <slot name="header"></slot>
 
-        <button v-if="showCloseButton" class="modal__close" @click="emitClose">
-          <Icon name="CloseIcon" :icon-size="1.4" />
-        </button>
-      </div>
+        <Button v-if="showCloseButton" class="modal__close ml-auto" rounded variant="secondary" @click="emitClose">
+          <Icon name="CloseIcon" :icon-size="1.5" />
+        </Button>
+      </header>
 
-      <div class="modal__content">
+      <section
+        class="modal__content"
+        :class="{
+          'pt-6 px-5 sm:pt-8 sm:px-8': variant === 'dialog',
+          'pb-6 sm:pb-8': variant === 'dialog' && !$slots.buttons,
+        }"
+      >
         <slot />
-      </div>
-      <div class="modal__buttons">
-        <slot name="buttons"> </slot>
-      </div>
+      </section>
+
+      <footer
+        v-if="$slots.buttons"
+        class="modal__footer relative mt-6 border-t border-border divide-x divide-border flex justify-center"
+      >
+        <slot name="buttons"></slot>
+      </footer>
     </div>
   </div>
 </template>
@@ -25,19 +64,24 @@
 <script lang="ts">
 import { computed, CSSProperties, defineComponent, PropType } from 'vue';
 
+import Button from './Button.vue';
 import Icon from './Icon.vue';
 
-type ModalVariant = 'dialog' | 'full' | 'fullscreen' | 'bottom';
+type ModalVariant = 'dialog' | 'center' | 'takeover' | 'bottom';
 
 export default defineComponent({
   name: 'Modal',
 
-  components: { Icon },
+  components: { Button, Icon },
 
   props: {
     variant: {
       type: String as PropType<ModalVariant>,
       default: 'dialog',
+    },
+    fullscreen: {
+      type: Boolean,
+      default: false,
     },
     open: {
       type: Boolean,
@@ -45,18 +89,18 @@ export default defineComponent({
     },
     showCloseButton: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     height: {
       type: [String, Number],
       default: undefined,
     },
-    width: {
-      type: [String, Number],
-      default: undefined,
+    maxWidthClass: {
+      type: String,
+      default: 'max-w-4xl',
     },
     bodyClass: {
-      type: String,
+      type: [String, Array, Object],
       default: undefined,
     },
     closeOnOverlayClick: {
@@ -73,10 +117,6 @@ export default defineComponent({
 
       if (props.height !== undefined) {
         styles.height = props.height as string;
-      }
-
-      if (props.width !== undefined) {
-        styles.width = props.width as string;
       }
 
       return styles;
@@ -99,106 +139,17 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .modal {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  overflow-y: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  margin: 0 !important;
-
-  &__overlay {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.4);
-  }
-
-  &__header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
   &__close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.6rem;
+    --tw-shadow: none;
+    --tw-translate-y: 0;
   }
 
   &__content {
     min-height: inherit;
   }
 
-  &__body {
-    background: var(--bg);
-    border-radius: 1.6rem;
-    padding: 2.4rem;
-    width: 100%;
-    z-index: 40;
-  }
-  &__buttons {
-    position: relative;
-    margin-left: -2.4rem;
-    margin-right: -2.4rem;
-    margin-bottom: -2.4rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.17);
-    margin-top: 2.4rem;
-    border-bottom-left-radius: 1.6rem;
-    border-bottom-right-radius: 1.6rem;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    div {
-      flex: 1;
-    }
-  }
-
-  &--full {
-    position: absolute;
-  }
-
-  &--full &__overlay {
-    display: none;
-  }
-
-  &--full &__body {
-    width: 100%;
-    height: 100%;
-  }
-
-  &--bottom {
-    position: absolute;
-    align-items: flex-end;
-  }
-
-  &--bottom &__overlay {
-    position: absolute;
-  }
-
-  &--bottom &__body {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  &--dialog &__body {
-    max-width: 80%;
-    width: auto;
-  }
-
-  &--fullscreen &__body {
-    border-radius: 0;
-    min-width: 100%;
-    min-height: 100%;
+  &__footer > div {
+    flex: 1;
   }
 }
 </style>

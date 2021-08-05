@@ -1,19 +1,54 @@
 <template>
-  <div class="input">
-    <div class="input__wrapper">
-      <span v-if="hasStartSlot" class="input__start">
+  <div class="input w-full max-w-md flex items-center">
+    <div
+      class="
+        input__wrapper
+        relative
+        flex-1
+        w-full
+        h-12
+        text-inactive
+        hover:text-muted
+        focus-within:text-muted
+        transition-colors
+      "
+    >
+      <div v-if="hasStartSlot" class="input__icon absolute z-20 top-0 left-0 p-4 pointer-events-none">
         <slot name="start" />
-      </span>
-
-      <input v-model="model" class="input__field" v-bind="$attrs" />
-
-      <span v-if="hasEndSlot" class="input__end">
+      </div>
+      <input
+        v-model="model"
+        class="
+          relative
+          z-10
+          h-12
+          w-full
+          py-2
+          text-0
+          font-normal
+          text-text
+          placeholder-inactive
+          hover:placeholder-muted
+          focus:placeholder-inactive
+          bg-fg
+          focus:bg-surface
+          rounded-xl
+          focus:rounded-lg
+          border-none
+          appearance-none
+        "
+        :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
+        v-bind="$attrs"
+      />
+      <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4 pointer-events-none">
         <slot name="end" />
-      </span>
+      </div>
+
+      <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
     </div>
 
-    <tippy v-if="hint" class="input__hint">
-      <span class="input__hint__icon"><HintIcon /></span>
+    <tippy v-if="hint" class="p-3 text-inactive hover:text-muted transition-colors" tabindex="0">
+      <span class="input__hint h-6 w-6"><HintIcon /></span>
 
       <template #content>
         {{ hint }}
@@ -64,58 +99,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.input {
-  display: flex;
-  align-items: center;
-  font-size: 1.6rem;
-  position: relative;
+input {
+  outline: none;
+}
 
-  &__wrapper {
-    flex: 1 1 0%;
-    width: 100%;
-    border-radius: 1rem;
-    padding: 1.2rem 1.4rem;
-    background-color: rgba(0, 0, 0, 0.03);
-    display: flex;
-    align-items: center;
-    color: rgba(0, 0, 0, 0.33);
-    line-height: 2.1rem;
-    position: relative;
-  }
+input::placeholder {
+  transition: color 150ms ease-out;
+}
 
-  &__start {
-    padding-right: 1.2rem;
-  }
+input:focus ~ .focus-border {
+  visibility: visible;
+}
 
-  &__end {
-    padding-left: 1.2rem;
-  }
-
-  &__field {
-    width: 100%;
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: rgba(0, 0, 0, 0.66);
-    flex: 1 1 0%;
-
-    &::placeholder {
-      color: rgba(0, 0, 0, 0.33);
-    }
-
-    &:focus {
-      border: 0;
-      outline: none;
-    }
-  }
-
-  &__hint {
-    margin-left: 1.2rem;
-
-    &__icon {
-      width: 1.5rem;
-      height: 1.5rem;
-    }
-  }
+.input__hint {
+  font-size: 1.5rem;
 }
 </style>

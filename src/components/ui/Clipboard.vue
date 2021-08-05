@@ -1,9 +1,17 @@
 <template>
   <div class="clipboard">
     <tippy ref="tippyRef" :trigger="hasCopied ? 'manual' : 'mouseenter focus'" duration="250 0">
-      <button name="clipboard-button" class="clipboard__button" @click="copy(text)">
-        <CopyIcon :class="{ 'animate-wobble': hasCopied }" />
-      </button>
+      <Button
+        :click-function="
+          () => {
+            copy(text);
+          }
+        "
+        variant="secondary"
+        size="sm"
+      >
+        <CopyIcon class="text-0" :class="{ 'animate-pop': hasCopied }" />
+      </Button>
 
       <template #content>
         <span v-if="hasCopied">{{ $t('components.clipBoard.copied') }}</span>
@@ -17,12 +25,14 @@
 import { defineComponent, ref, watch } from 'vue';
 
 import CopyIcon from '@/components/common/Icons/CopyIcon.vue';
+import Button from '@/components/ui/Button.vue';
 import useClipboard from '@/composables/useClipboard';
 
 export default defineComponent({
   name: 'Clipboard',
 
   components: {
+    Button,
     CopyIcon,
   },
 
@@ -46,13 +56,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.clipboard {
-  font-size: 1.8rem;
-
-  &__button {
-    outline: none;
-    padding: 0.4rem;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

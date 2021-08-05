@@ -1,23 +1,9 @@
 <template>
-  <svg
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:cc="http://creativecommons.org/ns#"
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    xmlns:svg="http://www.w3.org/2000/svg"
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    viewBox="0 0 16.933333 16.933334"
-    height="64"
-    width="64"
-  >
-    <g transform="translate(0,-280.06665)">
-      <g transform="matrix(0,1.2739205,-1.2739205,0,12.797308,281.65414)" style="fill: none">
-        <path
-          style="fill: currentColor"
-          d="m 8.799999,3.399995 -5.4,5.400004 -1.400004,-1.400004 4.000004,-4 -4.000004,-3.99999 1.400004,-1.4 z"
-        />
-      </g>
-    </g>
+  <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M7.99961 11.8996L2.59961 6.49961L3.99961 5.09961L7.99961 9.09961L11.9996 5.09961L13.3996 6.49961L7.99961 11.8996Z"
+      fill="currentColor"
+    />
   </svg>
 </template>
 

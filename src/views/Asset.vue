@@ -1,51 +1,61 @@
 <template>
   <AppLayout>
-    <div class="asset">
-      <div class="asset__main">
+    <div class="md:flex justify-between">
+      <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <!-- Info -->
 
-        <section class="asset__main__info">
-          <p class="asset__main__info__denom">
-            <CircleSymbol :denom="denom" class="asset__main__info__denom__symbol" />
-            <span class="asset__main__info__denom__name title-2-bold"> <Denom :name="denom" /></span>
-            <span class="asset__main__info__denom__ticker title-0-normal"> <Ticker :name="denom" /></span>
-          </p>
-          <h1 class="asset__main__info__price title-2-bold">
-            <Price :amount="{ amount: 0, denom }" />
-          </h1>
-        </section>
+        <header>
+          <div class="sm:flex items-center flex-wrap gap-y-3">
+            <CircleSymbol :denom="denom" size="md" class="mr-3" />
+            <div class="flex-grow flex items-baseline justify-between flex-nowrap">
+              <div class="sm:flex items-baseline flex-wrap">
+                <h1 class="text-1 sm:text-2 font-bold mt-4 sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
+                <span class="text-muted text-0 mt-2 flex-grow"><Ticker :name="denom" /></span>
+              </div>
+              <Price
+                v-tippy
+                :amount="{ amount: 0, denom }"
+                class="text-1 sm:text-2 font-bold"
+                content="Current asset price"
+              />
+            </div>
+          </div>
+        </header>
 
         <!-- Balance -->
 
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="asset__main__buy-banner" variant="banner" />
+        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
-        <section v-else class="asset__main__balance">
-          <p class="asset__main__balance__label title-0-normal">Balance</p>
-          <h2 class="asset__main__balance__value title-3-bold">
-            <Price :amount="{ amount: totalAmount, denom }" />
-          </h2>
-          <span class="asset__main__balance__price title-0-normal">
-            <AmountDisplay :amount="{ amount: totalAmount, denom }" />
-          </span>
+        <section v-else class="mt-16">
+          <header class="space-y-0.5">
+            <h2 class="text-muted">Balance</h2>
+            <Price :amount="{ amount: totalAmount, denom }" class="text-3 font-bold" />
+            <div class="text-muted">
+              <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+            </div>
+          </header>
 
-          <dl class="asset__main__balance__card">
-            <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Available</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+          <dl
+            class="border border-border rounded-xl grid gap-4 p-4 mt-6"
+            :class="assetConfig?.stakable ? 'grid-cols-3' : 'grid-cols-2'"
+          >
+            <div>
+              <dt class="text-muted">Available</dt>
+              <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
-            <div v-if="assetConfig?.stakable" class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Staked</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+            <div v-if="assetConfig?.stakable">
+              <dt class="text-muted">Staked</dt>
+              <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
-            <div class="asset__main__balance__card__item">
-              <dt class="asset__main__balance__card__label title-0-normal">Pooled</dt>
-              <dd class="asset__main__balance__card__value title-0-medium">
+            <div>
+              <dt class="text-muted">Pooled</dt>
+              <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
             </div>
@@ -54,32 +64,24 @@
 
         <!-- Chains -->
 
-        <section v-if="assets.length" class="asset__main__chains asset__list">
-          <div class="asset__list__header">
-            <h2 class="asset__list__header__title">Chains</h2>
-          </div>
+        <section v-if="assets.length" class="mt-16">
+          <h2 class="text-2 font-bold">Chains</h2>
 
-          <ul class="asset__list__wrapper">
-            <li v-for="asset of assets" :key="asset.address" class="asset__list__item asset__main__chains__item">
-              <div class="asset__main__chains__item__asset">
-                <CircleSymbol
-                  :denom="denom"
-                  :chain-name="asset.on_chain"
-                  class="asset__main__chains__item__asset__avatar"
-                  :glow="false"
-                  variant="chain"
-                />
-                <span class="asset__main__chains__item__asset__denom"><ChainName :name="asset.on_chain" /></span>
+          <ul class="mt-6">
+            <li v-for="asset of assets" :key="asset.address" class="flex items-center justify-between w-full py-5">
+              <div class="w-1/3 flex items-center min-w-0">
+                <CircleSymbol :denom="denom" :chain-name="asset.on_chain" size="lg" :glow="false" variant="chain" />
+                <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"><ChainName :name="asset.on_chain" /></span>
               </div>
-              <span class="asset__main__chains__item__amount">
+              <div class="w-1/3 ml-4 text-muted text-right">
                 <AmountDisplay
                   v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                   :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
-              </span>
-              <div class="asset__main__chains__item__balance">
-                <span class="asset__main__chains__item__balance__value">
+              </div>
+              <div class="w-1/3 ml-4">
+                <span class="text-right font-medium">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
                     :amount="{ amount: parseInt(asset.amount.slice(0, -4)) + stakedAmount + 'uatom', denom }"
@@ -93,38 +95,36 @@
 
         <!-- Pools -->
 
-        <section v-if="poolsDisplay.length" class="asset__main__pools asset__list">
-          <div class="asset__list__header">
-            <p class="asset__list__header__title">Pools</p>
-            <router-link :to="{ name: 'Pools' }" class="asset__list__header__button">
-              See all
-              <Icon name="ArrowRightIcon" :icon-size="1.6" />
+        <section v-if="poolsDisplay.length" class="mt-16">
+          <header class="flex items-baseline justify-between">
+            <h2 class="text-2 font-bold">Pools</h2>
+            <router-link
+              :to="{ name: 'Pools' }"
+              class="font-medium hover:opacity-80 active:opacity-70 transition select-none"
+            >
+              See all &rarr;
             </router-link>
-          </div>
+          </header>
 
-          <div class="asset__main__pools__wrapper">
-            <Pools :pools="poolsDisplay" />
-          </div>
+          <Pools :pools="poolsDisplay" class="mt-8" />
         </section>
 
         <!-- Staking -->
 
-        <section v-if="assetConfig?.stakable" class="asset__main__staking asset__list">
-          <div class="asset__list__header">
-            <h2 class="asset__list__header__title">Staking</h2>
-          </div>
+        <section v-if="assetConfig?.stakable" class="mt-16">
+          <h2 class="text-2 font-bold">Staking</h2>
 
-          <StakeTable class="asset__list__wrapper" :denom="denom" />
+          <StakeTable class="mt-8" :denom="denom" />
         </section>
-      </div>
+      </main>
 
       <!-- Swap -->
 
-      <div class="asset__aside">
-        <LiquiditySwap class="asset__aside__swap" />
+      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
+        <LiquiditySwap />
         <PoolBanner :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" variant="widget" class="asset__aside__buy" />
-      </div>
+        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
+      </aside>
     </div>
   </AppLayout>
 </template>
@@ -145,7 +145,6 @@ import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -166,7 +165,6 @@ export default defineComponent({
     StakeTable,
     AppLayout,
     Price,
-    Icon,
     LiquiditySwap,
     Pools,
     PoolBanner,
@@ -298,289 +296,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.asset {
-  display: flex;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-  padding-bottom: 4rem;
-  justify-content: space-between;
-
-  &__main {
-    display: flex;
-    flex-direction: column;
-    width: 60%;
-
-    &__info {
-      display: flex;
-      &__denom,
-      &__price {
-        flex: 1;
-      }
-      &__denom {
-        display: inline-flex;
-        align-items: center;
-
-        &__symbol {
-          margin-right: 1.2rem;
-          position: relative;
-        }
-        &__name {
-          margin-right: 1.2rem;
-        }
-        &__ticker {
-          color: var(--muted);
-        }
-      }
-      &__price {
-        text-align: right;
-      }
-    }
-
-    &__buy-banner {
-      margin-top: 6.4rem;
-    }
-    &__balance {
-      margin-top: 6.4rem;
-      &__label {
-        color: var(--muted);
-      }
-      &__price {
-        color: var(--muted);
-      }
-      &__card {
-        margin-top: 2.6rem;
-        border: 1px solid var(--border-trans);
-        border-radius: 1.2rem;
-        padding: 1.6rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        &__item {
-          flex: 1;
-        }
-        &__label {
-          color: var(--muted);
-        }
-      }
-    }
-
-    &__chains {
-      margin-top: 6.4rem;
-      &__item {
-        &__asset {
-          flex: 1 1 0%;
-          display: flex;
-          align-items: center;
-
-          &__avatar {
-            position: relative;
-            &:before {
-              display: block;
-              content: '';
-              width: 2.6rem;
-              height: 2.6rem;
-              position: absolute;
-              top: 0.3rem;
-              left: 0.3rem;
-              border-radius: 1.3rem;
-              background: var(--bg);
-              z-index: 5;
-            }
-          }
-          &__denom {
-            margin-left: 1.6rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-        }
-
-        &__amount {
-          margin-left: 1.6rem;
-          width: 33.33%;
-          text-align: right;
-          color: var(--muted);
-        }
-
-        &__balance {
-          margin-left: 1.6rem;
-          width: 33.33%;
-          display: flex;
-          align-items: center;
-
-          &__value {
-            flex: 1 1 0%;
-            text-align: right;
-            font-weight: 600;
-          }
-        }
-
-        &__more {
-          margin-left: 1.6rem;
-          width: 3.2rem;
-          height: 3.2rem;
-          border-radius: 2.6rem;
-          background-color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.8rem;
-          box-shadow: 0px 8px 24px rgba(0, 3, 66, 0.08);
-        }
-      }
-    }
-
-    &__staking {
-      &__rewards {
-        margin-top: 3rem;
-        padding: 1.6rem 2.4rem;
-        border-radius: 1.2rem;
-        background: var(--fg-trans);
-        display: flex;
-        align-items: center;
-
-        &__label {
-          flex: 1;
-          font-weight: 600;
-        }
-
-        &__amount {
-          margin-left: 1.6rem;
-          color: var(--muted);
-        }
-
-        &__balance {
-          margin-left: 1.6rem;
-          font-weight: 600;
-          text-align: right;
-        }
-
-        &__button {
-          margin-left: 1.6rem;
-          padding: 1.2rem 2.4rem;
-          background-color: black;
-          color: white;
-          font-weight: 600;
-          border-radius: 2rem;
-        }
-      }
-
-      &__item {
-        &__validator {
-          flex: 1 1 0%;
-          display: flex;
-          align-items: center;
-
-          &__avatar {
-            border-radius: 0.8rem;
-            width: 4rem;
-            height: 4rem;
-            background-color: rgba(0, 0, 0, 0.1);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          &__name {
-            margin-left: 1.6rem;
-            flex: 1 1 0%;
-            font-weight: bold;
-          }
-        }
-
-        &__amount {
-          margin-left: 1.6rem;
-          width: 33.33%;
-          text-align: right;
-          color: var(--muted);
-        }
-
-        &__balance {
-          margin-left: 1.6rem;
-          width: 33.33%;
-          display: flex;
-          align-items: center;
-
-          &__value {
-            flex: 1 1 0%;
-            text-align: right;
-            font-weight: 600;
-          }
-        }
-
-        &__more {
-          margin-left: 1.6rem;
-          padding: 0.4rem;
-        }
-      }
-    }
-
-    &__pools {
-      &__wrapper {
-        margin-top: 2.4rem;
-      }
-    }
-  }
-
-  &__aside {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    margin-left: 6.4rem;
-    width: 32rem;
-
-    &__buy {
-      margin-top: 2.6rem;
-    }
-  }
-
-  &__list {
-    margin-top: 6.4rem;
-    display: flex;
-    flex-direction: column;
-
-    &__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      &__button {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-
-        .icon {
-          margin-left: 0.6rem;
-        }
-      }
-
-      &__title {
-        font-size: 2.8rem;
-        font-weight: 700;
-      }
-    }
-
-    &__wrapper {
-      margin-top: 3.2rem;
-      margin-bottom: 1rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    &__item {
-      width: 100%;
-      display: flex;
-      align-items: center;
-    }
-
-    &__item + &__item {
-      margin-top: 3.2rem;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

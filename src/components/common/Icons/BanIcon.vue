@@ -1,11 +1,12 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path
+      d="M8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
+      stroke-miterlimit="10"
       stroke-linecap="round"
       stroke-linejoin="round"
-      stroke-width="2"
-      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
     />
+    <path d="M2.69701 13.3028L13.303 2.69678" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
   </svg>
 </template>
 

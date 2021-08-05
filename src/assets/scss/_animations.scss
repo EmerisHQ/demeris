@@ -1,5 +1,13 @@
+.animate-pop {
+  animation: pop 300ms ease-out 1;
+}
+
+.animate-shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
 .animate-wobble {
-  animation: wobble 1s infinite;
+  animation: wobble 500ms ease-out 1;
 }
 
 .animate-spin {
@@ -8,6 +16,35 @@
 
 .animate-none {
   animation: none;
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-2px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(3px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-5px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(5px, 0, 0);
+  }
 }
 
 @keyframes spin {
@@ -24,19 +61,19 @@
     transform: none;
   }
   15% {
-    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -2deg);
   }
   30% {
-    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 2deg);
   }
   45% {
-    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -1deg);
   }
   60% {
-    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 1deg);
   }
   75% {
-    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, 0deg);
   }
   100% {
     transform: none;

@@ -1,5 +1,13 @@
 <template>
-  <div class="denom-select" :class="{ 'denom-select--readonly': readonly, 'denom-select--empty': !hasOptions }">
+  <div
+    class="denom-select flex items-center"
+    :class="{
+      'denom-select--readonly': readonly,
+      'denom-select--empty': !hasOptions,
+      'py-4 px-6': size === 'sm',
+      'py-6 px-5': size === 'md',
+    }"
+  >
     <!--Displays a denom selection component:
 				Selected denom badge
 				Selected denom name
@@ -11,54 +19,82 @@
 				Dependencies:
 					vuex getter to get  chain name from chain id
 		-->
-    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin 
+    <!-- selectedDenom?.base_denom ?? ''set atom as a default coin
     when it changed-->
-    <CircleSymbol
-      :denom="selectedDenom?.base_denom ?? 'empty'"
-      :chain-name="selectedDenom?.on_chain ?? undefined"
-      size="sm"
-      class="denom-select__coin-image"
+
+    <div
+      class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
+      :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
       @click="toggleDenomSelectModal"
-    />
-
-    <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom s-0 w-medium">
-        <tippy
-          v-if="displayName.startsWith('Gravity')"
-          :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
-          class="tippy-info"
-        >
-          <div class="max-display-width">{{ displayName }}</div>
-          <template #content> {{ displayName }} </template>
-        </tippy>
-        <Denom v-else :name="selectedDenom?.base_denom" />
-        <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
+    >
+      <CircleSymbol
+        :denom="selectedDenom?.base_denom ?? 'empty'"
+        :chain-name="selectedDenom?.on_chain ?? undefined"
+        :size="size"
+        :class="showChain ? 'mr-3' : 'mr-4'"
+        @click="toggleDenomSelectModal"
+      />
+      <div v-if="isSelected">
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
+          <tippy
+            v-if="displayName.startsWith('Gravity')"
+            :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
+            class="tippy-info"
+          >
+            <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
+            <template #content> {{ displayName }} </template>
+          </tippy>
+          <Denom v-else :name="selectedDenom?.base_denom" />
+          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
+        </div>
+        <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
+          <ChainName :name="selectedDenom.on_chain" />
+        </div>
       </div>
-      <div class="denom-select__coin-from s-minus"><ChainName :name="selectedDenom.on_chain" /></div>
+      <div v-else>
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
+          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
+        </div>
+      </div>
     </div>
 
-    <div v-else class="denom-select__coin" @click="toggleDenomSelectModal">
-      <div class="denom-select__coin-denom s-0 w-medium">
-        {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1.6" />
+    <label
+      v-if="isSelected"
+      class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text"
+    >
+      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
+        {{ inputHeader }}
       </div>
-    </div>
-
-    <div class="denom-select__coin-amount">
-      <div class="denom-select__coin-amount-type s-minus">{{ inputHeader }}</div>
       <AmountInput
         :model-value="amount"
-        :class="isOver ? 'over' : ''"
         :readonly="readonly"
-        class="denom-select__coin-amount-input s-1"
+        class="
+          denom-select__coin-amount-input
+          text-text
+          w-full
+          p-0
+          text-right
+          font-bold
+          bg-transparent
+          placeholder-inactive
+          appearance-none
+          border-none
+        "
+        :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
       />
-    </div>
+    </label>
   </div>
 
   <DenomSelectModal
     v-show="isOpen"
+    class="inset-0 z-30"
+    :class="{
+      'absolute overflow-hidden z-30 bg-surface shadow-panel rounded-2xl': size === 'sm',
+      'fixed bg-bg': size === 'md',
+    }"
     v-bind="$attrs"
     :other-assets="otherAssets"
     :assets="assets"
@@ -96,6 +132,8 @@ export default defineComponent({
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
+    showChain: { type: Boolean, default: false },
+    size: { type: String, required: false, default: 'md' },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {
@@ -173,73 +211,22 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .denom-select {
-  display: flex;
-  align-items: center;
-
-  padding: 1.6rem 2.4rem;
-
-  &__coin-image {
-    cursor: pointer;
-    margin-right: 1.2rem;
-  }
-
-  &--empty &__coin {
-    cursor: default;
-  }
-
+  &--empty &__coin,
   &--empty &__coin-image {
     cursor: default;
   }
 
-  &__coin {
-    flex-shrink: 0;
-    cursor: pointer;
-
-    &-denom {
-      display: flex;
-      align-items: center;
-      color: var(--text);
-
-      .icon {
-        margin-left: 0.4rem;
-      }
-
-      .max-display-width {
-        max-width: 15rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    &-from {
-      color: var(--muted);
-    }
-
-    &-image {
-      margin-right: 1.2rem;
-
-      cursor: pointer;
-    }
+  .max-display-width {
+    max-width: 9.375rem;
   }
 
   &__coin-amount {
-    text-align: right;
-    width: 100%;
-    margin-left: 1.2rem;
-
-    &-type {
-      color: var(--muted);
-    }
-
     &-input {
-      width: 100%;
-      text-align: inherit;
-      border: none;
       outline: none;
-      padding: 0;
 
-      color: var(--text);
+      &::placeholder {
+        transition: color 150ms ease-out;
+      }
 
       /* Chrome, Safari, Edge, Opera */
       &::-webkit-outer-spin-button,
@@ -247,16 +234,10 @@ export default defineComponent({
         -webkit-appearance: none;
         margin: 0;
       }
-
-      /* Firefox */
-      & {
-        -moz-appearance: textfield;
-      }
     }
-  }
-
-  .over {
-    color: var(--negative-text);
+    &:hover &-input:not(:focus)::placeholder {
+      color: var(--muted);
+    }
   }
 }
 </style>

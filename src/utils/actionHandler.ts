@@ -1,5 +1,5 @@
-import { bech32 } from 'bech32';
 import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
+import { bech32 } from 'bech32';
 import Long from 'long';
 
 import { ChainData } from '@/store/demeris/state';
@@ -1206,10 +1206,9 @@ export async function getDisplayName(name, chain_name = null) {
     const displayName = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
     if (displayName) {
       return displayName;
-    } 
-      
+    }
+
     return name;
-    
   } else {
     let verifyTrace;
     try {

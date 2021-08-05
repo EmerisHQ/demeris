@@ -1,5 +1,5 @@
 <template>
-  <div class="s-0">
+  <div>
     <router-view />
   </div>
 </template>
@@ -20,13 +20,12 @@ export default defineComponent({
         set dark/light mode according to user Preference
         later, there will be a toggle button and save user's preference to localStorage
         for overriding default os/browser setting
-          // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          //   document.documentElement.setAttribute('color-theme', 'dark');
-          // } else {
-          //   document.documentElement.setAttribute('color-theme', 'light');
-          // }
-      */
-    document.documentElement.setAttribute('color-theme', 'light');
+    */
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-color-mode', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-color-mode', 'light');
+    }
 
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://dev.demeris.io/v1',
