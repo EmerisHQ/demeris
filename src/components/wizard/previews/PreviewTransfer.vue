@@ -25,7 +25,7 @@
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="$t('components.previews.transfer.txToSign', { txCount: step.transactions.length })"
+      :label="$t('components.previews.transfer.txToSign', { txCount: currentStep.transactions.length })"
       direction="column"
       :hint="$t('components.previews.transfer.txToSignHint')"
     >
@@ -46,7 +46,7 @@
       </template>
     </ListItem>
 
-    <ListItem label="Receive">
+    <ListItem :label="response ? 'Recipient got' : 'Receive'">
       <div class="send__item">
         <CircleSymbol :denom="denomName" :chain-name="transactionInfo.to.chain" size="sm" class="send__item__symbol" />
         <AmountDisplay class="w-bold" :amount="{ amount: transactionInfo.to.amount, denom: denomName }" />
@@ -92,7 +92,11 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
+    },
+    response: {
+      type: Object as PropType<Actions.Step>,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Actions.FeeTotals>,
@@ -109,8 +113,12 @@ export default defineComponent({
     const store = useStore();
     const denomName = ref('-');
 
+    const currentStep = computed(() => {
+      return props.response || props.step;
+    });
+
     const stepType = computed(() => {
-      const description = (props.step as Actions.Step).description;
+      const description = currentStep.value.description;
       const descriptionKeyMap = {
         'Assets Must be transferred to hub first': 'transfer-to-hub',
         'AssetA must be transferred to hub': 'transfer-to-hub',
@@ -123,7 +131,7 @@ export default defineComponent({
     });
 
     const hasMultipleTransactions = computed(() => {
-      return (props.step as Actions.Step).transactions.length > 1;
+      return currentStep.value.transactions.length > 1;
     });
     const includedFees = computed(() => {
       const included = [];
@@ -136,7 +144,7 @@ export default defineComponent({
       return included;
     });
     const transactionInfo = computed(() => {
-      const transactions = (props.step as Actions.Step).transactions;
+      const transactions = currentStep.value.transactions;
       const firstTransaction = transactions[0] as Record<string, any>;
       const [lastTransaction] = (transactions.length > 1 ? transactions.slice(-1) : transactions) as Record<
         string,
@@ -157,14 +165,6 @@ export default defineComponent({
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
         denom: (firstTransaction.data.amount as Base.Amount).denom,
       };
-
-      let totalFees = 0;
-
-      for (const denoms of Object.values(props.fees as Actions.FeeTotals)) {
-        for (const fee of Object.values(denoms)) {
-          totalFees += fee;
-        }
-      }
 
       const to = {
         amount: firstTransaction.data.amount.amount,
@@ -214,6 +214,7 @@ export default defineComponent({
     return {
       denomName,
       stepType,
+      currentStep,
       formatChain,
       transactionInfo,
       hasMultipleTransactions,

@@ -108,10 +108,11 @@ export const mutations: MutationTree<State> & Mutations = {
     txPromise = state.transactions.get(JSON.stringify(payload.params));
     const oldStatus = txPromise.status;
     if (ticket.status != oldStatus.status) {
-      txPromise.resolve({ status: ticket.status, height: ticket.height, error: ticket.error });
+      txPromise.resolve(ticket);
       if (
         ticket.status == 'complete' ||
         ticket.status == 'failed' ||
+        ticket.status == 'IBC_receive_failed' ||
         ticket.status == 'IBC_receive_success' ||
         ticket.status == 'Tokens_unlocked_timeout' ||
         ticket.status == 'Tokens_unlocked_ack'
