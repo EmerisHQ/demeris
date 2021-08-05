@@ -1,7 +1,7 @@
 <template>
-  <div class="move-form">
+  <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'amount'">
-      <h2 class="move-form__title s-2">{{ $t('components.moveForm.title') }}</h2>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.moveForm.title') }}</h2>
       <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
     </template>
 
@@ -132,11 +132,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.move-form {
-  &__title {
-    text-align: center;
-    margin-bottom: 3.2rem;
-  }
-}
-</style>
+<style lang="scss"></style>

@@ -1,29 +1,72 @@
 <template>
-  <header class="header">
-    <router-link to="/" class="header__logo">
-      <Logo />
+  <header
+    class="relative flex items-center justify-between xl:justify-center px-5 md:px-8 xl:px-32 h-16 sm:h-20"
+    role="navigation"
+  >
+    <router-link to="/" class="xl:absolute xl:left-0 xl:top-0 xl:h-full xl:px-8 hidden sm:flex items-center">
+      <NavbarLogo />
     </router-link>
 
     <Navbar />
-
-    <div class="space"></div>
-    <div class="header__wallet">
-      <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }">
+    <div class="xl:absolute xl:right-0 xl:top-0 xl:h-full xl:px-8 flex items-center">
+      <router-link v-if="redeemableBalances.length > 0" :to="{ name: 'Redeem' }" class="hidden sm:inline">
         <IconButton v-tippy :content="tip" name="RedeemIcon" status="circle" :show-badge="showBadge" />
       </router-link>
 
-      <router-link class="header__wallet-button" to="/receive">
-        <div class="header__wallet-button__icon">
-          <ReceiveIcon />
-        </div>
-        {{ $t('navbar.receive') }}
+      <router-link
+        class="
+          text-0
+          font-medium
+          leading-5
+          h-12
+          px-4
+          ml-3
+          lg:ml-0
+          hidden
+          sm:flex
+          bg-fg
+          lg:bg-transparent
+          rounded-full
+          lg:rounded-none
+          items-center
+          justify-center
+          rounded-lg
+          group
+          active:opacity-70
+          transition
+        "
+        to="/receive"
+      >
+        <ReceiveIcon class="group-hover:text-secondary" />
+        <span class="ml-3 hidden lg:inline">{{ $t('navbar.receive') }}</span>
       </router-link>
 
-      <router-link class="header__wallet-button" to="/send">
-        <div class="header__wallet-button__icon">
-          <SendIcon />
-        </div>
-        {{ $t('navbar.send') }}
+      <router-link
+        class="
+          text-0
+          font-medium
+          leading-5
+          h-12
+          px-4
+          ml-3
+          lg:ml-0
+          hidden
+          sm:flex
+          bg-fg
+          lg:bg-transparent
+          rounded-full
+          lg:rounded-none
+          items-center
+          justify-center
+          rounded-lg
+          group
+          active:opacity-70
+          transition
+        "
+        to="/send"
+      >
+        <SendIcon class="group-hover:text-quinary" />
+        <span class="ml-3 hidden lg:inline">{{ $t('navbar.send') }}</span>
       </router-link>
 
       <Settings />
@@ -33,7 +76,6 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import Logo from '@/components/common/Logo.vue';
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
@@ -41,11 +83,12 @@ import { useStore } from '@/store';
 
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
+import NavbarLogo from '../common/NavbarLogo.vue';
 import IconButton from '../ui/IconButton.vue';
 export default defineComponent({
   name: 'Header',
   components: {
-    Logo,
+    NavbarLogo,
     Navbar,
     ReceiveIcon,
     SendIcon,
@@ -68,52 +111,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
-.space {
-  flex: 1;
-}
-
-.header {
-  padding: 0 3.2rem;
-  display: flex;
-  height: 8rem;
-  align-items: center;
-  justify-content: space-between;
-
-  &__wallet {
-    display: flex;
-    align-items: center;
-
-    &-button {
-      font-size: 1.6rem;
-      font-weight: 600;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0 1.6rem;
-      line-height: 4.8rem;
-
-      &__icon {
-        margin-right: 1rem;
-      }
-    }
-
-    &__account {
-      &-name {
-        margin-bottom: 4px;
-
-        font-size: 15px;
-        font-weight: 500;
-      }
-
-      &-value {
-        font-size: 12px;
-      }
-    }
-  }
-
-  &__settings-menu {
-    margin: 0 1.6rem 0 1rem;
-  }
-}
-</style>
+<style scoped lang="scss"></style>

@@ -1,38 +1,90 @@
 <template>
-  <div class="receive">
-    <header class="receive__header">
-      <button v-if="state.selectedAsset" class="receive__header__button" @click="goBack">
-        <Icon name="ArrowLeftIcon" :icon-size="1.6" />
-      </button>
+  <div class="receive relative flex flex-col w-full min-h-screen items-center">
+    <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
+      <Button v-if="state.selectedAsset" variant="link" :full-width="false" :click-function="goBack">
+        <Icon name="ArrowLeftIcon" :icon-size="1.5" />
+      </Button>
 
-      <div v-if="state.selectedAsset" class="receive__header__title">
-        <h2 class="s-2">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
-        <p class="receive__header__title__label">on <ChainName :name="state.selectedAsset.on_chain" /></p>
-      </div>
-
-      <router-link to="/" class="receive__header__button close-button">
-        <Icon name="CloseIcon" :icon-size="1.6" />
+      <router-link to="/" class="ml-auto">
+        <Button variant="link" :full-width="false">
+          <Icon name="CloseIcon" :icon-size="1.5" />
+        </Button>
       </router-link>
     </header>
 
-    <main class="receive__main">
+    <main
+      class="
+        w-full
+        max-w-7xl
+        mx-auto
+        md:pt-8
+        px-8
+        pb-28
+        flex-1 flex flex-col
+        items-center
+        justify-center
+        overflow-hidden
+      "
+    >
       <template v-if="!state.selectedAsset">
-        <div class="receive__main__select">
-          <DenomSelectModal title="Receive" :assets="balances" :show-balance="true" @select="assetSelectHandler" />
+        <div class="absolute top-0 h-full w-full max-w-md mx-auto">
+          <DenomSelectModal
+            title="Receive"
+            class="denom-select-modal h-full"
+            :assets="balances"
+            :show-balance="true"
+            :show-back-button="false"
+            @select="assetSelectHandler"
+          />
         </div>
       </template>
 
       <template v-else-if="state.selectedAsset && recipientAddress">
-        <div class="receive__main__asset">
-          <p class="receive__main__asset__title w-bold">Which assets can I use?</p>
-          <div class="receive__main__asset__qr" :style="gradientStyle">
-            <div class="receive__main__asset__qr__code">
-              <QrCode :value="recipientAddress" width="160" :color="gradientStyle.color" />
+        <div class="md:flex items-center justify-end flex-1 w-full">
+          <div
+            class="
+              self-stretch
+              h-80
+              md:h-auto
+              w-full
+              md:w-1/2
+              flex
+              items-center
+              justify-center
+              md:justify-end md:order-last
+              mb-8
+              md:mb-0
+            "
+          >
+            <div
+              class="receive__portal relative h-full w-full max-w-md mx-auto md:px-16 flex items-center justify-center"
+            >
+              <div
+                class="
+                  receive__portal__glow
+                  absolute
+                  inset-0
+                  -left-1/2
+                  z-0
+                  bg-fg
+                  origin-right
+                  opacity-20
+                  filter
+                  blur-md
+                "
+                :style="gradientStyle"
+              ></div>
+              <div class="receive__portal__bg absolute inset-0 z-0 bg-fg origin-right" :style="gradientStyle"></div>
+              <QrCode class="relative z-10" :value="recipientAddress" width="160" :color="gradientStyle.color" />
             </div>
           </div>
-          <div>
-            <p class="receive__main__asset__label s-minus w-bold">Your address</p>
-            <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly />
+          <div v-if="state.selectedAsset" class="relative z-20 max-w-md w-full mx-auto">
+            <h2 class="text-3 font-bold mb-1">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
+            <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
+            <fieldset class="mt-16">
+              <div class="mb-3 font-bold">Your address</div>
+              <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly class="bg-fg" />
+            </fieldset>
           </div>
         </div>
       </template>
@@ -49,6 +101,7 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import QrCode from '@/components/common/QrCode.vue';
 import Address from '@/components/ui/Address.vue';
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
@@ -56,14 +109,14 @@ import { Balance } from '@/types/api';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
-  primary: '#E1E1E1',
-  secondary: '#F4F4F4',
-  tertiary: '#F9F9F9',
+  primary: '#fffd38',
+  secondary: '#30ffdf',
+  tertiary: '#64dafb',
 };
 
 export default {
   name: 'Receive',
-  components: { Address, ChainName, Denom, Icon, DenomSelectModal, QrCode },
+  components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
     const { nativeBalances } = useAccount();
@@ -119,104 +172,28 @@ export default {
 </script>
 
 <style lang="scss">
-.receive {
-  position: relative;
-  height: 100vh;
+.denom-select-modal::v-deep(.coin-list-fade) {
+  display: none;
+}
 
-  .denom-select-modal-wrapper,
-  .chain-select-wrapper {
-    box-shadow: none;
-    position: relative;
-    height: 100%;
+.receive__portal {
+  max-height: 60rem;
+  perspective: 400px;
+
+  &__bg {
+    transform: rotateY(-16deg) translateX(-8%);
   }
-
-  .denom-select-modal-wrapper {
-    height: 100% !important;
-    // Close icon
-    .title-with-goback > .icon:first-child {
-      visibility: hidden;
-    }
-    & > .coin-list {
-      height: 100% !important;
-    }
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3rem 4rem;
-    background: var(--bg);
-
-    &__button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
-    }
-
-    .close-button {
-      margin-left: auto;
-    }
-
-    &__title {
-      text-align: center;
-
-      &__label {
-        color: var(--muted);
-      }
-    }
-
-    &__title + .close-button {
-      margin-left: 0;
-    }
-  }
-
-  &__main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 3rem;
-
-    &__select {
+  &__glow {
+    transform: rotateY(4deg) translateX(-6%) skew(0deg, -19deg);
+    &:after {
+      content: '';
       position: absolute;
       top: 0;
-      width: 100%;
-      max-width: 44rem;
-      height: 100%;
-
-      .denom-select-modal {
-        height: 100%;
-      }
-    }
-
-    &__asset {
-      width: 100%;
-      max-width: 36rem;
-
-      &__title {
-        text-align: center;
-      }
-
-      &__qr {
-        width: 100%;
-        height: 38rem;
-        background: var(--border-trans);
-        border-radius: 1rem;
-        margin: 3.2rem auto;
-
-        &__code {
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-      }
-
-      &__label {
-        margin-bottom: 0.8rem;
-      }
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(257deg, var(--transparent), var(--bg));
+      opacity: 1;
     }
   }
 }

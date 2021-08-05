@@ -3,7 +3,7 @@
     <div class="get-browser__wrapper">
       <div class="get-browser__content">
         <div v-if="isLoading" class="get-browser__loading">
-          <Spinner :size="4.2" />
+          <Spinner :size="3" />
         </div>
         <template v-else>
           <slot name="title">
@@ -91,32 +91,32 @@ export default defineComponent({
   &__content {
     width: 50%;
     min-height: inherit;
-    padding: 4.8rem;
+    padding: 3rem;
     text-align: center;
   }
 
   &__controls {
     display: flex;
     flex-direction: column;
-    margin-top: 5rem;
+    margin-top: 3rem;
 
     div + div {
-      margin-top: 1.6rem;
+      margin-top: 1rem;
     }
   }
 
   &__description {
-    margin-top: 4rem;
+    margin-top: 2.5rem;
     line-height: 1.8;
     color: var(--muted);
 
     p:first-child {
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.125rem;
     }
   }
 
   &__title {
-    font-size: 2.8rem;
+    font-size: 1.75rem;
     font-weight: 600;
   }
 }

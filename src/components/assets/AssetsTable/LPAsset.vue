@@ -1,6 +1,8 @@
 <template>
   <div v-if="validPool && walletBalances && walletBalances.poolCoin">
-    <p>LP <Ticker :name="walletBalances.coinA.denom" /> &middot; <Ticker :name="walletBalances.coinB.denom" /></p>
+    <p class="-text-1 font-normal text-muted">
+      LP <Ticker :name="walletBalances.coinA.denom" /> &middot; <Ticker :name="walletBalances.coinB.denom" />
+    </p>
     <!--
     <p>Display Name: <Denom :name="walletBalances.poolCoin.denom" /></p>
     <p>Ticker: <Ticker :name="walletBalances.poolCoin.denom" /></p>
@@ -174,10 +176,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-p {
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: var(--muted);
-}
-</style>
+<style lang="scss" scoped></style>

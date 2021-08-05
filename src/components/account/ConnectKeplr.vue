@@ -1,44 +1,39 @@
 <template>
   <div class="connect-keplr">
-    <div class="connect-keplr__wrapper">
-      <div class="connect-keplr__content">
-        <template v-if="!isConnecting">
-          <slot name="title">
-            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
+    <div class="flex flex-col pb-8 px-8 text-center">
+      <template v-if="!isConnecting">
+        <slot name="title">
+          <img src="~@/assets/images/keplr-wallet-logo.png" alt="Keplr logo" class="w-12 mx-auto mb-8" />
+          <h2 class="text-3 font-bold">{{ $t('wallet.connect.modal1.title') }}</h2>
+        </slot>
+
+        <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+          <slot name="description">
+            <p>{{ $t('wallet.connect.modal1.text') }}</p>
           </slot>
-
-          <div class="connect-keplr__description">
-            <slot name="description">
-              <p>{{ $t('wallet.connect.modal1.text') }}</p>
-            </slot>
-          </div>
-
-          <div class="connect-keplr__controls">
-            <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
-
-            <a
-              href="https://t.me/EmerisHQ"
-              rel="noopener noreferrer"
-              target="_blank"
-              class="connect-keplr__controls__help s-minus"
-            >
-              {{ $t('wallet.connect.modal1.needHelp') }}
-            </a>
-          </div>
-        </template>
-
-        <div v-else class="connect-keplr__connecting">
-          <div class="connect-keplr__connecting__main">
-            <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
-            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
-          </div>
-
-          <button class="connect-keplr__connecting__button" @click="cancel">
-            {{ $t('generic_cta.cancel') }}
-          </button>
         </div>
-        <ConnectBanner />
+
+        <div class="flex flex-col mt-12">
+          <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
+
+          <a
+            href="https://t.me/EmerisHQ"
+            target="_blank"
+            rel="noreferrer noopener"
+            class="mt-4 text-muted hover:text-text -text-1 p-1.5 transition-colors active:opacity-70"
+          >
+            {{ $t('wallet.connect.modal1.needHelp') }}
+          </a>
+        </div>
+      </template>
+
+      <div v-else class="flex flex-col items-center justify-center h-full w-full">
+        <div class="flex-1 flex flex-col items-center justify-center">
+          <Spinner :size="3" />
+          <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.opening') }}</span>
+          <p class="text-3 font-bold mt-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
+        </div>
+        <Button variant="link" :name="$t('generic_cta.cancel')" :click-function="cancel" class="mt-12" />
       </div>
     </div>
   </div>
@@ -52,14 +47,12 @@ import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
-import ConnectBanner from './ConnectBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    ConnectBanner,
     Spinner,
   },
 
@@ -98,82 +91,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.connect-keplr {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
-    min-height: inherit;
-  }
-
-  &__content {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
-  &__connecting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-
-    &__main {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      &__label {
-        margin-top: 2.6rem;
-        color: var(--muted);
-      }
-    }
-
-    &__button {
-      width: 100%;
-      padding: 1.6rem 2rem;
-      border: 1px solid #e6e6e6;
-      border-radius: 0.8rem;
-      font-weight: 600;
-    }
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    margin-top: 5rem;
-
-    &__help {
-      margin-top: 1.6rem;
-      color: var(--muted);
-      display: block;
-      text-align: center;
-      padding: 0.6rem 0;
-    }
-  }
-
-  &__description {
-    flex: 1 1 0%;
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
-    }
-  }
-
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
-  }
-}
-</style>
+<style lang="scss"></style>

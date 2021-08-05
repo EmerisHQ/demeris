@@ -1,9 +1,17 @@
 <template>
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M16 0C7.178 0 0 7.178 0 16C0 24.822 7.178 32 16 32C24.822 32 32 24.822 32 16C32 7.178 24.822 0 16 0ZM17.929 7L17 19H15L14.071 7H17.929ZM16 25C14.895 25 14 24.105 14 23C14 21.895 14.895 21 16 21C17.105 21 18 21.895 18 23C18 24.105 17.105 25 16 25Z"
-      style="fill: currentColor"
+      d="M8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
     />
+    <path
+      d="M8 13C8.55228 13 9 12.5523 9 12C9 11.4477 8.55228 11 8 11C7.44772 11 7 11.4477 7 12C7 12.5523 7.44772 13 8 13Z"
+      fill="currentColor"
+    />
+    <path d="M8 3.5V9" stroke="currentColor" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
   </svg>
 </template>
 

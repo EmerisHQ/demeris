@@ -1,142 +1,67 @@
-@import url('https://rsms.me/inter/inter.css');
+@layer base {
+  /* Importing everything temporarily */
+  @import 'https://rsms.me/inter/inter.css';
 
-input,
-textarea,
-button {
-  font-family: 'Inter', sans-serif;
-  font-display: swap;
-}
-
-@supports (font-variation-settings: normal) {
-  html,
-  input,
-  textarea,
-  button {
+  :root {
     font-family: 'Inter', sans-serif;
-    font-variant: slashed-zero;
   }
-}
+  @supports (font-variation-settings: normal) {
+    :root {
+      font-family: 'Inter var', sans-serif;
+    }
+  }
 
-.font-basic {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-}
+  /* TODO: only import the necessary font weights + variable font - see WIP code below */
 
-.s-minus {
-  @extend .font-basic;
-  font-size: 1.2rem;
-  line-height: 1.6rem;
-  letter-spacing: 0.0005rem;
-}
-
-.s-0 {
-  @extend .font-basic;
-  font-size: 1.6rem;
-  line-height: 2.1rem;
-  letter-spacing: 0;
-}
-
-.s-1 {
-  @extend .font-basic;
-  font-size: 2.1rem;
-  line-height: 2.7rem;
-  letter-spacing: -0.007rem;
-}
-
-.s-2 {
-  @extend .font-basic;
-  font-size: 2.8rem;
-  font-weight: 700;
-  line-height: 3.6rem;
-  letter-spacing: -0.016rem;
-}
-
-.s-5 {
-  @extend .font-basic;
-  font-size: 6.7rem;
-  font-weight: 700;
-  line-height: 7.9rem;
-  letter-spacing: -0.055rem;
-}
-
-.l-solid {
-  line-height: 2.1rem;
-}
-
-.l-title {
-  line-height: 2.7rem;
-}
-
-.l-copy {
-  line-height: 3.4rem;
-}
-
-.w-normal {
-  font-weight: normal;
-}
-
-.w-medium {
-  font-weight: 500;
-}
-
-.w-bold {
-  font-weight: 600;
-}
-.title-0-normal {
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 130%;
-}
-.title-0-medium {
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 130%;
-}
-.title-0-bold {
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 130%;
-}
-.title-1-normal {
-  font-weight: 400;
-  font-size: 21px;
-  line-height: 128.7%;
-  letter-spacing: -0.7%;
-}
-.title-1-medium {
-  font-weight: 500;
-  font-size: 21px;
-  line-height: 128.7%;
-  letter-spacing: -0.7%;
-}
-.title-1-bold {
-  font-weight: 700;
-  font-size: 21px;
-  line-height: 128.7%;
-  letter-spacing: -0.7%;
-}
-.title-2-bold {
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 127%;
-  letter-spacing: -1.6%;
-}
-.title-3-bold {
-  font-weight: 700;
-  font-size: 38px;
-  line-height: 124.7%;
-  letter-spacing: -2.7%;
-}
-.title-4-bold {
-  font-weight: 700;
-  font-size: 51px;
-  line-height: 121.6%;
-  letter-spacing: -4.3%;
-}
-.title-5-bold {
-  font-weight: 700;
-  font-size: 67px;
-  line-height: 117.5%;
-  letter-spacing: -5.5%;
+  //   /*
+  //   Font families:
+  //
+  //   - "Inter"            static "traditional" font for older web browsers
+  //   - "Inter var"        single-axis variable font for all modern browsers
+  //
+  //   Individual font import declarations from https://rsms.me/inter/inter.css
+  //
+  //   */
+  //
+  //   $font-path-inter: 'https://raw.githubusercontent.com/rsms/inter/master/docs/font-files';
+  //
+  //   /*------------------------- static ------------------------- */
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 400;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Regular.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Regular.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 500;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Medium.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Medium.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 700;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Bold.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Bold.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   /* ----------------------- variable ----------------------- */
+  //
+  //   @font-face {
+  //     font-family: 'Inter var';
+  //     font-style: normal;
+  //     font-weight: 100 900;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-roman.var.woff2?v=3.19') format('woff2');
+  //     font-named-instance: 'Regular';
+  //   }
 }

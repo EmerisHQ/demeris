@@ -17,7 +17,7 @@
           <Button
             :name="$t('wallet.connect.modal2.button2')"
             class="get-keplr__controls__button"
-            :is-outline="true"
+            variant="link"
             @click="reloadApp"
           />
         </div>
@@ -86,34 +86,35 @@ export default defineComponent({
     flex-direction: column;
     width: 50%;
     min-height: inherit;
-    padding: 4.8rem;
+    padding: 3rem;
     text-align: center;
   }
 
   &__controls {
     display: flex;
     flex-direction: column;
+    margin-top: 3rem;
 
     &__button {
       & + & {
-        margin-top: 1.6rem;
+        margin-top: 1rem;
       }
     }
   }
 
   &__description {
     flex: 1 1 0%;
-    margin-top: 4rem;
+    margin-top: 2.5rem;
     line-height: 1.8;
     color: var(--muted);
 
     p:first-child {
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.125rem;
     }
   }
 
   &__title {
-    font-size: 2.8rem;
+    font-size: 1.75rem;
     font-weight: 600;
   }
 }

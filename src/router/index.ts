@@ -65,6 +65,10 @@ const routes: Array<RouteRecordRaw> = [
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },
+  {
+    path: '/styles',
+    component: () => import('../views/Styles.vue'),
+  },
 ];
 
 const router = createRouter({

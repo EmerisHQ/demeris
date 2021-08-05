@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, reactive, watch } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 const props = defineProps({
@@ -55,14 +56,24 @@ watch(props, () => {
 </script>
 
 <template>
-  <div class="collapse" :class="`collapse--${state.isOpen ? 'open' : 'closed'}`">
-    <button class="collapse__button" @click="toggle">
-      <span v-if="showLabel" class="collapse__button__label">{{ state.isOpen ? labelHide : labelOpen }}</span>
-      <Icon :name="'CaretUpIcon'" :icon-size="1.5" class="collapse__button__icon" />
-    </button>
+  <div class="collapse flex flex-col items-stretch gap-y-4">
+    <Button variant="link" :name="showLabel ? (state.isOpen ? labelHide : labelOpen) : null" :click-function="toggle">
+      <template #right>
+        <Icon
+          :name="'CaretDownIcon'"
+          :icon-size="1"
+          class="transform transition-transform -ml-2"
+          :class="{ 'rotate-180': state.isOpen }"
+        />
+      </template>
+    </Button>
 
     <Transition name="collapse__transition" mode="out-in" @enter="enter" @afterEnter="afterEnter" @leave="leave">
-      <div v-show="state.isOpen" class="collapse__content" :style="{ height: state.height }">
+      <div
+        v-show="state.isOpen"
+        class="collapse__content w-full duration-300 ease-in-out"
+        :style="{ height: state.height }"
+      >
         <slot />
       </div>
     </Transition>
@@ -71,14 +82,8 @@ watch(props, () => {
 
 <style lang="scss" scoped>
 .collapse {
-  display: flex;
-  flex-direction: column;
-
   &__content {
     transition-property: height;
-    transition-duration: 300ms;
-    transition-timing-function: cubic-bezier(0.25, 0.8, 0.5, 1);
-    width: 100%;
   }
 
   &__transition-enter-active,
@@ -89,23 +94,6 @@ watch(props, () => {
   &__transition-enter,
   &__transition-leave-to {
     height: 0;
-  }
-
-  &--closed &__button {
-    &__icon {
-      transform: rotate(180deg);
-    }
-  }
-
-  &__button {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-    padding: 1.6rem;
-
-    &__icon {
-      margin-left: 0.4rem;
-    }
   }
 }
 </style>
