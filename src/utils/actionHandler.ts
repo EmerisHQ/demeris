@@ -455,21 +455,20 @@ export async function move({
       // as the UI should not allow selection of such a token but leaving it here for consistency)
       throw new Error('Denom must be redeemed first');
     } else {
-      result.mustAddFee = true;
-      result.steps.push({
-        name: 'ibc_backward',
-        status: 'pending',
-        addFee: true,
-        feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
-        data: {
-          amount: amount,
-          from_chain: chain_name,
-          to_chain: verifyTrace.trace[0].counterparty_name,
-          through: verifyTrace.trace[0].channel,
-        },
-      });
-
       if (verifyTrace.trace[0].counterparty_name !== destination_chain_name) {
+        result.mustAddFee = true;
+        result.steps.push({
+          name: 'ibc_backward',
+          status: 'pending',
+          addFee: true,
+          feeToAdd: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: verifyTrace.trace[0].counterparty_name,
+            through: verifyTrace.trace[0].channel,
+          },
+        });
         const primaryChannel =
           store.getters['demeris/getPrimaryChannel']({
             chain_name: verifyTrace.trace[0].counterparty_name,
@@ -522,6 +521,17 @@ export async function move({
           chain_name: destination_chain_name,
         };
       } else {
+        result.mustAddFee = true;
+        result.steps.push({
+          name: 'ibc_backward',
+          status: 'pending',
+          data: {
+            amount: amount,
+            from_chain: chain_name,
+            to_chain: verifyTrace.trace[0].counterparty_name,
+            through: verifyTrace.trace[0].channel,
+          },
+        });
         result.output = {
           amount: {
             amount: amount.amount,
