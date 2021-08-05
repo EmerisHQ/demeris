@@ -16,15 +16,6 @@
         @try-demo="tryDemo"
       />
     </div>
-    <div v-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
-      <ConnectKeplr
-        ref="connectKeplrRef"
-        type="welcome"
-        @connect="cancelConnectKeplr"
-        @warning="showWarning"
-        @try-demo="tryDemo"
-      />
-    </div>
 
     <div v-else-if="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
       <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
