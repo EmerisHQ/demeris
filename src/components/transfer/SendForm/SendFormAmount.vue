@@ -32,7 +32,7 @@
             </Button>
           </div>
           <FlexibleAmountInput
-            v-if="state.isUSDInputChecked"
+            v-show="state.isUSDInputChecked"
             v-model="state.usdValue"
             :min-width="state.isUSDInputChecked ? 35 : 0"
             prefix="$"
@@ -56,17 +56,14 @@
             </template>
           </FlexibleAmountInput>
           <FlexibleAmountInput
-            v-else-if="!state.isUSDInputChecked"
+            v-show="!state.isUSDInputChecked"
             v-model="form.balance.amount"
-            :min-width="35"
+            :min-width="!state.isUSDInputChecked ? 35 : 0"
+            :suffix="state.assetTicker"
             placeholder="0"
             class="uppercase"
             @input="state.isMaximumAmountChecked = false"
-          >
-            <template v-if="state.currentAsset" #suffix>
-              <Denom :name="state.currentAsset?.base_denom || ''" />
-            </template>
-          </FlexibleAmountInput>
+          />
           <div class="flex items-center absolute inset-y-0 right-0">
             <Button
               :click-function="
@@ -201,6 +198,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GasPriceLevel, SendAddressForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
+import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -243,6 +241,7 @@ export default defineComponent({
 
     const state = reactive({
       currentAsset: undefined,
+      assetTicker: undefined,
       isMaximumAmountChecked: false,
       isUSDInputChecked: false,
       isSelectModalOpen: false,
@@ -333,12 +332,13 @@ export default defineComponent({
       emit('next');
     };
 
-    const setCurrentAsset = (asset: Record<string, unknown>) => {
+    const setCurrentAsset = async (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
 
       if (asset) {
         form.balance.denom = parseCoins(asset.amount as string)[0].denom;
         form.chain_name = asset.on_chain as string;
+        state.assetTicker = await getTicker(asset.base_denom, store.getters['demeris/getDexChain']);
       }
     };
 
