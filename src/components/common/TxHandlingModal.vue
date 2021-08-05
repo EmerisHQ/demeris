@@ -75,57 +75,51 @@
             <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
           </div>
         </template>
-
-        <template v-if="tx.name == 'addliquidity'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
-          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
-        </template>
-
-        <template v-if="tx.name == 'withdrawliquidity'">
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
-          <EphemerisSpinner class="flex-grow max-w-xs" />
-          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
-        </template>
       </div>
-
-      <div v-if="status === 'complete'" class="mt-4 leading-copy">
+      <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
           You received
           <span class="font-bold"><AmountDisplay
-            :amount="{
-              denom: txResult.demandCoinDenom,
-              amount: String(txResult.demandCoinSwappedAmount),
-            }"
-          /></span><br />
+            :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
+          /></span>
+          <br />
           on <ChainName :name="'cosmos-hub'" />.
-          <div v-if="txResult.swappedPercent < 100" class="my-4">
+          <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
             <span class="font-bold">
               <AmountDisplay
-                :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
+                :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
               />
             </span>
             not swapped
           </div>
         </template>
-      </div>
-      <div
-        v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'"
-        class="mt-6 font-medium text-1"
-      >
-        <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
-      </div>
-      <div
-        v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'"
-        class="mt-0.5 mb-6 text-muted"
-        :class="{ 'mb-12': status === 'complete' }"
-      >
-        <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-          <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" />
+        <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
+          <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
         </template>
-        <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /></template>
+        <template v-else-if="tx.name === 'withdrawliquidity'">
+          <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
+        </template>
+        <template
+          v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
+        >
+          <PreviewTransfer :response="txResult" :fees="txResult.fees" />
+        </template>
       </div>
+      <template v-if="status !== 'complete' || !isFinal">
+        <div class="status__detail-amount mt-6 font-medium text-1">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
+            <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+          </template>
+        </div>
+        <div class="status__detail-path mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+          </template>
+          <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
+        </div>
+      </template>
     </div>
+
     <div v-else>
       <p v-if="status === 'keplr-reject'" class="mt-4">
         <a href="https://faq.keplr.app" target="_blank" class="font-medium text-link hover:text-link-hover">
@@ -249,6 +243,9 @@ import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -280,6 +277,9 @@ type Result = {
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
+    PreviewAddLiquidity,
+    PreviewWithdrawLiquidity,
+    PreviewTransfer,
     Modal,
     SpinnerIcon,
     EphemerisSpinner,
@@ -318,16 +318,8 @@ export default defineComponent({
       default: undefined,
     },
     txResult: {
-      type: Object as PropType<Result>,
-      default: () => {
-        return {
-          swappedPercent: 0,
-          demandCoinSwappedAmount: 0,
-          demandCoinDenom: '',
-          offerCoinDenom: '',
-          remainingOfferCoinAmount: 0,
-        };
-      },
+      type: Object as PropType<Result | any>,
+      default: undefined,
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
@@ -436,7 +428,7 @@ export default defineComponent({
             overline.value = '';
             if (props.isFinal && !props.hasMore) {
               primaryButton.value = t('generic_cta.done');
-              if (props.tx.name === 'swap') {
+              if (props.tx.name === 'swap' && props.txResult) {
                 secondaryButton.value = `Send ${
                   Math.trunc(
                     (Number(props.txResult.demandCoinSwappedAmount) * 100) /

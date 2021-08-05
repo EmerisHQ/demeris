@@ -6,7 +6,7 @@ import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
-import { getTicker } from '@/utils/actionHandler';
+import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'AmountDisplay',
   props: {
@@ -18,13 +18,14 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const baseDenom = ref(props.amount?.denom);
 
     const ticker = ref('-');
 
     const displayValue = computed(() => {
       const precision =
         store.getters['demeris/getDenomPrecision']({
-          name: (props.amount as Amount).denom,
+          name: baseDenom,
         }) ?? '6';
       return parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
     });
@@ -37,6 +38,7 @@ export default defineComponent({
             (props.amount as Amount).denom,
             props.chain || store.getters['demeris/getDexChain'],
           );
+          baseDenom.value = await getBaseDenom(props.amount.denom);
         }
       },
       { immediate: true },

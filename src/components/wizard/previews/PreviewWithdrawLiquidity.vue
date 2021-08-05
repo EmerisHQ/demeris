@@ -17,18 +17,20 @@
       </ListItem>
     </div>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
-      <div class="flex justify-end items-center">
-        <div class="text-right">
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
+      <div class="supply__item flex justify-end items-center">
+        <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
+        <div class="supply__item__amount text-right">
           <AmountDisplay class="text-1 font-medium" :amount="data.poolCoin" />
-          <span class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></span>
+          <span class="supply__item__chain"><ChainName :name="chainName" /></span>
+          <span class="supply__item__chain block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></span>
         </div>
         <CircleSymbol :denom="data.poolCoin.denom" size="md" class="ml-3" />
       </div>
     </ListItem>
 
     <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)"
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
       <div class="flex items-center justify-end">
@@ -69,6 +71,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
+import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 
 export default defineComponent({
@@ -85,11 +88,15 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
+    },
+    response: {
+      type: Object as PropType<WithdrawLiquidityEndBlockResponse>,
+      default: undefined,
     },
   },
 
@@ -97,7 +104,15 @@ export default defineComponent({
     const store = useStore();
     const price = ref(1);
 
+    const { poolPriceById, pools } = usePools();
+
     const data = computed(() => {
+      if (props.response) {
+        const pool = pools.value.find((item) => item.id === props.response.pool_id);
+        const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
+        return { pool, poolCoin };
+      }
+
       return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
     });
 
@@ -106,7 +121,6 @@ export default defineComponent({
     });
 
     const { pool, pairName, calculateWithdrawBalances } = usePool(data.value.pool.id);
-    const { poolPriceById } = usePools();
 
     const receiveAmount = computed(() => {
       const result = calculateWithdrawBalances(+data.value.poolCoin.amount);

@@ -179,6 +179,7 @@
           <TxStepsModal
             :data="actionSteps"
             :gas-price-level="state.gasPrice"
+            action-name="withdrawliquidity"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
             @reset="resetHandler"

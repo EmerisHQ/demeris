@@ -326,7 +326,7 @@ export default defineComponent({
       chainsModalSource: 'from',
       usdValue: '',
       fees: {},
-      gasPrice: undefined,
+      gasPrice: '',
     });
 
     const feesAmount = computed(() => {

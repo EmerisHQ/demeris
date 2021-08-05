@@ -60,7 +60,7 @@
           />
         </div>
 
-        <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy">
+        <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
           Once executed, transactions cannot be reverted. By continuing, you agree to our
           <a href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
         </div>
@@ -209,7 +209,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -229,13 +229,13 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, IBCBackwardsData, Step } from '@/types/actions';
-import { Balances } from '@/types/api';
+import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
+import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
-  getFeeForChain,
+  getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
   validateStepFeeBalances,
 } from '@/utils/actionHandler';
@@ -516,6 +516,7 @@ export default defineComponent({
                   while (
                     txResultData.status != 'complete' &&
                     txResultData.status != 'failed' &&
+                    txResultData.status != 'IBC_receive_failed' &&
                     txResultData.status != 'IBC_receive_success' &&
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
@@ -561,30 +562,77 @@ export default defineComponent({
 
                   errorDetails.value = undefined;
 
-                  if (!txResultData.error && currentData.value.data.name === 'swap') {
-                    const result = {
-                      swappedPercent: 0,
-                      demandCoinSwappedAmount: 0,
-                      demandCoinDenom: '',
-                      remainingOfferCoinAmount: 0,
-                      offerCoinDenom: '',
-                    };
+                  let txhash: string;
+                  let chain_name: string;
 
-                    //Get end block events
-                    let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                      height: txResultData.height,
-                    });
+                  if (txResultData.status === 'IBC_receive_success') {
+                    const ticketData = txResultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
+                    txhash = ticketData.TxHash;
+                    chain_name = ticketData.Chain;
+                  } else {
+                    txhash = result.ticket;
+                    chain_name = res.chain_name;
+                  }
 
-                    result.demandCoinDenom = endBlockEvent.demand_coin_denom;
-                    result.swappedPercent =
-                      (Number(endBlockEvent.exchanged_offer_coin_amount) /
-                        (Number(endBlockEvent.remaining_offer_coin_amount) +
-                          Number(endBlockEvent.exchanged_offer_coin_amount))) *
-                      100;
-                    result.demandCoinSwappedAmount = endBlockEvent.exchanged_demand_coin_amount;
-                    result.remainingOfferCoinAmount = endBlockEvent.remaining_offer_coin_amount;
-                    result.offerCoinDenom = endBlockEvent.offer_coin_denom;
-                    txResult.value = result;
+                  const txsResponse: TransactionDetailResponse = await store.dispatch(
+                    GlobalDemerisActionTypes.GET_TXS,
+                    { txhash, chain_name },
+                  );
+
+                  const txsResponseFees = {
+                    [chain_name]: txsResponse?.tx.auth_info.fee.amount.reduce((acc, item) => {
+                      acc[item.denom] = item.amount;
+                      return acc;
+                    }, {}),
+                  };
+
+                  if (!txResultData.error) {
+                    if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
+                      //Get end block events
+                      let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                        height: txResultData.height,
+                        stepType: currentData.value.data.name,
+                      });
+
+                      if (endBlockEvent) {
+                        let resultData = endBlockEvent;
+
+                        switch (currentData.value.data.name) {
+                          case 'swap':
+                            resultData = {
+                              swappedPercent:
+                                (Number(endBlockEvent.exchanged_offer_coin_amount) /
+                                  (Number(endBlockEvent.remaining_offer_coin_amount) +
+                                    Number(endBlockEvent.exchanged_offer_coin_amount))) *
+                                100,
+                              demandCoinSwappedAmount: endBlockEvent.exchanged_demand_coin_amount,
+                              demandCoinDenom: endBlockEvent.demand_coin_denom,
+                              remainingOfferCoinAmount: endBlockEvent.remaining_offer_coin_amount,
+                              offerCoinDenom: endBlockEvent.offer_coin_denom,
+                            };
+                            break;
+                        }
+
+                        txResult.value = resultData;
+                      }
+                    } else if (txsResponse) {
+                      const txResponseDetail = getStepTransactionDetailFromResponse(txsResponse);
+
+                      if (txResponseDetail) {
+                        txResult.value = {
+                          name: currentData.value.data.name,
+                          transactions: [
+                            {
+                              data: txResponseDetail,
+                              //@ts-ignore
+                              name: transaction.value.name,
+                            },
+                          ],
+                        };
+                      }
+                    }
+
+                    txResult.value.fees = txsResponseFees;
                   }
 
                   // TODO: deal with status here
@@ -621,8 +669,10 @@ export default defineComponent({
       emit(event);
     };
 
+    const refProps = toRefs(props);
+
     watch(
-      props,
+      [refProps.data, refProps.actionName],
       () => {
         if (!interstitialProceed.value) {
           let shouldOpenConfirmation = false;
