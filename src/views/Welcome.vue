@@ -121,8 +121,10 @@ export default defineComponent({
     };
 
     // TODO: Implement demo account
+    // right now it skips past the welcome flow
     const tryDemo = () => {
-      window.alert('An Emeris demo is coming soon!');
+      isReturnUser.value = true;
+      router.push('/');
     };
 
     onMounted(async () => {
