@@ -242,6 +242,15 @@ export default defineComponent({
       return store.getters['demeris/allowCustomSlippage'];
     });
 
+    watch(
+      () => allowCustomSlippage.value,
+      () => {
+        if (!allowCustomSlippage.value && state.isCustomSelected) {
+          state.setSlippage(0.5);
+        }
+      },
+    );
+
     //TODO: dynamic digit float calculation
     watch(
       () => [props.swapData, state.slippage],

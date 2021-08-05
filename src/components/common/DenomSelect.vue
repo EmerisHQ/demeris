@@ -34,10 +34,11 @@
         :class="showChain ? 'mr-3' : 'mr-4'"
         @click="toggleDenomSelectModal"
       />
-      <div v-if="isSelected">
-        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
+
+      <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
+        <div class="denom-select__coin-denom flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
           <tippy
-            v-if="displayName.startsWith('GDEX')"
+            v-if="displayName.startsWith('Gravity')"
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
             class="tippy-info"
           >
@@ -45,15 +46,10 @@
             <template #content> {{ displayName }} </template>
           </tippy>
           <Denom v-else :name="selectedDenom?.base_denom" />
-          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
+          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
         </div>
         <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
-        </div>
-      </div>
-      <div v-else>
-        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
-          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
       </div>
     </div>
@@ -95,7 +91,10 @@
       'absolute overflow-hidden z-30 bg-surface shadow-panel rounded-2xl': size === 'sm',
       'fixed bg-bg': size === 'md',
     }"
+    v-bind="$attrs"
+    :other-assets="otherAssets"
     :assets="assets"
+    :counter-denom="counterDenom"
     :func="toggleDenomSelectModal"
     :title="inputHeader.startsWith('Pay') ? 'Pay with' : 'Receive'"
     @select="denomSelectHandler"
@@ -118,7 +117,14 @@ export default defineComponent({
   props: {
     inputHeader: { type: String, required: true },
     selectedDenom: { type: Object, required: false, default: null },
+    counterDenom: { type: Object, required: false, default: null },
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
@@ -157,7 +163,7 @@ export default defineComponent({
       try {
         const denom = displayName.value;
         let denomIconName = 'empty';
-        if (denom.includes('GDEX')) {
+        if (denom.includes('Gravity')) {
           denomIconName = 'pool';
         } else {
           //TODO adjust url

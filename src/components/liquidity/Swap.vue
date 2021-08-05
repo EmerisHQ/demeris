@@ -50,7 +50,9 @@
             amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToPay"
         :selected-denom="payCoinData"
+        :counter-denom="receiveCoinData"
         :assets="assetsToPay"
         :is-over="isOver"
         @change="setCounterPairCoinAmount"
@@ -97,7 +99,9 @@
             amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToReceive"
         :selected-denom="receiveCoinData"
+        :counter-denom="payCoinData"
         :assets="assetsToReceive"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
@@ -257,7 +261,7 @@ export default defineComponent({
         };
 
         // TODO: get isAdvanced from local storage
-        const isAdvanced = false;
+        const isAdvanced = true;
 
         //Pool coin included(advanced) or excluded
         if (isAdvanced) {
@@ -346,7 +350,7 @@ export default defineComponent({
             };
 
             // TODO: get isAdvanced from local storage
-            const isAdvanced = false;
+            const isAdvanced = true;
 
             //Pool coin included(advanced) or excluded
             if (isAdvanced) {
@@ -383,7 +387,6 @@ export default defineComponent({
     const availableReceiveSide = computed(() => {
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-
         return receiveSide;
       } else {
         return availablePairs.value;
@@ -420,7 +423,7 @@ export default defineComponent({
           }
         });
       }
-      return verifiedBalances;
+      return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
@@ -437,7 +440,44 @@ export default defineComponent({
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
-      return assets;
+      return sortAssetList(assets);
+    });
+
+    const otherAssetsToPay = computed(() => {
+      let assets = allBalances.value.filter((x) => {
+        return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
+      });
+
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToPay.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined && asset.base_denom !== data.receiveCoinData?.base_denom) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    });
+
+    const otherAssetsToReceive = computed(() => {
+      let receivalbePairs = availablePairs.value.filter(
+        (pair, index, self) => index === self.findIndex((p) => p.pay.denom === pair.pay.denom),
+      );
+
+      let assets = receivalbePairs.map((x) => {
+        return {
+          denom: x.pay.denom,
+          base_denom: x.pay.base_denom,
+          on_chain: store.getters['demeris/getDexChain'],
+        };
+      });
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToReceive.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined && asset.base_denom !== data.payCoinData?.base_denom) {
+          return true;
+        } else {
+          return false;
+        }
+      });
     });
 
     // default pay coin set
@@ -485,7 +525,9 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
-          if (data.isNotEnoughLiquidity) {
+          if (data.selectedPoolData === null) {
+            return 'No pool for this pair';
+          } else if (data.isNotEnoughLiquidity) {
             return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
@@ -511,7 +553,7 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (!isInit.value) {
+        if (!isInit.value || data.isLoading) {
           return 'loading';
         } else {
           return 'active';
@@ -557,6 +599,8 @@ export default defineComponent({
         const fee = data.payCoinAmount * swapFeeRate;
         return Math.ceil(fee * 1000000) / 1000000 ?? 0;
       }),
+      // pool search loading
+      isLoading: false,
 
       // for swap action
       actionHandlerResult: null,
@@ -597,7 +641,8 @@ export default defineComponent({
           !data.isBothSelected ||
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
-          !isSignedIn.value
+          !isSignedIn.value ||
+          data.selectedPoolData === null
         );
       }),
       isChildModalOpen: false,
@@ -693,7 +738,11 @@ export default defineComponent({
           let payDenom = data.payCoinData.base_denom;
           const receiveDenom = data.receiveCoinData.denom;
 
-          if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+          if (
+            !data.payCoinData.denom.startsWith('ibc') &&
+            data.payCoinData.denom !== 'uatom' &&
+            !data.payCoinData.denom.startsWith('pool')
+          ) {
             // nativeDenomToIBCDenom
             payDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
@@ -706,7 +755,7 @@ export default defineComponent({
               payDenom = data.payCoinData.denom;
             }
           }
-
+          data.isLoading = true;
           try {
             const id = poolsByDenom(payDenom).find((pool) => {
               return (
@@ -729,9 +778,11 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+            data.isLoading = false;
           } catch (e) {
             poolId.value = null;
             data.selectedPoolData = null;
+            data.isLoading = false;
           }
         }
       },
@@ -757,7 +808,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            setCounterPairCoinAmount('Pay');
+            // setCounterPairCoinAmount('Pay');
           }, priceUpdateTerm * 1000);
         }
       },
@@ -771,9 +822,10 @@ export default defineComponent({
       () => data.payCoinAmount,
       async () => {
         if (data.isSwapReady) {
-          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
-
+          // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
+          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+          const toPrecision =
+            store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom }) || 6;
           const swapParams = {
             name: 'swap',
             params: {
@@ -887,6 +939,20 @@ export default defineComponent({
       reviewModalToggle();
     }
 
+    //helper
+    function sortAssetList(list) {
+      const poolCoinPairList = [];
+      const coinPairList = [];
+      list.forEach((pair) => {
+        if (pair.denom.startsWith('pool')) {
+          poolCoinPairList.push(pair);
+        } else {
+          coinPairList.push(pair);
+        }
+      });
+      return [...coinPairList, ...poolCoinPairList];
+    }
+
     return {
       ...toRefs(data),
       isInit,
@@ -906,6 +972,9 @@ export default defineComponent({
       slippageSettingModalToggle,
       getDisplayPrice,
       gasPrice,
+      availablePaySide,
+      otherAssetsToPay,
+      otherAssetsToReceive,
     };
   },
 });

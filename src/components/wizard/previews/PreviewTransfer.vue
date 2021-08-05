@@ -37,7 +37,9 @@
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
-          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="text-sm" />
+          <span v-if="includedFees && includedFees.includes(denom)" class="text-sm">
+            ({{ $t('components.previews.transfer.includedFee') }})</span>
         </template>
       </ListItem>
     </ListItem>
@@ -119,6 +121,10 @@ export default defineComponent({
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
     },
+    gasPriceLevel: {
+      type: String as PropType<Actions.GasPriceLevel>,
+      required: true,
+    },
   },
 
   setup(props) {
@@ -141,7 +147,16 @@ export default defineComponent({
     const hasMultipleTransactions = computed(() => {
       return (props.step as Actions.Step).transactions.length > 1;
     });
-
+    const includedFees = computed(() => {
+      const included = [];
+      const transactions = (props.step as Actions.Step).transactions;
+      for (const tx of transactions) {
+        if (tx.addFee) {
+          included.push(tx.feeToAdd[0].denom);
+        }
+      }
+      return included;
+    });
     const transactionInfo = computed(() => {
       const transactions = (props.step as Actions.Step).transactions;
       const firstTransaction = transactions[0] as Record<string, any>;
@@ -151,10 +166,16 @@ export default defineComponent({
       >[];
 
       const isIBC = ['ibc_forward', 'ibc_backward'].includes(firstTransaction.name);
-
+      let fromAmount = firstTransaction.data.amount.amount;
+      if (firstTransaction.addFee) {
+        fromAmount = (
+          parseInt(fromAmount) +
+          parseFloat(firstTransaction.feeToAdd[0].amount[props.gasPriceLevel]) * store.getters['demeris/getGasLimit']
+        ).toString();
+      }
       const from = {
         address: '',
-        amount: firstTransaction.data.amount.amount,
+        amount: fromAmount,
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
         denom: (firstTransaction.data.amount as Base.Amount).denom,
       };
@@ -168,7 +189,7 @@ export default defineComponent({
       }
 
       const to = {
-        amount: from.amount,
+        amount: firstTransaction.data.amount.amount,
         address: lastTransaction.data.to_address,
         chain:
           lastTransaction.data.to_chain ||
@@ -224,6 +245,7 @@ export default defineComponent({
       transactionInfo,
       hasMultipleTransactions,
       formatMultipleChannel,
+      includedFees,
     };
   },
 });

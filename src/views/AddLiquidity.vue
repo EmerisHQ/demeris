@@ -251,6 +251,12 @@
                     :steps="actionSteps"
                     @update:fees="state.fees = $event"
                   />
+                  <span v-if="hasPool" class="font-bold">
+                    <Ticker :name="pool.pool_coin_denom" />
+                  </span>
+                  <span v-else class="font-bold">
+                    <Ticker :name="preview_pool_coin_denom" />
+                  </span>
                 </div>
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
                   Your assets will be transferred to Cosmos Hub
@@ -423,7 +429,9 @@ export default {
       return result;
     });
 
-    const { pools, getReserveBaseDenoms } = usePools();
+    const { allPools, pools, getReserveBaseDenoms } = usePools();
+
+    const preview_pool_coin_denom = `G` + (allPools.value.length + 1);
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -922,6 +930,7 @@ export default {
       isValid,
       exchangeAmount,
       hasPrices,
+      preview_pool_coin_denom,
       hasFunds,
       coinAChangeHandler,
       coinBChangeHandler,

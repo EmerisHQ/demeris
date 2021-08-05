@@ -245,7 +245,7 @@ export default defineComponent({
       } as StepTransaction;
       */
 
-      let res = await msgFromStepTransaction(stepTx as StepTransaction);
+      let res = await msgFromStepTransaction(stepTx as StepTransaction, GasPriceLevel.AVERAGE);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
         amount: [

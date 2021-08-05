@@ -54,6 +54,7 @@
             v-else
             :step="currentData.data"
             :fees="currentData.fees"
+            :gas-price-level="gasPriceLevel"
             :context="variant"
             :class="{ '-text-1': variant === 'widget' }"
           />
@@ -227,12 +228,13 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
+import { FeeTotals, GasPriceLevel, IBCBackwardsData, Step } from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
+  getFeeForChain,
   msgFromStepTransaction,
   validateStepFeeBalances,
 } from '@/utils/actionHandler';
@@ -363,7 +365,7 @@ export default defineComponent({
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
-
+      console.log(currentStepData);
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -405,7 +407,12 @@ export default defineComponent({
       () => currentData.value,
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
-        feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
+        feeWarning.value = await validateStepFeeBalances(
+          newData.data,
+          toCheckBalances,
+          newData.fees,
+          props.gasPriceLevel,
+        );
         interstitialProceed.value = false;
       },
     );
@@ -444,12 +451,15 @@ export default defineComponent({
               };
 
               txToResolve.value = txToResolvePromise;
-              let res = await msgFromStepTransaction(stepTx);
+              let res = await msgFromStepTransaction(stepTx, props.gasPriceLevel);
               const feeOptions = await feeForStepTransaction(stepTx);
               const fee = {
                 amount: [
                   {
-                    amount: '' + parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) * 400000,
+                    amount:
+                      '' +
+                      parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) *
+                        store.getters['demeris/getGasLimit'],
                     denom: feeOptions[0].denom,
                   },
                 ],

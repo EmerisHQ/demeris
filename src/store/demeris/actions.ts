@@ -768,7 +768,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 300000 },
+    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 400000 },
   ) {
     console.log('Vuex nodule: demeris initialized!');
     commit('INIT', { endpoint, hub_chain, gas_limit });

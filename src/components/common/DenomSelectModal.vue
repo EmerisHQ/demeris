@@ -2,7 +2,7 @@
   <div class="flex">
     <ChainSelectModal
       v-if="isModalOpen"
-      :assets="assets"
+      :assets="chainSelectModalData"
       :title="'Select chain'"
       :func="toggleChainSelectModal"
       :selected-denom="selectedDenom"
@@ -13,17 +13,33 @@
         <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
       </header>
 
-      <div class="relative flex-1 min-h-0 flex flex-col">
+      <div class="search-bar relative flex-1 min-h-0 flex flex-col">
         <Search v-model:keyword="keyword" placeholder="Search assets" class="w-full mx-auto max-w-md px-6 pb-3" />
         <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
           <div class="mx-auto max-w-md mb-20">
             <CoinList
-              :data="keywordFilteredAssets"
+              :data="keywordFilteredAssets[0]"
               :type="title === 'Receive' ? 'receive' : 'pay'"
               :show-balance="showBalance"
               :keyword="keyword"
               @select="coinListselectHandler"
-            />
+            >
+            </CoinList>
+
+            <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
+              <div class="other-assets__title text-base font-bold">{{ $t('components.denomSelect.otherAssets') }}</div>
+              <div class="other-assets__subtitle text-sm">
+                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+              </div>
+              <CoinList
+                :data="keywordFilteredAssets[1]"
+                :type="title === 'Receive' ? 'receive' : 'pay'"
+                :show-balance="showBalance"
+                :keyword="keyword"
+                @select="coinListselectHandler"
+              >
+              </CoinList>
+            </div>
           </div>
         </div>
         <WhiteOverlay />
@@ -52,6 +68,13 @@ export default defineComponent({
   },
   props: {
     assets: { type: Object, required: true },
+    otherAssets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
+    counterDenom: { type: Object, required: false, default: null },
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
@@ -63,7 +86,11 @@ export default defineComponent({
     const keyword = ref('');
     const selectedDenom = ref(null);
 
+    const chainSelectModalData = ref(props.assets);
+
     const displayNameAddedList = ref([]);
+    const displayNameAddedOtherList = ref([]);
+
     watch(
       () => props.assets,
       async () => {
@@ -78,6 +105,19 @@ export default defineComponent({
               }),
             ),
           ];
+
+          if (props.otherAssets.length > 0) {
+            displayNameAddedOtherList.value = [
+              await Promise.all(
+                props.otherAssets.map(async (asset) => {
+                  return {
+                    ...asset,
+                    display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                  };
+                }),
+              ),
+            ];
+          }
         } else {
           return [];
         }
@@ -85,12 +125,26 @@ export default defineComponent({
       { immediate: true },
     );
 
+    const displaySeletedPair = ref('');
+    watch(
+      () => props.counterDenom,
+      async () => {
+        displaySeletedPair.value = await getDisplayName(
+          props.counterDenom.base_denom,
+          store.getters['demeris/getDexChain'],
+        );
+      },
+    );
+
     const keywordFilteredAssets = computed(() => {
       const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
         return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
       });
+      const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
+      });
 
-      return filteredAssets;
+      return [filteredAssets, filteredOtherAssets];
     });
 
     function coinListselectHandler(payload) {
@@ -101,6 +155,14 @@ export default defineComponent({
         selectedDenom.value = payload.base_denom;
 
         if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
+          chainSelectModalData.value = props.assets;
+          toggleChainSelectModal();
+          return;
+        } else if (
+          props.otherAssets.length > 0 &&
+          props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1
+        ) {
+          chainSelectModalData.value = props.otherAssets;
           toggleChainSelectModal();
           return;
         }
@@ -123,11 +185,13 @@ export default defineComponent({
       isModalOpen,
       toggleChainSelectModal,
       coinListselectHandler,
+      chainSelectModalData,
       chainSelectHandler,
       keyword,
       keywordFilteredAssets,
       displayNameAddedList,
       selectedDenom,
+      displaySeletedPair,
     };
   },
 });
@@ -140,6 +204,18 @@ export default defineComponent({
 
   &::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera*/
+  }
+
+  .other-assets {
+    &__title {
+      padding-top: 1.5rem;
+      color: var(--text);
+    }
+
+    &__subtitle {
+      padding-bottom: 0.5rem;
+      color: var(--muted);
+    }
   }
 }
 </style>
