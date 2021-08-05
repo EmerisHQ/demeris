@@ -47,7 +47,7 @@
               </Button>
             </div>
             <FlexibleAmountInput
-              v-if="state.isUSDInputChecked"
+              v-show="state.isUSDInputChecked"
               v-model="state.usdValue"
               :min-width="state.isUSDInputChecked ? 35 : 0"
               prefix="$"
@@ -71,17 +71,14 @@
               </template>
             </FlexibleAmountInput>
             <FlexibleAmountInput
-              v-else-if="!state.isUSDInputChecked"
+              v-show="!state.isUSDInputChecked"
               v-model="form.balance.amount"
-              :min-width="35"
+              :min-width="!state.isUSDInputChecked ? 35 : 0"
               placeholder="0"
+              :suffix="state.assetTicker"
               class="uppercase"
               @input="state.isMaximumAmountChecked = false"
-            >
-              <template v-if="state.currentAsset" #suffix>
-                <Denom :name="state.currentAsset?.base_denom || ''" />
-              </template>
-            </FlexibleAmountInput>
+            />
             <div class="flex items-center absolute inset-y-0 right-0">
               <Button
                 :click-function="
@@ -277,6 +274,7 @@ import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
 import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
+import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -319,6 +317,7 @@ export default defineComponent({
 
     const state = reactive({
       currentAsset: undefined,
+      assetTicker: undefined,
       isMaximumAmountChecked: false,
       isUSDInputChecked: false,
       isDenomModalOpen: false,
@@ -496,16 +495,19 @@ export default defineComponent({
       router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
     };
 
-    const setCurrentAsset = (asset: Record<string, unknown>) => {
+    const setCurrentAsset = async (asset: Record<string, unknown>) => {
       const dexChain = store.getters['demeris/getDexChain'];
       const targetChains = Object.values(store.getters['demeris/getChains']).filter(
         (chain: Chain) => chain.chain_name !== dexChain,
       );
 
       state.currentAsset = asset;
+
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.on_chain = asset.on_chain as string;
       form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
+
+      state.assetTicker = await getTicker(asset.base_denom, dexChain);
     };
 
     onMounted(() => {
