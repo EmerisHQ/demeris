@@ -61,7 +61,8 @@
         </div>
 
         <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy">
-          Non-revertable transactions. Prices not guaranteed etc.
+          Once executed, transactions cannot be reverted. By continuing, you agree to our
+          <a href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
         </div>
 
         <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">

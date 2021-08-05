@@ -27,8 +27,10 @@
             </CoinList>
 
             <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
-              <div class="other-assets__title text-base font-bold">{{ $t('components.denomSelect.otherAssets') }}</div>
-              <div class="other-assets__subtitle text-sm">
+              <div class="other-assets__title text-base font-bold px-6">
+                {{ $t('components.denomSelect.otherAssets') }}
+              </div>
+              <div class="other-assets__subtitle -text-1 px-6">
                 {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
               </div>
               <CoinList

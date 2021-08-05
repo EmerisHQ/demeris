@@ -34,9 +34,8 @@
         :class="showChain ? 'mr-3' : 'mr-4'"
         @click="toggleDenomSelectModal"
       />
-
-      <div v-if="isSelected" class="denom-select__coin" @click="toggleDenomSelectModal">
-        <div class="denom-select__coin-denom flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
+      <div v-if="isSelected">
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
           <tippy
             v-if="displayName.startsWith('Gravity')"
             :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
@@ -46,10 +45,15 @@
             <template #content> {{ displayName }} </template>
           </tippy>
           <Denom v-else :name="selectedDenom?.base_denom" />
-          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1.6" />
+          <Icon v-if="hasOptions" name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div v-if="showChain" class="text-muted -text-1 overflow-hidden overflow-ellipsis whitespace-nowrap">
           <ChainName :name="selectedDenom.on_chain" />
+        </div>
+      </div>
+      <div v-else>
+        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
+          {{ $t('components.denomSelect.select') }} <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
       </div>
     </div>
