@@ -283,7 +283,7 @@ export default defineComponent({
       emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
-    return { ...toRefs(data), txCount, fees, swapDollarFee };
+    return { ...toRefs(data), txCount, fees, swapDollarFee, isPoolCoin, poolCoinSwapFee, poolCoinDisplayDenom };
   },
 });
 </script>
