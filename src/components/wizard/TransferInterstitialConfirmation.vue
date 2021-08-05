@@ -13,7 +13,12 @@
       </h1>
       <p v-if="subtitle" class="text-1 text-muted mt-3 mb-8">{{ subtitle }}</p>
 
-      <img src="@/assets/images/transfer-interstitial.png" name="Transfer" class="-mt-8 -mb-10 max-w-sm" />
+      <img
+        src="@/assets/images/transfer-interstitial.png"
+        name="Transfer"
+        class=""
+        :class="{ '-mt-8 -mb-10 max-w-sm': action !== 'swap' }"
+      />
     </div>
 
     <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
