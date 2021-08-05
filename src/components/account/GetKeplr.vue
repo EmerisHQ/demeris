@@ -14,7 +14,7 @@
         </slot>
       </div>
 
-      <div class="flex flex-col mt-12">
+      <div class="flex items-center flex-col mt-12">
         <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
         <a class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitTryDemo">
           {{ $t('generic_cta.tryTheDemo') }}

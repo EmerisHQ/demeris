@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <Modal
-      v-if="isKeplrInstalled && isWarningAgreed"
+      v-show="isKeplrInstalled && isWarningAgreed"
       :open="open"
       variant="center"
       fullscreen
@@ -14,7 +14,7 @@
     </Modal>
 
     <Modal
-      v-else-if="isKeplrInstalled && !isWarningAgreed"
+      v-show="isKeplrInstalled && !isWarningAgreed"
       :open="open"
       variant="center"
       fullscreen
@@ -27,7 +27,7 @@
     </Modal>
 
     <Modal
-      v-else-if="isKeplrSupported && !isKeplrInstalled"
+      v-show="isKeplrSupported && !isKeplrInstalled"
       :open="open"
       variant="center"
       fullscreen
@@ -36,11 +36,11 @@
       max-width-class="max-w-sm"
       @close="closeGetKeplr"
     >
-      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" @try-demo="tryDemo" />
     </Modal>
 
     <Modal
-      v-else
+      v-show="!isKeplrSupported"
       :open="open"
       variant="center"
       fullscreen
@@ -49,13 +49,14 @@
       max-width-class="max-w-sm"
       @close="closeGetBrowser"
     >
-      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
+      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" @try-demo="tryDemo" />
     </Modal>
   </teleport>
 </template>
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
@@ -105,6 +106,7 @@ export default defineComponent({
   emits: ['close'],
 
   setup(_, { emit }) {
+    const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
@@ -131,6 +133,11 @@ export default defineComponent({
     const agreeWarning = () => {
       isWarningAgreed.value = true;
       connectKeplrRef.value.signIn();
+    };
+
+    // TODO: Implement demo account
+    const tryDemo = () => {
+      router.push('/');
     };
 
     onMounted(async () => {

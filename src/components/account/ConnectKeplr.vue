@@ -1,6 +1,6 @@
 <template>
   <div class="connect-keplr">
-    <div class="flex flex-col pb-8 px-8 text-center">
+    <div class="flex flex-col px-8 text-center" :class="type == 'welcome' ? 'py-8' : 'pb-8'">
       <template v-if="!isConnecting">
         <slot name="title">
           <img
