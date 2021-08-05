@@ -6,7 +6,7 @@
     @click="toggle"
   >
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
-    <div class="flex items-center">
+    <div class="fees-total flex items-center">
       <span v-show="!isFeesOpen">
         ~{{
           isPoolCoin
@@ -22,17 +22,28 @@
       />
     </div>
   </div>
-  <div v-if="isFeesOpen" class="pb-6 space-y-6">
-    <div class="flex items-center justify-between">
+  <div v-if="isFeesOpen" class="fees-detail pb-6 space-y-6">
+    <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
-      <div>
+      <div class="fees-detail__info-value">
         {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
     </div>
 
-    <div class="flex items-center justify-stretch space-x-3">
+    <div class="fees-detail__selector flex items-center justify-stretch space-x-3">
       <button
-        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
         :class="
           gasPriceLevel === GasPriceLevel.LOW
             ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
@@ -40,13 +51,24 @@
         "
         @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
-        <div>{{ $t('context.feeLevels.low') }}</div>
-        <div class="font-normal -text-1 mt-0.5">
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
-        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
         :class="
           gasPriceLevel === GasPriceLevel.AVERAGE
             ? 'bg-brand dark:theme-inverse text-text font-medium'
@@ -54,13 +76,24 @@
         "
         @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
-        <div>{{ $t('context.feeLevels.average') }}</div>
-        <div class="font-normal -text-1 mt-0.5">
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
-        class="w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
         :class="
           gasPriceLevel === GasPriceLevel.HIGH
             ? 'bg-brand dark:theme-inverse text-text font-medium'
@@ -68,8 +101,8 @@
         "
         @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
-        <div>{{ $t('context.feeLevels.high') }}</div>
-        <div class="font-normal -text-1 mt-0.5">
+        <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>
@@ -84,13 +117,13 @@
 
     <div v-if="swapDollarFee || poolCoinSwapFee" class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
-      <div>
+      <div class="fees-detail__info-value">
         {{ isPoolCoin ? `${poolCoinSwapFee} ${poolCoinDisplayDenom}` : formatter.format(swapDollarFee) }}
       </div>
     </div>
-    <div class="flex items-center justify-between">
+    <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
-      <div class="font-bold">
+      <div class="fees-detail__info-value font-bold">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
       </div>
     </div>
@@ -199,10 +232,12 @@ export default defineComponent({
 
       return fees;
     });
+
     const isPoolCoin = computed(() => {
       const tx = props.steps[0]?.transactions[0].data as SwapData;
       return tx.from.denom.startsWith('pool');
     });
+
     const poolCoinDisplayDenom = ref('');
     watch(
       () => props.steps,
@@ -253,7 +288,6 @@ export default defineComponent({
         return null;
       }
     });
-
     const data = reactive({
       isFeesOpen: false,
       setGasPriceLevel: (level: GasPriceLevel) => {
@@ -272,6 +306,7 @@ export default defineComponent({
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
       }),
+      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
     watch([fees, props], () => {
