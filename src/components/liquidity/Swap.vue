@@ -1,13 +1,15 @@
 <template>
   <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper w-full relative">
     <SlippageSettingModal
-      v-show="isSlippageSettingModalOpen"
+      v-if="isSlippageSettingModalOpen"
       :swap-data="{
         pay: {
           denom: payCoinData?.base_denom,
           amount: payCoinAmount,
         },
         receive: { denom: receiveCoinData?.base_denom, amount: receiveCoinAmount },
+        firstReserve: selectedPoolData?.reserves[0],
+        poolPrice: selectedPoolData?.poolPrice,
       }"
       @goback="slippageSettingModalToggle"
     />
@@ -732,11 +734,12 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData?.denom, data.receiveCoinData];
+        return [data.payCoinData?.denom, data.receiveCoinData, data.payCoinAmount];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
           let payDenom = data.payCoinData.base_denom;
+
           const receiveDenom = data.receiveCoinData.denom;
 
           if (
@@ -769,9 +772,9 @@ export default defineComponent({
             poolId.value = id;
 
             const pool = poolById(id);
-            const poolPrice = await poolPriceById(id);
             const reserves = await getReserveBaseDenoms(pool);
             const reserveBalances = await reserveBalancesById(id);
+            const poolPrice = await poolPriceById(id);
 
             data.selectedPoolData = {
               pool,
@@ -779,6 +782,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+
             data.isLoading = false;
           } catch (e) {
             poolId.value = null;

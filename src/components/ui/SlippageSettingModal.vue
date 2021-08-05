@@ -126,6 +126,8 @@ import { getDisplayName } from '@/utils/actionHandler';
 type SwapData = {
   pay: { denom: string; amount: number };
   receive: { denom: string; amount: number };
+  poolPrice: number;
+  firstReserve: string;
 };
 
 export default defineComponent({
@@ -143,6 +145,7 @@ export default defineComponent({
         return {
           pay: { denom: '', amount: 0 },
           receive: { denom: '', amount: 0 },
+          poolPrice: 0,
         };
       },
     },
@@ -253,27 +256,34 @@ export default defineComponent({
 
     //TODO: dynamic digit float calculation
     watch(
-      () => [props.swapData, state.slippage],
+      () => [props.swapData.pay.amount, props.swapData.pay.denom, props.swapData.receive.denom, state.slippage],
       async () => {
+        const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
+        const receiveDisplayName = await getDisplayName(
+          props.swapData.receive.denom,
+          store.getters['demeris/getDexChain'],
+        );
+        const payAmount = props.swapData.pay.amount;
+        const receiveAmount = props.swapData.receive.amount;
+
+        let slippageTolerancePercent = 1 - state.slippage / 100;
+        const isReverse = props.swapData.pay.denom !== props.swapData.firstReserve;
+        limitPriceText.value = `1 ${payDisplayName} = ${
+          payAmount
+            ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
+            : isReverse
+            ? props.swapData.poolPrice.toFixed(4)
+            : (1 / props.swapData.poolPrice).toFixed(4)
+        } ${receiveDisplayName}`;
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
-          const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
-          const receiveDisplayName = await getDisplayName(
-            props.swapData.receive.denom,
-            store.getters['demeris/getDexChain'],
-          );
-          const payAmount = props.swapData.pay.amount;
-          const receiveAmount = props.swapData.receive.amount;
-
-          let slippageTolerancePercent = 1 - state.slippage / 100;
-
-          limitPriceText.value = `1 ${payDisplayName} = ${
-            Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
-          } ${receiveDisplayName}`;
           minReceivedText.value = `${
             Math.floor(receiveAmount * slippageTolerancePercent * 10000) / 10000
           } ${receiveDisplayName}`;
+        } else {
+          minReceivedText.value = null;
         }
       },
+      { immediate: true },
     );
 
     onMounted(() => {
