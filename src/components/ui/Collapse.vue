@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, reactive, watch } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 const props = defineProps({
@@ -55,7 +56,7 @@ watch(props, () => {
 </script>
 
 <template>
-  <div class="collapse flex flex-col">
+  <div class="collapse flex flex-col items-stretch gap-y-4">
     <Button variant="link" :name="showLabel ? (state.isOpen ? labelHide : labelOpen) : null" :click-function="toggle">
       <template #right>
         <Icon

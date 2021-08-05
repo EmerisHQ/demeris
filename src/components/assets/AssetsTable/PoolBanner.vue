@@ -1,31 +1,35 @@
 <template>
-  <div v-if="pool" class="pool-banner bg-surface dark:bg-fg rounded-2xl shadow-panel">
-    <div class="py-6 px-6">
-      <p class="font-bold">About <Ticker :name="name" /></p>
-    </div>
-    <div class="pb-6 px-6">
-      <p class="pb-6">
-        <Ticker :name="name" /> is a Gravity DEX liquidity pool token. This token represents a share of the
-        <strong>{{ pairName }}</strong> liquidity pool.
-      </p>
-      <Button name="View pool" @click="openPoolPage" />
-    </div>
-  </div>
+  <Alert v-if="pool" status="info" class="mt-4" size="md" :show-icon="false">
+    <h5 class="font-bold text-text">What is <Denom :name="name" />?</h5>
+    <p class="mt-3 text-muted -text-1 leading-copy">
+      <Denom :name="name" /> (<Ticker :name="name" />) is a liquidity pool (LP) asset. LP assets represent shares of the
+      <strong>{{ pairName }}</strong> liquidity pool.
+    </p>
+    <p class="mt-3">
+      <a
+        class="font-medium cursor-pointer text-link hover:text-link-hover active:opacity-70 transition"
+        href="#"
+        @click="openPoolPage"
+      >View pool &rarr;</a>
+    </p>
+  </Alert>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
+import Denom from '@/components/common/Denom.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import Button from '@/components/ui/Button.vue';
+import Alert from '@/components/ui/Alert.vue';
 import usePool from '@/composables/usePool';
 import { useAllStores } from '@/store';
 
 export default defineComponent({
   name: 'PoolBanner',
   components: {
-    Button,
+    Alert,
+    Denom,
     Ticker,
   },
   props: {
@@ -61,14 +65,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.pool-banner {
-  position: relative;
-  z-index: 10;
-  margin-top: 2rem;
-  min-width: 20rem;
-  svg {
-    float: right;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

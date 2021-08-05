@@ -11,7 +11,10 @@
       <TransferInterstitialConfirmation
         :action="actionName"
         :step="data[0]"
-        @continue="isTransferConfirmationOpen = false"
+        @continue="
+          isTransferConfirmationOpen = false;
+          interstitialProceed = true;
+        "
       />
     </template>
 
@@ -278,7 +281,7 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-
+    const interstitialProceed = ref(false);
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
@@ -403,6 +406,7 @@ export default defineComponent({
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
         feeWarning.value = await validateStepFeeBalances(newData.data, toCheckBalances, newData.fees);
+        interstitialProceed.value = false;
       },
     );
 
@@ -609,19 +613,21 @@ export default defineComponent({
     watch(
       props,
       () => {
-        let shouldOpenConfirmation = false;
+        if (!interstitialProceed.value) {
+          let shouldOpenConfirmation = false;
 
-        if (props.actionName === 'move') {
-          shouldOpenConfirmation = true;
-        } else if (props.actionName === 'transfer') {
-          if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+          if (props.actionName === 'move') {
             shouldOpenConfirmation = true;
+          } else if (props.actionName === 'transfer') {
+            if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+              shouldOpenConfirmation = true;
+            }
+          } else if (['swap', 'addliquidity'].includes(props.actionName)) {
+            shouldOpenConfirmation = props.data?.length > 1;
           }
-        } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-          shouldOpenConfirmation = props.data?.length > 1;
-        }
 
-        isTransferConfirmationOpen.value = shouldOpenConfirmation;
+          isTransferConfirmationOpen.value = shouldOpenConfirmation;
+        }
       },
       { immediate: true },
     );
@@ -634,6 +640,7 @@ export default defineComponent({
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,
+      interstitialProceed,
       txResult,
       confirm,
       toggleTxHandlingModal,

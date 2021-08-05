@@ -14,7 +14,7 @@
     ]"
   >
     <template v-if="label || description">
-      <div class="w-full" :class="{ 'flex items-start justify-between gap-x-3': direction === 'col' }">
+      <div :class="[firstCellClass, { 'flex items-start justify-between gap-x-3': direction === 'col' }]">
         <div v-if="label" class="font-medium text-left flex items-center">
           <span>{{ label }}</span>
           <span v-if="hint" v-tippy :content="hint" class="text-muted hover:text-current ml-2">
@@ -48,10 +48,12 @@
 
     <div
       v-show="!isCollapsed"
-      class="w-full"
-      :class="{
-        'text-right': direction === 'row',
-      }"
+      :class="[
+        secondCellClass,
+        {
+          'text-right': direction === 'row',
+        },
+      ]"
     >
       <slot>
         <p v-if="value">{{ value }}</p>
@@ -97,9 +99,13 @@ export default defineComponent({
       type: String,
       default: 'Hide',
     },
+    firstCellClass: {
+      type: String,
+      default: 'w-full',
+    },
     hint: {
       type: String,
-      default: '',
+      default: undefined,
     },
     inset: {
       type: Boolean,
@@ -108,6 +114,10 @@ export default defineComponent({
     label: {
       type: String,
       default: undefined,
+    },
+    secondCellClass: {
+      type: String,
+      default: 'w-full',
     },
     value: {
       type: String,

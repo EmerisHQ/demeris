@@ -1,29 +1,32 @@
 <template>
   <div
     role="alert"
-    class="alert border border-solid rounded-lg flex items-start py-3 px-4"
+    class="alert border border-solid flex items-start break-words"
     :class="[
       `alert--${status}`,
       { 'border-warning': status === 'warning' },
       { 'border-negative': status === 'error' },
       { 'border-border': status === 'info' },
+      { 'py-3 px-4 rounded-lg': size === 'sm' },
+      { 'py-5 px-6 rounded-xl': size === 'md' },
     ]"
   >
     <span
       v-if="showIcon"
-      class="alert__icon mt-0.5 mr-3"
+      class="mt-0.5 mr-3"
       :class="[
         { 'text-inactive': status === 'info' },
         { 'text-warning': status === 'warning' },
         { 'text-negative': status === 'error' },
       ]"
     >
-      <BanIcon v-if="status === 'error'" />
-      <ExclamationIcon v-else-if="status === 'warning'" />
-      <InformationIcon v-else-if="status === 'info'" />
+      <Icon :name="iconName" :icon-size="size === 'sm' ? 1 : 1.5" />
     </span>
 
-    <div class="alert__content -text-1 leading-copy" :class="[status === 'info' ? 'text-muted' : 'text-text']">
+    <div
+      class="max-w-full flex-grow leading-copy"
+      :class="[status === 'info' ? 'text-muted' : 'text-text', { '-text-1': size === 'sm' }]"
+    >
       <slot>
         <p>{{ message }}</p>
       </slot>
@@ -32,21 +35,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
-import BanIcon from '@/components/common/Icons/BanIcon.vue';
-import ExclamationIcon from '@/components/common/Icons/ExclamationIcon.vue';
-import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
+import Icon from '@/components/ui/Icon.vue';
 
 type AlertStatus = 'error' | 'info' | 'warning';
+type AlertSize = 'sm' | 'md';
 
 export default defineComponent({
   name: 'Alert',
 
   components: {
-    BanIcon,
-    ExclamationIcon,
-    InformationIcon,
+    Icon,
   },
 
   props: {
@@ -62,6 +62,33 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    size: {
+      type: String as PropType<AlertSize>,
+      default: 'sm',
+    },
+  },
+
+  setup(props) {
+    const iconName = computed(() => {
+      switch (props.status) {
+        case 'error':
+          return 'WarningTriangleIcon';
+          break;
+        case 'warning':
+          return 'ExclamationIcon';
+          break;
+        case 'info':
+          return 'InformationIcon';
+          break;
+        default:
+          return null;
+          break;
+      }
+    });
+
+    return {
+      iconName,
+    };
   },
 });
 </script>
