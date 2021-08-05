@@ -18,7 +18,7 @@ export default function () {
     payCoinData: { base_denom: string; amount: number },
     payCoinPoolAmount: number,
     receiveCoinPoolAmount: number,
-    maxDecimal = 2,
+    maxDecimal = 4,
   ) {
     if (payCoinData.amount) {
       const swapFeeRate =
@@ -41,7 +41,7 @@ export default function () {
     receiveCoinData: { base_denom: string; amount: number },
     payCoinPoolAmount: number,
     receiveCoinPoolAmount: number,
-    maxDecimal = 2,
+    maxDecimal = 4,
   ) {
     const swapFeeRate =
       1 - (store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate ?? 0.003 / 2);
