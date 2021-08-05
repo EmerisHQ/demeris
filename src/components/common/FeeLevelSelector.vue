@@ -1,48 +1,108 @@
 <template>
-  <div v-if="steps" class="fees s-minus" :class="isFeesOpen ? 'fees-detail-open' : ''" @click="toggle">
+  <div
+    v-if="steps"
+    class="fees flex justify-between cursor-pointer pb-6 group"
+    :class="isFeesOpen ? 'text-text font-bold' : 'text-muted hover:text-text'"
+    @click="toggle"
+  >
     <div>{{ $t('components.feeLevelSelector.feesIncl') }}</div>
-    <div class="fees-total">
-      <span v-show="!isFeesOpen"> ~{{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }} </span>
-      <Icon v-show="!isFeesOpen" name="CaretDownIcon" :icon-size="1.6" :color="feeIconColor" />
-      <Icon v-show="isFeesOpen" name="CaretUpIcon" :icon-size="1.6" :color="feeIconColor" />
+    <div class="fees-total flex items-center">
+      <span v-show="!isFeesOpen">
+        ~{{
+          isPoolCoin
+            ? `${formatter.format(fees[gasPriceLevel])} + ${poolCoinSwapFee} ${poolCoinDisplayDenom}`
+            : formatter.format(swapDollarFee + fees[gasPriceLevel])
+        }}
+      </span>
+      <Icon
+        name="CaretDownIcon"
+        :icon-size="1"
+        class="text-inactive group-hover:text-current ml-1 transform transition-transform"
+        :class="{ 'rotate-180 text-current': isFeesOpen }"
+      />
     </div>
   </div>
-  <div v-if="isFeesOpen" class="fees-detail">
-    <div class="fees-detail__info s-minus">
+  <div v-if="isFeesOpen" class="fees-detail pb-6 space-y-6">
+    <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
         {{ formatter.format(fees[gasPriceLevel]) }}
       </div>
     </div>
 
-    <div class="fees-detail__selector s-minus">
+    <div class="fees-detail__selector flex items-center justify-stretch space-x-3">
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.LOW ? 'selected' : ''"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
+        :class="
+          gasPriceLevel === GasPriceLevel.LOW
+            ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.LOW)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.AVERAGE ? 'selected' : ''"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
+        :class="
+          gasPriceLevel === GasPriceLevel.AVERAGE
+            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
-        class="fees-detail__selector-block"
-        :class="gasPriceLevel === GasPriceLevel.HIGH ? 'selected' : ''"
+        class="
+          fees-detail__selector-block
+          w-full
+          h-auto
+          py-3
+          px-2
+          text-center
+          rounded-lg
+          border-none
+          outline-none
+          appearance-none
+        "
+        :class="
+          gasPriceLevel === GasPriceLevel.HIGH
+            ? 'bg-brand dark:theme-inverse text-text font-medium'
+            : 'bg-fg font-normal'
+        "
         @click="setGasPriceLevel(GasPriceLevel.HIGH)"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
-        <div class="fees-detail__selector-block-value">
+        <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
           {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>
@@ -52,15 +112,18 @@
       v-if="gasPriceLevel === GasPriceLevel.LOW"
       status="warning"
       :message="$t('components.feeLevelSelector.slowWarning')"
+      class="mt-4"
     />
 
-    <div v-if="swapDollarFee" class="fees-detail__info s-minus">
+    <div v-if="swapDollarFee || poolCoinSwapFee" class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
-      <div class="fees-detail__info-value">{{ formatter.format(swapDollarFee) }}</div>
-    </div>
-    <div class="fees-detail__info s-minus">
-      <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
       <div class="fees-detail__info-value">
+        {{ isPoolCoin ? `${poolCoinSwapFee} ${poolCoinDisplayDenom}` : formatter.format(swapDollarFee) }}
+      </div>
+    </div>
+    <div class="fees-detail__info flex items-center justify-between">
+      <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
+      <div class="fees-detail__info-value font-bold">
         {{ formatter.format(swapDollarFee + fees[gasPriceLevel]) }}
       </div>
     </div>
@@ -74,7 +137,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
-import { feeForSteps } from '@/utils/actionHandler';
+import { feeForSteps, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -169,26 +232,57 @@ export default defineComponent({
 
       return fees;
     });
+
+    const isPoolCoin = computed(() => {
+      const tx = props.steps[0]?.transactions[0].data as SwapData;
+      return tx.from.denom.startsWith('pool');
+    });
+
+    const poolCoinDisplayDenom = ref('');
+    watch(
+      () => props.steps,
+      async () => {
+        const tx = props.steps[0]?.transactions[0].data as SwapData;
+        poolCoinDisplayDenom.value = await getDisplayName(tx.from.denom, store.getters['demeris/getDexChain']);
+      },
+      { immediate: true },
+    );
+
+    const poolCoinSwapFee = computed(() => {
+      if (isPoolCoin.value) {
+        const swapFeeRate = parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate);
+        const tx = props.steps[0]?.transactions[0].data as SwapData;
+        const precision = store.getters['demeris/getDenomPrecision']({
+          name: tx.from.denom,
+        });
+        return (Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision);
+      } else {
+        return null;
+      }
+    });
+
     const swapDollarFee = computed(() => {
       if (props.steps[0]?.name === 'swap') {
         let value = 0;
         const tx = props.steps[0]?.transactions[0].data as SwapData;
-
-        const fromPrecision =
-          store.getters['demeris/getDenomPrecision']({
-            name: tx.from.denom,
-          }) ?? '6';
-        const fromPrice = store.getters['demeris/getPrice']({ denom: tx.from.denom });
-        const toPrecision =
-          store.getters['demeris/getDenomPrecision']({
-            name: tx.to.denom,
-          }) ?? '6';
-        const toPrice = store.getters['demeris/getPrice']({ denom: tx.to.denom });
-        const swapFeeRate = parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate);
-        value =
-          (fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) +
-          (toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision));
-
+        if (isPoolCoin.value) {
+          const fromPrecision =
+            store.getters['demeris/getDenomPrecision']({
+              name: tx.from.denom,
+            }) ?? '6';
+          const fromPrice = store.getters['demeris/getPrice']({ denom: tx.from.denom });
+          const toPrecision =
+            store.getters['demeris/getDenomPrecision']({
+              name: tx.to.denom,
+            }) ?? '6';
+          const toPrice = store.getters['demeris/getPrice']({ denom: tx.to.denom });
+          const swapFeeRate = parseFloat(
+            store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate,
+          );
+          value =
+            (fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) +
+            (toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision));
+        }
         return value;
       } else {
         return null;
@@ -224,81 +318,8 @@ export default defineComponent({
       emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
-    return { ...toRefs(data), txCount, fees, swapDollarFee };
+    return { ...toRefs(data), txCount, fees, swapDollarFee, isPoolCoin, poolCoinSwapFee, poolCoinDisplayDenom };
   },
 });
 </script>
-<style lang="scss" scoped>
-.fees {
-  display: flex;
-  padding: 0 2.4rem 0;
-  cursor: pointer;
-  justify-content: space-between;
-  color: var(--muted);
-
-  &-total {
-    display: flex;
-    align-items: center;
-  }
-
-  &-detail {
-    padding: 0 2.4rem;
-    color: var(--text);
-
-    &__info {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      margin: 1.6rem 0;
-
-      &:last-child {
-        margin-bottom: 0;
-        .fees-detail__info-value {
-          font-weight: bold;
-        }
-      }
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    &__selector {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      &-block {
-        width: 8.3rem;
-        height: 4.9rem;
-        color: var(--text);
-
-        background-color: var(--fg-trans);
-
-        border-radius: 8px;
-
-        outline: none;
-      }
-
-      .selected {
-        background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-      }
-    }
-  }
-}
-
-.alert--warning {
-  margin-top: 1.6rem;
-}
-
-.fees-detail-open {
-  font-weight: bold;
-  padding-bottom: 2.4rem;
-  color: var(--text);
-
-  .icon {
-    color: var(--text) !important;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

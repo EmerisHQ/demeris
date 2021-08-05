@@ -1,25 +1,31 @@
 <template>
-  <fieldset class="form__field">
-    <label>{{ $t('components.sendForm.to') }}</label>
-    <Address v-model:address.trim="form.recipient" :invalid="!!form.recipient && !isValidAddress" />
-  </fieldset>
+  <div class="w-full max-w-sm mx-auto">
+    <fieldset class="mt-8">
+      <label class="block mb-2 -text-1 text-muted">{{ $t('components.sendForm.to') }}</label>
+      <Address
+        v-model:address.trim="form.recipient"
+        :invalid="!!form.recipient && !isValidAddress"
+        :placeholder="$t('components.sendForm.toPlaceholder')"
+      />
+    </fieldset>
 
-  <fieldset class="form__field">
-    <label>{{ $t('components.sendForm.memo') }}</label>
-    <Input
-      v-model="form.memo"
-      :placeholder="$t('components.sendForm.memoPlaceholder')"
-      :hint="$t('components.sendForm.memoHint')"
-    />
-  </fieldset>
+    <fieldset class="mt-8">
+      <label class="block mb-2 -text-1 text-muted">{{ $t('components.sendForm.memo') }}</label>
+      <Input
+        v-model="form.memo"
+        :placeholder="$t('components.sendForm.memoPlaceholder')"
+        :hint="$t('components.sendForm.memoHint')"
+      />
+    </fieldset>
 
-  <fieldset v-if="form.recipient" class="form__field">
-    <Checkbox v-model="form.isTermChecked" :label="$t('components.sendForm.agreeTerms')" />
-  </fieldset>
+    <fieldset v-if="form.recipient" class="mt-8">
+      <Checkbox v-model="form.isTermChecked" :label="$t('components.sendForm.agreeTerms')" />
+    </fieldset>
 
-  <fieldset class="form__field">
-    <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="onSubmit" />
-  </fieldset>
+    <fieldset class="mt-8">
+      <Button :name="$t('generic_cta.continue')" :disabled="!isValid" :click-function="isValid && onSubmit" />
+    </fieldset>
+  </div>
 </template>
 
 <script lang="ts">

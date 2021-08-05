@@ -1,21 +1,35 @@
 <template>
-  <div class="transfer-interstitial" :class="`transfer-interstitial--${currentAction}`">
-    <div class="transfer-interstitial__header">
-      <h2 class="transfer-interstitial__title">{{ title }}</h2>
+  <div class="flex flex-col items-center text-center">
+    <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': currentAction === 'swap' }">
+      <h1
+        class="font-bold pt-8 whitespace-pre-line"
+        :class="{
+          'mb-8': !subtitle,
+          'text-3': action !== 'swap',
+          'text-2 px-3': action === 'swap',
+        }"
+      >
+        {{ title }}
+      </h1>
+      <p v-if="subtitle" class="text-1 text-muted mt-3 mb-8">{{ subtitle }}</p>
 
-      <img src="@/assets/images/transfer-interstitial.png" name="Transfer" class="transfer-interstitial__img" />
+      <img
+        src="@/assets/images/transfer-interstitial.png"
+        name="Transfer"
+        class=""
+        :class="{ '-mt-8 -mb-10 max-w-sm': action !== 'swap' }"
+      />
     </div>
 
-    <p class="transfer-interstitial__description">
+    <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
       {{ description }}
+      <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="text-link hover:text-link-hover">
+        {{ $t('generic_cta.learnMore') }} &#x2197;
+      </a>
     </p>
 
-    <div class="transfer-interstitial__controls">
-      <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="transfer-interstitial__link">
-        {{ $t('generic_cta.learnMore') }} <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
-      </a>
-
-      <Button :name="$t('generic_cta.continue')" class="transfer-interstitial__button" @click="emitContinue" />
+    <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': action === 'swap' }">
+      <Button :name="$t('generic_cta.continue')" class="mt-12 mb-8" :click-function="emitContinue" />
     </div>
   </div>
 </template>
@@ -26,14 +40,12 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
 import { IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
   components: {
     Button,
-    Icon,
   },
   props: {
     action: {
@@ -66,10 +78,7 @@ export default defineComponent({
 
       switch (currentAction.value) {
         case 'transfer':
-          const data = props.step.transactions[0].data as IBCForwardsData;
-          const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
-          const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
-          result = t('components.transferToHub.transfer', { from: chainFrom, to: chainTo });
+          result = t('components.transferToHub.transfer');
           break;
         case 'addliquidity':
           result = t('components.transferToHub.addLiquidity');
@@ -77,6 +86,19 @@ export default defineComponent({
         case 'swap':
           result = t('components.transferToHub.swap');
           break;
+      }
+
+      return result;
+    });
+
+    const subtitle = computed(() => {
+      let result = '';
+
+      if (currentAction.value === 'transfer') {
+        const data = props.step.transactions[0].data as IBCForwardsData;
+        const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
+        const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+        return t('components.transferToHub.transferSubtitle', { from: chainFrom, to: chainTo });
       }
 
       return result;
@@ -133,6 +155,7 @@ export default defineComponent({
     return {
       currentAction,
       title,
+      subtitle,
       description,
       emitContinue,
     };
@@ -140,68 +163,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.transfer-interstitial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  &--swap &__header {
-    flex-direction: column-reverse;
-  }
-
-  &__header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  &__title {
-    font-weight: 700;
-    font-size: 2.8rem;
-    padding: 0 2.4rem;
-    text-align: center;
-    line-height: 1.4;
-    white-space: pre-line;
-    margin-bottom: 2.4rem;
-  }
-
-  &__img {
-    margin-bottom: -2rem;
-  }
-
-  &__description {
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.6;
-    padding: 0 2.4rem;
-  }
-
-  &__link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    width: 100%;
-    padding: 1.6rem;
-    margin-top: 2.4rem;
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding: 0 2.4rem;
-  }
-
-  &__button {
-    width: 100%;
-    margin: 2.4rem 0;
-  }
-
-  .external-icon {
-    margin-left: 0.4rem;
-    transform: rotate(45deg);
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -1,5 +1,5 @@
 <template>
-  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper">
+  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper w-full relative">
     <SlippageSettingModal
       v-show="isSlippageSettingModalOpen"
       :swap-data="{
@@ -27,36 +27,32 @@
       @goback="gobackFunc"
     />
     <div
-      class="swap-widget elevation-panel"
-      :style="[
-        !isSlippageSettingModalOpen && !isOpen ? '' : 'display:none',
-        isChildModalOpen ? 'box-shadow:none;' : '',
+      class="swap-widget bg-surface dark:bg-fg rounded-2xl"
+      :class="[
+        { hidden: !(!isSlippageSettingModalOpen && !isOpen) },
+        isChildModalOpen ? 'shadow-none' : 'shadow-panel',
       ]"
     >
-      <div class="swap-widget-header">
-        <div class="s-2 w-bold">{{ $t('components.swap.title') }}</div>
-        <div class="swap-widget-header__dot-button">
-          <IconButton
-            :name="'ThreeDotsIcon'"
-            :type="'flat'"
-            :status="'normal'"
-            :data="{
-              type: 'custom',
-              function: slippageSettingModalToggle,
-            }"
-          />
-        </div>
+      <div class="flex justify-between items-center py-6 px-6 h-24">
+        <div class="text-2 font-bold">{{ $t('components.swap.title') }}</div>
+        <Button variant="link" rounded :click-function="slippageSettingModalToggle">
+          <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+        </Button>
       </div>
 
       <!-- pay coin selector -->
       <DenomSelect
         v-model:amount="payCoinAmount"
+        size="sm"
+        show-chain
         :input-header="
           $t('components.swap.payHeader', {
             amount: getDisplayPrice(payCoinData?.base_denom, payCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToPay"
         :selected-denom="payCoinData"
+        :counter-denom="receiveCoinData"
         :assets="assetsToPay"
         :is-over="isOver"
         @change="setCounterPairCoinAmount"
@@ -65,12 +61,14 @@
       />
 
       <!-- button-divider -->
-      <div class="swap-widget__controller">
-        <div class="swap-widget__controller-divider" />
-        <div class="swap-widget__controller-wrapper">
+      <div class="relative flex items-center h-12">
+        <div class="w-full border-t border-border" />
+        <div class="absolute flex justify-between w-full px-4">
           <IconButton
+            class="ml-0.5 text-text bg-surface"
             :name="'UpsideDownIcon'"
             :type="'circle'"
+            :icon-size="1"
             :status="'normal'"
             :data="{
               type: 'custom',
@@ -78,6 +76,7 @@
             }"
           />
           <IconButton
+            class="mr-0.5 bg-surface"
             :name="maxButtonText"
             :type="'text'"
             :status="'normal'"
@@ -93,12 +92,16 @@
       <!-- receive coin selector -->
       <DenomSelect
         v-model:amount="receiveCoinAmount"
+        size="sm"
+        show-chain
         :input-header="
           $t('components.swap.receiveHeader', {
             amount: getDisplayPrice(receiveCoinData?.base_denom, receiveCoinAmount).value ?? '',
           })
         "
+        :other-assets="otherAssetsToReceive"
         :selected-denom="receiveCoinData"
+        :counter-denom="payCoinData"
         :assets="assetsToReceive"
         @change="setCounterPairCoinAmount"
         @select="denomSelectHandler"
@@ -106,25 +109,28 @@
       />
 
       <!-- price change alert -->
-      <div v-if="isPriceChanged && isBothSelected" class="price-alert-wrapper">
+      <div v-if="isPriceChanged && isBothSelected" class="mt-4 py-2 px-6">
         <Alert status="warning" :message="$t('components.swap.priceAlert')" />
       </div>
 
       <!-- swap button -->
-      <div class="button-wrapper">
-        <ActionButton
+      <div class="pt-4 px-6 pb-6">
+        <Button
           :name="buttonName"
           :status="buttonStatus"
+          :disabled="buttonDisabled"
           :click-function="swap"
           :tooltip-text="buttonTooltipText"
         />
       </div>
 
-      <FeeLevelSelector
-        v-if="actionHandlerResult && actionHandlerResult.length > 0"
-        v-model:gasPriceLevel="gasPrice"
-        :steps="actionHandlerResult"
-      />
+      <div class="-text-1 px-6">
+        <FeeLevelSelector
+          v-if="actionHandlerResult && actionHandlerResult.length > 0"
+          v-model:gasPriceLevel="gasPrice"
+          :steps="actionHandlerResult"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -135,7 +141,8 @@ import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-import ActionButton from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
@@ -152,9 +159,10 @@ import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
+    Button,
     DenomSelect,
+    Icon,
     IconButton,
-    ActionButton,
     ReviewModal,
     Alert,
     SlippageSettingModal,
@@ -253,7 +261,7 @@ export default defineComponent({
         };
 
         // TODO: get isAdvanced from local storage
-        const isAdvanced = false;
+        const isAdvanced = true;
 
         //Pool coin included(advanced) or excluded
         if (isAdvanced) {
@@ -342,7 +350,7 @@ export default defineComponent({
             };
 
             // TODO: get isAdvanced from local storage
-            const isAdvanced = false;
+            const isAdvanced = true;
 
             //Pool coin included(advanced) or excluded
             if (isAdvanced) {
@@ -379,7 +387,6 @@ export default defineComponent({
     const availableReceiveSide = computed(() => {
       if (data?.payCoinData) {
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
-
         return receiveSide;
       } else {
         return availablePairs.value;
@@ -416,7 +423,7 @@ export default defineComponent({
           }
         });
       }
-      return verifiedBalances;
+      return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
@@ -433,7 +440,44 @@ export default defineComponent({
           on_chain: store.getters['demeris/getDexChain'],
         };
       });
-      return assets;
+      return sortAssetList(assets);
+    });
+
+    const otherAssetsToPay = computed(() => {
+      let assets = allBalances.value.filter((x) => {
+        return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
+      });
+
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToPay.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined && asset.base_denom !== data.receiveCoinData?.base_denom) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    });
+
+    const otherAssetsToReceive = computed(() => {
+      let receivalbePairs = availablePairs.value.filter(
+        (pair, index, self) => index === self.findIndex((p) => p.pay.denom === pair.pay.denom),
+      );
+
+      let assets = receivalbePairs.map((x) => {
+        return {
+          denom: x.pay.denom,
+          base_denom: x.pay.base_denom,
+          on_chain: store.getters['demeris/getDexChain'],
+        };
+      });
+      return assets.filter((asset) => {
+        const isInPayAssets = assetsToReceive.value.find((payAsset) => payAsset.denom === asset.denom);
+        if (isInPayAssets === undefined && asset.base_denom !== data.payCoinData?.base_denom) {
+          return true;
+        } else {
+          return false;
+        }
+      });
     });
 
     // default pay coin set
@@ -481,7 +525,9 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
-          if (data.isNotEnoughLiquidity) {
+          if (data.selectedPoolData === null) {
+            return 'No pool for this pair';
+          } else if (data.isNotEnoughLiquidity) {
             return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
@@ -489,7 +535,7 @@ export default defineComponent({
             if (data.isPriceChanged) {
               return 'Update prices';
             } else {
-              if (data.buttonStatus === 'normal') {
+              if (data.buttonStatus === 'active' && !data.buttonDisabled) {
                 return 'Review';
               }
               return 'Swap';
@@ -507,14 +553,14 @@ export default defineComponent({
         }
       }),
       buttonStatus: computed(() => {
-        if (!isInit.value) {
+        if (!isInit.value || data.isLoading) {
           return 'loading';
-        }
-        if (data.isSwapReady) {
-          return 'normal';
         } else {
-          return 'inactive';
+          return 'active';
         }
+      }),
+      buttonDisabled: computed(() => {
+        return !data.isSwapReady;
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
@@ -553,6 +599,8 @@ export default defineComponent({
         const fee = data.payCoinAmount * swapFeeRate;
         return Math.ceil(fee * 1000000) / 1000000 ?? 0;
       }),
+      // pool search loading
+      isLoading: false,
 
       // for swap action
       actionHandlerResult: null,
@@ -593,7 +641,8 @@ export default defineComponent({
           !data.isBothSelected ||
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
-          !isSignedIn.value
+          !isSignedIn.value ||
+          data.selectedPoolData === null
         );
       }),
       isChildModalOpen: false,
@@ -689,7 +738,11 @@ export default defineComponent({
           let payDenom = data.payCoinData.base_denom;
           const receiveDenom = data.receiveCoinData.denom;
 
-          if (!data.payCoinData.denom.startsWith('ibc') && data.payCoinData.denom !== 'uatom') {
+          if (
+            !data.payCoinData.denom.startsWith('ibc') &&
+            data.payCoinData.denom !== 'uatom' &&
+            !data.payCoinData.denom.startsWith('pool')
+          ) {
             // nativeDenomToIBCDenom
             payDenom = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.denom;
@@ -702,7 +755,7 @@ export default defineComponent({
               payDenom = data.payCoinData.denom;
             }
           }
-
+          data.isLoading = true;
           try {
             const id = poolsByDenom(payDenom).find((pool) => {
               return (
@@ -725,9 +778,11 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+            data.isLoading = false;
           } catch (e) {
             poolId.value = null;
             data.selectedPoolData = null;
+            data.isLoading = false;
           }
         }
       },
@@ -753,7 +808,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            setCounterPairCoinAmount('Pay');
+            // setCounterPairCoinAmount('Pay');
           }, priceUpdateTerm * 1000);
         }
       },
@@ -767,9 +822,10 @@ export default defineComponent({
       () => data.payCoinAmount,
       async () => {
         if (data.isSwapReady) {
-          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
-
+          // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
+          const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+          const toPrecision =
+            store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom }) || 6;
           const swapParams = {
             name: 'swap',
             params: {
@@ -883,6 +939,20 @@ export default defineComponent({
       reviewModalToggle();
     }
 
+    //helper
+    function sortAssetList(list) {
+      const poolCoinPairList = [];
+      const coinPairList = [];
+      list.forEach((pair) => {
+        if (pair.denom.startsWith('pool')) {
+          poolCoinPairList.push(pair);
+        } else {
+          coinPairList.push(pair);
+        }
+      });
+      return [...coinPairList, ...poolCoinPairList];
+    }
+
     return {
       ...toRefs(data),
       isInit,
@@ -902,6 +972,9 @@ export default defineComponent({
       slippageSettingModalToggle,
       getDisplayPrice,
       gasPrice,
+      availablePaySide,
+      otherAssetsToPay,
+      otherAssetsToReceive,
     };
   },
 });
@@ -909,128 +982,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .wrapper {
-  position: relative;
-  width: 32rem;
-  /* height: 42.6rem; */
-}
-
-.swap-widget {
-  padding-bottom: 2.4rem;
-  background-color: var(--surface);
-
-  &-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3rem 2.4rem;
-
-    color: var(--text);
-    /* &__dot-button {
-      width: 2.4rem;
-      height: 2.4rem;
-    } */
-  }
-
-  &__controller {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    height: 3.6rem;
-
-    &-divider {
-      width: 100%;
-      height: 1px;
-      background-color: var(--border-trans);
-    }
-
-    &-wrapper {
-      position: absolute;
-      display: flex;
-      justify-content: space-between;
-
-      width: 100%;
-      padding: 0 18px;
-    }
-  }
-
-  .price-alert-wrapper {
-    padding: 0.8rem 2.4rem;
-  }
-
-  .button-wrapper {
-    padding: 1.6rem 2.4rem 2.4rem;
-  }
-
-  .fees {
-    display: flex;
-    padding: 0 2.4rem 2.4rem;
-    justify-content: space-between;
-    color: var(--muted);
-
-    &-total {
-      display: flex;
-      align-items: center;
-    }
-
-    &-detail {
-      padding: 0 2.4rem;
-      color: var(--text);
-
-      &__info {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        margin: 1.6rem 0;
-
-        &:last-child {
-          margin-bottom: 0;
-          .fees-detail__info-value {
-            font-weight: bold;
-          }
-        }
-
-        &:first-child {
-          margin-top: 0;
-        }
-      }
-
-      &__selector {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        &-block {
-          width: 8.3rem;
-          height: 4.9rem;
-          color: var(--text);
-
-          background-color: var(--fg-trans);
-
-          border-radius: 8px;
-
-          outline: none;
-        }
-
-        .selected {
-          background: linear-gradient(100.01deg, #aae3f9 -9.61%, #fbcbb8 96.61%);
-        }
-      }
-    }
-  }
-
-  .alert--warning {
-    margin-top: 1.6rem;
-  }
-
-  .fees-detail-open {
-    font-weight: bold;
-    color: var(--text);
-
-    .icon {
-      color: var(--text) !important;
-    }
-  }
+  min-width: 20rem;
+  /* min-height: 17rem; */
 }
 </style>

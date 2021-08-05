@@ -1,206 +1,242 @@
 <template>
-  <Modal
-    :variant="modalVariant ?? 'full'"
-    :class="modalVariant === 'full' ? 'tx-handling--full' : ''"
-    :show-close-button="false"
-    :body-class="status === 'complete' && modalVariant === 'bottom' ? 'transferred-bg' : ''"
-    class="tx-handling"
+  <component
+    :is="variant === 'step' ? 'div' : 'Modal'"
+    :variant="variant === 'modal' ? 'bottom' : null"
+    :show-close-button="variant === 'modal' ? false : null"
+    class="text-center m-auto w-full max-w-lg"
+    :body-class="
+      variant === 'modal' ? [{ 'bg-brand dark:theme-inverse text-text': status === 'complete' }, 'p-6'] : null
+    "
     @close="emitClose"
   >
-    <div class="status">
-      <div v-if="iconType" class="status__icon">
-        <SpinnerIcon v-if="iconType === 'pending'" :size="4.2" :gradients="['#FFF1C3', '#9B7C3A']" />
-        <div v-else-if="iconType === 'warning'" class="status__icon-warning">
-          <WarningIcon />
-        </div>
-        <div v-else class="status__icon-error">
-          <ErrorIcon />
-        </div>
-      </div>
-      <div v-else-if="status === 'complete' && tx.name === 'swap'" class="status__icon-swap-result" />
-      <div v-else class="status__icon-none" />
-      <div class="status__title-sub w-normal s-0">
-        <template v-if="status == 'failed' || status == 'unknown'">
-          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="getDenom(tx.data.from_chain)" /> -> <ChainName :name="tx.data.to_chain" />
-          </template>
-          <template v-if="tx.name == 'transfer'">
-            <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
-          </template>
-          <template v-if="tx.name == 'swap'">
-            <Denom :name="getDenom(tx.data.from.denom)" /> -> <Denom :name="getDenom(tx.data.to.denom)" />
-          </template>
-          <template v-if="tx.name == 'addliquidity'">
-            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
-          </template>
-          <template v-if="tx.name == 'createpool'">
-            <Denom :name="getDenom(tx.data.coinA.denom)" /> / <Denom :name="getDenom(tx.data.coinB.denom)" /> Pool
-          </template>
-          <template v-if="tx.name == 'withdrawliquidity'">
-            <Denom :name="getDenom(tx.data.poolCoin.denom)" />
-          </template>
+    <div v-if="iconType" class="flex items-center justify-center my-6">
+      <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
+      <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+      <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
+    </div>
+    <div
+      v-else-if="status === 'complete' && tx.name === 'swap'"
+      class="swapped-image bg-center bg-no-repeat bg-cover -mt-6 -mx-6"
+    />
+    <div class="text-muted">
+      <template v-if="status == 'failed' || status == 'unknown'">
+        <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+          <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
         </template>
-        <template v-else>
-          {{ subTitle }}
+        <template v-if="tx.name == 'transfer'">
+          <Denom :name="getDenom(tx.data.amount.denom)" /> (<ChainName :name="tx.data.chain_name" />)
         </template>
-      </div>
+        <template v-if="tx.name == 'swap'">
+          <Denom :name="getDenom(tx.data.from.denom)" /> &rarr; <Denom :name="getDenom(tx.data.to.denom)" />
+        </template>
+        <template v-if="tx.name == 'addliquidity'">
+          <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; <Denom :name="getDenom(tx.data.coinB.denom)" /> pool
+        </template>
+        <template v-if="tx.name == 'createpool'">
+          <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; <Denom :name="getDenom(tx.data.coinB.denom)" /> pool
+        </template>
+        <template v-if="tx.name == 'withdrawliquidity'">
+          <Denom :name="getDenom(tx.data.poolCoin.denom)" />
+        </template>
+      </template>
+      <template v-else>
+        {{ overline }}
+      </template>
+    </div>
 
-      <div v-if="status.startsWith('complete') && tx.name !== 'swap'" class="transferred-image" />
-      <div class="status__title s-2 w-bold">{{ title }}</div>
-      <div class="status__detail">
+    <div
+      v-if="status.startsWith('complete') && tx.name !== 'swap'"
+      class="transferred-image block mx-auto bg-no-repeat bg-center bg-contain bg w-60 h-60 mb-8 mt-4"
+    />
+    <div class="font-bold mt-2 mb-3" :class="variant === 'modal' ? 'text-2' : 'text-3'">{{ title }}</div>
+    <div v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'">
+      <div
+        v-if="status == 'delay' || status == 'IBC_receive_failed'"
+        class="mx-auto max-w-sm leading-copy text-muted mt-2"
+      >
+        {{ subtitle }}
+      </div>
+      <div
+        v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
+        class="w-full max-w-lg flex items-center justify-center -space-x-8"
+      >
+        <template v-if="tx.name == 'addliquidity'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
+        </template>
+
+        <template v-if="tx.name == 'withdrawliquidity'">
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[0])" />
+          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
+        </template>
+
+        <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+          <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.from_chain" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" />
+          </div>
+          <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.to_chain" />
+        </template>
+
+        <template v-if="tx.name == 'transfer'">
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol size="lg" :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
+          </div>
+        </template>
+      </div>
+      <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
+        <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
+          You received
+          <span class="font-bold"><AmountDisplay
+            :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
+          /></span>
+          <br />
+          on <ChainName :name="'cosmos-hub'" />.
+          <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+            <span class="font-bold">
+              <AmountDisplay
+                :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
+              />
+            </span>
+            not swapped
+          </div>
+        </template>
+        <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
+          <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
+        </template>
+        <template v-else-if="tx.name === 'withdrawliquidity'">
+          <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
+        </template>
         <template
-          v-if="status == 'transacting' || status == 'delay' || status == 'IBC_receive_failed' || status == 'complete'"
+          v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
         >
-          <div
-            v-if="status == 'delay' || status == 'IBC_receive_failed'"
-            class="status__detail-subtitle-under w-normal s-0"
-          >
-            {{ subTitleUnder }}
-          </div>
-          <div
-            v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
-            class="status__detail-transferring"
-          >
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.from_chain" />
-              <div class="arrow">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.to_chain" />
-            </template>
-
-            <template v-if="tx.name == 'transfer'">
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
-              <div class="arrow">-></div>
-              <CircleSymbol :denom="getDenom(tx.data.amount.denom)" :chain-name="tx.data.chain_name" />
-            </template>
-          </div>
-
-          <div v-if="status === 'complete'" class="status__detail-detail s-0 w-normal" :style="'margin-top: 1.6rem;'">
-            <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
-              You received
-              <span class="w-bold"><AmountDisplay
-                :amount="{ denom: txResult.demandCoinDenom, amount: String(txResult.demandCoinSwappedAmount) }"
-              /></span>
-              <br />
-              on <ChainName :name="'cosmos-hub'" />.
-              <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
-                <span class="w-bold">
-                  <AmountDisplay
-                    :amount="{ denom: txResult.offerCoinDenom, amount: String(txResult.remainingOfferCoinAmount) }"
-                  />
-                </span>
-                not swapped
-              </div>
-            </template>
-          </div>
-          <div class="status__detail-amount s-0 w-medium">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
-            </template>
-          </div>
-          <div class="status__detail-path s-0 w-normal" :style="status === 'complete' ? 'margin-bottom: 4.8rem' : ''">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              <ChainName :name="tx.data.from_chain" /> -> <ChainName :name="tx.data.to_chain" /> chain
-            </template>
-            <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
-          </div>
-        </template>
-        <template v-else>
-          <a v-if="status === 'keplr-reject'" href="https://faq.keplr.app" target="_blank" class="link s-0 w-bold">
-            {{ $t('components.txHandlingModal.keplrSupport') }}
-          </a>
-          <a v-if="status === 'unknown'" href="https://t.me/EmerisHQ" target="_blank" class="link s-0 w-bold">
-            {{ $t('components.txHandlingModal.contactSupport') }}
-          </a>
-          <div v-if="status === 'keplr-sign'" class="spacer" />
-          <div v-if="status === 'keplr-reject'" class="spacer-2" />
-          <div v-if="status === 'unknown'" class="spacer-3" />
-
-          <div v-else-if="status === 'failed'" class="status__detail-text-weak">
-            <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-              <ChainName :name="tx.data.from_chain" /> could not be transferred to
-              <ChainName :name="tx.data.to_chain" />
-            </template>
-            <template v-if="tx.name == 'transfer'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-              <ChainName :name="tx.data.chain_name" /> could not be transferred.
-            </template>
-            <template v-if="tx.name == 'swap'">
-              Your
-              <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not
-              be swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'addliquidity'">
-              Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> /
-              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'createpool'">
-              Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
-              <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
-            </template>
-            <template v-if="tx.name == 'withdrawliquidity'">
-              Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos
-              Hub.
-            </template>
-            <Collapse
-              v-if="errorDetails"
-              label-open="Show details"
-              label-hide="Hide details"
-              class="status__error-collapse"
-            >
-              <Alert status="info" :show-icon="false">
-                <p v-if="errorDetails.status" class="status__error__item__key">Status</p>
-                <p v-if="errorDetails.status" class="status__error__item">{{ errorDetails.status }}</p>
-                <p v-if="errorDetails.ticket" class="status__error__item__key">Ticket</p>
-                <p v-if="errorDetails.ticket" class="status__error__item">{{ errorDetails.ticket }}</p>
-                <p v-if="errorDetails.message" class="status__error__item__key">Error</p>
-                <p v-if="errorDetails.message" class="status__error__item">{{ errorDetails.message }}</p>
-              </Alert>
-            </Collapse>
-          </div>
+          <PreviewTransfer :response="txResult" :fees="txResult.fees" />
         </template>
       </div>
+      <template v-if="status !== 'complete' || !isFinal">
+        <div class="status__detail-amount mt-6 font-medium text-1">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward' || tx.name == 'transfer'">
+            <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+          </template>
+        </div>
+        <div class="status__detail-path mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
+          <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+          </template>
+          <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
+        </div>
+      </template>
+    </div>
+
+    <div v-else>
+      <p v-if="status === 'keplr-reject'" class="mt-4">
+        <a href="https://faq.keplr.app" target="_blank" class="font-medium text-link hover:text-link-hover">
+          {{ $t('components.txHandlingModal.keplrSupport') }}
+        </a>
+      </p>
+
+      <p v-if="status === 'unknown'" class="mt-4">
+        <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
+          {{ $t('components.txHandlingModal.contactSupport') }}
+        </a>
+      </p>
+      <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
+        <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
+          Your
+          <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+          <ChainName :name="tx.data.from_chain" /> could not be transferred to
+          <ChainName :name="tx.data.to_chain" />
+        </template>
+        <template v-if="tx.name == 'transfer'">
+          Your
+          <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
+          <ChainName :name="tx.data.chain_name" /> could not be transferred.
+        </template>
+        <template v-if="tx.name == 'swap'">
+          Your
+          <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not be
+          swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
+        </template>
+        <template v-if="tx.name == 'addliquidity'">
+          Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot;
+          <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
+        </template>
+        <template v-if="tx.name == 'createpool'">
+          Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
+          <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
+        </template>
+        <template v-if="tx.name == 'withdrawliquidity'">
+          Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos Hub.
+        </template>
+        <Collapse
+          v-if="errorDetails"
+          label-open="Show details"
+          label-hide="Hide details"
+          class="mt-8 items-center text-left"
+        >
+          <Alert status="info" :show-icon="false">
+            <ul class="space-y-3">
+              <li v-if="errorDetails.status">
+                <h5 class="font-medium text-text">Status</h5>
+                <p class="mt-0.5">{{ errorDetails.status }}</p>
+              </li>
+              <li v-if="errorDetails.ticket">
+                <h5 class="font-medium text-text">Ticket</h5>
+                <p class="mt-0.5">{{ errorDetails.ticket }}</p>
+              </li>
+              <li v-if="errorDetails.message">
+                <h5 class="font-medium text-text">Error</h5>
+                <p class="mt-0.5">{{ errorDetails.message }}</p>
+              </li>
+            </ul>
+          </Alert>
+        </Collapse>
+      </div>
+    </div>
+    <div
+      v-if="secondaryButton || primaryButton"
+      class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
+    >
       <Button
-        v-if="whiteButton && tx.name === 'swap' && status === 'complete'"
-        :name="whiteButton"
-        class="send-another-button"
-        :status="'normal'"
+        v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
+        :name="secondaryButton"
+        variant="link"
         :click-function="
           () => {
             router.push('/send');
           }
         "
-        :is-outline="true"
       />
       <Button
-        v-if="blackButton"
-        :name="blackButton"
-        :status="'normal'"
+        v-if="primaryButton"
+        :name="primaryButton"
+        variant="primary"
         :click-function="
           () => {
             status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
           }
         "
-        :style="{ marginBottom: `${blackButton && whiteButton ? '1.6rem' : ''}` }"
       />
       {{ router?.pathname }}
       <Button
         v-if="status === 'unknown'"
+        variant="link"
         :name="$t('components.txHandlingModal.backToPortfolio')"
-        :status="'normal'"
         :click-function="unknownHandler"
       />
       <Button
-        v-if="whiteButton && tx.name !== 'swap' && status !== 'complete'"
-        :name="whiteButton"
-        :status="'normal'"
+        v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
+        :name="secondaryButton"
+        variant="link"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
-        :is-outline="true"
+        class="mb-4"
       />
     </div>
-  </Modal>
+  </component>
 </template>
 
 <script lang="ts">
@@ -212,13 +248,16 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import ErrorIcon from '@/components/common/Icons/AlertIcon.vue';
-import WarningIcon from '@/components/common/Icons/ExclamationIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
+import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import SpinnerIcon from '@/components/ui/Spinner.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -250,11 +289,14 @@ type Result = {
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
+    PreviewAddLiquidity,
+    PreviewWithdrawLiquidity,
+    PreviewTransfer,
     Modal,
     SpinnerIcon,
-    WarningIcon,
-    ErrorIcon,
+    EphemerisSpinner,
     Button,
+    Icon,
     AmountDisplay,
     ChainName,
     Denom,
@@ -267,9 +309,9 @@ export default defineComponent({
       type: String as PropType<Status>,
       default: 'keplr-sign',
     },
-    modalVariant: {
-      type: String,
-      default: 'full',
+    variant: {
+      type: String as PropType<'step' | 'modal'>,
+      default: 'modal',
     },
     tx: {
       type: Object as PropType<StepTransaction>,
@@ -288,16 +330,8 @@ export default defineComponent({
       default: undefined,
     },
     txResult: {
-      type: Object as PropType<Result>,
-      default: () => {
-        return {
-          swappedPercent: 0,
-          demandCoinSwappedAmount: 0,
-          demandCoinDenom: '',
-          offerCoinDenom: '',
-          remainingOfferCoinAmount: 0,
-        };
-      },
+      type: Object as PropType<Result | any>,
+      default: undefined,
     },
   },
   emits: ['close', 'next', 'retry', 'reset', 'done'],
@@ -320,11 +354,11 @@ export default defineComponent({
     });
 
     //Set default texts
-    const subTitle = ref(t('components.txHandlingModal.openKeplr'));
+    const overline = ref(t('components.txHandlingModal.openKeplr'));
     const title = ref(t('components.txHandlingModal.signTx'));
-    const subTitleUnder = ref('');
-    const whiteButton = ref(t('generic_cta.cancel'));
-    const blackButton = ref('');
+    const subtitle = ref('');
+    const secondaryButton = ref(t('generic_cta.cancel'));
+    const primaryButton = ref('');
     const baseDenoms = reactive({});
 
     const isIBC = computed(() => {
@@ -341,40 +375,42 @@ export default defineComponent({
       async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
-            subTitle.value = t('components.txHandlingModal.openKeplr');
+            overline.value = t('components.txHandlingModal.openKeplr');
             title.value = t('components.txHandlingModal.signTx');
-            whiteButton.value = t('generic_cta.cancel');
-            blackButton.value = '';
+            secondaryButton.value = t('generic_cta.cancel');
+            primaryButton.value = '';
             break;
           case 'keplr-reject':
-            subTitle.value = '';
+            overline.value = '';
             title.value = t('components.txHandlingModal.signError');
-            whiteButton.value = t('generic_cta.cancel');
-            blackButton.value = t('components.txHandlingModal.tryAgain');
+            secondaryButton.value = t('generic_cta.cancel');
+            primaryButton.value = t('components.txHandlingModal.tryAgain');
             break;
           case 'delay':
             title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
-            subTitleUnder.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
-            subTitle.value = '';
+            subtitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
+            overline.value = '';
+            primaryButton.value = '';
+            secondaryButton.value = '';
             break;
           case 'unknown':
             title.value = t('components.txHandlingModal.somethingWentWrong');
-            subTitle.value = '';
+            overline.value = '';
             break;
           case 'IBC_receive_failed':
             title.value = t('components.txHandlingModal.somethingWentWrong');
-            subTitleUnder.value = t('components.txHandlingModal.revertTx');
-            blackButton.value = t('components.txHandlingModal.backToPortfolio');
-            subTitle.value = '';
+            subtitle.value = t('components.txHandlingModal.revertTx');
+            primaryButton.value = t('components.txHandlingModal.backToPortfolio');
+            overline.value = '';
             break;
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
-              subTitle.value = t('components.txHandlingModal.ibcTransferSubtitle');
+              overline.value = t('components.txHandlingModal.ibcTransferSubtitle');
             } else {
-              subTitle.value = t('components.txHandlingModal.txProgress');
+              overline.value = t('components.txHandlingModal.txProgress');
             }
-            whiteButton.value = '';
-            blackButton.value = '';
+            secondaryButton.value = '';
+            primaryButton.value = '';
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
@@ -401,11 +437,11 @@ export default defineComponent({
             }
             break;
           case 'complete':
-            subTitle.value = '';
+            overline.value = '';
             if (props.isFinal && !props.hasMore) {
-              blackButton.value = t('generic_cta.done');
-              if (props.tx.name === 'swap') {
-                whiteButton.value = `Send ${
+              primaryButton.value = t('generic_cta.done');
+              if (props.tx.name === 'swap' && props.txResult) {
+                secondaryButton.value = `Send ${
                   Math.trunc(
                     (Number(props.txResult.demandCoinSwappedAmount) * 100) /
                       Math.pow(
@@ -415,15 +451,15 @@ export default defineComponent({
                         }),
                       ),
                   ) / 100
-                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} ->`;
+                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} \u2192`;
               } else {
-                whiteButton.value = t('components.txHandlingModal.reset');
+                secondaryButton.value = t('components.txHandlingModal.reset');
               }
             } else {
               props.hasMore
-                ? (blackButton.value = t('components.txHandlingModal.next'))
-                : (blackButton.value = t('generic_cta.continue'));
-              whiteButton.value = '';
+                ? (primaryButton.value = t('components.txHandlingModal.next'))
+                : (primaryButton.value = t('generic_cta.continue'));
+              secondaryButton.value = '';
             }
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
@@ -474,9 +510,9 @@ export default defineComponent({
                 break;
             }
 
-            subTitle.value = '';
-            whiteButton.value = t('generic_cta.cancel');
-            blackButton.value = t('components.txHandlingModal.tryAgain');
+            overline.value = '';
+            secondaryButton.value = t('generic_cta.cancel');
+            primaryButton.value = t('components.txHandlingModal.tryAgain');
             break;
         }
       },
@@ -542,11 +578,11 @@ export default defineComponent({
       emitDone,
       getDenom,
       iconType,
-      subTitle,
+      overline,
       title,
-      subTitleUnder,
-      whiteButton,
-      blackButton,
+      subtitle,
+      secondaryButton,
+      primaryButton,
       router,
       unknownHandler,
     };
@@ -555,147 +591,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.tx-handling {
-  &--full {
-    position: relative !important;
-  }
-}
-
-.status {
-  text-align: center;
-
-  &__error-collapse {
-    align-items: center;
-    margin-top: 2rem;
-  }
-
-  &__error__item {
-    & + &__key {
-      margin-top: 1.6rem;
-    }
-    &__key {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.3rem;
-    }
-  }
-
-  &__title {
-    margin-top: 2rem;
-  }
-
-  &__title-sub {
-    color: var(--muted);
-  }
-
-  &__icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2.4rem 0;
-
-    &-warning {
-      font-size: 4.2rem;
-      color: var(--warning);
-    }
-
-    &-error {
-      font-size: 3.2rem;
-      color: var(--negative-text);
-    }
-
-    &-swap-result {
-      background-image: url('../../assets/images/swap-result.png');
-      height: 21rem;
-      transform: translate(-2.4rem, -2.4rem);
-      width: 32rem;
-    }
-
-    /* &-none {
-    } */
-  }
-
-  &__detail {
-    .link {
-      display: block;
-      margin-top: 1.6rem;
-    }
-
-    .spacer {
-      height: 8.8rem;
-    }
-
-    .spacer-2 {
-      height: 4.8rem;
-    }
-
-    .spacer-3 {
-      height: 2.4rem;
-    }
-
-    &-transferring {
-      width: 9.6rem;
-      margin: 3.2rem auto;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      .arrow {
-        color: var(--inactive);
-        font-weight: bold;
-      }
-    }
-
-    &-subtitle-under {
-      margin-top: 8px;
-      color: var(--muted);
-    }
-
-    &-text,
-    &-link {
-      padding: 4rem 0 3.2rem;
-    }
-
-    &-text {
-      color: var(--text);
-    }
-
-    &-text-weak {
-      color: var(--muted);
-      padding: 1.6rem 0 3.2rem;
-    }
-
-    &-link {
-      display: block;
-    }
-
-    &-amount {
-      margin-top: 0.8rem;
-    }
-
-    &-path {
-      margin-bottom: 2.4rem;
-      color: var(--muted);
-    }
-  }
+.swapped-image {
+  background-image: url('~@/assets/images/swap-result.png');
+  height: 13rem;
 }
 
 .transferred-image {
-  background-image: url('~@/assets/images/blue-surfer-1.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 18.8rem;
-  height: 17.7rem;
-  display: block;
-  margin: 0 auto;
+  background-image: url('~@/assets/images/silver-surfer-1-light.png');
 }
 
-.send-another-button {
-  @import '@/assets/scss/_elevation.scss';
-  margin-top: -2.4rem;
-  margin-bottom: 1.2rem;
-  border-radius: $border-radius;
-  background-color: var(--surface);
+@media (prefers-color-scheme: dark) {
+  .transferred-image {
+    background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+  }
+}
+
+.animate-lr {
+  animation: animate-lr 2s infinite cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@keyframes animate-lr {
+  0% {
+    transform: translateX(-300%) rotate(0deg);
+    opacity: 0;
+  }
+  40%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(350%) rotate(360deg);
+    opacity: 0;
+  }
 }
 </style>

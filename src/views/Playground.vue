@@ -79,15 +79,15 @@
           />
 
           <Button name="Open Modal Fullscreen" @click="modalIsOpen = 'fullscreen'" />
-          <Modal :open="modalIsOpen === 'fullscreen'" variant="fullscreen" @close="modalIsOpen = false">
+          <Modal :open="modalIsOpen === 'fullscreen'" variant="full" fullscreen @close="modalIsOpen = false">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni placeat accusamus, quam repudiandae odio
             similique recusandae. Vitae aspernatur eos ad dignissimos, architecto odio quod optio reprehenderit, omnis
             nihil eveniet molestiae!
           </Modal>
 
           <div
-            class="border rounded-lg overflow-hidden elevation-card relative p-10"
-            :style="{ width: '30rem', height: '30rem' }"
+            class="border rounded-lg overflow-hidden shadow-card rounded-2xl relative p-10"
+            :style="{ width: '18rem', height: '18rem' }"
           >
             <Button name="Send Transaction" @click="modalIsOpen = 'send'" />
 
@@ -245,7 +245,7 @@ export default defineComponent({
       } as StepTransaction;
       */
 
-      let res = await msgFromStepTransaction(stepTx as StepTransaction);
+      let res = await msgFromStepTransaction(stepTx as StepTransaction, GasPriceLevel.AVERAGE);
       const feeOptions = await feeForStepTransaction(stepTx as StepTransaction);
       const fee = {
         amount: [
@@ -279,7 +279,7 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .icons {
-  font-size: 1.6rem;
+  font-size: 1rem;
   color: red;
 }
 </style>

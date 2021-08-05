@@ -28,7 +28,7 @@ export default function usePools() {
         pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
       )
     )
-      .join('/')
+      .join(' · ')
       .toUpperCase();
   };
 
@@ -160,7 +160,7 @@ export default function usePools() {
             return denomsInfo;
           } else {
             return denomsInfo.filter((coin) => {
-              return !coin.display_name.includes('GDEX');
+              return !coin.display_name.includes('Gravity');
             });
           }
         }),
@@ -228,6 +228,7 @@ export default function usePools() {
     return liquidityPriceById(id, [reserveBalances.balanceA.amount, reserveBalances.balanceB.amount]);
   };
   return {
+    allPools,
     pools,
     getReserveBaseDenoms,
     poolsByDenom,

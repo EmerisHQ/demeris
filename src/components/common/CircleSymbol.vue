@@ -1,30 +1,85 @@
 <template>
   <div
-    class="circle-symbol"
-    :class="[`circle-symbol--${variant}`, `circle-symbol--${size}`, { 'circle-symbol--ringed': !isNativeChain }]"
+    class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
+    :class="[`circle-symbol--${variant}`, `circle-symbol--${size}`]"
   >
     <template v-if="variant === 'chain'">
-      <div class="circle-symbol__ring" :style="ringStyle" />
+      <div
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        :style="ringStyle"
+      />
     </template>
 
     <template v-else-if="!isVerified">
-      <div class="circle-symbol__circle" :style="innerStyle">
-        <div class="circle-symbol__badge" />
-        <p class="circle-symbol__letter">{{ denoms[0]?.[0] || denom[0] }}</p>
+      <div
+        class="w-full h-full rounded-full flex items-center justify-center relative z-10 p-1.5"
+        :class="{ 'w-3/4 h-3/4': !isNativeChain }"
+        :style="innerStyle"
+      >
+        <!-- Unverified asset badge -->
+        <div class="hidden absolute w-3 h-3 -top-0.5 -mt-px right-0 bg-warning rounded-full" />
+        <p class="uppercase font-bold">{{ denoms[0]?.[0] || denom[0] }}</p>
       </div>
     </template>
 
     <template v-else-if="assetConfig && !isPoolCoin">
-      <img :src="assetConfig.logo" :alt="denom" class="circle-symbol__circle logo" />
-      <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
-      <img v-if="glow" alt="Logo glow" :src="assetConfig.logo" class="circle-symbol__logo-glow" />
+      <img
+        :src="assetConfig.logo"
+        :alt="denom"
+        class="w-full h-full rounded-full relative z-10"
+        :class="{ 'w-3/4 h-3/4': !isNativeChain }"
+      />
+      <div
+        v-if="!isNativeChain"
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        :style="ringStyle"
+      />
+      <img
+        v-if="glow"
+        alt="Logo glow"
+        :src="assetConfig.logo"
+        class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter"
+      />
     </template>
 
     <template v-else>
-      <div v-if="!isNativeChain" class="circle-symbol__ring" :style="ringStyle" />
-      <div class="circle-symbol__circle" :style="innerStyle">
-        <img v-if="symbolImage" :src="symbolImage" />
+      <div
+        v-if="!isNativeChain"
+        class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
+        :style="ringStyle"
+      />
+      <div
+        class="
+          circle-symbol__logo-container
+          w-full
+          h-full
+          rounded-full
+          flex
+          items-center
+          justify-center
+          relative
+          z-10
+          m-auto
+        "
+        :class="{ 'w-3/4 h-3/4': !isNativeChain }"
+        :style="innerStyle"
+      >
+        <img v-if="symbolImage" :src="symbolImage" class="w-full h-full rounded-full relative z-10" />
       </div>
+    </template>
+
+    <template v-if="variant === 'chain' || (assetConfig && !isPoolCoin) || isVerified">
+      <svg class="absolute w-0 h-0">
+        <defs>
+          <clipPath :id="clipPathId" clipPathUnits="objectBoundingBox">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M0.5,0.938 C0.742,0.938,0.938,0.742,0.938,0.5 C0.938,0.258,0.742,0.063,0.5,0.063 C0.258,0.063,0.063,0.258,0.063,0.5 C0.063,0.742,0.258,0.938,0.5,0.938 M0.5,1 C0.776,1,1,0.776,1,0.5 C1,0.224,0.776,0,0.5,0 C0.224,0,0,0.224,0,0.5 C0,0.776,0.224,1,0.5,1"
+            />
+          </clipPath>
+        </defs>
+      </svg>
     </template>
   </div>
 </template>
@@ -76,6 +131,10 @@ export default defineComponent({
     size: {
       type: String as PropType<CircleSymbolSize>,
       default: 'md',
+    },
+    logo: {
+      type: Boolean,
+      default: true,
     },
     glow: {
       type: Boolean,
@@ -177,13 +236,22 @@ export default defineComponent({
       };
     });
 
+    const clipPathId =
+      'clip-' +
+      Math.random()
+        .toString(36)
+        .replace(/[^a-z]+/g, '')
+        .substr(2, 10);
+
     const ringStyle = computed(() => {
       const colors = findSymbolColors(props.chainName as string);
 
       const background = generateBackground(colors);
+      const clipPath = `url(#${clipPathId})`;
 
       return {
         background,
+        clipPath,
       };
     });
 
@@ -228,6 +296,7 @@ export default defineComponent({
       isLoaded,
       isNativeChain,
       isVerified,
+      clipPathId,
       ringStyle,
       symbolImage,
     };
@@ -237,102 +306,36 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .circle-symbol {
-  border-radius: 2.6rem;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
   width: var(--symbol-size);
   height: var(--symbol-size);
 
   &--xs {
-    --symbol-size: 2rem;
+    --symbol-size: 1rem;
   }
 
   &--sm {
-    --symbol-size: 2.4rem;
+    --symbol-size: 1.5rem;
   }
 
   &--md {
-    --symbol-size: 3.2rem;
+    --symbol-size: 2rem;
   }
 
   &--lg {
-    --symbol-size: 4.2rem;
+    --symbol-size: 2.5rem;
   }
 
   &--xl {
-    --symbol-size: 9.6rem;
-  }
-
-  &--ringed &__circle {
-    width: 75%;
-    height: 75%;
-  }
-
-  &__circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 2.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-    &:not(.logo) {
-      padding: 0.6rem;
-    }
+    --symbol-size: 6rem;
   }
 
   &__logo-glow {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0.5;
     filter: blur(calc(0.4 * var(--symbol-size)));
     top: 12.5%;
   }
 
-  &__ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    width: 100%;
-    height: 100%;
-    border-radius: 2.6rem;
-    z-index: 0;
-    flex-shrink: 0;
-    box-shadow: none !important;
-
-    &::before {
-      position: absolute;
-      content: '';
-      top: 0.3rem;
-      bottom: 0.3rem;
-      left: 0.3rem;
-      right: 0.3rem;
-      border-radius: 2.6rem;
-      background: var(--bg);
-    }
-  }
-
-  &__letter {
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-
-  &__badge {
-    // display: block;
-    display: none;
-    position: absolute;
-    width: 1.2rem;
-    height: 1.2rem;
-    top: -0.3rem;
-    right: 0;
-    content: '';
-    background: #ff7d05;
-    border-radius: 2.6rem;
+  &__logo-container {
+    padding: 12.5%;
   }
 }
 </style>

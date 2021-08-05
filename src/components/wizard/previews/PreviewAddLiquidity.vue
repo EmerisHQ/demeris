@@ -1,71 +1,91 @@
 <template>
   <List>
-    <ListItem direction="column">
-      <List>
-        <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
-          <div class="pool__pair">
-            <div v-if="poolInfo.denoms.length" class="pool__pair__symbols">
-              <CircleSymbol :denom="poolInfo.denoms[0]" size="xs" class="pool__pair__symbols__token token-a" />
-              <CircleSymbol :denom="poolInfo.denoms[1]" size="xs" class="pool__pair__symbols__token token-b" />
-            </div>
-
-            <span class="pool__pair__name w-bold">{{ poolInfo.pairName }}</span>
+    <div class="space-y-2 pt-2 pb-8">
+      <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
+        <div class="flex justify-end items-center">
+          <div v-if="poolInfo.denoms.length" class="flex -space-x-0.5 mr-2">
+            <CircleSymbol :denom="poolInfo.denoms[0]" size="xs" />
+            <CircleSymbol :denom="poolInfo.denoms[1]" size="xs" />
           </div>
-        </ListItem>
-
-        <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-          <div class="s-minus">
-            <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: poolInfo.exchangeAmountPrice * 1e6, denom: data.coinB.denom }" />
-          </div>
-        </ListItem>
-      </List>
-    </ListItem>
-
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
-      <div class="supply__item">
-        <div class="pool__item">
-          <CircleSymbol :denom="data.coinA.denom" size="sm" class="pool__item__symbol" />
-          <AmountDisplay class="w-bold" :amount="data.coinA" />
+          <span class="text-1 font-medium">{{ poolInfo.pairName }}</span>
         </div>
-        <span class="supply__item__chain"><ChainName :name="chainName" /></span>
-      </div>
-
-      <div class="supply__item">
-        <div class="pool__item">
-          <CircleSymbol :denom="data.coinB.denom" size="sm" class="pool__item__symbol" />
-          <AmountDisplay class="w-bold" :amount="data.coinB" />
-        </div>
-        <span class="supply__item__chain"><ChainName :name="chainName" /></span>
-      </div>
-    </ListItem>
-
-    <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
-      :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
-    >
-      <div class="pool__item">
-        <CircleSymbol
-          v-if="poolInfo.denoms.length"
-          :pool-denoms="poolInfo.denoms"
-          size="sm"
-          class="pool__item__symbol"
-        />
-        <AmountDisplay class="w-bold" :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }" />
-      </div>
-    </ListItem>
-
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
-      <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
-        <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
-          <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
-        </template>
       </ListItem>
+
+      <ListItem inset>
+        <div class="flex justify-end items-center">
+          <div class="text-right">
+            <div>
+              <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
+              <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
+            </div>
+            <div class="block text-muted -text-1 mt-0.5">
+              {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
+            </div>
+          </div>
+        </div>
+      </ListItem>
+    </div>
+
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="data.coinA" />
+          <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
+        </div>
+        <CircleSymbol :denom="data.coinA.denom" size="md" class="ml-3" />
+      </div>
+
+      <div class="flex justify-end items-center mt-6">
+        <div class="text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="data.coinB" />
+          <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
+        </div>
+        <CircleSymbol :denom="data.coinB.denom" size="md" class="ml-3" />
+      </div>
+    </ListItem>
+
+    <ListItem v-if="refundedAmount" :label="$t('components.previews.addWithdrawLiquidity.refundedLbl')">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="refundedAmount" />
+          <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
+        </div>
+        <CircleSymbol :denom="refundedAmount.denom" size="md" class="ml-3" />
+      </div>
+    </ListItem>
+
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay
+            class="font-medium text-1"
+            :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }"
+          />
+          <div class="block text-muted -text-1 mt-0.5">
+            {{ $t('components.previews.addWithdrawLiquidity.receiveLblHint') }}
+          </div>
+        </div>
+        <CircleSymbol v-if="poolInfo.denoms.length" :pool-denoms="poolInfo.denoms" size="md" class="ml-3" />
+      </div>
+    </ListItem>
+
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')">
+      <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
+        <div class="flex justify-end items-center">
+          <div class="text-right">
+            <AmountDisplay :amount="{ amount: amount, denom: denom }" />
+            <div class="block text-muted -text-1 mt-0.5">
+              {{ $t('components.previews.addWithdrawLiquidity.feeLbl') }}
+            </div>
+          </div>
+        </div>
+      </template>
     </ListItem>
   </List>
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, reactive, watch } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -76,8 +96,10 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
+import { AddLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewAddLiquidity',
@@ -93,16 +115,21 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
     },
+    response: {
+      type: Object as PropType<AddLiquidityEndBlockResponse | Actions.Step>,
+      default: undefined,
+    },
   },
 
   setup(props) {
     const store = useStore();
+    const { pools } = usePools();
     const poolInfo = reactive({
       exchangeAmountPrice: 1,
       pairName: '-/-',
@@ -111,7 +138,22 @@ export default defineComponent({
     });
 
     const data = computed(() => {
-      return (props.step as Actions.Step).transactions[0].data as Actions.CreatePoolData;
+      if ((props.response as AddLiquidityEndBlockResponse)?.accepted_coins) {
+        const [coinA, coinB] = parseCoins((props.response as AddLiquidityEndBlockResponse).accepted_coins);
+        const pool = pools.value.find(
+          (item) => item.pool_coin_denom === (props.response as AddLiquidityEndBlockResponse).pool_coin_denom,
+        );
+
+        return {
+          coinA,
+          coinB,
+          pool,
+        };
+      }
+
+      const step = (props.response as Actions.Step) || props.step;
+
+      return step.transactions[0].data as Actions.CreatePoolData;
     });
 
     const chainName = computed(() => {
@@ -123,8 +165,23 @@ export default defineComponent({
     });
 
     // Add liquidity to a existing pool
-    const { calculateSupplyTokenAmount } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
-    const { formatPoolName } = usePools();
+    const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
+    const { formatPoolName, allPools } = usePools();
+
+    const exchangeAmount = computed(() => {
+      if (!hasPool.value) {
+        return ((+data.value.coinB.amount || 1) / (+data.value.coinA.amount || 1)) * 1e6;
+      }
+
+      if (reserveBalances.value?.length) {
+        return new BigNumber(reserveBalances.value[1].amount)
+          .dividedBy(reserveBalances.value[0].amount)
+          .shiftedBy(6)
+          .toNumber();
+      }
+
+      return undefined;
+    });
 
     const updatePoolInfo = async () => {
       if (hasPool.value) {
@@ -138,22 +195,32 @@ export default defineComponent({
       const denomA = await getDisplayName(denoms[0], chainName.value);
       const denomB = await getDisplayName(denoms[1], chainName.value);
 
-      const priceA = store.getters['demeris/getPrice']({ denom: denoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: denoms[1] });
-
-      poolInfo.exchangeAmountPrice = !priceA || !priceB ? 1 : priceA / priceB;
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
-      poolInfo.denom = `GDEX ${denomA}/${denomB}`;
+      poolInfo.denom = `Gravity ` + (allPools.value.length + 1);
       poolInfo.denoms = denoms;
     };
 
     const receiveAmount = computed(() => {
+      if (props.response) {
+        return +(props.response as AddLiquidityEndBlockResponse).pool_coin_amount;
+      }
+
       return calculateSupplyTokenAmount(+data.value.coinA.amount, +data.value.coinB.amount);
+    });
+
+    const refundedAmount = computed(() => {
+      if (!(props.response as AddLiquidityEndBlockResponse)?.refunded_coins) {
+        return;
+      }
+
+      return parseCoins((props.response as AddLiquidityEndBlockResponse).refunded_coins)[0];
     });
 
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      refundedAmount,
+      exchangeAmount,
       hasPool,
       poolInfo,
       chainName,
@@ -164,51 +231,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.pool__pair {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  &__symbols {
-    display: flex;
-    align-items: center;
-    margin-right: 0.8rem;
-
-    &__token {
-      z-index: 0;
-
-      &.token-a {
-        z-index: 1;
-        margin-right: -0.6rem;
-      }
-    }
-  }
-}
-
-.pool__item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  &__symbol {
-    margin-right: 0.8rem;
-  }
-}
-.supply__item {
-  & + & {
-    margin-top: 1.6rem;
-  }
-
-  &__chain {
-    margin-top: -0.5rem;
-    font-size: 1.2rem;
-  }
-}
-
-.fees {
-  &__item {
-    padding: 0;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -1,40 +1,62 @@
 <template>
   <div
     :key="label || description"
-    class="list-item"
+    class="flex justify-between w-full"
     :class="[
-      `list-item--${direction}`,
+      `flex-${direction}`,
       {
-        'list-item--descripted': !label,
-        'list-item--inset': inset,
-        'list-item--collapsed': isCollapsed,
+        'items-center': direction === 'col',
+        'py-6': !inset && size === 'sm',
+        'py-8': !inset && size === 'md',
+        'pt-4': inset && size === 'sm',
+        'pt-6': inset && size === 'md',
       },
     ]"
   >
     <template v-if="label || description">
-      <div class="list-item__info">
-        <div v-if="label" class="list-item__label">
-          <span class="list-item__label__text">{{ label }}</span>
-          <span v-if="hint" class="list-item__label__hint">
-            <Icon name="HintIcon" :icon-size="1.5" />
+      <div :class="[firstCellClass, { 'flex items-start justify-between gap-x-3': direction === 'col' }]">
+        <div v-if="label" class="font-medium text-left flex items-center">
+          <span>{{ label }}</span>
+          <span v-if="hint" v-tippy :content="hint" class="text-muted hover:text-current ml-2">
+            <Icon name="HintIcon" :icon-size="1" />
           </span>
         </div>
 
-        <div class="list-item__description">
+        <div class="text-muted mt-0.5">
           <slot name="description">
             <p v-if="description" class="list-item__description__text">{{ description }}</p>
           </slot>
         </div>
 
-        <button v-if="collapsable" class="list-item__collapse-button" @click="toggleCollapse">
-          <Icon :name="'CaretUpIcon'" :icon-size="1.5" class="list-item__collapse-button__icon" />
-        </button>
+        <Button
+          v-if="collapsible"
+          variant="link"
+          :name="isCollapsed ? disclosureShowText : disclosureHideText"
+          :click-function="toggleCollapse"
+        >
+          <template #right>
+            <Icon
+              :name="'CaretUpIcon'"
+              :icon-size="1"
+              class="transform transition-transform -ml-2"
+              :class="{ 'rotate-180': isCollapsed }"
+            />
+          </template>
+        </Button>
       </div>
     </template>
 
-    <div v-show="!isCollapsed" class="list-item__content">
+    <div
+      v-show="!isCollapsed"
+      :class="[
+        secondCellClass,
+        {
+          'text-right': direction === 'row',
+        },
+      ]"
+    >
       <slot>
-        <p v-if="value" class="list-item__content__value">{{ value }}</p>
+        <p v-if="value">{{ value }}</p>
       </slot>
     </div>
   </div>
@@ -43,23 +65,21 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
   name: 'ListItem',
   components: {
+    Button,
     Icon,
   },
   props: {
     direction: {
-      type: String as PropType<'row' | 'column'>,
+      type: String as PropType<'row' | 'col'>,
       default: 'row',
     },
-    collapsable: {
-      type: Boolean,
-      default: false,
-    },
-    inset: {
+    collapsible: {
       type: Boolean,
       default: false,
     },
@@ -67,21 +87,45 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    description: {
+      type: String,
+      default: '',
+    },
+    disclosureShowText: {
+      type: String,
+      default: 'Show',
+    },
+    disclosureHideText: {
+      type: String,
+      default: 'Hide',
+    },
+    firstCellClass: {
+      type: String,
+      default: 'w-full',
+    },
+    hint: {
+      type: String,
+      default: undefined,
+    },
+    inset: {
+      type: Boolean,
+      default: false,
+    },
     label: {
       type: String,
       default: undefined,
+    },
+    secondCellClass: {
+      type: String,
+      default: 'w-full',
     },
     value: {
       type: String,
       default: undefined,
     },
-    description: {
-      type: String,
-      default: '',
-    },
-    hint: {
-      type: String,
-      default: '',
+    size: {
+      type: String as PropType<'sm' | 'md'>,
+      default: 'md',
     },
   },
   setup(props) {
@@ -96,78 +140,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.list-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: 100%;
-  padding: 1.6rem 0;
-
-  &--descripted {
-    align-items: center;
-  }
-
-  &--inset {
-    padding: 0.6rem 0;
-  }
-
-  &--row {
-    flex-direction: row;
-  }
-
-  &--column {
-    flex-direction: column;
-  }
-
-  &__label {
-    font-size: 1.2rem;
-    font-weight: 600;
-  }
-
-  &--row > &__content {
-    text-align: right;
-  }
-
-  &--column > &__content {
-    margin-top: 1.6rem;
-  }
-
-  &__description {
-    font-size: 1.2rem;
-    color: var(--muted);
-  }
-
-  &--column > &__info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__info {
-    width: 100%;
-
-    &__label {
-      text-align: left;
-    }
-  }
-
-  &__content {
-    width: 100%;
-
-    &__value {
-      font-size: 1.2rem;
-    }
-  }
-
-  &--collapsed &__collapse-button {
-    &__icon {
-      transform: rotate(180deg);
-    }
-  }
-
-  &__collapse-button {
-    padding: 0.4rem;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

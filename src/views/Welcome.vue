@@ -2,7 +2,7 @@
   <main class="welcome">
     <header class="welcome__header">
       <div class="welcome__header__logo">
-        <Logo />
+        <Brandmark />
       </div>
 
       <div class="welcome__header__controls">
@@ -18,14 +18,14 @@
 
     <div class="welcome__wrapper">
       <section class="welcome__main">
-        <h2 class="welcome__main__subtitle">A new world for defi</h2>
+        <h2 class="welcome__main__subtitle">A new world for DeFi</h2>
         <h1 class="welcome__main__title">
           Your one-stop app <br />
           for decentralized <br />
           financial services.
         </h1>
         <p class="welcome__main__description">
-          Demeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
+          Emeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
           of blockchains.
         </p>
       </section>
@@ -54,7 +54,7 @@ import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import Logo from '@/components/common/Logo.vue';
+import Brandmark from '@/components/common/Brandmark.vue';
 import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
@@ -63,7 +63,7 @@ export default defineComponent({
   components: {
     Button,
     ConnectKeplr,
-    Logo,
+    Brandmark,
   },
 
   setup() {
@@ -87,7 +87,7 @@ export default defineComponent({
   height: 100vh;
 
   &__header {
-    padding: 1.6rem 3.2rem;
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -97,7 +97,7 @@ export default defineComponent({
       align-items: center;
 
       &__link {
-        margin-left: 3.4rem;
+        margin-left: 2rem;
       }
     }
   }
@@ -108,7 +108,7 @@ export default defineComponent({
     align-items: center;
     max-width: 1536px;
     margin: 0 auto;
-    padding: 4.8rem 3.2rem;
+    padding: 3rem 2rem;
     position: relative;
     z-index: 1;
   }
@@ -123,15 +123,15 @@ export default defineComponent({
     }
 
     &__title {
-      font-size: 5.1rem;
+      font-size: 3.1875rem;
       font-weight: 600;
-      margin-top: 2.6rem;
+      margin-top: 1.5rem;
       line-height: 1.21;
       letter-spacing: -0.043em;
     }
 
     &__description {
-      margin-top: 5.6rem;
+      margin-top: 3.5rem;
       color: var(--muted);
       line-height: 1.5;
     }
@@ -142,17 +142,17 @@ export default defineComponent({
 
     &__connect {
       width: 80%;
-      min-height: 32rem;
-      max-width: 44rem;
+      min-height: 20rem;
+      max-width: 27.5rem;
       margin: 0 auto;
       box-shadow: 32px 48px 96px -8px rgba(0, 0, 0, 0.14);
       background: rgba(255, 255, 255, 0.7);
-      border-radius: 2rem;
+      border-radius: 1.25rem;
       backdrop-filter: blur(42px);
 
       &__title {
         text-align: center;
-        font-size: 3.2rem;
+        font-size: 2rem;
         font-weight: 600;
         line-height: 1;
       }
@@ -167,7 +167,7 @@ export default defineComponent({
     right: 0;
     top: 50%;
     transform: translateY(-45%);
-    background-image: url('~@/assets/images/gradient-light-2.png');
+    background-image: url('~@/assets/images/gradient-primary.jpg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;

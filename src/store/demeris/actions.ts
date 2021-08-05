@@ -1,5 +1,4 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
-import { sleep } from '@cosmjs/utils';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
@@ -16,6 +15,7 @@ import {
   DemerisActionsByAddressParams,
   DemerisActionsByChainParams,
   DemerisActionsByTicketParams,
+  DemerisActionsGetTxsParams,
   DemerisActionsTraceParams,
   DemerisActionTypes,
   DemerisSubscriptions,
@@ -38,6 +38,7 @@ export type DemerisTxParams = {
 };
 export type DemerisTxResultParams = {
   height: number;
+  stepType: string;
 };
 export type GasFee = {
   amount: Array<Amount>;
@@ -573,9 +574,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, cache = true, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
-    if (state._InProgess.get(reqHash)) {
+    if (state._InProgess.get(reqHash) && cache) {
       await state._InProgess.get(reqHash);
       return getters['getVerifyTrace'](params);
     } else {
@@ -699,11 +700,21 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx });
       return response.data;
     } catch (e) {
-      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + e.message);
+      const cause = e.response?.data?.cause || e.message;
+      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
     }
   },
 
-  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height }: DemerisTxResultParams) {
+  async [DemerisActionTypes.GET_TXS]({ getters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/txs/' + txhash);
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetTicketTxs', 'Could not fetch ticket transactions.' + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
       const wakeUpTime = Date.now() + ms;
       while (Date.now() < wakeUpTime) {}
@@ -718,24 +729,19 @@ export const actions: ActionTree<State, RootState> & Actions = {
         let isMine = false;
 
         const checks = getEndBlockChecks({
-          type: 'Swap',
+          type: stepType,
           requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
         });
 
         response.data.result?.end_block_events?.forEach((item) => {
           if (item.type === checks.type) {
             item.attributes.forEach((result) => {
-              if (atob(result.key) === checks.txAddress) {
-                if (atob(result.value) === checks.requesterAddress) {
-                  isMine = true;
-                } else {
-                  isMine = false;
-                }
-              }
-              if (isMine) {
-                successData[atob(result.key)] = atob(result.value);
-              }
+              const key = atob(result.key);
+              const value = result.value ? atob(result.value) : null;
+              successData[key] = value;
             });
+
+            isMine = successData[checks.txAddress] === checks.requesterAddress;
           }
         });
 
@@ -747,15 +753,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
 
       function getEndBlockChecks(data) {
-        if (data.type === 'Swap') {
+        if (data.type === 'swap') {
           return { type: 'swap_transacted', txAddress: 'swap_requester', requesterAddress: data.requesterAddress };
         }
 
-        if (data.type === 'Redeem') {
+        if (data.type === 'withdrawliquidity') {
           return { type: 'withdraw_from_pool', txAddress: 'withdrawer', requesterAddress: data.requesterAddress };
         }
 
-        if (data.type === 'Add Liquidity') {
+        if (data.type === 'addliquidity') {
           return { type: 'deposit_to_pool', txAddress: 'depositor', requesterAddress: data.requesterAddress };
         }
       }
@@ -768,7 +774,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 300000 },
+    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 400000 },
   ) {
     console.log('Vuex nodule: demeris initialized!');
     commit('INIT', { endpoint, hub_chain, gas_limit });

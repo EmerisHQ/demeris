@@ -1,79 +1,57 @@
 <template>
   <List>
-    <ListItem direction="column">
-      <List>
-        <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
-          <div class="pool__item">
-            <div class="pool__item__symbols">
-              <CircleSymbol
-                size="sm"
-                :denom="data.pool.reserve_coin_denoms[0]"
-                class="pool__item__symbols__symbol token-a"
-              />
-              <CircleSymbol
-                size="sm"
-                :denom="data.pool.reserve_coin_denoms[1]"
-                class="pool__item__symbols__symbol token-b"
-              />
-            </div>
-            <div class="pool__item__name w-bold">{{ pairName }}</div>
+    <div class="space-y-2 pt-2 pb-8">
+      <ListItem :label="$t('components.previews.addWithdrawLiquidity.poolLbl')" inset>
+        <div class="flex justify-end items-center">
+          <div class="flex -space-x-0.5 mr-2">
+            <CircleSymbol size="xs" :denom="data.pool.reserve_coin_denoms[0]" />
+            <CircleSymbol size="xs" :denom="data.pool.reserve_coin_denoms[1]" />
           </div>
-        </ListItem>
-
-        <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-          <div class="s-minus">
-            <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
-            <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
-          </div>
-        </ListItem>
-      </List>
-    </ListItem>
-
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.supplyLbl')">
-      <div class="supply__item">
-        <CircleSymbol :denom="data.poolCoin.denom" class="supply__item__symbol" />
-        <div class="supply__item__amount">
-          <AmountDisplay class="w-bold" :amount="data.poolCoin" />
-          <span class="supply__item__chain"><ChainName :name="chainName" /></span>
+          <div class="text-1 font-medium">{{ pairName }}</div>
         </div>
+      </ListItem>
+
+      <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
+        <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
+        <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
+      </ListItem>
+    </div>
+
+    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'suppliedLbl' : 'supplyLbl'}`)">
+      <div class="supply__item flex justify-end items-center">
+        <div class="supply__item__amount text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="data.poolCoin" />
+          <span class="supply__item__chain block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></span>
+        </div>
+        <CircleSymbol :denom="data.poolCoin.denom" size="md" class="ml-3" />
       </div>
     </ListItem>
 
     <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.receiveLbl')"
+      :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)"
       :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
     >
-      <div class="receive__item">
-        <div class="receive__item__wrapper">
-          <CircleSymbol
-            :denom="receiveAmount.coinA.denom"
-            :chain-name="chainName"
-            size="sm"
-            class="receive__item__symbol"
-          />
-          <AmountDisplay class="w-bold" :amount="receiveAmount.coinA" />
+      <div class="flex items-center justify-end">
+        <div class="text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="receiveAmount.coinA" />
+          <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
         </div>
-        <span class="receive__item__chain"><ChainName :name="chainName" /></span>
+        <CircleSymbol :denom="receiveAmount.coinA.denom" :chain-name="chainName" size="md" class="ml-3" />
       </div>
 
-      <div class="receive__item">
-        <div class="receive__item__wrapper">
-          <CircleSymbol
-            :denom="receiveAmount.coinB.denom"
-            :chain-name="chainName"
-            size="sm"
-            class="receive__item__symbol"
-          />
-          <AmountDisplay class="w-bold" :amount="receiveAmount.coinB" />
+      <div class="flex items-center justify-end mt-6">
+        <div class="text-right">
+          <AmountDisplay class="text-1 font-medium" :amount="receiveAmount.coinB" />
+          <div class="block text-muted -text-1 mt-0.5"><ChainName :name="chainName" /></div>
         </div>
-        <span class="receive__item__chain"><ChainName :name="chainName" /></span>
+        <CircleSymbol :denom="receiveAmount.coinB.denom" :chain-name="chainName" size="md" class="ml-3" />
       </div>
     </ListItem>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="column">
-      <ListItem class="fees__item" :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="col">
+      <ListItem :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
-          <AmountDisplay class="s-minus" :amount="{ amount: amount, denom: denom }" />
+          <AmountDisplay :amount="{ amount: amount, denom: denom }" />
         </template>
       </ListItem>
     </ListItem>
@@ -91,6 +69,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
+import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
 
 export default defineComponent({
@@ -107,11 +86,15 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<Actions.Step>,
-      required: true,
+      default: undefined,
     },
     fees: {
       type: Object as PropType<Record<string, Base.Amount>>,
       required: true,
+    },
+    response: {
+      type: Object as PropType<WithdrawLiquidityEndBlockResponse>,
+      default: undefined,
     },
   },
 
@@ -119,7 +102,15 @@ export default defineComponent({
     const store = useStore();
     const price = ref(1);
 
+    const { poolPriceById, pools } = usePools();
+
     const data = computed(() => {
+      if (props.response) {
+        const pool = pools.value.find((item) => item.id === props.response.pool_id);
+        const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
+        return { pool, poolCoin };
+      }
+
       return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
     });
 
@@ -128,7 +119,6 @@ export default defineComponent({
     });
 
     const { pool, pairName, calculateWithdrawBalances } = usePool(data.value.pool.id);
-    const { poolPriceById } = usePools();
 
     const receiveAmount = computed(() => {
       const result = calculateWithdrawBalances(+data.value.poolCoin.amount);
@@ -154,62 +144,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.pool__item {
-  display: inline-flex;
-  align-items: center;
-
-  &__symbols {
-    display: inline-flex;
-    margin-right: 0.8rem;
-
-    .token-a {
-      z-index: 1;
-    }
-
-    .token-b {
-      margin-left: -0.6rem;
-    }
-  }
-}
-
-.supply__item {
-  display: inline-flex;
-  align-items: flex-start;
-
-  &__symbol {
-    margin-right: 0.8rem;
-  }
-
-  &__amount {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__chain {
-    font-size: 1.2rem;
-  }
-}
-.receive__item {
-  &__wrapper {
-    display: inline-flex;
-    align-items: flex-start;
-  }
-  & + & {
-    margin-top: 1.6rem;
-  }
-  &__symbol {
-    margin-right: 0.8rem;
-  }
-  &__chain {
-    display: block;
-    font-size: 1.2rem;
-  }
-}
-
-.fees {
-  &__item {
-    padding: 0;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

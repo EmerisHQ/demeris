@@ -1,8 +1,8 @@
 <template>
-  <div ref="menuRef" class="settings-wrapper">
+  <div ref="menuRef" class="settings-wrapper sm:pl-3 sm:relative">
     <div
       v-if="isSignedIn"
-      class="settings"
+      class="settings -mr-2 sm:mr-0 py-1 px-2 h-12 flex items-center rounded-lg cursor-pointer"
       :class="{ 'settings--open': isSettingsModalOpen }"
       @click="toggleSettingsModal"
     >
@@ -11,7 +11,7 @@
 
     <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
 
-    <SettingsModal v-show="isSettingsModalOpen" />
+    <SettingsModal v-show="isSettingsModalOpen" @disconnect="toggleSettingsModal" />
     <ConnectWalletModal :open="isWalletModalOpen" @close="toggleWalletModal" />
   </div>
 </template>
@@ -100,23 +100,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.settings-wrapper {
-  padding: 0.4rem;
-}
-
 .settings {
-  display: flex;
-  align-items: center;
-  border-radius: 0.8rem;
-  padding: 0.4rem 0.8rem;
-
   &--open {
-    background: var(--fg-trans);
-  }
-
-  &:hover {
-    background: var(--fg-trans);
-    cursor: pointer;
+    background: var(--fg);
   }
 }
 </style>

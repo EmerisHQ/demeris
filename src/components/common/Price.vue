@@ -58,9 +58,9 @@ export default defineComponent({
           ? formatter
               .format((price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
               .split('.')
-          : '-';
+          : '–';
       } else if (!props.showZero) {
-        value = price.value ? formatter.format(price.value).split('.') : '-';
+        value = price.value ? formatter.format(price.value).split('.') : '–';
       } else {
         value = formatter.format(0);
       }

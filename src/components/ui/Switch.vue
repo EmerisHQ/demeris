@@ -47,28 +47,28 @@ export default defineComponent({
   }
 
   &__input:checked ~ &__track &__thumb {
-    transform: translate(calc(100% - 0.2rem), -50%);
+    transform: translate(calc(100% - 0.125rem), -50%);
   }
 
   &__track {
     transition: background ease-in-out 150ms;
     position: relative;
     display: inline-flex;
-    height: 2.4rem;
-    min-width: 4rem;
-    border-radius: 1.2rem;
-    background: var(--fg-trans);
+    height: 1.5rem;
+    min-width: 2.5rem;
+    border-radius: 0.75rem;
+    background: var(--fg);
     cursor: pointer;
     flex-shrink: 0;
-    padding: 0.3rem;
+    padding: 0.1875rem;
   }
 
   &__thumb {
     transition: all ease-in-out 150ms;
     position: absolute;
-    border-radius: 1.8rem;
-    width: 1.8rem;
-    height: 1.8rem;
+    border-radius: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
     top: 50%;
     transform: translate(0%, -50%);
     background: conic-gradient(
