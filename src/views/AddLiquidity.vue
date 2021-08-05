@@ -2,7 +2,7 @@
   <div class="flex w-full min-h-screen justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <header class="flex items-center justify-between py-6 h-24">
-        <Button variant="link" :full-width="false" :disabled="state.step === 'send'" :click-function="goBack">
+        <Button variant="link" :full-width="false" :disabled="state.step === 'send'" @click="goBack">
           <Icon name="ArrowLeftIcon" :icon-size="1.5" />
         </Button>
 
@@ -17,7 +17,7 @@
           </span>
         </nav>
 
-        <Button class="ml-auto" variant="link" :click-function="onClose">
+        <Button class="ml-auto" variant="link" @click="onClose">
           <Icon name="CloseIcon" :icon-size="1.5" />
         </Button>
       </header>
@@ -224,7 +224,7 @@
               </fieldset>
 
               <div class="mt-2 w-full max-w-sm mx-auto">
-                <ListItem inset size="md" label="Price">
+                <ListItem v-if="exchangeAmount" inset size="md" label="Price">
                   <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> &asymp;
                   <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
                 </ListItem>
@@ -237,10 +237,9 @@
                       class="mr-3"
                     />
                     <span class="font-medium">{{ state.receiveAmount }}
-                      <span v-if="hasPool" class="font-bold">
-                        <Ticker :name="pool.pool_coin_denom" />
+                      <span class="font-bold">
+                        <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
                       </span>
-                      <span v-else class="font-bold">LP</span>
                     </span>
                   </div>
                 </ListItem>
@@ -251,14 +250,6 @@
                     :steps="actionSteps"
                     @update:fees="state.fees = $event"
                   />
-                  <!--
-                  <span v-if="hasPool" class="font-bold">
-                    <Ticker :name="pool.pool_coin_denom" />
-                  </span>
-                  <span v-else class="font-bold">
-                    <Ticker :name="preview_pool_coin_denom" />
-                  </span>
-                  -->
                 </div>
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
                   Your assets will be transferred to Cosmos Hub
@@ -266,14 +257,16 @@
                 <Button
                   :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
                   :disabled="!isValid"
-                  :click-function="goToReview"
+                  @click="goToReview"
                 />
               </div>
             </template>
 
             <template v-else-if="state.isCreationConfirmationOpen">
               <article class="flex flex-col items-center">
-                <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line">Creating a pool is risky business</h2>
+                <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line text-center">
+                  Creating a pool is risky business
+                </h2>
 
                 <img
                   src="@/assets/images/transfer-interstitial.png"
@@ -291,9 +284,9 @@
                     name="Cancel"
                     variant="secondary"
                     class="flex-1"
-                    :click-function="(state.isCreationConfirmationOpen = false)"
+                    @click="state.isCreationConfirmationOpen = false"
                   />
-                  <Button name="I understand" class="flex-1" :click-function="goToReview" />
+                  <Button name="I understand" class="flex-1" @click="goToReview" />
                 </footer>
               </article>
             </template>
@@ -433,7 +426,9 @@ export default {
 
     const { allPools, pools, getReserveBaseDenoms } = usePools();
 
-    const preview_pool_coin_denom = `G` + (allPools.value.length + 1);
+    const previewPoolCoinDenom = computed(() => {
+      return `G` + (allPools.value.length + 1);
+    });
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -932,7 +927,7 @@ export default {
       isValid,
       exchangeAmount,
       hasPrices,
-      preview_pool_coin_denom,
+      previewPoolCoinDenom,
       hasFunds,
       coinAChangeHandler,
       coinBChangeHandler,

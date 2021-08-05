@@ -196,7 +196,7 @@ export default defineComponent({
       const denomB = await getDisplayName(denoms[1], chainName.value);
 
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
-      poolInfo.denom = `Gravity  ` + allPools.value.length;
+      poolInfo.denom = `Gravity ` + (allPools.value.length + 1);
       poolInfo.denoms = denoms;
     };
 
