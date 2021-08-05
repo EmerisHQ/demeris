@@ -3,11 +3,11 @@
     <img class="portal" src="@/assets/svg/portal.svg" />
     <img class="surfer" src="@/assets/images/surfer.png" />
 
-    <div v-if="isMobile" class="connect-wallet-panel">
+    <div v-show="isMobile" class="connect-wallet-panel">
       <GetDesktop ref="getDesktopRef" />
     </div>
 
-    <div v-else-if="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
+    <div v-show="(isKeplrInstalled && !isWarningNeeded) || isWarningAgreed" class="connect-wallet-panel">
       <ConnectKeplr
         ref="connectKeplrRef"
         type="welcome"
@@ -17,15 +17,15 @@
       />
     </div>
 
-    <div v-else-if="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
+    <div v-show="isWarningNeeded && !isWarningAgreed" class="connect-wallet-panel">
       <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
     </div>
 
-    <div v-else-if="isKeplrSupported && !isKeplrInstalled" class="connect-wallet-panel">
+    <div v-show="isKeplrSupported && !isKeplrInstalled" class="connect-wallet-panel">
       <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
     </div>
 
-    <div v-else class="connect-wallet-panel">
+    <div class="connect-wallet-panel">
       <GetBrowser ref="getBrowserRef" :is-loading="isLoading" />
     </div>
   </div>
@@ -106,6 +106,7 @@ export default defineComponent({
     const agreeWarning = () => {
       isWarningNeeded.value = false;
       isWarningAgreed.value = true;
+      connectKeplrRef.value.signIn();
     };
     const showWarning = () => {
       isWarningNeeded.value = true;

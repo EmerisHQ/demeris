@@ -119,7 +119,7 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, trySignIn, emitTryDemo };
+    return { isConnecting, emitCancel, cancel, signIn, trySignIn, emitTryDemo };
   },
 });
 </script>
