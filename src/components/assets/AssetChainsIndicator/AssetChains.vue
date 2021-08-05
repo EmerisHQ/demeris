@@ -1,6 +1,6 @@
 <template>
   <tippy v-if="chainsCount > 1" class="block w-8 h-8 relative">
-    <CircleSymbol variant="chain" :chain-name="balances[0].on_chain" :glow="false" />
+    <CircleSymbol variant="chain" :chain-name="filteredBalances[0].on_chain" :glow="false" />
     <div class="absolute inset-0.5 -text-1 font-normal z-10 flex items-center justify-center">
       <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
     </div>
