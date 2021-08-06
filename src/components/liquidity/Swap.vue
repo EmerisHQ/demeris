@@ -8,7 +8,7 @@
           amount: payCoinAmount,
         },
         receive: { denom: receiveCoinData?.base_denom, amount: receiveCoinAmount },
-        firstReserve: selectedPoolData?.reserves[0],
+        isReverse: selectedPoolData?.reserves[0] !== payCoinData?.base_denom,
         poolPrice: selectedPoolData?.poolPrice,
       }"
       @goback="slippageSettingModalToggle"
