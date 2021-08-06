@@ -118,7 +118,7 @@
 
     <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.estimate') }}</div>
-      <div class="fees-detail__info-value">
+      <div class="fees-detail__info-value font-bold">
         {{ totalFee }}
       </div>
     </div>
