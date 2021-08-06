@@ -39,7 +39,7 @@
 
       <tbody>
         <tr
-          v-for="asset in balancesFiltered"
+          v-for="asset in orderBalances(balancesWithName)"
           :key="asset.denom"
           class="assets-table__row group cursor-pointer"
           @click="handleClick(asset)"
@@ -99,7 +99,8 @@
 
 <script lang="ts">
 import groupBy from 'lodash.groupby';
-import { computed, defineComponent, PropType, ref } from 'vue';
+import orderBy from 'lodash.orderby';
+import { computed, defineComponent, PropType, reactive, ref } from 'vue';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
@@ -112,7 +113,9 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import getPrice from '@/utils/getPrice';
 
 type TableStyleType = 'full' | 'balance';
 
@@ -217,6 +220,31 @@ export default defineComponent({
       return balancesByAsset.value.slice(0, currentLimit.value);
     });
 
+    const balancesWithPrice = computed(() => {
+      let balances = balancesFiltered.value;
+
+      if (balances.length > 0) {
+        balances.map((b) => {
+          let price = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
+          (b as any).price = price;
+        });
+      }
+      return balances;
+    });
+
+    const balancesWithName = computed(() => {
+      let balances = balancesWithPrice.value;
+      balances.map(async (b) => {
+        let name = await getDisplayName(b.denom, store.getters['demeris/getDexChain']);
+        (b as any).name = name;
+      });
+      return balances;
+    });
+
+    const orderBalances = (balances) => {
+      return orderBy(balances, [(b) => b.price.value, 'name'], ['desc', 'asc']);
+    };
+
     const getFormattedMarketCap = (denom: string) => {
       const price = store.getters['demeris/getPrice']({ denom });
       const supply = store.getters['demeris/getSupply']({ denom });
@@ -241,9 +269,11 @@ export default defineComponent({
       allBalances,
       balancesByAsset,
       balancesFiltered,
+      balancesWithName,
       getFormattedMarketCap,
       handleClick,
       viewAllHandler,
+      orderBalances,
     };
   },
 });
