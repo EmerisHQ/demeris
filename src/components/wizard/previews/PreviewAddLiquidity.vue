@@ -67,17 +67,12 @@
       </div>
     </ListItem>
 
-    <ListItem
-      :label="$t('components.previews.addWithdrawLiquidity.feesLbl')"
-      :description="$t('components.previews.addWithdrawLiquidity.feeLbl')"
-    >
-      <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
-        <div class="flex justify-end items-center">
-          <div class="text-right">
-            <AmountDisplay :amount="{ amount: amount, denom: denom }" />
-          </div>
-        </div>
-      </template>
+    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="col">
+      <ListItem :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
+        <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
+          <AmountDisplay :amount="{ amount: amount, denom: denom }" />
+        </template>
+      </ListItem>
     </ListItem>
   </List>
 </template>
