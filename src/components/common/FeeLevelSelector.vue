@@ -109,7 +109,7 @@
       class="mt-4"
     />
 
-    <div v-if="swapTx" class="fees-detail__info s-minus">
+    <div v-if="swapTx" class="fees-detail__info s-minus flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.swapFee') }}</div>
       <div class="fees-detail__info-value">
         {{ swapFee }}
