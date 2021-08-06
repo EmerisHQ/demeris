@@ -18,6 +18,7 @@
         <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
           <div class="mx-auto max-w-md mb-20">
             <CoinList
+              v-if="keywordFilteredAssets[0].length > 0"
               :data="keywordFilteredAssets[0]"
               :type="title === 'Receive' ? 'receive' : 'pay'"
               :show-balance="showBalance"
