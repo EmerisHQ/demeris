@@ -116,7 +116,7 @@ export default defineComponent({
     });
 
     const updateTotalLiquidityPrice = async () => {
-      if (!pool.value || !reserveBalances.value) {
+      if (!pool.value || reserveBalances.value.length == 0) {
         return;
       }
 
@@ -127,7 +127,6 @@ export default defineComponent({
       for (const [index, denom] of reserveDenoms.entries()) {
         const price = store.getters['demeris/getPrice']({ denom });
         const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-
         total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
       }
 

@@ -15,7 +15,7 @@
 
         <div class="flex flex-col mt-12">
           <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
-
+          <Button variant="secondary" :name="$t('wallet.connect.modal1.demo')" class="mt-4" @click="signInDemo" />
           <a
             href="https://t.me/EmerisHQ"
             target="_blank"
@@ -80,13 +80,17 @@ export default defineComponent({
       isConnecting.value = true;
     };
 
+    const signInDemo = () => {
+      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      isConnecting.value = true;
+    };
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
         emit('connect');
       }
     });
 
-    return { isConnecting, emitCancel, cancel, signIn };
+    return { isConnecting, emitCancel, cancel, signIn, signInDemo };
   },
 });
 </script>

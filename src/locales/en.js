@@ -31,6 +31,7 @@ export const messages = {
           title: 'Connect to Keplr',
           text: 'To use Emeris beta, please allow this web app to connect to the Keplr browser extension wallet.',
           button: 'Connect to Keplr',
+          demo: 'Try the demo',
           needHelp: 'Need help?',
           opening: 'Opening Keplr',
           connecting: 'Connecting',

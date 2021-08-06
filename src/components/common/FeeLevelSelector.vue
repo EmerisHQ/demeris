@@ -235,7 +235,7 @@ export default defineComponent({
 
     const isPoolCoin = computed(() => {
       const tx = props.steps[0]?.transactions[0].data as SwapData;
-      return tx.from.denom.startsWith('pool');
+      return tx.from?.denom.startsWith('pool');
     });
 
     const poolCoinDisplayDenom = ref('');
@@ -243,6 +243,7 @@ export default defineComponent({
       () => props.steps,
       async () => {
         const tx = props.steps[0]?.transactions[0].data as SwapData;
+        console.log(props.steps);
         poolCoinDisplayDenom.value = await getDisplayName(tx.from.denom, store.getters['demeris/getDexChain']);
       },
       { immediate: true },
