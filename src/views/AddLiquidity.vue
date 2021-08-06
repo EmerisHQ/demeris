@@ -243,6 +243,11 @@
                     </span>
                   </div>
                 </ListItem>
+
+                <ListItem v-if="hasPair && !hasPool" inset size="md" label="Pool creation fee">
+                  <AmountDisplay :amount="{ amount: 40000000, denom: 'uatom' }" />
+                </ListItem>
+
                 <div class="mt-6 mb-2">
                   <FeeLevelSelector
                     v-if="actionSteps.length > 0 && gasPrice"

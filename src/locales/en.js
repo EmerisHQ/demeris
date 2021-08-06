@@ -199,7 +199,9 @@ export const messages = {
           feesLbl: 'Fees',
           feeLbl: 'Transaction fee',
         },
-        createPool: {},
+        createPool: {
+          poolCreationFee: 'Pool creation fee',
+        },
         transfer: {
           sendLbl: 'Send',
           fromLbl: 'Send address',
