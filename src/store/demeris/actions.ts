@@ -707,6 +707,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_TXS]({ getters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
     try {
+      // sleep
+      await new Promise((r) => setTimeout(r, 500));
+      console.log('setSleep', 500);
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/txs/' + txhash);
       return response.data;
     } catch (e) {
