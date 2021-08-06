@@ -130,7 +130,7 @@ export default defineComponent({
 
     const displaySeletedPair = ref('');
     watch(
-      () => props.counterDenom,
+      () => props.counterDenom?.base_denom,
       async () => {
         if (props.counterDenom?.base_denom) {
           displaySeletedPair.value = await getDisplayName(
@@ -139,6 +139,7 @@ export default defineComponent({
           );
         }
       },
+      { immediate: true },
     );
 
     const keywordFilteredAssets = computed(() => {
