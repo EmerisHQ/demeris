@@ -62,7 +62,7 @@
         <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
           <a
             href="https://emeris.com/privacy"
-            class="settings-modal__list__item white-space-nowrap hover:text-text"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -70,7 +70,7 @@
           </a>
           <a
             href="https://emeris.com/terms"
-            class="settings-modal__list__item white-space-nowrap hover:text-text"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -78,7 +78,7 @@
           </a>
           <a
             href="https://www.cookiesandyou.com/"
-            class="settings-modal__list__item white-space-nowrap hover:text-text"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
             rel="noopener noreferrer"
             target="_blank"
           >

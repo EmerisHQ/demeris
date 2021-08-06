@@ -243,7 +243,7 @@ export const messages = {
         twitter: 'Twitter',
         privacy: 'Privacy',
         tos: 'Terms of Service',
-        cookiesPolicy: 'Cookies Policy',
+        cookiesPolicy: 'Cookies',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',
