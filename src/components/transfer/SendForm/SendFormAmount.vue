@@ -171,6 +171,37 @@
         :disabled="!isValid"
         :click-function="onSubmit"
       />
+      <button
+        v-if="state.currentAsset && !hasFunds"
+        class="
+          get-asset-cta
+          mt-6
+          relative
+          h-12
+          py-3
+          px-4
+          flex
+          items-center
+          w-full
+          bg-surface
+          shadow-button
+          rounded-xl
+          overflow-hidden
+          outline-none
+          text-left
+          font-medium
+          transition
+          transform
+          hover:-translate-y-px
+          active:opacity-70 active:transform-none
+        "
+        @click="openAssetPage"
+      >
+        <span> {{ $t('generic_cta.get') }} <Denom :name="state.currentAsset?.base_denom" /> &rarr; </span>
+        <div class="absolute right-4 -mt-4 transform -rotate-6">
+          <CircleSymbol size="lg" :denom="state.currentAsset?.base_denom" />
+        </div>
+      </button>
     </fieldset>
   </div>
 </template>
@@ -179,6 +210,7 @@
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -234,6 +266,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const router = useRouter();
     const form = inject<SendAddressForm>('transferForm');
     const { nativeBalances } = useAccount();
 
@@ -290,6 +323,20 @@ export default defineComponent({
       }
     });
 
+    const hasFunds = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+
+      return +totalAmount > 0;
+    });
+
+    const openAssetPage = () => {
+      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+    };
+
     const hasPrice = computed(() => {
       if (!state.currentAsset) {
         return false;
@@ -302,6 +349,10 @@ export default defineComponent({
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
+        return true;
+      }
+
+      if (!hasFunds.value) {
         return false;
       }
 
@@ -420,6 +471,7 @@ export default defineComponent({
     }
 
     return {
+      hasFunds,
       availableBalances,
       state,
       form,
@@ -428,6 +480,7 @@ export default defineComponent({
       hasSufficientFunds,
       denomDecimals,
       isValid,
+      openAssetPage,
       onSubmit,
       setCurrentAsset,
       toggleSelectModal,
@@ -442,5 +495,11 @@ export default defineComponent({
   &:focus:not(:active) {
     --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
   }
+}
+.get-asset-cta {
+  background-image: url('~@/assets/images/gold-rings-2.png');
+  background-position: 121% 70%;
+  background-repeat: no-repeat;
+  background-size: 52%;
 }
 </style>
