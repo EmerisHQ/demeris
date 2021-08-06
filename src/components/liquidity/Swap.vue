@@ -154,7 +154,7 @@ import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { SwapAction } from '@/types/actions';
+import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
@@ -188,9 +188,15 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
-    });
+    const gasPrice = ref('');
+    watch(
+      () => store.getters['demeris/getPreferredGasPriceLevel'],
+      () => {
+        gasPrice.value = store.getters['demeris/getPreferredGasPriceLevel'] || GasPriceLevel.AVERAGE;
+      },
+      { immediate: true },
+    );
+
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
@@ -744,7 +750,7 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData?.denom, data.receiveCoinData?.denom, data.payCoinAmount];
+        return [data.payCoinData?.denom, data.receiveCoinData?.denom];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
@@ -882,9 +888,9 @@ export default defineComponent({
       data.receiveCoinData = assetsToReceive.value.find((asset) => {
         return asset?.base_denom === originPayCoinData?.base_denom;
       });
-
-      data.receiveCoinAmount = data.payCoinAmount;
-      setCounterPairCoinAmount('');
+      data.payCoinAmount = null;
+      data.receiveCoinAmount = null;
+      // setCounterPairCoinAmount('');
     }
 
     function setMax() {
