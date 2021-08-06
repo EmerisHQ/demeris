@@ -87,9 +87,8 @@
       />
     </label>
   </div>
-
   <DenomSelectModal
-    v-show="isOpen"
+    v-if="isOpen"
     class="inset-0 z-30"
     :class="{
       'absolute overflow-hidden z-30 bg-surface shadow-panel rounded-2xl': size === 'sm',
