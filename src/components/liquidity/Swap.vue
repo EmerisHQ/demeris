@@ -744,7 +744,7 @@ export default defineComponent({
     const poolId = ref(null); // for price update
     watch(
       () => {
-        return [data.payCoinData?.denom, data.receiveCoinData, data.payCoinAmount];
+        return [data.payCoinData?.denom, data.receiveCoinData?.denom, data.payCoinAmount];
       },
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
@@ -792,7 +792,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-
+            setCounterPairCoinAmount('Pay');
             data.isLoading = false;
           } catch (e) {
             poolId.value = null;
@@ -904,12 +904,8 @@ export default defineComponent({
     function denomSelectHandler(payload) {
       if (payload.type === 'Receive') {
         data.receiveCoinData = payload;
-        data.payCoinAmount = null;
-        data.receiveCoinAmount = null;
       } else {
         data.payCoinData = payload;
-        data.payCoinAmount = null;
-        data.receiveCoinAmount = null;
       }
     }
 
