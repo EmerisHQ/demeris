@@ -57,17 +57,33 @@
             <span>emeris.com</span>
             <span>&#8599;</span>
           </a>
-          <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.privacy') }}
-            </router-link>
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.termsOfUse') }}
-            </router-link>
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.cookiesPolicy') }}
-            </router-link>
-          </div>
+        </div>
+
+        <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
+          <a
+            href="https://emeris.com/privacy"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.privacy') }}
+          </a>
+          <a
+            href="https://emeris.com/terms"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.tos') }}
+          </a>
+          <a
+            href="https://www.cookiesandyou.com/"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.cookiesPolicy') }}
+          </a>
         </div>
       </div>
       <!-- end settings-basic-->
