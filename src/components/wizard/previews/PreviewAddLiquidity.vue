@@ -12,15 +12,13 @@
       </ListItem>
 
       <ListItem inset>
-        <div class="flex justify-end items-center">
-          <div class="text-right">
-            <div>
-              <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-              <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
-            </div>
-            <div class="block text-muted -text-1 mt-0.5">
-              {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
-            </div>
+        <div class="flex justify-between">
+          <div class="block text-muted -text-1 mt-0.5">
+            {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
+          </div>
+          <div>
+            <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
+            <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
           </div>
         </div>
       </ListItem>
@@ -54,29 +52,29 @@
       </div>
     </ListItem>
 
-    <ListItem :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)">
+    <ListItem
+      :label="$t(`components.previews.addWithdrawLiquidity.${response ? 'receivedLbl' : 'receiveLbl'}`)"
+      :description="$t('components.previews.addWithdrawLiquidity.receiveLblHint')"
+    >
       <div class="flex justify-end items-center">
         <div class="text-right">
           <AmountDisplay
             class="font-medium text-1"
             :amount="{ amount: hasPool ? receiveAmount : 1e6, denom: poolInfo.denom }"
           />
-          <div class="block text-muted -text-1 mt-0.5">
-            {{ $t('components.previews.addWithdrawLiquidity.receiveLblHint') }}
-          </div>
         </div>
         <CircleSymbol v-if="poolInfo.denoms.length" :pool-denoms="poolInfo.denoms" size="md" class="ml-3" />
       </div>
     </ListItem>
 
-    <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')">
+    <ListItem
+      :label="$t('components.previews.addWithdrawLiquidity.feesLbl')"
+      :description="$t('components.previews.addWithdrawLiquidity.feeLbl')"
+    >
       <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
         <div class="flex justify-end items-center">
           <div class="text-right">
             <AmountDisplay :amount="{ amount: amount, denom: denom }" />
-            <div class="block text-muted -text-1 mt-0.5">
-              {{ $t('components.previews.addWithdrawLiquidity.feeLbl') }}
-            </div>
           </div>
         </div>
       </template>
