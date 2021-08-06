@@ -56,6 +56,10 @@
             </td>
 
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              <Price :amount="{ denom: asset.denom, amount: null }" />
+            </td>
+
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
               <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
               <div class="text-muted mt-0.5 -text-1">
                 <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
