@@ -11,8 +11,11 @@
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
-              1 <Ticker :name="walletBalances.coinA.denom" /> &asymp; {{ exchangeAmount }}
-              <Ticker :name="walletBalances.coinB.denom" />
+              <template v-if="exchangeAmount">
+                1 <Ticker :name="walletBalances.coinA.denom" /> &asymp; {{ exchangeAmount }}
+                <Ticker :name="walletBalances.coinB.denom" />
+              </template>
+              <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
@@ -269,11 +272,10 @@ export default defineComponent({
     });
 
     const exchangeAmount = computed(() => {
-      let balanceA = walletBalances.value.coinA.amount;
-      let balanceB = walletBalances.value.coinB.amount;
-      console.log('balanceA', balanceA, 'balanceB', balanceB);
+      let balanceA = reserveBalances.value[0].amount;
+      let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {
-        return Math.round((balanceA / balanceB) * 100) / 100;
+        return Math.round((balanceB / balanceA) * 100) / 100;
       }
       return undefined;
     });
