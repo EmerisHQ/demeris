@@ -90,7 +90,10 @@
         <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>
 
-          <select v-model="settings.theme" class="bg-transparent font-medium appearance-none outline-none">
+          <select
+            v-model="settings.theme"
+            class="bg-transparent font-medium appearance-none outline-none dark:bg-surface"
+          >
             <option value="system">{{ $t('components.settingsMenu.system') }}</option>
             <option value="light">{{ $t('components.settingsMenu.light') }}</option>
             <option value="dark">{{ $t('components.settingsMenu.dark') }}</option>
