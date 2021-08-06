@@ -261,20 +261,20 @@ export default defineComponent({
       return balancesByAsset.value.slice(0, currentLimit.value);
     });
 
-    const balancesWithPrice = computed(() => {
+    const balancesWithValue = computed(() => {
       let balances = balancesFiltered.value;
 
       if (balances.length > 0) {
         balances.map((b) => {
-          let price = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
-          (b as any).price = price;
+          let value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
+          (b as any).value = value;
         });
       }
       return balances;
     });
 
     const balancesWithName = computed(() => {
-      let balances = balancesWithPrice.value;
+      let balances = balancesWithValue.value;
       balances.map(async (b) => {
         let name = await getDisplayName(b.denom, store.getters['demeris/getDexChain']);
         (b as any).name = name;
@@ -294,11 +294,11 @@ export default defineComponent({
     });
 
     const orderUserBalances = (balances) => {
-      return orderBy(balances, [(b) => b.price.value, 'name'], ['desc', 'asc']);
+      return orderBy(balances, [(b) => b.value.value, 'name'], ['desc', 'asc']);
     };
 
     const orderAllBalances = (balances) => {
-      return orderBy(balances, ['marketCap', (b) => b.price.value, 'name'], ['desc', 'desc', 'asc']);
+      return orderBy(balances, ['marketCap', (b) => b.value.value, 'name'], ['desc', 'desc', 'asc']);
     };
 
     const getFormattedMarketCap = (denom: string) => {

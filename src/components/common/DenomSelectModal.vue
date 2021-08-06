@@ -32,7 +32,7 @@
                 {{ $t('components.denomSelect.otherAssets') }}
               </div>
               <div class="other-assets__subtitle -text-1 px-6">
-                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySelectedPair }) }}
               </div>
               <CoinList
                 :data="keywordFilteredAssets[1]"
@@ -128,12 +128,12 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const displaySeletedPair = ref('');
+    const displaySelectedPair = ref('');
     watch(
       () => props.counterDenom?.base_denom,
       async () => {
         if (props.counterDenom?.base_denom) {
-          displaySeletedPair.value = await getDisplayName(
+          displaySelectedPair.value = await getDisplayName(
             props.counterDenom.base_denom,
             store.getters['demeris/getDexChain'],
           );
@@ -197,7 +197,7 @@ export default defineComponent({
       keywordFilteredAssets,
       displayNameAddedList,
       selectedDenom,
-      displaySeletedPair,
+      displaySelectedPair,
     };
   },
 });
