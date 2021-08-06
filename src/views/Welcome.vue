@@ -268,7 +268,7 @@ export default defineComponent({
     max-width: 34rem;
     position: relative;
     z-index: 11;
-    background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.5));
+    background: linear-gradient(to right, var(--bg), var(--transparent));
 
     .agree-warning {
       .scrollable {
