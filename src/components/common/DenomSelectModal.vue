@@ -132,10 +132,12 @@ export default defineComponent({
     watch(
       () => props.counterDenom,
       async () => {
-        displaySeletedPair.value = await getDisplayName(
-          props.counterDenom.base_denom,
-          store.getters['demeris/getDexChain'],
-        );
+        if (props.counterDenom?.base_denom) {
+          displaySeletedPair.value = await getDisplayName(
+            props.counterDenom.base_denom,
+            store.getters['demeris/getDexChain'],
+          );
+        }
       },
     );
 

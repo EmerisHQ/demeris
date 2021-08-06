@@ -391,7 +391,9 @@ export default defineComponent({
         let receiveSide = availablePairs.value.filter((x) => x.pay.base_denom == data.payCoinData?.base_denom); // Chain name check optional since we only have unique verified denoms
         return receiveSide;
       } else {
-        return availablePairs.value;
+        return availablePairs.value.filter(
+          (pair, index, self) => index === self.findIndex((p) => p.receive.denom === pair.receive.denom),
+        );
       }
     });
     const allBalances = computed(() => {
@@ -446,6 +448,10 @@ export default defineComponent({
     });
 
     const otherAssetsToPay = computed(() => {
+      if (!data.receiveCoinData) {
+        return [];
+      }
+
       let assets = allBalances.value.filter((x) => {
         return availablePairs.value.find((y) => y.pay.base_denom == x.base_denom);
       });
@@ -461,6 +467,10 @@ export default defineComponent({
     });
 
     const otherAssetsToReceive = computed(() => {
+      if (!data.payCoinData) {
+        return [];
+      }
+
       let receivalbePairs = availablePairs.value.filter(
         (pair, index, self) => index === self.findIndex((p) => p.pay.denom === pair.pay.denom),
       );
