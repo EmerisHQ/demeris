@@ -873,8 +873,8 @@ export default defineComponent({
         return asset?.base_denom === originPayCoinData?.base_denom;
       });
 
-      data.payCoinAmount = 0;
-      data.receiveCoinAmount = 0;
+      data.receiveCoinAmount = data.payCoinAmount;
+      setCounterPairCoinAmount('');
     }
 
     function setMax() {
