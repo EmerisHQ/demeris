@@ -23,7 +23,7 @@ export default defineComponent({
     const ticker = ref('-');
 
     const displayValue = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({ name: props.amount.denom }) || 6;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: baseDenom.value }) || 6;
       return parseInt((props.amount as Amount).amount) / Math.pow(10, parseInt(precision));
     });
 
