@@ -68,6 +68,9 @@
     </ListItem>
 
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="col">
+      <ListItem v-if="!hasPool" inset description="Pool creation fee">
+        <AmountDisplay :amount="creationFee" />
+      </ListItem>
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
           <AmountDisplay :amount="{ amount: amount, denom: denom }" />
@@ -128,6 +131,10 @@ export default defineComponent({
       pairName: '-/-',
       denom: '-',
       denoms: [],
+    });
+
+    const creationFee = computed(() => {
+      return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
     const data = computed(() => {
@@ -212,6 +219,7 @@ export default defineComponent({
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      creationFee,
       refundedAmount,
       exchangeAmount,
       hasPool,

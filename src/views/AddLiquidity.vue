@@ -245,7 +245,7 @@
                 </ListItem>
 
                 <ListItem v-if="hasPair && !hasPool" inset size="md" label="Pool creation fee">
-                  <AmountDisplay :amount="{ amount: 40000000, denom: 'uatom' }" />
+                  <AmountDisplay :amount="creationFee" />
                 </ListItem>
 
                 <div class="mt-6 mb-2">
@@ -385,6 +385,10 @@ export default {
 
     const gasPrice = computed(() => {
       return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
+    const creationFee = computed(() => {
+      return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
     const hasPrices = computed(() => {
@@ -918,6 +922,7 @@ export default {
 
     return {
       gasPrice,
+      creationFee,
       actionSteps,
       balances,
       balancesForSecond,
