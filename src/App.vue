@@ -88,7 +88,10 @@ export default defineComponent({
   mounted() {
     window.addEventListener('keplr_keystorechange', async () => {
       window.localStorage.setItem('lastEmerisSession', '');
-      this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      if (this.$store.getters['demeris/isSignedIn']) {
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      }
     });
 
     // send new users to welcome page

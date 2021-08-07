@@ -7,7 +7,13 @@
         v-html="getAvatar(keplrAccountName)"
       />
       <div
+        v-if="keplrAccountName != 'Demo Account'"
         class="avatar__gradient relative rounded-full overflow-hidden w-full h-full"
+        v-html="getAvatar(keplrAccountName)"
+      ></div>
+      <div
+        v-else
+        class="avatar__gradient_demo relative rounded-full overflow-hidden w-full h-full"
         v-html="getAvatar(keplrAccountName)"
       ></div>
     </div>
@@ -63,7 +69,11 @@ export default defineComponent({
   },
   methods: {
     getAvatar: function (name: string): string {
-      return avatar(MD5(name) + '', 64);
+      if (name == 'Demo Account') {
+        return '<svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.5" filter="url(#filter0_f)"> <circle cx="29" cy="29" r="16" fill="#D5BC83"/> <circle cx="29" cy="29" r="16" fill="url(#paint0_angular)"/> </g> <circle cx="29" cy="25" r="16" fill="#D5BC83"/> <circle cx="29" cy="25" r="16" fill="url(#paint1_angular)"/> <defs> <filter id="filter0_f" x="0.2" y="0.2" width="57.6" height="57.6" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"> <feFlood flood-opacity="0" result="BackgroundImageFix"/> <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/> <feGaussianBlur stdDeviation="6.4" result="effect1_foregroundBlur"/> </filter> <radialGradient id="paint0_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 29) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> <radialGradient id="paint1_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 25) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> </defs> </svg> ';
+      } else {
+        return avatar(MD5(name) + '', 64);
+      }
     },
   },
 });

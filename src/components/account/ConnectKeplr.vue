@@ -26,7 +26,7 @@
           <a
             v-if="type === 'welcome'"
             class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
-            @click="emitTryDemo"
+            @click="signInDemo"
           >
             {{ $t('generic_cta.tryTheDemo') }}
           </a>
@@ -90,10 +90,6 @@ export default defineComponent({
       emit('cancel');
     };
 
-    const emitTryDemo = () => {
-      emit('try-demo');
-    };
-
     const cancel = () => {
       isConnecting.value = false;
     };
@@ -120,13 +116,17 @@ export default defineComponent({
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
     });
 
+    const signInDemo = () => {
+      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      isConnecting.value = true;
+    };
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
         emit('connect');
       }
     });
 
-    return { isConnecting, emitCancel, cancel, signIn, trySignIn, emitTryDemo };
+    return { isConnecting, emitCancel, cancel, signIn, trySignIn, signInDemo };
   },
 });
 </script>
