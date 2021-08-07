@@ -1,11 +1,7 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      stroke-width="2"
-      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-    />
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M11.5 0.5H0.5V11.5H11.5V0.5Z" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M13.5 4.5H15.5V15.5H4.5V13.5" stroke-linecap="round" stroke-linejoin="round" />
   </svg>
 </template>
 

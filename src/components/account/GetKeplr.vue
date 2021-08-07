@@ -1,28 +1,25 @@
 <template>
   <div class="get-keplr">
-    <div class="get-keplr__wrapper">
-      <div class="get-keplr__content">
-        <slot name="title">
-          <h2 class="get-keplr__title">{{ $t('wallet.connect.modal2.title') }}</h2>
+    <div class="flex flex-col py-8 px-8 text-center">
+      <slot name="title">
+        <h2 v-if="type === 'welcome'" class="text-3 font-bold">
+          {{ $t('generic_cta.connectToEmeris') }}
+        </h2>
+        <h2 v-else class="text-3 font-bold">{{ $t('wallet.connect.modal2.title') }}</h2>
+      </slot>
+
+      <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+        <slot name="description">
+          <p>{{ $t('wallet.connect.modal2.text') }}</p>
         </slot>
-
-        <div class="get-keplr__description">
-          <slot name="description">
-            <p>{{ $t('wallet.connect.modal2.text') }}</p>
-          </slot>
-        </div>
-
-        <div class="get-keplr__controls">
-          <Button :name="$t('wallet.connect.modal2.button1')" class="get-keplr__controls__button" @click="openUrl" />
-          <Button
-            :name="$t('wallet.connect.modal2.button2')"
-            class="get-keplr__controls__button"
-            :is-outline="true"
-            @click="reloadApp"
-          />
-        </div>
       </div>
-      <ConnectBanner />
+
+      <div class="flex items-center flex-col mt-12">
+        <Button :name="$t('wallet.connect.modal2.button')" class="connect-wallet__controls__button" @click="openUrl" />
+        <a class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitTryDemo">
+          {{ $t('generic_cta.tryTheDemo') }}
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -32,28 +29,29 @@ import { defineComponent } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
-import ConnectBanner from './ConnectBanner.vue';
-
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    ConnectBanner,
   },
 
   props: {
-    showBanner: {
-      type: Boolean,
-      default: true,
+    type: {
+      type: String,
+      default: undefined,
     },
   },
 
-  emits: ['cancel', 'connect'],
+  emits: ['cancel', 'try-demo'],
 
   setup(_, { emit }) {
     const emitCancel = () => {
       emit('cancel');
+    };
+
+    const emitTryDemo = () => {
+      emit('try-demo');
     };
 
     const openUrl = () => {
@@ -67,54 +65,23 @@ export default defineComponent({
       location.reload();
     };
 
-    return { emitCancel, openUrl, reloadApp };
+    return { emitCancel, openUrl, reloadApp, emitTryDemo };
   },
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .get-keplr {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
-    min-height: inherit;
-  }
-
-  &__content {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
   &__controls {
     display: flex;
     flex-direction: column;
+    margin-top: 3rem;
 
     &__button {
       & + & {
-        margin-top: 1.6rem;
+        margin-top: 1rem;
       }
     }
-  }
-
-  &__description {
-    flex: 1 1 0%;
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
-    }
-  }
-
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
   }
 }
 </style>

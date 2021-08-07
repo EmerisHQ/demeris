@@ -1,77 +1,97 @@
 <template>
   <div class="connect-keplr">
-    <div class="connect-keplr__wrapper">
-      <div class="connect-keplr__content">
-        <template v-if="!isConnecting">
-          <slot name="title">
-            <h2 class="connect-keplr__title">{{ $t('wallet.connect.modal1.title') }}</h2>
+    <div class="flex flex-col px-8 text-center" :class="type == 'welcome' ? 'py-8' : 'pb-8'">
+      <template v-if="!isConnecting">
+        <slot name="title">
+          <img
+            v-if="type !== 'welcome'"
+            src="~@/assets/images/keplr-wallet-logo.png"
+            alt="Keplr logo"
+            class="w-12 mx-auto mb-8"
+          />
+          <h2 v-if="type === 'welcome'" class="text-3 font-bold">
+            {{ $t('generic_cta.connectToEmeris') }}
+          </h2>
+          <h2 v-else class="text-3 font-bold">{{ $t('wallet.connect.modal1.title') }}</h2>
+        </slot>
+
+        <div class="flex-1 mt-8 leading-copy text-muted space-y-4">
+          <slot name="description">
+            <p>{{ $t('wallet.connect.modal1.text') }}</p>
           </slot>
-
-          <div class="connect-keplr__description">
-            <slot name="description">
-              <p>{{ $t('wallet.connect.modal1.text') }}</p>
-            </slot>
-          </div>
-
-          <div class="connect-keplr__controls">
-            <Button :name="$t('wallet.connect.modal1.button')" @click="signIn" />
-
-            <a
-              href="https://t.me/EmerisHQ"
-              rel="noopener noreferrer"
-              target="_blank"
-              class="connect-keplr__controls__help s-minus"
-            >
-              {{ $t('wallet.connect.modal1.needHelp') }}
-            </a>
-          </div>
-        </template>
-
-        <div v-else class="connect-keplr__connecting">
-          <div class="connect-keplr__connecting__main">
-            <Spinner :size="3.2" />
-            <span class="connect-keplr__connecting__main__label">{{ $t('wallet.connect.modal1.opening') }}</span>
-            <p class="s-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
-          </div>
-
-          <button class="connect-keplr__connecting__button" @click="cancel">
-            {{ $t('generic_cta.cancel') }}
-          </button>
         </div>
-        <ConnectBanner />
+
+        <div class="flex items-center flex-col mt-12">
+          <Button :name="$t('wallet.connect.modal1.button')" @click="trySignIn" />
+          <a
+            v-if="type === 'welcome'"
+            class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
+            @click="emitTryDemo"
+          >
+            {{ $t('generic_cta.tryTheDemo') }}
+          </a>
+          <a
+            v-else
+            class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
+            @click="emitCancel"
+          >
+            {{ $t('generic_cta.cancel') }}
+          </a>
+        </div>
+      </template>
+
+      <div v-else class="flex flex-col items-center justify-center h-full w-full">
+        <div class="flex-1 flex flex-col items-center justify-center">
+          <Spinner :size="3" />
+          <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.opening') }}</span>
+          <p class="text-3 font-bold mt-2">{{ $t('wallet.connect.modal1.connecting') }}</p>
+          <span class="mt-6 text-muted">{{ $t('wallet.connect.modal1.connectingHelp') }}</span>
+        </div>
+        <Button variant="link" :name="$t('generic_cta.cancel')" :click-function="cancel" class="mt-12" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 import Spinner from '../ui/Spinner.vue';
-import ConnectBanner from './ConnectBanner.vue';
 
 export default defineComponent({
   name: 'ConnectKeplr',
 
   components: {
     Button,
-    ConnectBanner,
     Spinner,
   },
 
-  emits: ['cancel', 'connect'],
+  props: {
+    type: {
+      type: String,
+      default: undefined,
+    },
+  },
+
+  emits: ['cancel', 'connect', 'warning', 'try-demo'],
 
   setup(_, { emit }) {
     const store = useStore();
     const isConnecting = ref(false);
+    const isWarningAgreed = ref(null);
+    const isWarningNeeded = ref(null);
 
     const emitCancel = () => {
       cancel();
       emit('cancel');
+    };
+
+    const emitTryDemo = () => {
+      emit('try-demo');
     };
 
     const cancel = () => {
@@ -82,10 +102,23 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
+    const trySignIn = () => {
+      if (isWarningAgreed.value) {
+        signIn();
+      } else {
+        emit('warning');
+      }
+    };
+
     const signIn = () => {
       store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
       isConnecting.value = true;
     };
+
+    onMounted(() => {
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+    });
 
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
@@ -93,87 +126,12 @@ export default defineComponent({
       }
     });
 
-    return { isConnecting, emitCancel, cancel, signIn };
+    return { isConnecting, emitCancel, cancel, signIn, trySignIn, emitTryDemo };
   },
 });
 </script>
-
-<style lang="scss">
-.connect-keplr {
-  min-height: inherit;
-
-  &__wrapper {
-    display: flex;
-    min-height: inherit;
-  }
-
-  &__content {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    min-height: inherit;
-    padding: 4.8rem;
-    text-align: center;
-  }
-
-  &__connecting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-
-    &__main {
-      flex: 1 1 0%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      &__label {
-        margin-top: 2.6rem;
-        color: var(--muted);
-      }
-    }
-
-    &__button {
-      width: 100%;
-      padding: 1.6rem 2rem;
-      border: 1px solid #e6e6e6;
-      border-radius: 0.8rem;
-      font-weight: 600;
-    }
-  }
-
-  &__controls {
-    display: flex;
-    flex-direction: column;
-    margin-top: 5rem;
-
-    &__help {
-      margin-top: 1.6rem;
-      color: var(--muted);
-      display: block;
-      text-align: center;
-      padding: 0.6rem 0;
-    }
-  }
-
-  &__description {
-    flex: 1 1 0%;
-    margin-top: 4rem;
-    line-height: 1.8;
-    color: var(--muted);
-
-    p:first-child {
-      margin-bottom: 1.8rem;
-    }
-  }
-
-  &__title {
-    font-size: 2.8rem;
-    font-weight: 600;
-  }
+<style lang="scss" scoped>
+a {
+  cursor: pointer;
 }
 </style>

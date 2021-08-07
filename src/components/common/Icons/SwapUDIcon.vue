@@ -1,39 +1,33 @@
 <template>
-  <svg
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:cc="http://creativecommons.org/ns#"
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    xmlns:svg="http://www.w3.org/2000/svg"
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    viewBox="0 0 16.933333 16.933334"
-    height="64"
-    width="64"
-  >
-    <g transform="translate(0,-280.06665)">
-      <g transform="matrix(0,-1.0573921,1.0573921,0,-0.00211666,296.99998)" style="fill: none">
-        <path
-          style="stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10"
-          stroke-miterlimit="10"
-          d="m 12.507121,15.50505 3,-3 -3,-2.9999999"
-        />
-        <path
-          style="stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10"
-          stroke-miterlimit="10"
-          d="M 3.5071212,12.50505 H 15.507121"
-        />
-        <path
-          style="stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10"
-          stroke-miterlimit="10"
-          d="m 3.5071212,6.5050501 -2.99999996,-3 2.99999996,-2.99999998"
-        />
-        <path
-          style="stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10"
-          stroke-miterlimit="10"
-          d="M 12.507121,3.5050501 H 0.50712124"
-        />
-      </g>
-    </g>
+  <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M16.3672 3.5L13.3672 0.5L10.3672 3.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M13.3672 12.5L13.3672 0.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M7.36719 12.5L4.36719 15.5L1.36719 12.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M4.36719 3.5L4.36719 15.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
   </svg>
 </template>
 

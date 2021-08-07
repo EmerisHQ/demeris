@@ -1,26 +1,63 @@
 <template>
-  <div
-    class="address"
-    :class="{ 'address--readonly': readonly, 'address--invalid': invalid, 'elevation-button': !readonly }"
+  <label
+    class="address block relative w-full max-w-lg"
+    :class="{
+      'address--readonly border border-solid border-border rounded-xl': readonly,
+      'address--editable': !readonly,
+      'address--invalid': invalid,
+    }"
   >
-    <textarea v-model="model" rows="2" class="address__field" :readonly="readonly" v-bind="$attrs" spellcheck="false" />
-    <div class="address__controls">
-      <span class="address__chain"><ChainName :name="chainName" /></span>
+    <textarea
+      v-model="model"
+      rows="1"
+      class="
+        address__field
+        relative
+        z-10
+        block
+        w-full
+        px-4
+        pt-3
+        pb-20
+        text-0
+        leading-copy
+        font-normal
+        text-text
+        border-none
+        rounded-xl
+        appearance-none
+      "
+      :class="[
+        { 'bg-fg focus:bg-surface focus:rounded-lg': !readonly },
+        { 'bg-transparent': readonly },
+        { 'text-negative-text': invalid },
+      ]"
+      :placeholder="placeholder"
+      :readonly="readonly"
+      v-bind="$attrs"
+      spellcheck="false"
+    />
+    <div v-if="!readonly" class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular"></div>
+    <div class="address__controls absolute z-10 px-4 pb-4 left-0 bottom-0 w-full flex justify-between items-end">
+      <span class="text-muted -text-1"><ChainName :name="chainName" /></span>
       <Clipboard v-if="readonly" :text="address" />
+      <Button v-else name="Paste" size="sm" variant="secondary" />
     </div>
-  </div>
+  </label>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
+import Button from '@/components/ui/Button.vue';
 import Clipboard from '@/components/ui/Clipboard.vue';
 
 export default defineComponent({
   name: 'Address',
 
   components: {
+    Button,
     ChainName,
     Clipboard,
   },
@@ -35,6 +72,10 @@ export default defineComponent({
     readonly: {
       type: Boolean,
       default: false,
+    },
+    placeholder: {
+      type: String,
+      default: 'Enter an address',
     },
     address: {
       type: String,
@@ -60,44 +101,29 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.address {
-  padding: 1.6rem;
-  display: flex;
-  flex-direction: column;
-  border-radius: 1rem;
+textarea {
+  outline: none;
+  resize: none;
+}
 
-  &--invalid {
-    color: var(--negative-text);
-  }
+textarea::placeholder {
+  transition: color 150ms ease-out;
+}
 
-  &--readonly {
-    background: rgba(0, 0, 0, 0.03);
-  }
+textarea:hover::placeholder {
+  color: var(--muted);
+}
 
-  &__field {
-    width: 100%;
-    flex: 1 1 0%;
-    appearance: none;
-    outline: none;
-    background: transparent;
-    font-size: 1.6rem;
-    resize: none;
+textarea::placeholder,
+textarea:focus::placeholder {
+  color: var(--inactive);
+}
 
-    &::placeholder {
-      color: var(--inactive);
-    }
-  }
+.focus-border {
+  z-index: 7;
+}
 
-  &__controls {
-    margin-top: 1.6rem;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-
-  &__chain {
-    font-size: 1.2rem;
-    color: rgba(0, 0, 0, 0.667);
-  }
+textarea:focus ~ .focus-border {
+  visibility: visible;
 }
 </style>

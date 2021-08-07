@@ -1,16 +1,24 @@
 <template>
-  <div class="avatar-balance" :class="{ 'avatar-balance--wallet': walletName }">
-    <div class="avatar-balance__avatar">
+  <div class="flex items-center" :class="{ 'py-3 px-6': walletName }">
+    <div class="avatar relative w-8 h-8">
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="avatar-balance__avatar__gradient" v-html="getAvatar(keplrAccountName)"></div>
-      <div class="avatar-balance__avatar__glow" v-html="getAvatar(keplrAccountName)" />
+      <div
+        class="absolute rounded-full overflow-hidden w-full h-full opacity-50 filter blur-md top-1"
+        v-html="getAvatar(keplrAccountName)"
+      />
+      <div
+        class="avatar__gradient relative rounded-full overflow-hidden w-full h-full"
+        v-html="getAvatar(keplrAccountName)"
+      ></div>
     </div>
 
-    <div class="avatar-balance__details">
-      <div class="avatar-balance__details__account-name">{{ keplrAccountName }}</div>
-      <div class="avatar-balance__details__value">
-        <TotalPrice :balances="balances" variant="none" />
-        <span v-if="walletName">&middot; {{ walletName }}</span>
+    <div class="ml-3 flex-grow" :class="{ 'hidden sm:block': !walletName }">
+      <div class="-text-1 slashed-zero" :class="[walletName ? 'font-bold mb-0.5' : 'leading-none mb-1']">
+        {{ keplrAccountName }}
+      </div>
+      <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
+        <TotalPrice class="inline" :balances="balances" />
+        <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
       </div>
     </div>
   </div>
@@ -62,91 +70,27 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.avatar-balance {
-  display: flex;
-
-  &__avatar {
-    width: 3.2rem;
-    height: 3.2rem;
-    position: relative;
-
-    &__gradient,
-    &__glow {
-      width: 3.2rem;
-      height: 3.2rem;
-      border-radius: 1.6rem;
-      overflow: hidden;
-    }
-    &__gradient {
-      z-index: 1;
-      position: relative;
-
-      &:before {
-        content: '';
-        display: block;
-        background: url(../../assets/images/rectangle-avatar.png);
-        background-size: 20px;
-        background-repeat: no-repeat;
-        width: 20px;
-        height: 20px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-top: -10px;
-        margin-left: -10px;
-      }
-
-      svg {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    &__glow {
+.avatar {
+  &__gradient {
+    &:before {
+      content: '';
+      display: block;
+      background: url('../../assets/images/rectangle-avatar.png');
+      background-size: 1.25rem;
+      background-repeat: no-repeat;
+      width: 1.25rem;
+      height: 1.25rem;
       position: absolute;
-      width: 100%;
-      height: 100%;
-      opacity: 0.5;
-      filter: blur(1.28rem);
-      top: 12.5%;
+      top: 50%;
+      left: 50%;
+      margin-top: -0.6125rem;
+      margin-left: -0.6125rem;
     }
   }
 
-  &__details {
-    flex: 1;
-    margin-left: 1.2rem;
-    &__account-name {
-      font-size: 1.3rem;
-      line-height: 100%;
-      font-feature-settings: 'zero' on;
-      margin-bottom: 0.3rem;
-    }
-    &__value {
-      font-size: 1.6rem;
-      line-height: 100%;
-      font-weight: bold;
-      display: flex;
-    }
-  }
-}
-.avatar-balance.avatar-balance--wallet {
-  padding: 1.4rem 2.4rem;
-
-  .avatar-balance__details {
-    &__account-name {
-      font-size: 1.3rem;
-      font-weight: 600;
-      line-height: 1.5rem;
-      margin-bottom: 0.2rem;
-    }
-    &__value {
-      font-size: 1.3rem;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.5rem;
-    }
-    .total-price {
-      padding-right: 0.25em;
-    }
+  svg {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

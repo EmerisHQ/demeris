@@ -1,90 +1,134 @@
 <template>
   <div>
-    <div class="settings-modal elevation-panel">
+    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-30 shadow-panel">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
-        <p class="settings-modal__label">
-          {{ $t('components.settingsMenu.connectedWallet') }}
-        </p>
-        <div class="connected-wallet">
+        <div class="py-2">
+          <p class="pt-3 px-6 pb-1 -text-1 text-muted">
+            {{ $t('components.settingsMenu.connectedWallet') }}
+          </p>
           <AvatarBalance wallet-name="Keplr" />
-          <div class="settings-modal__button" @click="disconnectWallet">
+          <div
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+            @click="disconnectWallet"
+          >
             <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
           </div>
         </div>
 
-        <hr class="settings-modal__divider" />
+        <hr class="border-t border-border" />
 
-        <div class="settings-modal__button" @click="toggleAdvancedSettings">
-          <span>{{ $t('components.settingsMenu.settings') }}</span>
-          <Icon name="CaretRightIcon" :icon-size="1.5" />
+        <div class="py-2">
+          <div
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+            @click="toggleAdvancedSettings"
+          >
+            <span>{{ $t('components.settingsMenu.settings') }}</span>
+            <Icon class="text-muted" name="CaretRightIcon" :icon-size="1" />
+          </div>
         </div>
 
-        <hr class="settings-modal__divider" />
+        <hr class="border-t border-border" />
 
-        <div>
-          <a href="https://t.me/EmerisHQ" target="_blank" class="settings-modal__button">
+        <div class="py-2">
+          <a
+            href="https://t.me/EmerisHQ"
+            target="_blank"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+          >
             <span>{{ $t('components.settingsMenu.support') }}</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <span>&#8599;</span>
           </a>
 
-          <a href="https://twitter.com/emerisHQ" target="_blank" class="settings-modal__button">
+          <a
+            href="https://twitter.com/emerisHQ"
+            target="_blank"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+          >
             <span>{{ $t('components.settingsMenu.twitter') }}</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <span>&#8599;</span>
           </a>
 
-          <a href="https://emeris.com" target="_blank" class="settings-modal__button">
+          <a
+            href="https://emeris.com"
+            target="_blank"
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+          >
             <span>emeris.com</span>
-            <Icon name="ArrowUpIcon" :icon-size="1.5" class="external-icon" />
+            <span>&#8599;</span>
           </a>
         </div>
 
-        <div class="settings-modal__list">
-          <router-link to="/" class="settings-modal__list__item">
+        <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
+          <a
+            href="https://emeris.com/privacy"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             {{ $t('components.settingsMenu.privacy') }}
-          </router-link>
-          <router-link to="/" class="settings-modal__list__item">
-            {{ $t('components.settingsMenu.termsOfUse') }}
-          </router-link>
-          <router-link to="/" class="settings-modal__list__item">
+          </a>
+          <a
+            href="https://emeris.com/terms"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.tos') }}
+          </a>
+          <a
+            href="https://www.cookiesandyou.com/"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             {{ $t('components.settingsMenu.cookiesPolicy') }}
-          </router-link>
+          </a>
         </div>
       </div>
       <!-- end settings-basic-->
 
       <!-- advanced settings -->
-      <div v-else class="settings-modal-advanced">
-        <div class="settings-header">
-          <div class="settings-header__action" @click="toggleAdvancedSettings">
-            <Icon name="ArrowLeftIcon" :icon-size="2" />
-          </div>
-          <div class="settings-header__title title-1-bold">{{ $t('components.settingsMenu.settings') }}</div>
-          <div class="settings-header__action" />
+      <div v-else class="settings-modal-advanced pb-2">
+        <div class="flex items-center h-16 py-2 pl-6 pr-12">
+          <Button
+            :click-function="
+              () => {
+                toggleAdvancedSettings();
+              }
+            "
+            variant="link"
+          >
+            <Icon name="ArrowLeftIcon" :icon-size="1.5" />
+          </Button>
+          <div class="flex-grow text-center text-1 font-bold">{{ $t('components.settingsMenu.settings') }}</div>
         </div>
-        <div class="settings-modal__item">
+        <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>
 
-          <select v-model="settings.theme" class="settings-modal__button__select">
+          <select v-model="settings.theme" class="bg-transparent font-medium appearance-none outline-none">
             <option value="system">{{ $t('components.settingsMenu.system') }}</option>
             <option value="light">{{ $t('components.settingsMenu.light') }}</option>
           </select>
-        </div>
-        <hr class="settings-modal__divider" />
-        <div>
-          <p class="settings-modal__label">{{ $t('components.settingsMenu.advancedSettings') }}</p>
-          <button class="settings-modal__button" @click="confirmToggleSetting('allowCustomSlippage')">
+        </label>
+        <hr class="border-t border-border" />
+        <div class="py-2">
+          <p class="py-3 px-6 -text-1 text-muted">{{ $t('components.settingsMenu.advancedSettings') }}</p>
+          <button
+            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
+            @click="confirmToggleSetting('allowCustomSlippage')"
+          >
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
-            <Switch v-model="settings.allowCustomSlippage" class="settings-modal__button__switch" />
+            <Switch v-model="settings.allowCustomSlippage" class="pointer-events-none" />
           </button>
           <!--
-          <button class="settings-modal__button" @click="confirmToggleSetting('viewUnverified')">
+          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewUnverified')">
             <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
-            <Switch v-model="settings.viewUnverified" class="settings-modal__button__switch" />
+            <Switch v-model="settings.viewUnverified" class="pointer-events-none" />
           </button>
-          <button class="settings-modal__button" @click="confirmToggleSetting('viewLPAssetPools')">
+          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewLPAssetPools')">
             <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
-            <Switch v-model="settings.viewLPAssetPools" class="settings-modal__button__switch" />
+            <Switch v-model="settings.viewLPAssetPools" class="pointer-events-none" />
           </button>
           -->
         </div>
@@ -95,79 +139,119 @@
     <!-- warning modal - custom slippage -->
     <Modal
       v-show="isWarningCustomSlippageOpen"
-      class="warning-modal"
+      class="text-center z-40"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
       @close="toggleWarningCustomSlippage"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
-      </div>
-      <div class="warning-modal__title title-1-bold">
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+      <div class="text-1 font-bold">
         {{ $t('components.settingsMenu.allowCustomSlippage') }}
       </div>
-      <div class="warning-modal__body">
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
         <p>{{ $t('components.settingsMenu.warningCustomSlippage') }}</p>
         <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
       </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningCustomSlippage">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('allowCustomSlippage')">Proceed</div>
-      </div>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningCustomSlippage();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('allowCustomSlippage');
+            }
+          "
+        />
+      </template>
     </Modal>
 
     <!-- warning modal - view unverified assets -->
     <Modal
       v-show="isWarningViewUnverifiedOpen"
-      class="warning-modal"
+      class="text-center z-40"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
       @close="toggleWarningViewUnverified"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
-      </div>
-      <div class="warning-modal__title title-1-bold">
-        {{ $t('components.settingsMenu.viewAllAssets') }}
-      </div>
-      <div class="warning-modal__body">
-        <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
-        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-      </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningViewUnverified">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('viewUnverified')">Proceed</div>
-      </div>
+      <template>
+        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+        <div class="text-1 font-bold">
+          {{ $t('components.settingsMenu.viewAllAssets') }}
+        </div>
+        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+          <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
+          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+        </div>
+      </template>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningViewUnverified();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('viewUnverified');
+            }
+          "
+        />
+      </template>
     </Modal>
 
     <!-- warning modal - view lp asset pools -->
     <Modal
       v-show="isWarningViewLPAssetPoolsOpen"
-      class="warning-modal"
+      class="text-center z-40"
       variant="dialog"
+      fullscreen
       :show-close-button="false"
       :close-on-overlay-click="true"
-      width="320px"
       @close="toggleWarningViewLPAssetPools"
     >
-      <div class="warning-modal__icon">
-        <Icon name="ExclamationDiskIcon" :icon-size="3.2" />
-      </div>
-      <div class="warning-modal__title title-1-bold">
-        {{ $t('components.settingsMenu.viewLPAssetPools') }}
-      </div>
-      <div class="warning-modal__body">
-        <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
-        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-      </div>
-      <div class="warning-modal__actions">
-        <div class="warning-modal__action" @click="toggleWarningViewLPAssetPools">Cancel</div>
-        <div class="warning-modal__action" @click="toggleSetting('viewLPAssetPools')">Proceed</div>
-      </div>
+      <template>
+        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+        <div class="text-1 font-bold">
+          {{ $t('components.settingsMenu.viewLPAssetPools') }}
+        </div>
+        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+          <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
+          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+        </div>
+      </template>
+      <template #buttons>
+        <ModalButton
+          name="Cancel"
+          :click-function="
+            () => {
+              toggleWarningViewLPAssetPools();
+            }
+          "
+        />
+        <ModalButton
+          name="Proceed"
+          :click-function="
+            () => {
+              toggleSetting('viewLPAssetPools');
+            }
+          "
+        />
+      </template>
     </Modal>
   </div>
 </template>
@@ -177,20 +261,25 @@ import { computed, defineComponent, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
+import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
   name: 'SettingsModal',
   components: {
+    Button,
     Icon,
     Modal,
+    ModalButton,
     Switch,
     AvatarBalance,
   },
-  setup() {
+  emits: ['disconnect'],
+  setup(_, { emit }) {
     const store = useStore();
     const isAdvancedSettingsOpen = ref(false);
     const isWarningCustomSlippageOpen = ref(false);
@@ -253,8 +342,9 @@ export default defineComponent({
     };
 
     const disconnectWallet = () => {
+      emit('disconnect');
       window.localStorage.setItem('lastEmerisSession', '');
-      location.reload();
+      store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
     };
 
     return {
@@ -277,154 +367,17 @@ export default defineComponent({
 
 <style lang="scss">
 .settings-modal {
-  position: absolute;
-  background: var(--bg);
-  border-radius: 1rem;
-  min-height: 4.8rem;
-  transform: translate(-14rem, 0.8rem);
-  width: 28rem;
-  z-index: 50;
+  min-height: 3rem;
+  // transform: translate(-8.75rem, 0.5rem);
 
-  &__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.2rem 2.4rem;
-    width: 100%;
-  }
-
-  &__button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.8rem 2.4rem;
-    width: 100%;
-    transition: background ease-in-out 150ms;
-    cursor: pointer;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.03);
+  &__list-item {
+    &:after {
+      padding: 0 0.25rem;
+      content: '\00b7';
     }
-
-    &__switch {
-      pointer-events: none;
-    }
-
-    &__select {
-      background: transparent;
-      font-weight: 600;
-
-      &:focus {
-        outline: none;
-      }
-    }
-    &:last-child {
-      margin-bottom: 0.4rem;
+    &:last-child:after {
+      content: none;
     }
   }
-
-  &__label {
-    padding: 0.95rem 2.4rem;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: var(--muted);
-  }
-
-  &__divider {
-    margin: 0.4rem 0;
-    border-top: 1px solid var(--border-trans);
-  }
-
-  &__list {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.2rem 2.4rem;
-    font-size: 1.2rem;
-    color: var(--muted);
-
-    &__item {
-      white-space: nowrap;
-
-      &:hover {
-        color: var(--text);
-      }
-
-      &:after {
-        padding: 0 0.7rem;
-        content: '\00b7';
-      }
-      &:last-child:after {
-        content: none;
-      }
-    }
-  }
-}
-
-.external-icon {
-  transform: rotate(45deg);
-}
-.connected-wallet {
-  margin-top: -0.8rem;
-}
-.settings-header {
-  display: flex;
-  align-items: center;
-  height: 6.4rem;
-  padding: 0.8rem;
-}
-.settings-header__title {
-  flex: 1;
-  text-align: center;
-}
-.settings-header__action {
-  height: 4.8rem;
-  width: 4.8rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.modal.warning-modal {
-  z-index: 51;
-}
-.warning-modal__icon {
-  height: 6.4rem;
-  display: flex;
-  justify-content: center;
-  margin: 0.8rem 0 1.6rem;
-}
-.warning-modal__title {
-  margin-bottom: 2.4rem;
-}
-.warning-modal__title,
-.warning-modal__body {
-  text-align: center;
-  margin-bottom: 1.6rem;
-}
-.warning-modal__body p {
-  margin-bottom: 1.6rem;
-  line-height: 162.5%;
-  color: var(--muted);
-}
-.warning-modal__actions {
-  border-top: 1px solid var(--border-trans);
-  height: 6.4rem;
-  display: flex;
-  margin: 3.2rem -2.4rem -2.4rem;
-}
-.warning-modal__action {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-}
-.warning-modal__action:hover {
-  cursor: pointer;
-}
-.warning-modal__action:not(:last-child) {
-  border-right: 1px solid var(--border-trans);
 }
 </style>

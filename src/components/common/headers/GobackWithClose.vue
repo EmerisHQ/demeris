@@ -1,11 +1,11 @@
 <template>
-  <div class="goback-with-close">
-    <div class="icon-wrapper" @click="clickIcon('goback')">
-      <Icon :name="'ArrowLeftIcon'" class="icon" :icon-size="2.1" />
+  <div class="flex items-center justify-between py-7 px-4">
+    <div class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('goback')">
+      <Icon :name="'ArrowLeftIcon'" :icon-size="1.5" />
     </div>
-    <div class="space"></div>
-    <div class="icon-wrapper" @click="clickIcon('close')">
-      <Icon :name="'CloseIcon'" class="icon" :icon-size="1.6" />
+    <div class="w-6"></div>
+    <div class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('close')">
+      <Icon :name="'CloseIcon'" :icon-size="1.5" />
     </div>
   </div>
 </template>
@@ -25,25 +25,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.goback-with-close {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2.8rem 1.6rem;
-
-  .space {
-    width: 2.4rem;
-  }
-
-  .icon-wrapper {
-    width: 4rem;
-    height: 4rem;
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

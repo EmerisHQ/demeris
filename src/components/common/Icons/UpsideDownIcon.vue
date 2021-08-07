@@ -1,31 +1,33 @@
 <template>
-  <svg
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:cc="http://creativecommons.org/ns#"
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    xmlns:svg="http://www.w3.org/2000/svg"
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    viewBox="0 0 24 24"
-  >
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M4.5 16.5L7.5 19.5L10.5 16.5"
-      stroke="black"
-      fill="none"
+      d="M15.5 3.5L12.5 0.5L9.5 3.5"
+      stroke="currentColor"
       stroke-miterlimit="10"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-    <path d="M7.5 7.5L7.5 19.5" stroke="black" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
     <path
-      d="M13.5 7.5L16.5 4.5L19.5 7.5"
-      stroke="black"
-      fill="none"
+      d="M12.5 12.5L12.5 0.5"
+      stroke="currentColor"
       stroke-miterlimit="10"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-    <path d="M16.5 16.5V4.5" stroke="black" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+    <path
+      d="M6.5 12.5L3.5 15.5L0.5 12.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3.5 3.5L3.5 15.5"
+      stroke="currentColor"
+      stroke-miterlimit="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
   </svg>
 </template>
 <script>

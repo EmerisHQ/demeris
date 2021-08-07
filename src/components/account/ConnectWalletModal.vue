@@ -1,48 +1,68 @@
 <template>
   <teleport to="body">
     <Modal
-      v-if="isKeplrInstalled"
+      v-show="isKeplrInstalled && isWarningAgreed"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
       @close="closeConnectKeplr"
     >
       <ConnectKeplr ref="connectKeplrRef" @cancel="closeConnectKeplr" @connect="closeConnectKeplr" />
     </Modal>
 
     <Modal
-      v-else-if="isKeplrSupported && !isKeplrInstalled"
+      v-show="isKeplrInstalled && !isWarningAgreed"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
-      @close="closeGetKeplr"
+      max-width-class="max-w-sm"
+      @close="closeAgreeWarning"
     >
-      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" />
+      <AgreeWarning ref="agreeWarningRef" @cancel="closeAgreeWarning" @agree="agreeWarning" />
     </Modal>
 
     <Modal
-      v-else
+      v-show="isKeplrSupported && !isKeplrInstalled"
       :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
       class="connect-wallet-modal"
-      body-class="elevation-panel"
-      width="72rem"
+      max-width-class="max-w-sm"
+      @close="closeGetKeplr"
+    >
+      <GetKeplr ref="getKeplrRef" @cancel="closeGetKeplr" @try-demo="tryDemo" />
+    </Modal>
+
+    <Modal
+      v-show="!isKeplrSupported"
+      :open="open"
+      variant="center"
+      fullscreen
+      show-close-button
+      class="connect-wallet-modal"
+      max-width-class="max-w-sm"
       @close="closeGetBrowser"
     >
-      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" />
+      <GetBrowser ref="getBrowserRef" :is-loading="isLoading" @cancel="closeGetBrowser" @try-demo="tryDemo" />
     </Modal>
   </teleport>
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
+import AgreeWarning from '@/components/account/AgreeWarning.vue';
+import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
+import GetBrowser from '@/components/account/GetBrowser.vue';
+import GetKeplr from '@/components/account/GetKeplr.vue';
 import Modal from '@/components/ui/Modal.vue';
-
-import ConnectKeplr from './ConnectKeplr.vue';
-import GetBrowser from './GetBrowser.vue';
-import GetKeplr from './GetKeplr.vue';
 
 async function getKeplrInstance() {
   if (window.keplr) {
@@ -71,6 +91,7 @@ export default defineComponent({
   components: {
     Modal,
     ConnectKeplr,
+    AgreeWarning,
     GetKeplr,
     GetBrowser,
   },
@@ -85,15 +106,21 @@ export default defineComponent({
   emits: ['close'],
 
   setup(_, { emit }) {
+    const router = useRouter();
     const connectKeplrRef = ref(null);
+    const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
     const getBrowserRef = ref(null);
+    const isWarningAgreed = ref(null);
     const isKeplrSupported = ref(null);
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
 
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
+      emit('close');
+    };
+    const closeAgreeWarning = () => {
       emit('close');
     };
     const closeGetKeplr = () => {
@@ -103,8 +130,26 @@ export default defineComponent({
       emit('close');
     };
 
+    const agreeWarning = () => {
+      isWarningAgreed.value = true;
+      connectKeplrRef.value.signIn();
+    };
+
+    // TODO: Implement demo account
+    const tryDemo = () => {
+      router.push('/');
+    };
+
     onMounted(async () => {
-      const keplr = await getKeplrInstance();
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+
+      // dont present spinner forever if not Chrome
+      // @ts-ignore
+      if (!window.chrome) {
+        isLoading.value = false;
+      }
+
+      await getKeplrInstance();
       await nextTick();
 
       // @ts-ignore
@@ -117,13 +162,21 @@ export default defineComponent({
       });
     });
 
+    watch(isWarningAgreed, () => {
+      window.localStorage.setItem('isWarningAgreed', 'true');
+    });
+
     return {
-      isLoading,
+      agreeWarning,
       connectKeplrRef,
+      agreeWarningRef,
       getKeplrRef,
       getBrowserRef,
+      isLoading,
+      isWarningAgreed,
       isKeplrSupported,
       isKeplrInstalled,
+      closeAgreeWarning,
       closeConnectKeplr,
       closeGetKeplr,
       closeGetBrowser,
@@ -146,6 +199,54 @@ export default defineComponent({
     top: 2rem;
     right: 2rem;
     z-index: 40;
+  }
+
+  .connect-wallet {
+    min-height: inherit;
+
+    &__wrapper {
+      display: flex;
+      min-height: inherit;
+    }
+
+    &__loading {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &__content {
+      width: 50%;
+      min-height: inherit;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    &__controls {
+      display: flex;
+      flex-direction: column;
+      margin-top: 3rem;
+
+      div + div {
+        margin-top: 1rem;
+      }
+    }
+
+    &__description {
+      margin-top: 2.5rem;
+      line-height: 1.8;
+      color: var(--muted);
+
+      p:first-child {
+        margin-bottom: 1.125rem;
+      }
+    }
+
+    &__title {
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
   }
 }
 </style>

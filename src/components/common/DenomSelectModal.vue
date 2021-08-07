@@ -1,5 +1,5 @@
 <template>
-  <div class="denom-select-modal">
+  <div class="flex">
     <ChainSelectModal
       v-if="isModalOpen"
       :assets="chainSelectModalData"
@@ -8,39 +8,45 @@
       :selected-denom="selectedDenom"
       @select="chainSelectHandler"
     />
-    <div v-else class="denom-select-modal-wrapper elevation-panel">
-      <TitleWithGoback :title="title" :func="func" />
+    <div v-else class="denom-select-modal-wrapper w-full h-full flex-1 flex flex-col items-stretch">
+      <header class="w-full max-w-7xl mx-auto px-2">
+        <TitleWithGoback :title="title" :func="func" :show-back-button="showBackButton" />
+      </header>
 
-      <div class="search-bar">
-        <Search v-model:keyword="keyword" />
-      </div>
-      <div class="coin-list">
-        <CoinList
-          :data="keywordFilteredAssets[0]"
-          :type="title === 'Receive' ? 'receive' : 'pay'"
-          :show-balance="showBalance"
-          :keyword="keyword"
-          @select="coinListselectHandler"
-        >
-        </CoinList>
+      <div class="search-bar relative flex-1 min-h-0 flex flex-col">
+        <Search v-model:keyword="keyword" placeholder="Search assets" class="w-full mx-auto max-w-md px-6 pb-3" />
+        <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
+          <div class="mx-auto max-w-md mb-20">
+            <CoinList
+              v-if="keywordFilteredAssets[0].length > 0"
+              :data="keywordFilteredAssets[0]"
+              :type="title === 'Receive' ? 'receive' : 'pay'"
+              :show-balance="showBalance"
+              :keyword="keyword"
+              @select="coinListselectHandler"
+            >
+            </CoinList>
 
-        <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
-          <div class="other-assets__title s-1 w-bold">{{ $t('components.denomSelect.otherAssets') }}</div>
-          <div class="other-assets__subtitle s-minus w-normal">
-            {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+            <div v-if="keywordFilteredAssets[1].length > 0" class="other-assets">
+              <div class="other-assets__title text-base font-bold px-6">
+                {{ $t('components.denomSelect.otherAssets') }}
+              </div>
+              <div class="other-assets__subtitle -text-1 px-6">
+                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+              </div>
+              <CoinList
+                :data="keywordFilteredAssets[1]"
+                :type="title === 'Receive' ? 'receive' : 'pay'"
+                :show-balance="showBalance"
+                :keyword="keyword"
+                @select="coinListselectHandler"
+              >
+              </CoinList>
+            </div>
           </div>
-          <CoinList
-            :data="keywordFilteredAssets[1]"
-            :type="title === 'Receive' ? 'receive' : 'pay'"
-            :show-balance="showBalance"
-            :keyword="keyword"
-            @select="coinListselectHandler"
-          >
-          </CoinList>
         </div>
+        <WhiteOverlay />
       </div>
-
-      <WhiteOverlay />
     </div>
   </div>
 </template>
@@ -75,6 +81,7 @@ export default defineComponent({
     func: { type: Function, default: () => void 0 },
     title: { type: String, required: true },
     showBalance: { type: Boolean, default: false },
+    showBackButton: { type: Boolean, required: false, default: true },
   },
   emits: ['select'],
   setup(props, { emit }) {
@@ -123,13 +130,16 @@ export default defineComponent({
 
     const displaySeletedPair = ref('');
     watch(
-      () => props.counterDenom,
+      () => props.counterDenom?.base_denom,
       async () => {
-        displaySeletedPair.value = await getDisplayName(
-          props.counterDenom.base_denom,
-          store.getters['demeris/getDexChain'],
-        );
+        if (props.counterDenom?.base_denom) {
+          displaySeletedPair.value = await getDisplayName(
+            props.counterDenom.base_denom,
+            store.getters['demeris/getDexChain'],
+          );
+        }
       },
+      { immediate: true },
     );
 
     const keywordFilteredAssets = computed(() => {
@@ -194,45 +204,23 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.denom-select-modal-wrapper {
-  position: absolute;
-  width: 100%;
-  height: 55.8rem !important;
-  top: 0;
-  left: 0;
+.scroll-container {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 
-  overflow: hidden;
-
-  background-color: var(--surface);
-  z-index: 10;
-
-  .search-bar {
-    padding: 0 2.4rem 2.4rem;
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
   }
 
-  .coin-list {
-    padding: 0 1.6rem 0 2.4rem;
-    height: 37.8rem;
-
-    overflow-y: scroll;
-
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-
-    &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera*/
+  .other-assets {
+    &__title {
+      padding-top: 1.5rem;
+      color: var(--text);
     }
 
-    .other-assets {
-      &__title {
-        padding-top: 2.4rem;
-        color: var(--text);
-      }
-
-      &__subtitle {
-        padding-bottom: 0.8rem;
-        color: var(--muted);
-      }
+    &__subtitle {
+      padding-bottom: 0.5rem;
+      color: var(--muted);
     }
   }
 }

@@ -1,29 +1,38 @@
 <template>
   <AppLayout>
-    <div class="pool">
-      <div class="pool__main">
-        <section class="pool__main__stats">
-          <span class="pool__main__stats__subtitle">Gravity DEX Pool</span>
-          <div class="pool__main__stats__header">
-            <div class="pool__main__stats__pair">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="pool__main__stats__pair__token token-a" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="pool__main__stats__pair__token token-b" />
+    <div class="md:flex justify-between">
+      <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
+        <header>
+          <div class="text-muted mb-4">Gravity DEX Pool</div>
+          <div class="sm:flex items-center flex-wrap gap-y-2">
+            <div class="flex -space-x-1.5 mr-3 self-center">
+              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
             </div>
-            <h2 class="pool__main__stats__name s-2">{{ pairName }}</h2>
+            <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
+            <div class="text-muted mt-2">
+              <template v-if="exchangeAmount">
+                1 <Ticker :name="walletBalances.coinA.denom" /> &asymp; {{ exchangeAmount }}
+                <Ticker :name="walletBalances.coinB.denom" />
+              </template>
+              <template v-else> Ratio is loading&hellip; </template>
+            </div>
           </div>
-          <h1 v-if="hasPrices.all" class="pool__main__stats__supply">{{ toUSD(totalLiquidityPrice) }}</h1>
-        </section>
+          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
+        </header>
 
-        <section v-if="reserveBalances" class="pool__main__assets">
-          <h2 class="pool__main__assets__title s-2">Underlying assets</h2>
+        <section v-if="reserveBalances" class="mt-16">
+          <h2 class="text-2 font-bold">Underlying assets</h2>
 
-          <table class="pool__main__assets__table assets-table">
-            <thead>
+          <table class="assets-table table-fixed -ml-6 mt-4">
+            <thead class="hidden md:table-header-group text-muted">
               <tr>
-                <th class="text-left">Asset</th>
-                <th class="text-right">Quantity</th>
-                <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-10 bg-app text-left">Asset</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">Quantity</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">Price</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">
+                  Allocation
+                </th>
               </tr>
             </thead>
 
@@ -31,128 +40,135 @@
               <tr
                 v-for="(balance, index) of reserveBalances"
                 :key="balance.denom"
-                class="assets-table__row"
+                class="assets-table__row group cursor-pointer"
                 @click="openAssetPage(balance)"
               >
-                <td class="assets-table__row__denom">
-                  <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
-                  <span class="w-bold"><Denom :name="balance.denom" /></span>
+                <td class="py-5 align-middle group-hover:bg-fg transition">
+                  <div class="flex items-center">
+                    <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
+                    <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                      <span class="font-medium"><Denom :name="balance.denom" /></span>
+                    </div>
+                  </div>
                 </td>
-                <td class="text-right"><AmountDisplay :amount="balance" /></td>
-                <td class="text-right"><Price :amount="{ denom: balance.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold">
-                  <Price v-if="hasPrices[index === 0 ? 'coinA' : 'coinB']" :amount="balance" />
-                  <span v-else>-</span>
+                <td class="py-5 align-middle text-right text-muted group-hover:bg-fg transition">
+                  <AmountDisplay :amount="balance" />
+                </td>
+                <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                  <Price :amount="{ denom: balance.denom, amount: 0 }" />
+                </td>
+                <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                  <Price v-if="hasPrices[index === 0 ? 'coinA' : 'coinB']" :amount="balance" class="font-medium" />
+                  <span v-else>–</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </section>
 
-        <section v-if="reserveBalances" class="pool__main__assets">
-          <h2 class="pool__main__assets__title s-2">Liquidity pool token</h2>
+        <section v-if="reserveBalances" class="mt-16">
+          <h2 class="text-2 font-bold">Liquidity pool token</h2>
 
-          <table class="pool__main__assets__table assets-table">
-            <thead>
+          <table class="assets-table table-fixed -ml-6 mt-6">
+            <thead class="hidden md:table-header-group text-muted">
               <tr>
-                <th class="text-left">Asset</th>
-                <th class="text-right">Ticker</th>
-                <th class="text-right">Price</th>
-                <th class="text-right">Allocation</th>
+                <th class="align-middle -text-1 font-normal py-4 pr-0 sticky top-0 z-10 bg-app text-left">Asset</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-center">Ticker</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">Price</th>
+                <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-10 bg-app text-right">
+                  Allocation
+                </th>
               </tr>
             </thead>
 
             <tbody>
-              <tr class="assets-table__row" @click="openAssetPage(walletBalances.poolCoin)">
-                <td class="assets-table__row__denom">
-                  <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
-                  <span class="w-bold"><Denom :name="walletBalances.poolCoin.denom" /></span>
+              <tr class="assets-table__row group cursor-pointer" @click="openAssetPage(walletBalances.poolCoin)">
+                <td class="py-5 align-middle group-hover:bg-fg transition">
+                  <div class="flex items-center">
+                    <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
+                    <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                      <span class="font-medium"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                    </div>
+                  </div>
                 </td>
-                <td class="text-right">
+                <td class="py-5 align-middle text-center group-hover:bg-fg transition">
                   <Ticker :name="walletBalances.poolCoin.denom" />
                 </td>
-                <td class="text-right"><Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" /></td>
-                <td class="text-right w-bold">
-                  <span v-if="hasPrices.all">{{ toUSD(totalLiquidityPrice) }}</span>
-                  <span v-else>-</span>
+                <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                  <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
+                </td>
+                <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice) }}</span>
+                  <span v-else>–</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </section>
 
-        <section v-if="relatedPools.length" class="pool__main__pools">
-          <div class="pool__main__pools__header">
-            <h2 class="s-2">More pools</h2>
-            <router-link :to="{ name: 'Pools' }" class="pool__main__pools__header__button">
-              See all
-              <Icon name="ArrowRightIcon" :icon-size="1.6" />
+        <section v-if="relatedPools.length" class="mt-16">
+          <header class="flex items-baseline justify-between">
+            <h2 class="text-2 font-bold">More pools</h2>
+            <router-link
+              :to="{ name: 'Pools' }"
+              class="font-medium hover:opacity-80 active:opacity-70 transition select-none"
+            >
+              See all &rarr;
             </router-link>
-          </div>
+          </header>
 
-          <div class="pool__main__pools__wrapper">
-            <Pools :pools="relatedPools" />
-          </div>
+          <Pools class="mt-8" :pools="relatedPools" />
         </section>
-      </div>
+      </main>
 
-      <div class="pool__aside">
-        <div class="pool__aside__widget">
-          <div v-if="walletBalances" class="pool-equity elevation-panel" :style="equityGradientStyle">
-            <div class="pool-equity__header">
-              <h2 class="s-2 w-bold">Equity</h2>
-              <Icon name="ThreeDotsIcon" />
+      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
+        <section class="pool-equity w-full rounded-2xl bg-gold-circular">
+          <div v-if="walletBalances" class="pool-equity__inner m-0.5 bg-app p-6">
+            <div class="flex items-end justify-between">
+              <h2 class="text-muted">Equity</h2>
+              <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
+            <p class="mt-1 text-2 font-bold">
+              {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
+            </p>
+            <p class="text-muted mt-1">
+              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
+            </p>
 
-            <div class="pool-equity__stats">
-              <CircleSymbol :denom="walletBalances.poolCoin.denom" class="pool-equity__stats__avatar" />
-              <div class="pool-equity__stats__wrapper">
-                <p class="pool-equity__stats__amount w-bold">
-                  <AmountDisplay :amount="walletBalances.poolCoin" />
-                </p>
-                <p v-if="hasPrices.all" class="pool-equity__stats__balance s-2 w-bold">
-                  {{ toUSD(ownSharePrice) }}
-                </p>
-                <span class="pool-equity__stats__share s-minus"> {{ ownShare.toFixed(2) }}% of pool </span>
-              </div>
-            </div>
-
-            <div class="pool-equity__supply">
-              <Button name="Add liquidity" @click="addLiquidityHandler" />
-            </div>
-
-            <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__assets">
-              <span class="pool-equity__assets__label s-minus">Assets provided</span>
-              <ul class="pool-equity__assets__list">
-                <li class="pool-equity__assets__list__item">
-                  <CircleSymbol :denom="walletBalances.coinA.denom" class="pool-equity__assets__list__item__avatar" />
-                  <span class="pool-equity__assets__list__item__denom w-bold">
-                    <AmountDisplay :amount="walletBalances.coinA" />
-                  </span>
+            <div v-if="walletBalances.poolCoin?.amount > 0" class="mt-8">
+              <h3 class="text-muted -text-1">Assets provided</h3>
+              <ul class="mt-2">
+                <li class="flex w-full py-2 gap-x-1">
+                  <CircleSymbol :denom="walletBalances.coinA.denom" size="xs" />
+                  <AmountDisplay :amount="walletBalances.coinA" class="ml-2 font-medium flex-grow" />
                   <span v-if="hasPrices.coinA"><Price :amount="walletBalances.coinA" /></span>
                   <span v-else>-</span>
                 </li>
-                <li class="pool-equity__assets__list__item">
-                  <CircleSymbol
-                    :denom="walletBalances.coinB.denom"
-                    size="sm"
-                    class="pool-equity__assets__list__item__avatar"
-                  />
-                  <span class="pool-equity__assets__list__item__denom w-bold">
-                    <AmountDisplay :amount="walletBalances.coinB" />
-                  </span>
+                <li class="flex w-full py-2 gap-x-1">
+                  <CircleSymbol :denom="walletBalances.coinB.denom" size="xs" />
+                  <AmountDisplay :amount="walletBalances.coinB" class="ml-2 font-medium flex-grow" />
                   <span v-if="hasPrices.coinB"><Price :amount="walletBalances.coinB" /></span>
                   <span v-else>-</span>
                 </li>
               </ul>
             </div>
 
-            <div v-if="walletBalances.poolCoin?.amount > 0" class="pool-equity__withdraw">
-              <Button name="Withdraw" status="secondary" @click="withdrawLiquidityHandler" />
+            <div class="flex justify-between w-full gap-x-3 mt-6">
+              <Button
+                :name="walletBalances.poolCoin?.amount > 0 ? 'Add' : 'Add liquidity'"
+                class="flex-1"
+                :click-function="addLiquidityHandler"
+              />
+              <Button
+                v-if="walletBalances.poolCoin?.amount > 0"
+                name="Withdraw"
+                class="flex-1"
+                :click-function="withdrawLiquidityHandler"
+              />
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </aside>
     </div>
   </AppLayout>
 </template>
@@ -170,20 +186,13 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
-import { hexToRGB, isNative } from '@/utils/basic';
-
-const defaultColors = {
-  primary: '#E1E1E1',
-  secondary: '#F4F4F4',
-  tertiary: '#F9F9F9',
-};
+import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',
@@ -193,7 +202,6 @@ export default defineComponent({
     AppLayout,
     CircleSymbol,
     Denom,
-    Icon,
     Button,
     Pools,
     Price,
@@ -263,42 +271,20 @@ export default defineComponent({
       };
     });
 
+    const exchangeAmount = computed(() => {
+      let balanceA = reserveBalances.value[0].amount;
+      let balanceB = reserveBalances.value[1].amount;
+      if (balanceA && balanceB) {
+        return Math.round((balanceB / balanceA) * 100) / 100;
+      }
+      return undefined;
+    });
+
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
       return [...poolsByDenom(pool.value.reserve_coin_denoms[0]), ...poolsByDenom(pool.value.reserve_coin_denoms[1])]
         .filter((item) => item.id !== pool.value.id)
         .slice(0, 3);
-    });
-
-    const generateBackground = (colors: Record<string, string>) => {
-      const hexArray = Object.values(colors).reverse();
-      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
-      const colorStops = [];
-
-      for (const [index, hex] of Object.entries(hexArray)) {
-        colorStops.push(`rgba(${hexToRGB(hex)}, 0.06) ${positions[index]}`);
-      }
-
-      return `radial-gradient(
-					ellipse farthest-corner at 16.67% 16.67%,
-					${colorStops.join(',')}
-				)`;
-    };
-
-    const equityGradientStyle = computed(() => {
-      let colors = defaultColors;
-
-      if (denoms.value.length) {
-        colors = {
-          primary: symbolsData[denoms.value[0]]?.colors.primary || defaultColors.primary,
-          secondary: symbolsData['gdex'].colors.primary,
-          tertiary: symbolsData[denoms.value[1]]?.colors.primary || defaultColors.secondary,
-        };
-      }
-
-      return {
-        background: generateBackground(colors),
-      };
     });
 
     const addLiquidityHandler = () => {
@@ -362,7 +348,6 @@ export default defineComponent({
       relatedPools,
       walletBalances,
       totalLiquidityPrice,
-      equityGradientStyle,
       addLiquidityHandler,
       withdrawLiquidityHandler,
       formatPoolName,
@@ -370,275 +355,37 @@ export default defineComponent({
       ownSharePrice,
       toUSD,
       openAssetPage,
+      exchangeAmount,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.pool {
-  display: flex;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-  padding-bottom: 4rem;
-
-  &__main {
-    display: flex;
-    flex-direction: column;
-    width: 60%;
-
-    &__stats {
-      &__header {
-        margin-top: 1.2rem;
-        display: flex;
-        align-items: center;
-      }
-
-      &__pair {
-        margin-right: 1.2rem;
-
-        &__token {
-          &.token-a {
-            z-index: 1;
-          }
-          &.token-b {
-            z-index: 0;
-            margin-left: -0.6rem;
-          }
-        }
-      }
-
-      &__name {
-        line-height: 1.5;
-      }
-
-      &__subtitle {
-        color: var(--muted);
-      }
-
-      &__supply {
-        font-size: 5.1rem;
-        font-weight: 700;
-        line-height: 1.2;
-        margin-top: 0.4rem;
-      }
-
-      &__pair {
-        display: inline-flex;
-
-        &__avatar {
-          width: 3.4rem;
-          height: 3.4rem;
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 2.6rem;
-
-          & + & {
-            margin-left: -1rem;
-          }
-        }
-      }
-    }
-
-    &__assets {
-      margin-top: 6.4rem;
-
-      &__table {
-        margin-top: 3.2rem;
-      }
-    }
-
-    &__pools {
-      margin-top: 4rem;
-
-      &__wrapper {
-        margin-top: 3rem;
-      }
-
-      &__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        &__button {
-          display: flex;
-          align-items: center;
-          font-weight: 600;
-
-          .icon {
-            margin-left: 0.6rem;
-          }
-        }
-      }
-    }
-  }
-
-  &__aside {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-left: 3.2rem;
-    flex: 1 1 0%;
-
-    &__widget {
-      width: 80%;
-    }
-  }
-}
-
 .assets-table {
-  width: calc(100% + 4rem);
-  margin-inline: -2rem;
-  table-layout: fixed;
-
-  &__wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .text-right {
-    text-align: right;
-  }
-
-  .text-left {
-    text-align: left;
-  }
-
-  th {
-    color: var(--muted);
-    background: var(--bg);
-    vertical-align: middle;
-    font-size: 1.3rem;
-    font-weight: 400;
-    padding: 1.5rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  width: calc(100% + 3rem);
 
   td,
   th {
-    transition: all 100ms ease-in;
-
     &:first-child {
-      padding-left: 2rem;
+      padding-left: 1.5rem;
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
     }
 
     &:last-child {
-      padding-right: 2rem;
-    }
-  }
-
-  &__row {
-    cursor: pointer;
-
-    &:hover {
-      td {
-        background: rgba(0, 0, 0, 0.03);
-      }
-
-      td:first-child {
-        border-top-left-radius: 0.8rem;
-        border-bottom-left-radius: 0.8rem;
-      }
-
-      td:last-child {
-        border-top-right-radius: 0.8rem;
-        border-bottom-right-radius: 0.8rem;
-      }
-    }
-
-    &__denom {
-      padding: 2.4rem 0;
-      display: flex;
-      align-items: center;
-
-      &__avatar {
-        width: 3.2rem;
-        height: 3.2rem;
-        border-radius: 2.6rem;
-        background: rgba(0, 0, 0, 0.1);
-        margin-right: 1.6rem;
-        flex-shrink: 0;
-      }
+      padding-right: 1.5rem;
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
     }
   }
 }
 
 .pool-equity {
-  width: 100%;
-  background: red;
-  padding: 2.4rem;
-  border-radius: 1.6rem;
+  min-width: 20rem;
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__stats {
-    display: flex;
-    align-items: flex-start;
-    margin-top: 3rem;
-
-    &__avatar {
-      margin-right: 1.2rem;
-    }
-
-    &__wrapper {
-      display: flex;
-      flex-direction: column;
-    }
-
-    &__balance {
-      margin: 0.2rem 0;
-    }
-
-    &__share {
-      color: var(--muted);
-    }
-  }
-
-  &__supply {
-    margin-top: 3.2rem;
-  }
-
-  &__withdraw {
-    margin-top: 3.2rem;
-  }
-
-  &__assets {
-    margin-top: 4rem;
-
-    &__label {
-      color: var(--muted);
-    }
-
-    &__list {
-      margin-top: 2.1rem;
-
-      &__item {
-        display: flex;
-        align-items: center;
-
-        &__avatar {
-          width: 2.4rem;
-          height: 2.4rem;
-          border-radius: 2.6rem;
-          background: rgba(0, 0, 0, 0.1);
-          margin-right: 1.2rem;
-        }
-
-        &__denom {
-          flex: 1 1 0%;
-        }
-
-        & + & {
-          margin-top: 1.6rem;
-        }
-      }
-    }
+  &__inner {
+    border-radius: 0.875rem; // ~14px
   }
 }
 </style>

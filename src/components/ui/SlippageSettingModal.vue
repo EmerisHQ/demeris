@@ -1,5 +1,5 @@
 <template>
-  <div class="slippage-modal elevation-panel">
+  <div class="relative w-full z-10 overflow-hidden bg-surface shadow-panel rounded-2xl">
     <TitleWithGoback
       :title="'Price'"
       :func="
@@ -9,87 +9,107 @@
       "
     />
 
-    <div class="setting">
-      <div class="s-minus w-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
-      <div class="setting__sections">
+    <div class="px-6">
+      <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
+      <div class="flex justify-between my-4 space-x-2">
         <button
-          class="setting__sections-block"
-          :class="[
-            slippage === 0.1 && !isCustomSelected ? 'selected' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          :class="[slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
-          class="setting__sections-block"
-          :class="[
-            slippage === 0.5 && !isCustomSelected ? 'selected' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          :class="[slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
-          class="setting__sections-block"
-          :class="[
-            slippage === 1 && !isCustomSelected ? 'selected' : '',
-            allowCustomSlippage ? '' : 'no-custom-slippage',
-          ]"
+          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          :class="[slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
           @click="setSlippage(1)"
         >
           1%
         </button>
-        <button
+        <label
           v-if="allowCustomSlippage"
-          class="setting__sections-block"
-          :class="[isCustomSelected ? 'selected custom-selected' : '', Number(slippage) < 0 ? 'custom-error' : '']"
+          class="
+            custom-slippage
+            h-12
+            pr-3
+            flex-shrink flex
+            items-baseline
+            justify-center
+            text-center
+            focus-within:text-right
+            bg-fg
+            rounded-xl
+            outline-none
+            text-text
+          "
+          :class="[
+            isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
+            Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
+          ]"
+          for=""
         >
-          <div class="custom-slippage">
-            <input
-              ref="customSlippageInput"
-              :value="customSlippage"
-              type="number"
-              placeholder="Custom"
-              @input="setCustomSlippage"
-            />
-            <span v-if="isCustomSelected" class="custom-slippage__percent">%</span>
-          </div>
-        </button>
+          <input
+            ref="customSlippageInput"
+            :value="customSlippage"
+            type="number"
+            placeholder="Custom"
+            class="
+              custom-slippage__input
+              h-12
+              appearance-none
+              overflow-hidden
+              py-0
+              pr-0
+              pl-3
+              m-0
+              flex-grow
+              border-none
+              outline-none
+              bg-transparent
+            "
+            :class="[isCustomSelected ? 'w-12' : 'w-20']"
+            required
+            @input="setCustomSlippage"
+          />
+          <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
+        </label>
       </div>
     </div>
-    <div v-if="alertStatus" class="alert-wrapper">
+    <div v-if="alertStatus" class="px-6">
       <Alert :status="alertStatus" :message="alertText" />
     </div>
 
-    <div class="details">
-      <div class="details__row">
-        <div class="details__row-left s-minus w-medium">
-          {{ $t('components.slippageSettingsModal.limitPrice') }}
+    <div class="px-6 pb-6 mt-8 space-y-6">
+      <div class="flex justify-between">
+        <div class="flex-1 -text-1 font-medium">
           <tippy :max-width="192">
-            <HintIcon />
+            {{ $t('components.slippageSettingsModal.limitPrice') }}
             <template #content> {{ $t('components.slippageSettingsModal.disclaimer') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">
+        <div class="flex-shrink ml-1 -text-1 font-normal text-right">
           {{ limitPriceText }}
         </div>
       </div>
-      <div class="details__row">
-        <div class="details__row-left s-minus w-medium">
-          <div>
-            {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
-              $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
-            }}
-          </div>
+      <div class="flex justify-between">
+        <div class="flex-1 -text-1 font-medium">
           <tippy :max-width="192">
-            <HintIcon />
+            <div>
+              {{ $t('components.slippageSettingsModal.minReceivedLbl').split('/')[0] }} <br />{{
+                $t('components.slippageSettingsModal.minReceivedLbl').split('/')[1]
+              }}
+            </div>
             <template #content>{{ $t('components.slippageSettingsModal.minReceivedLblHint') }} </template>
           </tippy>
         </div>
-        <div class="details__row-right s-minus w-normal">{{ minReceivedText }}</div>
+        <div class="flex-shrink ml-1 -text-1 font-normal text-right">{{ minReceivedText }}</div>
       </div>
     </div>
   </div>
@@ -98,7 +118,6 @@
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import Alert from '@/components/ui/Alert.vue';
 import { store } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -107,13 +126,14 @@ import { getDisplayName } from '@/utils/actionHandler';
 type SwapData = {
   pay: { denom: string; amount: number };
   receive: { denom: string; amount: number };
+  poolPrice: number;
+  isReverse: boolean;
 };
 
 export default defineComponent({
   name: 'SlippageSettingModal',
   components: {
     TitleWithGoback,
-    HintIcon,
     Alert,
   },
 
@@ -125,6 +145,8 @@ export default defineComponent({
         return {
           pay: { denom: '', amount: 0 },
           receive: { denom: '', amount: 0 },
+          poolPrice: 0,
+          isReverse: false,
         };
       },
     },
@@ -235,27 +257,33 @@ export default defineComponent({
 
     //TODO: dynamic digit float calculation
     watch(
-      () => [props.swapData, state.slippage],
+      () => [props.swapData.pay.amount, props.swapData.pay.denom, props.swapData.receive.denom, state.slippage],
       async () => {
+        const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
+        const receiveDisplayName = await getDisplayName(
+          props.swapData.receive.denom,
+          store.getters['demeris/getDexChain'],
+        );
+        const payAmount = props.swapData.pay.amount;
+        const receiveAmount = props.swapData.receive.amount;
+
+        let slippageTolerancePercent = 1 - state.slippage / 100;
+        limitPriceText.value = `1 ${payDisplayName} = ${
+          payAmount
+            ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
+            : props.swapData.isReverse
+            ? props.swapData.poolPrice.toFixed(4)
+            : (1 / props.swapData.poolPrice).toFixed(4)
+        } ${receiveDisplayName}`;
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
-          const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
-          const receiveDisplayName = await getDisplayName(
-            props.swapData.receive.denom,
-            store.getters['demeris/getDexChain'],
-          );
-          const payAmount = props.swapData.pay.amount;
-          const receiveAmount = props.swapData.receive.amount;
-
-          let slippageTolerancePercent = 1 - state.slippage / 100;
-
-          limitPriceText.value = `1 ${payDisplayName} = ${
-            Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
-          } ${receiveDisplayName}`;
           minReceivedText.value = `${
             Math.floor(receiveAmount * slippageTolerancePercent * 10000) / 10000
           } ${receiveDisplayName}`;
+        } else {
+          minReceivedText.value = null;
         }
       },
+      { immediate: true },
     );
 
     onMounted(() => {
@@ -277,122 +305,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.slippage-modal {
-  position: relative;
-  width: 40rem;
-  /* height: 55.8rem; */
+.custom-slippage {
+  &:hover &__input::placeholder {
+    color: var(--muted);
+  }
 
-  margin-bottom: 5rem;
-  top: 0;
-  left: 0;
+  &__input {
+    min-width: 0.66em;
+    font: inherit;
+    letter-spacing: inherit;
+    outline: none;
+    -moz-appearance: textfield;
 
-  overflow: hidden;
+    &:empty {
+      text-align: center;
+    }
 
-  background-color: var(--surface);
-  z-index: 10;
+    &:focus,
+    &:valid {
+      text-align: right;
+    }
 
-  .setting {
-    padding: 0 2.4rem;
-
-    &__sections {
-      display: flex;
-      justify-content: space-between;
-
-      margin: 1.6rem 0;
-
-      /* Chrome, Safari, Edge, Opera */
-      input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
-      /* Firefox */
-      input[type='number'] {
-        -moz-appearance: textfield;
-      }
-      &-block {
-        width: 5.2rem;
-        height: 4rem;
-        background-color: var(--fg-trans);
-
-        border-radius: 8px;
-
-        outline: none;
-
-        &:nth-child(4) {
-          width: 9.2rem;
-          padding: 0.6rem 1.2rem;
-          text-align: center;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .custom-slippage {
-            display: flex;
-
-            input {
-              background-color: transparent;
-              width: 6rem;
-              outline: none;
-            }
-
-            &__percent {
-              color: var(--text);
-            }
-          }
-        }
-      }
-      .custom-selected {
-        input {
-          width: 2.8rem !important;
-          text-align: right;
-          outline: none;
-          &::placeholder {
-            color: transparent;
-          }
-        }
-      }
-
-      .custom-error {
-        justify-content: flex-end;
-        background: linear-gradient(135deg, #ffc1cc 0%, #ffcfc9 100%);
-      }
+    &::placeholder,
+    &:focus::placeholder {
+      color: var(--inactive);
+    }
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
     }
   }
-
-  .details {
-    padding: 0 2.4rem 2.4rem;
-    margin-top: 3.2rem;
-    &__row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      margin-bottom: 1.6rem;
-
-      &-left {
-        display: flex;
-        align-items: center;
-
-        span {
-          margin-left: 0.45rem;
-        }
-      }
-    }
-  }
-
-  .selected {
-    background: linear-gradient(102.36deg, #64dbfc -2.26%, #30ffdf 34.48%, #fffe39 92.77%);
-  }
-
-  .alert-wrapper {
-    padding: 0 2.4rem;
-  }
-}
-
-.no-custom-slippage {
-  width: 9.2rem !important;
 }
 </style>

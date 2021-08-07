@@ -2,176 +2,316 @@
   <main class="welcome">
     <header class="welcome__header">
       <div class="welcome__header__logo">
-        <Logo />
+        <Brandmark />
       </div>
 
       <div class="welcome__header__controls">
-        <router-link to="/">
-          <Button name="Try demo version" />
-        </router-link>
-
         <a title="Emeris" class="welcome__header__controls__link" href="https://emeris.com" target="_blank">
           emeris.com ↗️
         </a>
       </div>
     </header>
 
-    <div class="welcome__wrapper">
-      <section class="welcome__main">
-        <h2 class="welcome__main__subtitle">A new world for defi</h2>
-        <h1 class="welcome__main__title">
-          Your one-stop app <br />
-          for decentralized <br />
-          financial services.
-        </h1>
-        <p class="welcome__main__description">
-          Demeris is the interchain portal: a simple-to-use, all-in-one dashboard, wallet and app store for the internet
-          of blockchains.
-        </p>
-      </section>
-
-      <aside class="welcome__aside">
-        <div class="welcome__aside__connect">
-          <ConnectKeplr :show-banner="false" @connect="onConnect">
-            <template #title>
-              <h2 class="welcome__aside__connect__title">Connect to Emeris</h2>
-            </template>
-            <template #description>
-              Install Keplr in your browser and connect your wallet to start using Emeris. We will support other wallets
-              in the near future.
-            </template>
-          </ConnectKeplr>
-        </div>
-      </aside>
+    <div v-show="isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetDesktop ref="getDesktopRef" />
+      </div>
     </div>
 
-    <div class="welcome__polygon" />
+    <div
+      v-show="((isKeplrInstalled && !isWarningNeeded) || (isKeplrInstalled && isWarningAgreed)) && !isMobile"
+      class="welcome-modal__bg"
+    >
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <ConnectKeplr
+          ref="connectKeplrRef"
+          type="welcome"
+          @connect="cancelConnectKeplr"
+          @warning="showWarning"
+          @try-demo="tryDemo"
+        />
+      </div>
+    </div>
+
+    <div v-show="isWarningNeeded && !isWarningAgreed && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <AgreeWarning ref="agreeWarningRef" @cancel="cancelAgreeWarning" @agree="agreeWarning" />
+      </div>
+    </div>
+
+    <div v-show="isKeplrSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetKeplr ref="getKeplrRef" type="welcome" @try-demo="tryDemo" />
+      </div>
+    </div>
+
+    <div v-show="!isKeplrSupported && !isMobile" class="welcome-modal__bg">
+      <img class="portal" src="@/assets/svg/portal.svg" />
+      <img class="surfer" src="@/assets/images/surfer.png" />
+      <div class="welcome-modal__fg">
+        <GetBrowser ref="getBrowserRef" type="welcome" :is-loading="isLoading" @try-demo="tryDemo" />
+      </div>
+    </div>
   </main>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import Logo from '@/components/common/Logo.vue';
-import Button from '@/components/ui/Button.vue';
+import GetBrowser from '@/components/account/GetBrowser.vue';
+import GetDesktop from '@/components/account/GetDesktop.vue';
+import GetKeplr from '@/components/account/GetKeplr.vue';
+import Brandmark from '@/components/common/Brandmark.vue';
+
+async function getKeplrInstance() {
+  if (window.keplr) {
+    return window.keplr;
+  }
+
+  if (document.readyState === 'complete') {
+    return window.keplr;
+  }
+
+  return new Promise((resolve) => {
+    const documentStateChange = (event: Event) => {
+      if (event.target && (event.target as Document).readyState === 'complete') {
+        resolve(window.keplr);
+        document.removeEventListener('readystatechange', documentStateChange);
+      }
+    };
+
+    document.addEventListener('readystatechange', documentStateChange);
+  });
+}
 
 export default defineComponent({
-  name: 'Welcome',
+  name: 'ConnectWalletModal',
 
   components: {
-    Button,
     ConnectKeplr,
-    Logo,
+    Brandmark,
+    AgreeWarning,
+    GetKeplr,
+    GetDesktop,
+    GetBrowser,
+  },
+
+  props: {
+    open: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   setup() {
     const router = useRouter();
+    const connectKeplrRef = ref(null);
+    const agreeWarningRef = ref(null);
+    const getKeplrRef = ref(null);
+    const getBrowserRef = ref(null);
+    const isKeplrSupported = ref(null);
+    const isKeplrInstalled = ref(null);
+    const isLoading = ref(true);
+    const isMobile = ref(null);
+    const isReturnUser = ref(null);
+    const isWarningAgreed = ref(null);
+    const isWarningNeeded = ref(null);
 
-    const onConnect = () => {
+    const cancelConnectKeplr = () => {
+      connectKeplrRef.value.cancel();
+      isReturnUser.value = true;
+      router.push('/');
+    };
+    const cancelAgreeWarning = () => {
+      isWarningNeeded.value = null;
+    };
+
+    const agreeWarning = () => {
+      isWarningNeeded.value = false;
+      isWarningAgreed.value = true;
+      connectKeplrRef.value.signIn();
+    };
+
+    const showWarning = () => {
+      isWarningNeeded.value = true;
+    };
+
+    // TODO: Implement demo account
+    // right now it skips past the welcome flow
+    const tryDemo = () => {
+      isReturnUser.value = true;
       router.push('/');
     };
 
+    onMounted(async () => {
+      isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches;
+      isReturnUser.value = window.localStorage.getItem('isReturnUser');
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+
+      // dont present spinner forever if not Chrome
+      // @ts-ignore
+      if (!window.chrome) {
+        isLoading.value = false;
+      }
+
+      await getKeplrInstance();
+      await nextTick();
+
+      // @ts-ignore
+      isKeplrSupported.value = !!window.chrome;
+
+      nextTick(() => {
+        // detect keplr installed
+        // @ts-ignore
+        isKeplrInstalled.value = !!window.keplr;
+      });
+    });
+
+    watch(isWarningAgreed, () => {
+      window.localStorage.setItem('isWarningAgreed', 'true');
+    });
+    watch(isWarningNeeded, (newVal: string) => {
+      window.localStorage.setItem('isWarningNeeded', newVal);
+    });
+    watch(isReturnUser, (newVal: string) => {
+      window.localStorage.setItem('isReturnUser', newVal);
+    });
+
     return {
-      onConnect,
+      agreeWarning,
+      showWarning,
+      connectKeplrRef,
+      agreeWarningRef,
+      getKeplrRef,
+      getBrowserRef,
+      isLoading,
+      isKeplrSupported,
+      isKeplrInstalled,
+      isMobile,
+      isReturnUser,
+      isWarningAgreed,
+      isWarningNeeded,
+      cancelAgreeWarning,
+      cancelConnectKeplr,
+      tryDemo,
     };
   },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .welcome {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  position: relative;
+
+  .surfer {
+    position: absolute;
+    top: 0;
+    margin-top: 30vh;
+    right: 5vh;
+    width: 40vh;
+    height: 40vh;
+  }
+
+  .portal {
+    position: absolute;
+    top: 2vh;
+    right: 0;
+    width: 60vh;
+    height: 100vh;
+  }
 
   &__header {
-    padding: 1.6rem 3.2rem;
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
 
     &__controls {
       display: flex;
+      flex-direction: column;
       align-items: center;
-
-      &__link {
-        margin-left: 3.4rem;
-      }
     }
   }
 
-  &__wrapper {
-    flex: 1 1 0%;
+  .welcome-modal__bg {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: flex;
     align-items: center;
-    max-width: 1536px;
-    margin: 0 auto;
-    padding: 4.8rem 3.2rem;
+    justify-content: center;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .welcome-modal__fg {
+    max-width: 34rem;
     position: relative;
-    z-index: 1;
-  }
+    z-index: 11;
+    background: linear-gradient(to right, var(--bg), var(--transparent));
 
-  &__main {
-    flex: 1 1 0%;
-
-    &__subtitle {
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    &__title {
-      font-size: 5.1rem;
-      font-weight: 600;
-      margin-top: 2.6rem;
-      line-height: 1.21;
-      letter-spacing: -0.043em;
-    }
-
-    &__description {
-      margin-top: 5.6rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-  }
-
-  &__aside {
-    flex: 1 1 0%;
-
-    &__connect {
-      width: 80%;
-      min-height: 32rem;
-      max-width: 44rem;
-      margin: 0 auto;
-      box-shadow: 32px 48px 96px -8px rgba(0, 0, 0, 0.14);
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 2rem;
-      backdrop-filter: blur(42px);
-
-      &__title {
-        text-align: center;
-        font-size: 3.2rem;
-        font-weight: 600;
-        line-height: 1;
+    .agree-warning {
+      .scrollable {
+        height: auto;
+        border: none;
+        padding: 0;
+        &:after {
+          display: none;
+        }
+        .scrollable-content {
+          padding: 0;
+        }
       }
     }
   }
+}
 
-  &__polygon {
-    width: 36%;
-    height: 78%;
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-45%);
-    background-image: url('~@/assets/images/gradient-light-2.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    clip-path: polygon(0 10%, 100% 0, 100% 90%, 0% 100%);
+@media only screen and (max-width: 768px) {
+  .welcome {
+    .surfer {
+      right: -10vh;
+    }
+    .portal {
+      right: -20vh;
+    }
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .welcome {
+    .connect-wallet__content {
+      max-width: 100%;
+    }
+    .surfer {
+      margin-top: -3.5vh;
+      width: 35vh;
+      height: 35vh;
+      right: 5vh;
+    }
+    .portal {
+      top: -45vh;
+      right: -1vh;
+    }
   }
 }
 </style>
