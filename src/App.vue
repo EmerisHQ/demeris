@@ -4,7 +4,8 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin } from './utils/basic';
@@ -89,6 +90,14 @@ export default defineComponent({
       window.localStorage.setItem('lastEmerisSession', '');
       this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
     });
+
+    // send new users to welcome page
+    const router = useRouter();
+    const isReturnUser = ref(null);
+    isReturnUser.value = window.localStorage.getItem('isReturnUser');
+    if (!isReturnUser.value) {
+      router.push('/welcome');
+    }
   },
 });
 </script>

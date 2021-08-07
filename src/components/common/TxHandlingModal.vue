@@ -202,16 +202,6 @@
       class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
     >
       <Button
-        v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
-        :name="secondaryButton"
-        variant="link"
-        :click-function="
-          () => {
-            router.push('/send');
-          }
-        "
-      />
-      <Button
         v-if="primaryButton"
         :name="primaryButton"
         variant="primary"
