@@ -21,6 +21,7 @@ export type State = {
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
   numbers: Record<string, API.Numbers>;
+  chainnumbers: Record<string, Record<string, API.SeqNumber>>;
   verifiedDenoms: API.VerifiedDenoms;
   keplr: KeplrKeyData;
   prices: API.Prices;
