@@ -224,7 +224,6 @@ export default defineComponent({
       fees[GasPriceLevel.LOW] = lowFeeUSD.value;
       fees[GasPriceLevel.AVERAGE] = avgFeeUSD.value;
       fees[GasPriceLevel.HIGH] = highFeeUSD.value;
-
       return fees;
     });
 
@@ -307,24 +306,24 @@ export default defineComponent({
 
     const swapFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
-        return `${swapDollarFee.value ? data.formatter.format(swapDollarFee.value) + ' +' : ''} ${
+        return `${swapDollarFee.value ? formatter.value.format(swapDollarFee.value) + ' +' : ''} ${
           poolCoinSwapFees.value[0] ? `${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]} + ` : ''
         } ${poolCoinSwapFees.value[1] ? `${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''}`;
       } else {
-        return data.formatter.format(swapDollarFee.value);
+        return formatter.value.format(swapDollarFee.value);
       }
     });
 
     const totalFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
         return (
-          data.formatter.format(swapDollarFee.value + fees.value[props.gasPriceLevel]) +
+          formatter.value.format(swapDollarFee.value + fees.value[props.gasPriceLevel]) +
           `${poolCoinSwapFees.value[0] ? ` + ${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]}` : ''} ${
             poolCoinSwapFees.value[1] ? ` + ${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''
           }`
         );
       } else {
-        return data.formatter.format(swapDollarFee.value + fees.value[props.gasPriceLevel] * txCount.value);
+        return formatter.value.format(swapDollarFee.value + fees.value[props.gasPriceLevel] * txCount.value);
       }
     });
 
@@ -338,14 +337,6 @@ export default defineComponent({
         data.isFeesOpen = !data.isFeesOpen;
       },
       GasPriceLevel,
-      formatter: new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      }),
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
 
@@ -358,8 +349,29 @@ export default defineComponent({
       emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
+    const formatter = computed(() => {
+      let precisions = [];
+      for (const chain_name in lowFee.value) {
+        for (const denom in lowFee.value[chain_name]) {
+          precisions.push(store.getters['demeris/getDenomPrecision']({ name: denom }));
+        }
+      }
+
+      const maxPrecision = Math.max(...precisions.filter(Boolean));
+
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: maxPrecision,
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+      });
+    });
+
     return {
       ...toRefs(data),
+      formatter,
       txCount,
       fees,
       swapFee,

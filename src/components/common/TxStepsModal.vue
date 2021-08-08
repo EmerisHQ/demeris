@@ -594,6 +594,10 @@ export default defineComponent({
                     chain_name = res.chain_name;
                   }
 
+                  // sleep
+                  await new Promise((r) => setTimeout(r, 500));
+                  console.log('setSleep', 500);
+
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,
                     { txhash, chain_name },
