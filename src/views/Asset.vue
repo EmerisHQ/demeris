@@ -68,7 +68,11 @@
           <h2 class="text-2 font-bold">Chains</h2>
 
           <ul class="mt-6">
-            <li v-for="asset of assets" :key="asset.address" class="flex items-center justify-between w-full py-5">
+            <li
+              v-for="(asset, index) of assets"
+              :key="asset.address + '_' + index"
+              class="flex items-center justify-between w-full py-5"
+            >
               <div class="w-1/3 flex items-center min-w-0">
                 <CircleSymbol :denom="denom" :chain-name="asset.on_chain" size="lg" :glow="false" variant="chain" />
                 <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"><ChainName :name="asset.on_chain" /></span>
@@ -290,7 +294,7 @@ export default defineComponent({
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
-
+    console.log(assets);
     return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });

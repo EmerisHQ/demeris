@@ -1418,11 +1418,9 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
-  console.log(balances);
+
   for (const balance of balances) {
-    console.log(balance);
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-    console.log(ownAddress);
     const hashAddress = keyHashfromAddress(ownAddress);
 
     if (balance.address !== hashAddress) {
