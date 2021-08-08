@@ -66,7 +66,13 @@
         </div>
 
         <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
-          <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
+          <Button
+            v-if="chainsStatus.status"
+            :name="'Confirm and continue'"
+            variant="primary"
+            :click-function="confirm"
+          />
+          <Button v-else :name="'Try again later'" :disabled="true" variant="primary" />
         </div>
       </div>
       <Modal
@@ -232,6 +238,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
+  chainStatusForSteps,
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
@@ -300,6 +307,9 @@ export default defineComponent({
     });
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
+    });
+    const chainsStatus = computed(() => {
+      return chainStatusForSteps(props.data);
     });
     const goMoon = () => {
       if (isSignedIn.value) {
@@ -721,6 +731,7 @@ export default defineComponent({
       errorDetails,
       acceptedWarning,
       goMoon,
+      chainsStatus,
     };
   },
 });
