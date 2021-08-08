@@ -1530,7 +1530,92 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 
   return validPools;
 }
-
+export async function chainStatusForSteps(steps: Actions.Step[]) {
+  let allClear = true;
+  const failedChains = [];
+  for (const step of steps) {
+    for (const stepTx of step.transactions) {
+      if (stepTx.name == 'transfer') {
+        const chain_name = (stepTx.data as Actions.TransferData).chain_name;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'ibc_backward') {
+        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'ibc_forward') {
+        const chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'addliquidity') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'withdrawliquidity') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'createpool') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'swap') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+    }
+  }
+  return { status: allClear, failed: failedChains };
+}
 export async function validateStepFeeBalances(
   step: Actions.Step,
   balances: Balances,
