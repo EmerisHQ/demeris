@@ -1,5 +1,5 @@
 <template>
-  <template>
+  <div>
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
@@ -71,11 +71,12 @@
 
           <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
             Once executed, transactions cannot be reverted. By continuing, you agree to our
-            <a class="underline" href="https://emeris.com/terms" rel="noopener noreferrer" target="_blank">Terms of Service</a>.
+            <a class="underline" href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
           </div>
 
           <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
-            <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
+            <Button v-if="!isDemoAccount" :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
+            <Button v-else :name="'Connect Wallet'" variant="primary" :click-function="confirm" />
           </div>
         </div>
         <Modal
@@ -216,7 +217,7 @@
         @reset="emitHandler('reset')"
       />
     </div>
-  </template>
+  </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
@@ -430,9 +431,11 @@ export default defineComponent({
         interstitialProceed.value = false;
       },
     );
-
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
     const confirm = async () => {
-      if (store.getters['isDemoAccount']) {
+      if (isDemoAccount.value) {
         connectModalOpen.value = true;
         return;
       }
@@ -735,6 +738,7 @@ export default defineComponent({
       errorDetails,
       acceptedWarning,
       goMoon,
+      isDemoAccount,
     };
   },
 });

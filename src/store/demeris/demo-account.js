@@ -73,6 +73,6 @@ export const demoAddresses = {
   osmosis: 'osmo10ms58lgajy69z2x62shj0nxc6r3a0r7qpwtn69',
   iris: 'iaa10ms58lgajy69z2x62shj0nxc6r3a0r7quhcjwx',
   sentinel: 'sent10ms58lgajy69z2x62shj0nxc6r3a0r7qjww6gc',
-  'crypto-com': 'cro1scl2vtl3lrqshmz0xaepnhklp6g2c3m8mc8738',
+  'crypto-org': 'cro1scl2vtl3lrqshmz0xaepnhklp6g2c3m8mc8738',
   persistence: 'persistence1zf9x35scavvfzssaeu4240yvnfgfu5r3tsh34m',
 };
