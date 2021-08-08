@@ -1548,23 +1548,37 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'ibc_backward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
         if (!store.getters['demeris/getChainStatus']({ chain_name })) {
           allClear = false;
-          if (failedChains.includes(chain_name)) {
+          if (!failedChains.includes(chain_name)) {
+            failedChains.push(chain_name);
+          }
+        }
+        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+          allClear = false;
+          if (failedChains.includes(dest_chain_name)) {
             continue;
           } else {
-            failedChains.push(chain_name);
+            failedChains.push(dest_chain_name);
           }
         }
       }
       if (stepTx.name == 'ibc_forward') {
-        const chain_name = (stepTx.data as Actions.IBCForwardsData).from_chain;
+        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
         if (!store.getters['demeris/getChainStatus']({ chain_name })) {
           allClear = false;
-          if (failedChains.includes(chain_name)) {
+          if (!failedChains.includes(chain_name)) {
+            failedChains.push(chain_name);
+          }
+        }
+        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+          allClear = false;
+          if (failedChains.includes(dest_chain_name)) {
             continue;
           } else {
-            failedChains.push(chain_name);
+            failedChains.push(dest_chain_name);
           }
         }
       }
