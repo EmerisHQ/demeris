@@ -118,6 +118,7 @@ export default defineComponent({
 
     const closeConnectKeplr = () => {
       connectKeplrRef.value.cancel();
+      console.log('close?');
       emit('close');
     };
     const closeAgreeWarning = () => {

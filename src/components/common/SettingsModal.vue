@@ -344,7 +344,7 @@ export default defineComponent({
     const disconnectWallet = () => {
       emit('disconnect');
       window.localStorage.setItem('lastEmerisSession', '');
-      store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
+      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
     };
 
     return {
