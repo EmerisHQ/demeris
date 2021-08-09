@@ -41,7 +41,7 @@
     <div class="address__controls absolute z-10 px-4 pb-4 left-0 bottom-0 w-full flex justify-between items-end">
       <span class="text-muted -text-1"><ChainName :name="chainName" /></span>
       <Clipboard v-if="readonly" :text="address" />
-      <Button v-else name="Paste" size="sm" variant="secondary" />
+      <Button v-else name="Paste" size="sm" variant="secondary" :click-function="pasteClip" />
     </div>
   </label>
 </template>
@@ -94,8 +94,10 @@ export default defineComponent({
       get: () => props.address,
       set: (value) => emit('update:address', value),
     });
-
-    return { model };
+    const pasteClip = () => {
+      navigator.clipboard.readText().then((clipText) => (model.value = clipText));
+    };
+    return { model, pasteClip };
   },
 });
 </script>
