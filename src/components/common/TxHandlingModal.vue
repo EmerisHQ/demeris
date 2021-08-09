@@ -60,7 +60,7 @@
         v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
         class="w-full max-w-lg flex items-center justify-center -space-x-8"
       >
-        <template v-if="tx.name == 'addliquidity'">
+        <template v-if="tx.name == 'addliquidity' || tx.name == 'createpool'">
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
