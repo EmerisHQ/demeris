@@ -12,7 +12,8 @@
             class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="disconnectWallet"
           >
-            <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
+            <span v-if="isDemoAccount">{{ $t('components.settingsMenu.connectWallet') }}</span>
+            <span v-else>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
           </div>
         </div>
 
@@ -285,7 +286,9 @@ export default defineComponent({
     const isWarningCustomSlippageOpen = ref(false);
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
-
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
     const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
@@ -360,6 +363,7 @@ export default defineComponent({
       toggleWarningViewUnverified,
       toggleWarningViewLPAssetPools,
       disconnectWallet,
+      isDemoAccount,
     };
   },
 });

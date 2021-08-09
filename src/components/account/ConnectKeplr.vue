@@ -23,7 +23,11 @@
 
         <div class="flex items-center flex-col mt-12">
           <Button :name="$t('wallet.connect.modal1.button')" @click="trySignIn" />
-          <a class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="signInDemo">
+          <a
+            v-if="type !== 'welcome'"
+            class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
+            @click="signInDemo"
+          >
             {{ $t('generic_cta.tryTheDemo') }}
           </a>
           <a

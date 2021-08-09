@@ -241,6 +241,7 @@ export const messages = {
         settings: 'Settings',
         connectedWallet: 'Connected wallet',
         disconnectWallet: 'Disconnect wallet',
+        connectWallet: 'Connect wallet',
         support: 'Support',
         twitter: 'Twitter',
         privacy: 'Privacy',
