@@ -72,7 +72,7 @@
             variant="primary"
             :click-function="confirm"
           />
-          <Button v-else :name="'Try again later'" :disabled="true" variant="primary" />
+          <Button v-else :name="'Unavailable'" :tooltip-text="failedChainsText" :disabled="true" variant="primary" />
         </div>
       </div>
       <Modal
@@ -216,6 +216,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -288,6 +289,8 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
+
+    const { t } = useI18n({ useScope: 'global' });
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
@@ -310,6 +313,20 @@ export default defineComponent({
     });
     const chainsStatus = computed(() => {
       return chainStatusForSteps(props.data);
+    });
+    const failedChainsText = computed(() => {
+      const failed = chainsStatus.value.failed
+        .map((x) =>
+          store.getters['demeris/getDisplayChain']({
+            name: x,
+          }),
+        )
+        .join(',');
+      if (chainsStatus.value.failed.length > 1) {
+        return failed + ' ' + t('components.txStepsModal.chainsDown');
+      } else {
+        return failed + ' ' + t('components.txStepsModal.chainDown');
+      }
     });
     const goMoon = () => {
       if (isSignedIn.value) {
@@ -732,6 +749,7 @@ export default defineComponent({
       acceptedWarning,
       goMoon,
       chainsStatus,
+      failedChainsText,
     };
   },
 });

@@ -125,6 +125,10 @@ export const messages = {
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
+      txStepsModal: {
+        chainDown: 'appears to be down, action is temporarily unavailable.',
+        chainsDown: 'appear to be down, action is temporarily unavailable.',
+      },
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
         signTx: 'Sign transaction',

@@ -1530,7 +1530,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 
   return validPools;
 }
-export async function chainStatusForSteps(steps: Actions.Step[]) {
+export function chainStatusForSteps(steps: Actions.Step[]) {
   let allClear = true;
   const failedChains = [];
   for (const step of steps) {
