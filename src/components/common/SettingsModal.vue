@@ -107,9 +107,13 @@
         <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>
 
-          <select v-model="settings.theme" class="bg-transparent font-medium appearance-none outline-none">
+          <select
+            v-model="settings.theme"
+            class="bg-transparent font-medium appearance-none outline-none dark:bg-surface"
+          >
             <option value="system">{{ $t('components.settingsMenu.system') }}</option>
             <option value="light">{{ $t('components.settingsMenu.light') }}</option>
+            <option value="dark">{{ $t('components.settingsMenu.dark') }}</option>
           </select>
         </label>
         <hr class="border-t border-border" />
@@ -185,16 +189,14 @@
       :close-on-overlay-click="true"
       @close="toggleWarningViewUnverified"
     >
-      <template>
-        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
-        <div class="text-1 font-bold">
-          {{ $t('components.settingsMenu.viewAllAssets') }}
-        </div>
-        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
-          <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
-          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-        </div>
-      </template>
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+      <div class="text-1 font-bold">
+        {{ $t('components.settingsMenu.viewAllAssets') }}
+      </div>
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+        <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
       <template #buttons>
         <ModalButton
           name="Cancel"
@@ -225,16 +227,14 @@
       :close-on-overlay-click="true"
       @close="toggleWarningViewLPAssetPools"
     >
-      <template>
-        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
-        <div class="text-1 font-bold">
-          {{ $t('components.settingsMenu.viewLPAssetPools') }}
-        </div>
-        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
-          <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
-          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-        </div>
-      </template>
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+      <div class="text-1 font-bold">
+        {{ $t('components.settingsMenu.viewLPAssetPools') }}
+      </div>
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+        <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
       <template #buttons>
         <ModalButton
           name="Cancel"
@@ -267,6 +267,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
+import useTheme from '@/composables/useTheme';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
@@ -282,6 +283,7 @@ export default defineComponent({
   emits: ['disconnect'],
   setup(_, { emit }) {
     const store = useStore();
+    const theme = useTheme();
     const isAdvancedSettingsOpen = ref(false);
     const isWarningCustomSlippageOpen = ref(false);
     const isWarningViewUnverifiedOpen = ref(false);
@@ -300,7 +302,7 @@ export default defineComponent({
     };
 
     const settings = reactive({
-      theme: 'system',
+      theme,
       allowCustomSlippage: computed({
         get: () => store.getters['demeris/allowCustomSlippage'],
         set: (value: boolean) => updateSession('customSlippage', value),

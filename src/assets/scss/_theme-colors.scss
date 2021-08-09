@@ -69,16 +69,29 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
     @include themeLight;
   }
   /* + Elements with inverse theme in light mode */
-  @media (prefers-color-scheme: light) {
-    .theme-inverse {
+  .theme-inverse {
+    @include themeDark;
+  }
+
+  /* Dark theme:
+   * It will prefer system option on initial render.
+   * Then when the class is programatically set as 'dark' or 'light' (loaded from localStorage),
+   * it overrides css variables;
+   */
+  @media (prefers-color-scheme: dark) {
+    html:not(.light) {
       @include themeDark;
+
+      /* Elements with inverse theme in dark mode */
+      .dark\:theme-inverse {
+        @include themeLight;
+      }
     }
   }
-  /* Dark theme */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      @include themeDark;
-    }
+
+  html.dark {
+    @include themeDark;
+
     /* Elements with inverse theme in dark mode */
     .dark\:theme-inverse {
       @include themeLight;
