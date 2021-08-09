@@ -146,11 +146,39 @@ export default defineComponent({
     });
 
     const orderCoinsByName = (coins) => {
-      return orderBy(coins, ['display_name'], ['asc']);
+      let tokens = [];
+      let lpTokens = [];
+      coins.map((c) => {
+        if (c.display_name.includes('Gravity')) {
+          lpTokens.push(c);
+        } else {
+          tokens.push(c);
+        }
+      });
+      tokens = orderBy(tokens, ['display_name'], ['asc']);
+      lpTokens = orderBy(lpTokens, ['display_name'], ['asc']);
+      lpTokens = lpTokens.sort((a, b) =>
+        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return tokens.concat(lpTokens);
     };
 
     const orderCoinsByValue = (coins) => {
-      return orderBy(coins, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
+      let tokens = [];
+      let lpTokens = [];
+      coins.map((c) => {
+        if (c.display_name.includes('Gravity')) {
+          lpTokens.push(c);
+        } else {
+          tokens.push(c);
+        }
+      });
+      tokens = orderBy(tokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
+      lpTokens = orderBy(lpTokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
+      lpTokens = lpTokens.sort((a, b) =>
+        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return tokens.concat(lpTokens);
     };
 
     const coinsByType = computed(() => {

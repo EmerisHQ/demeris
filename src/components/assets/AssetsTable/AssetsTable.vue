@@ -294,11 +294,35 @@ export default defineComponent({
     });
 
     const orderUserBalances = (balances) => {
-      return orderBy(balances, [(b) => b.value.value, 'name'], ['desc', 'asc']);
+      let tokens = [];
+      let lpTokens = [];
+      balances.map((x) => {
+        if (x.name && x.name.includes('Gravity')) {
+          lpTokens.push(x);
+        } else {
+          tokens.push(x);
+        }
+      });
+      tokens = orderBy(tokens, [(b) => b.value.value, 'name'], ['desc', 'asc']);
+      lpTokens = orderBy(lpTokens, [(b) => b.value.value], ['desc']);
+      lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
+      return tokens.concat(lpTokens);
     };
 
     const orderAllBalances = (balances) => {
-      return orderBy(balances, ['marketCap', (b) => b.value.value, 'name'], ['desc', 'desc', 'asc']);
+      let tokens = [];
+      let lpTokens = [];
+      balances.map((x) => {
+        if (x.name && x.name.includes('Gravity')) {
+          lpTokens.push(x);
+        } else {
+          tokens.push(x);
+        }
+      });
+      tokens = orderBy(tokens, ['marketCap', (b) => b.value.value, 'name'], ['desc', 'desc', 'asc']);
+      lpTokens = orderBy(lpTokens, ['marketCap', (b) => b.value.value], ['desc', 'desc']);
+      lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
+      return tokens.concat(lpTokens);
     };
 
     const getFormattedMarketCap = (denom: string) => {
