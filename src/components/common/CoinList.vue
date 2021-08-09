@@ -149,7 +149,7 @@ export default defineComponent({
       let tokens = [];
       let lpTokens = [];
       coins.map((c) => {
-        if (c.display_name.includes('Gravity')) {
+        if (c.display_name && c.display_name.includes('Gravity')) {
           lpTokens.push(c);
         } else {
           tokens.push(c);
@@ -167,7 +167,7 @@ export default defineComponent({
       let tokens = [];
       let lpTokens = [];
       coins.map((c) => {
-        if (c.display_name.includes('Gravity')) {
+        if (c.display_name && c.display_name.includes('Gravity')) {
           lpTokens.push(c);
         } else {
           tokens.push(c);
