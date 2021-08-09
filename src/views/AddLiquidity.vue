@@ -244,6 +244,11 @@
                     </span>
                   </div>
                 </ListItem>
+
+                <ListItem v-if="hasPair && !hasPool" inset size="md" label="Pool creation fee">
+                  <AmountDisplay :amount="creationFee" />
+                </ListItem>
+
                 <div class="mt-6 mb-2">
                   <FeeLevelSelector
                     v-if="actionSteps.length > 0 && gasPrice"
@@ -255,11 +260,7 @@
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
                   Your assets will be transferred to Cosmos Hub
                 </Alert>
-                <Button
-                  :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
-                  :disabled="!isValid"
-                  @click="goToReview"
-                />
+                <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
               </div>
             </template>
 
@@ -382,6 +383,10 @@ export default {
 
     const gasPrice = computed(() => {
       return store.getters['demeris/getPreferredGasPriceLevel'];
+    });
+
+    const creationFee = computed(() => {
+      return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
     const hasPrices = computed(() => {
@@ -615,6 +620,22 @@ export default {
 
       state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
     };
+
+    const submitButtonName = computed(() => {
+      let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+      let insufficientFunds = !hasSufficientFunds.value.total;
+      let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
+
+      if (emptyFields) {
+        return 'Continue';
+      } else if (insufficientFunds) {
+        return 'Insufficient funds';
+      } else if (!insufficientFunds && invalidPool) {
+        return 'Supply amount must be > 1';
+      } else {
+        return 'Continue';
+      }
+    });
 
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
@@ -933,6 +954,7 @@ export default {
 
     return {
       gasPrice,
+      creationFee,
       actionSteps,
       balances,
       balancesForSecond,
@@ -945,6 +967,7 @@ export default {
       needsTransferToHub,
       hasSufficientFunds,
       isValid,
+      submitButtonName,
       exchangeAmount,
       hasPrices,
       previewPoolCoinDenom,
