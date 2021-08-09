@@ -909,7 +909,7 @@ export default {
             const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
-
+            
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
@@ -918,10 +918,12 @@ export default {
 
             const bigAmountA = new BigNumber(amountA).minus(feeA);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
-
             const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
+            const bigAmountBToA = bigAmountB.dividedBy(bigExchangeAmount)
 
-            const minAmount = BigNumber.minimum(bigAmountA, bigAmountB.dividedBy(bigExchangeAmount));
+            const minAmount = BigNumber.minimum(bigAmountA, bigAmountBToA);
+
+            console.log("minamount", minAmount.toString());
 
             if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
               form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
@@ -931,7 +933,7 @@ export default {
                 .shiftedBy(-precisionB)
                 .decimalPlaces(precisionB)
                 .toString();
-            } else if (minAmount.isEqualTo(bigAmountB) && amountsPositive) {
+            } else if (minAmount.isEqualTo(bigAmountBToA) && amountsPositive) {
               form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
 
               form.coinA.amount = bigAmountB
