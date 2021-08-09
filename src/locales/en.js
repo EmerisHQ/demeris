@@ -142,6 +142,9 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
+        chainDown: 'Transaction failed, the chain is unavailable',
+        chainDownDesc:
+          'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
         revertTx: 'Reverting transfer...',
         contactSupport: 'Contact support ↗️',
         backToPortfolio: 'Back to portfolio',

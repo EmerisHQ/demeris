@@ -66,15 +66,29 @@
         </div>
 
         <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
-          <Button
-            v-if="chainsStatus.status"
-            :name="'Confirm and continue'"
-            variant="primary"
-            :click-function="confirm"
-          />
-          <Button v-else :name="'Unavailable'" :tooltip-text="failedChainsText" :disabled="true" variant="primary" />
+          <Button :name="'Confirm and continue'" variant="primary" :click-function="confirm" />
         </div>
       </div>
+      <Modal
+        v-if="showChainError"
+        class="text-center"
+        :variant="variant === 'widget' ? 'bottom' : 'dialog'"
+        :fullscreen="variant === 'default'"
+        @close="goPortfolio"
+      >
+        <div class="flex items-center justify-center my-6">
+          <Icon name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
+        </div>
+        <div class="text-1 font-bold mb-4">
+          {{ $t('components.txHandlingModal.chainDown') }}
+        </div>
+        <div class="text-muted leading-copy mb-8">
+          {{ $t('components.txHandlingModal.chainDownDesc') }}
+        </div>
+        <template #buttons>
+          <ModalButton :name="$t('generic_cta.understand')" :click-function="goPortfolio" />
+        </template>
+      </Modal>
       <Modal
         v-if="feeWarning.feeWarning"
         class="text-center"
@@ -215,7 +229,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -225,6 +239,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
@@ -260,6 +275,7 @@ export default defineComponent({
     ModalButton,
     TxHandlingModal,
     Modal,
+    Icon,
     CircleSymbol,
     AmountDisplay,
     TransferInterstitialConfirmation,
@@ -328,6 +344,7 @@ export default defineComponent({
         return failed + ' ' + t('components.txStepsModal.chainDown');
       }
     });
+
     const goMoon = () => {
       if (isSignedIn.value) {
         window.open(mpUrl.value, '', 'height=480,width=320');
@@ -336,6 +353,9 @@ export default defineComponent({
       }
     };
     const router = useRouter();
+    const goPortfolio = () => {
+      router.push('/');
+    };
     const goBack = () => {
       if (props.backRoute) {
         router.push(props.backRoute);
@@ -379,6 +399,7 @@ export default defineComponent({
       },
     );
     const txToResolve = ref({});
+    const showChainError = ref(false);
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
       isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
@@ -450,6 +471,10 @@ export default defineComponent({
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
       } else {
+        if (!chainsStatus.value.status) {
+          showChainError.value = true;
+          return;
+        }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
             const isLastTransaction = i === currentData.value.data.transactions.length - 1;
@@ -469,6 +494,7 @@ export default defineComponent({
                 hasMore.value = false;
               }
               isTxHandlingModalOpen.value = true;
+              await nextTick();
               txstatus.value = 'keplr-sign';
               let txToResolveResolver;
               const txToResolvePromise = {
@@ -738,6 +764,7 @@ export default defineComponent({
       toggleTxHandlingModal,
       currentData,
       goBack,
+      goPortfolio,
       isTxHandlingModalOpen,
       nextTx,
       transaction,
@@ -750,6 +777,7 @@ export default defineComponent({
       goMoon,
       chainsStatus,
       failedChainsText,
+      showChainError,
     };
   },
 });
