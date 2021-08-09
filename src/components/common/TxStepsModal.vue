@@ -82,7 +82,7 @@
         <Modal
           v-if="feeWarning.feeWarning"
           class="text-center"
-          :variant="variant === 'widget' ? 'bottom' : 'dialog'"
+          :variant="'dialog'"
           :fullscreen="variant === 'default'"
           @close="
             () => {
@@ -423,7 +423,22 @@ export default defineComponent({
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
         if (currentStep.value == 0) {
-          feeWarning.value = await validateStepsFeeBalances(props.data, toCheckBalances, newData, props.gasPriceLevel);
+          if (feeWarning.value.feeWarning) {
+            feeWarning.value = await validateStepsFeeBalances(
+              props.data,
+              toCheckBalances,
+              newData,
+              props.gasPriceLevel,
+            );
+            feeWarning.value.feeWarning = true;
+          } else {
+            feeWarning.value = await validateStepsFeeBalances(
+              props.data,
+              toCheckBalances,
+              newData,
+              props.gasPriceLevel,
+            );
+          }
           interstitialProceed.value = false;
         } else {
           feeWarning.value = {
