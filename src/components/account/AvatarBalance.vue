@@ -11,14 +11,10 @@
         class="avatar__gradient relative rounded-full overflow-hidden w-full h-full"
         v-html="getAvatar(keplrAccountName)"
       ></div>
-      <div
-        v-else
-        class="avatar__gradient_demo relative rounded-full overflow-hidden w-full h-full"
-        v-html="getAvatar(keplrAccountName)"
-      ></div>
+      <div v-else class="avatar__demo relative rounded-full overflow-hidden w-full h-full"></div>
     </div>
 
-    <div class="ml-3 flex-grow" :class="{ 'hidden sm:block': !walletName }">
+    <div class="ml-3 flex-grow" :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }">
       <div class="-text-1 slashed-zero" :class="[walletName ? 'font-bold mb-0.5' : 'leading-none mb-1']">
         {{ keplrAccountName }}
       </div>
@@ -97,7 +93,24 @@ export default defineComponent({
       margin-left: -0.6125rem;
     }
   }
-
+  &__demo {
+    background: conic-gradient(
+        from 180deg at 50% 50%,
+        #cea851 -41.21deg,
+        #fff1c3 0.05deg,
+        #9b7c3a 74.45deg,
+        #fff0ca 115.85deg,
+        #d3ad5f 143.94deg,
+        #ffecc4 176.48deg,
+        #997736 232.74deg,
+        #fff2c0 284.83deg,
+        #cea851 318.79deg,
+        #fff1c3 360.05deg
+      ),
+      #d5bc83;
+    width: 100%;
+    height: 100%;
+  }
   svg {
     width: 100%;
     height: 100%;
