@@ -1,6 +1,6 @@
 <template>
   <List>
-    <ListItem :label="$t('components.previews.transfer.sendLbl')">
+    <ListItem :label="$t(`components.previews.transfer.${response ? 'sentLbl' : 'sendLbl'}`)">
       <div class="flex justify-end items-center">
         <div class="text-right">
           <AmountDisplay
@@ -18,7 +18,7 @@
 
     <ListItem
       v-if="stepType !== 'transfer-to-hub'"
-      :label="$t('components.previews.transfer.fromLbl')"
+      :label="$t(`components.previews.transfer.${response ? 'fromLbl' : 'senderLbl'}`)"
       :disclosure-show-text="truncateAddress(transactionInfo.from.address)"
       direction="col"
       collapsible
@@ -31,7 +31,11 @@
 
     <ListItem
       v-if="hasMultipleTransactions"
-      :label="$t('components.previews.transfer.txToSign', { txCount: currentStep.transactions.length })"
+      :label="
+        $t(`components.previews.transfer.${response ? 'feesLbl' : 'txToSign'}`, {
+          txCount: currentStep.transactions.length,
+        })
+      "
       direction="col"
       :hint="$t('components.previews.transfer.txToSignHint')"
     >
@@ -52,7 +56,7 @@
       </template>
     </ListItem>
 
-    <ListItem label="Receive">
+    <ListItem :label="$t(`components.previews.transfer.${response ? 'recipientGotLbl' : 'receiveLbl'}`)">
       <div class="flex justify-end items-center">
         <div>
           <AmountDisplay
