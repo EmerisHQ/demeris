@@ -18,6 +18,7 @@
         <div class="scroll-container overflow-y-auto flex-grow min-h-0 pt-1">
           <div class="mx-auto max-w-md mb-20">
             <CoinList
+              v-if="keywordFilteredAssets[0].length > 0"
               :data="keywordFilteredAssets[0]"
               :type="title === 'Receive' ? 'receive' : 'pay'"
               :show-balance="showBalance"
@@ -31,7 +32,7 @@
                 {{ $t('components.denomSelect.otherAssets') }}
               </div>
               <div class="other-assets__subtitle -text-1 px-6">
-                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySeletedPair }) }}
+                {{ $t('components.denomSelect.unavailableSwapPair', { pair: displaySelectedPair }) }}
               </div>
               <CoinList
                 :data="keywordFilteredAssets[1]"
@@ -127,15 +128,18 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const displaySeletedPair = ref('');
+    const displaySelectedPair = ref('');
     watch(
-      () => props.counterDenom,
+      () => props.counterDenom?.base_denom,
       async () => {
-        displaySeletedPair.value = await getDisplayName(
-          props.counterDenom.base_denom,
-          store.getters['demeris/getDexChain'],
-        );
+        if (props.counterDenom?.base_denom) {
+          displaySelectedPair.value = await getDisplayName(
+            props.counterDenom.base_denom,
+            store.getters['demeris/getDexChain'],
+          );
+        }
       },
+      { immediate: true },
     );
 
     const keywordFilteredAssets = computed(() => {
@@ -193,7 +197,7 @@ export default defineComponent({
       keywordFilteredAssets,
       displayNameAddedList,
       selectedDenom,
-      displaySeletedPair,
+      displaySelectedPair,
     };
   },
 });

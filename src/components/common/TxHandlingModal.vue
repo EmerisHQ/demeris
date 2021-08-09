@@ -60,7 +60,7 @@
         v-if="status === 'transacting' || status == 'delay' || status == 'IBC_receive_failed'"
         class="w-full max-w-lg flex items-center justify-center -space-x-8"
       >
-        <template v-if="tx.name == 'addliquidity'">
+        <template v-if="tx.name == 'addliquidity' || tx.name == 'createpool'">
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinA.denom)" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getDenom(tx.data.coinB.denom)" />
@@ -201,16 +201,6 @@
       v-if="secondaryButton || primaryButton"
       class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
     >
-      <Button
-        v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
-        :name="secondaryButton"
-        variant="link"
-        :click-function="
-          () => {
-            router.push('/send');
-          }
-        "
-      />
       <Button
         v-if="primaryButton"
         :name="primaryButton"

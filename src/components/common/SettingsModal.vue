@@ -12,7 +12,8 @@
             class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="disconnectWallet"
           >
-            <span>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
+            <span v-if="isDemoAccount">{{ $t('components.settingsMenu.connectWallet') }}</span>
+            <span v-else>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
           </div>
         </div>
 
@@ -57,17 +58,33 @@
             <span>emeris.com</span>
             <span>&#8599;</span>
           </a>
-          <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.privacy') }}
-            </router-link>
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.termsOfUse') }}
-            </router-link>
-            <router-link to="/" class="settings-modal__list-item white-space-nowrap hover:text-text">
-              {{ $t('components.settingsMenu.cookiesPolicy') }}
-            </router-link>
-          </div>
+        </div>
+
+        <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
+          <a
+            href="https://emeris.com/privacy"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.privacy') }}
+          </a>
+          <a
+            href="https://emeris.com/terms"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.tos') }}
+          </a>
+          <a
+            href="https://www.cookiesandyou.com/"
+            class="settings-modal__list-item white-space-nowrap hover:text-text"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {{ $t('components.settingsMenu.cookiesPolicy') }}
+          </a>
         </div>
       </div>
       <!-- end settings-basic-->
@@ -90,9 +107,13 @@
         <label class="flex items-center justify-between h-10 py-2 px-6 w-full">
           <span>{{ $t('components.settingsMenu.theme') }}</span>
 
-          <select v-model="settings.theme" class="bg-transparent font-medium appearance-none outline-none">
+          <select
+            v-model="settings.theme"
+            class="bg-transparent font-medium appearance-none outline-none dark:bg-surface"
+          >
             <option value="system">{{ $t('components.settingsMenu.system') }}</option>
             <option value="light">{{ $t('components.settingsMenu.light') }}</option>
+            <option value="dark">{{ $t('components.settingsMenu.dark') }}</option>
           </select>
         </label>
         <hr class="border-t border-border" />
@@ -168,16 +189,14 @@
       :close-on-overlay-click="true"
       @close="toggleWarningViewUnverified"
     >
-      <template>
-        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
-        <div class="text-1 font-bold">
-          {{ $t('components.settingsMenu.viewAllAssets') }}
-        </div>
-        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
-          <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
-          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-        </div>
-      </template>
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+      <div class="text-1 font-bold">
+        {{ $t('components.settingsMenu.viewAllAssets') }}
+      </div>
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+        <p>{{ $t('components.settingsMenu.warningViewUnverified') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
       <template #buttons>
         <ModalButton
           name="Cancel"
@@ -208,16 +227,14 @@
       :close-on-overlay-click="true"
       @close="toggleWarningViewLPAssetPools"
     >
-      <template>
-        <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
-        <div class="text-1 font-bold">
-          {{ $t('components.settingsMenu.viewLPAssetPools') }}
-        </div>
-        <div class="mt-4 text-0 leading-copy text-muted space-y-4">
-          <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
-          <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
-        </div>
-      </template>
+      <Icon name="ExclamationIcon" :icon-size="2" class="mb-8 text-warning" />
+      <div class="text-1 font-bold">
+        {{ $t('components.settingsMenu.viewLPAssetPools') }}
+      </div>
+      <div class="mt-4 text-0 leading-copy text-muted space-y-4">
+        <p>{{ $t('components.settingsMenu.warningLPAssetPools') }}</p>
+        <p>{{ $t('components.settingsMenu.warningSignificantLoss') }}</p>
+      </div>
       <template #buttons>
         <ModalButton
           name="Cancel"
@@ -250,6 +267,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
+import useTheme from '@/composables/useTheme';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
@@ -265,11 +283,14 @@ export default defineComponent({
   emits: ['disconnect'],
   setup(_, { emit }) {
     const store = useStore();
+    const theme = useTheme();
     const isAdvancedSettingsOpen = ref(false);
     const isWarningCustomSlippageOpen = ref(false);
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
-
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
     const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
@@ -281,7 +302,7 @@ export default defineComponent({
     };
 
     const settings = reactive({
-      theme: 'system',
+      theme,
       allowCustomSlippage: computed({
         get: () => store.getters['demeris/allowCustomSlippage'],
         set: (value: boolean) => updateSession('customSlippage', value),
@@ -328,7 +349,7 @@ export default defineComponent({
     const disconnectWallet = () => {
       emit('disconnect');
       window.localStorage.setItem('lastEmerisSession', '');
-      store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
+      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
     };
 
     return {
@@ -344,6 +365,7 @@ export default defineComponent({
       toggleWarningViewUnverified,
       toggleWarningViewLPAssetPools,
       disconnectWallet,
+      isDemoAccount,
     };
   },
 });

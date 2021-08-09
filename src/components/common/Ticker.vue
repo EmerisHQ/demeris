@@ -2,7 +2,7 @@
   {{ ticker }}
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { getTicker } from '@/utils/actionHandler';
@@ -15,15 +15,18 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const ticker = ref('-');
-    onMounted(async () => {
-      ticker.value = await getTicker(props.name, store.getters['demeris/getDexChain']);
+
+    const verifiedDenoms = computed(() => {
+      return store.getters['demeris/getVerifiedDenoms'];
     });
-    watch(
-      () => props.name,
-      async (newName) => {
-        ticker.value = await getTicker(newName, store.getters['demeris/getDexChain']);
-      },
-    );
+
+    const updateTicker = async () => {
+      ticker.value = await getTicker(props.name, store.getters['demeris/getDexChain']);
+    };
+
+    watch(() => props.name, updateTicker, { immediate: true });
+    watch(verifiedDenoms, updateTicker);
+
     return { ticker };
   },
 });

@@ -1,5 +1,5 @@
 <template>
-  <div ref="menuRef" class="settings-wrapper sm:pl-3 sm:relative">
+  <div ref="menuRef" class="settings-wrapper flex sm:pl-3 sm:relative">
     <div
       v-if="isSignedIn"
       class="settings -mr-2 sm:mr-0 py-1 px-2 h-12 flex items-center rounded-lg cursor-pointer"
@@ -9,7 +9,7 @@
       <AvatarBalance />
     </div>
 
-    <Button v-else :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
+    <Button v-if="!isSignedIn || isDemoAccount" :name="$t('wallet.connect.button')" @click="toggleWalletModal" />
 
     <SettingsModal v-show="isSettingsModalOpen" @disconnect="toggleSettingsModal" />
     <ConnectWalletModal :open="isWalletModalOpen" @close="toggleWalletModal" />
@@ -52,6 +52,9 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
     const toggleWalletModal = () => {
       isWalletModalOpen.value = !isWalletModalOpen.value;
     };
@@ -88,6 +91,7 @@ export default defineComponent({
       toggleWalletModal,
       isSettingsModalOpen,
       toggleSettingsModal,
+      isDemoAccount,
       menuRef,
     };
   },
