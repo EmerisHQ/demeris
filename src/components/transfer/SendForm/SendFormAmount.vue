@@ -286,6 +286,7 @@ export default defineComponent({
       isSelectModalOpen: false,
       usdValue: '',
       gasPrice: undefined,
+      fees: {},
     });
 
     const displayUSDValue = computed(() => {
@@ -299,9 +300,9 @@ export default defineComponent({
 
     const feesAmount = computed(() => {
       const result = {};
-
-      if (props.fees) {
-        for (const [, obj] of Object.entries(props.fees)) {
+      console.log(state.fees);
+      if (state.fees) {
+        for (const [, obj] of Object.entries(state.fees)) {
           for (const [denom, value] of Object.entries(obj)) {
             result[denom] = value;
           }
@@ -452,13 +453,12 @@ export default defineComponent({
 
     // TODO: Select chain based in user option
     watch(
-      () => [state.isMaximumAmountChecked, state.currentAsset, props.fees],
+      () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
           const precision = store.getters['demeris/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
           const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
           const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
-
           form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
           return;
         }
