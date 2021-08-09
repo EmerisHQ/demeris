@@ -840,7 +840,7 @@ export default defineComponent({
 
     //set actionHandlerResult when swapable
     watch(
-      () => [data.payCoinAmount, data.payCoinData, data.receiveCoinData],
+      () => [data.payCoinAmount, data.receiveCoinAmount, data.payCoinData, data.receiveCoinData],
       async () => {
         if (data.isSwapReady) {
           // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling
