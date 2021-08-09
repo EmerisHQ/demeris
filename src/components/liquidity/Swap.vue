@@ -755,7 +755,6 @@ export default defineComponent({
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
           let payDenom = data.payCoinData.base_denom;
-
           const receiveDenom = data.receiveCoinData.denom;
 
           if (
@@ -771,8 +770,9 @@ export default defineComponent({
             const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
             })?.pay?.denom;
+
             if (isPoolReserveIBCCoin) {
-              payDenom = data.payCoinData.denom;
+              payDenom = isPoolReserveIBCCoin;
             }
           }
           data.isLoading = true;
