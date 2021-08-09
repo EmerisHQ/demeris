@@ -213,7 +213,6 @@ export default defineComponent({
             ));
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
-          console.log('poolDenom', poolDenom.value);
         }
       },
       { immediate: true },
@@ -294,7 +293,6 @@ export default defineComponent({
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
-    console.log(assets);
     return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });

@@ -380,7 +380,6 @@ export default defineComponent({
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
       const currentStepData = props.data[currentStep.value];
-      console.log(currentStepData);
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -577,7 +576,6 @@ export default defineComponent({
                         failStatus = setTimeout(() => {
                           txstatus.value = 'unknown';
                         }, 310000);
-                        console.log('setTimeOut', delayStatus);
                       } else if (txResultData.status === 'IBC_receive_failed') {
                         txstatus.value = 'IBC_receive_failed';
                         clearTimeout(delayStatus);
@@ -586,8 +584,6 @@ export default defineComponent({
                         clearTimeout(failStatus);
                       }
                     }
-
-                    console.log(txResultData.status);
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -619,7 +615,6 @@ export default defineComponent({
 
                   // sleep
                   await new Promise((r) => setTimeout(r, 500));
-                  console.log('setSleep', 500);
 
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,

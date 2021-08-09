@@ -867,7 +867,6 @@ export default defineComponent({
             },
           };
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
-          console.log('actionHandlerResult', data.actionHandlerResult);
         } else {
           data.actionHandlerResult = null;
         }

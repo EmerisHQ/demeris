@@ -140,9 +140,6 @@ export default defineComponent({
     });
     const settingsRef = ref(null);
 
-    onMounted(() => {
-      console.log(settingsRef.value); // <div>This is a root element</div>
-    });
     return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef };
   },
 });

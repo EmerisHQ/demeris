@@ -1907,7 +1907,6 @@ export async function validateStepFeeBalances(
       }
     }
   }
-  console.log(feeWarning);
   return feeWarning;
 }
 
@@ -2292,7 +2291,6 @@ export async function validateStepsFeeBalances(
     }
     i++;
   }
-  console.log(feeWarning);
   return feeWarning;
 }
 export async function isValidIBCReserveDenom(
