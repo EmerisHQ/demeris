@@ -249,7 +249,7 @@ import {
   feeForStepTransaction,
   getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
-  validateStepFeeBalances,
+  validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'TxStepsModal',
@@ -419,16 +419,24 @@ export default defineComponent({
     });
 
     watch(
-      () => currentData.value,
+      () => fees.value,
       async (newData) => {
         const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
-        feeWarning.value = await validateStepFeeBalances(
-          newData.data,
-          toCheckBalances,
-          newData.fees,
-          props.gasPriceLevel,
-        );
-        interstitialProceed.value = false;
+        if (currentStep.value == 0) {
+          feeWarning.value = await validateStepsFeeBalances(props.data, toCheckBalances, newData, props.gasPriceLevel);
+          interstitialProceed.value = false;
+        } else {
+          feeWarning.value = {
+            missingFees: [],
+            ibcWarning: false,
+            feeWarning: false,
+            ibcDetails: {
+              ibcDenom: '',
+              chain_name: '',
+              denom: '',
+            },
+          };
+        }
       },
     );
     const isDemoAccount = computed(() => {
