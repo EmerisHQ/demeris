@@ -357,6 +357,10 @@ export default defineComponent({
       isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
     };
     const transaction = ref({});
+    const allTransactionResponses = ref({
+      responses: [],
+      fees: {},
+    });
     const nextTx = () => {
       txToResolve.value['resolver']();
     };
@@ -583,12 +587,14 @@ export default defineComponent({
                     { txhash, chain_name },
                   );
 
-                  const txsResponseFees = {
-                    [chain_name]: txsResponse?.tx.auth_info.fee.amount.reduce((acc, item) => {
+                  allTransactionResponses.value.responses.push(txsResponse);
+                  allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
+                    (acc, item) => {
                       acc[item.denom] = item.amount;
                       return acc;
-                    }, {}),
-                  };
+                    },
+                    {},
+                  );
 
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
@@ -620,23 +626,17 @@ export default defineComponent({
                         txResult.value = resultData;
                       }
                     } else if (txsResponse) {
-                      const txResponseDetail = getStepTransactionDetailFromResponse(txsResponse);
-
-                      if (txResponseDetail) {
-                        txResult.value = {
-                          name: currentData.value.data.name,
-                          transactions: [
-                            {
-                              data: txResponseDetail,
-                              //@ts-ignore
-                              name: transaction.value.name,
-                            },
-                          ],
-                        };
-                      }
+                      txResult.value = {
+                        name: currentData.value.data.name,
+                        transactions: allTransactionResponses.value.responses.map((item) => ({
+                          data: getStepTransactionDetailFromResponse(item),
+                          //@ts-ignore
+                          name: currentData.value.data.transactions[i].name,
+                        })),
+                      };
                     }
 
-                    txResult.value.fees = txsResponseFees;
+                    txResult.value.fees = allTransactionResponses.value.fees;
                   }
 
                   // TODO: deal with status here
