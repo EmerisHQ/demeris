@@ -235,6 +235,7 @@ export const messages = {
         theme: 'Theme',
         system: 'System',
         light: 'Light',
+        dark: 'Dark',
         advancedSettings: 'Advanced settings',
         settings: 'Settings',
         connectedWallet: 'Connected wallet',

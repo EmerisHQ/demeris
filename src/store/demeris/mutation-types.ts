@@ -42,6 +42,7 @@ export type UserData = {
   hasSeenRedeem?: boolean;
   slippagePerc?: number;
   isDemoAccount?: boolean;
+  theme?: string;
   updateDT: number;
 };
 export type UserSession = {
