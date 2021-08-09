@@ -626,9 +626,8 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value && data.payCoinData) {
-          // data.isBothSelected &&
           return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount) /
+            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
