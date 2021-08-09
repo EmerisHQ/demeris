@@ -56,6 +56,12 @@ export default defineComponent({
           chain_name: chain,
         },
       });
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
     }
     await this.$store.dispatch('common/env/config', {
       apiNode: 'https://dev.demeris.io/v1/liquidity',
