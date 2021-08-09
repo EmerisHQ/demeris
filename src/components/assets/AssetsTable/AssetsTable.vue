@@ -297,7 +297,7 @@ export default defineComponent({
       let tokens = [];
       let lpTokens = [];
       balances.map((x) => {
-        if (x.name && x.name.includes('Gravity')) {
+        if (x.name?.includes('Gravity')) {
           lpTokens.push(x);
         } else {
           tokens.push(x);
@@ -313,7 +313,7 @@ export default defineComponent({
       let tokens = [];
       let lpTokens = [];
       balances.map((x) => {
-        if (x.name && x.name.includes('Gravity')) {
+        if (x.name?.includes('Gravity')) {
           lpTokens.push(x);
         } else {
           tokens.push(x);
