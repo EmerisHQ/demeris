@@ -225,8 +225,9 @@
 
               <div class="mt-2 w-full max-w-sm mx-auto">
                 <ListItem v-if="exchangeAmount" inset size="md" label="Price">
-                  <AmountDisplay :amount="{ amount: 1e6, denom: form.coinA.asset.base_denom }" /> &asymp;
-                  <AmountDisplay :amount="{ amount: exchangeAmount, denom: form.coinB.asset.base_denom }" />
+                  <AmountDisplay :amount="{ amount: exchangeAmount.coinA, denom: form.coinA.asset.base_denom }" />
+                  &asymp;
+                  <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: form.coinB.asset.base_denom }" />
                 </ListItem>
                 <ListItem v-if="hasPair" inset size="md" label="Receive LP asset">
                   <div v-tippy="{ placement: 'right' }" class="flex items-center justify-end text-left" content="TODO">
@@ -360,6 +361,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
+
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
@@ -485,7 +487,16 @@ export default {
       state.receiveAmount = (+result.toFixed(6)).toString();
     };
 
+    const precisions = computed(() => {
+      return {
+        coinA: store.getters['demeris/getDenomPrecision']({ name: form.coinA?.asset?.base_denom }) ?? 6,
+        coinB: store.getters['demeris/getDenomPrecision']({ name: form.coinB?.asset?.base_denom }) ?? 6,
+      };
+    });
+
     const exchangeAmount = computed(() => {
+      const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
+
       if (!hasPair.value) {
         return;
       }
@@ -495,14 +506,23 @@ export default {
       }
 
       if (!hasPool.value) {
-        return ((+form.coinB.amount || 1) / (+form.coinA.amount || 1)) * 1e6;
+        return {
+          coinA,
+          coinB: new BigNumber(form.coinB.amount || 1)
+            .dividedBy(form.coinA.amount || 1)
+            .shiftedBy(precisions.value.coinB)
+            .toNumber(),
+        };
       }
 
       if (reserveBalances.value?.length) {
-        return new BigNumber(reserveBalances.value[1].amount)
-          .dividedBy(reserveBalances.value[0].amount)
-          .shiftedBy(6)
-          .toNumber();
+        return {
+          coinA,
+          coinB: new BigNumber(reserveBalances.value[1].amount)
+            .dividedBy(reserveBalances.value[0].amount)
+            .shiftedBy(precisions.value.coinB)
+            .toNumber(),
+        };
       }
 
       return undefined;
@@ -744,7 +764,9 @@ export default {
       }
 
       const bigAmountA = new BigNumber(+form.coinA.amount);
-      const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(bigAmountA);
+      const result = new BigNumber(exchangeAmount.value.coinB)
+        .shiftedBy(-precisions.value.coinB)
+        .multipliedBy(bigAmountA);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -764,7 +786,7 @@ export default {
       }
 
       const bigAmountB = new BigNumber(+form.coinB.amount);
-      const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
+      const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
       const result = bigAmountB.dividedBy(bigExchangeAmount);
 
       form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
@@ -867,13 +889,11 @@ export default {
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            console.log('fee', feeA);
-
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
-            const bigExchangeAmount = new BigNumber(exchangeAmount.value).shiftedBy(-6);
+            const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
 
             const bigAmountA = new BigNumber(amountA).minus(feeA);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
@@ -929,6 +949,7 @@ export default {
       hasPrices,
       previewPoolCoinDenom,
       hasFunds,
+      precisions,
       coinAChangeHandler,
       coinBChangeHandler,
       coinPoolChangeHandler,

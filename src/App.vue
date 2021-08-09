@@ -7,27 +7,21 @@
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import useTheme from '@/composables/useTheme';
+
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
-import { autoLogin } from './utils/basic';
+import { autoLogin, autoLoginDemo } from './utils/basic';
 export default defineComponent({
   name: 'App',
+  setup() {
+    useTheme({ updateOnChange: true });
+  },
   data() {
     return {
       initialized: false,
     };
   },
   async created() {
-    /*
-        set dark/light mode according to user Preference
-        later, there will be a toggle button and save user's preference to localStorage
-        for overriding default os/browser setting
-    */
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-color-mode', 'dark');
-    } else {
-      document.documentElement.setAttribute('data-color-mode', 'light');
-    }
-
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://dev.demeris.io/v1',
       hub_chain: 'cosmos-hub',
@@ -83,6 +77,10 @@ export default defineComponent({
     }
     if (autoLogin()) {
       await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+    } else {
+      if (autoLoginDemo()) {
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      }
     }
     this.initialized = true;
   },
@@ -94,7 +92,9 @@ export default defineComponent({
   mounted() {
     window.addEventListener('keplr_keystorechange', async () => {
       window.localStorage.setItem('lastEmerisSession', '');
-      this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      if (this.$store.getters['demeris/isSignedIn'] && !this.$store.getters['demeris/isDemoAccount']) {
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      }
     });
 
     // send new users to welcome page

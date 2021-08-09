@@ -38,44 +38,85 @@
       </thead>
 
       <tbody>
-        <tr
-          v-for="asset in balancesFiltered"
-          :key="asset.denom"
-          class="assets-table__row group cursor-pointer"
-          @click="handleClick(asset)"
-        >
-          <td class="py-5 align-middle group-hover:bg-fg transition">
-            <div class="flex items-center">
-              <CircleSymbol :denom="asset.denom" />
-              <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                <span class="font-medium"><Denom :name="asset.denom" /></span>
-                <LPAsset :name="asset.denom" />
+        <template v-if="variant === 'balance'">
+          <tr
+            v-for="asset in orderUserBalances(balancesWithName)"
+            :key="asset.denom"
+            class="assets-table__row group cursor-pointer"
+            @click="handleClick(asset)"
+          >
+            <td class="py-5 align-middle group-hover:bg-fg transition">
+              <div class="flex items-center">
+                <CircleSymbol :denom="asset.denom" />
+                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                  <span class="font-medium"><Denom :name="asset.denom" /></span>
+                  <LPAsset :name="asset.denom" />
+                </div>
               </div>
-            </div>
-          </td>
+            </td>
 
-          <td v-if="variant === 'full'" class="py-5 align-middle text-left text-muted group-hover:bg-fg transition">
-            <Ticker :name="asset.denom" />
-          </td>
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              <Price :amount="{ denom: asset.denom, amount: null }" />
+            </td>
 
-          <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <Price :amount="{ denom: asset.denom, amount: null }" />
-          </td>
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+              <div class="text-muted mt-0.5 -text-1">
+                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+              </div>
+            </td>
+            <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
+              <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
+            </td>
+          </tr>
+        </template>
+        <template v-else-if="variant === 'full'">
+          <tr
+            v-for="asset in orderAllBalances(balancesWithMarketCap)"
+            :key="asset.denom"
+            class="assets-table__row group cursor-pointer"
+            @click="handleClick(asset)"
+          >
+            <td class="py-5 align-middle group-hover:bg-fg transition">
+              <div class="flex items-center">
+                <CircleSymbol :denom="asset.denom" />
+                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                  <span class="font-medium"><Denom :name="asset.denom" /></span>
+                  <LPAsset :name="asset.denom" />
+                </div>
+              </div>
+            </td>
 
-          <td v-if="variant === 'full'" class="py-5 align-middle text-right group-hover:bg-fg transition">
-            {{ getFormattedMarketCap(asset.denom) }}
-          </td>
+            <td class="py-5 align-middle text-left text-muted group-hover:bg-fg transition">
+              <Ticker :name="asset.denom" />
+            </td>
 
-          <td v-if="variant === 'balance'" class="py-5 align-middle text-right group-hover:bg-fg transition">
-            <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            <div class="text-muted mt-0.5 -text-1">
-              <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-            </div>
-          </td>
-          <td v-if="variant === 'balance'" class="mt-0.5 pl-4 group-hover:bg-fg transition">
-            <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
-          </td>
-        </tr>
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              <Price :amount="{ denom: asset.denom, amount: null }" />
+            </td>
+
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              {{ getFormattedMarketCap(asset.denom) }}
+            </td>
+          </tr>
+        </template>
+        <template v-else>
+          <tr :key="asset.denom" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
+            <td class="py-5 align-middle group-hover:bg-fg transition">
+              <div class="flex items-center">
+                <CircleSymbol :denom="asset.denom" />
+                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                  <span class="font-medium"><Denom :name="asset.denom" /></span>
+                  <LPAsset :name="asset.denom" />
+                </div>
+              </div>
+            </td>
+
+            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+              <Price :amount="{ denom: asset.denom, amount: null }" />
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
 
@@ -99,6 +140,7 @@
 
 <script lang="ts">
 import groupBy from 'lodash.groupby';
+import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -112,7 +154,9 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import getPrice from '@/utils/getPrice';
 
 type TableStyleType = 'full' | 'balance';
 
@@ -217,6 +261,70 @@ export default defineComponent({
       return balancesByAsset.value.slice(0, currentLimit.value);
     });
 
+    const balancesWithValue = computed(() => {
+      let balances = balancesFiltered.value;
+
+      if (balances.length > 0) {
+        balances.map((b) => {
+          let value = getPrice({ denom: b.denom, amount: b.totalAmount.toString() });
+          (b as any).value = value;
+        });
+      }
+      return balances;
+    });
+
+    const balancesWithName = computed(() => {
+      let balances = balancesWithValue.value;
+      balances.map(async (b) => {
+        let name = await getDisplayName(b.denom, store.getters['demeris/getDexChain']);
+        (b as any).name = name;
+      });
+      return balances;
+    });
+
+    const balancesWithMarketCap = computed(() => {
+      let balances = balancesWithName.value;
+      balances.map((b) => {
+        let marketCap = getFormattedMarketCap(b.denom);
+        if (marketCap) {
+          (b as any).marketCap = marketCap;
+        }
+      });
+      return balances;
+    });
+
+    const orderUserBalances = (balances) => {
+      let tokens = [];
+      let lpTokens = [];
+      balances.map((x) => {
+        if (x.name?.includes('Gravity')) {
+          lpTokens.push(x);
+        } else {
+          tokens.push(x);
+        }
+      });
+      tokens = orderBy(tokens, [(b) => b.value.value, 'name'], ['desc', 'asc']);
+      lpTokens = orderBy(lpTokens, [(b) => b.value.value], ['desc']);
+      lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
+      return tokens.concat(lpTokens);
+    };
+
+    const orderAllBalances = (balances) => {
+      let tokens = [];
+      let lpTokens = [];
+      balances.map((x) => {
+        if (x.name?.includes('Gravity')) {
+          lpTokens.push(x);
+        } else {
+          tokens.push(x);
+        }
+      });
+      tokens = orderBy(tokens, ['marketCap', (b) => b.value.value, 'name'], ['desc', 'desc', 'asc']);
+      lpTokens = orderBy(lpTokens, ['marketCap', (b) => b.value.value], ['desc', 'desc']);
+      lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
+      return tokens.concat(lpTokens);
+    };
+
     const getFormattedMarketCap = (denom: string) => {
       const price = store.getters['demeris/getPrice']({ denom });
       const supply = store.getters['demeris/getSupply']({ denom });
@@ -241,9 +349,13 @@ export default defineComponent({
       allBalances,
       balancesByAsset,
       balancesFiltered,
+      balancesWithName,
+      balancesWithMarketCap,
       getFormattedMarketCap,
       handleClick,
       viewAllHandler,
+      orderUserBalances,
+      orderAllBalances,
     };
   },
 });
