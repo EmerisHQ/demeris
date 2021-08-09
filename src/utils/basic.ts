@@ -65,7 +65,7 @@ export function autoLogin() {
 export function autoLoginDemo() {
   const returning = window.localStorage.getItem('isReturnUser');
   const last = window.localStorage.getItem('lastEmerisSession');
-  if (returning && !last) {
+  if (returning) {
     return true;
   } else {
     return false;
