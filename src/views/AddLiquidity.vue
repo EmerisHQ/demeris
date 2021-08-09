@@ -260,11 +260,7 @@
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
                   Your assets will be transferred to Cosmos Hub
                 </Alert>
-                <Button
-                  :name="hasSufficientFunds.total ? 'Continue' : 'Insufficient funds'"
-                  :disabled="!isValid"
-                  @click="goToReview"
-                />
+                <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
               </div>
             </template>
 
@@ -625,6 +621,22 @@ export default {
       state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
     };
 
+    const submitButtonName = computed(() => {
+      let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+      let insufficientFunds = !hasSufficientFunds.value.total;
+      let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
+
+      if (emptyFields) {
+        return 'Continue';
+      } else if (insufficientFunds) {
+        return 'Insufficient funds';
+      } else if (!insufficientFunds && invalidPool) {
+        return 'Supply amount must be > 1';
+      } else {
+        return 'Continue';
+      }
+    });
+
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
       const precisions = [
@@ -957,6 +969,7 @@ export default {
       needsTransferToHub,
       hasSufficientFunds,
       isValid,
+      submitButtonName,
       exchangeAmount,
       hasPrices,
       previewPoolCoinDenom,
