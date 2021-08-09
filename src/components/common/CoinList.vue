@@ -1,11 +1,11 @@
 <template>
-  <div v-if="modifiedData.length === 0" class="mt-12 text-center">
+  <div v-if="coinsByType.length === 0" class="mt-12 text-center">
     <Icon name="MagnifyingGlassIcon" :icon-size="2" class="text-inactive mb-8" />
     <div class="text-1 text-text font-medium">{{ $t('generic_cta.filterNoResults', { keyword }) }}</div>
     <div class="text-0 text-muted mt-1">{{ $t('generic_cta.filterRetry') }}</div>
   </div>
   <div
-    v-for="coin in modifiedData"
+    v-for="coin in coinsByType"
     :key="coin.base_denom"
     class="flex items-center justify-between py-4 px-3 mx-3 cursor-pointer hover:bg-fg rounded-xl"
     @click="$emit('select', coin)"
@@ -74,6 +74,7 @@
   </div>
 </template>
 <script lang="ts">
+import orderBy from 'lodash.orderby';
 import { computed, defineComponent } from 'vue';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
@@ -82,6 +83,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
+import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
   name: 'CoinList',
@@ -132,7 +134,62 @@ export default defineComponent({
       return modifiedData;
     }
 
-    return { setWordColorByKeyword, modifiedData };
+    const coinsWithValue = computed(() => {
+      let coins = modifiedData.value;
+      if (coins.length > 0) {
+        coins.map((b) => {
+          let value = getPrice({ denom: b.base_denom, amount: b.amount.toString() });
+          (b as any).value = value;
+        });
+      }
+      return coins;
+    });
+
+    const orderCoinsByName = (coins) => {
+      let tokens = [];
+      let lpTokens = [];
+      coins.map((c) => {
+        if (c.display_name.includes('Gravity')) {
+          lpTokens.push(c);
+        } else {
+          tokens.push(c);
+        }
+      });
+      tokens = orderBy(tokens, ['display_name'], ['asc']);
+      lpTokens = orderBy(lpTokens, ['display_name'], ['asc']);
+      lpTokens = lpTokens.sort((a, b) =>
+        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return tokens.concat(lpTokens);
+    };
+
+    const orderCoinsByValue = (coins) => {
+      let tokens = [];
+      let lpTokens = [];
+      coins.map((c) => {
+        if (c.display_name.includes('Gravity')) {
+          lpTokens.push(c);
+        } else {
+          tokens.push(c);
+        }
+      });
+      tokens = orderBy(tokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
+      lpTokens = orderBy(lpTokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
+      lpTokens = lpTokens.sort((a, b) =>
+        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return tokens.concat(lpTokens);
+    };
+
+    const coinsByType = computed(() => {
+      if (props.type === 'receive') {
+        return orderCoinsByName(modifiedData.value);
+      } else {
+        return orderCoinsByValue(coinsWithValue.value);
+      }
+    });
+
+    return { setWordColorByKeyword, coinsByType };
   },
 });
 </script>
