@@ -755,7 +755,6 @@ export default defineComponent({
       async (watchValues) => {
         if (watchValues[0] && watchValues[1]) {
           let payDenom = data.payCoinData.base_denom;
-
           const receiveDenom = data.receiveCoinData.denom;
 
           if (
@@ -771,8 +770,9 @@ export default defineComponent({
             const isPoolReserveIBCCoin = availablePairs.value.find((pair) => {
               return pair.pay.denom.startsWith('ibc') && pair.pay.base_denom === data.payCoinData.base_denom;
             })?.pay?.denom;
+
             if (isPoolReserveIBCCoin) {
-              payDenom = data.payCoinData.denom;
+              payDenom = isPoolReserveIBCCoin;
             }
           }
           data.isLoading = true;
@@ -840,7 +840,7 @@ export default defineComponent({
 
     //set actionHandlerResult when swapable
     watch(
-      () => data.payCoinAmount,
+      () => [data.payCoinAmount, data.receiveCoinAmount, data.payCoinData, data.receiveCoinData],
       async () => {
         if (data.isSwapReady) {
           // Note, I added || 6 as a quick fix in case no precision can be obtained, but we should instead have better error handling

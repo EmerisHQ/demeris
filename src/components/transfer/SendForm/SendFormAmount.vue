@@ -4,7 +4,7 @@
       v-if="state.isSelectModalOpen"
       class="fixed inset-0 z-30 bg-bg"
       title="Select asset"
-      :assets="balances"
+      :assets="availableBalances"
       :func="() => toggleSelectModal()"
       @select="toggleSelectModal"
     />
@@ -32,7 +32,7 @@
             </Button>
           </div>
           <FlexibleAmountInput
-            v-if="state.isUSDInputChecked"
+            v-show="state.isUSDInputChecked"
             v-model="state.usdValue"
             :min-width="state.isUSDInputChecked ? 35 : 0"
             prefix="$"
@@ -56,24 +56,16 @@
             </template>
           </FlexibleAmountInput>
           <FlexibleAmountInput
-            v-else-if="!state.isUSDInputChecked"
+            v-show="!state.isUSDInputChecked"
             v-model="form.balance.amount"
-            :min-width="35"
+            :min-width="!state.isUSDInputChecked ? 35 : 0"
+            :suffix="state.assetTicker"
             placeholder="0"
             class="uppercase"
             @input="state.isMaximumAmountChecked = false"
-          >
-            <template v-if="state.currentAsset" #suffix>
-              <Denom :name="state.currentAsset?.base_denom || ''" />
-            </template>
-          </FlexibleAmountInput>
+          />
           <div class="flex items-center absolute inset-y-0 right-0">
             <Button
-              :click-function="
-                () => {
-                  state.isMaximumAmountChecked = true;
-                }
-              "
               :name="$t('generic_cta.max')"
               class="flex"
               :class="{ 'text-negative-text': !hasSufficientFunds }"
@@ -81,6 +73,7 @@
               size="sm"
               variant="secondary"
               rounded
+              @click="state.isMaximumAmountChecked = true"
             />
           </div>
         </div>
@@ -178,6 +171,37 @@
         :disabled="!isValid"
         :click-function="onSubmit"
       />
+      <button
+        v-if="state.currentAsset && !hasFunds"
+        class="
+          get-asset-cta
+          mt-6
+          relative
+          h-12
+          py-3
+          px-4
+          flex
+          items-center
+          w-full
+          bg-surface
+          shadow-button
+          rounded-xl
+          overflow-hidden
+          outline-none
+          text-left
+          font-medium
+          transition
+          transform
+          hover:-translate-y-px
+          active:opacity-70 active:transform-none
+        "
+        @click="openAssetPage"
+      >
+        <span> {{ $t('generic_cta.get') }} <Denom :name="state.currentAsset?.base_denom" /> &rarr; </span>
+        <div class="absolute right-4 -mt-4 transform -rotate-6">
+          <CircleSymbol size="lg" :denom="state.currentAsset?.base_denom" />
+        </div>
+      </button>
     </fieldset>
   </div>
 </template>
@@ -186,6 +210,7 @@
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -199,8 +224,10 @@ import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import { GasPriceLevel, SendAddressForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
+import { getTicker } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -239,10 +266,21 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const router = useRouter();
     const form = inject<SendAddressForm>('transferForm');
+    const { nativeBalances } = useAccount();
+
+    const availableBalances = computed(() => {
+      if (props.balances.length) {
+        return props.balances;
+      }
+
+      return nativeBalances.value;
+    });
 
     const state = reactive({
       currentAsset: undefined,
+      assetTicker: undefined,
       isMaximumAmountChecked: false,
       isUSDInputChecked: false,
       isSelectModalOpen: false,
@@ -285,6 +323,20 @@ export default defineComponent({
       }
     });
 
+    const hasFunds = computed(() => {
+      if (!state.currentAsset) {
+        return false;
+      }
+
+      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+
+      return +totalAmount > 0;
+    });
+
+    const openAssetPage = () => {
+      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
+    };
+
     const hasPrice = computed(() => {
       if (!state.currentAsset) {
         return false;
@@ -297,6 +349,10 @@ export default defineComponent({
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
+        return true;
+      }
+
+      if (!hasFunds.value) {
         return false;
       }
 
@@ -333,12 +389,13 @@ export default defineComponent({
       emit('next');
     };
 
-    const setCurrentAsset = (asset: Record<string, unknown>) => {
+    const setCurrentAsset = async (asset: Record<string, unknown>) => {
       state.currentAsset = asset;
 
       if (asset) {
         form.balance.denom = parseCoins(asset.amount as string)[0].denom;
         form.chain_name = asset.on_chain as string;
+        state.assetTicker = await getTicker(asset.base_denom, store.getters['demeris/getDexChain']);
       }
     };
 
@@ -350,7 +407,7 @@ export default defineComponent({
     };
 
     const findDefaultAsset = () => {
-      const sortedBalances = [...props.balances].sort((a, b) =>
+      const sortedBalances = [...availableBalances.value].sort((a, b) =>
         +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
       );
       const chains: Chain[] = Object.values(store.getters['demeris/getChains']);
@@ -385,7 +442,7 @@ export default defineComponent({
 
         setCurrentAsset(availableAssets[0]);
       } catch (e) {
-        setCurrentAsset(props.balances[0]);
+        setCurrentAsset(sortedBalances[0]);
       }
     };
 
@@ -414,6 +471,8 @@ export default defineComponent({
     }
 
     return {
+      hasFunds,
+      availableBalances,
       state,
       form,
       hasPrice,
@@ -421,6 +480,7 @@ export default defineComponent({
       hasSufficientFunds,
       denomDecimals,
       isValid,
+      openAssetPage,
       onSubmit,
       setCurrentAsset,
       toggleSelectModal,
@@ -435,5 +495,11 @@ export default defineComponent({
   &:focus:not(:active) {
     --tw-shadow: 4px 11px 35px -4px rgba(0, 0, 0, 0.12);
   }
+}
+.get-asset-cta {
+  background-image: url('~@/assets/images/gold-rings-2.png');
+  background-position: 121% 70%;
+  background-repeat: no-repeat;
+  background-size: 52%;
 }
 </style>
