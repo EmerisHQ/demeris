@@ -471,6 +471,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       const chains = getters['getChains'];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
@@ -512,6 +513,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {

@@ -10,8 +10,7 @@ import { useRouter } from 'vue-router';
 import useTheme from '@/composables/useTheme';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
-import { autoLogin } from './utils/basic';
-
+import { autoLogin, autoLoginDemo } from './utils/basic';
 export default defineComponent({
   name: 'App',
   setup() {
@@ -72,6 +71,10 @@ export default defineComponent({
     }
     if (autoLogin()) {
       await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+    } else {
+      if (autoLoginDemo()) {
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      }
     }
     this.initialized = true;
   },
@@ -83,7 +86,9 @@ export default defineComponent({
   mounted() {
     window.addEventListener('keplr_keystorechange', async () => {
       window.localStorage.setItem('lastEmerisSession', '');
-      this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      if (this.$store.getters['demeris/isSignedIn'] && !this.$store.getters['demeris/isDemoAccount']) {
+        await this.$store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      }
     });
 
     // send new users to welcome page
