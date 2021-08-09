@@ -62,6 +62,15 @@ export function autoLogin() {
     return false;
   }
 }
+export function autoLoginDemo() {
+  const returning = window.localStorage.getItem('isReturnUser');
+  const last = window.localStorage.getItem('lastEmerisSession');
+  if (returning) {
+    return true;
+  } else {
+    return false;
+  }
+}
 export function encodeUTF8(s) {
   let i = 0;
   const bytes = new Uint8Array(s.length * 4);

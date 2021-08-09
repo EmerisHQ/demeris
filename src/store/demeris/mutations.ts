@@ -82,8 +82,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
-
-    window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+    if (!state._Session.isDemoAccount) {
+      window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+    }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
     state.prices = payload.value as API.Prices;
