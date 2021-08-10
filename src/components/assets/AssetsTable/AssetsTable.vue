@@ -257,10 +257,6 @@ export default defineComponent({
       return sortedSummary;
     });
 
-    const balancesFiltered = computed(() => {
-      return balancesByAsset.value.slice(0, currentLimit.value);
-    });
-
     const balancesWithValue = computed(() => {
       let balances = balancesByAsset.value;
 
@@ -352,7 +348,6 @@ export default defineComponent({
     return {
       allBalances,
       balancesByAsset,
-      balancesFiltered,
       balancesWithName,
       balancesWithMarketCap,
       getMarketCap,
