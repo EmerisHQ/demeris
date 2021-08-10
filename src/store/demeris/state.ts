@@ -39,6 +39,7 @@ export function getDefaultState(): State {
     balances: {},
     stakingBalances: {},
     numbers: {},
+    chainnumbers: {},
     verifiedDenoms: [],
     keplr: null,
     prices: {

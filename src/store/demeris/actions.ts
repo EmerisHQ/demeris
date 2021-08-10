@@ -470,15 +470,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
-      const numbers =
-        getters['getNumbers']({ address: keyHashfromAddress(account.address) }) ??
-        (await dispatch(DemerisActionTypes.GET_NUMBERS, {
-          subscribe: true,
-          params: {
-            address: keyHashfromAddress(account.address),
-          },
-        }));
-      const signerData = numbers.find((x) => x.chain_name == chain_name);
+      const numbers = await dispatch(DemerisActionTypes.GET_NUMBERS_CHAIN, {
+        subscribe: false,
+        params: {
+          address: keyHashfromAddress(account.address),
+          chain_name: chain_name,
+        },
+      });
+
+      const signerData = numbers;
       const cosmjsSignerData = {
         chainId: chain.node_info.chain_id,
         accountNumber: parseInt(signerData.account_number),
