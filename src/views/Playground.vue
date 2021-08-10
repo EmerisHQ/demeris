@@ -196,7 +196,7 @@ export default defineComponent({
       },
     ];
     const sendMessage = async () => {
-      await store.dispatch(GlobalDemerisActionTypes.SIGN_OUT);
+      await store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
       //action.value = steps;
     };
     const sendStepTx = async () => {
