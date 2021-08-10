@@ -69,6 +69,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
         status: 'pending',
         data: {
           amount: { amount: amount.amount, denom: getDenomHash(verifyTrace.path, verifyTrace.base_denom, i) },
+          base_denom: await getBaseDenom(getDenomHash(verifyTrace.path, verifyTrace.base_denom, i), hop.chain_name),
           from_chain: hop.chain_name,
           to_chain: hop.counterparty_name,
           through: hop.channel,
@@ -206,6 +207,7 @@ export async function transfer({
         data: {
           amount: amount,
           from_chain: chain_name,
+          base_denom: await getBaseDenom(amount.denom, chain_name),
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -236,6 +238,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             to_address,
             through: verifyTrace.trace[0].channel,
@@ -251,6 +254,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
@@ -410,6 +414,7 @@ export async function move({
         data: {
           amount: amount,
           from_chain: chain_name,
+          base_denom: await getBaseDenom(amount.denom, chain_name),
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -465,6 +470,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
@@ -527,6 +533,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
