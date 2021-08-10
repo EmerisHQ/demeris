@@ -316,7 +316,6 @@ export default defineComponent({
         }
       });
       tokens = orderBy(tokens, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
-      console.log(tokens);
       lpTokens = orderBy(lpTokens, [(x) => x.marketCap || '', (x) => x.value.value], ['desc', 'desc']);
       lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
       return tokens.concat(lpTokens).slice(0, currentLimit.value);
