@@ -582,7 +582,7 @@ export default defineComponent({
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
-        const maxBalance = parseInt(
+        const selectedCoinBalance = parseInt(
           allBalances.value.filter((coin) => {
             return coin.denom === data.payCoinData?.denom;
           })[0]?.amount,
@@ -591,8 +591,8 @@ export default defineComponent({
           parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
           0.0015;
 
-        if (maxBalance > Math.ceil(maxBalance * swapFeeRate) + txFee.value) {
-          return maxBalance - Math.ceil(maxBalance * swapFeeRate) - txFee.value ?? 0;
+        if (selectedCoinBalance > Math.ceil(selectedCoinBalance * swapFeeRate) + txFee.value) {
+          return selectedCoinBalance - Math.ceil(selectedCoinBalance * swapFeeRate) - txFee.value ?? 0;
         } else {
           return 0;
         }
@@ -682,21 +682,16 @@ export default defineComponent({
 
     //tx fee setting
     watch(
-      () => data.payCoinData,
+      () => [data.payCoinData, data.actionHandlerResult],
       async () => {
-        if (data.payCoinData) {
+        if (data.payCoinData && (data.actionHandlerResult?.length > 1 || data.payCoinData.denom === 'uatom')) {
           const fees = await getFeeForChain(data.payCoinData.on_chain);
-          if (
-            data.payCoinData.denom === 'uatom' ||
-            (!data.payCoinData.denom.startsWith('ibc') &&
-              data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
-          ) {
-            txFee.value =
-              fees[0].amount[gasPrice.value] *
-              10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          } else {
-            return 0;
-          }
+          txFee.value =
+            fees[0].amount[gasPrice.value] *
+            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          console.log('TX fee', txFee.value);
+        } else {
+          return (txFee.value = 0);
         }
       },
     );
