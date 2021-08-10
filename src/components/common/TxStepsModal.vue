@@ -82,7 +82,7 @@
         <Modal
           v-if="showChainError"
           class="text-center"
-          :variant="variant === 'widget' ? 'bottom' : 'dialog'"
+          :variant="'dialog'"
           :fullscreen="variant === 'default'"
           @close="goPortfolio"
         >
@@ -242,7 +242,7 @@
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouteLocationRaw, useRouter } from 'vue-router';
+import { RouteLocationRaw, useRoute,useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -366,8 +366,13 @@ export default defineComponent({
       }
     };
     const router = useRouter();
+    const route = useRoute();
     const goPortfolio = () => {
-      router.push('/');
+      if (route.path == '/') {
+        emit('reset');
+      } else {
+        router.push('/');
+      }
     };
     const goBack = () => {
       if (props.backRoute) {
