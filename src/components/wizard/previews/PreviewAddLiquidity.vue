@@ -11,14 +11,14 @@
         </div>
       </ListItem>
 
-      <ListItem inset>
+      <ListItem v-if="exchangeAmount" inset>
         <div class="flex justify-between">
           <div class="block text-muted -text-1 mt-0.5">
             {{ $t('components.previews.addWithdrawLiquidity.priceLbl') }}
           </div>
           <div>
-            <AmountDisplay :amount="{ amount: 1e6, denom: data.coinA.denom }" /> =
-            <AmountDisplay :amount="{ amount: exchangeAmount, denom: data.coinB.denom }" />
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinA, denom: data.coinA.denom }" /> =
+            <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: data.coinB.denom }" />
           </div>
         </div>
       </ListItem>
@@ -68,6 +68,9 @@
     </ListItem>
 
     <ListItem :label="$t('components.previews.addWithdrawLiquidity.feesLbl')" direction="col">
+      <ListItem v-if="!hasPool" inset description="Pool creation fee">
+        <AmountDisplay :amount="creationFee" />
+      </ListItem>
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.feeLbl')" inset>
         <template v-for="(amount, denom) in fees[chainName]" :key="'fee_' + denom">
           <AmountDisplay :amount="{ amount: amount, denom: denom }" />
@@ -122,12 +125,16 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
+
     const { pools } = usePools();
     const poolInfo = reactive({
-      exchangeAmountPrice: 1,
       pairName: '-/-',
       denom: '-',
       denoms: [],
+    });
+
+    const creationFee = computed(() => {
+      return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
     const data = computed(() => {
@@ -149,6 +156,13 @@ export default defineComponent({
       return step.transactions[0].data as Actions.CreatePoolData;
     });
 
+    const precisions = computed(() => {
+      return {
+        coinA: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[0] }) ?? 6,
+        coinB: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[1] }) ?? 6,
+      };
+    });
+
     const chainName = computed(() => {
       return store.getters['demeris/getDexChain'];
     });
@@ -162,15 +176,26 @@ export default defineComponent({
     const { formatPoolName, allPools } = usePools();
 
     const exchangeAmount = computed(() => {
+      const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
+
       if (!hasPool.value) {
-        return ((+data.value.coinB.amount || 1) / (+data.value.coinA.amount || 1)) * 1e6;
+        return {
+          coinA,
+          coinB: new BigNumber(data.value.coinB.amount || 1)
+            .dividedBy(data.value.coinA.amount || 1)
+            .shiftedBy(precisions.value.coinB)
+            .toNumber(),
+        };
       }
 
       if (reserveBalances.value?.length) {
-        return new BigNumber(reserveBalances.value[1].amount)
-          .dividedBy(reserveBalances.value[0].amount)
-          .shiftedBy(6)
-          .toNumber();
+        return {
+          coinA,
+          coinB: new BigNumber(reserveBalances.value[1].amount)
+            .dividedBy(reserveBalances.value[0].amount)
+            .shiftedBy(precisions.value.coinB)
+            .toNumber(),
+        };
       }
 
       return undefined;
@@ -212,6 +237,7 @@ export default defineComponent({
     watch(data, updatePoolInfo, { immediate: true });
 
     return {
+      creationFee,
       refundedAmount,
       exchangeAmount,
       hasPool,

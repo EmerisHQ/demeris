@@ -36,6 +36,7 @@ export type DemerisConfig = {
 export type DemerisTxParams = {
   tx: string;
   chain_name: string;
+  address: string;
 };
 export type DemerisTxResultParams = {
   height: number;
@@ -487,7 +488,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const tx_data = Buffer.from(tx).toString('base64');
       //console.log(Buffer.from(tx).toString('hex'));
-      return { tx: tx_data, chain_name };
+      return { tx: tx_data, chain_name, address: account.address };
     } catch (e) {
       console.error(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
@@ -496,6 +497,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       const chains = getters['getChains'];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
@@ -537,6 +539,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
@@ -721,9 +724,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getChainStatus'](params);
   },
 
-  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name }: DemerisTxParams) {
+  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
     try {
-      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx });
+      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx, address });
       return response.data;
     } catch (e) {
       const cause = e.response?.data?.cause || e.message;
