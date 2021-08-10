@@ -96,7 +96,7 @@
             </td>
 
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              {{ getFormattedMarketCap(asset.denom) }}
+              {{ formatUsd(getMarketCap(asset.denom)) }}
             </td>
           </tr>
         </template>
@@ -262,7 +262,7 @@ export default defineComponent({
     });
 
     const balancesWithValue = computed(() => {
-      let balances = balancesFiltered.value;
+      let balances = balancesByAsset.value;
 
       if (balances.length > 0) {
         balances.map((b) => {
@@ -285,7 +285,7 @@ export default defineComponent({
     const balancesWithMarketCap = computed(() => {
       let balances = balancesWithName.value;
       balances.map((b) => {
-        let marketCap = getFormattedMarketCap(b.denom);
+        let marketCap = getMarketCap(b.denom);
         if (marketCap) {
           (b as any).marketCap = marketCap;
         }
@@ -303,10 +303,10 @@ export default defineComponent({
           tokens.push(x);
         }
       });
-      tokens = orderBy(tokens, [(b) => b.value.value, 'name'], ['desc', 'asc']);
-      lpTokens = orderBy(lpTokens, [(b) => b.value.value], ['desc']);
+      tokens = orderBy(tokens, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+      lpTokens = orderBy(lpTokens, [(x) => x.value.value], ['desc']);
       lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
-      return tokens.concat(lpTokens);
+      return tokens.concat(lpTokens).slice(0, currentLimit.value);
     };
 
     const orderAllBalances = (balances) => {
@@ -319,22 +319,26 @@ export default defineComponent({
           tokens.push(x);
         }
       });
-      tokens = orderBy(tokens, ['marketCap', (b) => b.value.value, 'name'], ['desc', 'desc', 'asc']);
-      lpTokens = orderBy(lpTokens, ['marketCap', (b) => b.value.value], ['desc', 'desc']);
+      tokens = orderBy(tokens, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
+      console.log(tokens);
+      lpTokens = orderBy(lpTokens, ['marketCap', (x) => x.value.value], ['desc', 'desc']);
       lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
-      return tokens.concat(lpTokens);
+      return tokens.concat(lpTokens).slice(0, currentLimit.value);
     };
 
-    const getFormattedMarketCap = (denom: string) => {
+    const getMarketCap = (denom: string) => {
       const price = store.getters['demeris/getPrice']({ denom });
       const supply = store.getters['demeris/getSupply']({ denom });
-      const marketCap = price * supply;
+      let marketCap = price * supply;
+      return marketCap;
+    };
+    const formatUsd = (amount: number) => {
       const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
       });
 
-      return marketCap ? formatter.format(marketCap) : '-';
+      return amount ? formatter.format(amount) : '-';
     };
 
     const viewAllHandler = () => {
@@ -351,7 +355,8 @@ export default defineComponent({
       balancesFiltered,
       balancesWithName,
       balancesWithMarketCap,
-      getFormattedMarketCap,
+      getMarketCap,
+      formatUsd,
       handleClick,
       viewAllHandler,
       orderUserBalances,
