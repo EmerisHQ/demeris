@@ -71,6 +71,7 @@ export type IBCForwardsData = {
   amount: Base.Amount;
   from_chain: string;
   to_chain: string;
+  chain_fee?: FeeWDenom;
   to_address?: string;
   through: string;
 };

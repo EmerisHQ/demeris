@@ -145,6 +145,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            chain_fee: await getFeeForChain(chain_name),
             to_chain: destination_chain_name,
             to_address,
             through: primaryChannel,
@@ -218,6 +219,7 @@ export async function transfer({
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
+          chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           to_chain: destination_chain_name,
           to_address,
           through: primaryChannel,
@@ -283,6 +285,7 @@ export async function transfer({
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
             from_chain: verifyTrace.trace[0].counterparty_name,
+            chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
             to_chain: destination_chain_name,
             to_address,
             through: primaryChannel,
@@ -342,6 +345,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            chain_fee: await getFeeForChain(chain_name),
             to_chain: destination_chain_name,
             through: primaryChannel,
           },
@@ -426,6 +430,7 @@ export async function move({
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
+          chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           to_chain: destination_chain_name,
           through: primaryChannel,
         },
@@ -497,6 +502,7 @@ export async function move({
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
             from_chain: verifyTrace.trace[0].counterparty_name,
+            chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
             to_chain: destination_chain_name,
             through: primaryChannel,
           },

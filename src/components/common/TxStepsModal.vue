@@ -241,7 +241,7 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, IBCBackwardsData,Step } from '@/types/actions';
+import { FeeTotals, GasPriceLevel, IBCForwardsData, Step } from '@/types/actions';
 import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
   ensureTraceChannel,
@@ -376,6 +376,28 @@ export default defineComponent({
                 stepTx.feeToAdd = [];
                 stepTx.addFee = false;
               }
+            }
+          }
+          if (stepTx.name == 'ibc_forward') {
+            const baseDenomBalance = balances.value.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (amount.denom == x.base_denom && x.base_denom == (stepTx.data as IBCForwardsData).amount.denom) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            const fee =
+              parseInt((stepTx.data as IBCForwardsData).chain_fee.amount[props.gasPriceLevel]) *
+              store.getters['demeris/getGasLimit'];
+            const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
+            if (baseDenomBalance) {
+              const amount = parseCoins(baseDenomBalance.amount)[0];
+              if (parseInt(amount.amount) - txAmount < fee) {
+                (stepTx.data as IBCForwardsData).amount.amount = parseInt(amount.amount) - fee + '';
+              }
+            } else {
+              (stepTx.data as IBCForwardsData).amount.amount = txAmount - fee + '';
             }
           }
         }
