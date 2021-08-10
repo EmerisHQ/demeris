@@ -257,6 +257,10 @@ export default defineComponent({
       return sortedSummary;
     });
 
+    const balancesFiltered = computed(() => {
+      return balancesByAsset.value.slice(0, currentLimit.value);
+    });
+
     const balancesWithValue = computed(() => {
       let balances = balancesByAsset.value;
 
@@ -316,7 +320,7 @@ export default defineComponent({
         }
       });
       tokens = orderBy(tokens, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
-      lpTokens = orderBy(lpTokens, [(x) => x.marketCap || '', (x) => x.value.value], ['desc', 'desc']);
+      lpTokens = orderBy(lpTokens, ['marketCap', (x) => x.value.value], ['desc', 'desc']);
       lpTokens = lpTokens.sort((a, b) => a.name.localeCompare(b.name, 0, { numeric: true, sensitivity: 'base' }));
       return tokens.concat(lpTokens).slice(0, currentLimit.value);
     };
@@ -347,6 +351,7 @@ export default defineComponent({
     return {
       allBalances,
       balancesByAsset,
+      balancesFiltered,
       balancesWithName,
       balancesWithMarketCap,
       getMarketCap,
