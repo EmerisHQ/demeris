@@ -22,6 +22,7 @@ export type Mutations<S = State> = {
   ): void;
   [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
+  [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
@@ -66,6 +67,13 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
     state.numbers[(payload.params as API.AddrReq).address] = payload.value as API.Numbers;
   },
+  [MutationTypes.SET_NUMBERS_CHAIN](state: State, payload: DemerisMutations) {
+    if (!state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name]) {
+      state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name] = {};
+    }
+    state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name][(payload.params as API.ChainAddrReq).address] =
+      payload.value as API.SeqNumber;
+  },
   [MutationTypes.SET_FEE_ADDRESSES](state: State, payload: DemerisMutations) {
     for (const feeAddress of payload.value as API.FeeAddresses) {
       state.chains[feeAddress.chain_name].demeris_addresses = [feeAddress.fee_address];
@@ -82,8 +90,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
     state._Session = { ...state._Session, ...(payload as UserData) };
-
-    window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+    if (!state._Session.isDemoAccount) {
+      window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
+    }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
     state.prices = payload.value as API.Prices;

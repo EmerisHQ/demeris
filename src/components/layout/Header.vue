@@ -14,6 +14,7 @@
       </router-link>
 
       <router-link
+        v-if="!isDemoAccount"
         class="
           text-0
           font-medium
@@ -40,7 +41,35 @@
         <ReceiveIcon class="group-hover:text-secondary" />
         <span class="ml-3 hidden lg:inline">{{ $t('navbar.receive') }}</span>
       </router-link>
-
+      <a
+        v-else
+        href="javascript:void(0)"
+        class="
+          text-0
+          font-medium
+          leading-5
+          h-12
+          px-4
+          ml-3
+          lg:ml-0
+          hidden
+          sm:flex
+          bg-fg
+          lg:bg-transparent
+          rounded-full
+          lg:rounded-none
+          items-center
+          justify-center
+          rounded-lg
+          group
+          active:opacity-70
+          transition
+        "
+        @click="settingsRef.toggleWalletModal"
+      >
+        <ReceiveIcon class="group-hover:text-secondary" />
+        <span class="ml-3 hidden lg:inline">{{ $t('navbar.receive') }}</span>
+      </a>
       <router-link
         class="
           text-0
@@ -69,12 +98,12 @@
         <span class="ml-3 hidden lg:inline">{{ $t('navbar.send') }}</span>
       </router-link>
 
-      <Settings />
+      <Settings ref="settingsRef" />
     </div>
   </header>
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
@@ -103,10 +132,15 @@ export default defineComponent({
         ? (tip = 'You have 1 asset to redeem')
         : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
     });
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
     const showBadge = computed(() => {
       return store.getters['demeris/hasSeenReedem'] ? false : true;
     });
-    return { redeemableBalances, tip, showBadge };
+    const settingsRef = ref(null);
+
+    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef };
   },
 });
 </script>

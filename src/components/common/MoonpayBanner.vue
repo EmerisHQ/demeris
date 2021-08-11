@@ -54,6 +54,10 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
 
+    const isDemoAccount = computed(() => {
+      return store.getters['demeris/isDemoAccount'];
+    });
+
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
@@ -72,13 +76,13 @@ export default defineComponent({
     });
 
     const goMoon = () => {
-      if (isSignedIn.value) {
+      if (isSignedIn.value && !isDemoAccount.value) {
         window.open(mpUrl.value, '', 'height=480,width=320');
       } else {
         emitter.emit('toggle-settings-modal');
       }
     };
-    return { isSignedIn, goMoon };
+    return { isSignedIn, goMoon, isDemoAccount };
   },
 });
 </script>
