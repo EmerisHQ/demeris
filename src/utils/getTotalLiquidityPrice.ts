@@ -1,8 +1,8 @@
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import { useStore } from '@/store';
 import { Pool } from '@/types/actions';
 
 export default function (thePool: Pool): number {

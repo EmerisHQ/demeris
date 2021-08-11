@@ -114,8 +114,7 @@ export default {
     });
 
     const orderPools = (pools) => {
-      let ordered = orderBy(pools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
-      return ordered;
+      return orderBy(pools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
     };
 
     const filteredPools = computed(() => {
