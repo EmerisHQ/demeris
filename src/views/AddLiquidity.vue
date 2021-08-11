@@ -711,6 +711,7 @@ export default {
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
+            state.poolBaseDenoms = reserveDenoms;
             pool.value = poolIterator;
             return;
           }
