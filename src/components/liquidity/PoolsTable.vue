@@ -127,8 +127,8 @@ export default {
           pools.push(x);
         }
       });
-      pools = orderBy(pools, [(x) => x.totalLiquidityPrice || '', 'displayName'], ['desc', 'asc']);
-      lpPools = orderBy(lpPools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
+      pools = orderBy(pools, ['totalLiquidityPrice', 'displayName'], ['desc', 'asc']);
+      lpPools = orderBy(lpPools, ['totalLiquidityPrice'], ['desc']);
       lpPools = lpPools.sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 0, { numeric: true, sensitivity: 'base' }),
       );
