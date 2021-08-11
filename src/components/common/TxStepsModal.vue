@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
