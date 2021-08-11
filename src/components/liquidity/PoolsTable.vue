@@ -38,9 +38,12 @@
             </div>
             <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
               {{ pool.displayName }}
+              {{ pool.totalLiquidityPrice }}
             </span>
           </td>
-          <td class="text-right group-hover:bg-fg transition"><TotalLiquidityPrice :pool="pool" /></td>
+          <td class="text-right group-hover:bg-fg transition">
+            <TotalLiquidityPrice :pool="pool" />
+          </td>
           <!--<td class="text-right">10%</td>//-->
           <td class="text-right group-hover:bg-fg transition"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
         </tr>
@@ -52,6 +55,7 @@
 <script lang="ts">
 import { ref } from '@vue/reactivity';
 import { computed, PropType, watch } from '@vue/runtime-core';
+import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -62,6 +66,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default {
   name: 'PoolsTable',
@@ -96,9 +101,27 @@ export default {
       { immediate: true },
     );
 
+    const poolsWithTotalLiquidityPrice = computed(() => {
+      let pools = renderedPools.value;
+      pools.map((p) => {
+        let tlp = getTotalLiquidityPrice(p);
+        console.log('totalLiquidityPrice', tlp);
+        if (tlp) {
+          p.totalLiquidityPrice = tlp.totalLiquidityPrice;
+        }
+        return p;
+      });
+      return pools;
+    });
+
+    const orderPools = (pools) => {
+      let ordered = orderBy(pools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
+      return ordered;
+    };
+
     const filteredPools = computed(() => {
       const query = keyword.value.toLowerCase();
-      return renderedPools.value.filter(
+      return poolsWithTotalLiquidityPrice.value.filter(
         (pool) =>
           pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
       );
@@ -118,6 +141,8 @@ export default {
       rowClickHandler,
       openAddLiqudityPage,
       formatPoolName,
+      orderPools,
+      poolsWithTotalLiquidityPrice,
     };
   },
 };
