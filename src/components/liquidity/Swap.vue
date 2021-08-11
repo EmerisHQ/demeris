@@ -74,7 +74,7 @@
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: changePayToReceive,
+              function: switchPayToReceive,
             }"
           />
           <IconButton
@@ -582,7 +582,7 @@ export default defineComponent({
       }),
       maxButtonText: 'Max',
       maxAmount: computed(() => {
-        const maxBalance = parseInt(
+        const selectedCoinBalance = parseInt(
           allBalances.value.filter((coin) => {
             return coin.denom === data.payCoinData?.denom;
           })[0]?.amount,
@@ -591,8 +591,8 @@ export default defineComponent({
           parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
           0.0015;
 
-        if (maxBalance > Math.ceil(maxBalance * swapFeeRate) + txFee.value) {
-          return maxBalance - Math.ceil(maxBalance * swapFeeRate) - txFee.value ?? 0;
+        if (selectedCoinBalance > Math.ceil(selectedCoinBalance * swapFeeRate) + txFee.value) {
+          return selectedCoinBalance - Math.ceil(selectedCoinBalance * swapFeeRate) - txFee.value ?? 0;
         } else {
           return 0;
         }
@@ -626,9 +626,8 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value && data.payCoinData) {
-          // data.isBothSelected &&
           return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount) /
+            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
@@ -682,21 +681,16 @@ export default defineComponent({
 
     //tx fee setting
     watch(
-      () => data.payCoinData,
+      () => data.payCoinData?.denom,
       async () => {
-        if (data.payCoinData) {
+        if (data.payCoinData?.denom.startsWith('ibc') || data.payCoinData?.denom === 'uatom') {
           const fees = await getFeeForChain(data.payCoinData.on_chain);
-          if (
-            data.payCoinData.denom === 'uatom' ||
-            (!data.payCoinData.denom.startsWith('ibc') &&
-              data.payCoinData.on_chain !== store.getters['demeris/getDexChain'])
-          ) {
-            txFee.value =
-              fees[0].amount[gasPrice.value] *
-              10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          } else {
-            return 0;
-          }
+          txFee.value =
+            fees[0].amount[gasPrice.value] *
+            10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
+          console.log('TX fee', txFee.value);
+        } else {
+          return (txFee.value = 0);
         }
       },
     );
@@ -725,7 +719,7 @@ export default defineComponent({
 
     //calculate slippage and set
     watch(
-      () => data.payCoinAmount,
+      () => [data.payCoinAmount, data.receiveCoinAmount],
       () => {
         if (data.selectedPoolData) {
           const minimalDecimal = Math.pow(
@@ -873,17 +867,32 @@ export default defineComponent({
       },
     );
 
-    function changePayToReceive() {
+    function switchPayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
-      let originReceiveCoinData = null;
-      if (originPayCoinData) {
-        originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
-      }
+      let originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
       if (data.receiveCoinData) {
         originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
       }
 
-      data.payCoinData = originReceiveCoinData;
+      const sortedBalance =
+        allBalances.value
+          .filter((asset) => asset?.base_denom === originReceiveCoinData?.base_denom)
+          .sort((a, b) => {
+            const amountA = parseInt(a.amount);
+            const amountB = parseInt(b.amount);
+            if (amountA > amountB) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }) ?? [];
+
+      if (sortedBalance.length > 0) {
+        data.payCoinData = sortedBalance[0];
+      } else {
+        data.payCoinData = originReceiveCoinData;
+      }
+
       data.receiveCoinData = assetsToReceive.value.find((asset) => {
         return asset?.base_denom === originPayCoinData?.base_denom;
       });
@@ -902,7 +911,21 @@ export default defineComponent({
         ),
       );
 
-      data.payCoinAmount = data.maxAmount / precisionDecimal;
+      if (data.selectedPoolData) {
+        const payCoinReserveAmount = Number(
+          data.selectedPoolData.reserves.indexOf(data.payCoinData.base_denom) == 0
+            ? data.selectedPoolData.reserveBalances.balanceA
+            : data.selectedPoolData.reserveBalances.balanceB,
+        );
+
+        if (Math.trunc(payCoinReserveAmount / 10) > data.maxAmount) {
+          data.payCoinAmount = data.maxAmount / precisionDecimal;
+        } else {
+          data.payCoinAmount = Math.trunc(payCoinReserveAmount / 10) / precisionDecimal;
+        }
+      } else {
+        data.payCoinAmount = data.maxAmount / precisionDecimal;
+      }
       setCounterPairCoinAmount('Pay');
     }
 
@@ -972,7 +995,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       isInit,
-      changePayToReceive,
+      switchPayToReceive,
       denomSelectHandler,
       getPrecisedAmount,
       setMax,
