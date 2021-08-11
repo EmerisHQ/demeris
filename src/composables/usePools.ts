@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { store, useAllStores } from '../store/index';
 
@@ -45,13 +46,16 @@ export default function usePools() {
     return pools.value.find((item) => item.id === id);
   };
 
+  const getReserveBalancesById = (id: string) => {
+    const pool = pools.value.find((item) => item.id === id);
+    const hashAddress = keyHashfromAddress(pool.reserve_account_address);
+    const balances = store.getters['demeris/getBalances']({ address: hashAddress }) || [];
+    return balances.map((item) => parseCoins(item.amount)[0]);
+  };
+
   const poolPriceById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
-    const balances = (
-      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
-        params: { address: pool.reserve_account_address },
-      })
-    ).balances;
+    const balances = getReserveBalancesById(id);
     const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return parseInt(balanceA.amount) / parseInt(balanceB.amount);
@@ -67,9 +71,7 @@ export default function usePools() {
     const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
-    const reserveBalances =
-      store.getters['cosmos.bank.v1beta1/getAllBalances']({ params: { address: pool.reserve_account_address } })
-        ?.balances || [];
+    const reserveBalances = getReserveBalancesById(pool.id);
 
     /**
      * TODO: Consider fee proportion
@@ -77,7 +79,7 @@ export default function usePools() {
      * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
      */
 
-    const hasParams = totalSupply && reserveBalances;
+    const hasParams = totalSupply && reserveBalances.length;
 
     const withdrawCoins = [
       {
@@ -202,15 +204,12 @@ export default function usePools() {
 
   const reserveBalancesById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
-    const balances = (
-      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
-        params: { address: pool.reserve_account_address },
-      })
-    ).balances;
+    const balances = getReserveBalancesById(id);
     const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
     const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
     return { balanceA: balanceA.amount, balanceB: balanceB.amount };
   };
+
   const liquidityPriceById = async (id: string, amounts: number[]) => {
     const reserveDenoms = await getReserveBaseDenoms(await poolById(id));
     let total = 0;

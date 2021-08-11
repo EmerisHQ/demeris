@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -66,14 +67,14 @@ export default defineComponent({
 
       for (const [index, denom] of reserveDenoms.entries()) {
         const price = store.getters['demeris/getPrice']({ denom });
-        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) ?? 6;
 
         const amount = reserveBalances.value[index].amount;
         if (!amount) {
           continue;
         }
 
-        total += (amount / Math.pow(10, precision)) * price;
+        total += new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).decimalPlaces(precision).toNumber();
       }
 
       totalLiquidityPrice.value = total;
