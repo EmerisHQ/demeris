@@ -105,9 +105,8 @@ export default {
       let pools = renderedPools.value;
       pools.map((p) => {
         let tlp = getTotalLiquidityPrice(p);
-        console.log('totalLiquidityPrice', tlp);
         if (tlp) {
-          p.totalLiquidityPrice = tlp.totalLiquidityPrice;
+          p.totalLiquidityPrice = tlp;
         }
         return p;
       });
