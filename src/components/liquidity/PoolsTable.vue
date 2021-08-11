@@ -30,7 +30,12 @@
       </thead>
 
       <tbody>
-        <tr v-for="pool of filteredPools" :key="pool.id" class="group cursor-pointer" @click="rowClickHandler(pool)">
+        <tr
+          v-for="pool of orderPools(filteredPools)"
+          :key="pool.id"
+          class="group cursor-pointer"
+          @click="rowClickHandler(pool)"
+        >
           <td class="py-5 flex items-center group-hover:bg-fg transition">
             <div class="inline-flex items-center mr-4">
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="w-8 h-8 rounded-full bg-fg z-1" />
@@ -38,7 +43,6 @@
             </div>
             <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
               {{ pool.displayName }}
-              {{ pool.totalLiquidityPrice }}
             </span>
           </td>
           <td class="text-right group-hover:bg-fg transition">
@@ -113,8 +117,22 @@ export default {
       return pools;
     });
 
-    const orderPools = (pools) => {
-      return orderBy(pools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
+    const orderPools = (unorderedPools) => {
+      let pools = [];
+      let lpPools = [];
+      unorderedPools.map((x) => {
+        if (x.displayName?.substring(0, 7) === 'Gravity') {
+          lpPools.push(x);
+        } else {
+          pools.push(x);
+        }
+      });
+      pools = orderBy(pools, [(x) => x.totalLiquidityPrice || '', 'displayName'], ['desc', 'asc']);
+      lpPools = orderBy(lpPools, [(x) => x.totalLiquidityPrice || ''], ['desc']);
+      lpPools = lpPools.sort((a, b) =>
+        a.displayName.localeCompare(b.displayName, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return pools.concat(lpPools);
     };
 
     const filteredPools = computed(() => {

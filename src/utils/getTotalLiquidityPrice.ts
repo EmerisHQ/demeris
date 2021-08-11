@@ -2,13 +2,12 @@ import { ref, watch } from 'vue';
 
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
+import { store } from '@/store/index';
 import { Pool } from '@/types/actions';
 
-export default function (thePool: Pool): number {
+export default function (thePool: Pool): any {
   const { pool, reserveBalances } = usePool((thePool as Pool).id);
   const denoms = ref(pool.value.reserve_coin_denoms);
-  const store = useStore();
   const { getReserveBaseDenoms } = usePools();
 
   const totalLiquidityPrice = ref(0);
@@ -19,30 +18,32 @@ export default function (thePool: Pool): number {
     }
 
     const reserveDenoms = await getReserveBaseDenoms(pool.value);
-    if (reserveDenoms) {
-      denoms.value = reserveDenoms;
+    denoms.value = reserveDenoms;
 
-      let total = 0;
+    let total = 0;
 
-      for (const [index, denom] of reserveDenoms.entries()) {
-        if (denom.substring(0, 4) !== 'pool') {
-          const price = store.getters['demeris/getPrice']({ denom });
-          const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+    for (const [index, denom] of reserveDenoms.entries()) {
+      const price = store.getters['demeris/getPrice']({ denom });
 
-          const amount = reserveBalances.value[index].amount;
-          if (!amount) {
-            continue;
-          }
-
-          total += (amount / Math.pow(10, precision)) * price;
-        }
+      // if one token doesn't have a price, we can't get an accorate total liquidity price
+      if (!price) {
+        return;
       }
 
-      totalLiquidityPrice.value = total;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+
+      const amount = reserveBalances.value[index].amount;
+      if (!amount) {
+        continue;
+      }
+
+      total += (amount / Math.pow(10, precision)) * price;
     }
+
+    totalLiquidityPrice.value = total;
   };
 
-  watch(reserveBalances, updateTotalLiquidityPrice);
+  watch(reserveBalances, updateTotalLiquidityPrice, { immediate: true });
 
-  return totalLiquidityPrice.value;
+  return totalLiquidityPrice;
 }
