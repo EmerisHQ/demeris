@@ -8,6 +8,7 @@ export enum DemerisActionTypes {
   GET_ALL_BALANCES = 'GET_ALL_BALANCES',
   GET_ALL_STAKING_BALANCES = 'GET_ALL_STAKING_BALANCES',
   GET_NUMBERS = 'GET_NUMBERS',
+  GET_NUMBERS_CHAIN = 'GET_NUMBERS_CHAIN',
   GET_ALL_NUMBERS = 'GET_ALL_NUMBERS',
   GET_FEE_ADDRESSES = 'GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'GET_VERIFIED_DENOMS',
@@ -46,6 +47,7 @@ export enum GlobalDemerisActionTypes {
   GET_ALL_BALANCES = 'demeris/GET_ALL_BALANCES',
   GET_ALL_STAKING_BALANCES = 'demeris/GET_ALL_STAKING_BALANCES',
   GET_NUMBERS = 'demeris/GET_NUMBERS',
+  GET_NUMBERS_CHAIN = 'demeris/GET_NUMBERS_CHAIN',
   GET_ALL_NUMBERS = 'demeris/GET_ALL_NUMBERS',
   GET_FEE_ADDRESSES = 'demeris/GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'demeris/GET_VERIFIED_DENOMS',
@@ -82,6 +84,10 @@ export type DemerisActionParams = {
 export type DemerisActionsByAddressParams = {
   subscribe: boolean;
   params?: API.AddrReq;
+};
+export type DemerisActionsByChainAddressParams = {
+  subscribe: boolean;
+  params?: API.ChainAddrReq;
 };
 export type DemerisActionsByChainParams = {
   subscribe: boolean;
