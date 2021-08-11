@@ -74,7 +74,7 @@
             :status="'normal'"
             :data="{
               type: 'custom',
-              function: changePayToReceive,
+              function: switchPayToReceive,
             }"
           />
           <IconButton
@@ -626,9 +626,8 @@ export default defineComponent({
       // booleans-start(for various status check)
       isOver: computed(() => {
         if (isSignedIn.value && data.payCoinData) {
-          // data.isBothSelected &&
           return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount) /
+            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
@@ -868,17 +867,32 @@ export default defineComponent({
       },
     );
 
-    function changePayToReceive() {
+    function switchPayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
-      let originReceiveCoinData = null;
-      if (originPayCoinData) {
-        originPayCoinData.on_chain = store.getters['demeris/getDexChain']; // receive assets should only have cosmos-hub for on_chain value
-      }
+      let originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
       if (data.receiveCoinData) {
         originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
       }
 
-      data.payCoinData = originReceiveCoinData;
+      const sortedBalance =
+        allBalances.value
+          .filter((asset) => asset?.base_denom === originReceiveCoinData?.base_denom)
+          .sort((a, b) => {
+            const amountA = parseInt(a.amount);
+            const amountB = parseInt(b.amount);
+            if (amountA > amountB) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }) ?? [];
+
+      if (sortedBalance.length > 0) {
+        data.payCoinData = sortedBalance[0];
+      } else {
+        data.payCoinData = originReceiveCoinData;
+      }
+
       data.receiveCoinData = assetsToReceive.value.find((asset) => {
         return asset?.base_denom === originPayCoinData?.base_denom;
       });
@@ -981,7 +995,7 @@ export default defineComponent({
     return {
       ...toRefs(data),
       isInit,
-      changePayToReceive,
+      switchPayToReceive,
       denomSelectHandler,
       getPrecisedAmount,
       setMax,
