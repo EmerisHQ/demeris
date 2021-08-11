@@ -13,6 +13,7 @@ export enum DemerisMutationTypes {
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
   SET_KEPLR = 'SET_KEPLR',
   SET_NUMBERS = 'SET_NUMBERS',
+  SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
   SET_PRICES = 'SET_PRICES',
   SET_TX_STATUS = 'SET_TX_STATUS',
   SET_CHAINS = 'SET_CHAINS',
@@ -60,6 +61,7 @@ export type DemerisMutationArgs =
   | API.PrimaryChannel
   | API.StakingBalances
   | API.Numbers
+  | API.SeqNumber
   | API.VerifyTrace
   | API.Chains
   | API.Chain
