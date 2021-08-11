@@ -682,9 +682,9 @@ export default defineComponent({
 
     //tx fee setting
     watch(
-      () => [data.payCoinData, data.actionHandlerResult],
+      () => data.payCoinData?.denom,
       async () => {
-        if (data.payCoinData && (data.actionHandlerResult?.length > 1 || data.payCoinData.denom === 'uatom')) {
+        if (data.payCoinData?.denom.startsWith('ibc') || data.payCoinData?.denom === 'uatom') {
           const fees = await getFeeForChain(data.payCoinData.on_chain);
           txFee.value =
             fees[0].amount[gasPrice.value] *
@@ -720,7 +720,7 @@ export default defineComponent({
 
     //calculate slippage and set
     watch(
-      () => data.payCoinAmount,
+      () => [data.payCoinAmount, data.receiveCoinAmount],
       () => {
         if (data.selectedPoolData) {
           const minimalDecimal = Math.pow(
@@ -897,7 +897,21 @@ export default defineComponent({
         ),
       );
 
-      data.payCoinAmount = data.maxAmount / precisionDecimal;
+      if (data.selectedPoolData) {
+        const payCoinReserveAmount = Number(
+          data.selectedPoolData.reserves.indexOf(data.payCoinData.base_denom) == 0
+            ? data.selectedPoolData.reserveBalances.balanceA
+            : data.selectedPoolData.reserveBalances.balanceB,
+        );
+
+        if (Math.trunc(payCoinReserveAmount / 10) > data.maxAmount) {
+          data.payCoinAmount = data.maxAmount / precisionDecimal;
+        } else {
+          data.payCoinAmount = Math.trunc(payCoinReserveAmount / 10) / precisionDecimal;
+        }
+      } else {
+        data.payCoinAmount = data.maxAmount / precisionDecimal;
+      }
       setCounterPairCoinAmount('Pay');
     }
 
