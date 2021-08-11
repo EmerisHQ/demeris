@@ -190,7 +190,15 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
   },
+  [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
+    state.relayer = payload.value as boolean;
+  },
 
+  [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
+    for (const relayerBalance of payload.value as API.RelayerBalances) {
+      state.chains[relayerBalance.chain_name].relayerBalance = relayerBalance;
+    }
+  },
   // Internal module mutations
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {

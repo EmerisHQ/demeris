@@ -1532,6 +1532,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 }
 export function chainStatusForSteps(steps: Actions.Step[]) {
   let allClear = true;
+  let relayerStatus = true;
   const failedChains = [];
   for (const step of steps) {
     for (const stepTx of step.transactions) {
@@ -1563,6 +1564,12 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+        if (
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+        ) {
+          relayerStatus = false;
+        }
       }
       if (stepTx.name == 'ibc_forward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
@@ -1580,6 +1587,12 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
           } else {
             failedChains.push(dest_chain_name);
           }
+        }
+        if (
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+        ) {
+          relayerStatus = false;
         }
       }
       if (stepTx.name == 'addliquidity') {
@@ -1628,7 +1641,7 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       }
     }
   }
-  return { status: allClear, failed: failedChains };
+  return { status: allClear, failed: failedChains, relayer: relayerStatus };
 }
 export async function validateStepFeeBalances(
   step: Actions.Step,

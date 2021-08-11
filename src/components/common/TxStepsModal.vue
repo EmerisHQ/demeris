@@ -89,12 +89,22 @@
           <div class="flex items-center justify-center my-6">
             <Icon name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
           </div>
-          <div class="text-1 font-bold mb-4">
-            {{ $t('components.txHandlingModal.chainDown') }}
-          </div>
-          <div class="text-muted leading-copy mb-8">
-            {{ $t('components.txHandlingModal.chainDownDesc') }}
-          </div>
+          <template v-if="!chainsStatus.status">
+            <div class="text-1 font-bold mb-4">
+              {{ $t('components.txHandlingModal.chainDown') }}
+            </div>
+            <div class="text-muted leading-copy mb-8">
+              {{ $t('components.txHandlingModal.chainDownDesc') }}
+            </div>
+          </template>
+          <template v-else>
+            <div class="text-1 font-bold mb-4">
+              {{ $t('components.txHandlingModal.relayerDown') }}
+            </div>
+            <div class="text-muted leading-copy mb-8">
+              {{ $t('components.txHandlingModal.relayerDownDesc') }}
+            </div>
+          </template>
           <template #buttons>
             <ModalButton :name="$t('generic_cta.understand')" :click-function="goPortfolio" />
           </template>
@@ -242,7 +252,7 @@
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouteLocationRaw, useRoute,useRouter } from 'vue-router';
+import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -522,7 +532,7 @@ export default defineComponent({
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
       } else {
-        if (!chainsStatus.value.status) {
+        if (!chainsStatus.value.status || !chainsStatus.value.relayer) {
           showChainError.value = true;
           return;
         }

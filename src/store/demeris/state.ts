@@ -4,6 +4,7 @@ import { KeplrKeyData, UserData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
+  relayerBalance?: API.RelayerBalance;
   status?: boolean;
 };
 export type ChainData = API.Chain & ChainMeta;
@@ -24,6 +25,7 @@ export type State = {
   verifiedDenoms: API.VerifiedDenoms;
   keplr: KeplrKeyData;
   prices: API.Prices;
+  relayer: boolean;
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   _Subscriptions: Set<string>;
@@ -44,6 +46,7 @@ export function getDefaultState(): State {
       Fiats: [],
       Tokens: [],
     },
+    relayer: true,
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),

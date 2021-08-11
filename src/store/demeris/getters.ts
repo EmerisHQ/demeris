@@ -92,6 +92,15 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getSlippagePerc: (state) => {
     return state._Session.slippagePerc;
   },
+  getRelayerStatus: (state) => {
+    return state.relayer;
+  },
+  getRelayerBalance: (state) => (params) => {
+    return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
+  },
+  getRelayerChainStatus: (state) => (params) => {
+    return state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer;
+  },
   isDemoAccount: (state) => {
     return state._Session.isDemoAccount;
   },
