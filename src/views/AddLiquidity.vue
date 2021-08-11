@@ -785,9 +785,8 @@ export default {
       }
 
       const bigAmountA = new BigNumber(+form.coinA.amount);
-      const result = new BigNumber(exchangeAmount.value.coinB)
-        .shiftedBy(-precisions.value.coinB)
-        .multipliedBy(bigAmountA);
+      const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinA);
+      const result = bigAmountA.dividedBy(bigExchangeAmount);
 
       form.coinB.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
@@ -808,7 +807,7 @@ export default {
 
       const bigAmountB = new BigNumber(+form.coinB.amount);
       const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
-      const result = bigAmountB.dividedBy(bigExchangeAmount);
+      const result = bigAmountB.multipliedBy(bigExchangeAmount);
 
       form.coinA.amount = result.isFinite() ? result.decimalPlaces(6).toString() : '';
       updateTotalCurrencyPrice();
