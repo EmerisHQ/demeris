@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import usePools from './usePools';
@@ -11,7 +10,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
   const store = useAllStores();
   const reserveBaseDenoms = ref([]);
 
-  const { poolById, formatPoolName, poolPriceById, getReserveBaseDenoms } = usePools();
+  const { poolById, formatPoolName, poolPriceById } = usePools();
 
   const pool = computed(() => {
     const poolId = unref(id);
@@ -55,19 +54,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     return result.map((item) => parseCoins(item.amount)[0]);
   });
-
-  const updateReserveBalances = async () => {
-    if (!pool.value) {
-      return;
-    }
-
-    reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
-    const hashAddress = keyHashfromAddress(pool.value.reserve_account_address);
-
-    await store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
-      params: { address: hashAddress },
-    });
-  };
 
   const calculateSupplyTokenAmount = (amountA: number, amountB: number) => {
     if (!totalSupply.value || !reserveBalances.value) {
@@ -120,7 +106,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
   watch(
     pool,
     () => {
-      updateReserveBalances();
       setPairName();
     },
     { immediate: true },
@@ -133,7 +118,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
     reserveBalances,
     reserveBaseDenoms,
     poolPrice,
-    updateReserveBalances,
     calculateSupplyTokenAmount,
     calculateWithdrawBalances,
   };

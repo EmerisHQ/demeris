@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
@@ -15,10 +16,14 @@ export default function usePools() {
   });
 
   const pools = ref(allPools.value);
+
+  // TOFIX: This watch is being triggered multiple times in a few ms, needs a better strategy,
+  // maybe a debounce or something like
   watch(
-    () => allPools.value,
+    allPools,
     async (newPools) => {
       pools.value = await validPools(newPools);
+      await Promise.allSettled(pools.value.map((pool) => updateReserveBalancesById(pool.id)));
     },
     { immediate: true },
   );
@@ -44,6 +49,18 @@ export default function usePools() {
 
   const poolById = (id: string) => {
     return pools.value.find((item) => item.id === id);
+  };
+
+  const updateReserveBalancesById = async (id: string) => {
+    const pool = pools.value.find((item) => item.id === id);
+    if (!pool) {
+      return;
+    }
+    const hashAddress = keyHashfromAddress(pool.reserve_account_address);
+    await store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+      subscribe: false,
+      params: { address: hashAddress },
+    });
   };
 
   const getReserveBalancesById = (id: string) => {
