@@ -4,6 +4,10 @@ import * as Base from './base';
 export type AddrReq = {
   address: string;
 };
+export type ChainAddrReq = {
+  chain_name: string;
+  address: string;
+};
 // Params object for actions requiring a chain name (and optionally a target chain)
 export type ChainReq = {
   chain_name: string;
@@ -260,7 +264,7 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq;
 
 export type AddLiquidityEndBlockResponse = {
   accepted_coins: string;

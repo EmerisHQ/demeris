@@ -89,6 +89,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
   },
+  getNumbersChain: (state) => (params) => {
+    return state.chainnumbers[(params as API.ChainAddrReq).chain_name][(params as API.ChainAddrReq).address] ?? null;
+  },
   getSlippagePerc: (state) => {
     return state._Session.slippagePerc;
   },

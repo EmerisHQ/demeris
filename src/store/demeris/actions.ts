@@ -13,6 +13,7 @@ import { addChain } from '@/utils/keplr';
 import {
   DemerisActionParams,
   DemerisActionsByAddressParams,
+  DemerisActionsByChainAddressParams,
   DemerisActionsByChainParams,
   DemerisActionsByTicketParams,
   DemerisActionsGetTxsParams,
@@ -82,6 +83,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Numbers>;
+  [DemerisActionTypes.GET_NUMBERS_CHAIN](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByChainAddressParams,
+  ): Promise<API.SeqNumber>;
   [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Numbers>;
   [DemerisActionTypes.GET_VERIFIED_DENOMS](
     { commit, getters }: ActionContext<State, RootState>,
@@ -207,6 +212,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_NUMBERS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS]>;
+  [GlobalDemerisActionTypes.GET_NUMBERS_CHAIN](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS_CHAIN]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS_CHAIN]>;
   [GlobalDemerisActionTypes.GET_ALL_NUMBERS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>;
@@ -365,6 +373,24 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getNumbers'](params);
   },
+  async [DemerisActionTypes.GET_NUMBERS_CHAIN]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(
+        getters['getEndpoint'] +
+          '/chain/' +
+          (params as API.ChainAddrReq).chain_name +
+          '/numbers/' +
+          (params as API.ChainAddrReq).address,
+      );
+      commit(DemerisMutationTypes.SET_NUMBERS_CHAIN, { params, value: response.data.numbers });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_NUMBERS_CHAIN, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetNumbersChain', 'Could not perform API query.');
+    }
+    return getters['getNumbersChain'](params);
+  },
   async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
@@ -458,15 +484,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
-      const numbers =
-        getters['getNumbers']({ address: keyHashfromAddress(account.address) }) ??
-        (await dispatch(DemerisActionTypes.GET_NUMBERS, {
-          subscribe: true,
-          params: {
-            address: keyHashfromAddress(account.address),
-          },
-        }));
-      const signerData = numbers.find((x) => x.chain_name == chain_name);
+      const numbers = await dispatch(DemerisActionTypes.GET_NUMBERS_CHAIN, {
+        subscribe: false,
+        params: {
+          address: keyHashfromAddress(account.address),
+          chain_name: chain_name,
+        },
+      });
+
+      const signerData = numbers;
       const cosmjsSignerData = {
         chainId: chain.node_info.chain_id,
         accountNumber: parseInt(signerData.account_number),
