@@ -1,7 +1,7 @@
 <template>
   <tippy
-    v-if="chainName && chainDown"
-    v-tippy="{ maxWidth: 192 }"
+    v-if="chainName && !chainDown"
+    max-width="280px"
     class="status absolute z-50 top-0 left-0"
     :class="`status--${size}`"
     name="tooltipTrigger"
@@ -10,8 +10,7 @@
 
     <template #content>
       {{ $t('generic_cta.chainDown', { displayChain }) }}
-      <Ticker :name="denom" />
-      {{ $t('generic_cta.tickerUnavailable') }}
+      {{ $t('generic_cta.balancesInaccurate') }}
     </template>
   </tippy>
 </template>
@@ -21,13 +20,8 @@ type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
-import Ticker from '@/components/common/Ticker.vue';
-
 export default defineComponent({
   name: 'CircleSymbolStatus',
-  components: {
-    Ticker,
-  },
   props: {
     denom: {
       type: String,
