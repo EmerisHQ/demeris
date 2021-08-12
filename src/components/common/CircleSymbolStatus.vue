@@ -1,6 +1,6 @@
 <template>
   <tippy
-    v-if="chainName && !chainDown"
+    v-if="chainName && chainDown"
     max-width="280px"
     class="status absolute z-50 top-0 left-0"
     :class="`status--${size}`"
