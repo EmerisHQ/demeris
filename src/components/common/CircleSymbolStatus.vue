@@ -1,6 +1,7 @@
 <template>
   <tippy
     v-if="chainName && chainDown"
+    v-tippy="{ maxWidth: 192 }"
     class="status absolute z-50 top-0 left-0"
     :class="`status--${size}`"
     name="tooltipTrigger"
