@@ -79,6 +79,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
+      .filter((balance) => state.keplr.keyHashes.indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },

@@ -521,12 +521,19 @@ export default {
       }
 
       if (reserveBalances.value?.length) {
+        const amountA =
+          form.coinA.asset.base_denom == state.poolBaseDenoms[0]
+            ? reserveBalances.value[0].amount
+            : reserveBalances.value[1].amount;
+        const amountB =
+          form.coinB.asset.base_denom == state.poolBaseDenoms[1]
+            ? reserveBalances.value[1].amount
+            : reserveBalances.value[0].amount;
+        const precisionB =
+          form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
         return {
           coinA,
-          coinB: new BigNumber(reserveBalances.value[1].amount)
-            .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(precisions.value.coinB)
-            .toNumber(),
+          coinB: new BigNumber(amountB).dividedBy(amountA).shiftedBy(precisionB).toNumber(),
         };
       }
 
@@ -698,6 +705,8 @@ export default {
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
+          // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+          state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
 
           if (
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
@@ -909,7 +918,7 @@ export default {
             const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
-            
+
             const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
@@ -919,11 +928,11 @@ export default {
             const bigAmountA = new BigNumber(amountA).minus(feeA);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
             const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
-            const bigAmountBToA = bigAmountB.dividedBy(bigExchangeAmount)
+            const bigAmountBToA = bigAmountB.dividedBy(bigExchangeAmount);
 
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountBToA);
 
-            console.log("minamount", minAmount.toString());
+            console.log('minamount', minAmount.toString());
 
             if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
               form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();

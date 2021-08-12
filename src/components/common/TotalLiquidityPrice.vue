@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import usePool from '@/composables/usePool';
@@ -80,7 +80,9 @@ export default defineComponent({
     };
 
     watch(reserveBalances, updateTotalLiquidityPrice);
-
+    onMounted(() => {
+      updateTotalLiquidityPrice();
+    });
     return { hasPrices, totalLiquidityPrice, toUSD };
   },
 });

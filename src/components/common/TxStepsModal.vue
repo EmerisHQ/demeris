@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
@@ -578,7 +578,7 @@ export default defineComponent({
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '400000',
+                gas: '500000',
               };
               let tx;
               try {
