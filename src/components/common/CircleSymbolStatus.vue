@@ -1,8 +1,11 @@
 <template>
-  <tippy v-if="chainName && !chainDown" class="block w-8 h-8 relative">
-    <div class="status absolute z-50 top-0 left-0" :class="`status--${size}`" name="tooltipTrigger">
-      <div class="dot bg-negative h-2 w-2 rounded absolute top-0 right-0" :class="`dot--${size}`" />
-    </div>
+  <tippy
+    v-if="chainName && chainDown"
+    class="status absolute z-50 top-0 left-0"
+    :class="`status--${size}`"
+    name="tooltipTrigger"
+  >
+    <div class="dot bg-negative h-2 w-2 rounded absolute top-0 right-0" :class="`dot--${size}`" />
 
     <template #content>
       {{ $t('generic_cta.chainDown', { displayChain }) }}
