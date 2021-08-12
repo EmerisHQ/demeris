@@ -510,7 +510,7 @@ export default defineComponent({
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '500000',
+                gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
               try {

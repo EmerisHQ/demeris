@@ -28,6 +28,8 @@ export default defineComponent({
       refreshTime: 5000,
       gas_limit: 500000,
     });
+    await this.$store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: 600000 });
+    await this.$store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: 700000 });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
     });

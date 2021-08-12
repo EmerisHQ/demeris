@@ -23,6 +23,7 @@ export enum DemerisMutationTypes {
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
+  SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   INIT = 'INIT',
   SIGN_OUT = 'SIGN_OUT',
   SET_IN_PROGRESS = 'SET_IN_PROGRESS',
@@ -53,6 +54,7 @@ export type UserSession = {
 export type DemerisMutationArgs =
   | API.Balances
   | boolean
+  | number
   | API.Prices
   | API.FeeAddress
   | API.FeeAddresses

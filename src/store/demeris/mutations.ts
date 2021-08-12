@@ -199,6 +199,10 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
   },
 
+  [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
+    state.gas_limit = payload.value as number;
+  },
+
   // Internal module mutations
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
