@@ -119,6 +119,10 @@
         <hr class="border-t border-border" />
         <div class="py-2">
           <p class="py-3 px-6 -text-1 text-muted">{{ $t('components.settingsMenu.advancedSettings') }}</p>
+          <div class="flex items-center justify-between h-10 py-2 px-6 w-full">
+            <span>{{ $t('components.settingsMenu.setGasLimit') }}</span>
+            <AmountInput v-model="settings.gasLimit" max-decimals="0" placeholder="500000" class="w-1/2 text-right" />
+          </div>
           <button
             class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
             @click="confirmToggleSetting('allowCustomSlippage')"
@@ -262,6 +266,7 @@ import { computed, defineComponent, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -273,12 +278,13 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 export default defineComponent({
   name: 'SettingsModal',
   components: {
+    AmountInput,
+    AvatarBalance,
     Button,
     Icon,
     Modal,
     ModalButton,
     Switch,
-    AvatarBalance,
   },
   emits: ['disconnect'],
   setup(_, { emit }) {
@@ -303,6 +309,10 @@ export default defineComponent({
 
     const settings = reactive({
       theme,
+      gasLimit: computed({
+        get: () => store.getters['demeris/getGasLimit'],
+        set: (value: boolean) => updateSession('gasLimit', value),
+      }),
       allowCustomSlippage: computed({
         get: () => store.getters['demeris/allowCustomSlippage'],
         set: (value: boolean) => updateSession('customSlippage', value),
