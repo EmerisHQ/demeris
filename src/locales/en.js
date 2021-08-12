@@ -168,6 +168,7 @@ export const messages = {
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
+        noRevert: 'Once executed, transactions cannot be reverted. By continuing, you agree to our',
       },
       swap: {
         title: 'Swap',
