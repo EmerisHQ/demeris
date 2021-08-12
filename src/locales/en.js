@@ -18,6 +18,8 @@ export const messages = {
       get: 'Get',
       connectToEmeris: 'Connect to Emeris',
       tryTheDemo: 'Try the demo',
+      chainDown: '{displayChain} chain appears to be down. Your',
+      tickerUnavailable: 'on this chain may be temporarily unavailable.',
     },
     navbar: {
       portfolio: 'Portfolio',

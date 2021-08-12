@@ -1,21 +1,4 @@
 <template>
-  <div v-if="chainsDown.length > 0" class="bg-negative h-9 gap-x-2 -text-1 flex justify-center items-center">
-    <BanIcon />
-    <template v-if="chainsDown.length === 1">
-      <span class="font-bold"> {{ chainsDown[0] }} chain appears to be down. </span>
-      <span>Your assets on this chain may be unavailable for some time.</span>
-    </template>
-    <template v-else>
-      <span v-if="chainsDown.length === 2" class="font-bold">
-        {{ chainsDown[0] }} and {{ chainsDown[1] }} chains appear to be down.
-      </span>
-      <span v-else-if="chainsDown.length === 3" class="font-bold">
-        {{ chainsDown[0] }}, {{ chainsDown[1] }}, and {{ chainsDown[2] }} chains appear to be down.
-      </span>
-      <span v-else class="font-bold"> Several chains appear to be down. </span>
-      <span>Your assets on these chains may be unavailable for some time.</span>
-    </template>
-  </div>
   <header
     class="relative flex items-center justify-between xl:justify-center px-5 md:px-8 xl:px-32 h-16 sm:h-20"
     role="navigation"
@@ -122,7 +105,6 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 
-import BanIcon from '@/components/common/Icons/BanIcon.vue';
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
@@ -138,7 +120,6 @@ export default defineComponent({
     NavbarLogo,
     Navbar,
     ReceiveIcon,
-    BanIcon,
     SendIcon,
     Settings,
     IconButton,
@@ -159,19 +140,7 @@ export default defineComponent({
     });
     const settingsRef = ref(null);
 
-    const chainsDown = computed(() => {
-      let downedChains = [];
-      const chains = store.getters['demeris/getChains'] || [];
-      chains.map((c) => {
-        const chainStatus = store.getters['demeris/getChainStatus']({ chain_name: c.chain_name });
-        if (chainStatus.failed?.length > 0) {
-          downedChains.push(c.chain_name);
-        }
-      });
-      return downedChains;
-    });
-
-    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef, chainsDown };
+    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef };
   },
 });
 </script>
