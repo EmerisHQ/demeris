@@ -521,12 +521,19 @@ export default {
       }
 
       if (reserveBalances.value?.length) {
+        const amountA =
+          form.coinA.asset.base_denom == state.poolBaseDenoms[0]
+            ? reserveBalances.value[0].amount
+            : reserveBalances.value[1].amount;
+        const amountB =
+          form.coinB.asset.base_denom == state.poolBaseDenoms[1]
+            ? reserveBalances.value[1].amount
+            : reserveBalances.value[0].amount;
+        const precisionB =
+          form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
         return {
           coinA,
-          coinB: new BigNumber(reserveBalances.value[1].amount)
-            .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(precisions.value.coinB)
-            .toNumber(),
+          coinB: new BigNumber(amountB).dividedBy(amountA).shiftedBy(precisionB).toNumber(),
         };
       }
 
@@ -698,6 +705,8 @@ export default {
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
+          // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+          state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
 
           if (
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||

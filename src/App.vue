@@ -26,7 +26,7 @@ export default defineComponent({
       endpoint: 'https://dev.demeris.io/v1',
       hub_chain: 'cosmos-hub',
       refreshTime: 5000,
-      gas_limit: 400000,
+      gas_limit: 500000,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
