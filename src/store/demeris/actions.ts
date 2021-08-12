@@ -646,7 +646,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.GET_RELAYER_BALANCES]({ commit, getters }, { subscribe = false }) {
     try {
-      const response = await axios.get(getters['getEndpoint'] + '/relayer/balances');
+      const response = await axios.get(getters['getEndpoint'] + '/relayer/balance');
+
       commit(DemerisMutationTypes.SET_RELAYER_BALANCES, { value: response.data.balances });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_RELAYER_BALANCES, payload: {} });

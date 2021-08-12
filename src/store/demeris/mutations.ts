@@ -203,8 +203,11 @@ export const mutations: MutationTree<State> & Mutations = {
   },
 
   [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
+    const chains = Object.values(state.chains);
+
     for (const relayerBalance of payload.value as API.RelayerBalances) {
-      state.chains[relayerBalance.chain_name].relayerBalance = relayerBalance;
+      const chain_name = chains.find((x) => x.node_info.chain_id == relayerBalance.chain_name).chain_name;
+      state.chains[chain_name].relayerBalance = relayerBalance;
     }
   },
   // Internal module mutations
