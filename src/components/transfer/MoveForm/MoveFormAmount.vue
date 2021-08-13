@@ -556,6 +556,17 @@ export default defineComponent({
         } else {
           form.to_chain = undefined;
         }
+      } else {
+        const dexChain = store.getters['demeris/getDexChain'];
+        const nativeChain = nativeBalances.value.find(
+          (item) => item.base_denom === state.currentAsset?.base_denom,
+        )?.on_chain;
+
+        if (onChainNew === nativeChain && nativeChain !== dexChain) {
+          form.to_chain = dexChain;
+        } else if (onChainNew !== nativeChain) {
+          form.to_chain = nativeChain;
+        }
       }
     });
 
