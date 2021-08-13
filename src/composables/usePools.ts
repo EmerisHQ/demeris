@@ -46,9 +46,7 @@ export default function usePools() {
       await Promise.all(
         pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
       )
-    )
-      .join(' · ')
-      .toUpperCase();
+    ).join(' · ');
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
