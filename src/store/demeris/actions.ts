@@ -176,7 +176,10 @@ export interface Actions {
     dispatch,
   }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
-
+  [DemerisActionTypes.SET_GAS_LIMIT](
+    { commit }: ActionContext<State, RootState>,
+    { gasLimit }: { gasLimit: number },
+  ): Promise<void>;
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
@@ -275,6 +278,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
+  [GlobalDemerisActionTypes.SET_GAS_LIMIT](
+    ...args: Parameters<Actions[DemerisActionTypes.SET_GAS_LIMIT]>
+  ): ReturnType<Actions[DemerisActionTypes.SET_GAS_LIMIT]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -787,6 +793,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       const cause = e.response?.data?.cause || e.message;
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
+    }
+  },
+  async [DemerisActionTypes.SET_GAS_LIMIT]({ commit }, { gasLimit }: { gasLimit: number }) {
+    try {
+      commit('SET_GAS_LIMIT', { value: gasLimit });
+    } catch (e) {
+      throw new SpVuexError('Demeris:SetGasLimit', 'Could not set Gas Limit');
     }
   },
 

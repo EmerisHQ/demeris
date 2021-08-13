@@ -33,6 +33,7 @@ export enum DemerisActionTypes {
   SIGN_WITH_KEPLR = 'SIGN_WITH_KEPLR',
   SIGN_IN = 'SIGN_IN',
   SIGN_IN_WITH_WATCHER = 'SIGN_IN_WITH_WATCHER',
+  SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   // Internal module actions
   INIT = 'INIT',
   SIGN_OUT = 'SIGN_OUT',
@@ -74,6 +75,7 @@ export enum GlobalDemerisActionTypes {
   SIGN_WITH_KEPLR = 'demeris/SIGN_WITH_KEPLR',
   SIGN_IN = 'demeris/SIGN_IN',
   SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
+  SET_GAS_LIMIT = 'demeris/SET_GAS_LIMIT',
   // Internal module actions
   INIT = 'demeris/INIT',
   SIGN_OUT = 'demeris/SIGN_OUT',
