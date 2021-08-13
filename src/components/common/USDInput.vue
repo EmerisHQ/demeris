@@ -38,7 +38,7 @@ export default defineComponent({
 
         nextTick(() => {
           if (value.isFinite()) {
-            usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).decimalPlaces(2).toString();
+            usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).toFixed(2);
             return;
           }
 

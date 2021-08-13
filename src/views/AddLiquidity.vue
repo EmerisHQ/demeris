@@ -484,12 +484,12 @@ export default {
       }
 
       if (!form.coinA.amount || !form.coinB.amount) {
-        state.receiveAmount = undefined;
+        state.receiveAmount = '0';
         return;
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = (+result.toFixed(6)).toString();
+      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {
@@ -625,7 +625,7 @@ export default {
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const submitButtonName = computed(() => {
