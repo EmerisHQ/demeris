@@ -50,9 +50,11 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     return (
       store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.value.reserve_account_address) }) || []
-    ).map((x) => {
-      return parseCoins(x.amount)[0];
-    });
+    )
+      .map((item, i) => {
+        return { ...parseCoins(item.amount)[0], base_denom: reserveBaseDenoms.value[i] };
+      })
+      .sort((a, b) => (b.base_denom > a.base_denom ? -1 : 1));
   });
 
   const updateReserveBalances = async () => {
