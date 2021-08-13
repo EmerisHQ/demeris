@@ -56,6 +56,7 @@ export default defineComponent({
           chain_name: chain,
         },
       });
+
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
         subscribe: true,
         params: {

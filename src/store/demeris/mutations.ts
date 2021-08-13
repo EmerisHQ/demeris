@@ -202,6 +202,7 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
     state.relayer = payload.value as boolean;
   },
+
   [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
     const chains = Object.values(state.chains);
 
