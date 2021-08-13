@@ -187,7 +187,9 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-
+    const dexStatus = computed(() => {
+      return store.getters['demeris/getChainStatus']({ chain_name: store.getters['demeris/getDexChain'] });
+    });
     const gasPrice = ref('');
     watch(
       () => store.getters['demeris/getPreferredGasPriceLevel'],
@@ -549,6 +551,8 @@ export default defineComponent({
             return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
+          } else if (!dexStatus.value) {
+            return 'Swap unavailable';
           } else {
             if (data.isPriceChanged) {
               return 'Update prices';
@@ -567,7 +571,11 @@ export default defineComponent({
         if (data.buttonName === 'Swap limit reached') {
           return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
         } else {
-          return '';
+          if (!dexStatus.value) {
+            return 'Cosmos Hub appears to be down, swap is temporarily unavailable';
+          } else {
+            return '';
+          }
         }
       }),
       buttonStatus: computed(() => {
@@ -659,7 +667,8 @@ export default defineComponent({
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
           !isSignedIn.value ||
-          data.selectedPoolData === null
+          data.selectedPoolData === null ||
+          !dexStatus.value
         );
       }),
       isChildModalOpen: false,
@@ -1014,6 +1023,7 @@ export default defineComponent({
       availablePaySide,
       otherAssetsToPay,
       otherAssetsToReceive,
+      dexStatus,
     };
   },
 });

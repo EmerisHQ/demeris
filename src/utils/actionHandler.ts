@@ -1530,7 +1530,119 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
 
   return validPools;
 }
-
+export function chainStatusForSteps(steps: Actions.Step[]) {
+  let allClear = true;
+  let relayerStatus = true;
+  const failedChains = [];
+  for (const step of steps) {
+    for (const stepTx of step.transactions) {
+      if (stepTx.name == 'transfer') {
+        const chain_name = (stepTx.data as Actions.TransferData).chain_name;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'ibc_backward') {
+        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (!failedChains.includes(chain_name)) {
+            failedChains.push(chain_name);
+          }
+        }
+        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+          allClear = false;
+          if (failedChains.includes(dest_chain_name)) {
+            continue;
+          } else {
+            failedChains.push(dest_chain_name);
+          }
+        }
+        if (
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+        ) {
+          relayerStatus = false;
+        }
+      }
+      if (stepTx.name == 'ibc_forward') {
+        const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
+        const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (!failedChains.includes(chain_name)) {
+            failedChains.push(chain_name);
+          }
+        }
+        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+          allClear = false;
+          if (failedChains.includes(dest_chain_name)) {
+            continue;
+          } else {
+            failedChains.push(dest_chain_name);
+          }
+        }
+        if (
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+        ) {
+          relayerStatus = false;
+        }
+      }
+      if (stepTx.name == 'addliquidity') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'withdrawliquidity') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'createpool') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'swap') {
+        const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+    }
+  }
+  return { status: allClear, failed: failedChains, relayer: relayerStatus };
+}
 export async function validateStepFeeBalances(
   step: Actions.Step,
   balances: Balances,
