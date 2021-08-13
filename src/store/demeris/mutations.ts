@@ -177,6 +177,7 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name] = {
       ...state.chains[(payload.params as API.ChainReq).chain_name],
       ...(payload.value as API.Chain),
+      relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
     };
   },
   [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
