@@ -383,7 +383,7 @@ export default {
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
       total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const currencyAmountHandler = () => {
