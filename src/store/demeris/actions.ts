@@ -104,6 +104,14 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
   ): Promise<Record<string, ChainData>>;
+  [DemerisActionTypes.GET_RELAYER_STATUS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionParams,
+  ): Promise<boolean>;
+  [DemerisActionTypes.GET_RELAYER_BALANCES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionParams,
+  ): Promise<API.RelayerBalances>;
   [DemerisActionTypes.GET_PRICES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -219,6 +227,12 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_CHAINS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_CHAINS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_CHAINS]>;
+  [GlobalDemerisActionTypes.GET_RELAYER_STATUS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_RELAYER_STATUS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_RELAYER_STATUS]>;
+  [GlobalDemerisActionTypes.GET_RELAYER_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_RELAYER_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_RELAYER_BALANCES]>;
   [GlobalDemerisActionTypes.GET_PRICES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_PRICES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_PRICES]>;
@@ -618,6 +632,31 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getChains'];
   },
 
+  async [DemerisActionTypes.GET_RELAYER_STATUS]({ commit, getters }, { subscribe = false }) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/relayer/status');
+      commit(DemerisMutationTypes.SET_RELAYER_STATUS, { value: response.data.running });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_RELAYER_STATUS, payload: {} });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:getRelayerStatus', 'Could not perform API query.');
+    }
+    return getters['getRelayerStatus'];
+  },
+  async [DemerisActionTypes.GET_RELAYER_BALANCES]({ commit, getters }, { subscribe = false }) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/relayer/balance');
+
+      commit(DemerisMutationTypes.SET_RELAYER_BALANCES, { value: response.data.balances });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_RELAYER_BALANCES, payload: {} });
+      }
+      return response.data.balances;
+    } catch (e) {
+      throw new SpVuexError('Demeris:getRelayerBalances', 'Could not perform API query.');
+    }
+  },
   // Chain-specific endpoint actions
 
   async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, cache = true, params }) {

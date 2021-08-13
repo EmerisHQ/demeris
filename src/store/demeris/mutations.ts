@@ -177,6 +177,7 @@ export const mutations: MutationTree<State> & Mutations = {
     state.chains[(payload.params as API.ChainReq).chain_name] = {
       ...state.chains[(payload.params as API.ChainReq).chain_name],
       ...(payload.value as API.Chain),
+      relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
     };
   },
   [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
@@ -198,7 +199,18 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
     state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
   },
+  [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
+    state.relayer = payload.value as boolean;
+  },
 
+  [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
+    const chains = Object.values(state.chains);
+
+    for (const relayerBalance of payload.value as API.RelayerBalances) {
+      const chain_name = chains.find((x) => x.node_info.chain_id == relayerBalance.chain_name).chain_name;
+      state.chains[chain_name].relayerBalance = relayerBalance;
+    }
+  },
   // Internal module mutations
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {

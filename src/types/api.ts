@@ -171,7 +171,20 @@ export type ChainResponse = {
 export type ChainStatusResponse = {
   online: boolean;
 };
+export type RelayerStatusResponse = {
+  running: boolean;
+};
 
+export type RelayerBalance = {
+  address: string;
+  chain_name: string;
+  enough_balance: boolean;
+};
+export type RelayerBalances = RelayerBalance[];
+
+export type RelayerBalancesResponse = {
+  balances: RelayerBalances;
+};
 // /chain/:chain/denom/verify_trace/:hash endpoint data types
 
 export type Trace = {
