@@ -30,7 +30,12 @@
       </thead>
 
       <tbody>
-        <tr v-for="pool of filteredPools" :key="pool.id" class="group cursor-pointer" @click="rowClickHandler(pool)">
+        <tr
+          v-for="pool of orderPools(filteredPools)"
+          :key="pool.id"
+          class="group cursor-pointer"
+          @click="rowClickHandler(pool)"
+        >
           <td class="py-5 flex items-center group-hover:bg-fg transition">
             <div class="inline-flex items-center mr-4">
               <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="w-8 h-8 rounded-full bg-fg z-1" />
@@ -40,7 +45,9 @@
               {{ pool.displayName }}
             </span>
           </td>
-          <td class="text-right group-hover:bg-fg transition"><TotalLiquidityPrice :pool="pool" /></td>
+          <td class="text-right group-hover:bg-fg transition">
+            <TotalLiquidityPrice :pool="pool" />
+          </td>
           <!--<td class="text-right">10%</td>//-->
           <td class="text-right group-hover:bg-fg transition"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
         </tr>
@@ -52,6 +59,7 @@
 <script lang="ts">
 import { ref } from '@vue/reactivity';
 import { computed, PropType, watch } from '@vue/runtime-core';
+import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -62,6 +70,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default {
   name: 'PoolsTable',
@@ -96,9 +105,39 @@ export default {
       { immediate: true },
     );
 
+    const poolsWithTotalLiquidityPrice = computed(() => {
+      let pools = renderedPools.value;
+      pools.map((p) => {
+        let tlp = getTotalLiquidityPrice(p);
+        if (tlp) {
+          p.totalLiquidityPrice = tlp;
+        }
+        return p;
+      });
+      return pools;
+    });
+
+    const orderPools = (unorderedPools) => {
+      let pools = [];
+      let lpPools = [];
+      unorderedPools.map((x) => {
+        if (x.displayName?.substring(0, 7) === 'Gravity') {
+          lpPools.push(x);
+        } else {
+          pools.push(x);
+        }
+      });
+      pools = orderBy(pools, ['totalLiquidityPrice', 'displayName'], ['desc', 'asc']);
+      lpPools = orderBy(lpPools, ['totalLiquidityPrice'], ['desc']);
+      lpPools = lpPools.sort((a, b) =>
+        a.displayName.localeCompare(b.displayName, 0, { numeric: true, sensitivity: 'base' }),
+      );
+      return pools.concat(lpPools);
+    };
+
     const filteredPools = computed(() => {
       const query = keyword.value.toLowerCase();
-      return renderedPools.value.filter(
+      return poolsWithTotalLiquidityPrice.value.filter(
         (pool) =>
           pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
       );
@@ -118,6 +157,8 @@ export default {
       rowClickHandler,
       openAddLiqudityPage,
       formatPoolName,
+      orderPools,
+      poolsWithTotalLiquidityPrice,
     };
   },
 };

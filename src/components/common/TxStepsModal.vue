@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
@@ -70,8 +70,9 @@
           </div>
 
           <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
-            Once executed, transactions cannot be reverted. By continuing, you agree to our
-            <a class="underline" href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
+            {{ $t('components.txHandlingModal.noRevert') }}
+            <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">{{ $t('components.settingsMenu.tos') }}.
+            </a>
           </div>
 
           <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
@@ -578,7 +579,7 @@ export default defineComponent({
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '400000',
+                gas: '500000',
               };
               let tx;
               try {

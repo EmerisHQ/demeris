@@ -37,7 +37,7 @@ export function getDefaultState(): State {
   return {
     endpoint: '',
     hub_chain: 'cosmoshub-4',
-    gas_limit: 400000,
+    gas_limit: 500000,
     balances: {},
     stakingBalances: {},
     numbers: {},
@@ -48,7 +48,7 @@ export function getDefaultState(): State {
       Fiats: [],
       Tokens: [],
     },
-    relayer: true,
+    relayer: false,
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),

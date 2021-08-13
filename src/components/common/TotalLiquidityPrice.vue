@@ -1,14 +1,12 @@
 <template>
-  {{ hasPrices ? toUSD(totalLiquidityPrice) : '-' }}
+  {{ totalLiquidityPrice ? toUSD(totalLiquidityPrice) : '-' }}
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent, PropType } from 'vue';
 
-import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -25,9 +23,6 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pool, reserveBalances } = usePool((props.pool as Pool).id);
-    const denoms = ref(pool.value.reserve_coin_denoms);
-    const store = useStore();
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -39,49 +34,10 @@ export default defineComponent({
       });
       return formatter.format(value);
     };
-    const { getReserveBaseDenoms } = usePools();
 
-    const totalLiquidityPrice = ref(0);
+    const totalLiquidityPrice = getTotalLiquidityPrice(props.pool);
 
-    const hasPrices = computed(() => {
-      const priceA = store.getters['demeris/getPrice']({ denom: denoms.value[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: denoms.value[1] });
-
-      if (!priceA || !priceB) {
-        return false;
-      }
-
-      return true;
-    });
-
-    const updateTotalLiquidityPrice = async () => {
-      if (!pool.value) {
-        return;
-      }
-
-      const reserveDenoms = await getReserveBaseDenoms(pool.value);
-      denoms.value = reserveDenoms;
-
-      let total = 0;
-
-      for (const [index, denom] of reserveDenoms.entries()) {
-        const price = store.getters['demeris/getPrice']({ denom });
-        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-
-        const amount = reserveBalances.value[index].amount;
-        if (!amount) {
-          continue;
-        }
-
-        total += (amount / Math.pow(10, precision)) * price;
-      }
-
-      totalLiquidityPrice.value = total;
-    };
-
-    watch(reserveBalances, updateTotalLiquidityPrice);
-
-    return { hasPrices, totalLiquidityPrice, toUSD };
+    return { totalLiquidityPrice, toUSD };
   },
 });
 </script>

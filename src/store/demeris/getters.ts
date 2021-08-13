@@ -79,6 +79,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
+      .filter((balance) => state.keplr.keyHashes.indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
@@ -102,6 +103,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
   },
   getRelayerChainStatus: (state) => (params) => {
+    console.log(state);
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer;
   },
   isDemoAccount: (state) => {
@@ -156,6 +158,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
         }
       }
     },
+  getChainFromChainId: (state) => (chain_id) => {
+    return Object.values(state.chains).find((x) => x.node_info.chain_id == chain_id).chain_name;
+  },
   getDisplayChain:
     (state) =>
     ({ name }) => {

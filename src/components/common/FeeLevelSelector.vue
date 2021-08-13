@@ -20,7 +20,7 @@
     <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
-        {{ formatter.format(fees[gasPriceLevel] * txCount) }}
+        {{ formatAmount(fees[gasPriceLevel] * txCount) }}
       </div>
     </div>
 
@@ -47,7 +47,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatter.format(fees[GasPriceLevel.LOW]) }}
+          {{ formatAmount(fees[GasPriceLevel.LOW]) }}
         </div>
       </button>
       <button
@@ -72,7 +72,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatter.format(fees[GasPriceLevel.AVERAGE]) }}
+          {{ formatAmount(fees[GasPriceLevel.AVERAGE]) }}
         </div>
       </button>
       <button
@@ -97,7 +97,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatter.format(fees[GasPriceLevel.HIGH]) }}
+          {{ formatAmount(fees[GasPriceLevel.HIGH]) }}
         </div>
       </button>
     </div>
@@ -125,6 +125,7 @@
   </div>
 </template>
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -132,7 +133,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
-import { feeForSteps, getDisplayName } from '@/utils/actionHandler';
+import { feeForSteps, getTicker } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -185,7 +186,13 @@ export default defineComponent({
               name: denom,
             }) ?? '6';
           const price = store.getters['demeris/getPrice']({ denom });
-          value = value + (price * parseInt(lowFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+          value =
+            value +
+            new BigNumber(lowFee.value[chain_name][denom])
+              .multipliedBy(price)
+              .shiftedBy(-precision)
+              .decimalPlaces(precision)
+              .toNumber();
         }
       }
       return value;
@@ -200,7 +207,13 @@ export default defineComponent({
               name: denom,
             }) ?? '6';
           const price = store.getters['demeris/getPrice']({ denom });
-          value = value + (price * parseInt(avgFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+          value =
+            value +
+            new BigNumber(avgFee.value[chain_name][denom])
+              .multipliedBy(price)
+              .shiftedBy(-precision)
+              .decimalPlaces(precision)
+              .toNumber();
         }
       }
       return value;
@@ -214,7 +227,13 @@ export default defineComponent({
               name: denom,
             }) ?? '6';
           const price = store.getters['demeris/getPrice']({ denom });
-          value = value + (price * parseInt(highFee.value[chain_name][denom])) / Math.pow(10, parseInt(precision));
+          value =
+            value +
+            new BigNumber(highFee.value[chain_name][denom])
+              .multipliedBy(price)
+              .shiftedBy(-precision)
+              .decimalPlaces(precision)
+              .toNumber();
         }
       }
       return value;
@@ -247,14 +266,11 @@ export default defineComponent({
       () => props.steps,
       async () => {
         if (hasPoolCoinToSwap.value) {
-          poolCoinDisplayDenoms.value[0] = await getDisplayName(
+          poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
             store.getters['demeris/getDexChain'],
           );
-          poolCoinDisplayDenoms.value[1] = await getDisplayName(
-            swapTx.value.to.denom,
-            store.getters['demeris/getDexChain'],
-          );
+          poolCoinDisplayDenoms.value[1] = await getTicker(swapTx.value.to.denom, store.getters['demeris/getDexChain']);
         }
       },
       { immediate: true },
@@ -306,24 +322,24 @@ export default defineComponent({
 
     const swapFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
-        return `${swapDollarFee.value ? formatter.value.format(swapDollarFee.value) + ' +' : ''} ${
+        return `${swapDollarFee.value ? formatAmount(swapDollarFee.value) + ' +' : ''} ${
           poolCoinSwapFees.value[0] ? `${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]} + ` : ''
         } ${poolCoinSwapFees.value[1] ? `${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''}`;
       } else {
-        return formatter.value.format(swapDollarFee.value);
+        return formatAmount(swapDollarFee.value);
       }
     });
 
     const totalFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
         return (
-          formatter.value.format(swapDollarFee.value + fees.value[props.gasPriceLevel]) +
+          formatAmount(swapDollarFee.value + fees.value[props.gasPriceLevel]) +
           `${poolCoinSwapFees.value[0] ? ` + ${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]}` : ''} ${
             poolCoinSwapFees.value[1] ? ` + ${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''
           }`
         );
       } else {
-        return formatter.value.format(swapDollarFee.value + fees.value[props.gasPriceLevel] * txCount.value);
+        return formatAmount(swapDollarFee.value + fees.value[props.gasPriceLevel] * txCount.value);
       }
     });
 
@@ -349,29 +365,28 @@ export default defineComponent({
       emit('update:fees', feeMap[props.gasPriceLevel]);
     });
 
-    const formatter = computed(() => {
-      let precisions = [];
-      for (const chain_name in lowFee.value) {
-        for (const denom in lowFee.value[chain_name]) {
-          precisions.push(store.getters['demeris/getDenomPrecision']({ name: denom }));
-        }
-      }
+    const formatAmount = (value: number | string) => {
+      const bgValue = new BigNumber(value);
+      let maximumFractionDigits = 2;
 
-      const maxPrecision = Math.max(...precisions.filter(Boolean));
+      // This will prevent formatting smaller values like 0.0001 to 0.00
+      if (bgValue.decimalPlaces(2).isZero()) {
+        maximumFractionDigits = bgValue.decimalPlaces();
+      }
 
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-        maximumFractionDigits: maxPrecision,
+        maximumFractionDigits,
         // These options are needed to round to whole numbers if that's what you want.
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-    });
+      }).format(bgValue.toNumber());
+    };
 
     return {
       ...toRefs(data),
-      formatter,
+      formatAmount,
       txCount,
       fees,
       swapFee,
