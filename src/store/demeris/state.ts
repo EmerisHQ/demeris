@@ -48,7 +48,7 @@ export function getDefaultState(): State {
       Fiats: [],
       Tokens: [],
     },
-    relayer: true,
+    relayer: false,
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
