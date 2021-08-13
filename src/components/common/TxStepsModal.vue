@@ -413,7 +413,7 @@ export default defineComponent({
               }
             });
             const fee =
-              parseInt((stepTx.data as IBCForwardsData).chain_fee.amount[props.gasPriceLevel]) *
+              parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[props.gasPriceLevel]) *
               store.getters['demeris/getGasLimit'];
             const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
             if (baseDenomBalance) {

@@ -1943,6 +1943,7 @@ export async function validateStepsFeeBalances(
   for (const step of steps) {
     const fees = allFees[i];
     for (const stepTx of step.transactions) {
+      console.log(stepTx);
       if (stepTx.name == 'addliquidity') {
         const data = stepTx.data as Actions.AddLiquidityData;
         const balanceA = balances.find((x) => {
@@ -2087,6 +2088,7 @@ export async function validateStepsFeeBalances(
                 additionalFee =
                   parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
               }
+              console.log(additionalFee);
               if (rcptBalance) {
                 const newIbcAmount =
                   parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount) + additionalFee;
@@ -2102,11 +2104,13 @@ export async function validateStepsFeeBalances(
                   base_denom: ibcBalance.base_denom,
                   verified: ibcBalance.verified,
                   on_chain: data.to_chain,
-                  amount: data.amount.amount + newDenom,
+                  amount: parseInt(data.amount.amount) + additionalFee + newDenom,
                   ibc: ibcDetails,
                 };
                 balances.push(newIbcBalance);
+                console.log(newIbcBalance);
               }
+              console.log(rcptBalance);
             }
           } else {
             throw new Error('Insufficient balance: ' + data.amount.denom);
@@ -2283,8 +2287,10 @@ export async function validateStepsFeeBalances(
         if (feeBalance) {
           const newAmount = parseInt(parseCoins(feeBalance.amount)[0].amount) - fees[chain_name][denom];
           if (newAmount >= 0) {
+            console.log(feeBalance);
             feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
           } else {
+            console.log(feeBalance);
             feeWarning.feeWarning = false;
             feeWarning.missingFees.push({
               amount: '' + fees[chain_name][denom],
@@ -2293,6 +2299,7 @@ export async function validateStepsFeeBalances(
             });
           }
         } else {
+          console.log(feeBalance);
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + fees[chain_name][denom],
