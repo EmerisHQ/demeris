@@ -562,26 +562,30 @@ export default defineComponent({
     );
 
     const { on_chain: onChain, to_chain: toChain } = toRefs(form);
-    watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
-      if (onChainNew === toChainNew) {
-        if (onChainOld !== onChainNew) {
-          form.to_chain = onChainOld;
-        } else {
-          form.to_chain = undefined;
-        }
-      } else if (state.chainsModalSource === 'from') {
-        const dexChain = store.getters['demeris/getDexChain'];
-        const nativeChain = nativeBalances.value.find(
-          (item) => item.base_denom === state.currentAsset?.base_denom,
-        )?.on_chain;
+    watch(
+      [onChain, toChain],
+      ([onChainNew, toChainNew], [onChainOld]) => {
+        if (onChainNew === toChainNew) {
+          if (onChainOld !== onChainNew) {
+            form.to_chain = onChainOld;
+          } else {
+            form.to_chain = undefined;
+          }
+        } else if (state.chainsModalSource === 'from') {
+          const dexChain = store.getters['demeris/getDexChain'];
+          const nativeChain = nativeBalances.value.find(
+            (item) => item.base_denom === state.currentAsset?.base_denom,
+          )?.on_chain;
 
-        if (onChainNew === nativeChain && nativeChain !== dexChain) {
-          form.to_chain = dexChain;
-        } else if (onChainNew !== nativeChain) {
-          form.to_chain = nativeChain;
+          if (onChainNew === nativeChain && nativeChain !== dexChain) {
+            form.to_chain = dexChain;
+          } else if (onChainNew !== nativeChain) {
+            form.to_chain = nativeChain;
+          }
         }
-      }
-    });
+      },
+      { immediate: true },
+    );
 
     return {
       availableBalances,

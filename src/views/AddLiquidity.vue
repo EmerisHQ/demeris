@@ -489,7 +489,7 @@ export default {
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = (+result.toFixed(6)).toString();
+      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {

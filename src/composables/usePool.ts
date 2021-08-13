@@ -50,11 +50,9 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     return (
       store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.value.reserve_account_address) }) || []
-    )
-      .map((item, i) => {
-        return { ...parseCoins(item.amount)[0], base_denom: reserveBaseDenoms.value[i] };
-      })
-      .sort((a, b) => (b.base_denom > a.base_denom ? -1 : 1));
+    ).map((item, i) => {
+      return { ...parseCoins(item.amount)[0], base_denom: reserveBaseDenoms.value[i] };
+    });
   });
 
   const updateReserveBalances = async () => {
@@ -70,9 +68,11 @@ export default function usePool(id?: string | ComputedRef<string>) {
       return 1;
     }
 
+    const sortedBalances = [...reserveBalances.value].sort((a, b) => (b.base_denom > a.base_denom ? -1 : 1));
+
     const poolCoinAmount = Math.min(
-      (totalSupply.value * amountA) / reserveBalances.value[0].amount,
-      (totalSupply.value * amountB) / reserveBalances.value[1].amount,
+      (totalSupply.value * amountA) / sortedBalances[0].amount,
+      (totalSupply.value * amountB) / sortedBalances[1].amount,
     );
 
     return poolCoinAmount;
