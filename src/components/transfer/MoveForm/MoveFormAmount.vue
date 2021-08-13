@@ -533,15 +533,26 @@ export default defineComponent({
       () => props.balances,
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          const denom = form.balance.denom || 'uatom';
+          let asset;
 
-          let asset = props.balances.find((item) => {
-            const balance = parseCoins(item.amount)[0];
-            return balance.denom === denom;
-          });
+          if (form.balance.denom) {
+            asset = props.balances.find((item) => {
+              const balance = parseCoins(item.amount)[0];
+              return balance.denom === form.balance.denom;
+            });
+          }
 
           if (!asset) {
-            asset = props.balances?.[0];
+            asset = props.balances
+              .map((item) => {
+                const amount = parseCoins(item.amount)[0].amount;
+                const denom = item.base_denom;
+                const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) ?? 6;
+                const price = store.getters['demeris/getPrice']({ denom });
+                const result = new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).toNumber();
+                return { ...item, price: result };
+              })
+              .sort((a, b) => b.price - a.price)[0];
           }
 
           setCurrentAsset(asset);
