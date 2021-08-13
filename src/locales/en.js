@@ -127,6 +127,10 @@ export const messages = {
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
+      txStepsModal: {
+        chainDown: 'appears to be down, action is temporarily unavailable.',
+        chainsDown: 'appear to be down, action is temporarily unavailable.',
+      },
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
         signTx: 'Sign transaction',
@@ -140,6 +144,12 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
+        chainDown: 'Transaction failed, the chain is unavailable',
+        chainDownDesc:
+          'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
+        relayerDown: 'Transaction failed, the relayer is unavailable',
+        relayerDownDesc:
+          'Unfortunately, the relayer is unavailable. We are not able to do the transaction, please try later.',
         revertTx: 'Reverting transfer...',
         contactSupport: 'Contact support ↗️',
         backToPortfolio: 'Back to portfolio',
@@ -168,6 +178,7 @@ export const messages = {
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
+        noRevert: 'Once executed, transactions cannot be reverted. By continuing, you agree to our',
       },
       swap: {
         title: 'Swap',

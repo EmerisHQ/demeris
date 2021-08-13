@@ -96,6 +96,16 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getSlippagePerc: (state) => {
     return state._Session.slippagePerc;
   },
+  getRelayerStatus: (state) => {
+    return state.relayer;
+  },
+  getRelayerBalance: (state) => (params) => {
+    return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
+  },
+  getRelayerChainStatus: (state) => (params) => {
+    console.log(state);
+    return state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer;
+  },
   isDemoAccount: (state) => {
     return state._Session.isDemoAccount;
   },
@@ -148,6 +158,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
         }
       }
     },
+  getChainFromChainId: (state) => (chain_id) => {
+    return Object.values(state.chains).find((x) => x.node_info.chain_id == chain_id).chain_name;
+  },
   getDisplayChain:
     (state) =>
     ({ name }) => {

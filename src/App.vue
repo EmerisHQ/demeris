@@ -42,7 +42,13 @@ export default defineComponent({
     } catch {
       //
     }
-
+    try {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+        subscribe: true,
+      });
+    } catch {
+      //
+    }
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
         subscribe: true,
@@ -50,6 +56,21 @@ export default defineComponent({
           chain_name: chain,
         },
       });
+
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+    }
+
+    try {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+        subscribe: true,
+      });
+    } catch {
+      //
     }
     await this.$store.dispatch('common/env/config', {
       apiNode: 'https://dev.demeris.io/v1/liquidity',

@@ -24,6 +24,8 @@ export enum DemerisMutationTypes {
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
   SET_GAS_LIMIT = 'SET_GAS_LIMIT',
+  SET_RELAYER_STATUS = 'SET_RELAYER_STATUS',
+  SET_RELAYER_BALANCES = 'SET_RELAYER_BALANCES',
   INIT = 'INIT',
   SIGN_OUT = 'SIGN_OUT',
   SET_IN_PROGRESS = 'SET_IN_PROGRESS',
@@ -68,6 +70,7 @@ export type DemerisMutationArgs =
   | API.Chains
   | API.Chain
   | API.Ticket
+  | API.RelayerBalances
   | API.VerifiedDenoms
   | DemerisConfig
   | KeplrKeyData

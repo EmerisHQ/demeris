@@ -70,8 +70,9 @@
           </div>
 
           <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
-            Once executed, transactions cannot be reverted. By continuing, you agree to our
-            <a class="underline" href="https://emeris.com/terms" rel="noopener noreferrer">Terms of Service</a>.
+            {{ $t('components.txHandlingModal.noRevert') }}
+            <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">{{ $t('components.settingsMenu.tos') }}.
+            </a>
           </div>
 
           <div class="py-6 max-w-sm mx-auto" :class="{ 'px-6': variant === 'widget' }">
@@ -79,6 +80,36 @@
             <Button v-else :name="'Connect Wallet'" variant="primary" :click-function="confirm" />
           </div>
         </div>
+        <Modal
+          v-if="showChainError"
+          class="text-center"
+          :variant="'dialog'"
+          :fullscreen="variant === 'default'"
+          @close="goPortfolio"
+        >
+          <div class="flex items-center justify-center my-6">
+            <Icon name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
+          </div>
+          <template v-if="!chainsStatus.status">
+            <div class="text-1 font-bold mb-4">
+              {{ $t('components.txHandlingModal.chainDown') }}
+            </div>
+            <div class="text-muted leading-copy mb-8">
+              {{ $t('components.txHandlingModal.chainDownDesc') }}
+            </div>
+          </template>
+          <template v-else>
+            <div class="text-1 font-bold mb-4">
+              {{ $t('components.txHandlingModal.relayerDown') }}
+            </div>
+            <div class="text-muted leading-copy mb-8">
+              {{ $t('components.txHandlingModal.relayerDownDesc') }}
+            </div>
+          </template>
+          <template #buttons>
+            <ModalButton :name="$t('generic_cta.understand')" :click-function="goPortfolio" />
+          </template>
+        </Modal>
         <Modal
           v-if="feeWarning.feeWarning"
           class="text-center"
@@ -220,8 +251,9 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
-import { RouteLocationRaw, useRouter } from 'vue-router';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -230,6 +262,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
@@ -244,6 +277,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
 import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
+  chainStatusForSteps,
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
@@ -264,6 +298,7 @@ export default defineComponent({
     ModalButton,
     TxHandlingModal,
     Modal,
+    Icon,
     CircleSymbol,
     ConnectWalletModal,
     AmountDisplay,
@@ -294,6 +329,8 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
+
+    const { t } = useI18n({ useScope: 'global' });
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
@@ -314,6 +351,24 @@ export default defineComponent({
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
     });
+    const chainsStatus = computed(() => {
+      return chainStatusForSteps(props.data);
+    });
+    const failedChainsText = computed(() => {
+      const failed = chainsStatus.value.failed
+        .map((x) =>
+          store.getters['demeris/getDisplayChain']({
+            name: x,
+          }),
+        )
+        .join(',');
+      if (chainsStatus.value.failed.length > 1) {
+        return failed + ' ' + t('components.txStepsModal.chainsDown');
+      } else {
+        return failed + ' ' + t('components.txStepsModal.chainDown');
+      }
+    });
+
     const goMoon = () => {
       if (isSignedIn.value) {
         window.open(mpUrl.value, '', 'height=480,width=320');
@@ -322,6 +377,14 @@ export default defineComponent({
       }
     };
     const router = useRouter();
+    const route = useRoute();
+    const goPortfolio = () => {
+      if (route.path == '/') {
+        emit('reset');
+      } else {
+        router.push('/');
+      }
+    };
     const goBack = () => {
       if (props.backRoute) {
         router.push(props.backRoute);
@@ -366,6 +429,7 @@ export default defineComponent({
       },
     );
     const txToResolve = ref({});
+    const showChainError = ref(false);
     const isTxHandlingModalOpen = ref(false);
     const toggleTxHandlingModal = () => {
       isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
@@ -469,6 +533,10 @@ export default defineComponent({
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
       } else {
+        if (!chainsStatus.value.status || !chainsStatus.value.relayer) {
+          showChainError.value = true;
+          return;
+        }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
             const isLastTransaction = i === currentData.value.data.transactions.length - 1;
@@ -488,6 +556,7 @@ export default defineComponent({
                 hasMore.value = false;
               }
               isTxHandlingModalOpen.value = true;
+              await nextTick();
               txstatus.value = 'keplr-sign';
               let txToResolveResolver;
               const txToResolvePromise = {
@@ -749,6 +818,7 @@ export default defineComponent({
       toggleTxHandlingModal,
       currentData,
       goBack,
+      goPortfolio,
       isTxHandlingModalOpen,
       nextTx,
       transaction,
@@ -760,6 +830,9 @@ export default defineComponent({
       errorDetails,
       acceptedWarning,
       goMoon,
+      chainsStatus,
+      failedChainsText,
+      showChainError,
       isDemoAccount,
     };
   },
