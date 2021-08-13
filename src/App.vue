@@ -119,6 +119,12 @@ export default defineComponent({
     if (!isReturnUser.value) {
       router.push('/welcome');
     }
+
+    // get gas limit from localStorage
+    const gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
+    if (gasLimit) {
+      this.$store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit });
+    }
   },
 });
 </script>

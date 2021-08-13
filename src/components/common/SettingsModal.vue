@@ -121,7 +121,7 @@
           <p class="py-3 px-6 -text-1 text-muted">{{ $t('components.settingsMenu.advancedSettings') }}</p>
           <div class="flex items-center justify-between h-10 py-2 px-6 w-full">
             <span>{{ $t('components.settingsMenu.setGasLimit') }}</span>
-            <AmountInput v-model="settings.gasLimit" max-decimals="0" class="w-1/2 text-right" />
+            <AmountInput v-model="settings.gasLimit" :max-decimals="0" class="w-1/2 text-right" />
           </div>
           <button
             class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
@@ -311,7 +311,10 @@ export default defineComponent({
       theme,
       gasLimit: computed({
         get: () => store.getters['demeris/getGasLimit'],
-        set: (value: boolean) => updateSession('gasLimit', value),
+        set: (value: number) => {
+          store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: value });
+          window.localStorage.setItem('gasLimit', value.toString());
+        },
       }),
       allowCustomSlippage: computed({
         get: () => store.getters['demeris/allowCustomSlippage'],
