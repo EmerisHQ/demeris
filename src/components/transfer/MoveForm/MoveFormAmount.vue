@@ -474,7 +474,7 @@ export default defineComponent({
       state.isDenomModalOpen = !state.isDenomModalOpen;
     };
 
-    const toggleChainsModal = (asset?: Record<string, unknown>, source = 'from') => {
+    const toggleChainsModal = (asset?: Record<string, unknown>, source = state.chainsModalSource) => {
       if (asset) {
         if (state.chainsModalSource === 'to') {
           form.to_chain = asset.on_chain as string;
@@ -533,13 +533,15 @@ export default defineComponent({
       () => props.balances,
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          let asset = props.balances[0];
+          const denom = form.balance.denom || 'uatom';
 
-          if (form.balance.denom) {
-            asset = props.balances.find((item) => {
-              const balance = parseCoins(item.amount)[0];
-              return balance.denom === form.balance.denom;
-            });
+          let asset = props.balances.find((item) => {
+            const balance = parseCoins(item.amount)[0];
+            return balance.denom === denom;
+          });
+
+          if (!asset) {
+            asset = props.balances?.[0];
           }
 
           setCurrentAsset(asset);
@@ -556,7 +558,7 @@ export default defineComponent({
         } else {
           form.to_chain = undefined;
         }
-      } else {
+      } else if (state.chainsModalSource === 'from') {
         const dexChain = store.getters['demeris/getDexChain'];
         const nativeChain = nativeBalances.value.find(
           (item) => item.base_denom === state.currentAsset?.base_denom,
