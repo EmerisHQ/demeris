@@ -956,18 +956,15 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
+        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
         const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
         const precisionDiff = +fromPrecision - +toPrecision;
         let equalizer = 1;
-        if (precisionDiff > 0) {
-          equalizer = 10 ** precisionDiff;
-        } else if (precisionDiff < 0) {
-          equalizer = 10 ** precisionDiff;
+        if (precisionDiff !== 0) {
+          equalizer = 10 ** Math.abs(precisionDiff);
         }
-        console.log('equlizer', equalizer);
 
-        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
@@ -975,22 +972,28 @@ export default defineComponent({
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
         if (e.includes('Pay')) {
-          data.receiveCoinAmount =
-            getReceiveCoinAmount(
-              { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-              balanceA,
-              balanceB,
-            ) * equalizer;
+          data.receiveCoinAmount = parseFloat(
+            (
+              getReceiveCoinAmount(
+                { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+                balanceA,
+                balanceB,
+              ) / (isReverse ? equalizer : 1)
+            ).toFixed(4),
+          );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount =
-            getPayCoinAmount(
-              { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-              balanceB,
-              balanceA,
-            ) / equalizer;
+          data.payCoinAmount = parseFloat(
+            (
+              getPayCoinAmount(
+                { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+                balanceB,
+                balanceA,
+              ) * (isReverse ? equalizer : 1 / equalizer)
+            ).toFixed(4),
+          );
         }
       }
     }
