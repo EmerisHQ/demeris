@@ -697,7 +697,6 @@ export default defineComponent({
           txFee.value =
             fees[0].amount[gasPrice.value] *
             10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          console.log('TX fee', txFee.value);
         } else {
           return (txFee.value = 0);
         }
@@ -801,6 +800,7 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
+            console.log(reserveBalances);
             setCounterPairCoinAmount('Pay');
             data.isLoading = false;
           } catch (e) {
@@ -956,6 +956,17 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
+        const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+        const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
+        const precisionDiff = +fromPrecision - +toPrecision;
+        let equalizer = 1;
+        if (precisionDiff > 0) {
+          equalizer = 10 ** precisionDiff;
+        } else if (precisionDiff < 0) {
+          equalizer = 10 ** precisionDiff;
+        }
+        console.log('equlizer', equalizer);
+
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
@@ -963,25 +974,62 @@ export default defineComponent({
         const balanceB = isReverse
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
-
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(
-            { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-            balanceA,
-            balanceB,
-          );
+          data.receiveCoinAmount =
+            getReceiveCoinAmount(
+              { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+              balanceA,
+              balanceB,
+            ) * equalizer;
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = getPayCoinAmount(
-            { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-            balanceB,
-            balanceA,
-          );
+          data.payCoinAmount =
+            getPayCoinAmount(
+              { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+              balanceB,
+              balanceA,
+            ) / equalizer;
         }
       }
     }
+
+    //  if (data.isBothSelected) {
+    //     const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+    //     const toPrecision =
+    //         store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })
+    //     const precisionDiff = +fromPrecision - +toPrecision
+    //     let equalizerA = 1
+    //     let equalizerB = 1
+    //     if(precisionDiff > 0) {
+    //       equalizerA = 10 ** precisionDiff
+    //     } else if(precisionDiff < 0) {
+    //       equalizerA = 10 ** (-1 * precisionDiff)
+    //     }
+    //     const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+    //     const balanceA = isReverse
+    //       ? data.selectedPoolData.reserveBalances.balanceA
+    //       : data.selectedPoolData.reserveBalances.balanceB;
+    //     const balanceB = isReverse
+    //       ? data.selectedPoolData.reserveBalances.balanceB
+    //       : data.selectedPoolData.reserveBalances.balanceA;
+    //     if (e.includes('Pay')) {
+    //       data.receiveCoinAmount = getReceiveCoinAmount(
+    //         { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+    //         balanceA * equalizerA,
+    //         balanceB * equalizerB,
+    //       );
+    //       if (data.payCoinAmount + data.receiveCoinAmount === 0) {
+    //         slippage.value = 0;
+    //       }
+    //     } else {
+    //       data.payCoinAmount = getPayCoinAmount(
+    //         { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+    //         balanceB * equalizerB,
+    //         balanceA * equalizerA,
+    //       );
+    //     }
 
     async function swap() {
       reviewModalToggle();
