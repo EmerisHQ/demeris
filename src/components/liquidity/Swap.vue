@@ -148,7 +148,7 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
-import useCalculation from '@/composables/useCalculation.vue';
+import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
