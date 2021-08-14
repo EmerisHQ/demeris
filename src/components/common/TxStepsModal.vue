@@ -496,7 +496,7 @@ export default defineComponent({
       () => props.data,
       async (newData) => {
         fees.value = await Promise.all(
-          (newData as Step[]).map(async (step) => {
+          (newData as Step[])?.map(async (step) => {
             return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
           }),
         );
