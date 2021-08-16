@@ -71,6 +71,10 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        addLiquidity: 'Add liqudity',
+        createNew: 'Create new pool',
+      },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
         text2: 'Select the chain you wish to use.',
@@ -105,7 +109,8 @@ export const messages = {
         to: 'To',
         toPlaceholder: 'Recipient address',
         memo: 'Reference (memo)',
-        memoHint: 'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
+        memoHint:
+          'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
         memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
       },
@@ -222,7 +227,8 @@ export const messages = {
           fromLbl: 'From address',
           txToSign: '{txCount} transactions to sign',
           feesLbl: 'Fees',
-          txToSignHint: 'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
+          txToSignHint:
+            'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
           receiveLbl: 'Receive',
           recipientGotLbl: 'Recipient got',
           includedFee: 'included',
