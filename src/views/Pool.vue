@@ -272,6 +272,10 @@ export default defineComponent({
     });
 
     const exchangeAmount = computed(() => {
+      if (!reserveBalances.value?.length) {
+        return;
+      }
+
       const fromPrecision =
         store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
       const toPrecision =
