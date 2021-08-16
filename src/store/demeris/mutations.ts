@@ -212,6 +212,7 @@ export const mutations: MutationTree<State> & Mutations = {
   },
 
   [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
+    window.localStorage.setItem('gasLimit', (payload.value as number).toString());
     state.gas_limit = payload.value as number;
   },
 
