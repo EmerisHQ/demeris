@@ -298,7 +298,9 @@ export default defineComponent({
         );
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
-        assetPooledAmount += assetBalanceInPool.amount;
+        if (assetBalanceInPool) {
+          assetPooledAmount += assetBalanceInPool.amount;
+        }
       }
 
       return assetPooledAmount;
