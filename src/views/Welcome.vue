@@ -20,10 +20,7 @@
       </div>
     </div>
 
-    <div
-      v-show="((isKeplrInstalled && !isWarningNeeded) || (isKeplrInstalled && isWarningAgreed)) && !isMobile"
-      class="welcome-modal__bg"
-    >
+    <div v-show="isEmerisSupported && isKeplrInstalled && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -45,7 +42,7 @@
       </div>
     </div>
 
-    <div v-show="isKeplrSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
+    <div v-show="isEmerisSupported && !isKeplrInstalled && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -53,7 +50,7 @@
       </div>
     </div>
 
-    <div v-show="!isKeplrSupported && !isMobile" class="welcome-modal__bg">
+    <div v-show="!isEmerisSupported && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
@@ -120,7 +117,7 @@ export default defineComponent({
     const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);
     const getBrowserRef = ref(null);
-    const isKeplrSupported = ref(null);
+    const isEmerisSupported = ref(null);
     const isKeplrInstalled = ref(null);
     const isLoading = ref(true);
     const isMobile = ref(null);
@@ -160,17 +157,31 @@ export default defineComponent({
       isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
       isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
 
-      // dont present spinner forever if not Chrome
       // @ts-ignore
-      if (!window.chrome) {
+      let isChromium = window.chrome;
+      let winNav = window.navigator;
+      let vendorName = winNav.vendor;
+      // @ts-ignore
+      let isBrave = typeof navigator.brave !== 'undefined';
+      // @ts-ignore
+      let isOpera = typeof window.opr !== 'undefined';
+      let isIEedge = winNav.userAgent.indexOf('Edge') > -1;
+
+      isEmerisSupported.value =
+        isChromium !== null &&
+        typeof isChromium !== 'undefined' &&
+        vendorName === 'Google Inc.' &&
+        isBrave === false &&
+        isIEedge === false &&
+        isOpera === false;
+
+      // dont present spinner forever if not Chromium
+      if (!isEmerisSupported.value) {
         isLoading.value = false;
       }
 
       await getKeplrInstance();
       await nextTick();
-
-      // @ts-ignore
-      isKeplrSupported.value = !!window.chrome;
 
       nextTick(() => {
         // detect keplr installed
@@ -197,7 +208,7 @@ export default defineComponent({
       getKeplrRef,
       getBrowserRef,
       isLoading,
-      isKeplrSupported,
+      isEmerisSupported,
       isKeplrInstalled,
       isMobile,
       isReturnUser,

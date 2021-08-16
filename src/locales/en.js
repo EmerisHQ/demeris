@@ -49,8 +49,8 @@ export const messages = {
         },
         modal3: {
           title: 'Not compatible',
-          text: 'Emeris uses Keplr for accessing your accounts, which is only supported on Chromium-based browser like Google Chrome or Brave.',
-          button1: 'Install Chrome',
+          text: 'Emeris is only supported on Google Chrome. We are working hard on enabling support for more browsers.',
+          button1: 'Install Google Chrome',
           button2: 'Install Brave',
         },
         modal3welcome: {
