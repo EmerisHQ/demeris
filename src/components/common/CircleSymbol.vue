@@ -3,6 +3,12 @@
     class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
     :class="[`circle-symbol--${variant}`, `circle-symbol--${size}`]"
   >
+    <CircleSymbolStatus
+      v-if="assetConfig?.chain_name"
+      :chain-name="assetConfig.chain_name"
+      :denom="denom"
+      :size="size"
+    />
     <template v-if="variant === 'chain'">
       <div
         class="circle-symbol__ring absolute w-full h-full rounded-full z-0 flex-shrink-0 shadow-none"
@@ -92,6 +98,7 @@ type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 import { useStore } from 'vuex';
 
+import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
 import { Chains, VerifiedDenoms } from '@/types/api';
@@ -110,6 +117,10 @@ const findSymbolColors = (symbol: string) => {
 
 export default defineComponent({
   name: 'CircleSymbol',
+
+  components: {
+    CircleSymbolStatus,
+  },
 
   props: {
     denom: {
