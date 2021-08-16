@@ -12,13 +12,17 @@ export default function usePools() {
   const stores = useAllStores();
 
   const allPools = computed<Pool[]>(() => {
-    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
+    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools ?? [];
   });
 
   const pools = ref(allPools.value);
+
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
+      if (!oldPools) {
+        return;
+      }
       let oldIds = [];
       if (oldPools) {
         oldIds = oldPools.map((x) => x.id);
@@ -31,8 +35,8 @@ export default function usePools() {
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
-          await store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
-            subscribe: true,
+          store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+            subscribe: false,
             params: { address: hashAddress },
           });
         }

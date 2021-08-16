@@ -22,11 +22,16 @@ export default defineComponent({
     };
   },
   async created() {
+    let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
+    if (!gasLimit) {
+      gasLimit = 500000;
+      window.localStorage.setItem('gasLimit', gasLimit.toString());
+    }
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://dev.demeris.io/v1',
       hub_chain: 'cosmos-hub',
       refreshTime: 5000,
-      gas_limit: 500000,
+      gas_limit: gasLimit,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,

@@ -176,7 +176,10 @@ export interface Actions {
     dispatch,
   }: ActionContext<State, RootState>): Promise<boolean>;
   // Internal module actions
-
+  [DemerisActionTypes.SET_GAS_LIMIT](
+    { commit }: ActionContext<State, RootState>,
+    { gasLimit }: { gasLimit: number },
+  ): Promise<void>;
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
@@ -275,6 +278,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
+  [GlobalDemerisActionTypes.SET_GAS_LIMIT](
+    ...args: Parameters<Actions[DemerisActionTypes.SET_GAS_LIMIT]>
+  ): ReturnType<Actions[DemerisActionTypes.SET_GAS_LIMIT]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -304,8 +310,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
+
       return getters['getBalances'](params);
     } else {
       let resolver;
@@ -328,8 +336,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         rejecter(e);
         throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
       }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, { hash: reqHash, promise });
+
       return getters['getBalances'](params);
     }
   },
@@ -689,7 +698,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
       }
       resolver();
-      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, { hash: reqHash, promise });
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
       return getters['getVerifyTrace'](params);
     }
   },
@@ -787,6 +796,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       const cause = e.response?.data?.cause || e.message;
       throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
+    }
+  },
+  async [DemerisActionTypes.SET_GAS_LIMIT]({ commit }, { gasLimit }: { gasLimit: number }) {
+    try {
+      commit('SET_GAS_LIMIT', { value: gasLimit });
+    } catch (e) {
+      throw new SpVuexError('Demeris:SetGasLimit', 'Could not set Gas Limit');
     }
   },
 

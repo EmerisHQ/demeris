@@ -18,6 +18,8 @@ export const messages = {
       get: 'Get',
       connectToEmeris: 'Connect to Emeris',
       tryTheDemo: 'Try the demo',
+      chainDown: '{displayChain} chain appears to be down.',
+      balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -264,6 +266,7 @@ export const messages = {
         privacy: 'Privacy',
         tos: 'Terms of Service',
         cookiesPolicy: 'Cookies',
+        setGasLimit: 'Set gas limit',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',

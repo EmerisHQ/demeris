@@ -21,7 +21,7 @@ const Akash: SymbolConfig = {
   },
 };
 
-const CryptoCom: SymbolConfig = {
+const CryptoOrg: SymbolConfig = {
   colors: {
     primary: '#5044E7',
     secondary: '#5070FF',
@@ -83,7 +83,7 @@ const GravityDex: SymbolConfig = {
 const chains: Record<string, SymbolConfig> = {
   'cosmos-hub': Cosmos,
   akash: Akash,
-  'crypto-com': CryptoCom,
+  'crypto-org': CryptoOrg,
   persistence: Persistence,
   sentinel: Sentinel,
   regen: Regen,
@@ -96,7 +96,7 @@ const denoms: Record<string, SymbolConfig> = {
   uxprt: Persistence,
   uakt: Akash,
   uatom: Cosmos,
-  basecro: CryptoCom,
+  basecro: CryptoOrg,
   uregen: Regen,
   uion: Ion,
 };
