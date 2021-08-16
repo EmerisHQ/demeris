@@ -48,10 +48,20 @@ export default defineComponent({
     });
 
     const pool = computed(() => {
-      return pools.value.find((pool) => pool.pool_coin_denom == props.name);
+      if (pools.value) {
+        return pools.value.find((pool) => pool.pool_coin_denom == props.name);
+      }
+      return '';
     });
 
-    const { pairName } = usePool(computed(() => pool.value.id as string));
+    const { pairName } = usePool(
+      computed(() => {
+        if (pool.value) {
+          return pool.value.id as string;
+        }
+        return '';
+      }),
+    );
 
     const openPoolPage = () => {
       router.push({ name: 'Pool', params: { id: pool.value.id } });

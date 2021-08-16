@@ -28,7 +28,7 @@
             <template v-if="!state.isCreationConfirmationOpen">
               <div class="pt-8 mb-8 text-center">
                 <h1 class="text-3 font-bold">
-                  {{ hasPair && !hasPool ? 'Create new pool' : 'Add liquidity' }}
+                  {{ pageTitle }}
                 </h1>
 
                 <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
@@ -313,6 +313,8 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -359,6 +361,8 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
@@ -477,6 +481,17 @@ export default {
       return !!pool.value;
     });
 
+    const pageTitle = computed(() => {
+      return hasPair.value && !hasPool.value
+        ? t('components.addLiquidity.createNew')
+        : t('components.addLiquidity.addLiquidity');
+    });
+
+    const metaSource = computed(() => ({
+      title: pageTitle.value,
+    }));
+    useMeta(metaSource);
+
     const updateReceiveAmount = () => {
       if (!hasPool.value) {
         state.receiveAmount = '1';
@@ -484,12 +499,12 @@ export default {
       }
 
       if (!form.coinA.amount || !form.coinB.amount) {
-        state.receiveAmount = undefined;
+        state.receiveAmount = '0';
         return;
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = (+result.toFixed(6)).toString();
+      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {
@@ -521,12 +536,15 @@ export default {
       }
 
       if (reserveBalances.value?.length) {
+        const baseDenomIndex = {};
+        baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
+        baseDenomIndex[state.poolBaseDenoms[1]] = pool.value.reserve_coin_denoms[1];
         const amountA =
-          form.coinA.asset.base_denom == state.poolBaseDenoms[0]
+          baseDenomIndex[form.coinA.asset.base_denom] == reserveBalances.value[0].denom
             ? reserveBalances.value[0].amount
             : reserveBalances.value[1].amount;
         const amountB =
-          form.coinB.asset.base_denom == state.poolBaseDenoms[1]
+          baseDenomIndex[form.coinB.asset.base_denom] == reserveBalances.value[1].denom
             ? reserveBalances.value[1].amount
             : reserveBalances.value[0].amount;
         const precisionB =
@@ -625,7 +643,7 @@ export default {
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const submitButtonName = computed(() => {
@@ -964,6 +982,7 @@ export default {
     );
 
     return {
+      pageTitle,
       gasPrice,
       creationFee,
       actionSteps,

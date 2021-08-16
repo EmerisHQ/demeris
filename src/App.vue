@@ -1,4 +1,7 @@
 <template>
+  <metainfo>
+    <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
+  </metainfo>
   <div>
     <router-view />
   </div>
@@ -22,11 +25,16 @@ export default defineComponent({
     };
   },
   async created() {
+    let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
+    if (!gasLimit) {
+      gasLimit = 500000;
+      window.localStorage.setItem('gasLimit', gasLimit.toString());
+    }
     await this.$store.dispatch(GlobalDemerisActionTypes.INIT, {
       endpoint: 'https://staging.demeris.io/v1',
       hub_chain: 'cosmos-hub',
       refreshTime: 5000,
-      gas_limit: 500000,
+      gas_limit: gasLimit,
     });
     await this.$store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
       subscribe: true,
@@ -42,7 +50,13 @@ export default defineComponent({
     } catch {
       //
     }
-
+    try {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+        subscribe: true,
+      });
+    } catch {
+      //
+    }
     for (let chain in chains) {
       await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
         subscribe: true,
@@ -50,6 +64,21 @@ export default defineComponent({
           chain_name: chain,
         },
       });
+
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+        subscribe: true,
+        params: {
+          chain_name: chain,
+        },
+      });
+    }
+
+    try {
+      await this.$store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+        subscribe: true,
+      });
+    } catch {
+      //
     }
     await this.$store.dispatch('common/env/config', {
       apiNode: 'https://staging.demeris.io/v1/liquidity',

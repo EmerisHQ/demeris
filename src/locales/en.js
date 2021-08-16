@@ -18,6 +18,8 @@ export const messages = {
       get: 'Get',
       connectToEmeris: 'Connect to Emeris',
       tryTheDemo: 'Try the demo',
+      chainDown: '{displayChain} chain appears to be down.',
+      balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -47,8 +49,8 @@ export const messages = {
         },
         modal3: {
           title: 'Not compatible',
-          text: 'Emeris uses Keplr for accessing your accounts, which is only supported on Chromium-based browser like Google Chrome or Brave.',
-          button1: 'Install Chrome',
+          text: 'Emeris is only supported on Google Chrome. We are working hard on enabling support for more browsers.',
+          button1: 'Install Google Chrome',
           button2: 'Install Brave',
         },
         modal3welcome: {
@@ -69,6 +71,17 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        addLiquidity: 'Add liquidity',
+        createNew: 'Create new pool',
+      },
+      send: {
+        send: 'Send',
+        moveAssets: 'Move assets',
+        moveAssetsDescription: 'Move assets between your addresses on different chains.',
+        sendToAddress: 'Send to address',
+        sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+      },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
         text2: 'Select the chain you wish to use.',
@@ -103,7 +116,8 @@ export const messages = {
         to: 'To',
         toPlaceholder: 'Recipient address',
         memo: 'Reference (memo)',
-        memoHint: 'Memo hint',
+        memoHint:
+          'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
         memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
       },
@@ -116,7 +130,13 @@ export const messages = {
         limitPrice: 'Limit price',
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
         minReceivedLbl: 'Min. received if 100% swapped',
-        minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
+        minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
+      },
+      stakeTable: {
+        earnRewards: 'Earn rewards by staking',
+        lockUp: 'Lock up your',
+        andEarn: 'and earn staking rewards with an average',
+        apy: '9.7% APY',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
@@ -126,6 +146,10 @@ export const messages = {
         missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
+      },
+      txStepsModal: {
+        chainDown: 'appears to be down, action is temporarily unavailable.',
+        chainsDown: 'appear to be down, action is temporarily unavailable.',
       },
       txHandlingModal: {
         openKeplr: 'Opening Keplr',
@@ -140,6 +164,12 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
+        chainDown: 'Transaction failed, the chain is unavailable',
+        chainDownDesc:
+          'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
+        relayerDown: 'Transaction failed, the relayer is unavailable',
+        relayerDownDesc:
+          'Unfortunately, the relayer is unavailable. We are not able to do the transaction, please try later.',
         revertTx: 'Reverting transfer...',
         contactSupport: 'Contact support ↗️',
         backToPortfolio: 'Back to portfolio',
@@ -158,7 +188,7 @@ export const messages = {
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
-        swapActionPartiallyComplete: `Assets partially swapped ({swappedPercent}%)`,
+        swapActionPartiallyComplete: 'Assets partially swapped ({swappedPercent}%)',
         createPoolActionComplete: 'Pool created',
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
@@ -168,6 +198,7 @@ export const messages = {
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
+        noRevert: 'Once executed, transactions cannot be reverted. By continuing, you agree to our',
       },
       swap: {
         title: 'Swap',
@@ -209,7 +240,8 @@ export const messages = {
           fromLbl: 'From address',
           txToSign: '{txCount} transactions to sign',
           feesLbl: 'Fees',
-          txToSignHint: 'TODO',
+          txToSignHint:
+            'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
           receiveLbl: 'Receive',
           recipientGotLbl: 'Recipient got',
           includedFee: 'included',
@@ -228,14 +260,14 @@ export const messages = {
           receiveLblHint: '(estimated)',
           priceLbl: 'Price',
           minReceivedLbl: 'Min. received if 100% swapped',
-          minReceivedLblHint: 'TODO',
+          minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
           limitPriceLbl: 'Limit price',
-          limitPriceLblHint: 'TODO',
+          limitPriceLblHint: 'Assets will not be swapped at a higher rate than the limit rate.',
           feesLbl: 'Fees',
           feeLbl: 'Transaction fee',
-          feeLblHint: 'TODO',
+          feeLblHint: 'Base fee paid to the network',
           swapFeeLbl: 'Swap fee',
-          swapFeeLblHint: 'TODO',
+          swapFeeLblHint: 'Swap fee paid to liquidity providers',
         },
       },
       settingsMenu: {
@@ -253,6 +285,7 @@ export const messages = {
         privacy: 'Privacy',
         tos: 'Terms of Service',
         cookiesPolicy: 'Cookies',
+        setGasLimit: 'Set gas limit',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',
@@ -277,7 +310,7 @@ export const messages = {
         asset: 'Asset',
         ticker: 'Ticker',
         price: 'Price',
-        marketCap: 'Market cap.',
+        marketCap: 'Market Cap',
         amount: 'Amount',
         balance: 'Balance',
         onchain: '{amount} on {chain}',

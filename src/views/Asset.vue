@@ -134,7 +134,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -150,11 +151,10 @@ import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
-import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
-import { getBaseDenom } from '@/utils/actionHandler';
+import { getDisplayName } from '@/utils/actionHandler';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -176,12 +176,18 @@ export default defineComponent({
   },
 
   setup() {
+    const displayName = ref('');
+    const metaSource = computed(() => {
+      return { title: displayName.value };
+    });
+    useMeta(metaSource);
+
     const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
     const { balances, balancesByDenom, stakingBalancesByChain } = useAccount();
-    const { pools, poolsByDenom, withdrawBalancesById } = usePools();
+    const { poolsByDenom, withdrawBalancesById } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
@@ -197,7 +203,7 @@ export default defineComponent({
       async () => {
         const dexChain = store.getters['demeris/getDexChain'];
 
-        if (assetConfig.value.chain_name != dexChain) {
+        if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -214,6 +220,8 @@ export default defineComponent({
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
         }
+
+        displayName.value = await getDisplayName(denom.value, dexChain);
       },
       { immediate: true },
     );
@@ -233,10 +241,16 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
-        return parseFloat(staked[0].amount);
+      let totalStakedAmount = 0;
+      if (Array.isArray(staked)) {
+        for (let i = 0; i < staked.length; i++) {
+          let amount = parseFloat(staked[i].amount);
+          if (amount) {
+            totalStakedAmount += amount;
+          }
+        }
       }
-      return 0;
+      return totalStakedAmount;
     });
 
     const poolsInvestedWithAsset = computed(() => {
@@ -284,7 +298,9 @@ export default defineComponent({
         );
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
-        assetPooledAmount += assetBalanceInPool.amount;
+        if (assetBalanceInPool) {
+          assetPooledAmount += assetBalanceInPool.amount;
+        }
       }
 
       return assetPooledAmount;
@@ -293,6 +309,7 @@ export default defineComponent({
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
+
     return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
   },
 });

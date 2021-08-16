@@ -1,8 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { store, useAllStores } from '../store/index';
 
@@ -10,26 +12,62 @@ export default function usePools() {
   const stores = useAllStores();
 
   const allPools = computed<Pool[]>(() => {
-    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools || [];
+    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools ?? [];
   });
 
   const pools = ref(allPools.value);
+  onMounted(() => {
+    validPools(allPools.value).then((vp) => {
+      pools.value = vp;
+    });
+  });
   watch(
     () => allPools.value,
-    async (newPools) => {
-      pools.value = await validPools(newPools);
+    async (newPools, oldPools) => {
+      if (!oldPools) {
+        return;
+      }
+      let oldIds = [];
+      if (oldPools) {
+        oldIds = oldPools.map((x) => x.id);
+      }
+      const newIds = newPools.map((x) => x.id);
+      const addedIds = newIds.filter((x) => !oldIds.includes(x));
+      if (addedIds.length > 0) {
+        pools.value = await validPools(newPools);
+        const addedPools = newPools.filter((x) => addedIds.includes(x.id));
+        for (const addedPool of addedPools) {
+          const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
+
+          store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+            subscribe: false,
+            params: { address: hashAddress },
+          });
+        }
+      }
     },
     { immediate: true },
   );
+  const updatePoolById = (id: string) => {
+    const pool = pools.value.find((item) => item.id === id);
+    if (pool) {
+      updatePool(pool);
+    }
+  };
+  const updatePool = (pool: Pool) => {
+    const hashAddress = keyHashfromAddress(pool.reserve_account_address);
 
+    store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+      subscribe: false,
+      params: { address: hashAddress },
+    });
+  };
   const formatPoolName = async (pool: Pool) => {
     return (
       await Promise.all(
         pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
       )
-    )
-      .join(' · ')
-      .toUpperCase();
+    ).join(' · ');
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
@@ -47,14 +85,17 @@ export default function usePools() {
 
   const poolPriceById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
-    const balances = (
-      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
-        params: { address: pool.reserve_account_address },
-      })
-    ).balances;
-    const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
-    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
-    return parseInt(balanceA.amount) / parseInt(balanceB.amount);
+    const balances = store.getters['demeris/getBalances']({
+      address: keyHashfromAddress(pool.reserve_account_address),
+    });
+
+    const balanceA = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0];
+    });
+    const balanceB = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1];
+    });
+    return parseInt(parseCoins(balanceA.amount)[0].amount) / parseInt(parseCoins(balanceB.amount)[0].amount);
   };
 
   const withdrawBalancesById = (id: string, poolCoinAmount: number) => {
@@ -67,9 +108,11 @@ export default function usePools() {
     const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
-    const reserveBalances =
-      store.getters['cosmos.bank.v1beta1/getAllBalances']({ params: { address: pool.reserve_account_address } })
-        ?.balances || [];
+    const reserveBalances = (
+      store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.reserve_account_address) }) || []
+    ).map((x) => {
+      return parseCoins(x.amount)[0];
+    });
 
     /**
      * TODO: Consider fee proportion
@@ -84,21 +127,21 @@ export default function usePools() {
         amount: !hasParams
           ? 0
           : new BigNumber(poolCoinAmount)
-              .multipliedBy(reserveBalances[0].amount)
+              .multipliedBy(reserveBalances[0]?.amount || 0)
               .dividedBy(totalSupply)
               .decimalPlaces(6)
               .toNumber(),
-        denom: reserveBalances[0].denom,
+        denom: reserveBalances[0]?.denom || '',
       },
       {
         amount: !hasParams
           ? 0
           : new BigNumber(poolCoinAmount)
-              .multipliedBy(reserveBalances[1].amount)
+              .multipliedBy(reserveBalances[1]?.amount || 0)
               .dividedBy(totalSupply)
               .decimalPlaces(6)
               .toNumber(),
-        denom: reserveBalances[1].denom,
+        denom: reserveBalances[1]?.denom || '',
       },
     ];
 
@@ -202,14 +245,21 @@ export default function usePools() {
 
   const reserveBalancesById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
-    const balances = (
-      await stores.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
-        params: { address: pool.reserve_account_address },
-      })
-    ).balances;
-    const balanceA = balances.find((x) => x.denom == pool.reserve_coin_denoms[0]);
-    const balanceB = balances.find((x) => x.denom == pool.reserve_coin_denoms[1]);
-    return { balanceA: balanceA.amount, balanceB: balanceB.amount };
+
+    const balances = store.getters['demeris/getBalances']({
+      address: keyHashfromAddress(pool.reserve_account_address),
+    });
+
+    const balanceA = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0];
+    });
+    const balanceB = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1];
+    });
+    return {
+      balanceA: parseInt(parseCoins(balanceA.amount)[0].amount),
+      balanceB: parseInt(parseCoins(balanceB.amount)[0].amount),
+    };
   };
   const liquidityPriceById = async (id: string, amounts: number[]) => {
     const reserveDenoms = await getReserveBaseDenoms(await poolById(id));
@@ -225,7 +275,7 @@ export default function usePools() {
   };
   const totalLiquidityPriceById = async (id: string) => {
     const reserveBalances = await reserveBalancesById(id);
-    return liquidityPriceById(id, [reserveBalances.balanceA.amount, reserveBalances.balanceB.amount]);
+    return liquidityPriceById(id, [reserveBalances.balanceA, reserveBalances.balanceB]);
   };
   return {
     allPools,
@@ -239,5 +289,7 @@ export default function usePools() {
     reserveBalancesById,
     denomListByPools,
     totalLiquidityPriceById,
+    updatePool,
+    updatePoolById,
   };
 }

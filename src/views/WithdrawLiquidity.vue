@@ -26,7 +26,7 @@
         <template v-if="state.step === 'amount'">
           <div class="w-full max-w-lg mx-auto">
             <div class="pt-8 mb-8 text-center">
-              <h1 class="text-3 font-bold">Withdraw liquidity</h1>
+              <h1 class="text-3 font-bold">{{ $t('components.withdrawLiquidity.title') }}</h1>
 
               <p class="mt-3 text-muted">{{ pairName }}</p>
             </div>
@@ -193,6 +193,8 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -231,6 +233,14 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('components.withdrawLiquidity.title'),
+      })),
+    );
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
@@ -383,7 +393,7 @@ export default {
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
       total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const currencyAmountHandler = () => {

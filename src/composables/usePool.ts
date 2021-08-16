@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
+import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import usePools from './usePools';
 
@@ -48,9 +49,10 @@ export default function usePool(id?: string | ComputedRef<string>) {
     }
 
     return (
-      store.getters['cosmos.bank.v1beta1/getAllBalances']({ params: { address: pool.value.reserve_account_address } })
-        ?.balances || []
-    );
+      store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.value.reserve_account_address) }) || []
+    ).map((item, i) => {
+      return { ...parseCoins(item.amount)[0], base_denom: reserveBaseDenoms.value[i] };
+    });
   });
 
   const updateReserveBalances = async () => {
@@ -59,10 +61,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
     }
 
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
-
-    await store.dispatch('cosmos.bank.v1beta1/QueryAllBalances', {
-      params: { address: pool.value.reserve_account_address },
-    });
   };
 
   const calculateSupplyTokenAmount = (amountA: number, amountB: number) => {
@@ -70,9 +68,11 @@ export default function usePool(id?: string | ComputedRef<string>) {
       return 1;
     }
 
+    const sortedBalances = [...reserveBalances.value].sort((a, b) => (b.base_denom > a.base_denom ? -1 : 1));
+
     const poolCoinAmount = Math.min(
-      (totalSupply.value * amountA) / reserveBalances.value[0].amount,
-      (totalSupply.value * amountB) / reserveBalances.value[1].amount,
+      (totalSupply.value * amountA) / sortedBalances[0].amount,
+      (totalSupply.value * amountB) / sortedBalances[1].amount,
     );
 
     return poolCoinAmount;

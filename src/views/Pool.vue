@@ -128,7 +128,7 @@
               <h2 class="text-muted">Equity</h2>
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
-            <p class="mt-1 text-2 font-bold">
+            <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
               {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
             </p>
             <p class="text-muted mt-1">
@@ -176,6 +176,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -189,10 +190,8 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
-import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',
@@ -249,6 +248,12 @@ export default defineComponent({
     const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
       computed(() => route.params.id as string),
     );
+
+    const metaSource = computed(() => ({
+      title: pairName.value,
+    }));
+    useMeta(metaSource);
+
     const totalLiquidityPrice = ref(0);
 
     const walletBalances = computed(() => {
@@ -272,10 +277,18 @@ export default defineComponent({
     });
 
     const exchangeAmount = computed(() => {
+      if (!reserveBalances.value?.length) {
+        return;
+      }
+
+      const fromPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+      const toPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA) * 100) / 100;
+        return Math.round((balanceB / balanceA / 10 ** (fromPrecision - toPrecision)) * 100) / 100;
       }
       return undefined;
     });
@@ -309,7 +322,9 @@ export default defineComponent({
         const price = store.getters['demeris/getPrice']({ denom });
         const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
 
-        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+        if (reserveBalances.value[index].amount) {
+          total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+        }
       }
 
       totalLiquidityPrice.value = total;

@@ -148,7 +148,7 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
-import useCalculation from '@/composables/useCalculation.vue';
+import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
@@ -178,7 +178,8 @@ export default defineComponent({
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
+    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms, updatePoolById } =
+      usePools();
     const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
     const isInit = ref(false);
@@ -187,7 +188,9 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
-
+    const dexStatus = computed(() => {
+      return store.getters['demeris/getChainStatus']({ chain_name: store.getters['demeris/getDexChain'] });
+    });
     const gasPrice = ref('');
     watch(
       () => store.getters['demeris/getPreferredGasPriceLevel'],
@@ -549,6 +552,8 @@ export default defineComponent({
             return 'Swap limit reached';
           } else if (data.isOver) {
             return 'Insufficent funds';
+          } else if (!dexStatus.value) {
+            return 'Swap unavailable';
           } else {
             if (data.isPriceChanged) {
               return 'Update prices';
@@ -567,7 +572,11 @@ export default defineComponent({
         if (data.buttonName === 'Swap limit reached') {
           return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
         } else {
-          return '';
+          if (!dexStatus.value) {
+            return 'Cosmos Hub appears to be down, swap is temporarily unavailable';
+          } else {
+            return '';
+          }
         }
       }),
       buttonStatus: computed(() => {
@@ -659,7 +668,8 @@ export default defineComponent({
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
           !isSignedIn.value ||
-          data.selectedPoolData === null
+          data.selectedPoolData === null ||
+          !dexStatus.value
         );
       }),
       isChildModalOpen: false,
@@ -688,7 +698,6 @@ export default defineComponent({
           txFee.value =
             fees[0].amount[gasPrice.value] *
             10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          console.log('TX fee', txFee.value);
         } else {
           return (txFee.value = 0);
         }
@@ -812,11 +821,11 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
+            await updatePoolById(id);
             const pool = poolById(id);
             const poolPrice = await poolPriceById(id);
             const reserves = await getReserveBaseDenoms(pool);
             const reserveBalances = await reserveBalancesById(id);
-
             data.selectedPoolData = {
               pool,
               poolPrice,
@@ -948,27 +957,42 @@ export default defineComponent({
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+        const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+        const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
+        const precisionDiff = +fromPrecision - +toPrecision;
+        let equalizer = 1;
+        if (precisionDiff !== 0) {
+          equalizer = 10 ** Math.abs(precisionDiff);
+        }
+
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
         const balanceB = isReverse
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
-
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(
-            { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-            balanceA,
-            balanceB,
+          data.receiveCoinAmount = parseFloat(
+            (
+              getReceiveCoinAmount(
+                { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+                balanceA,
+                balanceB,
+              ) / (isReverse ? equalizer : 1)
+            ).toFixed(4),
           );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = getPayCoinAmount(
-            { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-            balanceB,
-            balanceA,
+          data.payCoinAmount = parseFloat(
+            (
+              getPayCoinAmount(
+                { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+                balanceB,
+                balanceA,
+              ) * (isReverse ? equalizer : 1 / equalizer)
+            ).toFixed(4),
           );
         }
       }
@@ -1014,6 +1038,7 @@ export default defineComponent({
       availablePaySide,
       otherAssetsToPay,
       otherAssetsToReceive,
+      dexStatus,
     };
   },
 });

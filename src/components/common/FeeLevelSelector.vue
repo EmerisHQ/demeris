@@ -133,7 +133,7 @@ import Alert from '@/components/ui/Alert.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
-import { feeForSteps, getDisplayName } from '@/utils/actionHandler';
+import { feeForSteps, getTicker } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -266,14 +266,11 @@ export default defineComponent({
       () => props.steps,
       async () => {
         if (hasPoolCoinToSwap.value) {
-          poolCoinDisplayDenoms.value[0] = await getDisplayName(
+          poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
             store.getters['demeris/getDexChain'],
           );
-          poolCoinDisplayDenoms.value[1] = await getDisplayName(
-            swapTx.value.to.denom,
-            store.getters['demeris/getDexChain'],
-          );
+          poolCoinDisplayDenoms.value[1] = await getTicker(swapTx.value.to.denom, store.getters['demeris/getDexChain']);
         }
       },
       { immediate: true },
