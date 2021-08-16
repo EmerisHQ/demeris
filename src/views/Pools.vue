@@ -9,6 +9,8 @@
 </template>
 
 <script lang="ts">
+import { computed } from '@vue/reactivity';
+import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
@@ -20,7 +22,14 @@ export default {
   components: { AppLayout, PoolsTable },
 
   setup() {
-    useMeta({ title: 'Pools' });
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('context.pools.title'),
+      })),
+    );
+
     const { pools } = usePools();
     return {
       pools,

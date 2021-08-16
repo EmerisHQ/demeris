@@ -26,7 +26,7 @@
         <template v-if="state.step === 'amount'">
           <div class="w-full max-w-lg mx-auto">
             <div class="pt-8 mb-8 text-center">
-              <h1 class="text-3 font-bold">Withdraw liquidity</h1>
+              <h1 class="text-3 font-bold">{{ $t('components.withdrawLiquidity.title') }}</h1>
 
               <p class="mt-3 text-muted">{{ pairName }}</p>
             </div>
@@ -193,6 +193,7 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -232,7 +233,13 @@ export default {
   },
 
   setup() {
-    useMeta({ title: 'Withdraw ' });
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('components.withdrawLiquidity.title'),
+      })),
+    );
 
     const route = useRoute();
     const router = useRouter();

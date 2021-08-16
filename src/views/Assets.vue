@@ -9,6 +9,8 @@
 </template>
 
 <script lang="ts">
+import { computed } from '@vue/reactivity';
+import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -20,7 +22,14 @@ export default {
   components: { AppLayout, AssetsTable },
 
   setup() {
-    useMeta({ title: 'Assets' });
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('context.assets.title'),
+      })),
+    );
+
     const router = useRouter();
 
     const openAssetPage = (asset: Record<string, string>) => {
