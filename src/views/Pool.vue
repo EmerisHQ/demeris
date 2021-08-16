@@ -128,7 +128,7 @@
               <h2 class="text-muted">Equity</h2>
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
-            <p class="mt-1 text-2 font-bold">
+            <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
               {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
             </p>
             <p class="text-muted mt-1">
