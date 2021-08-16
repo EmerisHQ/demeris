@@ -313,7 +313,6 @@ export default defineComponent({
         get: () => store.getters['demeris/getGasLimit'],
         set: (value: number) => {
           store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: value });
-          window.localStorage.setItem('gasLimit', value.toString());
         },
       }),
       allowCustomSlippage: computed({
