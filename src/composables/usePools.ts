@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
@@ -16,10 +16,17 @@ export default function usePools() {
   });
 
   const pools = ref(allPools.value);
-
+  onMounted(() => {
+    validPools(allPools.value).then((vp) => {
+      pools.value = vp;
+    });
+  });
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
+      if (!oldPools) {
+        return;
+      }
       let oldIds = [];
       if (oldPools) {
         oldIds = oldPools.map((x) => x.id);
