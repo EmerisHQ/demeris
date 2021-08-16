@@ -200,7 +200,9 @@ export default defineComponent({
         const price = store.getters['demeris/getPrice']({ denom });
         const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
 
-        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+        if (reserveBalances.value[index]) {
+          total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
+        }
       }
 
       totalLiquidityPrice.value = total;
