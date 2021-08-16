@@ -20,10 +20,7 @@
       </div>
     </div>
 
-    <div
-      v-show="((isKeplrInstalled && !isWarningNeeded) || (isKeplrInstalled && isWarningAgreed)) && !isMobile"
-      class="welcome-modal__bg"
-    >
+    <div v-show="isEmerisSupported && isKeplrInstalled && !isMobile" class="welcome-modal__bg">
       <img class="portal" src="@/assets/svg/portal.svg" />
       <img class="surfer" src="@/assets/images/surfer.png" />
       <div class="welcome-modal__fg">
