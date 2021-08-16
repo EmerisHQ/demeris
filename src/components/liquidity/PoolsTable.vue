@@ -143,9 +143,7 @@ export default {
           pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
       );
       // filter out higher ID pools with pairs that already exist
-      // bandage fix for validPools/usePools issue
-      pools = uniqBy(pools, 'displayName');
-      return pools;
+      return uniqBy(pools, 'displayName');
     });
 
     const openAddLiqudityPage = () => {
