@@ -761,7 +761,7 @@ export default defineComponent({
                   }
 
                   // sleep
-                  await new Promise((r) => setTimeout(r, 500));
+                  await new Promise((r) => setTimeout(r, 750));
 
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,
