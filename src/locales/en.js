@@ -72,7 +72,7 @@ export const messages = {
     },
     components: {
       addLiquidity: {
-        addLiquidity: 'Add liqudity',
+        addLiquidity: 'Add liquidity',
         createNew: 'Create new pool',
       },
       send: {
