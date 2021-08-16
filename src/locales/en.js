@@ -256,6 +256,7 @@ export const messages = {
         dark: 'Dark',
         advancedSettings: 'Advanced settings',
         settings: 'Settings',
+        version: 'Version',
         connectedWallet: 'Connected wallet',
         disconnectWallet: 'Disconnect wallet',
         connectWallet: 'Connect wallet',

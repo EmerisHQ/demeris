@@ -60,6 +60,15 @@
           </a>
         </div>
 
+        <hr class="border-t border-border" />
+
+        <div class="py-2">
+          <span class="flex items-center justify-between h-10 py-2 px-6 w-full">
+            <span>{{ $t('components.settingsMenu.version') }}</span>
+            <span class="text-muted -text-1">{{ gitVersion }}</span>
+          </span>
+        </div>
+
         <div class="flex items-center justify-center pt-3 pl-6 pr-4 pb-2.5 -text-1 text-muted">
           <a
             href="https://emeris.com/privacy"
@@ -282,8 +291,10 @@ export default defineComponent({
   },
   emits: ['disconnect'],
   setup(_, { emit }) {
+    const gitVersion = process.env.VUE_APP_GIT_VERSION;
     const store = useStore();
     const theme = useTheme();
+
     const isAdvancedSettingsOpen = ref(false);
     const isWarningCustomSlippageOpen = ref(false);
     const isWarningViewUnverifiedOpen = ref(false);
@@ -353,6 +364,7 @@ export default defineComponent({
     };
 
     return {
+      gitVersion,
       settings,
       confirmToggleSetting,
       toggleSetting,
