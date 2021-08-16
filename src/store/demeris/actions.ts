@@ -310,8 +310,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+
     if (state._InProgess.get(reqHash)) {
       await state._InProgess.get(reqHash);
+
       return getters['getBalances'](params);
     } else {
       let resolver;
@@ -334,8 +336,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         rejecter(e);
         throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
       }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
       resolver();
-      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, { hash: reqHash, promise });
+
       return getters['getBalances'](params);
     }
   },
@@ -695,7 +698,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
       }
       resolver();
-      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, { hash: reqHash, promise });
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
       return getters['getVerifyTrace'](params);
     }
   },

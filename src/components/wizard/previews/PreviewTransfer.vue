@@ -231,7 +231,10 @@ export default defineComponent({
     };
 
     const truncateAddress = (address: string) => {
-      return `${address.substring(0, 6)}…${address.substring(address.length - 6, address.length)}`;
+      return `${address.substring(0, address.indexOf('1') + 6)}…${address.substring(
+        address.length - 3,
+        address.length,
+      )}`;
     };
 
     watch(
