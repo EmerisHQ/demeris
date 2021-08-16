@@ -60,6 +60,7 @@
 import { ref } from '@vue/reactivity';
 import { computed, PropType, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
+import uniqBy from 'lodash.uniqby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -137,10 +138,14 @@ export default {
 
     const filteredPools = computed(() => {
       const query = keyword.value.toLowerCase();
-      return poolsWithTotalLiquidityPrice.value.filter(
+      let pools = poolsWithTotalLiquidityPrice.value.filter(
         (pool) =>
           pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
       );
+      // filter out higher ID pools with pairs that already exist
+      // bandage fix for validPools/usePools issue
+      pools = uniqBy(pools, 'displayName');
+      return pools;
     });
 
     const openAddLiqudityPage = () => {
