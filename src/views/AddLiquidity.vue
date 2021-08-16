@@ -28,7 +28,7 @@
             <template v-if="!state.isCreationConfirmationOpen">
               <div class="pt-8 mb-8 text-center">
                 <h1 class="text-3 font-bold">
-                  {{ hasPair && !hasPool ? 'Create new pool' : 'Add liquidity' }}
+                  {{ pageTitle }}
                 </h1>
 
                 <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
@@ -313,6 +313,8 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -359,6 +361,8 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
@@ -476,6 +480,17 @@ export default {
     const hasPool = computed(() => {
       return !!pool.value;
     });
+
+    const pageTitle = computed(() => {
+      return hasPair.value && !hasPool.value
+        ? t('components.addLiquidity.createNew')
+        : t('components.addLiquidity.addLiquidity');
+    });
+
+    const metaSource = computed(() => ({
+      title: pageTitle.value,
+    }));
+    useMeta(metaSource);
 
     const updateReceiveAmount = () => {
       if (!hasPool.value) {
@@ -967,6 +982,7 @@ export default {
     );
 
     return {
+      pageTitle,
       gasPrice,
       creationFee,
       actionSteps,

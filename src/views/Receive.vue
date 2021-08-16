@@ -95,6 +95,8 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -119,6 +121,14 @@ export default {
   components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('navbar.receive'),
+      })),
+    );
+
     const { nativeBalances } = useAccount();
 
     const state = reactive({

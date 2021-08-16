@@ -69,6 +69,7 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
@@ -119,6 +120,8 @@ export default defineComponent({
   },
 
   setup() {
+    useMeta({ title: '' });
+
     const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);

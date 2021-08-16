@@ -53,6 +53,8 @@
 
 <script lang="ts">
 import { computed } from '@vue/runtime-core';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
@@ -80,6 +82,14 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('navbar.portfolio'),
+      })),
+    );
+
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
