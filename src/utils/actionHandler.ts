@@ -1540,7 +1540,6 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
       }
     }
   }
-
   return validPools;
 }
 export function chainStatusForSteps(steps: Actions.Step[]) {

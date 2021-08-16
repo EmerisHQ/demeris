@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
@@ -16,7 +16,11 @@ export default function usePools() {
   });
 
   const pools = ref(allPools.value);
-
+  onMounted(() => {
+    validPools(allPools.value).then((vp) => {
+      pools.value = vp;
+    });
+  });
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
@@ -44,7 +48,20 @@ export default function usePools() {
     },
     { immediate: true },
   );
+  const updatePoolById = (id: string) => {
+    const pool = pools.value.find((item) => item.id === id);
+    if (pool) {
+      updatePool(pool);
+    }
+  };
+  const updatePool = (pool: Pool) => {
+    const hashAddress = keyHashfromAddress(pool.reserve_account_address);
 
+    store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+      subscribe: false,
+      params: { address: hashAddress },
+    });
+  };
   const formatPoolName = async (pool: Pool) => {
     return (
       await Promise.all(
@@ -272,5 +289,7 @@ export default function usePools() {
     reserveBalancesById,
     denomListByPools,
     totalLiquidityPriceById,
+    updatePool,
+    updatePoolById,
   };
 }
