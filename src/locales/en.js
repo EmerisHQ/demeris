@@ -132,6 +132,12 @@ export const messages = {
         minReceivedLbl: 'Min. received if 100% swapped',
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
       },
+      stakeTable: {
+        earnRewards: 'Earn rewards by staking',
+        lockUp: 'Lock up your',
+        andEarn: 'and earn staking rewards with an average',
+        apy: '9.7% APY',
+      },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
         missingOneText: 'Lorem ipsum',
