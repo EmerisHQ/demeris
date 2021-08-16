@@ -54,7 +54,7 @@
                   overflow-hidden
                 "
               >
-                <h4 class="relative z-10 text-1 font-medium mb-8">Send to address</h4>
+                <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.sendToAddress') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
                     class="
@@ -71,7 +71,7 @@
                   <Icon class="relative" name="SendIcon" :icon-size="1.5" />
                 </div>
                 <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
-                  Send assets to someone else or another account with a crypto address.
+                  {{ $t('components.send.sendToAddressDescription') }}
                 </p>
               </router-link>
 
@@ -96,7 +96,7 @@
                   overflow-hidden
                 "
               >
-                <h4 class="relative z-10 text-1 font-medium mb-8">Move assets</h4>
+                <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.moveAssets') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
                     class="
@@ -113,7 +113,7 @@
                   <Icon class="relative" name="SwapLRIcon" :icon-size="1.5" />
                 </div>
                 <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
-                  Move assets between your addresses on different chains.
+                  {{ $t('components.send.moveAssetsDescription') }}
                 </p>
               </router-link>
             </div>
@@ -131,6 +131,7 @@
 
 <script lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -147,7 +148,7 @@ export default {
   components: { Button, SendForm, MoveForm, Icon },
 
   setup() {
-    useMeta({ title: 'Send' });
+    const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
@@ -165,6 +166,18 @@ export default {
     };
 
     const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value));
+
+    const metaSource = computed(() => {
+      let title = t('components.send.send');
+      if (transferType.value) {
+        title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
+      }
+
+      return {
+        title,
+      };
+    });
+    useMeta(metaSource);
 
     const goBack = () => {
       if (currentStepIndex.value > 0) {

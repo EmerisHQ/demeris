@@ -75,6 +75,13 @@ export const messages = {
         addLiquidity: 'Add liqudity',
         createNew: 'Create new pool',
       },
+      send: {
+        send: 'Send',
+        moveAssets: 'Move assets',
+        moveAssetsDescription: 'Move assets between your addresses on different chains.',
+        sendToAddress: 'Send to address',
+        sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+      },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
         text2: 'Select the chain you wish to use.',
