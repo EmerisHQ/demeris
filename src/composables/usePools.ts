@@ -20,9 +20,6 @@ export default function usePools() {
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
-      if (!oldPools) {
-        return;
-      }
       let oldIds = [];
       if (oldPools) {
         oldIds = oldPools.map((x) => x.id);
