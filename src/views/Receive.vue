@@ -125,7 +125,7 @@ export default {
 
     useMeta(
       computed(() => ({
-        title: t('components.navbar.receive'),
+        title: t('navbar.receive'),
       })),
     );
 
