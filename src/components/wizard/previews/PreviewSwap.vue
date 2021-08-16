@@ -67,7 +67,7 @@
             amount:
               10 **
               store.getters['demeris/getDenomPrecision']({
-                name: toCoinBaseDenom,
+                name: fromCoinBaseDenom,
               }),
             denom: data.from.denom,
           }"
@@ -119,7 +119,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
-import useCalculation from '@/composables/useCalculation.vue';
+import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -175,6 +175,7 @@ export default defineComponent({
     // minReceivedAmount & limit price
     const minReceivedAmount = ref({});
     const limitPrice = ref(0);
+    const fromCoinBaseDenom = ref('');
     const toCoinBaseDenom = ref('');
     watch(
       () => {
@@ -186,6 +187,7 @@ export default defineComponent({
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await reserveBalancesById(id);
         toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
+        fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
         let swapPrice = null;
 
         if (reserveDenoms[1] === toCoinBaseDenom.value) {
@@ -203,6 +205,14 @@ export default defineComponent({
           );
         }
 
+        const fromPrecision = store.getters['demeris/getDenomPrecision']({
+          name: fromCoinBaseDenom.value,
+        });
+        const toPrecision = store.getters['demeris/getDenomPrecision']({
+          name: toCoinBaseDenom.value,
+        });
+        const precisionDiff = fromPrecision - toPrecision < 0 ? Math.abs(fromPrecision - toPrecision) : 0;
+
         minReceivedAmount.value = {
           denom: toCoinBaseDenom.value,
           amount:
@@ -210,26 +220,21 @@ export default defineComponent({
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
             (1 - slippageTolerance.value / 100) *
-            10 **
-              store.getters['demeris/getDenomPrecision']({
-                name: toCoinBaseDenom.value,
-              }),
+            10 ** (toPrecision - precisionDiff),
         };
+
         limitPrice.value =
           Math.trunc(
             ((1 / Number(swapPrice)) *
               Number(
                 10 **
                   store.getters['demeris/getDenomPrecision']({
-                    name: toCoinBaseDenom.value,
+                    name: fromCoinBaseDenom.value,
                   }),
               ) *
               swapFeeRate.value ** 2 *
               (1 - slippageTolerance.value / 100) *
-              10 **
-                store.getters['demeris/getDenomPrecision']({
-                  name: toCoinBaseDenom.value,
-                })) /
+              10 ** (toPrecision - precisionDiff)) /
               10000,
           ) * 10000;
       },
@@ -284,6 +289,7 @@ export default defineComponent({
       limitPrice,
       minReceivedAmount,
       toCoinBaseDenom,
+      fromCoinBaseDenom,
       store,
       swapFeeRate,
       fee,

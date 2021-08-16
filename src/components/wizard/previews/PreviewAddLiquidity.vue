@@ -177,13 +177,13 @@ export default defineComponent({
 
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
-
       if (!hasPool.value) {
+        const precisionDiff = precisions.value.coinA - precisions.value.coinB;
         return {
           coinA,
           coinB: new BigNumber(data.value.coinB.amount || 1)
             .dividedBy(data.value.coinA.amount || 1)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }

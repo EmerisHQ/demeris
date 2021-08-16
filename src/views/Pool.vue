@@ -272,10 +272,14 @@ export default defineComponent({
     });
 
     const exchangeAmount = computed(() => {
+      const fromPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+      const toPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA) * 100) / 100;
+        return Math.round((balanceB / balanceA / 10 ** (fromPrecision - toPrecision)) * 100) / 100;
       }
       return undefined;
     });
