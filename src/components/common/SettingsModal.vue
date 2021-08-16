@@ -77,6 +77,7 @@
           >
             {{ $t('components.settingsMenu.tos') }}
           </a>
+          <!--
           <a
             href="https://www.cookiesandyou.com/"
             class="settings-modal__list-item white-space-nowrap hover:text-text"
@@ -85,6 +86,7 @@
           >
             {{ $t('components.settingsMenu.cookiesPolicy') }}
           </a>
+          -->
         </div>
       </div>
       <!-- end settings-basic-->
