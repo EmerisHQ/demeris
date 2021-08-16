@@ -178,7 +178,8 @@ export default defineComponent({
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
+    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms, updatePoolById } =
+      usePools();
     const { getDisplayPrice } = usePrice();
     const { balances } = useAccount();
     const isInit = ref(false);
@@ -820,11 +821,11 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
+            await updatePoolById(id);
             const pool = poolById(id);
             const poolPrice = await poolPriceById(id);
             const reserves = await getReserveBaseDenoms(pool);
             const reserveBalances = await reserveBalancesById(id);
-
             data.selectedPoolData = {
               pool,
               poolPrice,

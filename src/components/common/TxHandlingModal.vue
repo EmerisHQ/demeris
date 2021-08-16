@@ -248,6 +248,7 @@ import SpinnerIcon from '@/components/ui/Spinner.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -330,6 +331,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
+    const { updatePoolById } = usePools();
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
@@ -463,6 +465,7 @@ export default defineComponent({
                 title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'swap':
+                updatePoolById(((props.tx as StepTransaction).data as SwapData).pool.id);
                 if (props.txResult.swappedPercent !== 100) {
                   title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
@@ -472,9 +475,11 @@ export default defineComponent({
                 }
                 break;
               case 'addliquidity':
+                updatePoolById(((props.tx as StepTransaction).data as AddLiquidityData).pool.id);
                 title.value = t('components.txHandlingModal.addLiqActionComplete');
                 break;
               case 'withdrawliquidity':
+                updatePoolById(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool.id);
                 title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
                 break;
               case 'createpool':
