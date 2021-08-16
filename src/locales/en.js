@@ -266,6 +266,7 @@ export const messages = {
         privacy: 'Privacy',
         tos: 'Terms of Service',
         cookiesPolicy: 'Cookies',
+        setGasLimit: 'Set gas limit',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',

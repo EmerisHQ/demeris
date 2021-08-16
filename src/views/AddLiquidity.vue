@@ -484,12 +484,12 @@ export default {
       }
 
       if (!form.coinA.amount || !form.coinB.amount) {
-        state.receiveAmount = undefined;
+        state.receiveAmount = '0';
         return;
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = (+result.toFixed(6)).toString();
+      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {
@@ -521,12 +521,15 @@ export default {
       }
 
       if (reserveBalances.value?.length) {
+        const baseDenomIndex = {};
+        baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
+        baseDenomIndex[state.poolBaseDenoms[1]] = pool.value.reserve_coin_denoms[1];
         const amountA =
-          form.coinA.asset.base_denom == state.poolBaseDenoms[0]
+          baseDenomIndex[form.coinA.asset.base_denom] == reserveBalances.value[0].denom
             ? reserveBalances.value[0].amount
             : reserveBalances.value[1].amount;
         const amountB =
-          form.coinB.asset.base_denom == state.poolBaseDenoms[1]
+          baseDenomIndex[form.coinB.asset.base_denom] == reserveBalances.value[1].denom
             ? reserveBalances.value[1].amount
             : reserveBalances.value[0].amount;
         const precisionB =
@@ -625,7 +628,7 @@ export default {
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const submitButtonName = computed(() => {
