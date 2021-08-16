@@ -127,21 +127,21 @@ export default function usePools() {
         amount: !hasParams
           ? 0
           : new BigNumber(poolCoinAmount)
-              .multipliedBy(reserveBalances[0].amount)
+              .multipliedBy(reserveBalances[0]?.amount || 0)
               .dividedBy(totalSupply)
               .decimalPlaces(6)
               .toNumber(),
-        denom: reserveBalances[0].denom,
+        denom: reserveBalances[0]?.denom || '',
       },
       {
         amount: !hasParams
           ? 0
           : new BigNumber(poolCoinAmount)
-              .multipliedBy(reserveBalances[1].amount)
+              .multipliedBy(reserveBalances[1]?.amount || 0)
               .dividedBy(totalSupply)
               .decimalPlaces(6)
               .toNumber(),
-        denom: reserveBalances[1].denom,
+        denom: reserveBalances[1]?.denom || '',
       },
     ];
 

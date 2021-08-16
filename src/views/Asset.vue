@@ -203,7 +203,7 @@ export default defineComponent({
       async () => {
         const dexChain = store.getters['demeris/getDexChain'];
 
-        if (assetConfig.value.chain_name != dexChain) {
+        if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -298,7 +298,9 @@ export default defineComponent({
         );
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
-        assetPooledAmount += assetBalanceInPool.amount;
+        if (assetBalanceInPool) {
+          assetPooledAmount += assetBalanceInPool.amount;
+        }
       }
 
       return assetPooledAmount;
