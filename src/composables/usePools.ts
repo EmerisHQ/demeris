@@ -31,7 +31,7 @@ export default function usePools() {
       const addedIds = newIds.filter((x) => !oldIds.includes(x));
       if (addedIds.length > 0) {
         pools.value = await validPools(newPools);
-        const addedPools = newPools.filter((x) => addedIds.includes(x.id));
+        const addedPools = pools.value.filter((x) => addedIds.includes(x.id));
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
