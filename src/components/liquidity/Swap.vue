@@ -800,7 +800,6 @@ export default defineComponent({
               reserves,
               reserveBalances,
             };
-            console.log(reserveBalances);
             setCounterPairCoinAmount('Pay');
             data.isLoading = false;
           } catch (e) {
@@ -997,42 +996,6 @@ export default defineComponent({
         }
       }
     }
-
-    //  if (data.isBothSelected) {
-    //     const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
-    //     const toPrecision =
-    //         store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom })
-    //     const precisionDiff = +fromPrecision - +toPrecision
-    //     let equalizerA = 1
-    //     let equalizerB = 1
-    //     if(precisionDiff > 0) {
-    //       equalizerA = 10 ** precisionDiff
-    //     } else if(precisionDiff < 0) {
-    //       equalizerA = 10 ** (-1 * precisionDiff)
-    //     }
-    //     const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
-    //     const balanceA = isReverse
-    //       ? data.selectedPoolData.reserveBalances.balanceA
-    //       : data.selectedPoolData.reserveBalances.balanceB;
-    //     const balanceB = isReverse
-    //       ? data.selectedPoolData.reserveBalances.balanceB
-    //       : data.selectedPoolData.reserveBalances.balanceA;
-    //     if (e.includes('Pay')) {
-    //       data.receiveCoinAmount = getReceiveCoinAmount(
-    //         { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-    //         balanceA * equalizerA,
-    //         balanceB * equalizerB,
-    //       );
-    //       if (data.payCoinAmount + data.receiveCoinAmount === 0) {
-    //         slippage.value = 0;
-    //       }
-    //     } else {
-    //       data.payCoinAmount = getPayCoinAmount(
-    //         { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-    //         balanceB * equalizerB,
-    //         balanceA * equalizerA,
-    //       );
-    //     }
 
     async function swap() {
       reviewModalToggle();
