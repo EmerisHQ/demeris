@@ -464,7 +464,7 @@ export default defineComponent({
                 break;
               case 'swap':
                 if (props.txResult.swappedPercent !== 100) {
-                  title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
+                  title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
                   });
                 } else {
