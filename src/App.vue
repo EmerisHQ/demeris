@@ -1,4 +1,7 @@
 <template>
+  <metainfo>
+    <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
+  </metainfo>
   <div>
     <router-view />
   </div>

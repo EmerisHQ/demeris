@@ -131,6 +131,7 @@
 
 <script lang="ts">
 import { computed, ref } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import MoveForm from '@/components/transfer/MoveForm';
@@ -146,6 +147,7 @@ export default {
   components: { Button, SendForm, MoveForm, Icon },
 
   setup() {
+    useMeta({ title: 'Send' });
     const router = useRouter();
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);

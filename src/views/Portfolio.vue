@@ -53,6 +53,7 @@
 
 <script lang="ts">
 import { computed } from '@vue/runtime-core';
+import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
@@ -80,6 +81,7 @@ export default {
   },
 
   setup() {
+    useMeta({ title: 'Portfolio' });
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();

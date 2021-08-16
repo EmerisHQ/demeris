@@ -9,19 +9,18 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
+import { useMeta } from 'vue-meta';
 
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useAllStores } from '@/store';
 
 export default {
   name: 'Pools',
   components: { AppLayout, PoolsTable },
 
   setup() {
-    const stores = useAllStores();
+    useMeta({ title: 'Pools' });
     const { pools } = usePools();
     return {
       pools,

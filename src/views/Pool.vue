@@ -176,6 +176,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -189,10 +190,8 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
-import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',
@@ -249,6 +248,12 @@ export default defineComponent({
     const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
       computed(() => route.params.id as string),
     );
+
+    const metaSource = computed(() => ({
+      title: pairName.value,
+    }));
+    useMeta(metaSource);
+
     const totalLiquidityPrice = ref(0);
 
     const walletBalances = computed(() => {

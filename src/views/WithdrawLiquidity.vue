@@ -193,6 +193,7 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -231,6 +232,8 @@ export default {
   },
 
   setup() {
+    useMeta({ title: 'Withdraw ' });
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();

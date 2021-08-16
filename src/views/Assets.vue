@@ -9,6 +9,7 @@
 </template>
 
 <script lang="ts">
+import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
@@ -19,6 +20,7 @@ export default {
   components: { AppLayout, AssetsTable },
 
   setup() {
+    useMeta({ title: 'Assets' });
     const router = useRouter();
 
     const openAssetPage = (asset: Record<string, string>) => {

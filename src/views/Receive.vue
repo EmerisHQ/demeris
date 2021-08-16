@@ -95,6 +95,7 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
+import { useMeta } from 'vue-meta';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -119,6 +120,7 @@ export default {
   components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
+    useMeta({ title: 'Receive' });
     const { nativeBalances } = useAccount();
 
     const state = reactive({
