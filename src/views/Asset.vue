@@ -233,10 +233,16 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
-        return parseFloat(staked[0].amount);
+      let totalStakedAmount = 0;
+      if (Array.isArray(staked)) {
+        for (let i = 0; i < staked.length; i++) {
+          let amount = parseFloat(staked[i].amount);
+          if (amount) {
+            totalStakedAmount += amount;
+          }
+        }
       }
-      return 0;
+      return totalStakedAmount;
     });
 
     const poolsInvestedWithAsset = computed(() => {
