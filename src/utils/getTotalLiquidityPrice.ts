@@ -24,7 +24,7 @@ export default function (thePool: Pool): any {
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
       });
-      const amount = balance.amount;
+      const amount = balance?.amount;
       if (price && amount) {
         const liquidityPrice = (amount / Math.pow(10, precision)) * price;
         prices.push(liquidityPrice);

@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="md:flex justify-between">
+    <div v-if="pool" class="md:flex justify-between">
       <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
           <div class="text-muted mb-4">Gravity DEX Pool</div>
@@ -21,7 +21,7 @@
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice.value) }}</div>
         </header>
 
-        <section v-if="reserveBalances" class="mt-16">
+        <section v-if="reserveBalances && walletBalances" class="mt-16">
           <h2 class="text-2 font-bold">Underlying assets</h2>
 
           <table class="assets-table table-fixed -ml-6 mt-4">
@@ -66,7 +66,7 @@
           </table>
         </section>
 
-        <section v-if="reserveBalances" class="mt-16">
+        <section v-if="reserveBalances && walletBalances" class="mt-16">
           <h2 class="text-2 font-bold">Liquidity pool token</h2>
 
           <table class="assets-table table-fixed -ml-6 mt-6">
