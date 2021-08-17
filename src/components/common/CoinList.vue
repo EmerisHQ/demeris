@@ -140,6 +140,10 @@ export default defineComponent({
       return result;
     };
 
+    const sortLocale = (a, b) => {
+      return a.localeCompare(b, 0, { numeric: true, sensitivity: 'base' });
+    };
+
     const coinsWithValue = computed(() => {
       let coins = modifiedData.value;
       if (coins.length > 0) {
@@ -154,18 +158,20 @@ export default defineComponent({
     const orderCoins = (coins) => {
       let tokens = [];
       let zeroTokens = [];
+      let zeroLpTokens = [];
       coins.map((c) => {
         if (getAmount(c.amount, c.base_denom)) {
           tokens.push(c);
+        } else if (c.display_name?.includes('Gravity')) {
+          zeroLpTokens.push(c);
         } else {
           zeroTokens.push(c);
         }
       });
       tokens = orderBy(tokens, [(c) => c.value], ['desc']);
-      zeroTokens = zeroTokens.sort((a, b) =>
-        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
-      );
-      return tokens.concat(zeroTokens);
+      zeroTokens = zeroTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
+      zeroLpTokens = zeroLpTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
+      return tokens.concat(zeroTokens).concat(zeroLpTokens);
     };
 
     const coinsByType = computed(() => {
