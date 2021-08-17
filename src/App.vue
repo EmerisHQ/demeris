@@ -55,14 +55,6 @@ export default defineComponent({
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-      status.value = 'Fetching prices';
-      try {
-        await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
-          subscribe: true,
-        });
-      } catch {
-        //
-      }
       status.value = 'Checking relayers';
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
@@ -116,6 +108,14 @@ export default defineComponent({
         await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
       } catch (e) {
         console.error(e);
+      }
+      status.value = 'Fetching prices';
+      try {
+        await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
+          subscribe: true,
+        });
+      } catch {
+        //
       }
       status.value = 'Signing in';
       if (autoLogin()) {

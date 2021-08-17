@@ -30,7 +30,6 @@ export default function (thePool: Pool): any {
         prices.push(liquidityPrice);
       }
     });
-
     if (prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {
