@@ -288,7 +288,7 @@ export default defineComponent({
     ModalButton,
     Switch,
   },
-  emits: ['disconnect'],
+  emits: ['disconnect', 'connect'],
   setup(_, { emit }) {
     const store = useStore();
     const theme = useTheme();
@@ -361,9 +361,13 @@ export default defineComponent({
     };
 
     const disconnectWallet = () => {
-      emit('disconnect');
-      window.localStorage.setItem('lastEmerisSession', '');
-      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      if (isDemoAccount.value) {
+        emit('connect');
+      } else {
+        emit('disconnect');
+        window.localStorage.setItem('lastEmerisSession', '');
+        store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      }
     };
 
     return {

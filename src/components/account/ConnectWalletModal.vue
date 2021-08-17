@@ -137,7 +137,7 @@ export default defineComponent({
 
     // TODO: Implement demo account
     const tryDemo = () => {
-      router.push('/');
+      emit('close');
     };
 
     onMounted(async () => {
@@ -180,6 +180,7 @@ export default defineComponent({
       closeConnectKeplr,
       closeGetKeplr,
       closeGetBrowser,
+      tryDemo,
     };
   },
 });

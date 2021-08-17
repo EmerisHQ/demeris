@@ -126,7 +126,7 @@
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap />
-        <PoolBanner :name="denom" />
+        <PoolBanner v-if="isPoolCoin" :name="denom" />
         <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
@@ -182,6 +182,9 @@ export default defineComponent({
     });
     useMeta(metaSource);
 
+    const isPoolCoin = computed(() => {
+      return denom.value.startsWith('pool');
+    });
     const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
@@ -310,7 +313,17 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
 
-    return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
+    return {
+      assetConfig,
+      denom,
+      assets,
+      poolsDisplay,
+      availableAmount,
+      stakedAmount,
+      pooledAmount,
+      totalAmount,
+      isPoolCoin,
+    };
   },
 });
 </script>

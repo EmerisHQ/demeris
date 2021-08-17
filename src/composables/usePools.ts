@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
-import { getBaseDenom, getDisplayName, validPools } from '@/utils/actionHandler';
+import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import { store, useAllStores } from '../store/index';
@@ -12,15 +12,15 @@ export default function usePools() {
   const stores = useAllStores();
 
   const allPools = computed<Pool[]>(() => {
-    return stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools ?? [];
+    return stores.getters['demeris/getAllValidPools'] ?? [];
   });
 
   const pools = ref(allPools.value);
-  onMounted(() => {
-    validPools(allPools.value).then((vp) => {
-      pools.value = vp;
-    });
-  });
+
+  //  validPools(allPools.value).then((vp) => {
+  //    pools.value = vp;
+  //  });
+
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
@@ -34,12 +34,12 @@ export default function usePools() {
       const newIds = newPools.map((x) => x.id);
       const addedIds = newIds.filter((x) => !oldIds.includes(x));
       if (addedIds.length > 0) {
-        pools.value = await validPools(newPools);
+        pools.value = newPools;
         const addedPools = newPools.filter((x) => addedIds.includes(x.id));
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
-          store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+          store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
             subscribe: false,
             params: { address: hashAddress },
           });
@@ -57,7 +57,7 @@ export default function usePools() {
   const updatePool = (pool: Pool) => {
     const hashAddress = keyHashfromAddress(pool.reserve_account_address);
 
-    store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+    store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
       subscribe: false,
       params: { address: hashAddress },
     });
