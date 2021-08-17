@@ -1,10 +1,6 @@
 <template>
   <span>
-    {{
-      showShare
-        ? toUSD((ownShare / 100) * totalLiquidityPrice.value) + ' (' + ownShare.toFixed(2) + '%)'
-        : toUSD(ownSharePrice)
-    }}
+    {{ showShare ? toUSD((ownShare / 100) * totalLiquidityPrice.value) + ' (' + ownShare.toFixed(2) + '%)' : '-' }}
   </span>
 </template>
 
@@ -15,7 +11,6 @@ import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
@@ -34,7 +29,7 @@ export default defineComponent({
     },
     showShare: {
       type: Boolean as PropType<boolean>,
-      default: false,
+      default: true,
     },
   },
 
