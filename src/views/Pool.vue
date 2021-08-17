@@ -129,7 +129,7 @@
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
             <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
-              {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
+              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice.value : 0) }}
             </p>
             <p class="text-muted mt-1">
               <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
@@ -334,14 +334,6 @@ export default defineComponent({
         .toNumber();
     });
 
-    const ownSharePrice = computed(() => {
-      if (!ownShare.value || !totalLiquidityPrice.value) {
-        return '0.00';
-      }
-
-      return new BigNumber(ownShare.value).dividedBy(100).multipliedBy(totalLiquidityPrice.value).toFixed(2);
-    });
-
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
@@ -360,7 +352,6 @@ export default defineComponent({
       withdrawLiquidityHandler,
       formatPoolName,
       ownShare,
-      ownSharePrice,
       toUSD,
       openAssetPage,
       exchangeAmount,
