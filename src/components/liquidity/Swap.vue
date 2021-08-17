@@ -157,7 +157,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
-import { isNative } from '@/utils/basic';
+import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -440,7 +440,9 @@ export default defineComponent({
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
-        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom && parseInt(x.amount) > 0);
+        return availablePaySide.value.find(
+          (y) => y.pay.base_denom == x.base_denom && parseInt(parseCoins(x.amount)[0].amount) > 0,
+        );
       });
       return payAssets;
     });
