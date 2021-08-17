@@ -50,7 +50,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
 
     return (
       store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.value.reserve_account_address) }) || []
-    ).map((item, i) => {
+    ).map((item) => {
       return { ...parseCoins(item.amount)[0], base_denom: item.base_denom };
     });
   });
