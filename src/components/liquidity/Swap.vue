@@ -137,7 +137,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -155,6 +155,7 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
@@ -171,7 +172,14 @@ export default defineComponent({
     FeeLevelSelector,
   },
 
-  setup() {
+  props: {
+    defaultAsset: {
+      type: Object as PropType<Balance>,
+      default: undefined,
+    },
+  },
+
+  setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
@@ -181,7 +189,7 @@ export default defineComponent({
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms, updatePoolById } =
       usePools();
     const { getDisplayPrice } = usePrice();
-    const { balances } = useAccount();
+    const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
     const slippage = ref(0);
     const store = useStore();
@@ -439,9 +447,10 @@ export default defineComponent({
       return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
+      const hasBalance = balances.value.length > 0;
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find(
-          (y) => y.pay.base_denom == x.base_denom && parseInt(parseCoins(x.amount)[0].amount) > 0,
+          (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
         );
       });
       return payAssets;
@@ -529,10 +538,19 @@ export default defineComponent({
             };
           } else {
             //with-wallet
-            data.payCoinData =
-              assetsToPay.value.filter((coin) => {
-                return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
-              })[0] ?? assetsToPay.value[0];
+            let assetToReceive = null;
+
+            if (props.defaultAsset) {
+              const defaultAsset = JSON.parse(JSON.stringify(props.defaultAsset));
+              defaultAsset.on_chain = store.getters['demeris/getDexChain'];
+              assetToReceive =
+                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
+            }
+
+            data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
+            if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
+              data.receiveCoinData = assetToReceive;
+            }
           }
 
           isInit.value = true;
