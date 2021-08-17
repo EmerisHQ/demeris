@@ -5,21 +5,30 @@
   <div v-if="initialized">
     <router-view />
   </div>
-  <div v-else>
-    {{ status }}
+  <div v-else class="h-screen flex flex-col items-center justify-center">
+    <h1 class="text-1">Entering the portal</h1>
+    <EphemerisSpinner class="h-64 w-64" />
+    <h3 class="text-2">{{ status }}</h3>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { useAllStores } from '@/store';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin, autoLoginDemo } from './utils/basic';
+
 export default defineComponent({
   name: 'App',
+
+  components: {
+    EphemerisSpinner,
+  },
+
   setup() {
     useTheme({ updateOnChange: true });
     const store = useAllStores();
