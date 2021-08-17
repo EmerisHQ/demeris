@@ -177,8 +177,9 @@ export default defineComponent({
 
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
+      const precisionDiff = precisions.value.coinA - precisions.value.coinB;
+
       if (!hasPool.value) {
-        const precisionDiff = precisions.value.coinA - precisions.value.coinB;
         return {
           coinA,
           coinB: new BigNumber(data.value.coinB.amount || 1)
@@ -193,7 +194,7 @@ export default defineComponent({
           coinA,
           coinB: new BigNumber(reserveBalances.value[1].amount)
             .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }

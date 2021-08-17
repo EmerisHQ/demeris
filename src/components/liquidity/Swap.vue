@@ -874,14 +874,14 @@ export default defineComponent({
             params: {
               from: {
                 amount: {
-                  amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision)))),
                   denom: data.payCoinData.denom,
                 },
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
                 amount: {
-                  amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision)))),
                   denom: data.receiveCoinData.denom,
                 },
                 chain_name: store.getters['demeris/getDexChain'],

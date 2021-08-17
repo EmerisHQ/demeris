@@ -338,7 +338,7 @@ export default defineComponent({
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    watch(reserveBalances, updateDenoms);
+    watch(reserveBalances, updateDenoms, { immediate: true });
 
     return {
       hasPrices,

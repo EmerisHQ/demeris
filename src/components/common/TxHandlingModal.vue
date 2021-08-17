@@ -92,7 +92,10 @@
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
           You received
           <span class="font-bold"><AmountDisplay
-            :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
+            :amount="{
+              denom: txResult?.demandCoinDenom,
+              amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
+            }"
           /></span>
           <br />
           on <ChainName :name="'cosmos-hub'" />.

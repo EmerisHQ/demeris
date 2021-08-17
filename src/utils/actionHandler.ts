@@ -2,6 +2,7 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
+import usePools from '@/composables/usePools';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
@@ -1026,14 +1027,18 @@ export async function msgFromStepTransaction(
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
-    const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.SwapData;
+    const chain_name = store.getters['demeris/getDexChain'];
+    const slippage = (store.getters['demeris/getSlippagePerc'] || 0.5) / 100;
+    let isReverse = false;
+    if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
+      isReverse = true;
+    }
     const price = [data.from, data.to].sort((a, b) => {
       if (a.denom < b.denom) return -1;
       if (a.denom > b.denom) return 1;
       return 0;
     });
-
     const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
@@ -1042,7 +1047,10 @@ export async function msgFromStepTransaction(
         offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
         offerCoinFee: { amount: '0', denom: data.from.denom },
-        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount))
+        orderPrice: (
+          (parseInt(price[0].amount) / parseInt(price[1].amount)) *
+          (isReverse ? 1 - slippage : 1 + slippage)
+        )
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
