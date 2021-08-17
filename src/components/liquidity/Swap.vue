@@ -541,8 +541,10 @@ export default defineComponent({
             let assetToReceive = null;
 
             if (props.defaultAsset) {
+              const defaultAsset = JSON.parse(JSON.stringify(props.defaultAsset));
+              defaultAsset.on_chain = store.getters['demeris/getDexChain'];
               assetToReceive =
-                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || null;
+                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
             }
 
             data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
