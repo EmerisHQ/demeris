@@ -2,6 +2,7 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
+import usePools from '@/composables/usePools';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
@@ -1027,8 +1028,14 @@ export async function msgFromStepTransaction(
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const { getReserveBaseDenoms } = usePools();
     const data = stepTx.data as Actions.SwapData;
+    const chain_name = store.getters['demeris/getDexChain'];
+    const reservesBaseDenoms = await getReserveBaseDenoms(data.pool);
+    const precisionDiff =
+      store.getters['demeris/getDenomPrecision']({ name: reservesBaseDenoms[0] }) -
+      store.getters['demeris/getDenomPrecision']({ name: reservesBaseDenoms[1] });
+
     const price = [data.from, data.to].sort((a, b) => {
       if (a.denom < b.denom) return -1;
       if (a.denom > b.denom) return 1;
@@ -1042,7 +1049,7 @@ export async function msgFromStepTransaction(
         offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
         offerCoinFee: { amount: '0', denom: data.from.denom },
-        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount))
+        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount) / 10 ** precisionDiff)
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
