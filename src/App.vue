@@ -6,9 +6,9 @@
     <router-view />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
-    <h1 class="text-1">Entering the portal</h1>
+    <h1 class="text-3 font-bold">Entering the portal</h1>
     <EphemerisSpinner class="h-64 w-64" />
-    <h3 class="text-2">{{ status }}</h3>
+    <p class="leading-copy text-muted -text-1">{{ status }}</p>
   </div>
 </template>
 <script lang="ts">
@@ -34,7 +34,7 @@ export default defineComponent({
     const store = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
-    const status = ref('initializing...');
+    const status = ref('Initializing');
     onMounted(async () => {
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
@@ -47,15 +47,15 @@ export default defineComponent({
         refreshTime: 5000,
         gas_limit: gasLimit,
       });
-      status.value = 'Loading asset lists';
+      status.value = 'Loading assets';
       await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
-      status.value = 'Loading chain list';
+      status.value = 'Loading chains';
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-      status.value = 'Fetching Prices';
+      status.value = 'Fetching prices';
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
           subscribe: true,
@@ -117,7 +117,7 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
-      status.value = 'Signing in...';
+      status.value = 'Signing in';
       if (autoLogin()) {
         await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
       } else {
