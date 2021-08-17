@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { computed, Ref, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -123,12 +124,26 @@ export default function useAccount() {
     });
   };
 
+  const orderBalancesByPrice = (balances: Balances) => {
+    return balances
+      .map((item) => {
+        const amount = parseCoins(item.amount)[0].amount;
+        const denom = item.base_denom;
+        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) ?? 6;
+        const price = store.getters['demeris/getPrice']({ denom });
+        const result = new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).toNumber();
+        return { ...item, price: result };
+      })
+      .sort((a, b) => b.price - a.price);
+  };
+
   return {
     balances,
     nativeBalances,
     getNativeBalances,
     allbalances,
     balancesByDenom,
+    orderBalancesByPrice,
     userAccountBalances,
     redeemableBalances,
     isDemoAccount,

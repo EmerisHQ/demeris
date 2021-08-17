@@ -125,7 +125,7 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <LiquiditySwap />
+        <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
@@ -134,7 +134,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -189,12 +189,16 @@ export default defineComponent({
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
-    const { balances, balancesByDenom, stakingBalancesByChain } = useAccount();
+    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
     const { poolsByDenom, withdrawBalancesById } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
+    });
+
+    const nativeAsset = computed(() => {
+      return nativeBalances.value.find((item) => item.base_denom === denom.value);
     });
 
     const assets = computed(() => balancesByDenom(denom.value));
@@ -314,6 +318,7 @@ export default defineComponent({
     });
 
     return {
+      nativeAsset,
       assetConfig,
       denom,
       assets,
