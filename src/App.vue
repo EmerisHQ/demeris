@@ -48,6 +48,7 @@ export default defineComponent({
       } catch {
         //
       }
+      /*
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
           subscribe: true,
@@ -55,6 +56,7 @@ export default defineComponent({
       } catch {
         //
       }
+      */
       for (let chain in chains) {
         await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
           subscribe: true,
@@ -70,7 +72,7 @@ export default defineComponent({
           },
         });
       }
-
+      /*
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
           subscribe: true,
@@ -78,6 +80,7 @@ export default defineComponent({
       } catch {
         //
       }
+      */
       await store.dispatch('common/env/config', {
         apiNode: 'https://dev.demeris.io/v1/liquidity',
         rpcNode: null,

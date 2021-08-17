@@ -3,6 +3,7 @@ import { bech32 } from 'bech32';
 import Long from 'long';
 
 import usePools from '@/composables/usePools';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
@@ -1550,7 +1551,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   }
   return validPools;
 }
-export function chainStatusForSteps(steps: Actions.Step[]) {
+export async function chainStatusForSteps(steps: Actions.Step[]) {
   let allClear = true;
   let relayerStatus = true;
   const failedChains = [];
@@ -1558,7 +1559,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
     for (const stepTx of step.transactions) {
       if (stepTx.name == 'transfer') {
         const chain_name = (stepTx.data as Actions.TransferData).chain_name;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1570,13 +1577,25 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       if (stepTx.name == 'ibc_backward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
         const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        const dest_chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name: dest_chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
             failedChains.push(chain_name);
           }
         }
-        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+        if (!dest_chain_status) {
           allClear = false;
           if (failedChains.includes(dest_chain_name)) {
             continue;
@@ -1594,13 +1613,25 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       if (stepTx.name == 'ibc_forward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
         const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        const dest_chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name: dest_chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
             failedChains.push(chain_name);
           }
         }
-        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+        if (!dest_chain_status) {
           allClear = false;
           if (failedChains.includes(dest_chain_name)) {
             continue;
@@ -1608,6 +1639,12 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+          subscribe: false,
+        });
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+          subscribe: false,
+        });
         if (
           !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
           !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
@@ -1617,7 +1654,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'addliquidity') {
         const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1628,7 +1671,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'withdrawliquidity') {
         const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1639,7 +1688,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'createpool') {
         const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1650,7 +1705,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'swap') {
         const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_status = await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+          subscribe: false,
+          params: {
+            chain_name,
+          },
+        });
+        if (!chain_status) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;

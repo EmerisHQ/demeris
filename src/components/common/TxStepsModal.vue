@@ -346,14 +346,12 @@ export default defineComponent({
         // baseCurrencyAmount: '50',
       };
     });
+    const chainsStatus = ref({ status: true, failed: [], relayer: true });
     const mpQuery = computed(() => {
       return new URLSearchParams(mpParams.value).toString();
     });
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
-    });
-    const chainsStatus = computed(() => {
-      return chainStatusForSteps(props.data);
     });
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
@@ -413,6 +411,7 @@ export default defineComponent({
     });
     const txResult = ref(null);
     onMounted(async () => {
+      chainsStatus.value = await chainStatusForSteps(props.data);
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
           return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
@@ -495,6 +494,7 @@ export default defineComponent({
     watch(
       () => props.data,
       async (newData) => {
+        chainsStatus.value = await chainStatusForSteps(props.data);
         fees.value = await Promise.all(
           (newData as Step[])?.map(async (step) => {
             return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
