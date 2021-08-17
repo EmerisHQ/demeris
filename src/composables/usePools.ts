@@ -39,7 +39,7 @@ export default function usePools() {
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
-          store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+          store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
             subscribe: false,
             params: { address: hashAddress },
           });
@@ -57,7 +57,7 @@ export default function usePools() {
   const updatePool = (pool: Pool) => {
     const hashAddress = keyHashfromAddress(pool.reserve_account_address);
 
-    store.dispatch(GlobalDemerisActionTypes.GET_BALANCES, {
+    store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
       subscribe: false,
       params: { address: hashAddress },
     });

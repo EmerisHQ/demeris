@@ -17,6 +17,7 @@ import { getDefaultState, State } from './state';
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
+  [MutationTypes.SET_POOL_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
   [MutationTypes.SET_STAKING_BALANCES](
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
@@ -58,6 +59,9 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
+    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+  },
+  [MutationTypes.SET_POOL_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
   },
   [MutationTypes.ADD_KEPLR_KEYHASH](state: State, payload: string) {
@@ -240,7 +244,9 @@ export const mutations: MutationTree<State> & Mutations = {
         state._Subscriptions.delete(sub);
       }
     }
-    state.balances = {};
+    for (const keyhash of state.keplr?.keyHashes ?? []) {
+      delete state.balances[keyhash];
+    }
     state.stakingBalances = {};
     state.numbers = {};
     state.keplr = null;

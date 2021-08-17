@@ -66,6 +66,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Balances>;
+  [DemerisActionTypes.GET_POOL_BALANCES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByAddressParams,
+  ): Promise<API.Balances>;
   [DemerisActionTypes.REDEEM_GET_HAS_SEEN]({ commit, getters }: ActionContext<State, RootState>): Promise<boolean>;
   [DemerisActionTypes.REDEEM_SET_HAS_SEEN](
     { commit, getters }: ActionContext<State, RootState>,
@@ -202,6 +206,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_BALANCES]>;
+  [GlobalDemerisActionTypes.GET_POOL_BALANCES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_POOL_BALANCES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_POOL_BALANCES]>;
   [GlobalDemerisActionTypes.REDEEM_GET_HAS_SEEN](
     ...args: Parameters<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>
   ): ReturnType<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>;
@@ -339,6 +346,40 @@ export const actions: ActionTree<State, RootState> & Actions = {
         commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+        }
+      } catch (e) {
+        rejecter(e);
+        throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
+      }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getBalances'](params);
+    }
+  },
+  async [DemerisActionTypes.GET_POOL_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getBalances'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
+        );
+
+        commit(DemerisMutationTypes.SET_POOL_BALANCES, { params, value: response.data.balances });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
         }
       } catch (e) {
         rejecter(e);

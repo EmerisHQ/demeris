@@ -5,6 +5,7 @@ import { DemerisConfig } from './actions';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
+  SET_POOL_BALANCES = 'SET_POOL_BALANCES',
   SET_VERIFY_TRACE = 'SET_VERIFY_TRACE',
   SET_FEE_ADDRESS = 'SET_FEE_ADDRESS',
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
