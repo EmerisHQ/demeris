@@ -79,7 +79,7 @@ export default defineComponent({
         //
       }
       await store.dispatch('common/env/config', {
-        apiNode: 'https://dev.demeris.io/v1/liquidity',
+        apiNode: 'https://staging.demeris.io/v1/liquidity',
         rpcNode: null,
         wsNode: null,
         chainId: 'cosmos-hub',
