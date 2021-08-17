@@ -109,7 +109,7 @@ export default defineComponent({
   },
 
   errorCaptured(err) {
-    console.error(err);
+    //console.error(err);
     return false;
   },
   mounted() {

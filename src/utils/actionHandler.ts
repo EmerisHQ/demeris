@@ -1242,7 +1242,7 @@ export async function getDisplayName(name, chain_name = null) {
           { root: true },
         ));
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       return name + '(unverified)';
     }
 
