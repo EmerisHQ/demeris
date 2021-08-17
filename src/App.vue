@@ -29,7 +29,7 @@ export default defineComponent({
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
       await store.dispatch(GlobalDemerisActionTypes.INIT, {
-        endpoint: 'https://dev.demeris.io/v1',
+        endpoint: 'https://staging.demeris.io/v1',
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
         gas_limit: gasLimit,
