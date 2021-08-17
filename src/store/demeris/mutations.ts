@@ -1,5 +1,6 @@
 import { MutationTree } from 'vuex';
 
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -25,6 +26,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
+  [MutationTypes.SET_VALID_POOLS](state: S, payload: Pool[]): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
@@ -81,6 +83,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_VERIFIED_DENOMS](state: State, payload: DemerisMutations) {
     state.verifiedDenoms = payload.value as API.VerifiedDenoms;
+  },
+  [MutationTypes.SET_VALID_POOLS](state: State, pools: Pool[]) {
+    state.validPools = pools;
   },
   [MutationTypes.SET_CHAINS](state: State, payload: DemerisMutations) {
     state.chains = {};

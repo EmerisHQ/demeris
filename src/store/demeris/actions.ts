@@ -4,9 +4,10 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { GasPriceLevel } from '@/types/actions';
+import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
+import { validPools } from '@/utils/actionHandler';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
@@ -83,6 +84,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Numbers>;
+  [DemerisActionTypes.VALIDATE_POOLS](
+    { commit, getters }: ActionContext<State, RootState>,
+    pools: Pool[],
+  ): Promise<Pool[]>;
   [DemerisActionTypes.GET_NUMBERS_CHAIN](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainAddressParams,
@@ -206,6 +211,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
+  [GlobalDemerisActionTypes.VALIDATE_POOLS](
+    ...args: Parameters<Actions[DemerisActionTypes.VALIDATE_POOLS]>
+  ): ReturnType<Actions[DemerisActionTypes.VALIDATE_POOLS]>;
   [GlobalDemerisActionTypes.GET_ALL_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_ALL_BALANCES]>;
@@ -363,6 +371,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
     }
     return getters['getAllStakingBalances'];
+  },
+  async [DemerisActionTypes.VALIDATE_POOLS]({ commit, getters }, pools) {
+    try {
+      const vp = await validPools(pools);
+      commit('SET_VALID_POOLS', vp);
+    } catch (e) {
+      throw new SpVuexError('Demeris:ValidatePools', 'Could not perform pool validation.');
+    }
+    return getters['getAllValidPools'];
   },
   async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
     const redeem = window.localStorage.getItem('redeem');
