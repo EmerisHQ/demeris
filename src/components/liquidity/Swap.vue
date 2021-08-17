@@ -137,7 +137,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -155,9 +155,11 @@ import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { isNative } from '@/utils/basic';
+
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -171,7 +173,14 @@ export default defineComponent({
     FeeLevelSelector,
   },
 
-  setup() {
+  props: {
+    defaultAsset: {
+      type: Object as PropType<Balance>,
+      default: undefined,
+    },
+  },
+
+  setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
@@ -527,10 +536,19 @@ export default defineComponent({
             };
           } else {
             //with-wallet
-            data.payCoinData =
-              assetsToPay.value.filter((coin) => {
-                return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
-              })[0] ?? assetsToPay.value[0];
+            const defaultAsset = props.defaultAsset || {
+              base_denom: 'uatom',
+              on_chain: store.getters['demeris/getDexChain'],
+            };
+            let assetToPay = assetsToPay.value.find((coin) => {
+              return coin.base_denom === defaultAsset.base_denom && coin.on_chain === defaultAsset.on_chain;
+            });
+
+            if (!assetToPay) {
+              assetToPay = props.defaultAsset || assetsToPay.value[0];
+            }
+
+            data.payCoinData = assetToPay;
           }
 
           isInit.value = true;
