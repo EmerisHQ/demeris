@@ -1,5 +1,21 @@
 export const messages = {
   en: {
+    appInit: {
+      title: 'Entering the portal',
+      status: {
+        initializing: 'Initializing...',
+        assetLoading: 'Loading assets...',
+        chainLoading: 'Loading chains...',
+        priceFetching: 'Fetching prices...',
+        relayerChecking: 'Checking relayers...',
+        chainDetails: "Fetching '{displayChain}` details...",
+        chainStatus: "Checking '{displayChain}` status...",
+        relayerBalanceFetching: 'Fetching relayer balances...',
+        liquidityConfigure: 'Configuring liquidity module...',
+        poolFetching: 'Fetching liquidity pools...',
+        signingIn: 'Signing in...',
+      },
+    },
     generic_cta: {
       seeall: 'See all',
       done: 'Done',
