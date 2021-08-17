@@ -134,59 +134,42 @@ export default defineComponent({
       return modifiedData;
     }
 
+    const getAmount = (amount, denom) => {
+      let result = amount.replace(denom, '');
+      result = parseInt(result.replace('undefined', ''));
+      return result;
+    };
+
     const coinsWithValue = computed(() => {
       let coins = modifiedData.value;
       if (coins.length > 0) {
         coins.map((b) => {
-          let value = getPrice({ denom: b.base_denom, amount: b.amount.toString() });
+          let value = getPrice({ denom: b.base_denom, amount: getAmount(b.amount, b.base_denom).toString() });
           (b as any).value = value;
         });
       }
       return coins;
     });
 
-    const orderCoinsByName = (coins) => {
+    const orderCoins = (coins) => {
       let tokens = [];
-      let lpTokens = [];
+      let zeroTokens = [];
       coins.map((c) => {
-        if (c.display_name?.includes('Gravity')) {
-          lpTokens.push(c);
-        } else {
+        if (getAmount(c.amount, c.base_denom)) {
           tokens.push(c);
+        } else {
+          zeroTokens.push(c);
         }
       });
-      tokens = orderBy(tokens, ['display_name'], ['asc']);
-      lpTokens = orderBy(lpTokens, ['display_name'], ['asc']);
-      lpTokens = lpTokens.sort((a, b) =>
+      tokens = orderBy(tokens, [(c) => c.value], ['desc']);
+      zeroTokens = zeroTokens.sort((a, b) =>
         a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
       );
-      return tokens.concat(lpTokens);
-    };
-
-    const orderCoinsByValue = (coins) => {
-      let tokens = [];
-      let lpTokens = [];
-      coins.map((c) => {
-        if (c.display_name?.includes('Gravity')) {
-          lpTokens.push(c);
-        } else {
-          tokens.push(c);
-        }
-      });
-      tokens = orderBy(tokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
-      lpTokens = orderBy(lpTokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
-      lpTokens = lpTokens.sort((a, b) =>
-        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
-      );
-      return tokens.concat(lpTokens);
+      return tokens.concat(zeroTokens);
     };
 
     const coinsByType = computed(() => {
-      if (props.type === 'receive') {
-        return orderCoinsByName(modifiedData.value);
-      } else {
-        return orderCoinsByValue(coinsWithValue.value);
-      }
+      return orderCoins(coinsWithValue.value);
     });
 
     return { setWordColorByKeyword, coinsByType };
