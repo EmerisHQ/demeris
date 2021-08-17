@@ -9,7 +9,7 @@ import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import * as API from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
-import { store, useAllStores } from '../store/index';
+import { store } from '../store/index';
 import {
   generateDenomHash,
   getChannel,
@@ -20,7 +20,6 @@ import {
   parseCoins,
 } from './basic';
 
-const stores = useAllStores();
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
   const result = {
@@ -914,14 +913,14 @@ export async function msgFromStepTransaction(
 ): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
-    const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+    const msg = await store.dispatch('cosmos.bank.v1beta1/MsgSend', {
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
         fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
       },
     });
-    const registry = stores.getters['cosmos.bank.v1beta1/getRegistry'];
+    const registry = store.getters['cosmos.bank.v1beta1/getRegistry'];
     return { msg, chain_name: data.chain_name, registry };
   }
 
@@ -933,7 +932,7 @@ export async function msgFromStepTransaction(
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
-    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -944,7 +943,7 @@ export async function msgFromStepTransaction(
         token: { ...data.amount },
       },
     });
-    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
 
@@ -963,7 +962,7 @@ export async function msgFromStepTransaction(
         parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
       ).toString();
     }
-    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -973,7 +972,7 @@ export async function msgFromStepTransaction(
         token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
-    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
@@ -985,27 +984,27 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
         depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins,
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         poolCoin: { ...data.poolCoin },
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
@@ -1017,14 +1016,14 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
         depositCoins: depositCoins,
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
@@ -1041,7 +1040,8 @@ export async function msgFromStepTransaction(
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
+
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
@@ -1055,7 +1055,7 @@ export async function msgFromStepTransaction(
           .replace(/(^0+)/, ''),
       }),
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
 }
@@ -1249,7 +1249,7 @@ export async function getDisplayName(name, chain_name = null) {
           { root: true },
         ));
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       return name + '(unverified)';
     }
 

@@ -3,6 +3,7 @@ import { createStore } from 'vuex';
 import { DemerisStore, State as DemerisState, store as demeris } from '@/store/demeris';
 
 import init from './config';
+import { GlobalDemerisActionTypes } from './demeris/action-types';
 
 export type RootState = {
   demeris: DemerisState;
@@ -15,6 +16,11 @@ const initstore = createStore({
   },
 });
 init(initstore as Store);
+initstore.subscribe((mutation) => {
+  if (mutation.type == 'tendermint.liquidity.v1beta1/QUERY' && mutation.payload.query == 'LiquidityPools') {
+    store.dispatch(GlobalDemerisActionTypes.VALIDATE_POOLS, mutation.payload.value.pools);
+  }
+});
 export const store = initstore;
 
 export function useStore(): Store {

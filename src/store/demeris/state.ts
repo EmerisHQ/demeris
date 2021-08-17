@@ -1,3 +1,4 @@
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { KeplrKeyData, UserData } from './mutation-types';
@@ -29,6 +30,7 @@ export type State = {
   relayer: boolean;
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
+  validPools: Pool[];
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
   _Session: UserData | Record<string, never>;
@@ -43,6 +45,7 @@ export function getDefaultState(): State {
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
+    validPools: [],
     keplr: null,
     prices: {
       Fiats: [],
