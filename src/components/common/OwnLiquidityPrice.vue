@@ -1,19 +1,20 @@
 <template>
   <span>
-    {{ showShare ? toUSD(ownSharePrice) + ' (' + ownShare.toFixed(2) + '%)' : toUSD(ownSharePrice) }}
+    {{ toUSD((ownShare / 100) * totalLiquidityPrice.value) }}
+    <span v-if="showShare">{{ ' (' + ownShare.toFixed(2) + '%)' }}</span>
   </span>
 </template>
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -41,7 +42,6 @@ export default defineComponent({
     const store = useStore();
 
     const { balancesByDenom } = useAccount();
-    const { getReserveBaseDenoms } = usePools();
 
     const hasPrices = computed(() => {
       let baseDenoms = reserveBaseDenoms.value;
@@ -74,7 +74,12 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
 
-    const totalLiquidityPrice = ref(0);
+    const totalLiquidityPrice = computed(() => {
+      if (pool.value) {
+        return getTotalLiquidityPrice(pool.value);
+      }
+      return 0;
+    });
 
     const ownShare = computed(() => {
       if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
@@ -85,14 +90,6 @@ export default defineComponent({
         .dividedBy(totalSupply.value)
         .multipliedBy(100)
         .toNumber();
-    });
-
-    const ownSharePrice = computed(() => {
-      if (!ownShare.value || !totalLiquidityPrice.value) {
-        return '0.00';
-      }
-
-      return new BigNumber(ownShare.value).dividedBy(100).multipliedBy(totalLiquidityPrice.value).toFixed(2);
     });
 
     const walletBalances = computed(() => {
@@ -115,27 +112,7 @@ export default defineComponent({
       };
     });
 
-    const updateTotalLiquidityPrice = async () => {
-      if (!pool.value || reserveBalances.value.length == 0) {
-        return;
-      }
-
-      const reserveDenoms = await getReserveBaseDenoms(pool.value);
-
-      let total = 0;
-
-      for (const [index, denom] of reserveDenoms.entries()) {
-        const price = store.getters['demeris/getPrice']({ denom });
-        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
-      }
-
-      totalLiquidityPrice.value = total;
-    };
-
-    watch(reserveBalances, updateTotalLiquidityPrice, { immediate: true });
-
-    return { ownShare, totalLiquidityPrice, ownSharePrice, toUSD };
+    return { ownShare, totalLiquidityPrice, toUSD };
   },
 });
 </script>
