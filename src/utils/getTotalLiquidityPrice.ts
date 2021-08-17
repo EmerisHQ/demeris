@@ -7,7 +7,6 @@ import { Pool } from '@/types/actions';
 
 export default function (thePool: Pool): any {
   const { pool, reserveBalances } = usePool((thePool as Pool).id);
-  const denoms = ref(pool.value.reserve_coin_denoms);
   const { getReserveBaseDenoms } = usePools();
 
   const totalLiquidityPrice = ref(0);
@@ -17,28 +16,23 @@ export default function (thePool: Pool): any {
       return;
     }
 
-    const reserveDenoms = await getReserveBaseDenoms(pool.value);
-    denoms.value = reserveDenoms;
+    const baseDenoms = await getReserveBaseDenoms(pool.value);
 
     let total = 0;
 
-    for (const [index, denom] of reserveDenoms.entries()) {
+    baseDenoms.map((denom) => {
       const price = store.getters['demeris/getPrice']({ denom });
-
-      // if one token doesn't have a price, we can't get an accorate total liquidity price
-      if (!price) {
-        return;
+      const precision = store.getters['demeris/getDenomPrecision']({ name: denom });
+      const balance = reserveBalances.value.find((b) => {
+        return b.base_denom === denom;
+      });
+      const amount = balance.amount;
+      console.log('denom:', denom, 'reserveBalances.value', reserveBalances.value);
+      if (price && amount) {
+        const liquidityPrice = (amount / Math.pow(10, precision)) * price;
+        total += liquidityPrice;
       }
-
-      const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-
-      const amount = reserveBalances.value[index].amount;
-      if (!amount) {
-        continue;
-      }
-
-      total += (amount / Math.pow(10, precision)) * price;
-    }
+    });
 
     totalLiquidityPrice.value = total;
   };

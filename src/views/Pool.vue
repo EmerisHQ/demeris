@@ -18,7 +18,7 @@
               <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
-          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
+          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice.value) }}</div>
         </header>
 
         <section v-if="reserveBalances" class="mt-16">
@@ -98,7 +98,7 @@
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice) }}</span>
+                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice.value) }}</span>
                   <span v-else>–</span>
                 </td>
               </tr>
@@ -192,6 +192,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default defineComponent({
   name: 'Pool',
@@ -254,7 +255,12 @@ export default defineComponent({
     }));
     useMeta(metaSource);
 
-    const totalLiquidityPrice = ref(0);
+    const totalLiquidityPrice = computed(() => {
+      if (pool.value) {
+        return getTotalLiquidityPrice(pool.value);
+      }
+      return 0;
+    });
 
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
@@ -308,26 +314,13 @@ export default defineComponent({
       router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
     };
 
-    const updateTotalLiquidityPrice = async () => {
+    const updateDenoms = async () => {
       if (!pool.value) {
         return;
       }
 
       const reserveDenoms = await getReserveBaseDenoms(pool.value);
       denoms.value = reserveDenoms;
-
-      let total = 0;
-
-      for (const [index, denom] of reserveDenoms.entries()) {
-        const price = store.getters['demeris/getPrice']({ denom });
-        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-
-        if (reserveBalances.value[index].amount) {
-          total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
-        }
-      }
-
-      totalLiquidityPrice.value = total;
     };
 
     const ownShare = computed(() => {
@@ -353,7 +346,7 @@ export default defineComponent({
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    watch(reserveBalances, updateTotalLiquidityPrice);
+    watch(reserveBalances, updateDenoms);
 
     return {
       hasPrices,
