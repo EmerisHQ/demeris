@@ -58,16 +58,6 @@ export default defineComponent({
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-      status.value = t('appInit.status.priceFetching');
-      try {
-        await store.dispatch(GlobalDemerisActionTypes.
-        
-        , {
-          subscribe: true,
-        });
-      } catch {
-        //
-      }
       status.value = t('appInit.status.relayerChecking');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
@@ -126,6 +116,7 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
+      status.value = t('appInit.status.priceFetching');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
           subscribe: true,
