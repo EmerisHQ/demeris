@@ -189,7 +189,7 @@ export default defineComponent({
     const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms, updatePoolById } =
       usePools();
     const { getDisplayPrice } = usePrice();
-    const { balances } = useAccount();
+    const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
     const slippage = ref(0);
     const store = useStore();
@@ -537,19 +537,20 @@ export default defineComponent({
             };
           } else {
             //with-wallet
-            const defaultAsset = props.defaultAsset || {
-              base_denom: 'uatom',
-              on_chain: store.getters['demeris/getDexChain'],
-            };
-            let assetToPay = assetsToPay.value.find((coin) => {
-              return coin.base_denom === defaultAsset.base_denom && coin.on_chain === defaultAsset.on_chain;
-            });
+            let assetToReceive = null;
 
-            if (!assetToPay) {
-              assetToPay = props.defaultAsset || assetsToPay.value[0];
+            if (props.defaultAsset) {
+              assetToReceive =
+                assetsToPay.value.find(
+                  (coin) =>
+                    coin.base_denom === props.defaultAsset.base_denom && coin.on_chain === props.defaultAsset.on_chain,
+                ) || props.defaultAsset;
             }
 
-            data.payCoinData = assetToPay;
+            data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
+            if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
+              data.receiveCoinData = assetToReceive;
+            }
           }
 
           isInit.value = true;
