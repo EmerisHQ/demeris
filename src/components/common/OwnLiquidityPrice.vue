@@ -1,6 +1,7 @@
 <template>
   <span>
-    {{ showShare ? toUSD((ownShare / 100) * totalLiquidityPrice.value) + ' (' + ownShare.toFixed(2) + '%)' : '-' }}
+    {{ toUSD((ownShare / 100) * totalLiquidityPrice.value) }}
+    <span v-if="showShare">{{ ' (' + ownShare.toFixed(2) + '%)' }}</span>
   </span>
 </template>
 
@@ -29,7 +30,7 @@ export default defineComponent({
     },
     showShare: {
       type: Boolean as PropType<boolean>,
-      default: true,
+      default: false,
     },
   },
 
