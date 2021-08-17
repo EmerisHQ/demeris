@@ -658,6 +658,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
+      for (const denom of getters['getVerifiedDenoms']) {
+        response.data.data.Tokens.push({ Symbol: denom.ticker + 'USDT', Price: 1.0, Supply: 12 });
+      }
       commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
