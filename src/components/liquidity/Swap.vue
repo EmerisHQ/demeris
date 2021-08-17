@@ -440,7 +440,7 @@ export default defineComponent({
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
-        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
+        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom && parseInt(x.amount) > 0);
       });
       return payAssets;
     });
