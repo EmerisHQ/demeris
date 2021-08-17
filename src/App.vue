@@ -6,13 +6,14 @@
     <router-view />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
-    <h1 class="text-3 font-bold">Entering the portal</h1>
+    <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
     <EphemerisSpinner class="h-64 w-64" />
     <p class="leading-copy text-muted -text-1">{{ status }}</p>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
@@ -34,7 +35,9 @@ export default defineComponent({
     const store = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
-    const status = ref('Initializing');
+
+    const { t } = useI18n({ useScope: 'global' });
+    const status = ref(t('appInit.status.initializing'));
     onMounted(async () => {
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
@@ -47,15 +50,15 @@ export default defineComponent({
         refreshTime: 5000,
         gas_limit: gasLimit,
       });
-      status.value = 'Loading assets';
+      status.value = t('appInit.status.assetLoading');
       await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
-      status.value = 'Loading chains';
+      status.value = t('appInit.status.chainLoading');
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-      status.value = 'Fetching prices';
+      status.value = t('appInit.status.priceFetching');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
           subscribe: true,
@@ -63,7 +66,7 @@ export default defineComponent({
       } catch {
         //
       }
-      status.value = 'Checking relayers';
+      status.value = t('appInit.status.relayerChecking');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
           subscribe: true,
@@ -72,14 +75,18 @@ export default defineComponent({
         //
       }
       for (let chain in chains) {
-        status.value = 'Fetching ' + chain + ' chain details';
+        status.value = t('appInit.status.chainDetails', {
+          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+        });
         await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
           subscribe: true,
           params: {
             chain_name: chain,
           },
         });
-        status.value = 'Checking ' + chain + ' chain status';
+        status.value = t('appInit.status.chainStatus', {
+          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+        });
         await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
           subscribe: true,
           params: {
@@ -87,7 +94,7 @@ export default defineComponent({
           },
         });
       }
-      status.value = 'Fetching relayer balances';
+      status.value = t('appInit.status.relayerBalanceFetching');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
           subscribe: true,
@@ -95,7 +102,7 @@ export default defineComponent({
       } catch {
         //
       }
-      status.value = 'Configuring liquidity module';
+      status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
         apiNode: 'https://dev.demeris.io/v1/liquidity',
         rpcNode: null,
@@ -107,7 +114,7 @@ export default defineComponent({
         offline: true,
         refresh: 10000,
       });
-      status.value = 'Fetching liquidity pools';
+      status.value = t('appInit.status.poolFetching');
       try {
         await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
@@ -117,7 +124,7 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
-      status.value = 'Signing in';
+      status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
         await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
       } else {
