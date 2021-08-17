@@ -48,18 +48,12 @@ export default defineComponent({
     });
 
     const pool = computed(() => {
-      if (pools.value) {
-        return pools.value.find((pool) => pool.pool_coin_denom == props.name);
-      }
-      return '';
+      return pools.value?.find((pool) => pool.pool_coin_denom == props.name);
     });
 
     const { pairName } = usePool(
       computed(() => {
-        if (pool.value) {
-          return pool.value.id as string;
-        }
-        return '';
+        return (pool.value?.id as string) ?? '';
       }),
     );
 
