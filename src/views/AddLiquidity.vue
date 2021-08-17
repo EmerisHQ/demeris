@@ -944,9 +944,11 @@ export default {
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
+            const precisionDiff = precisionA - precisionB;
+
             const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
 
-            const bigAmountA = new BigNumber(amountA).minus(feeA);
+            const bigAmountA = new BigNumber(amountA).minus(feeA).dividedBy(10 ** precisionDiff);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
             const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
             const bigAmountBToA = bigAmountB.dividedBy(bigExchangeAmount);
@@ -956,7 +958,10 @@ export default {
             console.log('minamount', minAmount.toString());
 
             if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
-              form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
+              form.coinA.amount = bigAmountA
+                .shiftedBy(-precisionA + precisionDiff)
+                .decimalPlaces(precisionA)
+                .toString();
 
               form.coinB.amount = bigAmountA
                 .multipliedBy(bigExchangeAmount)
@@ -968,7 +973,7 @@ export default {
 
               form.coinA.amount = bigAmountB
                 .dividedBy(bigExchangeAmount)
-                .shiftedBy(-precisionA)
+                .shiftedBy(-precisionA + precisionDiff)
                 .decimalPlaces(precisionA)
                 .toString();
             } else {

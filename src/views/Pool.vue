@@ -294,7 +294,7 @@ export default defineComponent({
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA / 10 ** (fromPrecision - toPrecision)) * 100) / 100;
+        return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
       }
       return undefined;
     });
@@ -338,7 +338,7 @@ export default defineComponent({
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    watch(reserveBalances, updateDenoms);
+    watch(reserveBalances, updateDenoms, { immediate: true });
 
     return {
       hasPrices,
