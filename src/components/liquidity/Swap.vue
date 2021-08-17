@@ -447,9 +447,10 @@ export default defineComponent({
       return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
+      const hasBalance = balances.value.length > 0;
       let payAssets = allBalances.value.filter((x) => {
         return availablePaySide.value.find(
-          (y) => y.pay.base_denom == x.base_denom && parseInt(parseCoins(x.amount)[0].amount) > 0,
+          (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
         );
       });
       return payAssets;
