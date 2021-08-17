@@ -157,7 +157,7 @@ import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
-import { isNative } from '@/utils/basic';
+import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -440,7 +440,9 @@ export default defineComponent({
     });
     const assetsToPay = computed(() => {
       let payAssets = allBalances.value.filter((x) => {
-        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
+        return availablePaySide.value.find(
+          (y) => y.pay.base_denom == x.base_denom && parseInt(parseCoins(x.amount)[0].amount) > 0,
+        );
       });
       return payAssets;
     });
@@ -855,14 +857,14 @@ export default defineComponent({
             params: {
               from: {
                 amount: {
-                  amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision)))),
                   denom: data.payCoinData.denom,
                 },
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
                 amount: {
-                  amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision)))),
                   denom: data.receiveCoinData.denom,
                 },
                 chain_name: store.getters['demeris/getDexChain'],

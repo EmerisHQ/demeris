@@ -516,7 +516,7 @@ export default {
 
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
-
+      const precisionDiff = precisions.value.coinA - precisions.value.coinB;
       if (!hasPair.value) {
         return;
       }
@@ -530,7 +530,7 @@ export default {
           coinA,
           coinB: new BigNumber(form.coinB.amount || 1)
             .dividedBy(form.coinA.amount || 1)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }
@@ -551,7 +551,10 @@ export default {
           form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
         return {
           coinA,
-          coinB: new BigNumber(amountB).dividedBy(amountA).shiftedBy(precisionB).toNumber(),
+          coinB: new BigNumber(amountB)
+            .dividedBy(amountA)
+            .shiftedBy(precisionB + precisionDiff)
+            .toNumber(),
         };
       }
 

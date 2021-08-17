@@ -23,6 +23,7 @@ import Denom from '@/components/common/Denom.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Alert from '@/components/ui/Alert.vue';
 import usePool from '@/composables/usePool';
+import usePools from '@/composables/usePools';
 import { useAllStores } from '@/store';
 
 export default defineComponent({
@@ -40,26 +41,16 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
-    const stores = useAllStores();
 
-    const pools = computed(() => {
-      let liquidityPools = stores.getters['tendermint.liquidity.v1beta1/getLiquidityPools']();
-      return liquidityPools.pools;
-    });
+    const { pools } = usePools();
 
     const pool = computed(() => {
-      if (pools.value) {
-        return pools.value.find((pool) => pool.pool_coin_denom == props.name);
-      }
-      return '';
+      return pools.value?.find((pool) => pool.pool_coin_denom == props.name);
     });
 
     const { pairName } = usePool(
       computed(() => {
-        if (pool.value) {
-          return pool.value.id as string;
-        }
-        return '';
+        return (pool.value?.id as string) ?? '';
       }),
     );
 
