@@ -2,8 +2,11 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div>
+  <div v-if="initialized">
     <router-view />
+  </div>
+  <div v-else>
+    {{ status }}
   </div>
 </template>
 <script lang="ts">
@@ -22,6 +25,7 @@ export default defineComponent({
     const store = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
+    const status = ref('initializing...');
     onMounted(async () => {
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
@@ -34,13 +38,15 @@ export default defineComponent({
         refreshTime: 5000,
         gas_limit: gasLimit,
       });
+      status.value = 'Loading asset lists';
       await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
+      status.value = 'Loading chain list';
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-
+      status.value = 'Fetching Prices';
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
           subscribe: true,
@@ -48,6 +54,7 @@ export default defineComponent({
       } catch {
         //
       }
+      status.value = 'Checking relayers';
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
           subscribe: true,
@@ -56,13 +63,14 @@ export default defineComponent({
         //
       }
       for (let chain in chains) {
+        status.value = 'Fetching ' + chain + ' chain details';
         await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
           subscribe: true,
           params: {
             chain_name: chain,
           },
         });
-
+        status.value = 'Checking ' + chain + ' chain status';
         await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
           subscribe: true,
           params: {
@@ -70,7 +78,7 @@ export default defineComponent({
           },
         });
       }
-
+      status.value = 'Fetching relayer balances';
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
           subscribe: true,
@@ -78,6 +86,7 @@ export default defineComponent({
       } catch {
         //
       }
+      status.value = 'Configuring liquidity module';
       await store.dispatch('common/env/config', {
         apiNode: 'https://dev.demeris.io/v1/liquidity',
         rpcNode: null,
@@ -89,6 +98,7 @@ export default defineComponent({
         offline: true,
         refresh: 10000,
       });
+      status.value = 'Fetching liquidity pools';
       try {
         await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
@@ -98,6 +108,7 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
+      status.value = 'Signing in...';
       if (autoLogin()) {
         await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
       } else {
@@ -118,7 +129,7 @@ export default defineComponent({
         router.push('/welcome');
       }
     });
-    return { initialized };
+    return { initialized, status };
   },
   errorCaptured(err) {
     //console.error(err);
