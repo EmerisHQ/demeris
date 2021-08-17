@@ -542,10 +542,7 @@ export default defineComponent({
 
             if (props.defaultAsset) {
               assetToReceive =
-                assetsToPay.value.find(
-                  (coin) =>
-                    coin.base_denom === props.defaultAsset.base_denom && coin.on_chain === props.defaultAsset.on_chain,
-                ) || props.defaultAsset;
+                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || null;
             }
 
             data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
