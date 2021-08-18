@@ -12,7 +12,7 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType,ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 
 export default defineComponent({
   name: 'AmountInput',

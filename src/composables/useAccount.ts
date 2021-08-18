@@ -3,7 +3,7 @@ import { computed, Ref, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import { Balances, StakingBalances } from '@/types/api';
-import { toRedeem, validBalances } from '@/utils/actionHandler';
+import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 export default function useAccount() {
