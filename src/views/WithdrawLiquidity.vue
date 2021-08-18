@@ -249,7 +249,7 @@ export default {
 
     const poolId = computed(() => route.params.id);
 
-    const { formatPoolName } = usePools();
+    const { getPoolName } = usePools();
     const { balancesByDenom } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
@@ -292,7 +292,7 @@ export default {
     const {
       pool,
       pairName,
-      calculateWithdrawBalances,
+      getPoolWithdrawBalances,
       calculateSupplyTokenAmount,
       reserveBaseDenoms,
       reserveBalances,
@@ -417,7 +417,7 @@ export default {
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -456,7 +456,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = calculateWithdrawBalances(+state.amount);
+      const result = getPoolWithdrawBalances(+state.amount);
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -537,7 +537,7 @@ export default {
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          const result = calculateWithdrawBalances(+state.amount);
+          const result = getPoolWithdrawBalances(+state.amount);
 
           state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
           state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -567,7 +567,7 @@ export default {
       toggleChainsModal,
       goToReview,
       goToStep,
-      formatPoolName,
+      getPoolName,
       goBack,
       onClose,
       resetHandler,
