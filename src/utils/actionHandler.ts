@@ -2444,7 +2444,7 @@ export async function isValidIBCReserveDenom(
       store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {
