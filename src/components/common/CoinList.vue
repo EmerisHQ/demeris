@@ -179,11 +179,7 @@ export default defineComponent({
     };
 
     const coinsByType = computed(() => {
-      if (props.type === 'receive') {
-        return orderCoins(coinsWithValue.value);
-      } else {
-        return orderCoinsSimple(modifiedData.value);
-      }
+      return orderCoinsSimple(modifiedData.value);
     });
 
     return { setWordColorByKeyword, coinsByType };
