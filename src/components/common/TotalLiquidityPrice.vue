@@ -5,8 +5,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
+import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -35,7 +35,7 @@ export default defineComponent({
       return formatter.format(value);
     };
 
-    const totalLiquidityPrice = getTotalLiquidityPrice(props.pool);
+    const { totalLiquidityPrice } = usePool(props.pool.id);
 
     return { totalLiquidityPrice, toUSD };
   },

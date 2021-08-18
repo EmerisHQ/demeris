@@ -435,17 +435,17 @@ export default {
       return result;
     });
 
-    const { allPools, pools, getReserveBaseDenoms } = usePools();
+    const { getNextPoolId, pools, getReserveBaseDenoms } = usePools();
 
     const previewPoolCoinDenom = computed(() => {
-      return `G` + (allPools.value.length + 1);
+      return `G` + getNextPoolId();
     });
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances, totalSupply } = usePool(
+    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
     );
 
@@ -847,7 +847,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = calculateWithdrawBalances(+state.receiveAmount);
+      const result = getPoolWithdrawBalances(+state.receiveAmount);
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -875,7 +875,7 @@ export default {
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();

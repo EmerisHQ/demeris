@@ -58,7 +58,7 @@ export default defineComponent({
       return pools.value.find((pool) => pool.pool_coin_denom == props.name);
     });
 
-    const { pool, reserveBalances, calculateWithdrawBalances } = usePool(computed(() => validPool.value?.id));
+    const { pool, reserveBalances, getPoolWithdrawBalances } = usePool(computed(() => validPool.value?.id));
 
     const ownLiquidityPrice = ref();
     const walletBalances = computed(() => {
@@ -72,7 +72,7 @@ export default defineComponent({
         denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],

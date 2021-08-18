@@ -190,7 +190,7 @@ export default defineComponent({
     const denom = computed(() => route.params.denom as string);
 
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
-    const { poolsByDenom, withdrawBalancesById } = usePools();
+    const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
@@ -233,7 +233,7 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const poolsWithAsset = computed(() => poolsByDenom(poolDenom.value));
+    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
@@ -299,8 +299,8 @@ export default defineComponent({
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-        const withdrawBalances = withdrawBalancesById(
-          pool.id,
+        const withdrawBalances = getWithdrawBalances(
+          pool,
           poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
         );
 
