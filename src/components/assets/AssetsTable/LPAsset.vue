@@ -43,7 +43,6 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const stores = useAllStores();
 
     const toUSD = (value) => {
       let formatter = new Intl.NumberFormat('en-US', {

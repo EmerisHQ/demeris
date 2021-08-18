@@ -62,7 +62,7 @@ export default defineComponent({
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
 
-    const { pool, pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
+    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
 
