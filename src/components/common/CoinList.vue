@@ -134,9 +134,9 @@ export default defineComponent({
       return modifiedData;
     }
 
-    const getAmount = (amount, denom) => {
-      let result = amount.replace(denom, '');
-      result = parseInt(result.replace('undefined', ''));
+    const getAmount = (amount: number | string, denom: string) => {
+      const value = amount.toString().replace(denom, '');
+      const result = parseInt(value.replace('undefined', ''));
       return result;
     };
 
@@ -146,12 +146,18 @@ export default defineComponent({
 
     const coinsWithValue = computed(() => {
       let coins = modifiedData.value;
-      if (coins.length > 0) {
-        coins.map((b) => {
-          let value = getPrice({ denom: b.base_denom, amount: getAmount(b.amount, b.base_denom).toString() });
-          (b as any).value = value;
-        });
-      }
+      console.log(coins);
+      coins.map((b) => {
+        let denom = b.base_denom;
+        if (b.amount) {
+          let amount = getAmount(b.amount, b.base_denom).toString();
+          if (parseInt(amount) > 0) {
+            let value = getPrice({ denom, amount });
+            b.value = value;
+          }
+        }
+        return b;
+      });
       return coins;
     });
 
@@ -160,7 +166,7 @@ export default defineComponent({
       let zeroTokens = [];
       let zeroLpTokens = [];
       coins.map((c) => {
-        if (getAmount(c.amount, c.base_denom)) {
+        if (c.amount && getAmount(c.amount, c.base_denom)) {
           tokens.push(c);
         } else if (c.display_name?.includes('Gravity')) {
           zeroLpTokens.push(c);
@@ -174,12 +180,8 @@ export default defineComponent({
       return tokens.concat(zeroTokens).concat(zeroLpTokens);
     };
 
-    const orderCoinsSimple = (coins) => {
-      return coins.sort((a, b) => sortLocale(a.display_name, b.display_name));
-    };
-
     const coinsByType = computed(() => {
-      return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
+      return orderCoins(coinsWithValue.value);
     });
 
     return { setWordColorByKeyword, coinsByType };
