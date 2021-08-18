@@ -58,12 +58,6 @@ export default defineComponent({
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
       });
-      status.value = t('appInit.status.relayerChecking');
-      try {
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
-          subscribe: true,
-        });
-      } catch (e) {}
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
           displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
@@ -83,14 +77,6 @@ export default defineComponent({
             chain_name: chain,
           },
         });
-      }
-      status.value = t('appInit.status.relayerBalanceFetching');
-      try {
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
-          subscribe: true,
-        });
-      } catch (e) {
-        //
       }
       status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
