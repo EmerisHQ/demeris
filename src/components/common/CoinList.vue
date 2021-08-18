@@ -141,7 +141,10 @@ export default defineComponent({
     };
 
     const sortLocale = (a, b) => {
-      return a.localeCompare(b, 0, { numeric: true, sensitivity: 'base' });
+      if (a && b) {
+        return a.localeCompare(b, 0, { numeric: true, sensitivity: 'base' });
+      }
+      return;
     };
 
     const coinsWithValue = computed(() => {
@@ -176,7 +179,8 @@ export default defineComponent({
       tokens = orderBy(tokens, [(c) => c.value], ['desc']);
       zeroTokens = zeroTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
       zeroLpTokens = zeroLpTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
-      return tokens.concat(zeroTokens).concat(zeroLpTokens);
+      tokens = tokens.concat(zeroTokens).concat(zeroLpTokens);
+      return tokens;
     };
 
     const coinsByType = computed(() => {
