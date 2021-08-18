@@ -174,8 +174,16 @@ export default defineComponent({
       return tokens.concat(zeroTokens).concat(zeroLpTokens);
     };
 
+    const orderCoinsSimple = (coins) => {
+      return coins.sort((a, b) => sortLocale(a.display_name, b.display_name));
+    };
+
     const coinsByType = computed(() => {
-      return orderCoins(coinsWithValue.value);
+      if (props.type === 'receive') {
+        return orderCoins(coinsWithValue.value);
+      } else {
+        return orderCoinsSimple(modifiedData.value);
+      }
     });
 
     return { setWordColorByKeyword, coinsByType };
