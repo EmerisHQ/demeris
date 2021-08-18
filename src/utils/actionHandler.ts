@@ -3,6 +3,7 @@ import { bech32 } from 'bech32';
 import Long from 'long';
 
 import usePools from '@/composables/usePools';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
@@ -1550,7 +1551,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   }
   return validPools;
 }
-export function chainStatusForSteps(steps: Actions.Step[]) {
+export async function chainStatusForSteps(steps: Actions.Step[]) {
   let allClear = true;
   let relayerStatus = true;
   const failedChains = [];
@@ -1584,6 +1585,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+          subscribe: false,
+        });
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+          subscribe: false,
+        });
         if (
           !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
           !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
@@ -1608,6 +1616,12 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+          subscribe: false,
+        });
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+          subscribe: false,
+        });
         if (
           !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
           !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
@@ -2062,7 +2076,6 @@ export async function validateStepsFeeBalances(
   for (const step of steps) {
     const fees = allFees[i];
     for (const stepTx of step.transactions) {
-      console.log(stepTx);
       if (stepTx.name == 'addliquidity') {
         const data = stepTx.data as Actions.AddLiquidityData;
         const balanceA = balances.find((x) => {
@@ -2207,7 +2220,7 @@ export async function validateStepsFeeBalances(
                 additionalFee =
                   parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
               }
-              console.log(additionalFee);
+
               if (rcptBalance) {
                 const newIbcAmount =
                   parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount) + additionalFee;
@@ -2227,9 +2240,7 @@ export async function validateStepsFeeBalances(
                   ibc: ibcDetails,
                 };
                 balances.push(newIbcBalance);
-                console.log(newIbcBalance);
               }
-              console.log(rcptBalance);
             }
           } else {
             throw new Error('Insufficient balance: ' + data.amount.denom);
@@ -2406,10 +2417,8 @@ export async function validateStepsFeeBalances(
         if (feeBalance) {
           const newAmount = parseInt(parseCoins(feeBalance.amount)[0].amount) - fees[chain_name][denom];
           if (newAmount >= 0) {
-            console.log(feeBalance);
             feeBalance.amount = newAmount + parseCoins(feeBalance.amount)[0].denom;
           } else {
-            console.log(feeBalance);
             feeWarning.feeWarning = false;
             feeWarning.missingFees.push({
               amount: '' + fees[chain_name][denom],
@@ -2418,7 +2427,6 @@ export async function validateStepsFeeBalances(
             });
           }
         } else {
-          console.log(feeBalance);
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + fees[chain_name][denom],
@@ -2444,7 +2452,7 @@ export async function isValidIBCReserveDenom(
       store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {

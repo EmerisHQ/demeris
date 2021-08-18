@@ -1,17 +1,15 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
-import { unref } from 'vue';
 import { ActionContext, ActionTree } from 'vuex';
 
-import usePools from '@/composables/usePools';
+import usePool from '@/composables/usePool';
 import { RootState } from '@/store';
 import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 import { addChain } from '@/utils/keplr';
 
 import {
@@ -353,6 +351,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       } catch (e) {
         rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+        }
         throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
       }
       commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
@@ -387,6 +388,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       } catch (e) {
         rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
+        }
         throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
       }
       commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
@@ -433,19 +437,41 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
     seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
   },
-  async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(
-        getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/stakingbalances',
-      );
-      commit(DemerisMutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
+  async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getStakingBalances'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/stakingbalances',
+        );
+        commit(DemerisMutationTypes.SET_STAKING_BALANCES, { params, value: response.data.staking_balances });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
+        }
+      } catch (e) {
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetStakingBalances', 'Could not perform API query.');
       }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetStakingBalances', 'Could not perform API query.');
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getStakingBalances'](params);
     }
-    return getters['getStakingBalances'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
     try {
@@ -659,44 +685,60 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return false;
     }
   },
-  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters }, { subscribe = false }) {
-    try {
-      const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
-      const supplies = rootGetters['cosmos.bank.v1beta1/getTotalSupply']();
-      const { totalLiquidityPrice } = usePools();
-      for (const denom of getters['getVerifiedDenoms']) {
-        if (denom.name.startsWith('pool')) {
-          const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
-          if (pools) {
-            const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
-            if (pool) {
-              const supply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
-              try {
-                const price = await totalLiquidityPrice(pool);
+  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state }, { subscribe = false }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
 
-                if (price > 0) {
-                  const priceData = {
-                    Symbol: denom.ticker + 'USDT',
-                    Price: (price * 10 ** 6) / supply,
-                    Supply: supply,
-                  };
-                  console.log(priceData);
-                  response.data.data.Tokens.push(priceData);
-                }
-              } catch (e) {}
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getPrices'];
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
+        for (const denom of getters['getVerifiedDenoms']) {
+          if (denom.name.startsWith('pool')) {
+            const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
+            if (pools) {
+              const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
+              if (pool) {
+                const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
+                await initPromise;
+                try {
+                  if (totalLiquidityPrice.value > 0) {
+                    const priceData = {
+                      Symbol: denom.ticker + 'USDT',
+                      Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
+                      Supply: totalSupply.value,
+                    };
+                    response.data.data.Tokens.push(priceData);
+                  }
+                } catch (e) {}
+              }
             }
           }
         }
+        commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
+        }
+      } catch (e) {
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
+        }
+        throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
       }
-      commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
-      }
-    } catch (e) {
-      console.log(e);
-      throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+      return getters['getPrices'];
     }
-    return getters['getPrices'];
   },
   async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters }, { subscribe = false, params }) {
     try {
@@ -819,17 +861,38 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getBech32Config'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_CHAIN]({ commit, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
-      commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
+  async [DemerisActionTypes.GET_CHAIN]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_CHAIN, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getChain'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
+        commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
+        }
+      } catch (e) {
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
       }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetChain', 'Could not perform API query.');
+      resolver();
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      return getters['getChain'](params);
     }
-    return getters['getChain'](params);
   },
   async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
     try {
@@ -863,19 +926,40 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getPrimaryChannels'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters }, { subscribe = false, params }) {
-    try {
-      const response = await axios.get(
-        getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/status',
-      );
-      commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
-      if (subscribe) {
-        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
+  async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getChainStatus'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/status',
+        );
+        commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: response.data.online });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
+        }
+      } catch (e) {
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
       }
-    } catch (e) {
-      throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
+      resolver();
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      return getters['getChainStatus'](params);
     }
-    return getters['getChainStatus'](params);
   },
 
   async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
