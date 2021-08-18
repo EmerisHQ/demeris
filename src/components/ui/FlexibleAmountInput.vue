@@ -127,7 +127,16 @@ export default defineComponent({
         class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
       };
     });
-    return { model, state, innerStyle, inputProps };
+    return {
+      model,
+      state,
+      innerStyle,
+      inputProps,
+      containerElementRef,
+      sizeElementRef,
+      prefixElementRef,
+      suffixElementRef,
+    };
   },
 });
 </script>

@@ -91,6 +91,9 @@ export const messages = {
         addLiquidity: 'Add liquidity',
         createNew: 'Create new pool',
       },
+      withdrawLiquidity: {
+        title: 'Withdraw liquidity',
+      },
       send: {
         send: 'Send',
         moveAssets: 'Move assets',
