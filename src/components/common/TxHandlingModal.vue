@@ -334,7 +334,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
-    const { updatePoolById } = usePools();
+    const { updatePool } = usePools();
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
@@ -468,7 +468,7 @@ export default defineComponent({
                 title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'swap':
-                updatePoolById(((props.tx as StepTransaction).data as SwapData).pool.id);
+                updatePool(((props.tx as StepTransaction).data as SwapData).pool);
                 if (props.txResult.swappedPercent !== 100) {
                   title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
@@ -478,11 +478,11 @@ export default defineComponent({
                 }
                 break;
               case 'addliquidity':
-                updatePoolById(((props.tx as StepTransaction).data as AddLiquidityData).pool.id);
+                updatePool(((props.tx as StepTransaction).data as AddLiquidityData).pool);
                 title.value = t('components.txHandlingModal.addLiqActionComplete');
                 break;
               case 'withdrawliquidity':
-                updatePoolById(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool.id);
+                updatePool(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool);
                 title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
                 break;
               case 'createpool':

@@ -155,7 +155,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { reserveBalancesById, getReserveBaseDenoms, poolById } = usePools();
+    const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
     const { getSwapPrice } = useCalculation();
     const swapFeeRate = computed(() => {
       const feeRate =
@@ -182,10 +182,9 @@ export default defineComponent({
         ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
       },
       async () => {
-        const id = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool.id;
-        const pool = poolById(id);
+        const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
         const reserveDenoms = await getReserveBaseDenoms(pool);
-        const reserveBalances = await reserveBalancesById(id);
+        const reserveBalances = await getReserveBalances(pool);
         toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
         fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
         let swapPrice = null;
