@@ -29,7 +29,7 @@
         <section v-else class="mt-16">
           <header class="space-y-0.5">
             <h2 class="text-muted">Balance</h2>
-            <Price :amount="{ amount: totalAmount, denom }" class="text-3 font-bold" />
+            <Price :amount="{ amount: totalAmount, denom }" :show-zero="true" class="text-3 font-bold" />
             <div class="text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
             </div>
