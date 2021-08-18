@@ -1,14 +1,17 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
+import { unref } from 'vue';
 import { ActionContext, ActionTree } from 'vuex';
 
+import usePools from '@/composables/usePools';
 import { RootState } from '@/store';
 import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
+import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 import { addChain } from '@/utils/keplr';
 
 import {
@@ -47,6 +50,7 @@ export type GasFee = {
   amount: Array<Amount>;
   gas: string;
 };
+
 export type DemerisSignParams = {
   msgs: Array<EncodeObject>;
   chain_name: string;
@@ -655,14 +659,41 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return false;
     }
   },
-  async [DemerisActionTypes.GET_PRICES]({ commit, getters }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters }, { subscribe = false }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
+      const supplies = rootGetters['cosmos.bank.v1beta1/getTotalSupply']();
+      const { totalLiquidityPrice } = usePools();
+      for (const denom of getters['getVerifiedDenoms']) {
+        if (denom.name.startsWith('pool')) {
+          const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
+          if (pools) {
+            const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
+            if (pool) {
+              const supply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+              try {
+                const price = await totalLiquidityPrice(pool);
+
+                if (price > 0) {
+                  const priceData = {
+                    Symbol: denom.ticker + 'USDT',
+                    Price: (price * 10 ** 6) / supply,
+                    Supply: supply,
+                  };
+                  console.log(priceData);
+                  response.data.data.Tokens.push(priceData);
+                }
+              } catch (e) {}
+            }
+          }
+        }
+      }
       commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
       }
     } catch (e) {
+      console.log(e);
       throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
     }
     return getters['getPrices'];

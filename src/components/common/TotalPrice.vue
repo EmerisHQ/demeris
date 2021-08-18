@@ -27,18 +27,20 @@ export default defineComponent({
       const value = (props.balances as Balances).reduce((total, balance) => {
         if (balance.verified) {
           if (store.getters['demeris/getPrice']({ denom: balance.base_denom })) {
-            return (
-              total +
-              (parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom })) /
-                Math.pow(
-                  10,
-                  parseInt(
-                    store.getters['demeris/getDenomPrecision']({
-                      name: balance.base_denom,
-                    }),
-                  ),
-                )
+            let totalValue =
+              parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom });
+            let precision = Math.pow(
+              10,
+              parseInt(
+                store.getters['demeris/getDenomPrecision']({
+                  name: balance.base_denom,
+                }) || 6,
+              ),
             );
+            let value = totalValue / precision;
+            if (value) {
+              return total + value;
+            }
           } else {
             return total;
           }

@@ -313,7 +313,7 @@ export default defineComponent({
     const form = inject<MoveAssetsForm>('moveForm');
     const router = useRouter();
 
-    const { nativeBalances } = useAccount();
+    const { nativeBalances, orderBalancesByPrice } = useAccount();
 
     const state = reactive({
       currentAsset: undefined,
@@ -543,16 +543,7 @@ export default defineComponent({
           }
 
           if (!asset) {
-            asset = props.balances
-              .map((item) => {
-                const amount = parseCoins(item.amount)[0].amount;
-                const denom = item.base_denom;
-                const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) ?? 6;
-                const price = store.getters['demeris/getPrice']({ denom });
-                const result = new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).toNumber();
-                return { ...item, price: result };
-              })
-              .sort((a, b) => b.price - a.price)[0];
+            asset = orderBalancesByPrice(props.balances)[0];
           }
 
           setCurrentAsset(asset);

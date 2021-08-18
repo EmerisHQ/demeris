@@ -20,7 +20,7 @@ export default function (thePool: Pool): any {
 
     baseDenoms.map((denom) => {
       const price = store.getters['demeris/getPrice']({ denom });
-      const precision = store.getters['demeris/getDenomPrecision']({ name: denom });
+      const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
       });
@@ -30,7 +30,6 @@ export default function (thePool: Pool): any {
         prices.push(liquidityPrice);
       }
     });
-
     if (prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {
