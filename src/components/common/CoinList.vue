@@ -183,10 +183,6 @@ export default defineComponent({
       return tokens;
     };
 
-    const orderCoinsSimple = (coins) => {
-      return coins.sort((a, b) => sortLocale(a.display_name, b.display_name));
-    };
-
     const coinsByType = computed(() => {
       return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });

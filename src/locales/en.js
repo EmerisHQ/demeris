@@ -65,8 +65,8 @@ export const messages = {
         },
         modal3: {
           title: 'Not compatible',
-          text: 'Emeris is only supported on Google Chrome. We are working hard on enabling support for more browsers.',
-          button1: 'Install Google Chrome',
+          text: 'Emeris is only supported on Chrome, Brave, and Edge. We are working hard on supporting for more browsers.',
+          button1: 'Install Chrome',
           button2: 'Install Brave',
         },
         modal3welcome: {
