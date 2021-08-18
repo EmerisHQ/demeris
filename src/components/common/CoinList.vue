@@ -146,7 +146,6 @@ export default defineComponent({
 
     const coinsWithValue = computed(() => {
       let coins = modifiedData.value;
-      console.log(coins);
       coins.map((b) => {
         let denom = b.base_denom;
         if (b.amount) {
