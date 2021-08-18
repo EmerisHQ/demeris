@@ -118,21 +118,7 @@ export default {
     });
 
     const orderPools = (unorderedPools) => {
-      let pools = [];
-      let lpPools = [];
-      unorderedPools.map((x) => {
-        if (x.displayName?.substring(0, 7) === 'Gravity') {
-          lpPools.push(x);
-        } else {
-          pools.push(x);
-        }
-      });
-      pools = orderBy(pools, [(x) => x.totalLiquidityPrice || 0, 'displayName'], ['desc', 'asc']);
-      lpPools = orderBy(lpPools, [(x) => x.totalLiquidityPrice || 0], ['desc']);
-      lpPools = lpPools.sort((a, b) =>
-        a.displayName.localeCompare(b.displayName, 0, { numeric: true, sensitivity: 'base' }),
-      );
-      return pools.concat(lpPools);
+      return orderBy(unorderedPools, [(x) => x.totalLiquidityPrice || 0, 'displayName'], ['desc', 'asc']);
     };
 
     const filteredPools = computed(() => {

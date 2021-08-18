@@ -2,11 +2,10 @@ import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
-
-import { store, useAllStores } from '../store/index';
 
 export default function usePools() {
   const stores = useAllStores();
@@ -243,6 +242,22 @@ export default function usePools() {
     }
   };
 
+  const reserveBalances = async (pool: Pool) => {
+    const balances = store.getters['demeris/getBalances']({
+      address: keyHashfromAddress(pool.reserve_account_address),
+    });
+
+    const balanceA = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0];
+    });
+    const balanceB = balances.find((x) => {
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1];
+    });
+    return {
+      balanceA: parseInt(parseCoins(balanceA.amount)[0].amount),
+      balanceB: parseInt(parseCoins(balanceB.amount)[0].amount),
+    };
+  };
   const reserveBalancesById = async (id: string) => {
     const pool = pools.value.find((item) => item.id === id);
 
@@ -273,6 +288,10 @@ export default function usePools() {
     }
     return total;
   };
+  const totalLiquidityPrice = async (pool: Pool) => {
+    const reserveBals = await reserveBalances(pool);
+    return liquidityPriceById(pool.id, [reserveBals.balanceA, reserveBals.balanceB]);
+  };
   const totalLiquidityPriceById = async (id: string) => {
     const reserveBalances = await reserveBalancesById(id);
     return liquidityPriceById(id, [reserveBalances.balanceA, reserveBalances.balanceB]);
@@ -289,6 +308,7 @@ export default function usePools() {
     reserveBalancesById,
     denomListByPools,
     totalLiquidityPriceById,
+    totalLiquidityPrice,
     updatePool,
     updatePoolById,
   };
