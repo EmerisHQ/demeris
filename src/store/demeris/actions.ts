@@ -687,7 +687,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
       }
     } catch (e) {
-      console.log(e);
       throw new SpVuexError('Demeris:GetPrices', 'Could not perform API query.');
     }
     return getters['getPrices'];

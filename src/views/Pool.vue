@@ -334,7 +334,7 @@ export default defineComponent({
     };
 
     watch(reserveBalances, updateDenoms, { immediate: true });
-    console.log(totalLiquidityPrice);
+
     return {
       hasPrices,
       pool,

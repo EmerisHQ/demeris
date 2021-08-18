@@ -955,8 +955,6 @@ export default {
 
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountBToA);
 
-            console.log('minamount', minAmount.toString());
-
             if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
               form.coinA.amount = bigAmountA
                 .shiftedBy(-precisionA + precisionDiff)
