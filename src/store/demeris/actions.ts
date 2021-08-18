@@ -680,7 +680,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
                     Price: (price * 10 ** 6) / supply,
                     Supply: supply,
                   };
-                  console.log(priceData);
+                  // console.log(priceData);
                   response.data.data.Tokens.push(priceData);
                 }
               } catch (e) {}
