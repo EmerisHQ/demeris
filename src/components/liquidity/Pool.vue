@@ -29,7 +29,7 @@
         </div>
       </div>
       <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">
-        {{ toUSD(totalLiquidityPrice.value) }}
+        {{ toUSD(totalLiquidityPrice) }}
       </div>
       <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
     </div>
@@ -37,16 +37,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
 import { isNative } from '@/utils/basic';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default defineComponent({
   name: 'Pool',
@@ -63,7 +61,8 @@ export default defineComponent({
   setup(props) {
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
-    const pairName = ref('-/-');
+
+    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
 
@@ -139,13 +138,6 @@ export default defineComponent({
       },
       { immediate: true },
     );
-    const { formatPoolName } = usePools();
-
-    onMounted(async () => {
-      pairName.value = await formatPoolName(props.pool as Pool);
-    });
-
-    const { pool } = usePool((props.pool as Pool).id);
 
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
@@ -158,13 +150,6 @@ export default defineComponent({
       });
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
-
-    const totalLiquidityPrice = computed(() => {
-      if (pool.value) {
-        return getTotalLiquidityPrice(pool.value);
-      }
-      return 0;
-    });
 
     return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD };
   },

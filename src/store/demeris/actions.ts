@@ -3,7 +3,7 @@ import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
-import usePools from '@/composables/usePools';
+import usePool from '@/composables/usePool';
 import { RootState } from '@/store';
 import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
@@ -702,25 +702,21 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
-        const supplies = rootGetters['cosmos.bank.v1beta1/getTotalSupply']();
-        const { totalLiquidityPrice } = usePools();
         for (const denom of getters['getVerifiedDenoms']) {
           if (denom.name.startsWith('pool')) {
             const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
             if (pools) {
               const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
               if (pool) {
-                const supply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+                const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
+                await initPromise;
                 try {
-                  const price = await totalLiquidityPrice(pool);
-
-                  if (price > 0) {
+                  if (totalLiquidityPrice.value > 0) {
                     const priceData = {
                       Symbol: denom.ticker + 'USDT',
-                      Price: (price * 10 ** 6) / supply,
-                      Supply: supply,
+                      Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
+                      Supply: totalSupply.value,
                     };
-                    console.log(priceData);
                     response.data.data.Tokens.push(priceData);
                   }
                 } catch (e) {}

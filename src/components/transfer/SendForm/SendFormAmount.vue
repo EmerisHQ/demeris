@@ -300,7 +300,6 @@ export default defineComponent({
 
     const feesAmount = computed(() => {
       const result = {};
-      console.log(state.fees);
       if (state.fees) {
         for (const [, obj] of Object.entries(state.fees)) {
           for (const [denom, value] of Object.entries(obj)) {

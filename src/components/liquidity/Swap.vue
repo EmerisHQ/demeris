@@ -186,8 +186,15 @@ export default defineComponent({
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms, updatePoolById } =
-      usePools();
+    const {
+      pools,
+      filterPoolsByDenom,
+      getPoolById,
+      getPoolPrice,
+      getReserveBalances,
+      getReserveBaseDenoms,
+      updatePool,
+    } = usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
@@ -800,20 +807,18 @@ export default defineComponent({
           }
           data.isLoading = true;
           try {
-            const id = poolsByDenom(payDenom).find((pool) => {
+            const pool = filterPoolsByDenom(payDenom).find((pool) => {
               return (
                 pool.reserve_coin_denoms.find((denom) => {
                   return denom === receiveDenom;
                 })?.length > 0
               );
-            })?.id;
+            });
 
-            poolId.value = id;
-
-            const pool = poolById(id);
+            poolId.value = pool.id;
             const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await reserveBalancesById(id);
-            const poolPrice = await poolPriceById(id);
+            const reserveBalances = await getReserveBalances(pool);
+            const poolPrice = await getPoolPrice(pool);
 
             data.selectedPoolData = {
               pool,
@@ -841,11 +846,11 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
-            await updatePoolById(id);
-            const pool = poolById(id);
-            const poolPrice = await poolPriceById(id);
+            const pool = getPoolById(id);
+            await updatePool(pool);
+            const poolPrice = await getPoolPrice(pool);
             const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await reserveBalancesById(id);
+            const reserveBalances = await getReserveBalances(pool);
             data.selectedPoolData = {
               pool,
               poolPrice,
