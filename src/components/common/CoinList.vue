@@ -179,7 +179,7 @@ export default defineComponent({
     };
 
     const coinsByType = computed(() => {
-      return orderCoinsSimple(modifiedData.value);
+      return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });
 
     return { setWordColorByKeyword, coinsByType };
