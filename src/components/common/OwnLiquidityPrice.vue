@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ toUSD((ownShare / 100) * totalLiquidityPrice.value) }}
+    {{ toUSD((ownShare / 100) * totalLiquidityPrice) }}
     <span v-if="showShare">{{ ' (' + ownShare.toFixed(2) + '%)' }}</span>
   </span>
 </template>
@@ -87,7 +87,6 @@ export default defineComponent({
       if (!pool.value || !reserveBalances.value?.length) {
         return;
       }
-
       const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
 
       const poolCoin = {
