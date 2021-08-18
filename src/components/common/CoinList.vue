@@ -134,9 +134,9 @@ export default defineComponent({
       return modifiedData;
     }
 
-    const getAmount = (amount, denom) => {
-      let result = amount.replace(denom, '');
-      result = parseInt(result.replace('undefined', ''));
+    const getAmount = (amount: number | string, denom: string) => {
+      const value = amount.toString().replace(denom, '');
+      const result = parseInt(value.replace('undefined', ''));
       return result;
     };
 
