@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ toUSD((ownShare / 100) * totalLiquidityPrice.value) }}
+    {{ toUSD((ownShare / 100) * totalLiquidityPrice) }}
     <span v-if="showShare">{{ ' (' + ownShare.toFixed(2) + '%)' }}</span>
   </span>
 </template>
@@ -14,7 +14,6 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -35,9 +34,8 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pool, reserveBalances, calculateWithdrawBalances, reserveBaseDenoms, totalSupply } = usePool(
-      (props.pool as Pool).id,
-    );
+    const { pool, reserveBalances, getPoolWithdrawBalances, totalLiquidityPrice, reserveBaseDenoms, totalSupply } =
+      usePool((props.pool as Pool).id);
 
     const store = useStore();
 
@@ -74,13 +72,6 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
 
-    const totalLiquidityPrice = computed(() => {
-      if (pool.value) {
-        return getTotalLiquidityPrice(pool.value);
-      }
-      return 0;
-    });
-
     const ownShare = computed(() => {
       if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
         return 0;
@@ -96,14 +87,13 @@ export default defineComponent({
       if (!pool.value || !reserveBalances.value?.length) {
         return;
       }
-
       const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
 
       const poolCoin = {
         denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],

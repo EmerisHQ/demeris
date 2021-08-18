@@ -29,7 +29,7 @@
         <section v-else class="mt-16">
           <header class="space-y-0.5">
             <h2 class="text-muted">Balance</h2>
-            <Price :amount="{ amount: totalAmount, denom }" class="text-3 font-bold" />
+            <Price :amount="{ amount: totalAmount, denom }" :show-zero="true" class="text-3 font-bold" />
             <div class="text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
             </div>
@@ -190,7 +190,7 @@ export default defineComponent({
     const denom = computed(() => route.params.denom as string);
 
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
-    const { poolsByDenom, withdrawBalancesById } = usePools();
+    const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
@@ -233,7 +233,7 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const poolsWithAsset = computed(() => poolsByDenom(poolDenom.value));
+    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
@@ -299,8 +299,8 @@ export default defineComponent({
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-        const withdrawBalances = withdrawBalancesById(
-          pool.id,
+        const withdrawBalances = getWithdrawBalances(
+          pool,
           poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
         );
 

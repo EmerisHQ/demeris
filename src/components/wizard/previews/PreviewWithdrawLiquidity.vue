@@ -102,11 +102,11 @@ export default defineComponent({
     const store = useStore();
     const price = ref(1);
 
-    const { poolPriceById, pools } = usePools();
+    const { getPoolPrice, getPoolById } = usePools();
 
     const data = computed(() => {
       if (props.response) {
-        const pool = pools.value.find((item) => item.id === props.response.pool_id);
+        const pool = getPoolById(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
         return { pool, poolCoin };
       }
@@ -118,10 +118,10 @@ export default defineComponent({
       return store.getters['demeris/getDexChain'];
     });
 
-    const { pool, pairName, calculateWithdrawBalances } = usePool(data.value.pool.id);
+    const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
 
     const receiveAmount = computed(() => {
-      const result = calculateWithdrawBalances(+data.value.poolCoin.amount);
+      const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
       return {
         coinA: result[0],
         coinB: result[1],
@@ -129,7 +129,7 @@ export default defineComponent({
     });
 
     watch(props.step as Actions.Step, async () => {
-      price.value = await poolPriceById(pool.value.id);
+      price.value = await getPoolPrice(pool.value);
     });
 
     return {

@@ -68,9 +68,9 @@ import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default {
   name: 'PoolsTable',
@@ -87,16 +87,24 @@ export default {
     const router = useRouter();
     const keyword = ref<string>('');
     const renderedPools = ref([]);
+    const poolsWithTotalLiquidityPrice = ref([]);
 
-    const { formatPoolName, getReserveBaseDenoms } = usePools();
+    const { getPoolName, getReserveBaseDenoms } = usePools();
     watch(
       () => props.pools,
       async (newVal) => {
         if (newVal.length > 0) {
           renderedPools.value = await Promise.all(
             props.pools.map(async (pool: any) => {
-              pool.displayName = await formatPoolName(pool);
+              pool.displayName = await getPoolName(pool);
               pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
+              return pool;
+            }),
+          );
+          poolsWithTotalLiquidityPrice.value = await Promise.all(
+            renderedPools.value.map(async (pool) => {
+              const { totalLiquidityPrice } = usePool(pool.id);
+              pool.totalLiquidityPrice = totalLiquidityPrice;
               return pool;
             }),
           );
@@ -104,18 +112,6 @@ export default {
       },
       { immediate: true },
     );
-
-    const poolsWithTotalLiquidityPrice = computed(() => {
-      let pools = renderedPools.value;
-      pools.map((p) => {
-        let tlp = getTotalLiquidityPrice(p);
-        if (tlp) {
-          p.totalLiquidityPrice = tlp;
-        }
-        return p;
-      });
-      return pools;
-    });
 
     const orderPools = (unorderedPools) => {
       return orderBy(unorderedPools, [(x) => x.totalLiquidityPrice || 0, 'displayName'], ['desc', 'asc']);
@@ -142,7 +138,7 @@ export default {
       keyword,
       rowClickHandler,
       openAddLiqudityPage,
-      formatPoolName,
+      getPoolName,
       orderPools,
       poolsWithTotalLiquidityPrice,
     };

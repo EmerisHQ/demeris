@@ -18,7 +18,7 @@
               <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
-          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice.value) }}</div>
+          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>
 
         <section v-if="reserveBalances && walletBalances" class="mt-16">
@@ -98,7 +98,7 @@
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice.value) }}</span>
+                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice) }}</span>
                   <span v-else>–</span>
                 </td>
               </tr>
@@ -192,7 +192,6 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { parseCoins } from '@/utils/basic';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
 
 export default defineComponent({
   name: 'Pool',
@@ -226,7 +225,7 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
-    const { formatPoolName, poolsByDenom, getReserveBaseDenoms } = usePools();
+    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
     const hasPrices = computed(() => {
       let baseDenoms = denoms.value;
@@ -246,7 +245,7 @@ export default defineComponent({
       };
     });
 
-    const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
+    const { pool, reserveBalances, pairName, getPoolWithdrawBalances, totalSupply, totalLiquidityPrice } = usePool(
       computed(() => route.params.id as string),
     );
 
@@ -254,13 +253,6 @@ export default defineComponent({
       title: pairName.value,
     }));
     useMeta(metaSource);
-
-    const totalLiquidityPrice = computed(() => {
-      if (pool.value) {
-        return getTotalLiquidityPrice(pool.value);
-      }
-      return 0;
-    });
 
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
@@ -273,7 +265,7 @@ export default defineComponent({
         denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
@@ -301,7 +293,10 @@ export default defineComponent({
 
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
-      return [...poolsByDenom(pool.value.reserve_coin_denoms[0]), ...poolsByDenom(pool.value.reserve_coin_denoms[1])]
+      return [
+        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[0]),
+        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[1]),
+      ]
         .filter((item) => item.id !== pool.value.id)
         .slice(0, 3);
     });
@@ -350,7 +345,7 @@ export default defineComponent({
       totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
-      formatPoolName,
+      getPoolName,
       ownShare,
       toUSD,
       openAssetPage,

@@ -107,7 +107,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
   },
   getRelayerChainStatus: (state) => (params) => {
-    console.log(state);
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer;
   },
   isDemoAccount: (state) => {
