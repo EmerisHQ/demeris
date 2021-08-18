@@ -175,14 +175,14 @@ export default defineComponent({
       // let isBrave = typeof navigator.brave !== 'undefined';
       // @ts-ignore
       let isOpera = typeof window.opr !== 'undefined';
-      let isIEedge = winNav.userAgent.indexOf('Edge') > -1;
+      // let isIEedge = winNav.userAgent.indexOf('Edg') > -1;
 
       isEmerisSupported.value =
         isChromium !== null &&
         typeof isChromium !== 'undefined' &&
         vendorName === 'Google Inc.' &&
         // isBrave === false &&
-        isIEedge === false &&
+        // isIEedge === false &&
         isOpera === false;
 
       // dont present spinner forever if not Chromium
