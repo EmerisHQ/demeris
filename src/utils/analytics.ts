@@ -1,6 +1,7 @@
 import { useCookie } from 'vue-cookie-next';
-const { getCookie } = useCookie();
 import { event as gtagevent, pageview as gtagpageview } from 'vue-gtag';
+
+//const { getCookie } = useCookie();
 // eslint-disable-next-line @typescript-eslint/ban-types
 type ArgumentTypes<F extends Function> = F extends (...args: infer A) => any ? A : never;
 
