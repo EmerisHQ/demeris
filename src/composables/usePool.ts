@@ -84,8 +84,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
         prices.push(liquidityPrice);
       }
     });
-    console.log(baseDenoms);
-    console.log(prices);
     if (prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {

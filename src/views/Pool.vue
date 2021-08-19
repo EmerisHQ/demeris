@@ -232,8 +232,6 @@ export default defineComponent({
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-      console.log(store.getters['demeris/getPrice']({ denom: baseDenoms[0] }));
-      console.log(store.getters['demeris/getPrice']({ denom: baseDenoms[1] }));
       const coinA = !!store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
       const coinB = !!store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
       const all = coinA && coinB;
