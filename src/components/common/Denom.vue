@@ -20,7 +20,13 @@ export default defineComponent({
       (denomName, oldDenomName) => {
         if (denomName != oldDenomName || !loaded) {
           const { displayName } = useDenom(denomName);
-          display = displayName;
+          watch(
+            () => displayName.value,
+            (newName) => {
+              display.value = newName;
+            },
+            { immediate: true },
+          );
         }
       },
       { immediate: true },

@@ -20,7 +20,13 @@ export default defineComponent({
       (denomName, oldDenomName) => {
         if (denomName != oldDenomName || !loaded) {
           const { tickerName } = useDenom(denomName);
-          ticker = tickerName;
+          watch(
+            () => tickerName.value,
+            (newName) => {
+              ticker.value = newName;
+            },
+            { immediate: true },
+          );
         }
       },
       { immediate: true },
