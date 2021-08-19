@@ -154,7 +154,7 @@ export const messages = {
       stakeTable: {
         earnRewards: 'Earn rewards by staking',
         lockUp: 'Lock up your',
-        andEarn: 'and earn staking rewards with an average',
+        andEarn: 'and earn continuous staking rewards.',
         apy: '9.7% APY',
       },
       feeWarningModal: {

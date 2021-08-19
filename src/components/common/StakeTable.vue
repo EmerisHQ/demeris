@@ -45,7 +45,6 @@ export default defineComponent({
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
             {{ $t('components.stakeTable.lockUp') }} <Ticker :name="denom" /> {{ $t('components.stakeTable.andEarn') }}
-            <span class="font-bold">{{ $t('components.stakeTable.apy') }}</span>.
           </p>
         </div>
 
