@@ -95,6 +95,7 @@ export default defineComponent({
 
           const action: TransferAction = {
             name: 'transfer',
+            memo: form.memo,
             params: {
               from: {
                 amount: {

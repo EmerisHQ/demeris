@@ -346,5 +346,21 @@ export const messages = {
         explore: 'Explore pools',
       },
     },
+    pages: {
+      addLiquidity: {
+        selectCTA: 'Select two assets',
+        pool: 'pool',
+        firstProvider: 'You are the first liquidity provider',
+      },
+      asset: {},
+      assets: {},
+      chains: {},
+      portfolio: {},
+      receive: {},
+      redeem: {},
+      send: {},
+      welcome: {},
+      withdrawLiquidity: {},
+    },
   },
 };
