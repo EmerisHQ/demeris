@@ -24,6 +24,13 @@ export default function usePool(id?: string | ComputedRef<string>) {
   const init = async () => {
     pairName.value = await getPoolName(pool.value);
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
+
+    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
+      immediate: true,
+    });
+    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
+      immediate: true,
+    });
   };
 
   const totalSupply = computed(() => {

@@ -68,23 +68,34 @@ export default defineComponent({
       return value;
     });
 
+    /*
+     There are 2 reasons to update the price. Either amount changed or price changed.
+     If amount changes, ALWAYS recalculate.
+     If price changed, only recalculate if autoUpdate=true or on initial load.
+     If the autoUpdate prop is changed, if it is changed to false, do nothing, if changed to true, recalculate
+    */
+
     watch(
       () => props.amount as Amount,
       async (value) => {
         denom.value = await getBaseDenom((value as Amount).denom);
-        if (!isLoaded.value) {
-          price.value = priceObserver.value;
-        }
-        isLoaded.value = true;
+        price.value = priceObserver.value;
       },
       { immediate: true },
     );
-
     watch(
-      () => [props.autoUpdate, props.amount, priceObserver],
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ([autoUpdate, amount], [_, oldAmount]) => {
-        if (autoUpdate || (amount as Amount).denom !== (oldAmount as Amount).denom) {
+      () => priceObserver.value,
+      (newPrice) => {
+        if (props.autoUpdate || !isLoaded.value) {
+          price.value = newPrice;
+          isLoaded.value = true;
+        }
+      },
+    );
+    watch(
+      () => props.autoUpdate,
+      (autoUpdate) => {
+        if (autoUpdate) {
           nextTick(() => {
             price.value = priceObserver.value;
           });
