@@ -1,6 +1,6 @@
 <template>
   <div class="receive relative flex flex-col w-full min-h-screen items-center">
-    <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
+    <header class="absolute w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
       <Button v-if="state.selectedAsset" variant="link" :full-width="false" :click-function="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.5" />
       </Button>
@@ -19,7 +19,7 @@
         mx-auto
         md:pt-8
         px-8
-        pb-28
+        pb-0
         flex-1 flex flex-col
         items-center
         justify-center
@@ -27,9 +27,9 @@
       "
     >
       <template v-if="!state.selectedAsset">
-        <div class="absolute top-0 h-full w-full max-w-md mx-auto">
+        <div class="-mt-9 h-full w-full max-w-md mx-auto">
           <DenomSelectModal
-            title="Receive"
+            :title="$t('pages.receive.select')"
             class="denom-select-modal h-full"
             :assets="balances"
             :show-balance="true"
