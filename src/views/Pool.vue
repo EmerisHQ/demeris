@@ -129,7 +129,7 @@
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
             <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
-              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice.value : 0) }}
+              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0) }}
             </p>
             <p class="text-muted mt-1">
               <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
@@ -232,10 +232,10 @@ export default defineComponent({
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-
+      console.log(store.getters['demeris/getPrice']({ denom: baseDenoms[0] }));
+      console.log(store.getters['demeris/getPrice']({ denom: baseDenoms[1] }));
       const coinA = !!store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
       const coinB = !!store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
-
       const all = coinA && coinB;
 
       return {
