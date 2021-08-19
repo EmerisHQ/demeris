@@ -390,7 +390,7 @@ export default {
       }
       const coinA = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
       const coinB = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
-      const result = calculateSupplyTokenAmount(coinA * 10 ** precisionA.value, coinB * 10 ** precisionB.value);
+      const result = calculateSupplyTokenAmount(coinA * 10 ** (-1 * precisionDiffs.value.coinB), coinB);
       state.amount = (+result.toFixed(6)).toString();
     };
 
