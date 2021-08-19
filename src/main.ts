@@ -35,7 +35,15 @@ app
   .use(vueLib)
   .use(VueTippy)
   .use(createMetaManager())
-  .use(VueGtag, { config: { id: 'UA-201374903-1' } })
+  .use(VueGtag, {
+    config: {
+      id: 'UA-201374903-1',
+      params: {
+        anonymize_ip: true,
+        send_page_view: false,
+      },
+    },
+  })
   .mount('#app');
 
 app.config.globalProperties.$filters = {
