@@ -1,11 +1,10 @@
 <template>
-  {{ displayDenom }}
+  {{ display }}
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
-import { useStore } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
+import useDenoms from '@/composables/useDenoms';
 
 export default defineComponent({
   name: 'Denom',
@@ -13,21 +12,21 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const displayDenom = ref('-');
+    let display = ref('-');
+    const loaded = false;
+    const { useDenom } = useDenoms();
+    watch(
+      () => props.name,
+      (denomName, oldDenomName) => {
+        if (denomName != oldDenomName || !loaded) {
+          const { displayName } = useDenom(denomName);
+          display = displayName;
+        }
+      },
+      { immediate: true },
+    );
 
-    const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'];
-    });
-
-    const updateName = async () => {
-      displayDenom.value = await getDisplayName(props.name, store.getters['demeris/getDexChain']);
-    };
-
-    watch(() => props.name, updateName, { immediate: true });
-    watch(verifiedDenoms, updateName);
-
-    return { displayDenom };
+    return { display };
   },
 });
 </script>
