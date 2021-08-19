@@ -28,6 +28,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { event } from 'vue-gtag';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
@@ -115,6 +116,7 @@ export default defineComponent({
       },
     );
     const generateSteps = async () => {
+      event('review_send_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
       goToStep('review');
     };
 

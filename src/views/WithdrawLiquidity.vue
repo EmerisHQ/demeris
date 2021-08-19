@@ -193,6 +193,7 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { event } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -504,6 +505,10 @@ export default {
     };
 
     const goToReview = () => {
+      event('review_withdraw_liquidity_tx', {
+        event_label: 'Reviewing withdraw liquidity tx',
+        event_category: 'transactions',
+      });
       goToStep('review');
     };
 

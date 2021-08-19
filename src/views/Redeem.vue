@@ -99,6 +99,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue';
+import { event } from 'vue-gtag';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -212,6 +213,7 @@ export default defineComponent({
 
     const selectAsset = (asset: Record<string, unknown>) => {
       state.selectedAsset = asset;
+      event('review_redeem_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
       goToStep('review');
     };
 
