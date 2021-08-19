@@ -299,12 +299,25 @@ export default {
       totalSupply,
     } = usePool(computed(() => poolId.value as string));
 
+    const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom);
+    const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);
+    const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
+    const precisionA = computed(
+      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 1 : 0] }) || 6,
+    );
+    const precisionB = computed(
+      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 0 : 1] }) || 6,
+    );
+    const precisionDiffs = computed(() => {
+      return {
+        coinA: 6 - precisionA.value,
+        coinB: 6 - precisionB.value,
+      };
+    });
+
     const exchangeAmount = computed(() => {
       if (reserveBalances.value?.length) {
-        return new BigNumber(reserveBalances.value[1].amount)
-          .dividedBy(reserveBalances.value[0].amount)
-          .shiftedBy(6)
-          .toNumber();
+        return new BigNumber(coinB.value.amount).dividedBy(coinA.value.amount).shiftedBy(6).toNumber();
       }
 
       return undefined;
@@ -375,8 +388,9 @@ export default {
         state.amount = '';
         return;
       }
-
-      const result = calculateSupplyTokenAmount(+state.receiveAmounts.coinA.amount, +state.receiveAmounts.coinB.amount);
+      const coinA = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
+      const coinB = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
+      const result = calculateSupplyTokenAmount(coinA, coinB);
       state.amount = (+result.toFixed(6)).toString();
     };
 
@@ -406,18 +420,17 @@ export default {
         return;
       }
 
-      const precisionA = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
-      const precisionB = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
-
       const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
 
-      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
-      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA.value).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB.value).multipliedBy(priceB);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
       const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
+      console.log('result', result);
+      console.log('state', state);
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -431,9 +444,8 @@ export default {
         return;
       }
 
-      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
       const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(state.receiveAmounts.coinA.amount);
-      state.receiveAmounts.coinB.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      state.receiveAmounts.coinB.amount = result.isFinite() ? result.decimalPlaces(precisionB.value).toString() : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
@@ -445,11 +457,10 @@ export default {
         return;
       }
 
-      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
       const result = new BigNumber(state.receiveAmounts.coinB.amount).dividedBy(
         new BigNumber(exchangeAmount.value).shiftedBy(-6),
       );
-      state.receiveAmounts.coinA.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      state.receiveAmounts.coinA.amount = result.isFinite() ? result.decimalPlaces(precisionA.value).toString() : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
@@ -457,9 +468,14 @@ export default {
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
       const result = getPoolWithdrawBalances(+state.amount);
-
-      state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
-      state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
+        .shiftedBy(precisionDiffs.value.coinA)
+        .decimalPlaces(6)
+        .toString();
+      state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
+        .shiftedBy(precisionDiffs.value.coinB)
+        .decimalPlaces(6)
+        .toString();
       updateTotalCurrencyPrice();
     };
 
@@ -539,8 +555,14 @@ export default {
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
           const result = getPoolWithdrawBalances(+state.amount);
 
-          state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
-          state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+          state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
+            .shiftedBy(precisionDiffs.value.coinA)
+            .decimalPlaces(6)
+            .toString();
+          state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
+            .shiftedBy(precisionDiffs.value.coinB)
+            .decimalPlaces(6)
+            .toString();
           updateTotalCurrencyPrice();
         }
       },
