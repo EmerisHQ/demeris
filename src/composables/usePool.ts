@@ -28,7 +28,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
     watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
       immediate: true,
     });
-    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
+    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] }), updateTotalLiquidityPrice, {
       immediate: true,
     });
   };
@@ -84,6 +84,8 @@ export default function usePool(id?: string | ComputedRef<string>) {
         prices.push(liquidityPrice);
       }
     });
+    console.log(baseDenoms);
+    console.log(prices);
     if (prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {
