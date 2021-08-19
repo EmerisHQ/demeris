@@ -194,6 +194,7 @@
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
 import { event } from 'vue-gtag';
+import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -247,7 +248,7 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-
+    pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
     const poolId = computed(() => route.params.id);
 
     const { getPoolName } = usePools();

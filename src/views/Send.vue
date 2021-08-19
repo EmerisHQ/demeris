@@ -131,6 +131,7 @@
 
 <script lang="ts">
 import { computed, ref } from 'vue';
+import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -153,7 +154,7 @@ export default {
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
     const step = ref(undefined);
-
+    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const { balances } = useAccount();
 
     const showBackButton = computed(() => {

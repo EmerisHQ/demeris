@@ -176,6 +176,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
+import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -212,7 +213,7 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const denoms = ref([]);
-
+    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',

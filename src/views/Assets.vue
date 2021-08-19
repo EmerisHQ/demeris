@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import { computed } from '@vue/reactivity';
+import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -31,7 +32,7 @@ export default {
     );
 
     const router = useRouter();
-
+    pageview({ page_title: 'Assets', page_path: '/assets' });
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };

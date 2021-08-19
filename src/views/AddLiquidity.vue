@@ -314,7 +314,7 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
-import { event } from 'vue-gtag';
+import { event, pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -395,6 +395,7 @@ export default {
       return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
+    pageview({ page_title: 'Add Liquidity', page_path: '/pools/add/' + route.params.id });
     const hasPrices = computed(() => {
       if (!hasPool.value) {
         return false;

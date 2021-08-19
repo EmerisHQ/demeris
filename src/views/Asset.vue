@@ -135,6 +135,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue';
+import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -181,7 +182,6 @@ export default defineComponent({
       return { title: displayName.value };
     });
     useMeta(metaSource);
-
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
@@ -189,6 +189,7 @@ export default defineComponent({
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
+    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 

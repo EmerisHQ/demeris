@@ -69,6 +69,7 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -121,7 +122,7 @@ export default defineComponent({
 
   setup() {
     useMeta({ title: '' });
-
+    pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
     const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);

@@ -99,7 +99,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue';
-import { event } from 'vue-gtag';
+import { event, pageview } from 'vue-gtag';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -124,7 +124,7 @@ export default defineComponent({
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
     const store = useStore();
-
+    pageview({ page_title: 'Redeem', page_path: '/redeem' });
     store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
     const state = reactive({
       step: 'assets',

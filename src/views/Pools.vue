@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import { computed } from '@vue/reactivity';
+import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 
@@ -23,7 +24,7 @@ export default {
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
-
+    pageview({ page_title: 'Pools', page_path: '/pools' });
     useMeta(
       computed(() => ({
         title: t('context.pools.title'),
