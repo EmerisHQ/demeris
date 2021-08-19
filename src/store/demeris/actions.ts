@@ -1,6 +1,7 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
+import { event } from 'vue-gtag';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
@@ -626,6 +627,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
+
       const chains = getters['getChains'];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
@@ -646,6 +648,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await window.keplr.enable(dexchain.node_info.chain_id);
       const key = await window.keplr.getKey(dexchain.node_info.chain_id);
       commit(DemerisMutationTypes.SET_KEPLR, key);
+      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
       for (const chain of toQuery) {
         await window.keplr.enable(chain.node_info.chain_id);
@@ -675,7 +678,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
-
+      event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
       dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
       dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
         subscribe: true,
@@ -1060,6 +1063,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.RESET_STATE);
   },
   [DemerisActionTypes.SIGN_OUT]({ commit }) {
+    event('sign_out', { event_label: 'Signed out', event_category: 'authentication' });
     commit(DemerisMutationTypes.SIGN_OUT);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
