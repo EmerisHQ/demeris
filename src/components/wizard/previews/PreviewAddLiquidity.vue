@@ -180,6 +180,7 @@ export default defineComponent({
       const precisionDiff = precisions.value.coinA - precisions.value.coinB;
 
       if (!hasPool.value) {
+        const precisionDiff = precisions.value.coinA - precisions.value.coinB;
         return {
           coinA,
           coinB: new BigNumber(data.value.coinB.amount || 1)

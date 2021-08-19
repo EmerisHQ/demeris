@@ -31,11 +31,12 @@
                   {{ pageTitle }}
                 </h1>
 
-                <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
+                <p v-if="!hasPair" class="mt-3 text-muted">{{ $t('pages.addLiquidity.selectCTA') }}</p>
                 <div v-else class="mt-3 text-muted">
                   <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" />
                   <span class="mx-1">&middot;</span>
-                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" /> pool
+                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
+                  {{ $t('pages.addLiquidity.pool') }}
                 </div>
               </div>
 
@@ -77,7 +78,7 @@
               />
 
               <Alert v-if="hasPair && !hasPool" status="warning" class="my-6 max-w-sm mx-auto">
-                <p class="font-bold">You are the first liquidity provider</p>
+                <p class="font-bold">{{ $t('pages.addLiquidity.firstProvider') }}</p>
                 <p class="mt-0.5">
                   As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> &middot;
                   <Ticker :name="form.coinB.asset.base_denom" />
