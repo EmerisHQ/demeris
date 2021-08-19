@@ -390,7 +390,7 @@ export default {
       }
       const coinA = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
       const coinB = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
-      const result = calculateSupplyTokenAmount(coinA, coinB);
+      const result = calculateSupplyTokenAmount(coinA * 10 ** precisionA.value, coinB * 10 ** precisionB.value);
       state.amount = (+result.toFixed(6)).toString();
     };
 
@@ -445,7 +445,12 @@ export default {
       }
 
       const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(state.receiveAmounts.coinA.amount);
-      state.receiveAmounts.coinB.amount = result.isFinite() ? result.decimalPlaces(precisionB.value).toString() : '';
+      state.receiveAmounts.coinB.amount = result.isFinite()
+        ? result
+            .shiftedBy(-1 * precisionDiffs.value.coinB)
+            .decimalPlaces(precisionB.value)
+            .toString()
+        : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
@@ -460,7 +465,9 @@ export default {
       const result = new BigNumber(state.receiveAmounts.coinB.amount).dividedBy(
         new BigNumber(exchangeAmount.value).shiftedBy(-6),
       );
-      state.receiveAmounts.coinA.amount = result.isFinite() ? result.decimalPlaces(precisionA.value).toString() : '';
+      state.receiveAmounts.coinA.amount = result.isFinite()
+        ? result.shiftedBy(precisionDiffs.value.coinB).decimalPlaces(precisionA.value).toString()
+        : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
@@ -469,11 +476,11 @@ export default {
       state.isMaximumAmountChecked = false;
       const result = getPoolWithdrawBalances(+state.amount);
       state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
-        .shiftedBy(precisionDiffs.value.coinA)
+        .shiftedBy(precisionDiffs.value.coinB)
         .decimalPlaces(6)
         .toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
-        .shiftedBy(precisionDiffs.value.coinB)
+        .shiftedBy(precisionDiffs.value.coinA)
         .decimalPlaces(6)
         .toString();
       updateTotalCurrencyPrice();
@@ -554,13 +561,12 @@ export default {
 
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
           const result = getPoolWithdrawBalances(+state.amount);
-
           state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
-            .shiftedBy(precisionDiffs.value.coinA)
+            .shiftedBy(precisionDiffs.value.coinB)
             .decimalPlaces(6)
             .toString();
           state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
-            .shiftedBy(precisionDiffs.value.coinB)
+            .shiftedBy(precisionDiffs.value.coinA)
             .decimalPlaces(6)
             .toString();
           updateTotalCurrencyPrice();
