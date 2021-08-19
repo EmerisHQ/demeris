@@ -5,6 +5,7 @@ import * as Base from './base';
 
 export type BaseAction = {
   name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool';
+  memo?: string;
 };
 export type SwapParams = {
   from: Base.ChainAmount;
@@ -115,6 +116,7 @@ export type StepTransaction = {
 export type Step = {
   name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
   description: string;
+  memo?: string;
   output?: {
     amount: {
       denom: string;

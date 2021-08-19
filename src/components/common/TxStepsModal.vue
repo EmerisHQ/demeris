@@ -662,7 +662,7 @@ export default defineComponent({
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
-                  memo: '',
+                  memo: currentData.value.data.memo ?? '',
                 });
               } catch (e) {
                 console.error(e);
@@ -780,10 +780,13 @@ export default defineComponent({
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
-                      let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                        height: txResultData.height,
-                        stepType: currentData.value.data.name,
-                      });
+                      let endBlockEvent = null;
+                      while (!endBlockEvent) {
+                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                          height: txResultData.height,
+                          stepType: currentData.value.data.name,
+                        });
+                      }
 
                       if (endBlockEvent) {
                         let resultData = endBlockEvent;
