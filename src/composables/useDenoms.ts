@@ -21,7 +21,7 @@ export default function useDenoms() {
       displayName.value = await getDisplayName(base_denom, store.getters['demeris/getDexChain']);
     };
 
-    watch(verifiedDenoms, updateDenom);
+    watch(verifiedDenoms, updateDenom, { immediate: true });
     return { price, displayName, tickerName };
   };
   return { useDenom, verifiedDenoms };
