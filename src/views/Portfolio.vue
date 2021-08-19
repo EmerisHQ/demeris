@@ -53,7 +53,6 @@
 
 <script lang="ts">
 import { computed } from '@vue/runtime-core';
-import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -68,6 +67,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Portfolio',

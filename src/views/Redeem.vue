@@ -99,7 +99,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue';
-import { event, pageview } from 'vue-gtag';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -112,6 +111,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({

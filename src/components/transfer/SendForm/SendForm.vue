@@ -28,13 +28,13 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
-import { event } from 'vue-gtag';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';

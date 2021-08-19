@@ -176,7 +176,6 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
-import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -192,6 +191,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({

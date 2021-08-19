@@ -138,7 +138,6 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
-import { event } from 'vue-gtag';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -159,6 +158,7 @@ import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
 
 export default defineComponent({

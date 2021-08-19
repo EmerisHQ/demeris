@@ -95,7 +95,6 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
-import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 
@@ -109,6 +108,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
 import { Balance } from '@/types/api';
+import { pageview } from '@/utils/analytics';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {

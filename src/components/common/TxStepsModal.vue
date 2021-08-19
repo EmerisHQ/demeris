@@ -252,7 +252,6 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
-import { event } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -286,6 +285,7 @@ import {
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({

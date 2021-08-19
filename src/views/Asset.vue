@@ -135,7 +135,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue';
-import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -156,6 +155,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
+import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({

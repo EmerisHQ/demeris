@@ -4,6 +4,7 @@ import 'tippy.js/dist/tippy.css';
 import vueLib from '@starport/vue';
 import mitt from 'mitt';
 import { createApp } from 'vue';
+import { VueCookieNext } from 'vue-cookie-next';
 import VueGtag from 'vue-gtag';
 import { createI18n } from 'vue-i18n';
 import { createMetaManager } from 'vue-meta';
@@ -34,6 +35,7 @@ app
   .use(router)
   .use(vueLib)
   .use(VueTippy)
+  .use(VueCookieNext)
   .use(createMetaManager())
   .use(VueGtag, {
     config: {
@@ -46,6 +48,7 @@ app
   })
   .mount('#app');
 
+VueCookieNext.config({ expire: '3m' });
 app.config.globalProperties.$filters = {
   ...stringFilters,
 };

@@ -314,7 +314,6 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
-import { event, pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -341,6 +340,7 @@ import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default {

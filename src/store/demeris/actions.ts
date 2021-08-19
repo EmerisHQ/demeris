@@ -1,7 +1,6 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
-import { event } from 'vue-gtag';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
@@ -10,6 +9,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 

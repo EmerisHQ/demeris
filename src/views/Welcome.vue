@@ -69,7 +69,6 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
-import { pageview } from 'vue-gtag';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
@@ -79,6 +78,7 @@ import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetDesktop from '@/components/account/GetDesktop.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
 import Brandmark from '@/components/common/Brandmark.vue';
+import { pageview } from '@/utils/analytics';
 
 async function getKeplrInstance() {
   if (window.keplr) {

@@ -131,7 +131,6 @@
 
 <script lang="ts">
 import { computed, ref } from 'vue';
-import { pageview } from 'vue-gtag';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -141,6 +140,7 @@ import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { pageview } from '@/utils/analytics';
 
 type TransferType = 'address' | 'move';
 
