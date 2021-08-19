@@ -2,7 +2,6 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
-import usePools from '@/composables/usePools';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
@@ -711,6 +710,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           const redeemStep = await redeem(denom);
           steps.push({
             name: 'redeem',
+            memo: action.memo,
             description: 'Redeeming Assets',
             output: redeemStep.output,
             transactions: [...redeemStep.steps],
@@ -728,7 +728,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           destination_chain_name: params.to.chain_name,
         });
 
-        steps.push({ name: 'transfer', description: 'Assets Moved', transactions: [...moveStep.steps] }); //TODO
+        steps.push({
+          name: 'transfer',
+          description: 'Assets Moved',
+          memo: action.memo,
+          transactions: [...moveStep.steps],
+        }); //TODO
 
         break;
       case 'transfer':
@@ -744,7 +749,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           destination_chain_name: params.to.chain_name,
         });
 
-        steps.push({ name: 'transfer', description: 'Assets Transferred', transactions: [...transferStep.steps] }); //TODO
+        steps.push({
+          name: 'transfer',
+          description: 'Assets Transferred',
+          memo: action.memo,
+          transactions: [...transferStep.steps],
+        }); //TODO
         break;
       case 'swap':
         params = (action as Actions.SwapAction).params;
@@ -766,6 +776,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'Assets Must be transferred to hub first', //TODO
+            memo: action.memo,
             transactions: [...transferToHubStep.steps],
           });
         }
@@ -779,7 +790,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.to.amount.denom,
           },
         });
-        steps.push({ name: 'swap', description: 'Assets Swapped', transactions: [...swapStep.steps] }); //TODO
+        steps.push({
+          name: 'swap',
+          description: 'Assets Swapped',
+          memo: action.memo,
+          transactions: [...swapStep.steps],
+        }); //TODO
         break;
       case 'createpool':
         params = (action as Actions.CreatePoolAction).params;
@@ -796,6 +812,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetA must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinAtoHubCreate.steps],
           });
         }
@@ -813,6 +830,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetB must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinBtoHubCreate.steps],
           });
         }
@@ -824,6 +842,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'createpool',
           description: 'Creating Pool', //TODO
+          memo: action.memo,
           transactions: [...createPoolStep.steps],
         });
         break;
@@ -842,6 +861,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetA must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinAtoHub.steps],
           });
         }
@@ -859,6 +879,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetB must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinBtoHub.steps],
           });
         }
@@ -871,6 +892,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'addliquidity',
           description: 'Adding Liquidity', //TODO
+          memo: action.memo,
           transactions: [...addLiquidityStep.steps],
         });
         break;
@@ -888,6 +910,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'Pool token must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferPoolCointoHub.steps],
           });
         }
@@ -898,6 +921,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'withdrawliquidity',
           description: 'Withdrawing liquidity', //TODO
+          memo: action.memo,
           transactions: [...withdrawLiquidityStep.steps],
         });
         break;

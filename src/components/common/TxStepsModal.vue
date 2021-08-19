@@ -662,7 +662,7 @@ export default defineComponent({
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
-                  memo: '',
+                  memo: currentData.value.data.memo ?? '',
                 });
               } catch (e) {
                 console.error(e);
