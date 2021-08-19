@@ -429,8 +429,6 @@ export default {
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
       const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
-      console.log('result', result);
-      console.log('state', state);
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
