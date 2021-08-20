@@ -394,7 +394,9 @@ export const messages = {
         select: 'Select an asset to redeem',
         cta: 'Redeem',
       },
-      send: {},
+      send: {
+        where: 'Where are you sending assets?',
+      },
       welcome: {},
       withdrawLiquidity: {},
     },
