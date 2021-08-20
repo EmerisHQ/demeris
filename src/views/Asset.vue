@@ -40,25 +40,29 @@
             :class="assetConfig?.stakable ? 'grid-cols-3' : 'grid-cols-2'"
           >
             <div>
-              <dt class="text-muted">Available</dt>
+              <dt class="text-muted">{{ $t('components.asset.balance.available') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable">
-              <dt class="text-muted">Staked</dt>
+              <dt class="text-muted">{{ $t('components.asset.balance.staked') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
             <div>
-              <dt class="text-muted">Pooled</dt>
+              <dt class="text-muted">{{ $t('components.asset.balance.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
-                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+                <tippy>
+                  <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+                  <template #content>
+                    <TooltipPools :pools="poolsDisplay" :denom="denom" />
+                  </template>
+                </tippy>
               </dd>
-              <div class="text-muted -text-1">/*Pooled amount warning*/</div>
             </div>
           </dl>
         </section>
@@ -151,6 +155,7 @@ import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -172,6 +177,7 @@ export default defineComponent({
     Price,
     LiquiditySwap,
     Pools,
+    TooltipPools,
     PoolBanner,
     MoonpayBanner,
   },

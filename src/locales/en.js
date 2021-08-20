@@ -91,6 +91,14 @@ export const messages = {
         addLiquidity: 'Add liquidity',
         createNew: 'Create new pool',
       },
+      asset: {
+        balance: {
+          available: 'Available',
+          staked: 'Staked',
+          pooled: 'Pooled',
+        },
+        pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
+      },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
       },
