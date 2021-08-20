@@ -241,7 +241,8 @@ export default defineComponent({
     });
 
     const stakingBalance = computed(() => {
-      if (assetConfig.value && assetConfig.value.chain_name) {
+      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
         return stakingBalancesByChain(assetConfig.value.chain_name);
       }
       return 0;
