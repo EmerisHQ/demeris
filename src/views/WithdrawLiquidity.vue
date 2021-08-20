@@ -536,9 +536,13 @@ export default {
       goToStep('amount');
     };
 
-    onMounted(() => {
-      state.selectedAsset = balances.value[0];
-    });
+    watch(
+      balances,
+      () => {
+        state.selectedAsset = balances.value[0];
+      },
+      { immediate: true },
+    );
 
     watch(
       () => [state.amount, state.selectedAsset, pool],
