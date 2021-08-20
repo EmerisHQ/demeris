@@ -360,7 +360,16 @@ export const messages = {
         arbitrageWarning:
           'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
       },
-      asset: {},
+      asset: {
+        balance: 'Balance',
+        available: 'Available',
+        staked: 'Staked',
+        pooled: 'Pooled',
+        pooledWarning: 'Pooled Warning',
+        chains: 'Chains',
+        pooled: 'Pools',
+        staking: 'Staking',
+      },
       assets: {},
       chains: {},
       portfolio: {},
