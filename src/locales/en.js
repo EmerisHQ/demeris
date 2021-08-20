@@ -386,7 +386,14 @@ export const messages = {
         on: 'on',
         yourAddress: 'Your address',
       },
-      redeem: {},
+      redeem: {
+        title: 'Redeeming assets',
+        instructions:
+          'You hold assets with a transfer history that is not supported by Demeris. If you wish to use these assets with Demeris, you must first redeem them.',
+        learnMore: 'Learn more about redeeming',
+        select: 'Select an asset to redeem',
+        cta: 'Redeem',
+      },
       send: {},
       welcome: {},
       withdrawLiquidity: {},

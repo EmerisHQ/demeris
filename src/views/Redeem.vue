@@ -23,14 +23,13 @@
 
     <main class="redeem__wrapper">
       <div v-if="state.showInstruction" class="redeem__instruction">
-        <h2 class="redeem__title text-2">Redeeming assets</h2>
+        <h2 class="redeem__title text-2">{{ $t('pages.redeem.title') }}</h2>
 
         <div class="redeem__content">
           <div class="redeem__instruction__placeholder" />
 
           <p class="redeem__instruction__description">
-            You hold assets with a transfer history that is not supported by Demeris. If you wish to use these assets
-            with Demeris, you must first redeem them.
+            {{ $t('pages.redeem.instructions') }}
           </p>
 
           <a
@@ -39,17 +38,17 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            Learn more about redeeming ↗️
+            {{ $t('pages.redeem.learnMore') }} ↗️
           </a>
 
           <div class="redeem__controls">
-            <Button name="Continue" @click="closeInstruction" />
+            <Button :name="$t('generic_cta.continue')" @click="closeInstruction" />
           </div>
         </div>
       </div>
 
       <template v-else-if="state.step === 'assets'">
-        <h2 class="redeem__title text-2">Select an asset to redeem</h2>
+        <h2 class="redeem__title text-2">{{ $t('pages.redeem.select') }}</h2>
 
         <div class="redeem__content assets-content">
           <ul class="redeem__list">
@@ -75,7 +74,7 @@
               </div>
 
               <div class="redeem__list__item__controls">
-                <Button name="Redeem" @click="selectAsset(asset)" />
+                <Button :name="$t('pages.redeem.cta')" @click="selectAsset(asset)" />
               </div>
             </li>
           </ul>
