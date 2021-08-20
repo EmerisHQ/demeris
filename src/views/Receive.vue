@@ -12,20 +12,7 @@
       </router-link>
     </header>
 
-    <main
-      class="
-        w-full
-        max-w-7xl
-        mx-auto
-        md:pt-8
-        px-8
-        pb-0
-        flex-1 flex flex-col
-        items-center
-        justify-center
-        overflow-hidden
-      "
-    >
+    <main class="w-full max-w-7xl mx-auto md:pt-8 px-8 pb-0 flex-1 flex flex-col items-center overflow-hidden">
       <template v-if="!state.selectedAsset">
         <div class="-mt-9 h-full w-full max-w-md mx-auto">
           <DenomSelectModal
