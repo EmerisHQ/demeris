@@ -315,7 +315,7 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value + pooledAmount.value;
+      return availableAmount.value + stakedAmount.value;
     });
 
     return {

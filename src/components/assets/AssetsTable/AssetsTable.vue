@@ -152,6 +152,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
@@ -201,7 +202,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const currentLimit = ref(props.limitRows);
-
+    const { stakingBalances } = useAccount();
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
@@ -241,18 +242,34 @@ export default defineComponent({
 
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-
+      const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
       const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
-        const totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
+        let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
-
+        const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+        if (denom_details) {
+          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
+          if (stakedAmounts.length > 0) {
+            const stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+            totalAmount = totalAmount + stakedAmount;
+          }
+        }
         return {
           denom,
           totalAmount,
           chainsNames,
         };
       });
-
+      for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
+        const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
+        if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
+          summary.push({
+            chainsNames: [denom.chain_name],
+            denom: denom.name,
+            totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
+          });
+        }
+      }
       const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
       return sortedSummary;
     });
