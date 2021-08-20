@@ -320,6 +320,9 @@ export const messages = {
       chains: {
         title: 'Chains',
       },
+      moonpay: {
+        cta: 'Add crypto to your account',
+      },
       assets: {
         title: 'Assets',
         totalBalance: 'Total balance',
@@ -370,11 +373,18 @@ export const messages = {
         pooled: 'Pools',
         staking: 'Staking',
       },
-      assets: {},
-      chains: {},
+      assets: {
+        assets: 'Assets',
+      },
+      chains: {
+        chains: 'Chains',
+      },
       portfolio: {},
       receive: {
         select: 'Select asset',
+        receive: 'Receive',
+        on: 'on',
+        yourAddress: 'Your address',
       },
       redeem: {},
       send: {},
