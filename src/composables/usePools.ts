@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { store, useAllStores } from '@/store/index';
@@ -7,7 +7,9 @@ import { Pool } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
-export default function usePools() {
+let usePoolsInstance = null;
+
+function usePools() {
   const stores = useAllStores();
 
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
@@ -185,4 +187,10 @@ export default function usePools() {
     getNextPoolId,
     getReserveBalances,
   };
+}
+export default function usePoolsFactory() {
+  if (!usePoolsInstance) {
+    usePoolsInstance = usePools();
+  }
+  return usePoolsInstance;
 }
