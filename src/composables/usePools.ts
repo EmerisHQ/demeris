@@ -154,7 +154,7 @@ export default function usePools() {
     return withdrawCoins;
   };
   const getNextPoolId = () => {
-    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().length + 1;
+    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
   };
   const getReserveBalances = async (pool: Pool) => {
     const balances = store.getters['demeris/getBalances']({
