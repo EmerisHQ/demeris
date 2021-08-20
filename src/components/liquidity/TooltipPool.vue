@@ -1,14 +1,11 @@
 <template>
   <router-link :to="{ name: 'Pool', params: { id: pool.id } }" class="cursor-pointer">
-    <div>
-      <TooltipPoolAmount :pool="pool" :denom="denom" />
-      on <Ticker :name="pool.pool_coin_denom" />
-    </div>
+    <div><TooltipPoolAmount :pool="pool" :denom="denom" />&nbsp;<Ticker :name="denom" /> in {{ pairName }} Pool</div>
   </router-link>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
@@ -37,25 +34,9 @@ export default defineComponent({
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
 
-    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
+    const { pairName } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
-
-    const hasPrices = computed(() => {
-      let baseDenoms = denoms.value;
-      if (!baseDenoms.length) {
-        baseDenoms = props.pool.reserve_coin_denoms;
-      }
-
-      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
-
-      if (!priceA || !priceB) {
-        return false;
-      }
-
-      return true;
-    });
 
     watch(
       () => truedenoms.value,
@@ -114,7 +95,7 @@ export default defineComponent({
       { immediate: true },
     );
 
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice };
+    return { denoms, truedenoms, pairName };
   },
 });
 </script>

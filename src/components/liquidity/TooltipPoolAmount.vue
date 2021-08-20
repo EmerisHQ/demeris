@@ -53,7 +53,8 @@ export default defineComponent({
         name: props.denom,
       });
       const balance = walletBalances.value.find((b) => b.denom === props.denom);
-      return new BigNumber(balance.amount).shiftedBy(-precision).toString();
+      let balanceAmount = new BigNumber(balance.amount).shiftedBy(-precision);
+      return balanceAmount.toFixed(6);
     });
 
     return { amount };
