@@ -356,7 +356,9 @@ export const messages = {
       assets: {},
       chains: {},
       portfolio: {},
-      receive: {},
+      receive: {
+        select: 'Select asset',
+      },
       redeem: {},
       send: {},
       welcome: {},
