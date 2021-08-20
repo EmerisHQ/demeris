@@ -398,7 +398,14 @@ export const messages = {
         where: 'Where are you sending assets?',
       },
       welcome: {},
-      withdrawLiquidity: {},
+      withdrawLiquidity: {
+        withdraw: 'Withdraw',
+        from: 'From',
+        available: 'available',
+        receive: 'Receive',
+        on: 'On',
+        hubWarning: 'Your assets will be transferred to Cosmos Hub',
+      },
     },
   },
 };
