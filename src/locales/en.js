@@ -348,6 +348,7 @@ export const messages = {
         addLiquidity: 'Add liquidity',
         createNew: 'Create new pool',
         selectCTA: 'Select two assets',
+        available: 'available',
         pool: 'pool',
         firstProvider: 'You are the first liquidity provider',
         firstProviderWarning:

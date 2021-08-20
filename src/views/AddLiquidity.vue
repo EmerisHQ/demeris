@@ -95,7 +95,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinA.asset"
@@ -164,7 +164,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinB.asset"
