@@ -61,7 +61,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref, toRefs, watch } from 'vue';
+import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
