@@ -58,6 +58,7 @@
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
+              <div class="text-muted -text-1">/*Pooled amount warning*/</div>
             </div>
           </dl>
         </section>
