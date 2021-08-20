@@ -54,16 +54,14 @@
             </div>
 
             <div>
-              <dt class="text-muted flex">
-                <tippy class="flex">
-                  {{ $t('components.asset.balance.pooled') }} <HintIcon class="w-2 h-2" />
+              <dt class="text-muted">{{ $t('components.asset.balance.pooled') }}</dt>
+              <dd class="font-medium mt-0.5">
+                <tippy>
+                  <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
                   <template #content>
-                    <TooltipPools :pools="poolsDisplay" :denom="denom" />
+                    <TooltipPools :pools="poolsInvestedWithAsset" :denom="denom" />
                   </template>
                 </tippy>
-              </dt>
-              <dd class="font-medium mt-0.5">
-                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
             </div>
           </dl>
@@ -151,7 +149,6 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import HintIcon from '@/components/common/Icons/HintIcon.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
@@ -183,7 +180,6 @@ export default defineComponent({
     TooltipPools,
     PoolBanner,
     MoonpayBanner,
-    HintIcon,
   },
 
   setup() {
@@ -335,6 +331,7 @@ export default defineComponent({
       denom,
       assets,
       poolsDisplay,
+      poolsInvestedWithAsset,
       availableAmount,
       stakedAmount,
       pooledAmount,
