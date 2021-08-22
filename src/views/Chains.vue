@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div class="home">
-      <div>Chains</div>
+      <div>{{ $t('pages.chains.chains') }}</div>
     </div>
   </AppLayout>
 </template>

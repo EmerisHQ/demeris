@@ -68,9 +68,11 @@ import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
+import { parseCoins } from '@/utils/basic';
 
 export default {
   name: 'PoolsTable',
@@ -89,7 +91,8 @@ export default {
     const renderedPools = ref([]);
     const poolsWithTotalLiquidityPrice = ref([]);
 
-    const { getPoolName, getReserveBaseDenoms } = usePools();
+    const { getPoolName, getReserveBaseDenoms, getLiquidityShare } = usePools();
+    const { balancesByDenom } = useAccount();
     watch(
       () => props.pools,
       async (newVal) => {
@@ -103,8 +106,18 @@ export default {
           );
           poolsWithTotalLiquidityPrice.value = await Promise.all(
             renderedPools.value.map(async (pool) => {
-              const { totalLiquidityPrice } = usePool(pool.id);
+              const { totalLiquidityPrice, initPromise } = usePool(pool.id);
+              await initPromise;
+              const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
+              const poolCoinAmount = poolCoinBalances.reduce(
+                (acc, item) => acc + +parseCoins(item.amount)[0].amount,
+                0,
+              );
+
+              const ownShare = getLiquidityShare(pool, poolCoinAmount);
               pool.totalLiquidityPrice = totalLiquidityPrice;
+              pool.ownShare = totalLiquidityPrice.value * ownShare;
+
               return pool;
             }),
           );
@@ -114,7 +127,11 @@ export default {
     );
 
     const orderPools = (unorderedPools) => {
-      return orderBy(unorderedPools, [(x) => x.totalLiquidityPrice || 0, 'displayName'], ['desc', 'asc']);
+      return orderBy(
+        unorderedPools,
+        ['ownShare', (x) => x.totalLiquidityPrice || 0, 'displayName'],
+        ['desc', 'desc', 'asc'],
+      );
     };
 
     const filteredPools = computed(() => {

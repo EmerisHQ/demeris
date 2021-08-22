@@ -80,15 +80,13 @@
               <Alert v-if="hasPair && !hasPool" status="warning" class="my-6 max-w-sm mx-auto">
                 <p class="font-bold">{{ $t('pages.addLiquidity.firstProvider') }}</p>
                 <p class="mt-0.5">
-                  As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> &middot;
-                  <Ticker :name="form.coinB.asset.base_denom" />
-                  pool, you will be creating the pool and setting the price. Proceed with caution.
+                  {{ $t('pages.addLiquidity.firstProviderWarning', { tickerA, tickerB }) }}
                 </p>
               </Alert>
 
               <fieldset class="bg-surface shadow-card rounded-2xl">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
-                  <span>Supply</span>
+                  <span>{{ $t('pages.addLiquidity.supplyLbl') }}</span>
 
                   <span
                     v-if="form.coinA.asset && hasFunds.coinA"
@@ -97,7 +95,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinA.asset"
@@ -148,7 +146,7 @@
                   @click="toggleChainsModal(null, 'coinA')"
                 >
                   <div>
-                    From
+                    {{ $t('pages.addLiquidity.fromLbl') }}
                     <span class="font-medium text-text"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
                   </div>
                   <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -157,7 +155,7 @@
 
               <fieldset class="bg-surface shadow-card rounded-2xl mt-4">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
-                  <span>Supply</span>
+                  <span>{{ $t('pages.addLiquidity.supplyLbl') }}</span>
 
                   <span
                     v-if="form.coinB.asset && hasFunds.coinB"
@@ -166,7 +164,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinB.asset"
@@ -217,7 +215,7 @@
                   @click="toggleChainsModal(null, 'coinB')"
                 >
                   <div>
-                    From
+                    {{ $t('pages.addLiquidity.fromLbl') }}
                     <span class="font-medium text-text"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
                   </div>
                   <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -259,7 +257,7 @@
                   />
                 </div>
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
-                  Your assets will be transferred to Cosmos Hub
+                  {{ $t('pages.addLiquidity.hubWarning') }}
                 </Alert>
                 <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
               </div>
@@ -268,7 +266,7 @@
             <template v-else-if="state.isCreationConfirmationOpen">
               <article class="flex flex-col items-center">
                 <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line text-center">
-                  Creating a pool is risky business
+                  {{ $t('pages.addLiquidity.createWarning') }}
                 </h2>
 
                 <img
@@ -278,18 +276,17 @@
                 />
 
                 <p class="text-muted leading-copy max-w-md mx-auto">
-                  As the first liquidity provider, you are setting the pool price. This means that if you don’t know
-                  what you are doing, you may risk significant loss as a result of arbitrage.
+                  {{ $t('pages.addLiquidity.arbitrageWarning') }}
                 </p>
 
                 <footer class="w-full max-w-md mx-auto flex justify-stretch mt-12 mb-8 gap-6">
                   <Button
-                    name="Cancel"
+                    :name="$t('generic_cta.cancel')"
                     variant="secondary"
                     class="flex-1"
                     @click="state.isCreationConfirmationOpen = false"
                   />
-                  <Button name="I understand" class="flex-1" @click="goToReview" />
+                  <Button :name="$t('generic_cta.understand')" class="flex-1" @click="goToReview" />
                 </footer>
               </article>
             </template>
@@ -334,6 +331,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
+import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
@@ -367,7 +365,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
-
+    const { useDenom } = useDenoms();
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
@@ -445,6 +443,41 @@ export default {
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
+    const tickerA = ref('-');
+    const tickerB = ref('-');
+    watch(
+      () => form.coinA.asset,
+      (newDenom, oldDenom) => {
+        if (newDenom?.base_denom && newDenom?.base_denom != oldDenom?.base_denom) {
+          const { tickerName } = useDenom(newDenom.base_denom);
+          watch(
+            () => tickerName.value,
+            (newTicker) => {
+              tickerA.value = newTicker;
+            },
+            { immediate: true },
+          );
+        }
+      },
+      { immediate: true },
+    );
+
+    watch(
+      () => form.coinB.asset,
+      (newDenom, oldDenom) => {
+        if (newDenom?.base_denom && newDenom?.base_denom != oldDenom?.base_denom) {
+          const { tickerName } = useDenom(newDenom.base_denom);
+          watch(
+            () => tickerName.value,
+            (newTicker) => {
+              tickerB.value = newTicker;
+            },
+            { immediate: true },
+          );
+        }
+      },
+      { immediate: true },
+    );
 
     const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
@@ -483,9 +516,7 @@ export default {
     });
 
     const pageTitle = computed(() => {
-      return hasPair.value && !hasPool.value
-        ? t('components.addLiquidity.createNew')
-        : t('components.addLiquidity.addLiquidity');
+      return hasPair.value && !hasPool.value ? t('pages.addLiquidity.createNew') : t('pages.addLiquidity.addLiquidity');
     });
 
     const metaSource = computed(() => ({
@@ -656,13 +687,13 @@ export default {
       let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
 
       if (emptyFields) {
-        return 'Continue';
+        return t('generic_cta.continue');
       } else if (insufficientFunds) {
-        return 'Insufficient funds';
+        return t('generic_cta.noFunds');
       } else if (!insufficientFunds && invalidPool) {
-        return 'Supply amount must be > 1';
+        return t('generic_cta.noSupply');
       } else {
-        return 'Continue';
+        return t('generic_cta.continue');
       }
     });
 
@@ -1021,6 +1052,8 @@ export default {
       goToStep,
       coinSelectHandler,
       onClose,
+      tickerA,
+      tickerB,
     };
   },
 };
