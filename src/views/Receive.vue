@@ -66,10 +66,12 @@
             </div>
           </div>
           <div v-if="state.selectedAsset" class="relative z-20 max-w-md w-full mx-auto">
-            <h2 class="text-3 font-bold mb-1">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
-            <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
+            <h2 class="text-3 font-bold mb-1">
+              {{ $t('pages.receive.receive') }} <Denom :name="state.selectedAsset.base_denom" />
+            </h2>
+            <p class="text-muted">{{ $t('pages.receive.on') }} <ChainName :name="state.selectedAsset.on_chain" /></p>
             <fieldset class="mt-16">
-              <div class="mb-3 font-bold">Your address</div>
+              <div class="mb-3 font-bold">{{ $t('pages.receive.yourAddress') }}</div>
               <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly class="bg-fg" />
             </fieldset>
           </div>
