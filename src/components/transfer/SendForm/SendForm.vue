@@ -33,7 +33,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
+import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
 import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
@@ -100,7 +100,7 @@ export default defineComponent({
               from: {
                 amount: {
                   amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                  denom: form.balance.denom,
+                  denom: await getBaseDenom(form.balance.denom, form.chain_name),
                 },
                 chain_name: form.chain_name,
               },
