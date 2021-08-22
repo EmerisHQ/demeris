@@ -91,8 +91,10 @@ export default defineComponent({
       () => [form.balance.amount, form.balance.denom, form.chain_name],
       async () => {
         if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
-          const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
-
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: await getBaseDenom(form.balance.denom, form.chain_name),
+            }) || 6;
           const action: TransferAction = {
             name: 'transfer',
             memo: form.memo,
@@ -100,7 +102,7 @@ export default defineComponent({
               from: {
                 amount: {
                   amount: new BigNumber(form.balance.amount).shiftedBy(precision).toString(),
-                  denom: await getBaseDenom(form.balance.denom, form.chain_name),
+                  denom: form.balance.denom,
                 },
                 chain_name: form.chain_name,
               },
