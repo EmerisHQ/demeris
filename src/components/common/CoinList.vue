@@ -134,59 +134,57 @@ export default defineComponent({
       return modifiedData;
     }
 
+    const getAmount = (amount: number | string, denom: string) => {
+      const value = amount.toString().replace(denom, '');
+      const result = parseInt(value.replace('undefined', ''));
+      return result;
+    };
+
+    const sortLocale = (a, b) => {
+      if (a && b) {
+        return a.localeCompare(b, 0, { numeric: true, sensitivity: 'base' });
+      }
+      return;
+    };
+
     const coinsWithValue = computed(() => {
       let coins = modifiedData.value;
-      if (coins.length > 0) {
-        coins.map((b) => {
-          let value = getPrice({ denom: b.base_denom, amount: b.amount.toString() });
-          (b as any).value = value;
-        });
-      }
+      coins.map((b) => {
+        let denom = b.base_denom;
+        if (b.amount) {
+          let amount = getAmount(b.amount, b.base_denom).toString();
+          if (parseInt(amount) > 0) {
+            let value = getPrice({ denom, amount });
+            b.value = value;
+          }
+        }
+        return b;
+      });
       return coins;
     });
 
-    const orderCoinsByName = (coins) => {
+    const orderCoins = (coins) => {
       let tokens = [];
-      let lpTokens = [];
+      let zeroTokens = [];
+      let zeroLpTokens = [];
       coins.map((c) => {
-        if (c.display_name?.includes('Gravity')) {
-          lpTokens.push(c);
-        } else {
+        if (c.amount && getAmount(c.amount, c.base_denom)) {
           tokens.push(c);
+        } else if (c.display_name?.includes('Gravity')) {
+          zeroLpTokens.push(c);
+        } else {
+          zeroTokens.push(c);
         }
       });
-      tokens = orderBy(tokens, ['display_name'], ['asc']);
-      lpTokens = orderBy(lpTokens, ['display_name'], ['asc']);
-      lpTokens = lpTokens.sort((a, b) =>
-        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
-      );
-      return tokens.concat(lpTokens);
-    };
-
-    const orderCoinsByValue = (coins) => {
-      let tokens = [];
-      let lpTokens = [];
-      coins.map((c) => {
-        if (c.display_name?.includes('Gravity')) {
-          lpTokens.push(c);
-        } else {
-          tokens.push(c);
-        }
-      });
-      tokens = orderBy(tokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
-      lpTokens = orderBy(lpTokens, [(c) => c.value.value, 'display_name'], ['desc', 'asc']);
-      lpTokens = lpTokens.sort((a, b) =>
-        a.display_name.localeCompare(b.display_name, 0, { numeric: true, sensitivity: 'base' }),
-      );
-      return tokens.concat(lpTokens);
+      tokens = orderBy(tokens, [(c) => c.value], ['desc']);
+      zeroTokens = zeroTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
+      zeroLpTokens = zeroLpTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
+      tokens = tokens.concat(zeroTokens).concat(zeroLpTokens);
+      return tokens;
     };
 
     const coinsByType = computed(() => {
-      if (props.type === 'receive') {
-        return orderCoinsByName(modifiedData.value);
-      } else {
-        return orderCoinsByValue(coinsWithValue.value);
-      }
+      return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
     });
 
     return { setWordColorByKeyword, coinsByType };

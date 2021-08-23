@@ -26,7 +26,7 @@
         <template v-if="state.step === 'amount'">
           <div class="w-full max-w-lg mx-auto">
             <div class="pt-8 mb-8 text-center">
-              <h1 class="text-3 font-bold">Withdraw liquidity</h1>
+              <h1 class="text-3 font-bold">{{ $t('components.withdrawLiquidity.title') }}</h1>
 
               <p class="mt-3 text-muted">{{ pairName }}</p>
             </div>
@@ -69,13 +69,13 @@
 
             <fieldset class="bg-surface shadow-card rounded-2xl">
               <div class="w-full flex justify-between text-muted pt-6 px-5">
-                <span>Withdraw</span>
+                <span>{{ $t('pages.withdrawLiquidity.withdraw') }}</span>
 
                 <span v-if="state.selectedAsset" :class="{ 'text-negative-text': !hasSufficientFunds }">
                   <AmountDisplay
                     :amount="{ amount: state.selectedAsset.amount, denom: state.selectedAsset.base_denom }"
                   />
-                  available
+                  {{ $t('pages.withdrawLiquidity.available') }}
                 </span>
               </div>
               <DenomSelect
@@ -110,7 +110,7 @@
                 @click="toggleChainsModal(null, 'coinA')"
               >
                 <div>
-                  From
+                  {{ $t('pages.withdrawLiquidity.from') }}
                   <span class="font-medium text-text"><ChainName :name="state.selectedAsset.on_chain || '–'" /></span>
                 </div>
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -121,7 +121,7 @@
               v-if="state.selectedAsset && state.receiveAmounts"
               class="relative mt-6 z-10 bg-surface shadow-card rounded-2xl"
             >
-              <div class="text-muted pt-6 px-5">Receive</div>
+              <div class="text-muted pt-6 px-5">{{ $t('pages.withdrawLiquidity.receive') }}</div>
 
               <DenomSelect
                 v-model:amount="state.receiveAmounts.coinA.amount"
@@ -146,7 +146,7 @@
               />
 
               <div class="py-4 px-5 w-full text-muted border-t border-border">
-                On <ChainName :name="state.selectedAsset.on_chain || '–'" />
+                {{ $t('pages.withdrawLiquidity.on') }} <ChainName :name="state.selectedAsset.on_chain || '–'" />
               </div>
             </fieldset>
 
@@ -164,10 +164,10 @@
                 />
               </div>
               <Alert v-if="needsTransferToHub" status="info" class="w-full max-w-sm mx-auto my-6">
-                Your assets will be transferred to Cosmos Hub
+                {{ $t('pages.withdrawLiquidity.hubWarning') }}
               </Alert>
               <Button
-                :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'"
+                :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
                 :disabled="!isValid"
                 :click-function="goToReview"
               />
@@ -193,6 +193,8 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -212,6 +214,7 @@ import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default {
@@ -231,15 +234,23 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
+    useMeta(
+      computed(() => ({
+        title: t('components.withdrawLiquidity.title'),
+      })),
+    );
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
 
     const actionSteps = ref([]);
-
+    pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
     const poolId = computed(() => route.params.id);
 
-    const { formatPoolName } = usePools();
+    const { getPoolName } = usePools();
     const { balancesByDenom } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
@@ -282,19 +293,32 @@ export default {
     const {
       pool,
       pairName,
-      calculateWithdrawBalances,
+      getPoolWithdrawBalances,
       calculateSupplyTokenAmount,
       reserveBaseDenoms,
       reserveBalances,
       totalSupply,
     } = usePool(computed(() => poolId.value as string));
 
+    const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom);
+    const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);
+    const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
+    const precisionA = computed(
+      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 1 : 0] }) || 6,
+    );
+    const precisionB = computed(
+      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 0 : 1] }) || 6,
+    );
+    const precisionDiffs = computed(() => {
+      return {
+        coinA: 6 - precisionA.value,
+        coinB: 6 - precisionB.value,
+      };
+    });
+
     const exchangeAmount = computed(() => {
       if (reserveBalances.value?.length) {
-        return new BigNumber(reserveBalances.value[1].amount)
-          .dividedBy(reserveBalances.value[0].amount)
-          .shiftedBy(6)
-          .toNumber();
+        return new BigNumber(coinB.value.amount).dividedBy(coinA.value.amount).shiftedBy(6).toNumber();
       }
 
       return undefined;
@@ -365,8 +389,9 @@ export default {
         state.amount = '';
         return;
       }
-
-      const result = calculateSupplyTokenAmount(+state.receiveAmounts.coinA.amount, +state.receiveAmounts.coinB.amount);
+      const coinA = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
+      const coinB = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
+      const result = calculateSupplyTokenAmount(coinA * 10 ** (-1 * precisionDiffs.value.coinB), coinB);
       state.amount = (+result.toFixed(6)).toString();
     };
 
@@ -383,7 +408,7 @@ export default {
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
       total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const currencyAmountHandler = () => {
@@ -396,18 +421,15 @@ export default {
         return;
       }
 
-      const precisionA = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
-      const precisionB = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
-
       const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
       const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
 
-      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
-      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA.value).multipliedBy(priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB.value).multipliedBy(priceB);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -421,9 +443,13 @@ export default {
         return;
       }
 
-      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] }) || 6;
       const result = new BigNumber(exchangeAmount.value).shiftedBy(-6).multipliedBy(state.receiveAmounts.coinA.amount);
-      state.receiveAmounts.coinB.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      state.receiveAmounts.coinB.amount = result.isFinite()
+        ? result
+            .shiftedBy(-1 * precisionDiffs.value.coinB)
+            .decimalPlaces(precisionB.value)
+            .toString()
+        : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
@@ -435,21 +461,27 @@ export default {
         return;
       }
 
-      const precision = store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) || 6;
       const result = new BigNumber(state.receiveAmounts.coinB.amount).dividedBy(
         new BigNumber(exchangeAmount.value).shiftedBy(-6),
       );
-      state.receiveAmounts.coinA.amount = result.isFinite() ? result.decimalPlaces(precision).toString() : '';
+      state.receiveAmounts.coinA.amount = result.isFinite()
+        ? result.shiftedBy(precisionDiffs.value.coinB).decimalPlaces(precisionA.value).toString()
+        : '';
       updateReceiveAmount();
       updateTotalCurrencyPrice();
     };
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = calculateWithdrawBalances(+state.amount);
-
-      state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
-      state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      const result = getPoolWithdrawBalances(+state.amount);
+      state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
+        .shiftedBy(precisionDiffs.value.coinB)
+        .decimalPlaces(6)
+        .toString();
+      state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
+        .shiftedBy(precisionDiffs.value.coinA)
+        .decimalPlaces(6)
+        .toString();
       updateTotalCurrencyPrice();
     };
 
@@ -473,6 +505,10 @@ export default {
     };
 
     const goToReview = () => {
+      event('review_withdraw_liquidity_tx', {
+        event_label: 'Reviewing withdraw liquidity tx',
+        event_category: 'transactions',
+      });
       goToStep('review');
     };
 
@@ -505,9 +541,13 @@ export default {
       goToStep('amount');
     };
 
-    onMounted(() => {
-      state.selectedAsset = balances.value[0];
-    });
+    watch(
+      balances,
+      () => {
+        state.selectedAsset = balances.value[0];
+      },
+      { immediate: true },
+    );
 
     watch(
       () => [state.amount, state.selectedAsset, pool],
@@ -527,10 +567,15 @@ export default {
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          const result = calculateWithdrawBalances(+state.amount);
-
-          state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
-          state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+          const result = getPoolWithdrawBalances(+state.amount);
+          state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
+            .shiftedBy(precisionDiffs.value.coinB)
+            .decimalPlaces(6)
+            .toString();
+          state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
+            .shiftedBy(precisionDiffs.value.coinA)
+            .decimalPlaces(6)
+            .toString();
           updateTotalCurrencyPrice();
         }
       },
@@ -557,7 +602,7 @@ export default {
       toggleChainsModal,
       goToReview,
       goToStep,
-      formatPoolName,
+      getPoolName,
       goBack,
       onClose,
       resetHandler,

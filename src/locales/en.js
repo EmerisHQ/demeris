@@ -1,5 +1,21 @@
 export const messages = {
   en: {
+    appInit: {
+      title: 'Entering the portal',
+      status: {
+        initializing: 'Initializing...',
+        assetLoading: 'Loading assets...',
+        chainLoading: 'Loading chains...',
+        priceFetching: 'Fetching prices...',
+        relayerChecking: 'Checking relayers...',
+        chainDetails: "Fetching '{displayChain}` details...",
+        chainStatus: "Checking '{displayChain}` status...",
+        relayerBalanceFetching: 'Fetching relayer balances...',
+        liquidityConfigure: 'Configuring liquidity module...',
+        poolFetching: 'Fetching liquidity pools...',
+        signingIn: 'Signing in...',
+      },
+    },
     generic_cta: {
       seeall: 'See all',
       done: 'Done',
@@ -11,6 +27,7 @@ export const messages = {
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try adjusting your search',
       max: 'Max',
+      noSupply: 'Supply amount must be > 1',
       understand: 'I understand',
       getAtom: 'Get ATOM',
       proceed: 'Proceed',
@@ -18,6 +35,8 @@ export const messages = {
       get: 'Get',
       connectToEmeris: 'Connect to Emeris',
       tryTheDemo: 'Try the demo',
+      chainDown: '{displayChain} chain appears to be down.',
+      balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -47,7 +66,7 @@ export const messages = {
         },
         modal3: {
           title: 'Not compatible',
-          text: 'Emeris uses Keplr for accessing your accounts, which is only supported on Chromium-based browser like Google Chrome or Brave.',
+          text: 'Emeris is only supported on Chrome, Brave, and Edge. We are working hard on supporting for more browsers.',
           button1: 'Install Chrome',
           button2: 'Install Brave',
         },
@@ -69,6 +88,20 @@ export const messages = {
       },
     },
     components: {
+      cookieConsent: {
+        message: 'By using this website, you agree to our',
+        linkText: 'Cookie Policy.',
+      },
+      withdrawLiquidity: {
+        title: 'Withdraw liquidity',
+      },
+      send: {
+        send: 'Send',
+        moveAssets: 'Move assets',
+        moveAssetsDescription: 'Move assets between your addresses on different chains.',
+        sendToAddress: 'Send to address',
+        sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+      },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
         text2: 'Select the chain you wish to use.',
@@ -103,7 +136,8 @@ export const messages = {
         to: 'To',
         toPlaceholder: 'Recipient address',
         memo: 'Reference (memo)',
-        memoHint: 'Memo hint',
+        memoHint:
+          'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
         memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
       },
@@ -116,7 +150,13 @@ export const messages = {
         limitPrice: 'Limit price',
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
         minReceivedLbl: 'Min. received if 100% swapped',
-        minReceivedLblHint: 'Minimum total received if your entire swap is fulfilled.',
+        minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
+      },
+      stakeTable: {
+        earnRewards: 'Earn rewards by staking',
+        lockUp: 'Lock up your',
+        andEarn: 'and earn continuous staking rewards.',
+        apy: '9.7% APY',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
@@ -168,7 +208,7 @@ export const messages = {
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
-        swapActionPartiallyComplete: `Assets partially swapped ({swappedPercent}%)`,
+        swapActionPartiallyComplete: 'Assets partially swapped ({swappedPercent}%)',
         createPoolActionComplete: 'Pool created',
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
@@ -220,7 +260,8 @@ export const messages = {
           fromLbl: 'From address',
           txToSign: '{txCount} transactions to sign',
           feesLbl: 'Fees',
-          txToSignHint: 'TODO',
+          txToSignHint:
+            'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
           receiveLbl: 'Receive',
           recipientGotLbl: 'Recipient got',
           includedFee: 'included',
@@ -239,14 +280,14 @@ export const messages = {
           receiveLblHint: '(estimated)',
           priceLbl: 'Price',
           minReceivedLbl: 'Min. received if 100% swapped',
-          minReceivedLblHint: 'TODO',
+          minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
           limitPriceLbl: 'Limit price',
-          limitPriceLblHint: 'TODO',
+          limitPriceLblHint: 'Assets will not be swapped at a higher rate than the limit rate.',
           feesLbl: 'Fees',
           feeLbl: 'Transaction fee',
-          feeLblHint: 'TODO',
+          feeLblHint: 'Base fee paid to the network',
           swapFeeLbl: 'Swap fee',
-          swapFeeLblHint: 'TODO',
+          swapFeeLblHint: 'Swap fee paid to liquidity providers',
         },
       },
       settingsMenu: {
@@ -265,6 +306,7 @@ export const messages = {
         privacy: 'Privacy',
         tos: 'Terms of Service',
         cookiesPolicy: 'Cookies',
+        setGasLimit: 'Set gas limit',
         allowCustomSlippage: 'Allow custom slippage',
         viewAllAssets: 'View all assets',
         viewLPAssetPools: 'View LP asset pools',
@@ -283,13 +325,16 @@ export const messages = {
       chains: {
         title: 'Chains',
       },
+      moonpay: {
+        cta: 'Add crypto to your account',
+      },
       assets: {
         title: 'Assets',
         totalBalance: 'Total balance',
         asset: 'Asset',
         ticker: 'Ticker',
         price: 'Price',
-        marketCap: 'Market cap.',
+        marketCap: 'Market Cap',
         amount: 'Amount',
         balance: 'Balance',
         onchain: '{amount} on {chain}',
@@ -304,6 +349,67 @@ export const messages = {
         liquidity: 'Liquidity',
         empty: 'Pools you add liquidity to will appear here.',
         explore: 'Explore pools',
+      },
+    },
+    pages: {
+      addLiquidity: {
+        addLiquidity: 'Add liquidity',
+        createNew: 'Create new pool',
+        selectCTA: 'Select two assets',
+        available: 'available',
+        pool: 'pool',
+        firstProvider: 'You are the first liquidity provider',
+        firstProviderWarning:
+          'As the first liquidity provider to the {tickerA} · {tickerB} pool, you will be creating the pool and setting the price. Proceed with caution.',
+        supplyLbl: 'Supply',
+        fromLbl: 'From',
+        hubWarning: 'Your assets will be transferred to Cosmos Hub',
+        createWarning: 'Creating a pool is risky business',
+        arbitrageWarning:
+          'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
+      },
+      asset: {
+        balance: 'Balance',
+        available: 'Available',
+        staked: 'Staked',
+        pooled: 'Pooled',
+        pooledWarning: 'Pooled Warning',
+        chains: 'Chains',
+        pooled: 'Pools',
+        staking: 'Staking',
+      },
+      assets: {
+        assets: 'Assets',
+      },
+      chains: {
+        chains: 'Chains',
+      },
+      portfolio: {},
+      receive: {
+        select: 'Select asset',
+        receive: 'Receive',
+        on: 'on',
+        yourAddress: 'Your address',
+      },
+      redeem: {
+        title: 'Redeeming assets',
+        instructions:
+          'You hold assets with a transfer history that is not supported by Demeris. If you wish to use these assets with Demeris, you must first redeem them.',
+        learnMore: 'Learn more about redeeming',
+        select: 'Select an asset to redeem',
+        cta: 'Redeem',
+      },
+      send: {
+        where: 'Where are you sending assets?',
+      },
+      welcome: {},
+      withdrawLiquidity: {
+        withdraw: 'Withdraw',
+        from: 'From',
+        available: 'available',
+        receive: 'Receive',
+        on: 'On',
+        hubWarning: 'Your assets will be transferred to Cosmos Hub',
       },
     },
   },

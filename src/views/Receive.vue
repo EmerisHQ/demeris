@@ -1,6 +1,6 @@
 <template>
   <div class="receive relative flex flex-col w-full min-h-screen items-center">
-    <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
+    <header class="absolute w-full max-w-7xl mx-auto flex items-center justify-between py-6 px-8 h-24">
       <Button v-if="state.selectedAsset" variant="link" :full-width="false" :click-function="goBack">
         <Icon name="ArrowLeftIcon" :icon-size="1.5" />
       </Button>
@@ -12,24 +12,11 @@
       </router-link>
     </header>
 
-    <main
-      class="
-        w-full
-        max-w-7xl
-        mx-auto
-        md:pt-8
-        px-8
-        pb-28
-        flex-1 flex flex-col
-        items-center
-        justify-center
-        overflow-hidden
-      "
-    >
+    <main class="w-full max-w-7xl mx-auto md:pt-8 px-8 pb-0 flex-1 flex flex-col items-center overflow-hidden">
       <template v-if="!state.selectedAsset">
-        <div class="absolute top-0 h-full w-full max-w-md mx-auto">
+        <div class="-mt-9 h-full w-full max-w-md mx-auto">
           <DenomSelectModal
-            title="Receive"
+            :title="$t('pages.receive.select')"
             class="denom-select-modal h-full"
             :assets="balances"
             :show-balance="true"
@@ -79,10 +66,12 @@
             </div>
           </div>
           <div v-if="state.selectedAsset" class="relative z-20 max-w-md w-full mx-auto">
-            <h2 class="text-3 font-bold mb-1">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
-            <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
+            <h2 class="text-3 font-bold mb-1">
+              {{ $t('pages.receive.receive') }} <Denom :name="state.selectedAsset.base_denom" />
+            </h2>
+            <p class="text-muted">{{ $t('pages.receive.on') }} <ChainName :name="state.selectedAsset.on_chain" /></p>
             <fieldset class="mt-16">
-              <div class="mb-3 font-bold">Your address</div>
+              <div class="mb-3 font-bold">{{ $t('pages.receive.yourAddress') }}</div>
               <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly class="bg-fg" />
             </fieldset>
           </div>
@@ -95,6 +84,8 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -106,6 +97,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
 import { Balance } from '@/types/api';
+import { pageview } from '@/utils/analytics';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
@@ -119,6 +111,14 @@ export default {
   components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+    pageview({ page_title: 'Receive assets', page_path: '/receive' });
+    useMeta(
+      computed(() => ({
+        title: t('navbar.receive'),
+      })),
+    );
+
     const { nativeBalances } = useAccount();
 
     const state = reactive({

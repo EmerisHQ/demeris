@@ -68,9 +68,11 @@ import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { Pool } from '@/types/actions';
-import getTotalLiquidityPrice from '@/utils/getTotalLiquidityPrice';
+import { parseCoins } from '@/utils/basic';
 
 export default {
   name: 'PoolsTable',
@@ -87,16 +89,35 @@ export default {
     const router = useRouter();
     const keyword = ref<string>('');
     const renderedPools = ref([]);
+    const poolsWithTotalLiquidityPrice = ref([]);
 
-    const { formatPoolName, getReserveBaseDenoms } = usePools();
+    const { getPoolName, getReserveBaseDenoms, getLiquidityShare } = usePools();
+    const { balancesByDenom } = useAccount();
     watch(
       () => props.pools,
       async (newVal) => {
         if (newVal.length > 0) {
           renderedPools.value = await Promise.all(
             props.pools.map(async (pool: any) => {
-              pool.displayName = await formatPoolName(pool);
+              pool.displayName = await getPoolName(pool);
               pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
+              return pool;
+            }),
+          );
+          poolsWithTotalLiquidityPrice.value = await Promise.all(
+            renderedPools.value.map(async (pool) => {
+              const { totalLiquidityPrice, initPromise } = usePool(pool.id);
+              await initPromise;
+              const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
+              const poolCoinAmount = poolCoinBalances.reduce(
+                (acc, item) => acc + +parseCoins(item.amount)[0].amount,
+                0,
+              );
+
+              const ownShare = getLiquidityShare(pool, poolCoinAmount);
+              pool.totalLiquidityPrice = totalLiquidityPrice;
+              pool.ownShare = totalLiquidityPrice.value * ownShare;
+
               return pool;
             }),
           );
@@ -105,34 +126,12 @@ export default {
       { immediate: true },
     );
 
-    const poolsWithTotalLiquidityPrice = computed(() => {
-      let pools = renderedPools.value;
-      pools.map((p) => {
-        let tlp = getTotalLiquidityPrice(p);
-        if (tlp) {
-          p.totalLiquidityPrice = tlp;
-        }
-        return p;
-      });
-      return pools;
-    });
-
     const orderPools = (unorderedPools) => {
-      let pools = [];
-      let lpPools = [];
-      unorderedPools.map((x) => {
-        if (x.displayName?.substring(0, 7) === 'Gravity') {
-          lpPools.push(x);
-        } else {
-          pools.push(x);
-        }
-      });
-      pools = orderBy(pools, ['totalLiquidityPrice', 'displayName'], ['desc', 'asc']);
-      lpPools = orderBy(lpPools, ['totalLiquidityPrice'], ['desc']);
-      lpPools = lpPools.sort((a, b) =>
-        a.displayName.localeCompare(b.displayName, 0, { numeric: true, sensitivity: 'base' }),
+      return orderBy(
+        unorderedPools,
+        ['ownShare', (x) => x.totalLiquidityPrice || 0, 'displayName'],
+        ['desc', 'desc', 'asc'],
       );
-      return pools.concat(lpPools);
     };
 
     const filteredPools = computed(() => {
@@ -156,7 +155,7 @@ export default {
       keyword,
       rowClickHandler,
       openAddLiqudityPage,
-      formatPoolName,
+      getPoolName,
       orderPools,
       poolsWithTotalLiquidityPrice,
     };

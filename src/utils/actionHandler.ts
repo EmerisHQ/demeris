@@ -2,13 +2,14 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import * as API from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
-import { store, useAllStores } from '../store/index';
+import { store } from '../store/index';
 import {
   generateDenomHash,
   getChannel,
@@ -19,7 +20,6 @@ import {
   parseCoins,
 } from './basic';
 
-const stores = useAllStores();
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
   const result = {
@@ -69,6 +69,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
         status: 'pending',
         data: {
           amount: { amount: amount.amount, denom: getDenomHash(verifyTrace.path, verifyTrace.base_denom, i) },
+          base_denom: await getBaseDenom(getDenomHash(verifyTrace.path, verifyTrace.base_denom, i), hop.chain_name),
           from_chain: hop.chain_name,
           to_chain: hop.counterparty_name,
           through: hop.channel,
@@ -144,6 +145,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            chain_fee: await getFeeForChain(chain_name),
             to_chain: destination_chain_name,
             to_address,
             through: primaryChannel,
@@ -206,6 +208,7 @@ export async function transfer({
         data: {
           amount: amount,
           from_chain: chain_name,
+          base_denom: await getBaseDenom(amount.denom, chain_name),
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -216,6 +219,7 @@ export async function transfer({
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
+          chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           to_chain: destination_chain_name,
           to_address,
           through: primaryChannel,
@@ -236,6 +240,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             to_address,
             through: verifyTrace.trace[0].channel,
@@ -251,6 +256,7 @@ export async function transfer({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
@@ -279,6 +285,7 @@ export async function transfer({
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
             from_chain: verifyTrace.trace[0].counterparty_name,
+            chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
             to_chain: destination_chain_name,
             to_address,
             through: primaryChannel,
@@ -338,6 +345,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            chain_fee: await getFeeForChain(chain_name),
             to_chain: destination_chain_name,
             through: primaryChannel,
           },
@@ -410,6 +418,7 @@ export async function move({
         data: {
           amount: amount,
           from_chain: chain_name,
+          base_denom: await getBaseDenom(amount.denom, chain_name),
           to_chain: verifyTrace.trace[0].counterparty_name,
           through: verifyTrace.trace[0].channel,
         },
@@ -421,6 +430,7 @@ export async function move({
         data: {
           amount: { amount: amount.amount, denom: verifyTrace.base_denom },
           from_chain: verifyTrace.trace[0].counterparty_name,
+          chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
           to_chain: destination_chain_name,
           through: primaryChannel,
         },
@@ -465,6 +475,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
@@ -491,6 +502,7 @@ export async function move({
           data: {
             amount: { amount: amount.amount, denom: verifyTrace.base_denom },
             from_chain: verifyTrace.trace[0].counterparty_name,
+            chain_fee: await getFeeForChain(verifyTrace.trace[0].counterparty_name),
             to_chain: destination_chain_name,
             through: primaryChannel,
           },
@@ -527,6 +539,7 @@ export async function move({
           data: {
             amount: amount,
             from_chain: chain_name,
+            base_denom: await getBaseDenom(amount.denom, chain_name),
             to_chain: verifyTrace.trace[0].counterparty_name,
             through: verifyTrace.trace[0].channel,
           },
@@ -697,6 +710,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           const redeemStep = await redeem(denom);
           steps.push({
             name: 'redeem',
+            memo: action.memo,
             description: 'Redeeming Assets',
             output: redeemStep.output,
             transactions: [...redeemStep.steps],
@@ -714,7 +728,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           destination_chain_name: params.to.chain_name,
         });
 
-        steps.push({ name: 'transfer', description: 'Assets Moved', transactions: [...moveStep.steps] }); //TODO
+        steps.push({
+          name: 'transfer',
+          description: 'Assets Moved',
+          memo: action.memo,
+          transactions: [...moveStep.steps],
+        }); //TODO
 
         break;
       case 'transfer':
@@ -730,7 +749,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           destination_chain_name: params.to.chain_name,
         });
 
-        steps.push({ name: 'transfer', description: 'Assets Transferred', transactions: [...transferStep.steps] }); //TODO
+        steps.push({
+          name: 'transfer',
+          description: 'Assets Transferred',
+          memo: action.memo,
+          transactions: [...transferStep.steps],
+        }); //TODO
         break;
       case 'swap':
         params = (action as Actions.SwapAction).params;
@@ -752,6 +776,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'Assets Must be transferred to hub first', //TODO
+            memo: action.memo,
             transactions: [...transferToHubStep.steps],
           });
         }
@@ -765,7 +790,12 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.to.amount.denom,
           },
         });
-        steps.push({ name: 'swap', description: 'Assets Swapped', transactions: [...swapStep.steps] }); //TODO
+        steps.push({
+          name: 'swap',
+          description: 'Assets Swapped',
+          memo: action.memo,
+          transactions: [...swapStep.steps],
+        }); //TODO
         break;
       case 'createpool':
         params = (action as Actions.CreatePoolAction).params;
@@ -782,6 +812,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetA must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinAtoHubCreate.steps],
           });
         }
@@ -799,6 +830,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetB must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinBtoHubCreate.steps],
           });
         }
@@ -810,6 +842,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'createpool',
           description: 'Creating Pool', //TODO
+          memo: action.memo,
           transactions: [...createPoolStep.steps],
         });
         break;
@@ -828,6 +861,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetA must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinAtoHub.steps],
           });
         }
@@ -845,6 +879,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'AssetB must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferCoinBtoHub.steps],
           });
         }
@@ -857,6 +892,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'addliquidity',
           description: 'Adding Liquidity', //TODO
+          memo: action.memo,
           transactions: [...addLiquidityStep.steps],
         });
         break;
@@ -874,6 +910,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           steps.push({
             name: 'transfer',
             description: 'Pool token must be transferred to hub', //TODO
+            memo: action.memo,
             transactions: [...transferPoolCointoHub.steps],
           });
         }
@@ -884,6 +921,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         steps.push({
           name: 'withdrawliquidity',
           description: 'Withdrawing liquidity', //TODO
+          memo: action.memo,
           transactions: [...withdrawLiquidityStep.steps],
         });
         break;
@@ -900,14 +938,14 @@ export async function msgFromStepTransaction(
 ): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
-    const msg = await stores.dispatch('cosmos.bank.v1beta1/MsgSend', {
+    const msg = await store.dispatch('cosmos.bank.v1beta1/MsgSend', {
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
         fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
       },
     });
-    const registry = stores.getters['cosmos.bank.v1beta1/getRegistry'];
+    const registry = store.getters['cosmos.bank.v1beta1/getRegistry'];
     return { msg, chain_name: data.chain_name, registry };
   }
 
@@ -919,7 +957,7 @@ export async function msgFromStepTransaction(
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
-    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -930,7 +968,7 @@ export async function msgFromStepTransaction(
         token: { ...data.amount },
       },
     });
-    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
 
@@ -949,7 +987,7 @@ export async function msgFromStepTransaction(
         parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
       ).toString();
     }
-    const msg = await stores.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -959,7 +997,7 @@ export async function msgFromStepTransaction(
         token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
-    const registry = stores.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
@@ -971,27 +1009,27 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
         depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins,
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
     const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         poolCoin: { ...data.poolCoin },
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
@@ -1003,25 +1041,30 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
         depositCoins: depositCoins,
       },
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
-    const chain_name = store.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.SwapData;
+    const chain_name = store.getters['demeris/getDexChain'];
+    const slippage = (store.getters['demeris/getSlippagePerc'] || 0.5) / 100;
+    let isReverse = false;
+    if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
+      isReverse = true;
+    }
     const price = [data.from, data.to].sort((a, b) => {
       if (a.denom < b.denom) return -1;
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    const msg = await stores.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
+    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
@@ -1029,13 +1072,16 @@ export async function msgFromStepTransaction(
         offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
         offerCoinFee: { amount: '0', denom: data.from.denom },
-        orderPrice: (parseInt(price[0].amount) / parseInt(price[1].amount))
+        orderPrice: (
+          (parseInt(price[0].amount) / parseInt(price[1].amount)) *
+          (isReverse ? 1 - slippage : 1 + slippage)
+        )
           .toFixed(18)
           .replace('.', '')
           .replace(/(^0+)/, ''),
       }),
     });
-    const registry = stores.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
 }
@@ -1229,7 +1275,7 @@ export async function getDisplayName(name, chain_name = null) {
           { root: true },
         ));
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       return name + '(unverified)';
     }
 
@@ -1527,10 +1573,9 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
       }
     }
   }
-
   return validPools;
 }
-export function chainStatusForSteps(steps: Actions.Step[]) {
+export async function chainStatusForSteps(steps: Actions.Step[]) {
   let allClear = true;
   let relayerStatus = true;
   const failedChains = [];
@@ -1564,6 +1609,13 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+          subscribe: false,
+        });
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+          subscribe: false,
+        });
         if (
           !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
           !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
@@ -1588,6 +1640,12 @@ export function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+          subscribe: false,
+        });
+        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+          subscribe: false,
+        });
         if (
           !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
           !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
@@ -2186,6 +2244,7 @@ export async function validateStepsFeeBalances(
                 additionalFee =
                   parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
               }
+
               if (rcptBalance) {
                 const newIbcAmount =
                   parseInt(parseCoins(rcptBalance.amount)[0].amount) + parseInt(data.amount.amount) + additionalFee;
@@ -2201,7 +2260,7 @@ export async function validateStepsFeeBalances(
                   base_denom: ibcBalance.base_denom,
                   verified: ibcBalance.verified,
                   on_chain: data.to_chain,
-                  amount: data.amount.amount + newDenom,
+                  amount: parseInt(data.amount.amount) + additionalFee + newDenom,
                   ibc: ibcDetails,
                 };
                 balances.push(newIbcBalance);
@@ -2417,7 +2476,7 @@ export async function isValidIBCReserveDenom(
       store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
         'demeris/GET_VERIFY_TRACE',
-        { subscribe: true, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
+        { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
         { root: true },
       ));
   } catch (e) {

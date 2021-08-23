@@ -173,17 +173,19 @@ export default defineComponent({
 
     // Add liquidity to a existing pool
     const { calculateSupplyTokenAmount, reserveBalances } = usePool((data.value as Actions.AddLiquidityData).pool?.id);
-    const { formatPoolName, allPools } = usePools();
+    const { getPoolName, getNextPoolId } = usePools();
 
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
+      const precisionDiff = precisions.value.coinA - precisions.value.coinB;
 
       if (!hasPool.value) {
+        const precisionDiff = precisions.value.coinA - precisions.value.coinB;
         return {
           coinA,
           coinB: new BigNumber(data.value.coinB.amount || 1)
             .dividedBy(data.value.coinA.amount || 1)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }
@@ -193,7 +195,7 @@ export default defineComponent({
           coinA,
           coinB: new BigNumber(reserveBalances.value[1].amount)
             .dividedBy(reserveBalances.value[0].amount)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }
@@ -204,7 +206,7 @@ export default defineComponent({
     const updatePoolInfo = async () => {
       if (hasPool.value) {
         const pool = (data.value as Actions.AddLiquidityData).pool;
-        poolInfo.pairName = await formatPoolName(pool);
+        poolInfo.pairName = await getPoolName(pool);
         poolInfo.denom = pool.pool_coin_denom;
         return;
       }
@@ -214,7 +216,7 @@ export default defineComponent({
       const denomB = await getDisplayName(denoms[1], chainName.value);
 
       poolInfo.pairName = `${denomA}/${denomB}`.toUpperCase();
-      poolInfo.denom = `Gravity ` + (allPools.value.length + 1);
+      poolInfo.denom = `Gravity ` + getNextPoolId();
       poolInfo.denoms = denoms;
     };
 

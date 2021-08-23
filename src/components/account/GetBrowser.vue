@@ -19,14 +19,17 @@
         </div>
 
         <div class="flex items-center flex-col mt-12">
-          <Button :name="$t('wallet.connect.modal3.button1') + ' ->'" variant="secondary" @click="openUrlChrome" />
+          <Button :name="$t('wallet.connect.modal3.button1') + ' &rarr;'" variant="secondary" @click="openUrlChrome" />
           <Button
             class="mt-4"
-            :name="$t('wallet.connect.modal3.button2') + ' ->'"
+            :name="$t('wallet.connect.modal3.button2') + ' &rarr;'"
             variant="secondary"
             @click="openUrlBrave"
           />
-          <a class="mt-6 font-medium hover:text-text p-1.5 transition-colors active:opacity-70" @click="emitTryDemo">
+          <a
+            class="mt-6 font-medium hover:text-text p-1.5 transition-colors active:opacity-70 cursor-pointer"
+            @click="emitTryDemo"
+          >
             {{ $t('generic_cta.tryTheDemo') }}
           </a>
         </div>

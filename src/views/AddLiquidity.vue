@@ -28,14 +28,15 @@
             <template v-if="!state.isCreationConfirmationOpen">
               <div class="pt-8 mb-8 text-center">
                 <h1 class="text-3 font-bold">
-                  {{ hasPair && !hasPool ? 'Create new pool' : 'Add liquidity' }}
+                  {{ pageTitle }}
                 </h1>
 
-                <p v-if="!hasPair" class="mt-3 text-muted">Select two assets</p>
+                <p v-if="!hasPair" class="mt-3 text-muted">{{ $t('pages.addLiquidity.selectCTA') }}</p>
                 <div v-else class="mt-3 text-muted">
                   <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" />
                   <span class="mx-1">&middot;</span>
-                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" /> pool
+                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
+                  {{ $t('pages.addLiquidity.pool') }}
                 </div>
               </div>
 
@@ -77,17 +78,15 @@
               />
 
               <Alert v-if="hasPair && !hasPool" status="warning" class="my-6 max-w-sm mx-auto">
-                <p class="font-bold">You are the first liquidity provider</p>
+                <p class="font-bold">{{ $t('pages.addLiquidity.firstProvider') }}</p>
                 <p class="mt-0.5">
-                  As the first liquidity provider to the <Ticker :name="form.coinA.asset.base_denom" /> &middot;
-                  <Ticker :name="form.coinB.asset.base_denom" />
-                  pool, you will be creating the pool and setting the price. Proceed with caution.
+                  {{ $t('pages.addLiquidity.firstProviderWarning', { tickerA, tickerB }) }}
                 </p>
               </Alert>
 
               <fieldset class="bg-surface shadow-card rounded-2xl">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
-                  <span>Supply</span>
+                  <span>{{ $t('pages.addLiquidity.supplyLbl') }}</span>
 
                   <span
                     v-if="form.coinA.asset && hasFunds.coinA"
@@ -96,7 +95,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinA.asset.amount || 0, denom: form.coinA.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinA.asset"
@@ -147,7 +146,7 @@
                   @click="toggleChainsModal(null, 'coinA')"
                 >
                   <div>
-                    From
+                    {{ $t('pages.addLiquidity.fromLbl') }}
                     <span class="font-medium text-text"><ChainName :name="form.coinA.asset.on_chain || '-'" /></span>
                   </div>
                   <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -156,7 +155,7 @@
 
               <fieldset class="bg-surface shadow-card rounded-2xl mt-4">
                 <div class="w-full flex justify-between text-muted pt-6 px-5">
-                  <span>Supply</span>
+                  <span>{{ $t('pages.addLiquidity.supplyLbl') }}</span>
 
                   <span
                     v-if="form.coinB.asset && hasFunds.coinB"
@@ -165,7 +164,7 @@
                     <AmountDisplay
                       :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
                     />
-                    available
+                    {{ $t('pages.addLiquidity.available') }}
                   </span>
                   <router-link
                     v-else-if="form.coinB.asset"
@@ -216,7 +215,7 @@
                   @click="toggleChainsModal(null, 'coinB')"
                 >
                   <div>
-                    From
+                    {{ $t('pages.addLiquidity.fromLbl') }}
                     <span class="font-medium text-text"><ChainName :name="form.coinB.asset.on_chain || '-'" /></span>
                   </div>
                   <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -258,7 +257,7 @@
                   />
                 </div>
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
-                  Your assets will be transferred to Cosmos Hub
+                  {{ $t('pages.addLiquidity.hubWarning') }}
                 </Alert>
                 <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
               </div>
@@ -267,7 +266,7 @@
             <template v-else-if="state.isCreationConfirmationOpen">
               <article class="flex flex-col items-center">
                 <h2 class="text-3 font-bold pt-8 mb-8 whitespace-pre-line text-center">
-                  Creating a pool is risky business
+                  {{ $t('pages.addLiquidity.createWarning') }}
                 </h2>
 
                 <img
@@ -277,18 +276,17 @@
                 />
 
                 <p class="text-muted leading-copy max-w-md mx-auto">
-                  As the first liquidity provider, you are setting the pool price. This means that if you don’t know
-                  what you are doing, you may risk significant loss as a result of arbitrage.
+                  {{ $t('pages.addLiquidity.arbitrageWarning') }}
                 </p>
 
                 <footer class="w-full max-w-md mx-auto flex justify-stretch mt-12 mb-8 gap-6">
                   <Button
-                    name="Cancel"
+                    :name="$t('generic_cta.cancel')"
                     variant="secondary"
                     class="flex-1"
                     @click="state.isCreationConfirmationOpen = false"
                   />
-                  <Button name="I understand" class="flex-1" @click="goToReview" />
+                  <Button :name="$t('generic_cta.understand')" class="flex-1" @click="goToReview" />
                 </footer>
               </article>
             </template>
@@ -313,6 +311,8 @@
 <script lang="ts">
 import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -331,12 +331,14 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
+import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default {
@@ -359,10 +361,12 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
-
+    const { useDenom } = useDenoms();
     const poolId = computed(() => route.params.id as unknown as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
@@ -389,6 +393,7 @@ export default {
       return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
+    pageview({ page_title: 'Add Liquidity', page_path: '/pools/add/' + route.params.id });
     const hasPrices = computed(() => {
       if (!hasPool.value) {
         return false;
@@ -431,17 +436,52 @@ export default {
       return result;
     });
 
-    const { allPools, pools, getReserveBaseDenoms } = usePools();
+    const { getNextPoolId, pools, getReserveBaseDenoms } = usePools();
 
     const previewPoolCoinDenom = computed(() => {
-      return `G` + (allPools.value.length + 1);
+      return `G` + getNextPoolId();
     });
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
     });
+    const tickerA = ref('-');
+    const tickerB = ref('-');
+    watch(
+      () => form.coinA.asset,
+      (newDenom, oldDenom) => {
+        if (newDenom?.base_denom && newDenom?.base_denom != oldDenom?.base_denom) {
+          const { tickerName } = useDenom(newDenom.base_denom);
+          watch(
+            () => tickerName.value,
+            (newTicker) => {
+              tickerA.value = newTicker;
+            },
+            { immediate: true },
+          );
+        }
+      },
+      { immediate: true },
+    );
 
-    const { calculateSupplyTokenAmount, calculateWithdrawBalances, reserveBalances, totalSupply } = usePool(
+    watch(
+      () => form.coinB.asset,
+      (newDenom, oldDenom) => {
+        if (newDenom?.base_denom && newDenom?.base_denom != oldDenom?.base_denom) {
+          const { tickerName } = useDenom(newDenom.base_denom);
+          watch(
+            () => tickerName.value,
+            (newTicker) => {
+              tickerB.value = newTicker;
+            },
+            { immediate: true },
+          );
+        }
+      },
+      { immediate: true },
+    );
+
+    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
       computed(() => pool.value?.id),
     );
 
@@ -477,6 +517,15 @@ export default {
       return !!pool.value;
     });
 
+    const pageTitle = computed(() => {
+      return hasPair.value && !hasPool.value ? t('pages.addLiquidity.createNew') : t('pages.addLiquidity.addLiquidity');
+    });
+
+    const metaSource = computed(() => ({
+      title: pageTitle.value,
+    }));
+    useMeta(metaSource);
+
     const updateReceiveAmount = () => {
       if (!hasPool.value) {
         state.receiveAmount = '1';
@@ -484,12 +533,12 @@ export default {
       }
 
       if (!form.coinA.amount || !form.coinB.amount) {
-        state.receiveAmount = undefined;
+        state.receiveAmount = '0';
         return;
       }
 
       const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = (+result.toFixed(6)).toString();
+      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {
@@ -501,7 +550,7 @@ export default {
 
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
-
+      const precisionDiff = precisions.value.coinA - precisions.value.coinB;
       if (!hasPair.value) {
         return;
       }
@@ -515,25 +564,31 @@ export default {
           coinA,
           coinB: new BigNumber(form.coinB.amount || 1)
             .dividedBy(form.coinA.amount || 1)
-            .shiftedBy(precisions.value.coinB)
+            .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
       }
 
       if (reserveBalances.value?.length) {
+        const baseDenomIndex = {};
+        baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
+        baseDenomIndex[state.poolBaseDenoms[1]] = pool.value.reserve_coin_denoms[1];
         const amountA =
-          form.coinA.asset.base_denom == state.poolBaseDenoms[0]
+          baseDenomIndex[form.coinA.asset.base_denom] == reserveBalances.value[0].denom
             ? reserveBalances.value[0].amount
             : reserveBalances.value[1].amount;
         const amountB =
-          form.coinB.asset.base_denom == state.poolBaseDenoms[1]
+          baseDenomIndex[form.coinB.asset.base_denom] == reserveBalances.value[1].denom
             ? reserveBalances.value[1].amount
             : reserveBalances.value[0].amount;
         const precisionB =
           form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
         return {
           coinA,
-          coinB: new BigNumber(amountB).dividedBy(amountA).shiftedBy(precisionB).toNumber(),
+          coinB: new BigNumber(amountB)
+            .dividedBy(amountA)
+            .shiftedBy(precisionB + precisionDiff)
+            .toNumber(),
         };
       }
 
@@ -625,7 +680,7 @@ export default {
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
-      state.totalEstimatedPrice = total.isFinite() ? total.decimalPlaces(2).toString() : '';
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
     const submitButtonName = computed(() => {
@@ -634,13 +689,13 @@ export default {
       let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
 
       if (emptyFields) {
-        return 'Continue';
+        return t('generic_cta.continue');
       } else if (insufficientFunds) {
-        return 'Insufficient funds';
+        return t('generic_cta.noFunds');
       } else if (!insufficientFunds && invalidPool) {
-        return 'Supply amount must be > 1';
+        return t('generic_cta.noSupply');
       } else {
-        return 'Continue';
+        return t('generic_cta.continue');
       }
     });
 
@@ -743,6 +798,14 @@ export default {
 
     const goToReview = () => {
       if (state.isCreationConfirmationOpen) {
+        if (hasPool.value) {
+          event('review_add_liquidity_tx', {
+            event_label: 'Reviewing add liquidity tx',
+            event_category: 'transactions',
+          });
+        } else {
+          event('review_create_pool_tx', { event_label: 'Reviewing create pool tx', event_category: 'transactions' });
+        }
         goToStep('review');
         state.isCreationConfirmationOpen = false;
         return;
@@ -826,7 +889,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = calculateWithdrawBalances(+state.receiveAmount);
+      const result = getPoolWithdrawBalances(+state.receiveAmount);
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -854,7 +917,7 @@ export default {
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = calculateWithdrawBalances(poolCoinAmount.toNumber());
+      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -923,19 +986,22 @@ export default {
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
+            const precisionDiff = precisionA - precisionB;
+
             const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
 
-            const bigAmountA = new BigNumber(amountA).minus(feeA);
+            const bigAmountA = new BigNumber(amountA).minus(feeA).dividedBy(10 ** precisionDiff);
             const bigAmountB = new BigNumber(amountB).minus(feeB);
             const amountsPositive = bigAmountA.isPositive() && bigAmountB.isPositive();
             const bigAmountBToA = bigAmountB.dividedBy(bigExchangeAmount);
 
             const minAmount = BigNumber.minimum(bigAmountA, bigAmountBToA);
 
-            console.log('minamount', minAmount.toString());
-
             if (minAmount.isEqualTo(bigAmountA) && amountsPositive) {
-              form.coinA.amount = bigAmountA.shiftedBy(-precisionA).decimalPlaces(precisionA).toString();
+              form.coinA.amount = bigAmountA
+                .shiftedBy(-precisionA + precisionDiff)
+                .decimalPlaces(precisionA)
+                .toString();
 
               form.coinB.amount = bigAmountA
                 .multipliedBy(bigExchangeAmount)
@@ -947,7 +1013,7 @@ export default {
 
               form.coinA.amount = bigAmountB
                 .dividedBy(bigExchangeAmount)
-                .shiftedBy(-precisionA)
+                .shiftedBy(-precisionA + precisionDiff)
                 .decimalPlaces(precisionA)
                 .toString();
             } else {
@@ -964,6 +1030,7 @@ export default {
     );
 
     return {
+      pageTitle,
       gasPrice,
       creationFee,
       actionSteps,
@@ -995,6 +1062,8 @@ export default {
       goToStep,
       coinSelectHandler,
       onClose,
+      tickerA,
+      tickerB,
     };
   },
 };

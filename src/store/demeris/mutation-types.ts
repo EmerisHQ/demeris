@@ -1,16 +1,18 @@
-import { GasPriceLevel } from '@/types/actions';
+import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisConfig } from './actions';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
+  SET_POOL_BALANCES = 'SET_POOL_BALANCES',
   SET_VERIFY_TRACE = 'SET_VERIFY_TRACE',
   SET_FEE_ADDRESS = 'SET_FEE_ADDRESS',
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
   SET_FEE_ADDRESSES = 'SET_FEE_ADDRESSES',
   ADD_KEPLR_KEYHASH = 'ADD_KEPLR_KEYHASH',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
+  SET_VALID_POOLS = 'SET_VALID_POOLS',
   SET_KEPLR = 'SET_KEPLR',
   SET_NUMBERS = 'SET_NUMBERS',
   SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
@@ -23,6 +25,7 @@ export enum DemerisMutationTypes {
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
+  SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   SET_RELAYER_STATUS = 'SET_RELAYER_STATUS',
   SET_RELAYER_BALANCES = 'SET_RELAYER_BALANCES',
   INIT = 'INIT',
@@ -55,6 +58,7 @@ export type UserSession = {
 export type DemerisMutationArgs =
   | API.Balances
   | boolean
+  | number
   | API.Prices
   | API.FeeAddress
   | API.FeeAddresses
@@ -72,7 +76,8 @@ export type DemerisMutationArgs =
   | API.VerifiedDenoms
   | DemerisConfig
   | KeplrKeyData
-  | string;
+  | string
+  | Pool[];
 
 export type DemerisMutations = {
   params?: API.APIRequests;

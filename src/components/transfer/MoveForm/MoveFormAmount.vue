@@ -313,7 +313,7 @@ export default defineComponent({
     const form = inject<MoveAssetsForm>('moveForm');
     const router = useRouter();
 
-    const { nativeBalances } = useAccount();
+    const { nativeBalances, orderBalancesByPrice } = useAccount();
 
     const state = reactive({
       currentAsset: undefined,
@@ -474,7 +474,7 @@ export default defineComponent({
       state.isDenomModalOpen = !state.isDenomModalOpen;
     };
 
-    const toggleChainsModal = (asset?: Record<string, unknown>, source = 'from') => {
+    const toggleChainsModal = (asset?: Record<string, unknown>, source = state.chainsModalSource) => {
       if (asset) {
         if (state.chainsModalSource === 'to') {
           form.to_chain = asset.on_chain as string;
@@ -533,13 +533,17 @@ export default defineComponent({
       () => props.balances,
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          let asset = props.balances[0];
+          let asset;
 
           if (form.balance.denom) {
             asset = props.balances.find((item) => {
               const balance = parseCoins(item.amount)[0];
               return balance.denom === form.balance.denom;
             });
+          }
+
+          if (!asset) {
+            asset = orderBalancesByPrice(props.balances)[0];
           }
 
           setCurrentAsset(asset);
@@ -549,15 +553,30 @@ export default defineComponent({
     );
 
     const { on_chain: onChain, to_chain: toChain } = toRefs(form);
-    watch([onChain, toChain], ([onChainNew, toChainNew], [onChainOld]) => {
-      if (onChainNew === toChainNew) {
-        if (onChainOld !== onChainNew) {
-          form.to_chain = onChainOld;
-        } else {
-          form.to_chain = undefined;
+    watch(
+      [onChain, toChain],
+      ([onChainNew, toChainNew], [onChainOld]) => {
+        if (onChainNew === toChainNew) {
+          if (onChainOld !== onChainNew) {
+            form.to_chain = onChainOld;
+          } else {
+            form.to_chain = undefined;
+          }
+        } else if (state.chainsModalSource === 'from') {
+          const dexChain = store.getters['demeris/getDexChain'];
+          const nativeChain = nativeBalances.value.find(
+            (item) => item.base_denom === state.currentAsset?.base_denom,
+          )?.on_chain;
+
+          if (onChainNew === nativeChain && nativeChain !== dexChain) {
+            form.to_chain = dexChain;
+          } else if (onChainNew !== nativeChain) {
+            form.to_chain = nativeChain;
+          }
         }
-      }
-    });
+      },
+      { immediate: true },
+    );
 
     return {
       availableBalances,

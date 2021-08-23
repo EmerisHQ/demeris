@@ -1,7 +1,7 @@
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { GasPriceLevel } from '@/types/actions';
+import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
@@ -44,6 +44,7 @@ export type Getters = {
     (params: { denom: string; chain_name: string }): boolean;
   };
   getEndpoint(state: State): string;
+  getAllValidPools(state: State): Pool[];
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
   getKeyhashes(state: State): string[];
@@ -83,6 +84,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
+  getAllValidPools: (state) => {
+    return state.validPools ?? [];
+  },
   getAllStakingBalances: (state) => {
     const stakingBalances = Object.values(state.stakingBalances).flat();
     return stakingBalances.length > 0 ? stakingBalances : null;
@@ -103,7 +107,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
   },
   getRelayerChainStatus: (state) => (params) => {
-    console.log(state);
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer;
   },
   isDemoAccount: (state) => {
@@ -142,13 +145,13 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
   getTicker:
-    (state, getters, rootState, rootGetters) =>
+    (state, getters) =>
     ({ name }) => {
       const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
       if (ticker) {
         return ticker;
       }
-      const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']();
+      const pools = getters['tendermint.liquidity.v1beta1/getAllValidPools'];
       if (pools && pools.pools) {
         const pool = pools.pools.find((x) => x.pool_coin_denom == name);
         if (pool) {

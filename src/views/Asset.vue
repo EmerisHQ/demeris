@@ -28,8 +28,8 @@
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
-            <h2 class="text-muted">Balance</h2>
-            <Price :amount="{ amount: totalAmount, denom }" class="text-3 font-bold" />
+            <h2 class="text-muted">{{ $t('pages.asset.balance') }}</h2>
+            <Price :amount="{ amount: totalAmount, denom }" :show-zero="true" class="text-3 font-bold" />
             <div class="text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
             </div>
@@ -40,21 +40,21 @@
             :class="assetConfig?.stakable ? 'grid-cols-3' : 'grid-cols-2'"
           >
             <div>
-              <dt class="text-muted">Available</dt>
+              <dt class="text-muted">{{ $t('pages.asset.available') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable">
-              <dt class="text-muted">Staked</dt>
+              <dt class="text-muted">{{ $t('pages.asset.staked') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
             <div>
-              <dt class="text-muted">Pooled</dt>
+              <dt class="text-muted">{{ $t('pages.asset.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
@@ -65,7 +65,7 @@
         <!-- Chains -->
 
         <section v-if="assets.length" class="mt-16">
-          <h2 class="text-2 font-bold">Chains</h2>
+          <h2 class="text-2 font-bold">{{ $t('pages.asset.chains') }}</h2>
 
           <ul class="mt-6">
             <li
@@ -101,12 +101,12 @@
 
         <section v-if="poolsDisplay.length" class="mt-16">
           <header class="flex items-baseline justify-between">
-            <h2 class="text-2 font-bold">Pools</h2>
+            <h2 class="text-2 font-bold">{{ $t('pages.asset.pools') }}</h2>
             <router-link
               :to="{ name: 'Pools' }"
               class="font-medium hover:opacity-80 active:opacity-70 transition select-none"
             >
-              See all &rarr;
+              {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
           </header>
 
@@ -116,7 +116,7 @@
         <!-- Staking -->
 
         <section v-if="assetConfig?.stakable" class="mt-16">
-          <h2 class="text-2 font-bold">Staking</h2>
+          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
 
           <StakeTable class="mt-8" :denom="denom" />
         </section>
@@ -125,8 +125,8 @@
       <!-- Swap -->
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
-        <LiquiditySwap />
-        <PoolBanner :name="denom" />
+        <LiquiditySwap :default-asset="nativeAsset" />
+        <PoolBanner v-if="isPoolCoin" :name="denom" />
         <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
@@ -135,6 +135,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -150,11 +151,11 @@ import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import useAccount from '@/composables/useAccount';
-import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
-import { getBaseDenom } from '@/utils/actionHandler';
+import { getDisplayName } from '@/utils/actionHandler';
+import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -176,16 +177,29 @@ export default defineComponent({
   },
 
   setup() {
+    const displayName = ref('');
+    const metaSource = computed(() => {
+      return { title: displayName.value };
+    });
+    useMeta(metaSource);
+    const isPoolCoin = computed(() => {
+      return denom.value.startsWith('pool');
+    });
     const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
-    const { balances, balancesByDenom, stakingBalancesByChain } = useAccount();
-    const { pools, poolsByDenom, withdrawBalancesById } = usePools();
+    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
+    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
+    const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
+    });
+
+    const nativeAsset = computed(() => {
+      return nativeBalances.value.find((item) => item.base_denom === denom.value);
     });
 
     const assets = computed(() => balancesByDenom(denom.value));
@@ -197,7 +211,7 @@ export default defineComponent({
       async () => {
         const dexChain = store.getters['demeris/getDexChain'];
 
-        if (assetConfig.value.chain_name != dexChain) {
+        if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
             store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
@@ -214,18 +228,21 @@ export default defineComponent({
 
           poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
         }
+
+        displayName.value = await getDisplayName(denom.value, dexChain);
       },
       { immediate: true },
     );
 
-    const poolsWithAsset = computed(() => poolsByDenom(poolDenom.value));
+    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
 
     const availableAmount = computed(() => {
       return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
     });
 
     const stakingBalance = computed(() => {
-      if (assetConfig.value && assetConfig.value.chain_name) {
+      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
         return stakingBalancesByChain(assetConfig.value.chain_name);
       }
       return 0;
@@ -233,10 +250,16 @@ export default defineComponent({
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
-      if (staked && Array.isArray(staked) && staked.length > 0 && staked[0].amount) {
-        return parseFloat(staked[0].amount);
+      let totalStakedAmount = 0;
+      if (Array.isArray(staked)) {
+        for (let i = 0; i < staked.length; i++) {
+          let amount = parseFloat(staked[i].amount);
+          if (amount) {
+            totalStakedAmount += amount;
+          }
+        }
       }
-      return 0;
+      return totalStakedAmount;
     });
 
     const poolsInvestedWithAsset = computed(() => {
@@ -278,13 +301,15 @@ export default defineComponent({
 
       for (const pool of poolsInvestedWithAsset.value) {
         const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-        const withdrawBalances = withdrawBalancesById(
-          pool.id,
+        const withdrawBalances = getWithdrawBalances(
+          pool,
           poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
         );
 
         const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
-        assetPooledAmount += assetBalanceInPool.amount;
+        if (assetBalanceInPool) {
+          assetPooledAmount += assetBalanceInPool.amount;
+        }
       }
 
       return assetPooledAmount;
@@ -293,7 +318,19 @@ export default defineComponent({
     const totalAmount = computed(() => {
       return availableAmount.value + stakedAmount.value + pooledAmount.value;
     });
-    return { assetConfig, denom, assets, poolsDisplay, availableAmount, stakedAmount, pooledAmount, totalAmount };
+
+    return {
+      nativeAsset,
+      assetConfig,
+      denom,
+      assets,
+      poolsDisplay,
+      availableAmount,
+      stakedAmount,
+      pooledAmount,
+      totalAmount,
+      isPoolCoin,
+    };
   },
 });
 </script>

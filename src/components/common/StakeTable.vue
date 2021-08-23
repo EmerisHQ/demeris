@@ -3,7 +3,7 @@ import type { PropType } from 'vue';
 import { defineComponent } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import type { StakingBalance } from '@/types/api';
 
@@ -11,7 +11,7 @@ export default defineComponent({
   components: {
     Button,
     CircleSymbol,
-    Denom,
+    Ticker,
   },
   props: {
     denom: {
@@ -42,10 +42,9 @@ export default defineComponent({
         "
       >
         <div class="flex-1 max-w-xs">
-          <h3 class="text-1 font-bold">Earn rewards by staking <Denom :name="denom" /></h3>
+          <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            Lock up your <Denom :name="denom" /> and earn passive income with an average
-            <span class="font-bold">9.7% APY</span>.
+            {{ $t('components.stakeTable.lockUp') }} <Ticker :name="denom" /> {{ $t('components.stakeTable.andEarn') }}
           </p>
         </div>
 

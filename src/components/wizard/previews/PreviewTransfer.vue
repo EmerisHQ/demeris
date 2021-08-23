@@ -17,15 +17,15 @@
     </ListItem>
 
     <ListItem
-      v-if="stepType !== 'transfer-to-hub'"
+      v-if="stepType !== 'transfer-to-hub' && displayFrom != '-'"
       :label="$t(`components.previews.transfer.${response ? 'fromLbl' : 'senderLbl'}`)"
-      :disclosure-show-text="truncateAddress(transactionInfo.from.address)"
+      :disclosure-show-text="truncateAddress(displayFrom)"
       direction="col"
       collapsible
       collapsed
     >
       <div class="mt-4">
-        <Address :address="transactionInfo.from.address" :chain-name="transactionInfo.from.chain" readonly />
+        <Address :address="displayFrom" :chain-name="transactionInfo.from.chain" readonly />
       </div>
     </ListItem>
 
@@ -78,15 +78,15 @@
     </ListItem>
 
     <ListItem
-      v-if="stepType !== 'transfer-to-hub'"
+      v-if="stepType !== 'transfer-to-hub' && displayTo != '-'"
       :label="$t('components.previews.transfer.toLbl')"
-      :disclosure-show-text="truncateAddress(transactionInfo.to.address)"
+      :disclosure-show-text="truncateAddress(displayTo)"
       direction="col"
       collapsible
       collapsed
     >
       <div class="mt-4">
-        <Address :address="transactionInfo.to.address" :chain-name="transactionInfo.to.chain" readonly />
+        <Address :address="displayTo" :chain-name="transactionInfo.to.chain" readonly />
       </div>
     </ListItem>
   </List>
@@ -104,6 +104,7 @@ import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
+import { getOwnAddress } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewTransfer',
@@ -147,7 +148,8 @@ export default defineComponent({
     const currentStep = computed(() => {
       return props.response || props.step;
     });
-
+    const displayFrom = ref('-');
+    const displayTo = ref('-');
     const stepType = computed(() => {
       const description = currentStep.value.description;
       const descriptionKeyMap = {
@@ -207,11 +209,7 @@ export default defineComponent({
         denom: (lastTransaction.data.amount as Base.Amount).denom,
       };
 
-      from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
-
-      if (to.chain && !to.address) {
-        to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
-      }
+      //from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
 
       return {
         isIBC,
@@ -231,12 +229,24 @@ export default defineComponent({
     };
 
     const truncateAddress = (address: string) => {
-      return `${address.substring(0, 6)}…${address.substring(address.length - 6, address.length)}`;
+      return `${address.substring(0, address.indexOf('1') + 6)}…${address.substring(
+        address.length - 3,
+        address.length,
+      )}`;
     };
 
     watch(
       transactionInfo,
       async (detail) => {
+        if (!detail.from.address) {
+          displayFrom.value = await getOwnAddress({ chain_name: detail.from.chain });
+        }
+        if (detail.to.chain && detail.to.address) {
+          displayTo.value = detail.to.address;
+        }
+        if (detail.to.chain && !detail.to.address) {
+          displayTo.value = await getOwnAddress({ chain_name: detail.to.chain });
+        }
         if (detail.isIBC) {
           denomName.value = await getBaseDenom(detail.from.denom, detail.from.chain);
         } else {
@@ -256,6 +266,8 @@ export default defineComponent({
       hasMultipleTransactions,
       formatMultipleChannel,
       includedFees,
+      displayFrom,
+      displayTo,
     };
   },
 });

@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="md:flex justify-between">
+    <div v-if="pool" class="md:flex justify-between">
       <main class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
           <div class="text-muted mb-4">Gravity DEX Pool</div>
@@ -21,7 +21,7 @@
           <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
         </header>
 
-        <section v-if="reserveBalances" class="mt-16">
+        <section v-if="reserveBalances && walletBalances" class="mt-16">
           <h2 class="text-2 font-bold">Underlying assets</h2>
 
           <table class="assets-table table-fixed -ml-6 mt-4">
@@ -66,7 +66,7 @@
           </table>
         </section>
 
-        <section v-if="reserveBalances" class="mt-16">
+        <section v-if="reserveBalances && walletBalances" class="mt-16">
           <h2 class="text-2 font-bold">Liquidity pool token</h2>
 
           <table class="assets-table table-fixed -ml-6 mt-6">
@@ -128,8 +128,8 @@
               <h2 class="text-muted">Equity</h2>
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
-            <p class="mt-1 text-2 font-bold">
-              {{ toUSD(hasPrices.all ? ownSharePrice : 0) }}
+            <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
+              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0) }}
             </p>
             <p class="text-muted mt-1">
               <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
@@ -176,6 +176,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -189,10 +190,9 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import symbolsData from '@/data/symbols';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
-import { isNative } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Pool',
@@ -213,7 +213,7 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const denoms = ref([]);
-
+    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -226,17 +226,15 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
-    const { formatPoolName, poolsByDenom, getReserveBaseDenoms } = usePools();
+    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
     const hasPrices = computed(() => {
       let baseDenoms = denoms.value;
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-
       const coinA = !!store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
       const coinB = !!store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
-
       const all = coinA && coinB;
 
       return {
@@ -246,10 +244,14 @@ export default defineComponent({
       };
     });
 
-    const { pool, reserveBalances, pairName, calculateWithdrawBalances, totalSupply } = usePool(
+    const { pool, reserveBalances, pairName, getPoolWithdrawBalances, totalSupply, totalLiquidityPrice } = usePool(
       computed(() => route.params.id as string),
     );
-    const totalLiquidityPrice = ref(0);
+
+    const metaSource = computed(() => ({
+      title: pairName.value,
+    }));
+    useMeta(metaSource);
 
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
@@ -262,7 +264,7 @@ export default defineComponent({
         denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = calculateWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
@@ -272,17 +274,28 @@ export default defineComponent({
     });
 
     const exchangeAmount = computed(() => {
+      if (!reserveBalances.value?.length) {
+        return;
+      }
+
+      const fromPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+      const toPrecision =
+        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA) * 100) / 100;
+        return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
       }
       return undefined;
     });
 
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
-      return [...poolsByDenom(pool.value.reserve_coin_denoms[0]), ...poolsByDenom(pool.value.reserve_coin_denoms[1])]
+      return [
+        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[0]),
+        ...filterPoolsByDenom(pool.value.reserve_coin_denoms[1]),
+      ]
         .filter((item) => item.id !== pool.value.id)
         .slice(0, 3);
     });
@@ -295,24 +308,13 @@ export default defineComponent({
       router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
     };
 
-    const updateTotalLiquidityPrice = async () => {
+    const updateDenoms = async () => {
       if (!pool.value) {
         return;
       }
 
       const reserveDenoms = await getReserveBaseDenoms(pool.value);
       denoms.value = reserveDenoms;
-
-      let total = 0;
-
-      for (const [index, denom] of reserveDenoms.entries()) {
-        const price = store.getters['demeris/getPrice']({ denom });
-        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
-
-        total += (reserveBalances.value[index].amount / Math.pow(10, precision)) * price;
-      }
-
-      totalLiquidityPrice.value = total;
     };
 
     const ownShare = computed(() => {
@@ -326,19 +328,11 @@ export default defineComponent({
         .toNumber();
     });
 
-    const ownSharePrice = computed(() => {
-      if (!ownShare.value || !totalLiquidityPrice.value) {
-        return '0.00';
-      }
-
-      return new BigNumber(ownShare.value).dividedBy(100).multipliedBy(totalLiquidityPrice.value).toFixed(2);
-    });
-
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
 
-    watch(reserveBalances, updateTotalLiquidityPrice);
+    watch(reserveBalances, updateDenoms, { immediate: true });
 
     return {
       hasPrices,
@@ -350,9 +344,8 @@ export default defineComponent({
       totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
-      formatPoolName,
+      getPoolName,
       ownShare,
-      ownSharePrice,
       toUSD,
       openAssetPage,
       exchangeAmount,

@@ -103,7 +103,7 @@
   </header>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
@@ -144,5 +144,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped lang="scss"></style>

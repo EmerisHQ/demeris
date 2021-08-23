@@ -1,93 +1,3 @@
-<script setup lang="ts">
-import { computed, nextTick, reactive, ref, toRef, unref, watch } from 'vue';
-
-import AmountInput from './AmountInput.vue';
-
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: '',
-  },
-  // maxWidth: {
-  //   type: Number,
-  //   required: false
-  // },
-  minWidth: {
-    type: Number,
-    default: 30,
-  },
-  prefix: {
-    type: String,
-    default: undefined,
-  },
-  suffix: {
-    type: String,
-    default: undefined,
-  },
-  placeholder: {
-    type: String,
-    default: undefined,
-  },
-});
-
-const emit = defineEmits(['update:modelValue']);
-
-const containerElementRef = ref(null);
-const sizeElementRef = ref(null);
-const prefixElementRef = ref(null);
-const suffixElementRef = ref(null);
-
-const model = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-});
-
-const state = reactive({
-  width: 0,
-  maxWidth: '100%',
-  scale: 1,
-});
-
-watch(
-  [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
-  ([containerEl, sizeEl, prefixEl, suffixEl]) => {
-    if (!sizeEl) {
-      return;
-    }
-
-    nextTick(() => {
-      const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
-      const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
-      const fullWidth = width + extraWidth;
-      const maxWidth = containerEl?.offsetWidth;
-
-      const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
-
-      state.width = width;
-      state.maxWidth = maxWidth;
-      state.scale = scale;
-    });
-  },
-  { immediate: true },
-);
-
-const innerStyle = computed(() => {
-  return {
-    transform: `scale(${state.scale})`,
-    maxWidth: state.maxWidth,
-  };
-});
-
-const inputProps = computed(() => {
-  return {
-    style: { width: `${state.width}px` },
-    width: state.width,
-    placeholder: props.placeholder,
-    class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
-  };
-});
-</script>
-
 <template>
   <label
     ref="containerElementRef"
@@ -124,6 +34,112 @@ const inputProps = computed(() => {
     </div>
   </label>
 </template>
+<script lang="ts">
+import { computed, defineComponent, nextTick, PropType, reactive, ref, watch } from 'vue';
+
+import AmountInput from './AmountInput.vue';
+
+export default defineComponent({
+  name: 'FlexibleAmountInput',
+  components: {
+    AmountInput,
+  },
+  props: {
+    modelValue: {
+      type: String as PropType<string>,
+      default: '',
+    },
+    // maxWidth: {
+    //   type: Number,
+    //   required: false
+    // },
+    minWidth: {
+      type: Number as PropType<number>,
+      default: 30,
+    },
+    prefix: {
+      type: String as PropType<string>,
+      default: undefined,
+    },
+    suffix: {
+      type: String as PropType<string>,
+      default: undefined,
+    },
+    placeholder: {
+      type: String as PropType<string>,
+      default: undefined,
+    },
+  },
+  emits: ['update:modelValue'],
+
+  setup(props, { emit }) {
+    const containerElementRef = ref(null);
+    const sizeElementRef = ref(null);
+    const prefixElementRef = ref(null);
+    const suffixElementRef = ref(null);
+
+    const model = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    });
+
+    const state = reactive({
+      width: 0,
+      maxWidth: '100%',
+      scale: 1,
+    });
+
+    watch(
+      [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
+      ([containerEl, sizeEl, prefixEl, suffixEl]) => {
+        if (!sizeEl) {
+          return;
+        }
+
+        nextTick(() => {
+          const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
+          const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
+          const fullWidth = width + extraWidth;
+          const maxWidth = containerEl?.offsetWidth;
+
+          const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
+
+          state.width = width;
+          state.maxWidth = maxWidth;
+          state.scale = scale;
+        });
+      },
+      { immediate: true },
+    );
+
+    const innerStyle = computed(() => {
+      return {
+        transform: `scale(${state.scale})`,
+        maxWidth: state.maxWidth,
+      };
+    });
+
+    const inputProps = computed(() => {
+      return {
+        style: { width: `${state.width}px` },
+        width: state.width,
+        placeholder: props.placeholder,
+        class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
+      };
+    });
+    return {
+      model,
+      state,
+      innerStyle,
+      inputProps,
+      containerElementRef,
+      sizeElementRef,
+      prefixElementRef,
+      suffixElementRef,
+    };
+  },
+});
+</script>
 
 <style lang="scss">
 .flexible-input {

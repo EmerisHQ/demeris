@@ -92,7 +92,10 @@
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
           You received
           <span class="font-bold"><AmountDisplay
-            :amount="{ denom: txResult?.demandCoinDenom, amount: String(txResult?.demandCoinSwappedAmount) }"
+            :amount="{
+              denom: txResult?.demandCoinDenom,
+              amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
+            }"
           /></span>
           <br />
           on <ChainName :name="'cosmos-hub'" />.
@@ -248,6 +251,7 @@ import SpinnerIcon from '@/components/ui/Spinner.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import {
   AddLiquidityData,
@@ -330,6 +334,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
+    const { updatePool } = usePools();
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
@@ -463,8 +468,9 @@ export default defineComponent({
                 title.value = t('components.txHandlingModal.transferred');
                 break;
               case 'swap':
+                updatePool(((props.tx as StepTransaction).data as SwapData).pool);
                 if (props.txResult.swappedPercent !== 100) {
-                  title.value = t('components.previews.transfer.swapActionPartiallyComplete', {
+                  title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
                   });
                 } else {
@@ -472,9 +478,11 @@ export default defineComponent({
                 }
                 break;
               case 'addliquidity':
+                updatePool(((props.tx as StepTransaction).data as AddLiquidityData).pool);
                 title.value = t('components.txHandlingModal.addLiqActionComplete');
                 break;
               case 'withdrawliquidity':
+                updatePool(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool);
                 title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
                 break;
               case 'createpool':

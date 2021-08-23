@@ -274,7 +274,7 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, Step } from '@/types/actions';
+import { FeeTotals, GasPriceLevel, IBCBackwardsData, IBCForwardsData, Step } from '@/types/actions';
 import { Balances, TransactionDetailResponse } from '@/types/api';
 import {
   chainStatusForSteps,
@@ -285,6 +285,9 @@ import {
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
+import { parseCoins } from '@/utils/basic';
+
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -345,14 +348,12 @@ export default defineComponent({
         // baseCurrencyAmount: '50',
       };
     });
+    const chainsStatus = ref({ status: true, failed: [], relayer: true });
     const mpQuery = computed(() => {
       return new URLSearchParams(mpParams.value).toString();
     });
     const mpUrl = computed(() => {
       return mpDomain.value + '/?' + mpQuery.value;
-    });
-    const chainsStatus = computed(() => {
-      return chainStatusForSteps(props.data);
     });
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
@@ -412,17 +413,92 @@ export default defineComponent({
     });
     const txResult = ref(null);
     onMounted(async () => {
+      chainsStatus.value = await chainStatusForSteps(props.data);
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
           return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
         }),
       );
     });
+
+    const adjustedFeeData = computed(() => {
+      const steps = [] as Step[];
+      for (const step of JSON.parse(JSON.stringify(props.data)) as Step[]) {
+        for (const stepTx of step.transactions) {
+          if (stepTx.addFee) {
+            const sourceBalance = balances.value.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (
+                amount.denom == (stepTx.data as IBCBackwardsData).amount.denom &&
+                x.base_denom == stepTx.feeToAdd[0].denom
+              ) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            if (sourceBalance) {
+              const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
+              const fee = parseInt(stepTx.feeToAdd[0].amount[props.gasPriceLevel]);
+              const txAmount = parseInt((stepTx.data as IBCBackwardsData).amount.amount);
+              if (txAmount + fee > amount) {
+                if (txAmount == amount) {
+                  stepTx.feeToAdd = [];
+                  stepTx.addFee = false;
+                } else {
+                  stepTx.feeToAdd[0].amount[props.gasPriceLevel] = amount - fee + '';
+                }
+              }
+            }
+            const baseDenomBalance = balances.value.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (amount.denom == x.base_denom && x.base_denom == stepTx.feeToAdd[0].denom) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            if (baseDenomBalance) {
+              const amount = parseCoins(baseDenomBalance.amount)[0];
+              if (parseInt(stepTx.feeToAdd[0].amount[props.gasPriceLevel]) < parseInt(amount.amount)) {
+                stepTx.feeToAdd = [];
+                stepTx.addFee = false;
+              }
+            }
+          }
+          if (stepTx.name == 'ibc_forward') {
+            const baseDenomBalance = balances.value.find((x) => {
+              const amount = parseCoins(x.amount)[0];
+              if (amount.denom == x.base_denom && x.base_denom == (stepTx.data as IBCForwardsData).amount.denom) {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            const fee =
+              parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[props.gasPriceLevel]) *
+              store.getters['demeris/getGasLimit'];
+            const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
+            if (baseDenomBalance) {
+              const amount = parseCoins(baseDenomBalance.amount)[0];
+              if (parseInt(amount.amount) - txAmount < fee) {
+                (stepTx.data as IBCForwardsData).amount.amount = parseInt(amount.amount) - fee + '';
+              }
+            } else {
+              (stepTx.data as IBCForwardsData).amount.amount = txAmount - fee + '';
+            }
+          }
+        }
+        steps.push(step);
+      }
+      return steps;
+    });
     watch(
       () => props.data,
       async (newData) => {
+        chainsStatus.value = await chainStatusForSteps(props.data);
         fees.value = await Promise.all(
-          (newData as Step[]).map(async (step) => {
+          (newData as Step[])?.map(async (step) => {
             return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
           }),
         );
@@ -447,7 +523,7 @@ export default defineComponent({
     const errorDetails = ref(undefined);
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
-      const currentStepData = props.data[currentStep.value];
+      const currentStepData = adjustedFeeData.value[currentStep.value];
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -492,7 +568,7 @@ export default defineComponent({
         if (currentStep.value == 0) {
           if (feeWarning.value.feeWarning) {
             feeWarning.value = await validateStepsFeeBalances(
-              props.data,
+              adjustedFeeData.value,
               toCheckBalances,
               newData,
               props.gasPriceLevel,
@@ -500,7 +576,7 @@ export default defineComponent({
             feeWarning.value.feeWarning = true;
           } else {
             feeWarning.value = await validateStepsFeeBalances(
-              props.data,
+              adjustedFeeData.value,
               toCheckBalances,
               newData,
               props.gasPriceLevel,
@@ -532,15 +608,24 @@ export default defineComponent({
       let abort = false;
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
+        feeWarning.value.ibcWarning
+          ? event('ibc_fee_warning', { event_label: 'User got IBC fee warning', event_category: 'transactions' })
+          : event('fee_warning', { event_label: 'User got fee warning', event_category: 'transactions' });
       } else {
         if (!chainsStatus.value.status || !chainsStatus.value.relayer) {
           showChainError.value = true;
+          !chainsStatus.value.relayer
+            ? event('relayer_warning', { event_label: 'User got Relayer down warning', event_category: 'transactions' })
+            : event('chain_status_warning', {
+                event_label: 'User got chain down warning',
+                event_category: 'transactions',
+              });
           return;
         }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
             const isLastTransaction = i === currentData.value.data.transactions.length - 1;
-            const isLastStep = currentStep.value === props.data.length - 1;
+            const isLastStep = currentStep.value === adjustedFeeData.value.length - 1;
 
             if (isLastTransaction && isLastStep) {
               isFinal.value = true;
@@ -579,16 +664,20 @@ export default defineComponent({
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '500000',
+                gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
+              event('confirm_tx_' + stepTx.name, {
+                event_label: 'Confirmed ' + stepTx.name + ' tx',
+                event_category: 'transactions',
+              });
               try {
                 tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
                   msgs: [res.msg],
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
-                  memo: 'a memo',
+                  memo: currentData.value.data.memo ?? '',
                 });
               } catch (e) {
                 console.error(e);
@@ -600,6 +689,10 @@ export default defineComponent({
                 continue;
               }
               if (tx) {
+                event('signed_tx_' + stepTx.name, {
+                  event_label: 'Signed ' + stepTx.name + ' tx',
+                  event_category: 'transactions',
+                });
                 errorDetails.value = undefined;
                 emit('transacting');
                 txstatus.value = 'transacting';
@@ -687,7 +780,7 @@ export default defineComponent({
                   }
 
                   // sleep
-                  await new Promise((r) => setTimeout(r, 500));
+                  await new Promise((r) => setTimeout(r, 750));
 
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,
@@ -706,10 +799,13 @@ export default defineComponent({
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
-                      let endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                        height: txResultData.height,
-                        stepType: currentData.value.data.name,
-                      });
+                      let endBlockEvent = null;
+                      while (!endBlockEvent) {
+                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                          height: txResultData.height,
+                          stepType: currentData.value.data.name,
+                        });
+                      }
 
                       if (endBlockEvent) {
                         let resultData = endBlockEvent;
@@ -749,7 +845,10 @@ export default defineComponent({
                   // TODO: deal with status here
                   emit('complete');
                   txstatus.value = 'complete';
-
+                  event('completed_tx_' + stepTx.name, {
+                    event_label: 'Completed ' + stepTx.name + ' tx',
+                    event_category: 'transactions',
+                  });
                   await txToResolve.value['promise'];
                 } catch (e) {
                   console.error(e);
@@ -757,6 +856,10 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
+                  event('failed_tx_' + stepTx.name, {
+                    event_label: 'Failed ' + stepTx.name + ' tx',
+                    event_category: 'transactions',
+                  });
                   txstatus.value = 'failed';
                   await txToResolve.value['promise'];
                   abort = true;
@@ -767,7 +870,7 @@ export default defineComponent({
           }
           isTxHandlingModalOpen.value = false;
         }
-        if (currentStep.value == (props.data as Step[]).length - 1) {
+        if (currentStep.value == (adjustedFeeData.value as Step[]).length - 1) {
           // At the end, emit completion
           emit('finish');
         } else {
@@ -791,11 +894,11 @@ export default defineComponent({
           if (props.actionName === 'move') {
             shouldOpenConfirmation = true;
           } else if (props.actionName === 'transfer') {
-            if (props.data?.[0]?.transactions[0]?.name.includes('ibc')) {
+            if (adjustedFeeData.value[0]?.transactions[0]?.name.includes('ibc')) {
               shouldOpenConfirmation = true;
             }
           } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-            shouldOpenConfirmation = props.data?.length > 1;
+            shouldOpenConfirmation = adjustedFeeData.value?.length > 1;
           }
 
           isTransferConfirmationOpen.value = shouldOpenConfirmation;

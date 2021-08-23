@@ -33,7 +33,8 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
+import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
@@ -91,10 +92,13 @@ export default defineComponent({
       () => [form.balance.amount, form.balance.denom, form.chain_name],
       async () => {
         if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
-          const precision = store.getters['demeris/getDenomPrecision']({ name: form.balance.denom }) || 6;
-
+          const precision =
+            store.getters['demeris/getDenomPrecision']({
+              name: await getBaseDenom(form.balance.denom, form.chain_name),
+            }) || 6;
           const action: TransferAction = {
             name: 'transfer',
+            memo: form.memo,
             params: {
               from: {
                 amount: {
@@ -114,6 +118,7 @@ export default defineComponent({
       },
     );
     const generateSteps = async () => {
+      event('review_send_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
       goToStep('review');
     };
 

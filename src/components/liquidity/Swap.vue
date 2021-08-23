@@ -137,7 +137,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -148,16 +148,19 @@ import Icon from '@/components/ui/Icon.vue';
 import IconButton from '@/components/ui/IconButton.vue';
 import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
-import useCalculation from '@/composables/useCalculation.vue';
+import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
-import { isNative } from '@/utils/basic';
+import { event } from '@/utils/analytics';
+import { isNative, parseCoins } from '@/utils/basic';
+
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -171,16 +174,31 @@ export default defineComponent({
     FeeLevelSelector,
   },
 
-  setup() {
+  props: {
+    defaultAsset: {
+      type: Object as PropType<Balance>,
+      default: undefined,
+    },
+  },
+
+  setup(props) {
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const { pools, poolsByDenom, poolById, poolPriceById, reserveBalancesById, getReserveBaseDenoms } = usePools();
+    const {
+      pools,
+      filterPoolsByDenom,
+      getPoolById,
+      getPoolPrice,
+      getReserveBalances,
+      getReserveBaseDenoms,
+      updatePool,
+    } = usePools();
     const { getDisplayPrice } = usePrice();
-    const { balances } = useAccount();
+    const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
     const slippage = ref(0);
     const store = useStore();
@@ -438,8 +456,11 @@ export default defineComponent({
       return sortAssetList(verifiedBalances);
     });
     const assetsToPay = computed(() => {
+      const hasBalance = balances.value.length > 0;
       let payAssets = allBalances.value.filter((x) => {
-        return availablePaySide.value.find((y) => y.pay.base_denom == x.base_denom);
+        return availablePaySide.value.find(
+          (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
+        );
       });
       return payAssets;
     });
@@ -526,10 +547,19 @@ export default defineComponent({
             };
           } else {
             //with-wallet
-            data.payCoinData =
-              assetsToPay.value.filter((coin) => {
-                return coin.base_denom === 'uatom' && coin.on_chain === store.getters['demeris/getDexChain'];
-              })[0] ?? assetsToPay.value[0];
+            let assetToReceive = null;
+
+            if (props.defaultAsset) {
+              const defaultAsset = JSON.parse(JSON.stringify(props.defaultAsset));
+              defaultAsset.on_chain = store.getters['demeris/getDexChain'];
+              assetToReceive =
+                assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
+            }
+
+            data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
+            if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
+              data.receiveCoinData = assetToReceive;
+            }
           }
 
           isInit.value = true;
@@ -697,7 +727,6 @@ export default defineComponent({
           txFee.value =
             fees[0].amount[gasPrice.value] *
             10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
-          console.log('TX fee', txFee.value);
         } else {
           return (txFee.value = 0);
         }
@@ -780,20 +809,18 @@ export default defineComponent({
           }
           data.isLoading = true;
           try {
-            const id = poolsByDenom(payDenom).find((pool) => {
+            const pool = filterPoolsByDenom(payDenom).find((pool) => {
               return (
                 pool.reserve_coin_denoms.find((denom) => {
                   return denom === receiveDenom;
                 })?.length > 0
               );
-            })?.id;
+            });
 
-            poolId.value = id;
-
-            const pool = poolById(id);
+            poolId.value = pool.id;
             const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await reserveBalancesById(id);
-            const poolPrice = await poolPriceById(id);
+            const reserveBalances = await getReserveBalances(pool);
+            const poolPrice = await getPoolPrice(pool);
 
             data.selectedPoolData = {
               pool,
@@ -821,11 +848,11 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
-            const pool = poolById(id);
-            const poolPrice = await poolPriceById(id);
+            const pool = getPoolById(id);
+            await updatePool(pool);
+            const poolPrice = await getPoolPrice(pool);
             const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await reserveBalancesById(id);
-
+            const reserveBalances = await getReserveBalances(pool);
             data.selectedPoolData = {
               pool,
               poolPrice,
@@ -855,14 +882,14 @@ export default defineComponent({
             params: {
               from: {
                 amount: {
-                  amount: String(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.payCoinAmount) * Math.pow(10, parseInt(fromPrecision)))),
                   denom: data.payCoinData.denom,
                 },
                 chain_name: data.payCoinData.on_chain,
               },
               to: {
                 amount: {
-                  amount: String(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision))),
+                  amount: String(Math.trunc(parseFloat(data.receiveCoinAmount) * Math.pow(10, parseInt(toPrecision)))),
                   denom: data.receiveCoinData.denom,
                 },
                 chain_name: store.getters['demeris/getDexChain'],
@@ -957,33 +984,49 @@ export default defineComponent({
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
         const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+        const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
+        const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
+        const precisionDiff = +fromPrecision - +toPrecision;
+        let equalizer = 1;
+        if (precisionDiff !== 0) {
+          equalizer = 10 ** Math.abs(precisionDiff);
+        }
+
         const balanceA = isReverse
           ? data.selectedPoolData.reserveBalances.balanceA
           : data.selectedPoolData.reserveBalances.balanceB;
         const balanceB = isReverse
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
-
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = getReceiveCoinAmount(
-            { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-            balanceA,
-            balanceB,
+          data.receiveCoinAmount = parseFloat(
+            (
+              getReceiveCoinAmount(
+                { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+                balanceA,
+                balanceB,
+              ) / (isReverse ? equalizer : 1)
+            ).toFixed(4),
           );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
         } else {
-          data.payCoinAmount = getPayCoinAmount(
-            { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
-            balanceB,
-            balanceA,
+          data.payCoinAmount = parseFloat(
+            (
+              getPayCoinAmount(
+                { base_denom: data.receiveCoinData.base_denom, amount: data.receiveCoinAmount },
+                balanceB,
+                balanceA,
+              ) * (isReverse ? equalizer : 1 / equalizer)
+            ).toFixed(4),
           );
         }
       }
     }
 
     async function swap() {
+      event('review_swap_tx', { event_label: 'Reviewing swap tx', event_category: 'transactions' });
       reviewModalToggle();
     }
 

@@ -5,5 +5,5 @@ process.env.VUE_APP_GIT_VERSION = gitVersion();
 process.env.VUE_APP_VERSION = pkg.version;
 
 module.exports = {
-  transpileDependencies: ['@starport/tendermint-liquidity-js'],
+  transpileDependencies: ['@starport/tendermint-liquidity-js', 'vue-meta'],
 };

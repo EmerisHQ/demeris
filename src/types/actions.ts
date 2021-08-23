@@ -5,6 +5,7 @@ import * as Base from './base';
 
 export type BaseAction = {
   name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool';
+  memo?: string;
 };
 export type SwapParams = {
   from: Base.ChainAmount;
@@ -62,6 +63,7 @@ export type StepTransactionDetails = {
 export type IBCBackwardsData = {
   amount: Base.Amount;
   from_chain: string;
+  base_denom?: string;
   to_chain: string;
   to_address?: string;
   through: string;
@@ -70,6 +72,7 @@ export type IBCForwardsData = {
   amount: Base.Amount;
   from_chain: string;
   to_chain: string;
+  chain_fee?: FeeWDenom;
   to_address?: string;
   through: string;
 };
@@ -100,7 +103,7 @@ export type StepTransaction = {
   name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
-  feeToAdd?: FeeWDenom;
+  feeToAdd?: FeeWDenom[];
   data:
     | IBCBackwardsData
     | IBCForwardsData
@@ -113,6 +116,7 @@ export type StepTransaction = {
 export type Step = {
   name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
   description: string;
+  memo?: string;
   output?: {
     amount: {
       denom: string;

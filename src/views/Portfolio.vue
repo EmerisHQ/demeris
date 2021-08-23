@@ -25,7 +25,7 @@
             @row-click="openAssetPage"
           />
 
-          <MoonpayBanner v-if="!balances.length" title="Add crypto to your account" size="large" />
+          <MoonpayBanner v-if="!balances.length" :title="$t('context.moonpay.cta')" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
@@ -53,6 +53,8 @@
 
 <script lang="ts">
 import { computed } from '@vue/runtime-core';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
@@ -65,6 +67,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Portfolio',
@@ -80,6 +83,14 @@ export default {
   },
 
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+    pageview({ page_title: 'Portfolio', page_path: '/' });
+    useMeta(
+      computed(() => ({
+        title: t('navbar.portfolio'),
+      })),
+    );
+
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();

@@ -1,5 +1,6 @@
 import { MutationTree } from 'vuex';
 
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -16,6 +17,7 @@ import { getDefaultState, State } from './state';
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
+  [MutationTypes.SET_POOL_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
   [MutationTypes.SET_STAKING_BALANCES](
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
@@ -25,6 +27,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
+  [MutationTypes.SET_VALID_POOLS](state: S, payload: Pool[]): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
@@ -58,6 +61,9 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
   },
+  [MutationTypes.SET_POOL_BALANCES](state: State, payload: DemerisMutations) {
+    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+  },
   [MutationTypes.ADD_KEPLR_KEYHASH](state: State, payload: string) {
     if (state.keplr) state.keplr.keyHashes.push(payload);
   },
@@ -81,6 +87,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_VERIFIED_DENOMS](state: State, payload: DemerisMutations) {
     state.verifiedDenoms = payload.value as API.VerifiedDenoms;
+  },
+  [MutationTypes.SET_VALID_POOLS](state: State, pools: Pool[]) {
+    state.validPools = pools;
   },
   [MutationTypes.SET_CHAINS](state: State, payload: DemerisMutations) {
     state.chains = {};
@@ -124,7 +133,8 @@ export const mutations: MutationTree<State> & Mutations = {
         ticket.status == 'IBC_receive_failed' ||
         ticket.status == 'IBC_receive_success' ||
         ticket.status == 'Tokens_unlocked_timeout' ||
-        ticket.status == 'Tokens_unlocked_ack'
+        ticket.status == 'Tokens_unlocked_ack' ||
+        ticket.status.startsWith('stuck')
       ) {
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
@@ -205,12 +215,17 @@ export const mutations: MutationTree<State> & Mutations = {
 
   [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
     const chains = Object.values(state.chains);
-
     for (const relayerBalance of payload.value as API.RelayerBalances) {
       const chain_name = chains.find((x) => x.node_info.chain_id == relayerBalance.chain_name).chain_name;
       state.chains[chain_name].relayerBalance = relayerBalance;
     }
   },
+
+  [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
+    window.localStorage.setItem('gasLimit', (payload.value as number).toString());
+    state.gas_limit = payload.value as number;
+  },
+
   // Internal module mutations
 
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
@@ -230,7 +245,9 @@ export const mutations: MutationTree<State> & Mutations = {
         state._Subscriptions.delete(sub);
       }
     }
-    state.balances = {};
+    for (const keyhash of state.keplr?.keyHashes ?? []) {
+      delete state.balances[keyhash];
+    }
     state.stakingBalances = {};
     state.numbers = {};
     state.keplr = null;

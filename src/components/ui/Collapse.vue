@@ -1,60 +1,3 @@
-<script setup lang="ts">
-import { nextTick, reactive, watch } from 'vue';
-
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false,
-  },
-  labelOpen: {
-    type: String,
-    default: 'Show',
-  },
-  labelHide: {
-    type: String,
-    default: 'Hide',
-  },
-  showLabel: {
-    type: Boolean,
-    default: true,
-  },
-});
-
-const emit = defineEmits(['update:isOpen']);
-
-const state = reactive({
-  height: '0',
-  isOpen: props.isOpen,
-});
-
-const toggle = () => {
-  state.isOpen = !state.isOpen;
-  emit('update:isOpen', state.isOpen);
-};
-
-const enter = (el: Element) => {
-  const scrollHeight = `${el.scrollHeight}px`;
-  state.height = '0';
-  nextTick(() => (state.height = scrollHeight || 'auto'));
-};
-
-const afterEnter = () => {
-  setTimeout(() => (state.height = 'auto'), 5);
-};
-
-const leave = (el: Element) => {
-  state.height = getComputedStyle(el).height;
-  setTimeout(() => (state.height = '0'), 100);
-};
-
-watch(props, () => {
-  state.isOpen = props.isOpen;
-});
-</script>
-
 <template>
   <div class="collapse flex flex-col items-stretch gap-y-4">
     <Button variant="link" :name="showLabel ? (state.isOpen ? labelHide : labelOpen) : null" :click-function="toggle">
@@ -79,7 +22,71 @@ watch(props, () => {
     </Transition>
   </div>
 </template>
+<script lang="ts">
+import { defineComponent, nextTick, PropType, reactive, watch } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
+
+export default defineComponent({
+  name: 'Collapse',
+  components: {
+    Button,
+    Icon,
+  },
+  props: {
+    isOpen: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
+    labelOpen: {
+      type: String as PropType<string>,
+      default: 'Show',
+    },
+    labelHide: {
+      type: String as PropType<string>,
+      default: 'Hide',
+    },
+    showLabel: {
+      type: Boolean as PropType<boolean>,
+      default: true,
+    },
+  },
+  emits: ['update:isOpen'],
+
+  setup(props, { emit }) {
+    const state = reactive({
+      height: '0',
+      isOpen: props.isOpen,
+    });
+
+    const toggle = () => {
+      state.isOpen = !state.isOpen;
+      emit('update:isOpen', state.isOpen);
+    };
+
+    const enter = (el: Element) => {
+      const scrollHeight = `${el.scrollHeight}px`;
+      state.height = '0';
+      nextTick(() => (state.height = scrollHeight || 'auto'));
+    };
+
+    const afterEnter = () => {
+      setTimeout(() => (state.height = 'auto'), 5);
+    };
+
+    const leave = (el: Element) => {
+      state.height = getComputedStyle(el).height;
+      setTimeout(() => (state.height = '0'), 100);
+    };
+
+    watch(props, () => {
+      state.isOpen = props.isOpen;
+    });
+    return { state, toggle, enter, afterEnter, leave };
+  },
+});
+</script>
 <style lang="scss" scoped>
 .collapse {
   &__content {
