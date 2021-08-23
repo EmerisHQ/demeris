@@ -67,6 +67,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Portfolio',
@@ -83,7 +84,7 @@ export default {
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
-
+    pageview({ page_title: 'Portfolio', page_path: '/' });
     useMeta(
       computed(() => ({
         title: t('navbar.portfolio'),

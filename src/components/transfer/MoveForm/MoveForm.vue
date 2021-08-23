@@ -30,6 +30,7 @@ import { useStore } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 
 import MoveFormAmount from './MoveFormAmount.vue';
 
@@ -105,6 +106,7 @@ export default defineComponent({
     });
 
     const generateSteps = async () => {
+      event('review_move_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' });
       goToStep('review');
     };
 

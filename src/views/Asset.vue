@@ -155,6 +155,7 @@ import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
+import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -181,7 +182,6 @@ export default defineComponent({
       return { title: displayName.value };
     });
     useMeta(metaSource);
-
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
@@ -189,6 +189,7 @@ export default defineComponent({
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
+    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 

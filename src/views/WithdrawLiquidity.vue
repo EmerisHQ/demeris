@@ -214,6 +214,7 @@ import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default {
@@ -246,7 +247,7 @@ export default {
     const store = useStore();
 
     const actionSteps = ref([]);
-
+    pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
     const poolId = computed(() => route.params.id);
 
     const { getPoolName } = usePools();
@@ -504,6 +505,10 @@ export default {
     };
 
     const goToReview = () => {
+      event('review_withdraw_liquidity_tx', {
+        event_label: 'Reviewing withdraw liquidity tx',
+        event_category: 'transactions',
+      });
       goToStep('review');
     };
 
