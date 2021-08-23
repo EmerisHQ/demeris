@@ -247,7 +247,7 @@ export default defineComponent({
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
-        if (denom_details) {
+        if (denom_details.length > 0) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
             const stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
