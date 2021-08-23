@@ -48,7 +48,8 @@ app
   })
   .mount('#app');
 
-VueCookieNext.config({ expire: '3m' });
+VueCookieNext.config({ expire: '180d', domain: '.emeris.com' });
+
 app.config.globalProperties.$filters = {
   ...stringFilters,
 };
