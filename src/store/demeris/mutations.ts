@@ -133,7 +133,8 @@ export const mutations: MutationTree<State> & Mutations = {
         ticket.status == 'IBC_receive_failed' ||
         ticket.status == 'IBC_receive_success' ||
         ticket.status == 'Tokens_unlocked_timeout' ||
-        ticket.status == 'Tokens_unlocked_ack'
+        ticket.status == 'Tokens_unlocked_ack' ||
+        ticket.status.startsWith('stuck')
       ) {
         state._Subscriptions.delete(
           JSON.stringify({ action: DemerisActionTypes.GET_TX_STATUS, payload: { params: payload.params } }),
