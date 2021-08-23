@@ -2,8 +2,10 @@
   <div v-if="!consented" class="consent_banner">
     <div class="consent_banner__message text-muted -text-1 px-5 py-3 rounded-xl flex">
       <div class="consent_banner__message__text">
-        By using this website, you agree to our
-        <a href="https://www.cookiesandyou.com/" target="_blank" rel="noopener">Cookie Policy.</a>
+        {{ $t('components.cookieConsent.message') }}
+        <a href="https://www.cookiesandyou.com/" target="_blank" rel="noopener">{{
+          $t('components.cookieConsent.linkText')
+        }}</a>
       </div>
       <div class="consent_banner__message__close ml-2" @click="acceptCookies">
         <Icon name="CloseIcon" :icon-size="1.25" />

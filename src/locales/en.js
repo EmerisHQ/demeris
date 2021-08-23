@@ -88,6 +88,10 @@ export const messages = {
       },
     },
     components: {
+      cookieConsent: {
+        message: 'By using this website, you agree to our',
+        linkText: 'Cookie Policy.',
+      },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
       },
