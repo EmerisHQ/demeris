@@ -88,7 +88,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.validPools ?? [];
   },
   getAllStakingBalances: (state) => {
-    const stakingBalances = Object.values(state.stakingBalances).flat();
+    const stakingBalances = Object.values(state.stakingBalances)
+      .filter((balance) => balance !== null)
+      .flat();
     return stakingBalances.length > 0 ? stakingBalances : null;
   },
   getNumbers: (state) => (params) => {

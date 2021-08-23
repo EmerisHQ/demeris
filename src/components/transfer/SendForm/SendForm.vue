@@ -34,6 +34,7 @@ import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { getChainFromRecipient } from '@/utils/basic';
 
 import SendFormAmount from './SendFormAmount.vue';
@@ -117,6 +118,7 @@ export default defineComponent({
       },
     );
     const generateSteps = async () => {
+      event('review_send_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
       goToStep('review');
     };
 

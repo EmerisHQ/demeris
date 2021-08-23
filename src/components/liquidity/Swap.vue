@@ -158,7 +158,9 @@ import { GasPriceLevel, SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -1024,6 +1026,7 @@ export default defineComponent({
     }
 
     async function swap() {
+      event('review_swap_tx', { event_label: 'Reviewing swap tx', event_category: 'transactions' });
       reviewModalToggle();
     }
 

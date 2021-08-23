@@ -338,6 +338,7 @@ import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default {
@@ -392,6 +393,7 @@ export default {
       return store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
     });
 
+    pageview({ page_title: 'Add Liquidity', page_path: '/pools/add/' + route.params.id });
     const hasPrices = computed(() => {
       if (!hasPool.value) {
         return false;
@@ -796,6 +798,14 @@ export default {
 
     const goToReview = () => {
       if (state.isCreationConfirmationOpen) {
+        if (hasPool.value) {
+          event('review_add_liquidity_tx', {
+            event_label: 'Reviewing add liquidity tx',
+            event_category: 'transactions',
+          });
+        } else {
+          event('review_create_pool_tx', { event_label: 'Reviewing create pool tx', event_category: 'transactions' });
+        }
         goToStep('review');
         state.isCreationConfirmationOpen = false;
         return;

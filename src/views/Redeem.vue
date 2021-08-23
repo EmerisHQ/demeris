@@ -110,6 +110,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { actionHandler } from '@/utils/actionHandler';
+import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -122,7 +123,7 @@ export default defineComponent({
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
     const store = useStore();
-
+    pageview({ page_title: 'Redeem', page_path: '/redeem' });
     store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
     const state = reactive({
       step: 'assets',
@@ -211,6 +212,7 @@ export default defineComponent({
 
     const selectAsset = (asset: Record<string, unknown>) => {
       state.selectedAsset = asset;
+      event('review_redeem_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
       goToStep('review');
     };
 

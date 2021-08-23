@@ -88,6 +88,13 @@ export const messages = {
       },
     },
     components: {
+      cookieConsent: {
+        message: 'By using this website, you agree to our',
+        linkText: 'Cookie Policy.',
+      },
+      asset: {
+        pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
+      },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
       },
@@ -293,6 +300,7 @@ export const messages = {
         dark: 'Dark',
         advancedSettings: 'Advanced settings',
         settings: 'Settings',
+        version: 'Version',
         connectedWallet: 'Connected wallet',
         disconnectWallet: 'Disconnect wallet',
         connectWallet: 'Connect wallet',
@@ -370,7 +378,8 @@ export const messages = {
         pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
-        pooled: 'Pools',
+        pools: 'Pools',
+        pooled: 'Pooled',
         staking: 'Staking',
       },
       assets: {

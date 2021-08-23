@@ -97,6 +97,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import symbolsData from '@/data/symbols';
 import { Balance } from '@/types/api';
+import { pageview } from '@/utils/analytics';
 import { getOwnAddress, hexToRGB } from '@/utils/basic';
 
 const defaultColors = {
@@ -111,7 +112,7 @@ export default {
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
-
+    pageview({ page_title: 'Receive assets', page_path: '/receive' });
     useMeta(
       computed(() => ({
         title: t('navbar.receive'),

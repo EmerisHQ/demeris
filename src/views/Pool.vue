@@ -191,6 +191,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 export default defineComponent({
@@ -212,7 +213,7 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const denoms = ref([]);
-
+    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -328,7 +329,7 @@ export default defineComponent({
     });
 
     const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
+      router.push({ name: 'Asset', params: { denom: asset.base_denom } });
     };
 
     watch(reserveBalances, updateDenoms, { immediate: true });
