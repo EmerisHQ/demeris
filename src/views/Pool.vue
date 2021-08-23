@@ -329,7 +329,7 @@ export default defineComponent({
     });
 
     const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
+      router.push({ name: 'Asset', params: { denom: asset.base_denom } });
     };
 
     watch(reserveBalances, updateDenoms, { immediate: true });
