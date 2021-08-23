@@ -374,7 +374,8 @@ export const messages = {
         pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
-        pooled: 'Pools',
+        pools: 'Pools',
+        pooled: 'Pooled',
         staking: 'Staking',
       },
       assets: {
