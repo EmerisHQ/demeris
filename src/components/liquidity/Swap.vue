@@ -602,8 +602,10 @@ export default defineComponent({
         }
       }),
       buttonTooltipText: computed(() => {
-        if (data.buttonName === 'Swap limit reached') {
+        if (data.isNotEnoughLiquidity) {
           return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
+        } else if (data.isSlippageOver) {
+          return `Surpass the slippage limit! Try swapping a smaller amount or increase the slippage.`;
         } else {
           if (!dexStatus.value) {
             return 'Cosmos Hub appears to be down, swap is temporarily unavailable';
