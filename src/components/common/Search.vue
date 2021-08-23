@@ -61,7 +61,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
@@ -70,9 +70,10 @@ export default defineComponent({
   props: {
     keyword: { type: String, required: false, default: null },
     placeholder: { type: String, required: false, default: 'Search' },
+    autofocus: { type: Boolean, default: true },
   },
   emits: ['update:keyword'],
-  setup() {
+  setup(props) {
     const searchInput = ref(null);
     const isFocused = ref(false);
 
@@ -80,6 +81,18 @@ export default defineComponent({
       isFocused.value = true;
       searchInput.value.focus();
     }
+
+    const { autofocus } = toRefs(props);
+
+    watch(
+      autofocus,
+      (value) => {
+        if (value) {
+          nextTick(() => setFocus());
+        }
+      },
+      { immediate: true },
+    );
 
     return {
       searchInput,

@@ -69,13 +69,13 @@
 
             <fieldset class="bg-surface shadow-card rounded-2xl">
               <div class="w-full flex justify-between text-muted pt-6 px-5">
-                <span>Withdraw</span>
+                <span>{{ $t('pages.withdrawLiquidity.withdraw') }}</span>
 
                 <span v-if="state.selectedAsset" :class="{ 'text-negative-text': !hasSufficientFunds }">
                   <AmountDisplay
                     :amount="{ amount: state.selectedAsset.amount, denom: state.selectedAsset.base_denom }"
                   />
-                  available
+                  {{ $t('pages.withdrawLiquidity.available') }}
                 </span>
               </div>
               <DenomSelect
@@ -110,7 +110,7 @@
                 @click="toggleChainsModal(null, 'coinA')"
               >
                 <div>
-                  From
+                  {{ $t('pages.withdrawLiquidity.from') }}
                   <span class="font-medium text-text"><ChainName :name="state.selectedAsset.on_chain || '–'" /></span>
                 </div>
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -121,7 +121,7 @@
               v-if="state.selectedAsset && state.receiveAmounts"
               class="relative mt-6 z-10 bg-surface shadow-card rounded-2xl"
             >
-              <div class="text-muted pt-6 px-5">Receive</div>
+              <div class="text-muted pt-6 px-5">{{ $t('pages.withdrawLiquidity.receive') }}</div>
 
               <DenomSelect
                 v-model:amount="state.receiveAmounts.coinA.amount"
@@ -146,7 +146,7 @@
               />
 
               <div class="py-4 px-5 w-full text-muted border-t border-border">
-                On <ChainName :name="state.selectedAsset.on_chain || '–'" />
+                {{ $t('pages.withdrawLiquidity.on') }} <ChainName :name="state.selectedAsset.on_chain || '–'" />
               </div>
             </fieldset>
 
@@ -164,10 +164,10 @@
                 />
               </div>
               <Alert v-if="needsTransferToHub" status="info" class="w-full max-w-sm mx-auto my-6">
-                Your assets will be transferred to Cosmos Hub
+                {{ $t('pages.withdrawLiquidity.hubWarning') }}
               </Alert>
               <Button
-                :name="hasSufficientFunds ? 'Continue' : 'Insufficient funds'"
+                :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
                 :disabled="!isValid"
                 :click-function="goToReview"
               />
@@ -541,9 +541,13 @@ export default {
       goToStep('amount');
     };
 
-    onMounted(() => {
-      state.selectedAsset = balances.value[0];
-    });
+    watch(
+      balances,
+      () => {
+        state.selectedAsset = balances.value[0];
+      },
+      { immediate: true },
+    );
 
     watch(
       () => [state.amount, state.selectedAsset, pool],

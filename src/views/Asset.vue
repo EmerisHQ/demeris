@@ -28,7 +28,7 @@
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
-            <h2 class="text-muted">Balance</h2>
+            <h2 class="text-muted">{{ $t('pages.asset.balance') }}</h2>
             <Price :amount="{ amount: totalAmount, denom }" :show-zero="true" class="text-3 font-bold" />
             <div class="text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
@@ -40,21 +40,21 @@
             :class="assetConfig?.stakable ? 'grid-cols-3' : 'grid-cols-2'"
           >
             <div>
-              <dt class="text-muted">Available</dt>
+              <dt class="text-muted">{{ $t('pages.asset.available') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: availableAmount, denom }" />
               </dd>
             </div>
 
             <div v-if="assetConfig?.stakable">
-              <dt class="text-muted">Staked</dt>
+              <dt class="text-muted">{{ $t('pages.asset.staked') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: stakedAmount, denom }" />
               </dd>
             </div>
 
             <div>
-              <dt class="text-muted">Pooled</dt>
+              <dt class="text-muted">{{ $t('pages.asset.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
                 <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
               </dd>
@@ -65,7 +65,7 @@
         <!-- Chains -->
 
         <section v-if="assets.length" class="mt-16">
-          <h2 class="text-2 font-bold">Chains</h2>
+          <h2 class="text-2 font-bold">{{ $t('pages.asset.chains') }}</h2>
 
           <ul class="mt-6">
             <li
@@ -101,12 +101,12 @@
 
         <section v-if="poolsDisplay.length" class="mt-16">
           <header class="flex items-baseline justify-between">
-            <h2 class="text-2 font-bold">Pools</h2>
+            <h2 class="text-2 font-bold">{{ $t('pages.asset.pools') }}</h2>
             <router-link
               :to="{ name: 'Pools' }"
               class="font-medium hover:opacity-80 active:opacity-70 transition select-none"
             >
-              See all &rarr;
+              {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
           </header>
 
@@ -116,7 +116,7 @@
         <!-- Staking -->
 
         <section v-if="assetConfig?.stakable" class="mt-16">
-          <h2 class="text-2 font-bold">Staking</h2>
+          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
 
           <StakeTable class="mt-8" :denom="denom" />
         </section>

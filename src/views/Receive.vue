@@ -12,20 +12,7 @@
       </router-link>
     </header>
 
-    <main
-      class="
-        w-full
-        max-w-7xl
-        mx-auto
-        md:pt-8
-        px-8
-        pb-0
-        flex-1 flex flex-col
-        items-center
-        justify-center
-        overflow-hidden
-      "
-    >
+    <main class="w-full max-w-7xl mx-auto md:pt-8 px-8 pb-0 flex-1 flex flex-col items-center overflow-hidden">
       <template v-if="!state.selectedAsset">
         <div class="-mt-9 h-full w-full max-w-md mx-auto">
           <DenomSelectModal
@@ -79,10 +66,12 @@
             </div>
           </div>
           <div v-if="state.selectedAsset" class="relative z-20 max-w-md w-full mx-auto">
-            <h2 class="text-3 font-bold mb-1">Receive <Denom :name="state.selectedAsset.base_denom" /></h2>
-            <p class="text-muted">on <ChainName :name="state.selectedAsset.on_chain" /></p>
+            <h2 class="text-3 font-bold mb-1">
+              {{ $t('pages.receive.receive') }} <Denom :name="state.selectedAsset.base_denom" />
+            </h2>
+            <p class="text-muted">{{ $t('pages.receive.on') }} <ChainName :name="state.selectedAsset.on_chain" /></p>
             <fieldset class="mt-16">
-              <div class="mb-3 font-bold">Your address</div>
+              <div class="mb-3 font-bold">{{ $t('pages.receive.yourAddress') }}</div>
               <Address :address="recipientAddress" :chain-name="state.selectedAsset.on_chain" readonly class="bg-fg" />
             </fieldset>
           </div>

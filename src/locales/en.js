@@ -27,6 +27,7 @@ export const messages = {
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try adjusting your search',
       max: 'Max',
+      noSupply: 'Supply amount must be > 1',
       understand: 'I understand',
       getAtom: 'Get ATOM',
       proceed: 'Proceed',
@@ -87,10 +88,6 @@ export const messages = {
       },
     },
     components: {
-      addLiquidity: {
-        addLiquidity: 'Add liquidity',
-        createNew: 'Create new pool',
-      },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
       },
@@ -323,6 +320,9 @@ export const messages = {
       chains: {
         title: 'Chains',
       },
+      moonpay: {
+        cta: 'Add crypto to your account',
+      },
       assets: {
         title: 'Assets',
         totalBalance: 'Total balance',
@@ -348,21 +348,64 @@ export const messages = {
     },
     pages: {
       addLiquidity: {
+        addLiquidity: 'Add liquidity',
+        createNew: 'Create new pool',
         selectCTA: 'Select two assets',
+        available: 'available',
         pool: 'pool',
         firstProvider: 'You are the first liquidity provider',
+        firstProviderWarning:
+          'As the first liquidity provider to the {tickerA} · {tickerB} pool, you will be creating the pool and setting the price. Proceed with caution.',
+        supplyLbl: 'Supply',
+        fromLbl: 'From',
+        hubWarning: 'Your assets will be transferred to Cosmos Hub',
+        createWarning: 'Creating a pool is risky business',
+        arbitrageWarning:
+          'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
       },
-      asset: {},
-      assets: {},
-      chains: {},
+      asset: {
+        balance: 'Balance',
+        available: 'Available',
+        staked: 'Staked',
+        pooled: 'Pooled',
+        pooledWarning: 'Pooled Warning',
+        chains: 'Chains',
+        pooled: 'Pools',
+        staking: 'Staking',
+      },
+      assets: {
+        assets: 'Assets',
+      },
+      chains: {
+        chains: 'Chains',
+      },
       portfolio: {},
       receive: {
         select: 'Select asset',
+        receive: 'Receive',
+        on: 'on',
+        yourAddress: 'Your address',
       },
-      redeem: {},
-      send: {},
+      redeem: {
+        title: 'Redeeming assets',
+        instructions:
+          'You hold assets with a transfer history that is not supported by Demeris. If you wish to use these assets with Demeris, you must first redeem them.',
+        learnMore: 'Learn more about redeeming',
+        select: 'Select an asset to redeem',
+        cta: 'Redeem',
+      },
+      send: {
+        where: 'Where are you sending assets?',
+      },
       welcome: {},
-      withdrawLiquidity: {},
+      withdrawLiquidity: {
+        withdraw: 'Withdraw',
+        from: 'From',
+        available: 'available',
+        receive: 'Receive',
+        on: 'On',
+        hubWarning: 'Your assets will be transferred to Cosmos Hub',
+      },
     },
   },
 };
