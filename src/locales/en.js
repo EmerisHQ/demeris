@@ -92,6 +92,9 @@ export const messages = {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
       },
+      asset: {
+        pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
+      },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
       },
