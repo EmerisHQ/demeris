@@ -78,6 +78,7 @@ import GetBrowser from '@/components/account/GetBrowser.vue';
 import GetDesktop from '@/components/account/GetDesktop.vue';
 import GetKeplr from '@/components/account/GetKeplr.vue';
 import Brandmark from '@/components/common/Brandmark.vue';
+import { pageview } from '@/utils/analytics';
 
 async function getKeplrInstance() {
   if (window.keplr) {
@@ -121,7 +122,7 @@ export default defineComponent({
 
   setup() {
     useMeta({ title: '' });
-
+    pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
     const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);

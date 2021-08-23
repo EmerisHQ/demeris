@@ -108,6 +108,18 @@ function usePools() {
     });
     return parseInt(parseCoins(balanceA.amount)[0].amount) / parseInt(parseCoins(balanceB.amount)[0].amount);
   };
+
+  const getLiquidityShare = (pool: Pool, poolCoinAmount: number) => {
+    if (!pool) {
+      return;
+    }
+
+    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+
+    return new BigNumber(poolCoinAmount).dividedBy(totalSupply).multipliedBy(100).toNumber();
+  };
+
   const getWithdrawBalances = (pool: Pool, poolCoinAmount: number) => {
     if (!pool) {
       return;
@@ -156,7 +168,7 @@ function usePools() {
     return withdrawCoins;
   };
   const getNextPoolId = () => {
-    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().length + 1;
+    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
   };
   const getReserveBalances = async (pool: Pool) => {
     const balances = store.getters['demeris/getBalances']({
@@ -177,6 +189,7 @@ function usePools() {
 
   return {
     pools,
+    getLiquidityShare,
     getPoolById,
     updatePool,
     getPoolName,
