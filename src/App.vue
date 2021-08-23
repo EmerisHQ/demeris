@@ -3,6 +3,7 @@
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
   <div v-if="initialized">
+    <CookieConsent />
     <router-view />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
@@ -16,6 +17,7 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { useAllStores } from '@/store';
@@ -28,6 +30,7 @@ export default defineComponent({
 
   components: {
     EphemerisSpinner,
+    CookieConsent,
   },
 
   setup() {

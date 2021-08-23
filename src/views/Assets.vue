@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <header class="pb-3 sm:pb-6 md:pb-6">
-      <h1 class="text-2 sm:text-3 md:text-4 font-bold">Assets</h1>
+      <h1 class="text-2 sm:text-3 md:text-4 font-bold">{{ $t('pages.assets.assets') }}</h1>
     </header>
 
     <AssetsTable :balances="[]" :show-all-assets="true" :hide-lp-assets="true" @row-click="openAssetPage" />
@@ -16,6 +16,7 @@ import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Assets',
@@ -31,7 +32,7 @@ export default {
     );
 
     const router = useRouter();
-
+    pageview({ page_title: 'Assets', page_path: '/assets' });
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };

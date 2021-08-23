@@ -31,7 +31,7 @@
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
         <template v-if="!transferType">
           <div class="max-w-3xl">
-            <h1 class="text-3 font-bold py-8 text-center">Where are you sending assets?</h1>
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
             <div class="mt-8 pb-8 flex space-x-8">
               <router-link
                 :to="{ name: 'Send', params: { type: 'address' } }"
@@ -140,6 +140,7 @@ import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { pageview } from '@/utils/analytics';
 
 type TransferType = 'address' | 'move';
 
@@ -153,7 +154,7 @@ export default {
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
     const step = ref(undefined);
-
+    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const { balances } = useAccount();
 
     const showBackButton = computed(() => {

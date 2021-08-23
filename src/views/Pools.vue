@@ -16,6 +16,7 @@ import { useMeta } from 'vue-meta';
 import PoolsTable from '@/components/liquidity/PoolsTable.vue';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Pools',
@@ -23,7 +24,7 @@ export default {
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
-
+    pageview({ page_title: 'Pools', page_path: '/pools' });
     useMeta(
       computed(() => ({
         title: t('context.pools.title'),

@@ -285,7 +285,9 @@ import {
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+
 export default defineComponent({
   name: 'TxStepsModal',
   components: {
@@ -606,9 +608,18 @@ export default defineComponent({
       let abort = false;
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
+        feeWarning.value.ibcWarning
+          ? event('ibc_fee_warning', { event_label: 'User got IBC fee warning', event_category: 'transactions' })
+          : event('fee_warning', { event_label: 'User got fee warning', event_category: 'transactions' });
       } else {
         if (!chainsStatus.value.status || !chainsStatus.value.relayer) {
           showChainError.value = true;
+          !chainsStatus.value.relayer
+            ? event('relayer_warning', { event_label: 'User got Relayer down warning', event_category: 'transactions' })
+            : event('chain_status_warning', {
+                event_label: 'User got chain down warning',
+                event_category: 'transactions',
+              });
           return;
         }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
@@ -656,6 +667,10 @@ export default defineComponent({
                 gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
+              event('confirm_tx_' + stepTx.name, {
+                event_label: 'Confirmed ' + stepTx.name + ' tx',
+                event_category: 'transactions',
+              });
               try {
                 tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
                   msgs: [res.msg],
@@ -674,6 +689,10 @@ export default defineComponent({
                 continue;
               }
               if (tx) {
+                event('signed_tx_' + stepTx.name, {
+                  event_label: 'Signed ' + stepTx.name + ' tx',
+                  event_category: 'transactions',
+                });
                 errorDetails.value = undefined;
                 emit('transacting');
                 txstatus.value = 'transacting';
@@ -826,7 +845,10 @@ export default defineComponent({
                   // TODO: deal with status here
                   emit('complete');
                   txstatus.value = 'complete';
-
+                  event('completed_tx_' + stepTx.name, {
+                    event_label: 'Completed ' + stepTx.name + ' tx',
+                    event_category: 'transactions',
+                  });
                   await txToResolve.value['promise'];
                 } catch (e) {
                   console.error(e);
@@ -834,6 +856,10 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
+                  event('failed_tx_' + stepTx.name, {
+                    event_label: 'Failed ' + stepTx.name + ' tx',
+                    event_category: 'transactions',
+                  });
                   txstatus.value = 'failed';
                   await txToResolve.value['promise'];
                   abort = true;
