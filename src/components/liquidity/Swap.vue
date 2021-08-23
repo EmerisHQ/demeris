@@ -572,11 +572,15 @@ export default defineComponent({
     const txFee = ref(0);
 
     const data = reactive({
+      //user set slippage
+      userSlippageLimit: computed(() => (store.getters['demeris/getSlippagePerc'] || 0.5) / 100),
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
           if (data.selectedPoolData === null) {
             return 'No pool for this pair';
+          } else if (data.isSlippageOver) {
+            return 'Slippage limit reached';
           } else if (data.isNotEnoughLiquidity) {
             return 'Swap limit reached';
           } else if (data.isOver) {
@@ -673,6 +677,7 @@ export default defineComponent({
           return false;
         }
       }),
+      isSlippageOver: computed(() => slippage.value > data.userSlippageLimit),
       isNotEnoughLiquidity: computed(() => {
         if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
           return true;
@@ -693,6 +698,7 @@ export default defineComponent({
       isSwapReady: computed(() => {
         return !(
           data.isOver ||
+          data.isSlippageOver ||
           !data.isBothSelected ||
           data.isNotEnoughLiquidity ||
           !data.isAmount ||
