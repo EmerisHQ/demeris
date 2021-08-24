@@ -924,20 +924,28 @@ export default {
       updateReceiveAmount();
     };
 
-    onMounted(async () => {
-      if (!poolId.value) {
-        return;
-      }
+    watch(
+      [poolId, pools],
+      async () => {
+        if (!poolId.value) {
+          return;
+        }
 
-      const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
+        if (form.coinA.asset || form.coinB.asset) {
+          return;
+        }
 
-      if (poolFromRoute) {
-        const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
-        state.poolBaseDenoms = poolBaseDenoms;
-        form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
-        form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
-      }
-    });
+        const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
+
+        if (poolFromRoute) {
+          const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
+          state.poolBaseDenoms = poolBaseDenoms;
+          form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
+          form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+        }
+      },
+      { immediate: true },
+    );
 
     const { asset: assetA } = toRefs(form.coinA);
     const { asset: assetB } = toRefs(form.coinB);
