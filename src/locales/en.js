@@ -350,6 +350,7 @@ export const messages = {
         all: 'All pools',
         pair: 'Token pair',
         share: 'Your share',
+        apy: 'APY',
         liquidity: 'Liquidity',
         empty: 'Pools you add liquidity to will appear here.',
         explore: 'Explore pools',

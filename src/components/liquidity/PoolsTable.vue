@@ -9,9 +9,10 @@
 
     <table class="pools-table table-fixed -ml-6">
       <colgroup>
-        <col width="34%" />
-        <col width="33%" />
-        <col width="33%" />
+        <col width="25%" />
+        <col width="25%" />
+        <col width="25%" />
+        <col width="25%" />
       </colgroup>
 
       <thead class="hidden md:table-header-group text-muted">
@@ -22,7 +23,9 @@
           <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
             {{ $t('context.pools.liquidity') }}
           </th>
-          <!--<th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">APY</th>//-->
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
+            {{ $t('context.pools.apy') }}
+          </th>
           <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
             {{ $t('context.pools.share') }}
           </th>
@@ -48,7 +51,9 @@
           <td class="text-right group-hover:bg-fg transition">
             <TotalLiquidityPrice :pool="pool" />
           </td>
-          <!--<td class="text-right">10%</td>//-->
+          <td class="text-right group-hover:bg-fg transition">
+            <PoolAPY :pool="pool" />
+          </td>
           <td class="text-right group-hover:bg-fg transition"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
         </tr>
       </tbody>
@@ -64,6 +69,7 @@ import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
+import PoolAPY from '@/components/common/PoolAPY.vue';
 import Search from '@/components/common/Search.vue';
 import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import Button from '@/components/ui/Button.vue';
@@ -76,7 +82,7 @@ import { parseCoins } from '@/utils/basic';
 
 export default {
   name: 'PoolsTable',
-  components: { Search, Icon, Button, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
+  components: { Search, Icon, Button, CircleSymbol, TotalLiquidityPrice, PoolAPY, OwnLiquidityPrice },
 
   props: {
     pools: {

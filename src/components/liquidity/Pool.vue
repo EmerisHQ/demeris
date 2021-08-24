@@ -29,7 +29,11 @@
         </div>
       </div>
       <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">{{ toUSD(totalLiquidityPrice) }}</div>
-      <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
+      <div class="flex mt-auto justify-between items-center">
+        <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
+
+        <PoolAPY :pool="pool" class="text-muted -text-1" />
+      </div>
     </div>
   </router-link>
 </template>
@@ -40,6 +44,7 @@ import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
+import PoolAPY from '@/components/common/PoolAPY.vue';
 import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 import { isNative } from '@/utils/basic';
@@ -47,7 +52,7 @@ import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'Pool',
 
-  components: { CircleSymbol, OwnLiquidityPrice },
+  components: { CircleSymbol, OwnLiquidityPrice, PoolAPY },
 
   props: {
     pool: {
@@ -60,7 +65,7 @@ export default defineComponent({
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
 
-    const { pairName, totalLiquidityPrice, poolAPY } = usePool((props.pool as Pool).id);
+    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
 
@@ -149,7 +154,7 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
 
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD, poolAPY };
+    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD };
   },
 });
 </script>
