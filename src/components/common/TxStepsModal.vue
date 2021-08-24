@@ -514,6 +514,7 @@ export default defineComponent({
     const allTransactionResponses = ref({
       responses: [],
       fees: {},
+      hashes: [],
     });
     const nextTx = () => {
       txToResolve.value['resolver']();
@@ -787,6 +788,7 @@ export default defineComponent({
                     { txhash, chain_name },
                   );
 
+                  allTransactionResponses.value.hashes.push({ txhash, chain_name });
                   allTransactionResponses.value.responses.push(txsResponse);
                   allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
                     (acc, item) => {
@@ -839,6 +841,7 @@ export default defineComponent({
                       };
                     }
 
+                    txResult.value.hashes = allTransactionResponses.value.hashes;
                     txResult.value.fees = allTransactionResponses.value.fees;
                   }
 

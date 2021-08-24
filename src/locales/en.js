@@ -331,6 +331,9 @@ export const messages = {
       moonpay: {
         cta: 'Add crypto to your account',
       },
+      transaction: {
+        viewOnExplorer: 'View on explorer',
+      },
       assets: {
         title: 'Assets',
         totalBalance: 'Total balance',
