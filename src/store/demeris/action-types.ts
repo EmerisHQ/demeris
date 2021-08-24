@@ -14,9 +14,11 @@ export enum DemerisActionTypes {
   GET_FEE_ADDRESSES = 'GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'GET_VERIFIED_DENOMS',
   GET_CHAINS = 'GET_CHAINS',
+  GET_SWAP_FEES = 'GET_SWAP_FEES',
   GET_PRICES = 'GET_PRICES',
   GET_TX_STATUS = 'GET_TX_STATUS',
   SET_SESSION_DATA = 'SET_SESSION_DATA',
+  SET_APY = 'SET_APY',
   LOAD_SESSION_DATA = 'LOAD_SESSION_DATA',
   GET_END_BLOCK_EVENTS = 'GET_END_BLOCK_EVENTS',
   VALIDATE_POOLS = 'VALIDATE_POOLS',
@@ -58,11 +60,13 @@ export enum GlobalDemerisActionTypes {
   GET_FEE_ADDRESSES = 'demeris/GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'demeris/GET_VERIFIED_DENOMS',
   GET_CHAINS = 'demeris/GET_CHAINS',
+  GET_SWAP_FEES = 'demeris/GET_SWAP_FEES',
   GET_PRICES = 'demeris/GET_PRICES',
   GET_TX_STATUS = 'demeris/GET_TX_STATUS',
   GET_END_BLOCK_EVENTS = 'demeris/GET_END_BLOCK_EVENTS',
   VALIDATE_POOLS = 'demeris/VALIDATE_POOLS',
   SET_SESSION_DATA = 'demeris/SET_SESSION_DATA',
+  SET_APY = 'demeris/SET_APY',
   LOAD_SESSION_DATA = 'demeris/LOAD_SESSION_DATA',
   // Chain-specific endpoint actions
   GET_VERIFY_TRACE = 'demeris/GET_VERIFY_TRACE',
@@ -87,6 +91,11 @@ export enum GlobalDemerisActionTypes {
   UNSUBSCRIBE = 'demeris/UNSUBSCRIBE',
   STORE_UPDATE = 'demeris/STORE_UPDATE',
 }
+
+export type DemerisAPYParams = {
+  pool_id: string;
+  swapFees: API.SwapFees;
+};
 export type DemerisActionParams = {
   subscribe: boolean;
   params?: API.APIRequests;
@@ -94,6 +103,10 @@ export type DemerisActionParams = {
 export type DemerisActionsByAddressParams = {
   subscribe: boolean;
   params?: API.AddrReq;
+};
+export type DemerisActionsByPoolParams = {
+  subscribe: boolean;
+  params?: API.PoolReq;
 };
 export type DemerisActionsByChainAddressParams = {
   subscribe: boolean;

@@ -16,6 +16,11 @@ export type TransactionItem = {
   reject: (reason?: Error) => void;
   promise: Promise<string>;
 };
+export type PoolAPY = {
+  pool_id: string;
+  apy: number;
+  change?: '+' | '-' | '';
+};
 export type State = {
   endpoint: string;
   hub_chain: string;
@@ -29,6 +34,8 @@ export type State = {
   prices: API.Prices;
   relayer: boolean;
   chains: Record<string, ChainData>;
+  pools: Record<string, API.SwapFees>;
+  apy: Record<string, PoolAPY>;
   transactions: Map<string, TransactionItem>;
   validPools: Pool[];
   _Subscriptions: Set<string>;
@@ -45,6 +52,8 @@ export function getDefaultState(): State {
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
+    pools: {},
+    apy: {},
     validPools: [],
     keplr: null,
     prices: {

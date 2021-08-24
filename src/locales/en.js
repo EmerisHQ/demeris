@@ -11,6 +11,7 @@ export const messages = {
         chainDetails: "Fetching '{displayChain}` details...",
         chainStatus: "Checking '{displayChain}` status...",
         relayerBalanceFetching: 'Fetching relayer balances...',
+        apyFetching: 'Fetching pool APYs...',
         liquidityConfigure: 'Configuring liquidity module...',
         poolFetching: 'Fetching liquidity pools...',
         signingIn: 'Signing in...',

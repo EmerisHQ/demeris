@@ -4,6 +4,9 @@ import * as Base from './base';
 export type AddrReq = {
   address: string;
 };
+export type PoolReq = {
+  pool_id: string;
+};
 export type ChainAddrReq = {
   chain_name: string;
   address: string;
@@ -100,8 +103,11 @@ export type StakingBalancesResponse = {
   staking_balances: StakingBalances;
 };
 
+export type SwapFees = Array<Base.Amount>;
 // /verified_denoms endpoint data types
-
+export type SwapFeesResponse = {
+  fees: SwapFees;
+};
 export type VerifiedDenom = Denom & { chain_name: string };
 export type VerifiedDenoms = Array<VerifiedDenom>;
 export type VerifiedDenomsResponse = {
@@ -264,7 +270,7 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq | PoolReq;
 
 export type AddLiquidityEndBlockResponse = {
   accepted_coins: string;

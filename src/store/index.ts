@@ -20,6 +20,12 @@ initstore.subscribe((mutation) => {
   if (mutation.type == 'tendermint.liquidity.v1beta1/QUERY' && mutation.payload.query == 'LiquidityPools') {
     store.dispatch(GlobalDemerisActionTypes.VALIDATE_POOLS, mutation.payload.value.pools);
   }
+  if (mutation.type == 'demeris/SET_SWAP_FEES') {
+    store.dispatch(GlobalDemerisActionTypes.SET_APY, {
+      pool_id: mutation.payload.params.pool_id,
+      swapFees: mutation.payload.value,
+    });
+  }
 });
 export const store = initstore;
 

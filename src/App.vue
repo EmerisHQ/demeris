@@ -94,8 +94,9 @@ export default defineComponent({
         refresh: 10000,
       });
       status.value = t('appInit.status.poolFetching');
+      let pools;
       try {
-        await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+        pools = await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
         });
         await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
@@ -110,6 +111,17 @@ export default defineComponent({
         });
       } catch (e) {
         //
+      }
+      status.value = t('appInit.status.apyFetching');
+      for (const pool of pools.pools) {
+        try {
+          await store.dispatch(GlobalDemerisActionTypes.GET_SWAP_FEES, {
+            subscribe: true,
+            params: { pool_id: pool.id },
+          });
+        } catch (e) {
+          //
+        }
       }
       status.value = t('appInit.status.signingIn');
       if (autoLogin()) {

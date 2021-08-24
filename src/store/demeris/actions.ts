@@ -8,7 +8,7 @@ import { RootState } from '@/store';
 import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
-import { validPools } from '@/utils/actionHandler';
+import { getBaseDenom, validPools } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
@@ -18,17 +18,19 @@ import {
   DemerisActionsByAddressParams,
   DemerisActionsByChainAddressParams,
   DemerisActionsByChainParams,
+  DemerisActionsByPoolParams,
   DemerisActionsByTicketParams,
   DemerisActionsGetTxsParams,
   DemerisActionsTraceParams,
   DemerisActionTypes,
+  DemerisAPYParams,
   DemerisSubscriptions,
   GlobalDemerisActionTypes,
 } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
 import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
-import { ChainData, State } from './state';
+import { ChainData, PoolAPY, State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;
@@ -82,6 +84,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_SWAP_FEES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByPoolParams,
+  ): Promise<API.SwapFees>;
   [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Balances>;
   [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({
     dispatch,
@@ -132,6 +138,10 @@ export interface Actions {
   [DemerisActionTypes.SET_SESSION_DATA](
     { commit, getters, state }: ActionContext<State, RootState>,
     { data: UserData }: DemerisSessionParams,
+  ): Promise<void>;
+  [DemerisActionTypes.SET_APY](
+    { commit, getters, state }: ActionContext<State, RootState>,
+    { pool_id, swapFees }: DemerisAPYParams,
   ): Promise<void>;
   [DemerisActionTypes.LOAD_SESSION_DATA](
     { commit, getters }: ActionContext<State, RootState>,
@@ -221,6 +231,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
+  [GlobalDemerisActionTypes.GET_SWAP_FEES](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_SWAP_FEES]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_SWAP_FEES]>;
   [GlobalDemerisActionTypes.VALIDATE_POOLS](
     ...args: Parameters<Actions[DemerisActionTypes.VALIDATE_POOLS]>
   ): ReturnType<Actions[DemerisActionTypes.VALIDATE_POOLS]>;
@@ -302,6 +315,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
+  [GlobalDemerisActionTypes.SET_APY](
+    ...args: Parameters<Actions[DemerisActionTypes.SET_APY]>
+  ): ReturnType<Actions[DemerisActionTypes.SET_APY]>;
   [GlobalDemerisActionTypes.LOAD_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>;
@@ -488,6 +504,42 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getNumbers'](params);
   },
+  async [DemerisActionTypes.GET_SWAP_FEES]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_SWAP_FEES, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getSwapFees'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/pool/' + (params as API.PoolReq).pool_id + '/swapfees',
+        );
+        commit(DemerisMutationTypes.SET_SWAP_FEES, { params, value: response.data.fees });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_SWAP_FEES, payload: { params } });
+        }
+      } catch (e) {
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_SWAP_FEES, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetSwapFees', 'Could not perform API query.');
+      }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getSwapFees'](params);
+    }
+  },
   async [DemerisActionTypes.GET_NUMBERS_CHAIN]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
@@ -562,6 +614,32 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', newData);
     }
     commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
+  },
+  async [DemerisActionTypes.SET_APY]({ commit, getters }, { pool_id, swapFees }: DemerisAPYParams) {
+    const oldAPY = getters['getPoolAPY'](pool_id);
+    let newPrice = 0;
+    for (const swapFee of swapFees) {
+      const base_denom = await getBaseDenom(swapFee.denom);
+      const precision = getters['getDenomPrecision']({ name: base_denom }) || 6;
+      const price = getters['getPrice']({ denom: base_denom });
+      const value = (parseFloat(price) * parseInt(swapFee.amount)) / Math.pow(10, parseInt(precision));
+      newPrice = newPrice + value;
+    }
+    const { totalLiquidityPrice, initPromise } = usePool(pool_id);
+    await initPromise;
+    const newAPY = { pool_id: pool_id, apy: (newPrice / totalLiquidityPrice.value) * 24 * 365 } as PoolAPY;
+
+    if (newAPY.apy > oldAPY.apy) {
+      newAPY.change = '+';
+    }
+    if (newAPY.apy < oldAPY.apy) {
+      newAPY.change = '-';
+    }
+    if (newAPY.apy == oldAPY.apy) {
+      newAPY.change = '';
+    }
+    console.log(newAPY);
+    commit('SET_APY', { params: { pool_id }, value: newAPY });
   },
   async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
     if (data) {

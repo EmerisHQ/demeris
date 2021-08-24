@@ -24,6 +24,7 @@ export type Mutations<S = State> = {
   ): void;
   [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
+  [MutationTypes.SET_SWAP_FEES](state: S, payload: { params: API.APIRequests; value: API.SwapFees }): void;
   [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
@@ -72,6 +73,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
     state.numbers[(payload.params as API.AddrReq).address] = payload.value as API.Numbers;
+  },
+  [MutationTypes.SET_SWAP_FEES](state: State, payload: DemerisMutations) {
+    state.pools[(payload.params as API.PoolReq).pool_id] = payload.value as API.SwapFees;
   },
   [MutationTypes.SET_NUMBERS_CHAIN](state: State, payload: DemerisMutations) {
     if (!state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name]) {

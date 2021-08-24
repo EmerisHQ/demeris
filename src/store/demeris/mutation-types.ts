@@ -2,6 +2,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisConfig } from './actions';
+import { PoolAPY } from './state';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
@@ -17,8 +18,10 @@ export enum DemerisMutationTypes {
   SET_NUMBERS = 'SET_NUMBERS',
   SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
   SET_PRICES = 'SET_PRICES',
+  SET_SWAP_FEES = 'SET_SWAP_FEES',
   SET_TX_STATUS = 'SET_TX_STATUS',
   SET_CHAINS = 'SET_CHAINS',
+  SET_APY = 'SET_APY',
   SET_SESSION_DATA = 'SET_SESSION_DATA',
   SET_CHAIN = 'SET_CHAIN',
   SET_VERIFIED_DENOMS = 'SET_VERIFIED_DENOMS',
@@ -70,6 +73,8 @@ export type DemerisMutationArgs =
   | API.SeqNumber
   | API.VerifyTrace
   | API.Chains
+  | PoolAPY
+  | API.SwapFees
   | API.Chain
   | API.Ticket
   | API.RelayerBalances
