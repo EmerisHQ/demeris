@@ -1065,7 +1065,6 @@ export async function msgFromStepTransaction(
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    console.log(isReverse, slippage);
     const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
