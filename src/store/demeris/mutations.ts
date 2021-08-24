@@ -12,7 +12,7 @@ import {
   KeplrKeyData,
   UserData,
 } from './mutation-types';
-import { getDefaultState, State } from './state';
+import { getDefaultState, PoolAPY, State } from './state';
 
 export type Mutations<S = State> = {
   // Cross-chain endpoint mutations
@@ -33,6 +33,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
   [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
+  [MutationTypes.SET_APY](state: S, payload: PoolAPY): void;
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
   // Chain-specific endpoint mutations
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
@@ -76,6 +77,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_SWAP_FEES](state: State, payload: DemerisMutations) {
     state.pools[(payload.params as API.PoolReq).pool_id] = payload.value as API.SwapFees;
+  },
+  [MutationTypes.SET_APY](state: State, payload: PoolAPY) {
+    state.apy[payload.pool_id] = payload;
   },
   [MutationTypes.SET_NUMBERS_CHAIN](state: State, payload: DemerisMutations) {
     if (!state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name]) {

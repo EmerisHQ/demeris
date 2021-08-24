@@ -38,6 +38,10 @@ export default function usePool(id?: string | ComputedRef<string>) {
     return supplies?.supply.find((token) => token.denom === pool.value.pool_coin_denom)?.amount;
   });
 
+  const poolAPY = computed(() => {
+    return store.getters['demeris/getPoolAPY'](pool.value.id);
+  });
+
   const reserveBalances = computed(() => {
     if (!pool.value) {
       return [];
@@ -84,7 +88,7 @@ export default function usePool(id?: string | ComputedRef<string>) {
         prices.push(liquidityPrice);
       }
     });
-    if (prices[0] === 0 || prices[1] === 0) {
+    if (prices.length < 2 || prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {
       totalLiquidityPrice.value = prices[0] + prices[1];
@@ -116,5 +120,6 @@ export default function usePool(id?: string | ComputedRef<string>) {
     getPoolWithdrawBalances,
     totalLiquidityPrice,
     initPromise,
+    poolAPY,
   };
 }

@@ -28,9 +28,7 @@
           <CircleSymbol :denom="denoms[1]" size="xs" :glow="false" />
         </div>
       </div>
-      <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">
-        {{ toUSD(totalLiquidityPrice) }}
-      </div>
+      <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">{{ toUSD(totalLiquidityPrice) }}</div>
       <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
     </div>
   </router-link>
@@ -62,7 +60,7 @@ export default defineComponent({
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
     const store = useStore();
 
-    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
+    const { pairName, totalLiquidityPrice, poolAPY } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
     const denoms = ref((newPool as Pool).reserve_coin_denoms);
 
@@ -151,7 +149,7 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
 
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD };
+    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD, poolAPY };
   },
 });
 </script>

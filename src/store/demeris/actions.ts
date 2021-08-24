@@ -550,6 +550,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           (params as API.ChainAddrReq).address,
       );
       commit(DemerisMutationTypes.SET_NUMBERS_CHAIN, { params, value: response.data.numbers });
+
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_NUMBERS_CHAIN, payload: { params } });
       }
@@ -627,19 +628,26 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     const { totalLiquidityPrice, initPromise } = usePool(pool_id);
     await initPromise;
-    const newAPY = { pool_id: pool_id, apy: (newPrice / totalLiquidityPrice.value) * 24 * 365 } as PoolAPY;
-
-    if (newAPY.apy > oldAPY.apy) {
-      newAPY.change = '+';
+    let apy = 0;
+    if (totalLiquidityPrice.value > 0) {
+      apy = newPrice / totalLiquidityPrice.value;
     }
-    if (newAPY.apy < oldAPY.apy) {
-      newAPY.change = '-';
-    }
-    if (newAPY.apy == oldAPY.apy) {
+    const newAPY = { pool_id: pool_id, apy: apy * 24 * 365 } as PoolAPY;
+    if (oldAPY) {
+      if (newAPY.apy > oldAPY.apy) {
+        newAPY.change = '+';
+      }
+      if (newAPY.apy < oldAPY.apy) {
+        newAPY.change = '-';
+      }
+      if (newAPY.apy == oldAPY.apy) {
+        newAPY.change = '';
+      }
+    } else {
       newAPY.change = '';
     }
-    console.log(newAPY);
-    commit('SET_APY', { params: { pool_id }, value: newAPY });
+
+    commit('SET_APY', newAPY);
   },
   async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
     if (data) {
@@ -686,6 +694,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
 
       const signerData = numbers;
+
       const cosmjsSignerData = {
         chainId: chain.node_info.chain_id,
         accountNumber: parseInt(signerData.account_number),

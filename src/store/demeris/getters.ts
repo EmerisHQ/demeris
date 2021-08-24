@@ -96,11 +96,14 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getNumbers: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
   },
+  getPoolAPY: (state) => (pool_id) => {
+    return state.apy[pool_id] || null;
+  },
   getSwapFees: (state) => (params) => {
-    return state.numbers[(params as API.AddrReq).address] ?? null;
+    return state.pools[(params as API.PoolReq).pool_id] ?? [];
   },
   getNumbersChain: (state) => (params) => {
-    return state.pools[(params as API.PoolReq).pool_id] ?? [];
+    return state.chainnumbers[(params as API.ChainAddrReq).chain_name][(params as API.ChainAddrReq).address] ?? null;
   },
   getSlippagePerc: (state) => {
     return state._Session.slippagePerc;
