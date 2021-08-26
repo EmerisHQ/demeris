@@ -25,18 +25,18 @@
             @row-click="openAssetPage"
           />
 
-          <MoonpayBanner v-if="!balances.length" :title="$t('context.moonpay.cta')" size="large" />
+          <MoonpayBanner v-if="!balances.length && !isLoadingAssets" :title="$t('context.moonpay.cta')" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.pools.title') }}</h2>
           </header>
 
-          <div v-if="poolsInvested.length">
+          <div>
             <Pools :pools="poolsInvested" />
           </div>
 
-          <div v-else class="p-8 w-full flex flex-col items-center justify-center">
+          <div v-if="!poolsInvested.length" class="p-8 w-full flex flex-col items-center justify-center">
             <p class="text-muted">{{ $t('context.pools.empty') }}</p>
             <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
           </div>
@@ -67,6 +67,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { useStore } from '@/store';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -83,6 +84,7 @@ export default {
   },
 
   setup() {
+    const store = useStore();
     const { t } = useI18n({ useScope: 'global' });
     pageview({ page_title: 'Portfolio', page_path: '/' });
     useMeta(
@@ -94,6 +96,11 @@ export default {
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
+
+    const isLoadingAssets = computed(() => {
+      const state = store.state.demeris.sync;
+      return state.session !== 'synced';
+    });
 
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
@@ -108,7 +115,7 @@ export default {
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage };
+    return { isLoadingAssets, balances, poolsInvested, openAssetPage, openPoolsPage };
   },
 };
 </script>

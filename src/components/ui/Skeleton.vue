@@ -1,3 +1,3 @@
 <template>
-  <span class="skeleton rounded bg-muted animate-pulse inline-block" />
+  <span class="skeleton rounded bg-inactive animate-pulse inline-block" />
 </template>
