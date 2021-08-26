@@ -19,7 +19,7 @@
         {{ keplrAccountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
-        <TotalPrice class="inline" :balances="balances" />
+        <TotalPrice class="inline" skeleton-class="w-24 h-6" :balances="balances" />
         <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
       </div>
     </div>

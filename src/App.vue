@@ -133,13 +133,14 @@ export default defineComponent({
           await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
         }
       });
-      store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { session: 'synced' });
       initialized.value = true;
+
       const isReturnUser = ref(null);
       isReturnUser.value = window.localStorage.getItem('isReturnUser');
       if (!isReturnUser.value) {
         router.push('/welcome');
       }
+      store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { session: 'synced' });
     });
     return { initialized, status };
   },

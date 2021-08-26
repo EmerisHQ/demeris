@@ -1,6 +1,6 @@
 <template>
   <template v-if="isLoading">
-    <div class="rounded bg-muted animate-pulse" :class="skeletonClass" />
+    <Skeleton :class="skeletonClass" />
   </template>
 
   <div v-else class="total-price">
@@ -10,11 +10,16 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import Skeleton from '@/components/ui/Skeleton.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+
 export default defineComponent({
   name: 'TotalPrice',
+  components: {
+    Skeleton,
+  },
   props: {
     balances: {
       type: Array as PropType<Balances>,
@@ -38,6 +43,7 @@ export default defineComponent({
       const state = store.state.demeris.sync;
       return state.denoms !== 'synced' || state.prices !== 'synced';
     });
+
     const displayPrice = computed(() => {
       const liquidValue = (props.balances as Balances).reduce((total, balance) => {
         if (balance.verified) {

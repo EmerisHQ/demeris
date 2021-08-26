@@ -39,36 +39,58 @@
 
       <tbody>
         <template v-if="variant === 'balance'">
-          <tr
-            v-for="asset in orderUserBalances(balancesWithName)"
-            :key="asset.denom"
-            class="assets-table__row group cursor-pointer"
-            @click="handleClick(asset)"
-          >
-            <td class="py-5 align-middle group-hover:bg-fg transition">
-              <div class="flex items-center">
-                <CircleSymbol :denom="asset.denom" />
-                <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                  <span class="font-medium"><Denom :name="asset.denom" /></span>
-                  <LPAsset :name="asset.denom" />
+          <template v-if="isLoadingAssets">
+            <tr v-for="index of skeletonRows" :key="index">
+              <td class="py-4">
+                <div class="flex items-center">
+                  <Skeleton class="rounded-full w-8 h-8" />
+                  <Skeleton class="w-32 h-7 ml-6" />
                 </div>
-              </div>
-            </td>
+              </td>
+              <td class="text-right">
+                <Skeleton class="w-24 h-7" />
+              </td>
+              <td class="text-right">
+                <Skeleton class="w-24 h-7" />
+              </td>
+              <td class="text-right">
+                <Skeleton class="ml-3 w-32 h-7" />
+              </td>
+            </tr>
+          </template>
 
-            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price :amount="{ denom: asset.denom, amount: null }" />
-            </td>
+          <template v-else>
+            <tr
+              v-for="asset in orderUserBalances(balancesWithName)"
+              :key="asset.denom"
+              class="assets-table__row group cursor-pointer"
+              @click="handleClick(asset)"
+            >
+              <td class="py-5 align-middle group-hover:bg-fg transition">
+                <div class="flex items-center">
+                  <CircleSymbol :denom="asset.denom" />
+                  <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
+                    <span class="font-medium"><Denom :name="asset.denom" /></span>
+                    <LPAsset :name="asset.denom" />
+                  </div>
+                </div>
+              </td>
 
-            <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-              <div class="text-muted mt-0.5 -text-1">
-                <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
-              </div>
-            </td>
-            <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
-              <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
-            </td>
-          </tr>
+              <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                <Price :amount="{ denom: asset.denom, amount: null }" />
+              </td>
+
+              <td class="py-5 align-middle text-right group-hover:bg-fg transition">
+                <Price class="font-medium" :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+                <div class="text-muted mt-0.5 -text-1">
+                  <AmountDisplay :amount="{ denom: asset.denom, amount: asset.totalAmount }" />
+                </div>
+              </td>
+              <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
+                <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
+              </td>
+            </tr>
+          </template>
         </template>
         <template v-else-if="variant === 'full'">
           <tr
@@ -152,6 +174,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import Skeleton from '@/components/ui/Skeleton.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
@@ -164,7 +187,7 @@ type TableStyleType = 'full' | 'balance';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Button, Icon, LPAsset, Price, Ticker },
+  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Button, Icon, LPAsset, Price, Ticker, Skeleton },
 
   props: {
     variant: {
@@ -205,6 +228,15 @@ export default defineComponent({
     const { stakingBalances } = useAccount();
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    const isLoadingAssets = computed(() => {
+      const state = store.state.demeris.sync;
+      return state.session !== 'synced';
+    });
+
+    const skeletonRows = computed(() => {
+      return Array.from({ length: props.limitRows || 5 }, (_, i) => i);
     });
 
     const allBalances = computed<Balances>(() => {
@@ -344,6 +376,8 @@ export default defineComponent({
     };
 
     return {
+      skeletonRows,
+      isLoadingAssets,
       allBalances,
       balancesByAsset,
       balancesFiltered,
