@@ -1,5 +1,9 @@
 <template>
-  <div class="total-price">
+  <template v-if="isLoading">
+    <div class="rounded bg-muted animate-pulse" :class="skeletonClass" />
+  </template>
+
+  <div v-else class="total-price">
     {{ displayPrice[0] }}<span :class="{ 'text-0 sm:text-1 lg:text-2': smallDecimals }">.{{ displayPrice[1] }}</span>
   </div>
 </template>
@@ -20,11 +24,20 @@ export default defineComponent({
       type: Boolean as PropType<true | false>,
       default: false,
     },
+    skeletonClass: {
+      type: [String, Object, Array],
+      default: '',
+    },
   },
   setup(props) {
     const store = useStore();
 
     const { stakingBalances } = useAccount();
+
+    const isLoading = computed(() => {
+      const state = store.state.demeris.sync;
+      return state.denoms !== 'synced' || state.prices !== 'synced';
+    });
     const displayPrice = computed(() => {
       const liquidValue = (props.balances as Balances).reduce((total, balance) => {
         if (balance.verified) {
@@ -87,7 +100,7 @@ export default defineComponent({
       });
       return formatter.format(Number.isFinite(value) ? value : 0).split('.');
     });
-    return { displayPrice };
+    return { isLoading, displayPrice };
   },
 });
 </script>

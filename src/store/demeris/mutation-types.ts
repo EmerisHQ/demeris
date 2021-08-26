@@ -35,6 +35,7 @@ export enum DemerisMutationTypes {
   RESET_STATE = 'RESET_STATE',
   SUBSCRIBE = 'SUBSCRIBE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
+  SET_SYNC = 'SET_SYNC',
 }
 export type APIPromise = {
   hash: string;

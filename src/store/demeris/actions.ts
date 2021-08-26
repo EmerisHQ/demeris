@@ -1061,6 +1061,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);
   },
+  [DemerisActionTypes.UPDATE_SYNC]({ commit }, payload: Record<string, any>) {
+    commit(DemerisMutationTypes.SET_SYNC, payload);
+  },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
   },

@@ -5,7 +5,7 @@
         <header>
           <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
           <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
-            <TotalPrice :balances="balances" small-decimals />
+            <TotalPrice :balances="balances" skeleton-class="w-64 h-16" small-decimals />
           </div>
         </header>
         <section class="mt-16">

@@ -265,4 +265,10 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.UNSUBSCRIBE](state: State, subscription) {
     state._Subscriptions.delete(JSON.stringify(subscription));
   },
+  [MutationTypes.SET_SYNC](state: State, payload: Record<string, any>) {
+    state.sync = {
+      ...state.sync,
+      ...payload,
+    };
+  },
 };

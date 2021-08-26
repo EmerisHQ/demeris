@@ -2,11 +2,11 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div v-if="initialized">
+  <div>
     <CookieConsent />
     <router-view />
   </div>
-  <div v-else class="h-screen flex flex-col items-center justify-center">
+  <div v-if="false" class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
     <EphemerisSpinner class="h-64 w-64" />
     <p class="leading-copy text-muted -text-1">{{ status }}</p>
@@ -57,6 +57,8 @@ export default defineComponent({
       await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
+      store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { denoms: 'synced' });
+
       status.value = t('appInit.status.chainLoading');
       let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
         subscribe: false,
@@ -81,6 +83,8 @@ export default defineComponent({
           },
         });
       }
+      store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { chains: 'synced' });
+
       status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
         apiNode: 'https://dev.demeris.io/v1/liquidity',
@@ -100,17 +104,21 @@ export default defineComponent({
         });
         await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
         await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
+        store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { liquidity: 'synced' });
       } catch (e) {
         console.error(e);
       }
+
       status.value = t('appInit.status.priceFetching');
       try {
         await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
           subscribe: true,
         });
+        store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { prices: 'synced' });
       } catch (e) {
         //
       }
+
       status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
         await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
@@ -125,6 +133,7 @@ export default defineComponent({
           await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
         }
       });
+      store.dispatch(GlobalDemerisActionTypes.UPDATE_SYNC, { session: 'synced' });
       initialized.value = true;
       const isReturnUser = ref(null);
       isReturnUser.value = window.localStorage.getItem('isReturnUser');

@@ -16,6 +16,7 @@ export type TransactionItem = {
   reject: (reason?: Error) => void;
   promise: Promise<string>;
 };
+export type SyncState = 'idle' | 'loading' | 'synced' | 'failed';
 export type State = {
   endpoint: string;
   hub_chain: string;
@@ -31,6 +32,14 @@ export type State = {
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   validPools: Pool[];
+  sync: {
+    denoms: SyncState;
+    chains: SyncState;
+    liquidity: SyncState;
+    pools: SyncState;
+    prices: SyncState;
+    session: SyncState;
+  };
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
   _Session: UserData | Record<string, never>;
@@ -53,6 +62,14 @@ export function getDefaultState(): State {
     },
     relayer: false,
     chains: {},
+    sync: {
+      denoms: 'idle',
+      chains: 'idle',
+      liquidity: 'idle',
+      pools: 'idle',
+      prices: 'idle',
+      session: 'idle',
+    },
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),
