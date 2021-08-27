@@ -88,6 +88,10 @@ export const messages = {
       },
     },
     components: {
+      chainDown: {
+        assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
+        appearsDown: '{chain} appears to be down',
+      },
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',

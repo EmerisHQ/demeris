@@ -1,4 +1,5 @@
 <template>
+  <ChainDownBanner />
   <AppLayout>
     <div class="md:flex justify-between">
       <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
@@ -58,6 +59,7 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import ChainDownBanner from '@/components/common/ChainDownBanner.vue';
 import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -80,6 +82,7 @@ export default {
     AssetsTable,
     Pools,
     Intro,
+    ChainDownBanner,
   },
 
   setup() {
