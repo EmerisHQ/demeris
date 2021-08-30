@@ -65,8 +65,16 @@
       </div>
     </div>
     <div v-if="type === 'pay'" class="flex justify-between">
-      <AssetChainsIndicator :balances="data" :denom="coin.base_denom" :max-chains-count="4" :show-description="false" />
-      <Icon name="CaretRightIcon" :icon-size="1" class="text-inactive ml-1.5" />
+      <ChainDownWarning v-if="coin.unavailableChain" v-bind="coin.unavailableChain" />
+      <template v-else>
+        <AssetChainsIndicator
+          :balances="data"
+          :denom="coin.base_denom"
+          :max-chains-count="4"
+          :show-description="false"
+        />
+        <Icon name="CaretRightIcon" :icon-size="1" class="text-inactive ml-1.5" />
+      </template>
     </div>
     <div v-else-if="showBalance" class="text-muted text-right">
       <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
@@ -76,9 +84,11 @@
 <script lang="ts">
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -89,6 +99,7 @@ export default defineComponent({
   name: 'CoinList',
   components: {
     AssetChainsIndicator,
+    ChainDownWarning,
     ChainName,
     AmountDisplay,
     Icon,
@@ -103,6 +114,7 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props) {
+    const store = useStore();
     const modifiedData = computed(() => getUniqueCoinList(props.data));
 
     function setWordColorByKeyword(keyword, word) {
@@ -124,6 +136,7 @@ export default defineComponent({
             parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
         } else {
           denomNameObejct[denom.base_denom] = denom;
+          denomNameObejct[denom.base_denom].unavailableChain = getChainsStatus(denom.base_denom);
         }
       });
 
@@ -138,6 +151,21 @@ export default defineComponent({
       const value = amount.toString().replace(denom, '');
       const result = parseInt(value.replace('undefined', ''));
       return result;
+    };
+
+    const getChainsStatus = (denom: string) => {
+      const chainList = props.data.filter((item) => item.base_denom === denom).map((item) => item.on_chain);
+      const uniqueChainList = [...new Set(chainList)];
+      for (const chain of uniqueChainList) {
+        const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
+        if (!status) {
+          return {
+            chain,
+            denom,
+            unavailable: uniqueChainList.length > 1 ? 'part' : 'full',
+          };
+        }
+      }
     };
 
     const sortLocale = (a, b) => {

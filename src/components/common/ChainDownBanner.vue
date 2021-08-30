@@ -7,7 +7,7 @@
     <span class="font-bold">
       <i18n-t keypath="components.chainDown.appearsDown">
         <template #chain>
-          <ChainName :name="currentDownChain.chain_name" />
+          <ChainName :name="currentDownChain" />
         </template>
       </i18n-t>
     </span>
@@ -22,6 +22,7 @@ import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
 
 export default defineComponent({
   components: {
@@ -31,12 +32,13 @@ export default defineComponent({
 
   setup() {
     const store = useStore();
+    const { balances } = useAccount();
 
     const currentDownChain = computed(() => {
-      const chains = store.getters['demeris/getChains'] || {};
+      const uniqueUsedChains = [...new Set(balances.value.map((item) => item.on_chain))];
 
-      for (const chain of Object.values(chains)) {
-        const status = store.getters['demeris/getChainStatus'](chain);
+      for (const chain of uniqueUsedChains) {
+        const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
         if (!status) {
           return chain;
         }
