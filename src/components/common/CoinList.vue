@@ -7,10 +7,12 @@
   <div
     v-for="coin in coinsByType"
     :key="coin.base_denom"
-    class="flex items-center justify-between py-4 px-3 mx-3 cursor-pointer hover:bg-fg rounded-xl"
+    class="flex items-center justify-between py-4 px-3 mx-3 hover:bg-fg rounded-xl"
+    :class="coin.isFullAmountUnavailable ? 'cursor-not-allowed' : 'cursor-pointer'"
+    :disabled="coin.isFullAmountUnavailable"
     @click="$emit('select', coin)"
   >
-    <div class="flex items-center">
+    <div class="flex items-center" :class="coin.isFullAmountUnavailable ? 'opacity-50' : ''">
       <tippy class="tippy-info mr-4">
         <CircleSymbol
           :variant="type === 'chain' ? 'chain' : 'asset'"
@@ -41,7 +43,11 @@
         <div v-else class="text-0 font-medium">
           <Denom :name="coin.base_denom" />
         </div>
-        <div v-if="type === 'pay'" class="-text-1 font-normal text-muted">
+        <div
+          v-if="type === 'pay'"
+          class="-text-1 font-normal text-muted"
+          :class="coin.isFullAmountUnavailable ? 'text-negative' : ''"
+        >
           <div v-if="type === 'pay'">
             <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
             <!-- <span
@@ -51,7 +57,10 @@
             >
               {{ word }}
             </span> -->
-            {{ $t('components.coinList.available') }}
+            <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">{{
+              $t('components.coinList.available')
+            }}</span>
+            <span v-else-if="coin.unavailableChains.length">{{ $t('components.coinList.unavailable') }}</span>
           </div>
           <span v-else>{{ coin.on_chain }}</span>
         </div>
@@ -65,7 +74,7 @@
       </div>
     </div>
     <div v-if="type === 'pay'" class="flex justify-between">
-      <ChainDownWarning v-if="coin.unavailableChain" v-bind="coin.unavailableChain" />
+      <ChainDownWarning v-if="coin.unavailableChains.length" v-bind="coin.unavailableChains[0]" />
       <template v-else>
         <AssetChainsIndicator
           :balances="data"
@@ -132,11 +141,22 @@ export default defineComponent({
 
       newData.forEach((denom) => {
         if (denomNameObejct[denom.base_denom]) {
+          // Remove from available amount if chain is down
+          if (denomNameObejct[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
+            return;
+          }
+
           denomNameObejct[denom.base_denom].amount =
             parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
         } else {
           denomNameObejct[denom.base_denom] = denom;
-          denomNameObejct[denom.base_denom].unavailableChain = getChainsStatus(denom.base_denom);
+          const unavailableChains = getChainsStatus(denom.base_denom);
+          const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
+          denomNameObejct[denom.base_denom] = {
+            ...denom,
+            unavailableChains,
+            isFullAmountUnavailable,
+          };
         }
       });
 
@@ -156,16 +176,18 @@ export default defineComponent({
     const getChainsStatus = (denom: string) => {
       const chainList = props.data.filter((item) => item.base_denom === denom).map((item) => item.on_chain);
       const uniqueChainList = [...new Set(chainList)];
+      const result = [];
       for (const chain of uniqueChainList) {
         const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
-        if (!status) {
-          return {
+        if (status) {
+          result.push({
             chain,
             denom,
             unavailable: uniqueChainList.length > 1 ? 'part' : 'full',
-          };
+          });
         }
       }
+      return result;
     };
 
     const sortLocale = (a, b) => {
