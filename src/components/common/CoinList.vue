@@ -44,12 +44,15 @@
           <Denom :name="coin.base_denom" />
         </div>
         <div class="-text-1 font-normal text-muted" :class="coin.isFullAmountUnavailable ? 'text-negative' : ''">
-          <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+          <ChainName v-if="type === 'receive'" :name="coin.on_chain" />
 
-          <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
-            {{ $t('components.coinList.available') }}
-          </span>
-          <span v-else-if="coin.unavailableChains.length">{{ $t('components.coinList.unavailable') }}</span>
+          <template v-else>
+            <AmountDisplay :amount="{ amount: coin.amount, denom: coin.base_denom }" />
+            <span v-if="!coin.unavailableChains.length || !coin.isFullAmountUnavailable">
+              {{ $t('components.coinList.available') }}
+            </span>
+            <span v-else-if="coin.unavailableChains.length">{{ $t('components.coinList.unavailable') }}</span>
+          </template>
         </div>
       </div>
     </div>
@@ -83,6 +86,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { Balance } from '@/types/api';
+import { parseCoins } from '@/utils/basic';
 import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
@@ -114,7 +118,7 @@ export default defineComponent({
     function getUniqueCoinList(data) {
       if (props.type !== 'pay') {
         return data.map((item) => {
-          const unavailableChains = getUnavailableChains({ on_chain: item.on_chain });
+          const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
           return {
             ...item,
             unavailableChains,
@@ -140,8 +144,16 @@ export default defineComponent({
           denomNameObejct[denom.base_denom] = denom;
           const unavailableChains = getUnavailableChains(denom);
           const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
+          let amount = denom.amount;
+
+          // Remove from available amount if chain is down
+          if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
+            amount = `0${parseCoins(denom.amount)[0].denom}`;
+          }
+
           denomNameObejct[denom.base_denom] = {
             ...denom,
+            amount,
             unavailableChains,
             isFullAmountUnavailable,
           };
@@ -174,7 +186,7 @@ export default defineComponent({
 
       for (const chain of uniqueChainsList) {
         const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
-        if (status) {
+        if (!status) {
           result.push({
             chain,
             denom: base_denom,
