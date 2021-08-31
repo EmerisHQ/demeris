@@ -6,6 +6,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 export default defineComponent({
@@ -23,8 +24,9 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
+    const { stakingBalances } = useAccount();
     const displayPrice = computed(() => {
-      const value = (props.balances as Balances).reduce((total, balance) => {
+      const liquidValue = (props.balances as Balances).reduce((total, balance) => {
         if (balance.verified) {
           if (store.getters['demeris/getPrice']({ denom: balance.base_denom })) {
             let totalValue =
@@ -48,6 +50,33 @@ export default defineComponent({
           return total;
         }
       }, 0);
+      const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+      const stakedValue = stakingBalances.value.reduce((total, stakingBalance) => {
+        const stakedDenom = verifiedDenoms.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
+        if (stakedDenom.length > 0) {
+          if (store.getters['demeris/getPrice']({ denom: stakedDenom[0].name })) {
+            let totalValue =
+              parseInt(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name });
+            let precision = Math.pow(
+              10,
+              parseInt(
+                store.getters['demeris/getDenomPrecision']({
+                  name: stakedDenom[0].name,
+                }) || 6,
+              ),
+            );
+            let value = totalValue / precision;
+            if (value) {
+              return total + value;
+            }
+          } else {
+            return total;
+          }
+        } else {
+          return total;
+        }
+      }, 0);
+      const value = liquidValue + stakedValue;
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

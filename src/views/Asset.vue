@@ -56,7 +56,12 @@
             <div>
               <dt class="text-muted">{{ $t('pages.asset.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
-                <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+                <tippy>
+                  <AmountDisplay :amount="{ amount: pooledAmount, denom }" />
+                  <template #content>
+                    <TooltipPools :pools="poolsInvestedWithAsset" :denom="denom" />
+                  </template>
+                </tippy>
               </dd>
             </div>
           </dl>
@@ -150,6 +155,7 @@ import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -172,6 +178,7 @@ export default defineComponent({
     Price,
     LiquiditySwap,
     Pools,
+    TooltipPools,
     PoolBanner,
     MoonpayBanner,
   },
@@ -316,7 +323,7 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value + pooledAmount.value;
+      return availableAmount.value + stakedAmount.value;
     });
 
     return {
@@ -325,6 +332,7 @@ export default defineComponent({
       denom,
       assets,
       poolsDisplay,
+      poolsInvestedWithAsset,
       availableAmount,
       stakedAmount,
       pooledAmount,

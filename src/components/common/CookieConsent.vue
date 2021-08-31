@@ -41,7 +41,7 @@ export default defineComponent({
   left: 50%;
   transform: translateX(-50%);
   margin: 0 auto;
-  bottom: 20vh;
+  bottom: 10vh;
   text-align: center;
 
   &__message {
