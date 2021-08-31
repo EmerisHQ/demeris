@@ -30,8 +30,14 @@
           <header class="space-y-0.5">
             <h2 class="text-muted">{{ $t('pages.asset.balance') }}</h2>
             <Price :amount="{ amount: totalAmount, denom }" :show-zero="true" class="text-3 font-bold" />
-            <div class="text-muted">
+            <div class="inline-flex items-center text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
+              <ChainDownWarning
+                v-if="Object.keys(unavaibaleChains).length"
+                v-bind="Object.values(unavaibaleChains)[0]"
+                class="ml-2"
+                :icon-size="1.2"
+              />
             </div>
           </header>
 
@@ -89,7 +95,7 @@
                 />
                 <AmountDisplay v-else :amount="{ amount: asset.amount, denom }" />
               </div>
-              <div class="w-1/3 ml-4">
+              <div class="flex items-center justify-end w-1/3 ml-4">
                 <span class="text-right font-medium">
                   <Price
                     v-if="assetConfig && asset.on_chain === assetConfig.chain_name"
@@ -97,6 +103,11 @@
                   />
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
+                <ChainDownWarning
+                  v-if="unavaibaleChains[asset.on_chain]"
+                  v-bind="unavaibaleChains[asset.on_chain]"
+                  class="ml-4"
+                />
               </div>
             </li>
           </ul>
@@ -146,6 +157,7 @@ import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
@@ -181,6 +193,7 @@ export default defineComponent({
     TooltipPools,
     PoolBanner,
     MoonpayBanner,
+    ChainDownWarning,
   },
 
   setup() {
@@ -210,6 +223,20 @@ export default defineComponent({
     });
 
     const assets = computed(() => balancesByDenom(denom.value));
+    const unavaibaleChains = computed(() => {
+      const result = {};
+      for (const asset of assets.value) {
+        const status = store.getters['demeris/getChainStatus']({ chain_name: asset.on_chain });
+        if (!status) {
+          result[asset.on_chain] = {
+            chain: asset.on_chain,
+            denom: asset.base_denom,
+            unavailable: 'full',
+          };
+        }
+      }
+      return result;
+    });
 
     const poolDenom = ref(denom.value);
 
@@ -331,6 +358,7 @@ export default defineComponent({
       assetConfig,
       denom,
       assets,
+      unavaibaleChains,
       poolsDisplay,
       poolsInvestedWithAsset,
       availableAmount,
