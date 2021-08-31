@@ -11,9 +11,16 @@
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <router-link v-if="!balances.length" class="font-medium" to="/assets">
+            <div class="flex justify-between items-center max-w-3xl">
+              <button class="py-2 px-4 bg-text text-bg">All</button>
+              <button>Coins</button>
+              <button>LP assets</button>
+              <button>NFTs</button>
+            </div>
+
+            <!-- <router-link v-if="!balances.length" class="font-medium" to="/assets">
               {{ $t('generic_cta.seeall') }} &rarr;
-            </router-link>
+            </router-link> -->
           </header>
 
           <AssetsTable
