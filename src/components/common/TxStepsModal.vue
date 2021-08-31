@@ -802,12 +802,13 @@ export default defineComponent({
                       //Get end block events
                       let retries = 0;
                       let endBlockEvent = null;
-                      while (retries <= 5) {
+                      while (5 > retries) {
                         try {
                           endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentData.value.data.name,
                           });
+                          break;
                         } catch {
                           retries++;
                           // Sleep
