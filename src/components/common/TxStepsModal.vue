@@ -782,29 +782,37 @@ export default defineComponent({
                   // sleep
                   await new Promise((r) => setTimeout(r, 750));
 
-                  const txsResponse: TransactionDetailResponse = await store.dispatch(
-                    GlobalDemerisActionTypes.GET_TXS,
-                    { txhash, chain_name },
-                  );
-
-                  allTransactionResponses.value.responses.push(txsResponse);
-                  allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
-                    (acc, item) => {
-                      acc[item.denom] = item.amount;
-                      return acc;
-                    },
-                    {},
-                  );
+                  let txsResponse: TransactionDetailResponse;
+                  try {
+                    txsResponse = await store.dispatch(GlobalDemerisActionTypes.GET_TXS, { txhash, chain_name });
+                    allTransactionResponses.value.responses.push(txsResponse);
+                    allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
+                      (acc, item) => {
+                        acc[item.denom] = item.amount;
+                        return acc;
+                      },
+                      {},
+                    );
+                  } catch {
+                    //
+                  }
 
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
+                      let retries = 0;
                       let endBlockEvent = null;
-                      while (!endBlockEvent) {
-                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                          height: txResultData.height,
-                          stepType: currentData.value.data.name,
-                        });
+                      while (retries <= 5) {
+                        try {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                            height: txResultData.height,
+                            stepType: currentData.value.data.name,
+                          });
+                        } catch {
+                          retries++;
+                          // Sleep
+                          await new Promise((resolve) => setTimeout(resolve, 1000));
+                        }
                       }
 
                       if (endBlockEvent) {
@@ -826,7 +834,7 @@ export default defineComponent({
                             break;
                         }
 
-                        txResult.value = resultData;
+                        txResult.value = { ...resultData };
                       }
                     } else if (txsResponse) {
                       txResult.value = {
