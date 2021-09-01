@@ -30,7 +30,7 @@
           </header>
 
           <AssetsTable
-            :balances="balances"
+            :balances="filteredBalances"
             :hide-zero-assets="true"
             variant="balance"
             :show-headers="false"
@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
+import { computed, ref } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -122,8 +122,16 @@ export default {
       const poolsCopy = JSON.parse(JSON.stringify(pools.value));
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
+    const filterKeyword = ref('pool');
+    const filteredBalances = computed(() => {
+      console.log('te', balances.value);
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage };
+      return balances.value.filter((asset) => {
+        return asset.base_denom.startsWith(filterKeyword.value);
+      });
+    });
+
+    return { balances, filteredBalances, poolsInvested, openAssetPage, openPoolsPage };
   },
 };
 </script>
