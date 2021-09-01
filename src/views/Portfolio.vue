@@ -11,11 +11,17 @@
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
-            <div class="flex justify-between items-center max-w-3xl">
-              <button class="py-2 px-4 bg-text text-bg">All</button>
-              <button>Coins</button>
-              <button>LP assets</button>
-              <button>NFTs</button>
+            <div class="flex justify-between w-full">
+              <div class="flex justify-between items-center max-w-3xl ml-8">
+                <button class="py-2 px-4 -text-1 bg-text text-bg rounded-full">All</button>
+                <button class="py-2 px-4 -text-1 text-muted rounded-full">Coins</button>
+                <button class="py-2 px-4 -text-1 text-muted rounded-full">LP assets</button>
+                <button class="py-2 px-4 -text-1 text-muted rounded-full">NFTs</button>
+              </div>
+              <div class="flex justify-between items-center -text-1 text-text">
+                <div>Balance</div>
+                <Icon name="SmallDownIcon" :icon-size="1" class="ml-2" />
+              </div>
             </div>
 
             <!-- <router-link v-if="!balances.length" class="font-medium" to="/assets">
@@ -71,6 +77,7 @@ import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -87,6 +94,7 @@ export default {
     AssetsTable,
     Pools,
     Intro,
+    Icon,
   },
 
   setup() {
