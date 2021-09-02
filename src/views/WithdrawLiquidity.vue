@@ -248,7 +248,7 @@ export default {
 
     const actionSteps = ref([]);
     pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
-    const poolId = computed(() => route.params.id);
+    const poolId = computed(() => route.params.id as string);
 
     const { getPoolName } = usePools();
     const { balancesByDenom } = useAccount();
@@ -298,7 +298,7 @@ export default {
       reserveBaseDenoms,
       reserveBalances,
       totalSupply,
-    } = usePool(computed(() => poolId.value as string));
+    } = usePool(poolId.value);
 
     const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom);
     const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);

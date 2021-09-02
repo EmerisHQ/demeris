@@ -367,7 +367,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { useDenom } = useDenoms();
-    const poolId = computed(() => route.params.id as unknown as string);
+    const poolId = computed(() => route.params.id as string);
     const pool = ref<Pool>();
     const actionSteps = ref<Step[]>([]);
 
@@ -481,9 +481,7 @@ export default {
       { immediate: true },
     );
 
-    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
-      computed(() => pool.value?.id),
-    );
+    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(poolId.value);
 
     const { balances: userBalances, getNativeBalances } = useAccount();
 
