@@ -97,7 +97,7 @@ export default defineComponent({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
             }) || 6;
           const action: TransferAction = {
-            name: 'transfer',
+            name: form.memo && form.memo != '' ? 'memo-transfer' : 'transfer',
             memo: form.memo,
             params: {
               from: {
