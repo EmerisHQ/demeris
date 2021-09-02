@@ -931,9 +931,10 @@ export default defineComponent({
         assetsToReceive.value.find((asset) => {
           return asset?.base_denom === originPayCoinData?.base_denom;
         }) ?? originPayCoinData;
+
+      // reset amount, TODO: apply setCounterPairCoinAmount('');
       data.payCoinAmount = null;
       data.receiveCoinAmount = null;
-      // setCounterPairCoinAmount('');
     }
 
     function setMax() {
