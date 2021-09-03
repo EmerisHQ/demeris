@@ -1080,10 +1080,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.SIGN_OUT);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
-    state._Subscriptions.forEach((subscription_json) => {
+    state._Subscriptions.forEach(async (subscription_json) => {
       const subscription = JSON.parse(subscription_json);
       try {
-        dispatch(subscription.action, subscription.payload);
+        await dispatch(subscription.action, subscription.payload);
       } catch (e) {
         console.error(e);
       }
