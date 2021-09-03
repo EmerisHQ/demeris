@@ -1055,6 +1055,7 @@ export async function msgFromStepTransaction(
     const data = stepTx.data as Actions.SwapData;
     const chain_name = store.getters['demeris/getDexChain'];
     const slippage = (store.getters['demeris/getSlippagePerc'] || 0.5) / 100;
+    const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
     let isReverse = false;
     if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
       isReverse = true;
@@ -1071,7 +1072,7 @@ export async function msgFromStepTransaction(
         swapTypeId: data.pool.type_id,
         offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
-        offerCoinFee: { amount: '0', denom: data.from.denom },
+        offerCoinFee: { amount: String(Math.trunc(+data.from.amount * (swapFeeRate / 2))), denom: data.from.denom },
         orderPrice: (
           (parseInt(price[0].amount) / parseInt(price[1].amount)) *
           (isReverse ? 1 - slippage : 1 + slippage)
