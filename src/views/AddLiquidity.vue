@@ -309,8 +309,9 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
+import { computed, onMounted, reactive, Ref, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { unref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -362,7 +363,7 @@ export default {
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
-
+    console.log('Running setup');
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
@@ -480,9 +481,15 @@ export default {
       },
       { immediate: true },
     );
-
-    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
-      computed(() => pool.value?.id),
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    watch(
+      () => poolId.value,
+      async () => {
+        const inst = usePool(poolId);
+        await inst.initPromise;
+        usePoolInstance.value = inst;
+      },
+      { immediate: true },
     );
 
     const { balances: userBalances, getNativeBalances } = useAccount();
@@ -537,7 +544,7 @@ export default {
         return;
       }
 
-      const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      const result = usePoolInstance.value.calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
       state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
@@ -551,6 +558,9 @@ export default {
     const exchangeAmount = computed(() => {
       const coinA = new BigNumber(1).shiftedBy(precisions.value.coinA).toNumber();
       const precisionDiff = precisions.value.coinA - precisions.value.coinB;
+      console.log(hasPair.value);
+      console.log(hasPool.value);
+      console.log(form);
       if (!hasPair.value) {
         return;
       }
@@ -568,19 +578,18 @@ export default {
             .toNumber(),
         };
       }
-
-      if (reserveBalances.value?.length) {
+      if (unref(usePoolInstance.value?.reserveBalances).length) {
         const baseDenomIndex = {};
         baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
         baseDenomIndex[state.poolBaseDenoms[1]] = pool.value.reserve_coin_denoms[1];
         const amountA =
-          baseDenomIndex[form.coinA.asset.base_denom] == reserveBalances.value[0].denom
-            ? reserveBalances.value[0].amount
-            : reserveBalances.value[1].amount;
+          baseDenomIndex[form.coinA.asset.base_denom] == usePoolInstance.value.reserveBalances[0].denom
+            ? usePoolInstance.value.reserveBalances[0].amount
+            : usePoolInstance.value.reserveBalances[1].amount;
         const amountB =
-          baseDenomIndex[form.coinB.asset.base_denom] == reserveBalances.value[1].denom
-            ? reserveBalances.value[1].amount
-            : reserveBalances.value[0].amount;
+          baseDenomIndex[form.coinB.asset.base_denom] == usePoolInstance.value.reserveBalances[1].denom
+            ? usePoolInstance.value.reserveBalances[1].amount
+            : usePoolInstance.value.reserveBalances[0].amount;
         const precisionB =
           form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
         return {
@@ -768,12 +777,16 @@ export default {
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
             pool.value = poolIterator;
+            if (pool.value.id != route.params.id) {
+              router.push('/pools/add/' + pool.value.id);
+            }
             return;
           }
         }
       }
 
       pool.value = undefined;
+      router.push('/pools/add');
     };
 
     const onClose = () => {
@@ -889,7 +902,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = getPoolWithdrawBalances(+state.receiveAmount);
+      const result = usePoolInstance.value.getPoolWithdrawBalances(+state.receiveAmount);
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -912,12 +925,18 @@ export default {
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
-      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
-      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
+      const totalA = new BigNumber(usePoolInstance.value.reserveBalances.value[0].amount)
+        .shiftedBy(-precisionA)
+        .multipliedBy(priceA);
+      const totalB = new BigNumber(usePoolInstance.value.reserveBalances.value[1].amount)
+        .shiftedBy(-precisionB)
+        .multipliedBy(priceB);
+      const pricePerCoin = new BigNumber(usePoolInstance.value.totalSupply.value)
+        .shiftedBy(-6)
+        .dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
+      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -995,7 +1014,8 @@ export default {
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
             const precisionDiff = precisionA - precisionB;
-
+            console.log(exchangeAmount.value);
+            console.log(precisions.value);
             const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
 
             const bigAmountA = new BigNumber(amountA).minus(feeA).dividedBy(10 ** precisionDiff);
