@@ -251,6 +251,7 @@
   </div>
 </template>
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
@@ -790,7 +791,8 @@ export default defineComponent({
                   allTransactionResponses.value.responses.push(txsResponse);
                   allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
                     (acc, item) => {
-                      acc[item.denom] = item.amount;
+                      const total = allTransactionResponses.value.fees[chain_name]?.[item.denom] || 0;
+                      acc[item.denom] = new BigNumber(total).plus(item.amount).toString();
                       return acc;
                     },
                     {},
