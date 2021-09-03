@@ -351,6 +351,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
@@ -388,6 +389,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
@@ -462,6 +464,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
@@ -732,6 +735,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
@@ -830,7 +834,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
+
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
+        }
         throw new SpVuexError('Demeris:GetVerifiedPath', 'Could not perform API query.');
       }
       resolver();
@@ -888,6 +897,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
@@ -955,6 +965,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
         }
       } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
@@ -1069,9 +1080,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.SIGN_OUT);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
-    state._Subscriptions.forEach((subscription_json) => {
+    state._Subscriptions.forEach(async (subscription_json) => {
       const subscription = JSON.parse(subscription_json);
-      dispatch(subscription.action, subscription.payload);
+      try {
+        await dispatch(subscription.action, subscription.payload);
+      } catch (e) {
+        console.error(e);
+      }
     });
   },
   [DemerisActionTypes.UNSUBSCRIBE]({ commit }, subscription) {
