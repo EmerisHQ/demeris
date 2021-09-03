@@ -524,7 +524,7 @@ export default {
           poolCoin: {
             amount: {
               denom: state.selectedAsset.base_denom,
-              amount: (+state.amount * 1e6).toString(),
+              amount: new BigNumber(state.amount).shiftedBy(6).toString(),
             },
             chain_name: state.selectedAsset.on_chain,
           },

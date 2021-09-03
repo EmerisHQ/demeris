@@ -116,7 +116,7 @@ export const messages = {
       denomSelect: {
         select: 'Select asset',
         otherAssets: 'Other assets',
-        unavailableSwapPair: 'Unvailable to swap with {pair}',
+        unavailableSwapPair: 'Unavailable to swap with {pair}',
       },
       feeLevelSelector: {
         feesIncl: 'Fees (included)',
