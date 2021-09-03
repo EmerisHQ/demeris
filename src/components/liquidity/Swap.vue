@@ -905,10 +905,8 @@ export default defineComponent({
 
     function switchPayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
-      let originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      if (data.receiveCoinData) {
-        originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      }
+      const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
+      originPayCoinData.on_chain = store.getters['demeris/getDexChain'];
 
       const sortedBalance =
         allBalances.value
@@ -929,12 +927,14 @@ export default defineComponent({
         data.payCoinData = originReceiveCoinData;
       }
 
-      data.receiveCoinData = assetsToReceive.value.find((asset) => {
-        return asset?.base_denom === originPayCoinData?.base_denom;
-      });
+      data.receiveCoinData =
+        assetsToReceive.value.find((asset) => {
+          return asset?.base_denom === originPayCoinData?.base_denom;
+        }) ?? originPayCoinData;
+
+      // reset amount, TODO: apply setCounterPairCoinAmount('');
       data.payCoinAmount = null;
       data.receiveCoinAmount = null;
-      // setCounterPairCoinAmount('');
     }
 
     function setMax() {
