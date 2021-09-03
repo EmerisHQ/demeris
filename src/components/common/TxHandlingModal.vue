@@ -135,9 +135,8 @@
           v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
         >
           <PreviewTransfer :response="txResult" :fees="txResult.fees" />
-          <!-- TODO: Multiple transactions -->
           <a
-            v-if="txResult.hashes.length === 1 && getExplorerLink(txResult.hashes[0])"
+            v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
             :href="getExplorerLink(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
@@ -155,7 +154,19 @@
         </div>
         <div class="status__detail-path mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            <div class="my-3">
+              <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            </div>
+
+            <a
+              v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+              :href="getExplorerLink(txResult.hashes[0])"
+              rel="noopener noreferrer"
+              target="_blank"
+              class="block mt-5 p-2"
+            >
+              {{ $t('context.transaction.viewOnExplorer') }} ↗️
+            </a>
           </template>
           <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
         </div>
