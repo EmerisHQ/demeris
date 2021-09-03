@@ -254,7 +254,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
