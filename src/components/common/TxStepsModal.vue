@@ -720,6 +720,7 @@ export default defineComponent({
 
                   let delayStatus = null;
                   let failStatus = null;
+                  let pending = true;
 
                   while (
                     txResultData.status != 'complete' &&
@@ -729,6 +730,10 @@ export default defineComponent({
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
                   ) {
+                    if (!pending) {
+                      break;
+                    }
+
                     txResultData = await store.getters['demeris/getTxStatus']({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
@@ -741,6 +746,7 @@ export default defineComponent({
                         }, 60000);
                         failStatus = setTimeout(() => {
                           txstatus.value = 'unknown';
+                          pending = false;
                         }, 310000);
                       } else if (txResultData.status === 'IBC_receive_failed') {
                         txstatus.value = 'IBC_receive_failed';
