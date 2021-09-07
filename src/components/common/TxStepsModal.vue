@@ -251,7 +251,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, onUnmounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -332,6 +332,8 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
+    let delayTimeout = null;
+    let failTimeout = null;
 
     const { t } = useI18n({ useScope: 'global' });
     const isSignedIn = computed(() => {
@@ -714,13 +716,12 @@ export default defineComponent({
                 }
                 try {
                   let txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
-                    subscribe: true,
+                    subscribe: false,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
-                  let delayStatus = null;
-                  let failStatus = null;
                   let pending = true;
+                  let statusRetries = 0;
 
                   while (
                     txResultData.status != 'complete' &&
@@ -734,26 +735,36 @@ export default defineComponent({
                       break;
                     }
 
-                    txResultData = await store.getters['demeris/getTxStatus']({
-                      chain_name: res.chain_name,
-                      ticket: result.ticket,
+                    if (statusRetries > 0) {
+                      // Sleep
+                      await new Promise((resolve) => setTimeout(resolve, 5000));
+                    }
+
+                    statusRetries++;
+
+                    txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                      subscribe: false,
+                      params: { chain_name: res.chain_name, ticket: result.ticket },
                     });
 
                     if (stepTx.name.startsWith('ibc')) {
-                      if (txResultData.status === 'transit') {
-                        delayStatus = setTimeout(() => {
-                          txstatus.value = 'delay';
-                        }, 60000);
-                        failStatus = setTimeout(() => {
-                          txstatus.value = 'unknown';
-                          pending = false;
-                        }, 310000);
+                      if (['transit', 'pending', 'stuck_transit'].includes(txResultData.status)) {
+                        if (!delayTimeout) {
+                          delayTimeout = setTimeout(() => {
+                            txstatus.value = 'delay';
+                          }, 60000);
+
+                          failTimeout = setTimeout(() => {
+                            txstatus.value = 'unknown';
+                            pending = false;
+                          }, 310000);
+                        }
                       } else if (txResultData.status === 'IBC_receive_failed') {
                         txstatus.value = 'IBC_receive_failed';
-                        clearTimeout(delayStatus);
+                        clearTimeout(delayTimeout);
                       } else {
-                        clearTimeout(delayStatus);
-                        clearTimeout(failStatus);
+                        clearTimeout(delayTimeout);
+                        clearTimeout(failTimeout);
                       }
                     }
                   }
@@ -912,6 +923,14 @@ export default defineComponent({
       },
       { immediate: true },
     );
+
+    onUnmounted(() => {
+      if (delayTimeout) {
+        clearTimeout(delayTimeout);
+        clearTimeout(failTimeout);
+      }
+    });
+
     //TEST
     // setTimeout(()=> {
     //   txstatus.value = 'failed'
