@@ -782,7 +782,7 @@ export default defineComponent({
 
                   // sleep
                   await new Promise((r) => setTimeout(r, 750));
-
+                  /*
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,
                     { txhash, chain_name },
@@ -797,7 +797,7 @@ export default defineComponent({
                     },
                     {},
                   );
-
+*/
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
@@ -830,18 +830,12 @@ export default defineComponent({
 
                         txResult.value = resultData;
                       }
-                    } else if (txsResponse) {
-                      txResult.value = {
-                        name: currentData.value.data.name,
-                        transactions: allTransactionResponses.value.responses.map((item) => ({
-                          data: getStepTransactionDetailFromResponse(item),
-                          //@ts-ignore
-                          name: currentData.value.data.transactions[i].name,
-                        })),
-                      };
+                    } else {
+                      txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value.fees = allTransactionResponses.value.fees;
+                    txResult.value.fees = { ...fees.value[currentStep.value] };
+                    console.log(txResult.value);
                   }
 
                   // TODO: deal with status here
