@@ -251,7 +251,6 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
@@ -276,13 +275,12 @@ import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, IBCBackwardsData, IBCForwardsData, Step } from '@/types/actions';
-import { Balances, TransactionDetailResponse } from '@/types/api';
+import { Balances } from '@/types/api';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
-  getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
@@ -802,11 +800,18 @@ export default defineComponent({
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
                       let endBlockEvent = null;
-                      while (!endBlockEvent) {
-                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                          height: txResultData.height,
-                          stepType: currentData.value.data.name,
-                        });
+                      let retries = 0;
+                      while (retries < 5) {
+                        try {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                            height: txResultData.height,
+                            stepType: currentData.value.data.name,
+                          });
+                          break;
+                        } catch {
+                          retries++;
+                          await new Promise((r) => setTimeout(r, 1000));
+                        }
                       }
 
                       if (endBlockEvent) {
