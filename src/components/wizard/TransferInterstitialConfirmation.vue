@@ -52,8 +52,8 @@ export default defineComponent({
       type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
       default: 'swap',
     },
-    step: {
-      type: Object as PropType<Step>,
+    steps: {
+      type: Object as PropType<Step[]>,
       required: true,
     },
   },
@@ -65,12 +65,19 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
 
-    const hasMultiple = computed(() => props.step.transactions.length > 1);
     const currentAction = computed(() => {
       if (props.action === 'move') {
         return 'transfer';
       }
       return props.action;
+    });
+
+    const hasMultiple = computed(() => {
+      if (currentAction.value === 'addliquidity') {
+        return props.steps.length > 2;
+      }
+
+      return props.steps.length > 1;
     });
 
     const title = computed(() => {
@@ -95,7 +102,7 @@ export default defineComponent({
       let result = '';
 
       if (currentAction.value === 'transfer') {
-        const data = props.step.transactions[0].data as IBCForwardsData;
+        const data = props.steps[0].transactions[0].data as IBCForwardsData;
         const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
         const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
         return t('components.transferToHub.transferSubtitle', { from: chainFrom, to: chainTo });
@@ -138,13 +145,27 @@ export default defineComponent({
     };
 
     watch(
-      props.step,
+      props.steps,
       async () => {
+        let stepDenoms = [];
+        const dexChain = store.getters['demeris/getDexChain'];
+
+        stepDenoms = props.steps
+          .map((step) => {
+            const transaction = step.transactions[0];
+            if (!transaction.name.startsWith('ibc')) {
+              return;
+            }
+            const chain = (transaction.data as IBCForwardsData).from_chain || dexChain;
+            const denom = (transaction.data as TransferData).amount.denom;
+            return { chain, denom };
+          })
+          .filter(Boolean);
+
         denoms.value = await Promise.all(
-          props.step.transactions.map(async (transaction) => {
-            const chain = (transaction.data as IBCForwardsData).from_chain || store.getters['demeris/getDexChain'];
-            const denom = await getBaseDenom((transaction.data as TransferData).amount.denom, chain);
-            const displayDenom = await getDisplayName(denom, chain);
+          stepDenoms.map(async (item) => {
+            const denom = await getBaseDenom(item.denom, item.chain);
+            const displayDenom = await getDisplayName(denom, item.chain);
             return displayDenom;
           }),
         );

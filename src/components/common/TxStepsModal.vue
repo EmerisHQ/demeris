@@ -19,7 +19,7 @@
       <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
         <TransferInterstitialConfirmation
           :action="actionName"
-          :step="data[0]"
+          :steps="data"
           @continue="
             isTransferConfirmationOpen = false;
             interstitialProceed = true;
