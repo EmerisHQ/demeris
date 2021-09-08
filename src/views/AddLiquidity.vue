@@ -309,8 +309,8 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, ref, toRefs, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
+import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -367,8 +367,8 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { useDenom } = useDenoms();
-    const poolId = computed(() => route.params.id as unknown as string);
-    const pool = ref<Pool>();
+    const poolId = computed(() => route.params.id as string);
+
     const actionSteps = ref<Step[]>([]);
 
     const steps = ['amount', 'review', 'send'];
@@ -480,11 +480,26 @@ export default {
       },
       { immediate: true },
     );
-
-    const { calculateSupplyTokenAmount, getPoolWithdrawBalances, reserveBalances, totalSupply } = usePool(
-      computed(() => pool.value?.id),
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    watch(
+      () => poolId.value,
+      async () => {
+        const inst = usePool(poolId);
+        await inst.initPromise;
+        usePoolInstance.value = inst;
+      },
+      { immediate: true },
     );
 
+    const pool = computed(() => {
+      return unref(usePoolInstance.value?.pool);
+    });
+    const reserveBalances = computed(() => {
+      return unref(usePoolInstance.value?.reserveBalances);
+    });
+    const totalSupply = computed(() => {
+      return unref(usePoolInstance.value?.totalSupply);
+    });
     const { balances: userBalances, getNativeBalances } = useAccount();
 
     const balances = computed(() => {
@@ -537,7 +552,7 @@ export default {
         return;
       }
 
-      const result = calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
+      const result = usePoolInstance.value.calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
       state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
     };
 
@@ -568,8 +583,7 @@ export default {
             .toNumber(),
         };
       }
-
-      if (reserveBalances.value?.length) {
+      if (reserveBalances.value.length) {
         const baseDenomIndex = {};
         baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
         baseDenomIndex[state.poolBaseDenoms[1]] = pool.value.reserve_coin_denoms[1];
@@ -767,13 +781,14 @@ export default {
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
-            pool.value = poolIterator;
+            if (poolIterator.id != route.params.id) {
+              router.push('/pools/add/' + poolIterator.id);
+            }
             return;
           }
         }
+        router.push('/pools/add');
       }
-
-      pool.value = undefined;
     };
 
     const onClose = () => {
@@ -889,7 +904,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = getPoolWithdrawBalances(+state.receiveAmount);
+      const result = usePoolInstance.value.getPoolWithdrawBalances(+state.receiveAmount);
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -917,7 +932,7 @@ export default {
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
+      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -925,13 +940,9 @@ export default {
     };
 
     watch(
-      [poolId, pools],
+      [poolId, pools, balances],
       async () => {
         if (!poolId.value) {
-          return;
-        }
-
-        if (form.coinA.asset || form.coinB.asset) {
           return;
         }
 
@@ -939,9 +950,15 @@ export default {
 
         if (poolFromRoute) {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
-          state.poolBaseDenoms = poolBaseDenoms;
-          form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
-          form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+          state.poolBaseDenoms = poolBaseDenoms.sort();
+
+          const coinA = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
+          const coinB = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+
+          if (form.coinA.asset?.amount !== coinA?.amount || form.coinB.asset?.amount !== coinB?.amount) {
+            form.coinA.asset = coinA;
+            form.coinB.asset = coinB;
+          }
         }
       },
       { immediate: true },
@@ -995,7 +1012,6 @@ export default {
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
             const precisionDiff = precisionA - precisionB;
-
             const bigExchangeAmount = new BigNumber(exchangeAmount.value.coinB).shiftedBy(-precisions.value.coinB);
 
             const bigAmountA = new BigNumber(amountA).minus(feeA).dividedBy(10 ** precisionDiff);
