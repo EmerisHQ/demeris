@@ -781,8 +781,8 @@ export default {
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
-            if (pool.value.id != route.params.id) {
-              router.push('/pools/add/' + pool.value.id);
+            if (poolIterator.id != route.params.id) {
+              router.push('/pools/add/' + poolIterator.id);
             }
             return;
           }
@@ -950,10 +950,15 @@ export default {
 
         if (poolFromRoute) {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
-          state.poolBaseDenoms = poolBaseDenoms;
+          state.poolBaseDenoms = poolBaseDenoms.sort();
 
-          form.coinA.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
-          form.coinB.asset = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+          const coinA = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
+          const coinB = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+
+          if (form.coinA.asset?.amount !== coinA?.amount || form.coinB.asset?.amount !== coinB?.amount) {
+            form.coinA.asset = coinA;
+            form.coinB.asset = coinB;
+          }
         }
       },
       { immediate: true },
