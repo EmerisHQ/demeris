@@ -840,7 +840,6 @@ export default defineComponent({
                     }
 
                     txResult.value.fees = { ...fees.value[currentStep.value] };
-                    console.log(txResult.value);
                   }
 
                   // TODO: deal with status here
