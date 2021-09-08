@@ -157,19 +157,27 @@
             <div class="my-3">
               <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
             </div>
-
-            <a
-              v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
-              :href="getExplorerLink(txResult.hashes[0])"
-              rel="noopener noreferrer"
-              target="_blank"
-              class="block mt-5 p-2"
-            >
-              {{ $t('context.transaction.viewOnExplorer') }} ↗️
-            </a>
           </template>
           <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
         </div>
+      </template>
+
+      <template
+        v-if="
+          !isFinal &&
+            status === 'complete' &&
+            (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')
+        "
+      >
+        <a
+          v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+          :href="getExplorerLink(txResult.hashes[0])"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="inline-block p-2"
+        >
+          {{ $t('context.transaction.viewOnExplorer') }} ↗️
+        </a>
       </template>
     </div>
 
