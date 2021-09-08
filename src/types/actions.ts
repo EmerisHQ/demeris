@@ -4,7 +4,7 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool';
+  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool' | 'memo-transfer';
   memo?: string;
 };
 export type SwapParams = {
@@ -45,6 +45,7 @@ export type RedeemAction = BaseAction & { params: RedeemParams };
 export type AddLiquidityAction = BaseAction & { params: AddLiquidityParams };
 export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityParams };
 export type TransferAction = BaseAction & { params: TransferParams };
+export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
 export type Any =
   | SwapAction

@@ -275,13 +275,12 @@ import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { FeeTotals, GasPriceLevel, IBCBackwardsData, IBCForwardsData, Step } from '@/types/actions';
-import { Balances, TransactionDetailResponse } from '@/types/api';
+import { Balances } from '@/types/api';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
-  getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
@@ -781,7 +780,7 @@ export default defineComponent({
 
                   // sleep
                   await new Promise((r) => setTimeout(r, 750));
-
+                  /*
                   const txsResponse: TransactionDetailResponse = await store.dispatch(
                     GlobalDemerisActionTypes.GET_TXS,
                     { txhash, chain_name },
@@ -790,21 +789,29 @@ export default defineComponent({
                   allTransactionResponses.value.responses.push(txsResponse);
                   allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
                     (acc, item) => {
-                      acc[item.denom] = item.amount;
+                      const total = allTransactionResponses.value.fees[chain_name]?.[item.denom] || 0;
+                      acc[item.denom] = new BigNumber(total).plus(item.amount).toString();
                       return acc;
                     },
                     {},
                   );
-
+*/
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
                       let endBlockEvent = null;
-                      while (!endBlockEvent) {
-                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                          height: txResultData.height,
-                          stepType: currentData.value.data.name,
-                        });
+                      let retries = 0;
+                      while (retries < 5) {
+                        try {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                            height: txResultData.height,
+                            stepType: currentData.value.data.name,
+                          });
+                          break;
+                        } catch {
+                          retries++;
+                          await new Promise((r) => setTimeout(r, 1000));
+                        }
                       }
 
                       if (endBlockEvent) {
@@ -828,18 +835,12 @@ export default defineComponent({
 
                         txResult.value = resultData;
                       }
-                    } else if (txsResponse) {
-                      txResult.value = {
-                        name: currentData.value.data.name,
-                        transactions: allTransactionResponses.value.responses.map((item) => ({
-                          data: getStepTransactionDetailFromResponse(item),
-                          //@ts-ignore
-                          name: currentData.value.data.transactions[i].name,
-                        })),
-                      };
+                    } else {
+                      txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value.fees = allTransactionResponses.value.fees;
+                    txResult.value.fees = { ...fees.value[currentStep.value] };
+                    console.log(txResult.value);
                   }
 
                   // TODO: deal with status here
