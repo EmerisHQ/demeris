@@ -741,12 +741,12 @@ export default defineComponent({
                       txstatus.value = 'unknown';
                       stuck = true;
                       break;
-                    }
-
-                    if (!['pending', 'transit'].includes(txResultData.status)) {
-                      clearTimeout(delayTimeout);
+                    } else if (txResultData.status === 'IBC_receive_failed') {
+                      txstatus.value = 'IBC_receive_failed';
                     }
                   }
+
+                  clearTimeout(delayTimeout);
 
                   if (stuck) {
                     return;
