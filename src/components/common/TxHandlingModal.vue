@@ -449,18 +449,20 @@ export default defineComponent({
               primaryButton.value = t('generic_cta.done');
               if (props.tx.name === 'swap' && props.txResult) {
                 sendBaseDenom.value = await getBaseDenom(props.txResult.demandCoinDenom);
-                sendAmount.value = props.txResult.demandCoinSwappedAmount;
-                secondaryButton.value = `Send ${
-                  Math.trunc(
-                    (Number(sendAmount.value) * 100) /
-                      Math.pow(
-                        10,
-                        store.getters['demeris/getDenomPrecision']({
-                          name: sendBaseDenom.value,
-                        }),
-                      ),
-                  ) / 100
-                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} \u2192`;
+                (sendAmount.value =
+                  props.txResult.demandCoinSwappedAmount /
+                  Math.pow(
+                    10,
+                    store.getters['demeris/getDenomPrecision']({
+                      name: sendBaseDenom.value,
+                    }),
+                  )),
+                  (secondaryButton.value = `Send ${
+                    Math.trunc(Number(sendAmount.value) * 100) / 100
+                  } ${await getDisplayName(
+                    props.txResult.demandCoinDenom,
+                    store.getters['demeris/getDexChain'],
+                  )} \u2192`);
               } else {
                 secondaryButton.value = t('components.txHandlingModal.reset');
               }

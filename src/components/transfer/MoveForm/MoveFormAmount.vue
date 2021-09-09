@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ state.currentAsset }}
     <DenomSelectModal
       v-if="state.isDenomModalOpen"
       class="fixed inset-0 z-30 bg-bg"
@@ -505,7 +504,11 @@ export default defineComponent({
       state.currentAsset = asset;
 
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-      form.on_chain = asset.on_chain as string;
+      if (location.search) {
+        form.on_chain = dexChain;
+      } else {
+        form.on_chain = asset.on_chain as string;
+      }
       form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
 
       state.assetTicker = await getTicker(asset.base_denom, dexChain);
@@ -536,7 +539,9 @@ export default defineComponent({
         if (newVal.length > 0 && !state.currentAsset) {
           let asset;
           if (location.search) {
-            console.log('test');
+            const params = new URL(location.href).searchParams;
+            form.balance.denom = params.get('base_denom');
+            form.balance.amount = params.get('amount');
           }
 
           if (form.balance.denom) {
