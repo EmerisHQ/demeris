@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{ state.currentAsset }}
     <DenomSelectModal
       v-if="state.isDenomModalOpen"
       class="fixed inset-0 z-30 bg-bg"
@@ -534,6 +535,9 @@ export default defineComponent({
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
           let asset;
+          if (location.search) {
+            console.log('test');
+          }
 
           if (form.balance.denom) {
             asset = props.balances.find((item) => {

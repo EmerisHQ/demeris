@@ -210,7 +210,7 @@
         variant="secondary"
         :click-function="
           () => {
-            router.push('/send/address');
+            router.push(`/send/move?base_denom=${sendBaseDenom}&amount=${sendAmount}`);
           }
         "
       />
@@ -365,6 +365,8 @@ export default defineComponent({
     const secondaryButton = ref(t('generic_cta.cancel'));
     const primaryButton = ref('');
     const baseDenoms = reactive({});
+    const sendBaseDenom = ref('');
+    const sendAmount = ref(0);
 
     const isIBC = computed(() => {
       return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
@@ -446,13 +448,15 @@ export default defineComponent({
             if (props.isFinal && !props.hasMore) {
               primaryButton.value = t('generic_cta.done');
               if (props.tx.name === 'swap' && props.txResult) {
+                sendBaseDenom.value = await getBaseDenom(props.txResult.demandCoinDenom);
+                sendAmount.value = props.txResult.demandCoinSwappedAmount;
                 secondaryButton.value = `Send ${
                   Math.trunc(
-                    (Number(props.txResult.demandCoinSwappedAmount) * 100) /
+                    (Number(sendAmount.value) * 100) /
                       Math.pow(
                         10,
                         store.getters['demeris/getDenomPrecision']({
-                          name: await getBaseDenom(props.txResult.demandCoinDenom),
+                          name: sendBaseDenom.value,
                         }),
                       ),
                   ) / 100
@@ -592,6 +596,8 @@ export default defineComponent({
       secondaryButton,
       primaryButton,
       router,
+      sendBaseDenom,
+      sendAmount,
       unknownHandler,
     };
   },
