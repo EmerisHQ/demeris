@@ -839,7 +839,7 @@ export default defineComponent({
                       txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value.fees = { ...fees.value[currentStep.value] };
+                    txResult.value = { fees: { ...fees.value[currentStep.value] } };
                   }
 
                   // TODO: deal with status here

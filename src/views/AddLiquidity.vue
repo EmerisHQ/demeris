@@ -952,11 +952,22 @@ export default {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
           state.poolBaseDenoms = poolBaseDenoms.sort();
 
-          const coinA = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
-          const coinB = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
-
-          if (form.coinA.asset?.amount !== coinA?.amount || form.coinB.asset?.amount !== coinB?.amount) {
+          if (!form.coinA.asset) {
+            const coinA = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
             form.coinA.asset = coinA;
+          } else {
+            const coinA = balances.value.find(
+              (item) => item.base_denom === poolBaseDenoms[0] && item.on_chain == form.coinA.asset.on_chain,
+            );
+            form.coinA.asset = coinA;
+          }
+          if (!form.coinB.asset) {
+            const coinB = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+            form.coinB.asset = coinB;
+          } else {
+            const coinB = balances.value.find(
+              (item) => item.base_denom === poolBaseDenoms[1] && item.on_chain == form.coinB.asset.on_chain,
+            );
             form.coinB.asset = coinB;
           }
         }
