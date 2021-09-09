@@ -110,14 +110,40 @@
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️</a>
         </template>
         <template v-else-if="tx.name === 'withdrawliquidity'">
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️
+          </a>
         </template>
         <template
           v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
         >
           <PreviewTransfer :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️
+          </a>
         </template>
       </div>
       <template v-if="status !== 'complete' || !isFinal">
@@ -128,10 +154,30 @@
         </div>
         <div class="status__detail-path mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            <div class="my-3">
+              <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            </div>
           </template>
           <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
         </div>
+      </template>
+
+      <template
+        v-if="
+          !isFinal &&
+            status === 'complete' &&
+            (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')
+        "
+      >
+        <a
+          v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+          :href="getExplorerLink(txResult.hashes[0])"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="inline-block p-2"
+        >
+          {{ $t('context.transaction.viewOnExplorer') }} ↗️
+        </a>
       </template>
     </div>
 
@@ -364,6 +410,25 @@ export default defineComponent({
       return baseDenoms[denom] || denom;
     };
 
+    const getExplorerLink = (tx: { txhash: string; chain_name: string }) => {
+      const chainMintScanMap = {
+        'cosmos-hub': 'cosmos',
+        akash: 'akash',
+        'crypto-org': 'crypto-org',
+        iris: 'iris',
+        osmosis: 'osmosis',
+        persistence: 'persistence',
+        sentinel: 'sentinel',
+      };
+      const chain = chainMintScanMap[tx.chain_name];
+
+      if (!chain) {
+        return;
+      }
+
+      return `https://www.mintscan.io/${chain}/txs/${tx.txhash}`;
+    };
+
     // Watch for status changes
     watch(
       () => props.status,
@@ -569,6 +634,7 @@ export default defineComponent({
       }
     }
     return {
+      getExplorerLink,
       emitNext,
       emitRetry,
       emitClose,
