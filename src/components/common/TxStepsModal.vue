@@ -19,7 +19,7 @@
       <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
         <TransferInterstitialConfirmation
           :action="actionName"
-          :step="data[0]"
+          :steps="data"
           @continue="
             isTransferConfirmationOpen = false;
             interstitialProceed = true;
@@ -789,7 +789,7 @@ export default defineComponent({
                       //Get end block events
                       let endBlockEvent = null;
                       let retries = 0;
-                      while (retries < 5) {
+                      while (retries < 10) {
                         try {
                           endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
@@ -798,7 +798,7 @@ export default defineComponent({
                           break;
                         } catch {
                           retries++;
-                          await new Promise((r) => setTimeout(r, 1000));
+                          await new Promise((r) => setTimeout(r, 2000));
                         }
                       }
 
@@ -827,8 +827,9 @@ export default defineComponent({
                       txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value.hashes = allTransactionResponses.value.hashes;
-                    txResult.value.fees = { ...fees.value[currentStep.value] };
+                    txResult.value
+                      ? (txResult.value.fees = { ...fees.value[currentStep.value] })
+                      : (txResult.value = { fees: { ...fees.value[currentStep.value] } });
                   }
 
                   // TODO: deal with status here
