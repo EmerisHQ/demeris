@@ -513,6 +513,7 @@ export default defineComponent({
     const allTransactionResponses = ref({
       responses: [],
       fees: {},
+      hashes: [],
     });
     const nextTx = () => {
       txToResolve.value['resolver']();
@@ -778,24 +779,11 @@ export default defineComponent({
                     chain_name = res.chain_name;
                   }
 
+                  allTransactionResponses.value.hashes.push({ txhash, chain_name });
+
                   // sleep
                   await new Promise((r) => setTimeout(r, 750));
-                  /*
-                  const txsResponse: TransactionDetailResponse = await store.dispatch(
-                    GlobalDemerisActionTypes.GET_TXS,
-                    { txhash, chain_name },
-                  );
 
-                  allTransactionResponses.value.responses.push(txsResponse);
-                  allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
-                    (acc, item) => {
-                      const total = allTransactionResponses.value.fees[chain_name]?.[item.denom] || 0;
-                      acc[item.denom] = new BigNumber(total).plus(item.amount).toString();
-                      return acc;
-                    },
-                    {},
-                  );
-*/
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
@@ -839,9 +827,11 @@ export default defineComponent({
                       txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value
-                      ? (txResult.value.fees = { ...fees.value[currentStep.value] })
-                      : (txResult.value = { fees: { ...fees.value[currentStep.value] } });
+                    txResult.value = {
+                      ...txResult.value,
+                      hashes: allTransactionResponses.value.hashes,
+                      fees: { ...fees.value[currentStep.value] },
+                    };
                   }
 
                   // TODO: deal with status here
