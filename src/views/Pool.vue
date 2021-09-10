@@ -175,7 +175,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, Ref, ref, unref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -214,6 +214,8 @@ export default defineComponent({
     const store = useStore();
     const denoms = ref([]);
     pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
+
+    const poolId = computed(() => route.params.id as string);
     const toUSD = (value) => {
       var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -244,9 +246,32 @@ export default defineComponent({
       };
     });
 
-    const { pool, reserveBalances, pairName, getPoolWithdrawBalances, totalSupply, totalLiquidityPrice } = usePool(
-      computed(() => route.params.id as string),
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    watch(
+      () => poolId.value,
+      async () => {
+        const inst = usePool(poolId);
+        await inst.initPromise;
+        usePoolInstance.value = inst;
+      },
+      { immediate: true },
     );
+
+    const pool = computed(() => {
+      return unref(usePoolInstance.value?.pool);
+    });
+    const pairName = computed(() => {
+      return unref(usePoolInstance.value?.pairName);
+    });
+    const reserveBalances = computed(() => {
+      return unref(usePoolInstance.value?.reserveBalances);
+    });
+    const totalSupply = computed(() => {
+      return unref(usePoolInstance.value?.totalSupply);
+    });
+    const totalLiquidityPrice = computed(() => {
+      return unref(usePoolInstance.value?.totalLiquidityPrice);
+    });
 
     const metaSource = computed(() => ({
       title: pairName.value,
@@ -262,9 +287,10 @@ export default defineComponent({
 
       const poolCoin = {
         denom: pool.value.pool_coin_denom,
+        base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = getPoolWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
