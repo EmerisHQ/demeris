@@ -730,7 +730,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
             }
           }
         }
-        commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+        if (response.data?.data?.Tokens) {
+          commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+        }
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
         }
