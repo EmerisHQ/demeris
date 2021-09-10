@@ -597,6 +597,7 @@ export default {
             : reserveBalances.value[0].amount;
         const precisionB =
           form.coinB.asset.base_denom == state.poolBaseDenoms[1] ? precisions.value.coinB : precisions.value.coinA;
+
         return {
           coinA,
           coinB: new BigNumber(amountB)
@@ -950,23 +951,24 @@ export default {
 
         if (poolFromRoute) {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
-          state.poolBaseDenoms = poolBaseDenoms.sort();
+          state.poolBaseDenoms = poolBaseDenoms;
+          const sortedBaseDenoms = [...poolBaseDenoms].sort();
 
           if (!form.coinA.asset) {
-            const coinA = balances.value.find((item) => item.base_denom === poolBaseDenoms[0]);
+            const coinA = balances.value.find((item) => item.base_denom === sortedBaseDenoms[0]);
             form.coinA.asset = coinA;
           } else {
             const coinA = balances.value.find(
-              (item) => item.base_denom === poolBaseDenoms[0] && item.on_chain == form.coinA.asset.on_chain,
+              (item) => item.base_denom === sortedBaseDenoms[0] && item.on_chain == form.coinA.asset.on_chain,
             );
             form.coinA.asset = coinA;
           }
           if (!form.coinB.asset) {
-            const coinB = balances.value.find((item) => item.base_denom === poolBaseDenoms[1]);
+            const coinB = balances.value.find((item) => item.base_denom === sortedBaseDenoms[1]);
             form.coinB.asset = coinB;
           } else {
             const coinB = balances.value.find(
-              (item) => item.base_denom === poolBaseDenoms[1] && item.on_chain == form.coinB.asset.on_chain,
+              (item) => item.base_denom === sortedBaseDenoms[1] && item.on_chain == form.coinB.asset.on_chain,
             );
             form.coinB.asset = coinB;
           }
