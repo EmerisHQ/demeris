@@ -718,8 +718,11 @@ export default defineComponent({
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
-                  let delayStatus = null;
-                  let failStatus = null;
+                  let delayTimeout = setTimeout(() => {
+                    txstatus.value = 'delay';
+                  }, 60000);
+
+                  let stuck = false;
 
                   while (
                     txResultData.status != 'complete' &&
@@ -734,22 +737,19 @@ export default defineComponent({
                       ticket: result.ticket,
                     });
 
-                    if (stepTx.name.startsWith('ibc')) {
-                      if (txResultData.status === 'transit') {
-                        delayStatus = setTimeout(() => {
-                          txstatus.value = 'delay';
-                        }, 60000);
-                        failStatus = setTimeout(() => {
-                          txstatus.value = 'unknown';
-                        }, 310000);
-                      } else if (txResultData.status === 'IBC_receive_failed') {
-                        txstatus.value = 'IBC_receive_failed';
-                        clearTimeout(delayStatus);
-                      } else {
-                        clearTimeout(delayStatus);
-                        clearTimeout(failStatus);
-                      }
+                    if (txResultData.status.startsWith('stuck')) {
+                      txstatus.value = 'unknown';
+                      stuck = true;
+                      break;
+                    } else if (txResultData.status === 'IBC_receive_failed') {
+                      txstatus.value = 'IBC_receive_failed';
                     }
+                  }
+
+                  clearTimeout(delayTimeout);
+
+                  if (stuck) {
+                    return;
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
