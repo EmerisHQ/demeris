@@ -605,12 +605,16 @@ export default defineComponent({
       buttonTooltipText: computed(() => {
         if (data.buttonName === 'Swap limit reached') {
           return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
-        } else {
-          if (!dexStatus.value) {
+        } else if (data.isBothSelected) {
+          if (!data.selectedPoolData) {
+            return 'Currently there is no pool for this pair, please select other pair';
+          } else if (!dexStatus.value) {
             return 'Cosmos Hub appears to be down, swap is temporarily unavailable';
           } else {
             return '';
           }
+        } else {
+          return '';
         }
       }),
       buttonStatus: computed(() => {
