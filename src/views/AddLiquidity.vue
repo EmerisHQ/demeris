@@ -953,24 +953,25 @@ export default {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);
           state.poolBaseDenoms = poolBaseDenoms;
           const sortedBaseDenoms = [...poolBaseDenoms].sort();
-
-          if (!form.coinA.asset) {
-            const coinA = balances.value.find((item) => item.base_denom === sortedBaseDenoms[0]);
-            form.coinA.asset = coinA;
-          } else {
-            const coinA = balances.value.find(
-              (item) => item.base_denom === sortedBaseDenoms[0] && item.on_chain == form.coinA.asset.on_chain,
-            );
-            form.coinA.asset = coinA;
-          }
-          if (!form.coinB.asset) {
-            const coinB = balances.value.find((item) => item.base_denom === sortedBaseDenoms[1]);
-            form.coinB.asset = coinB;
-          } else {
-            const coinB = balances.value.find(
-              (item) => item.base_denom === sortedBaseDenoms[1] && item.on_chain == form.coinB.asset.on_chain,
-            );
-            form.coinB.asset = coinB;
+          if (state.step != 'review' && state.step != 'send') {
+            if (!form.coinA.asset) {
+              const coinA = balances.value.find((item) => item.base_denom === sortedBaseDenoms[0]);
+              form.coinA.asset = coinA;
+            } else {
+              const coinA = balances.value.find(
+                (item) => item.base_denom === sortedBaseDenoms[0] && item.on_chain == form.coinA.asset.on_chain,
+              );
+              form.coinA.asset = coinA;
+            }
+            if (!form.coinB.asset) {
+              const coinB = balances.value.find((item) => item.base_denom === sortedBaseDenoms[1]);
+              form.coinB.asset = coinB;
+            } else {
+              const coinB = balances.value.find(
+                (item) => item.base_denom === sortedBaseDenoms[1] && item.on_chain == form.coinB.asset.on_chain,
+              );
+              form.coinB.asset = coinB;
+            }
           }
         }
       },
