@@ -540,7 +540,7 @@ export default defineComponent({
           data.receiveCoinAmount = null;
         }
 
-        if (!isInit.value && watchValues[0].length) {
+        if (!isInit.value) {
           data.receiveCoinData = null;
           if (!isSignedIn.value) {
             //no-wallet
