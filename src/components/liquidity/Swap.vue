@@ -567,7 +567,6 @@ export default defineComponent({
               data.receiveCoinData = assetToReceive;
             }
           }
-
           isInit.value = true;
         }
       },
@@ -912,7 +911,9 @@ export default defineComponent({
     function switchPayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      originPayCoinData.on_chain = store.getters['demeris/getDexChain'];
+      if (originPayCoinData) {
+        originPayCoinData.on_chain = store.getters['demeris/getDexChain'];
+      }
 
       const sortedBalance =
         allBalances.value
