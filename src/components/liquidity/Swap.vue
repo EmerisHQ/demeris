@@ -221,6 +221,12 @@ export default defineComponent({
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
     });
 
+    onUnmounted(() => {
+      if (setIntervalId.value) {
+        clearInterval(setIntervalId.value);
+      }
+    });
+
     // REFACTOR STARTS HERE
     const availablePairs = ref([]);
     onMounted(async () => {
@@ -817,18 +823,21 @@ export default defineComponent({
               );
             });
 
-            poolId.value = pool.id;
-            const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await getReserveBalances(pool);
-            const poolPrice = await getPoolPrice(pool);
+            if (pool) {
+              poolId.value = pool.id;
+              const reserves = await getReserveBaseDenoms(pool);
+              const reserveBalances = await getReserveBalances(pool);
+              const poolPrice = await getPoolPrice(pool);
 
-            data.selectedPoolData = {
-              pool,
-              poolPrice,
-              reserves,
-              reserveBalances,
-            };
-            setCounterPairCoinAmount('Pay');
+              data.selectedPoolData = {
+                pool,
+                poolPrice,
+                reserves,
+                reserveBalances,
+              };
+              setCounterPairCoinAmount('Pay');
+            }
+
             data.isLoading = false;
           } catch (e) {
             poolId.value = null;
@@ -864,9 +873,6 @@ export default defineComponent({
         }
       },
     );
-    onUnmounted(() => {
-      clearInterval(setIntervalId.value);
-    });
 
     //set actionHandlerResult when swapable
     watch(
