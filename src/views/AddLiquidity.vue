@@ -815,12 +815,12 @@ export default {
     const goToReview = () => {
       if (state.isCreationConfirmationOpen) {
         if (hasPool.value) {
-          event('review_add_liquidity_tx', {
+          event('review_tx', {
             event_label: 'Reviewing add liquidity tx',
             event_category: 'transactions',
           });
         } else {
-          event('review_create_pool_tx', { event_label: 'Reviewing create pool tx', event_category: 'transactions' });
+          event('review_tx', { event_label: 'Reviewing create pool tx', event_category: 'transactions' });
         }
         goToStep('review');
         state.isCreationConfirmationOpen = false;

@@ -106,7 +106,7 @@ export default defineComponent({
     });
 
     const generateSteps = async () => {
-      event('review_move_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' });
+      event('review_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' });
       goToStep('review');
     };
 

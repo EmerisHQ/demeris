@@ -1026,7 +1026,7 @@ export default defineComponent({
     }
 
     async function swap() {
-      event('review_swap_tx', { event_label: 'Reviewing swap tx', event_category: 'transactions' });
+      event('review_tx', { event_label: 'Reviewing swap tx', event_category: 'transactions' });
       reviewModalToggle();
     }
 

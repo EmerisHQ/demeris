@@ -212,7 +212,7 @@ export default defineComponent({
 
     const selectAsset = (asset: Record<string, unknown>) => {
       state.selectedAsset = asset;
-      event('review_redeem_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
+      event('review_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
       goToStep('review');
     };
 

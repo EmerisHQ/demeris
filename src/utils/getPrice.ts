@@ -1,10 +1,10 @@
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
 
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 
-export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolean): any {
+export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolean): ComputedRef<number> {
   const store = useStore();
   const denom = ref((amount as Amount).denom);
   const isLoaded = ref(false);
