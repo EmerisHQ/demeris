@@ -208,6 +208,7 @@ export const messages = {
         reset: 'Send another',
         next: 'Next transaction',
 
+        sendAfterSwap: 'Send {amount} {displayName} \u2192',
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
