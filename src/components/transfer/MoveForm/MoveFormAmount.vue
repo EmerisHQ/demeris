@@ -62,6 +62,7 @@
                   @update:price="state.usdValue = $event"
                   @update:modelValue="
                     ($event) => {
+                      state.isMaximumAmountChecked = false;
                       if (state.isUSDInputChecked) {
                         form.balance.amount = $event;
                       }
