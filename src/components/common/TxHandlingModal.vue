@@ -5,11 +5,13 @@
     :show-close-button="variant === 'modal' ? false : null"
     class="text-center m-auto w-full max-w-lg"
     :body-class="
-      variant === 'modal' ? [{ 'bg-brand dark:theme-inverse text-text': status === 'complete' }, 'p-6'] : null
+      variant === 'modal'
+        ? [{ 'bg-brand dark:theme-inverse text-text': status === 'complete' && txResult?.swappedPercent }, 'p-6']
+        : null
     "
     @close="emitClose"
   >
-    <div v-if="iconType" class="flex items-center justify-center my-6">
+    <div v-if="iconType || txResult?.swappedPercent === 0" class="flex items-center justify-center my-6">
       <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
       <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
       <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
@@ -90,15 +92,19 @@
       </div>
       <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
-          You received
-          <span class="font-bold"><AmountDisplay
-            :amount="{
-              denom: txResult?.demandCoinDenom,
-              amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
-            }"
-          /></span>
-          <br />
-          on <ChainName :name="'cosmos-hub'" />.
+          <span v-if="txResult?.swappedPercent !== 0">
+            You received
+            <span class="font-bold">
+              <AmountDisplay
+                :amount="{
+                  denom: txResult?.demandCoinDenom,
+                  amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
+                }"
+              />
+            </span>
+            <br />
+            on <ChainName :name="'cosmos-hub'" />.
+          </span>
           <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
             <span class="font-bold">
               <AmountDisplay
@@ -534,12 +540,14 @@ export default defineComponent({
                 break;
               case 'swap':
                 updatePool(((props.tx as StepTransaction).data as SwapData).pool);
-                if (props.txResult.swappedPercent !== 100) {
+                if (props.txResult.swappedPercent === 100) {
+                  title.value = t('components.txHandlingModal.swapActionComplete');
+                } else if (props.txResult.swappedPercent === 0) {
+                  title.value = t('components.txHandlingModal.swapActionFail');
+                } else {
                   title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
                   });
-                } else {
-                  title.value = t('components.txHandlingModal.swapActionComplete');
                 }
                 break;
               case 'addliquidity':

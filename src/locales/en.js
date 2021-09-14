@@ -216,7 +216,7 @@ export const messages = {
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
 
-        swapActionFail: 'Swap failed',
+        swapActionFail: 'Assets failed to be swapped',
         createPoolActionFail: 'Create pool failed',
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
