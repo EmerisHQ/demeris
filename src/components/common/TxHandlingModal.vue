@@ -106,12 +106,13 @@
             on <ChainName :name="'cosmos-hub'" />.
           </span>
           <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+            Your
             <span class="font-bold">
               <AmountDisplay
                 :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
               />
             </span>
-            not swapped
+            on <ChainName :name="'cosmos-hub'" /> was not swapped.
           </div>
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
