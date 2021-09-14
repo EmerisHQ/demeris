@@ -651,9 +651,9 @@ export default defineComponent({
               } else {
                 hasMore.value = false;
               }
-              isTxHandlingModalOpen.value = true;
               await nextTick();
               txstatus.value = 'keplr-sign';
+              isTxHandlingModalOpen.value = true;
               let txToResolveResolver;
               const txToResolvePromise = {
                 promise: new Promise((resolve) => {
