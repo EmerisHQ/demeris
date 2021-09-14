@@ -274,7 +274,17 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, IBCBackwardsData, IBCForwardsData, Step } from '@/types/actions';
+import {
+  AddLiquidityData,
+  FeeTotals,
+  GasPriceLevel,
+  IBCBackwardsData,
+  IBCForwardsData,
+  Step,
+  SwapData,
+  TransferData,
+  WithdrawLiquidityData,
+} from '@/types/actions';
 import { Balances } from '@/types/api';
 import {
   chainStatusForSteps,
@@ -286,6 +296,7 @@ import {
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -667,7 +678,7 @@ export default defineComponent({
                 gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
-              event('confirm_tx_' + stepTx.name, {
+              event('confirm_tx', {
                 event_label: 'Confirmed ' + stepTx.name + ' tx',
                 event_category: 'transactions',
               });
@@ -689,7 +700,7 @@ export default defineComponent({
                 continue;
               }
               if (tx) {
-                event('signed_tx_' + stepTx.name, {
+                event('signed_tx', {
                   event_label: 'Signed ' + stepTx.name + ' tx',
                   event_category: 'transactions',
                 });
@@ -837,10 +848,75 @@ export default defineComponent({
                   // TODO: deal with status here
                   emit('complete');
                   txstatus.value = 'complete';
-                  event('completed_tx_' + stepTx.name, {
+                  event('completed_tx', {
                     event_label: 'Completed ' + stepTx.name + ' tx',
                     event_category: 'transactions',
                   });
+                  let value;
+                  switch (stepTx.name) {
+                    case 'ibc_forward':
+                      value = getPrice((stepTx.data as IBCForwardsData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'IBC transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'ibc_backward':
+                      value = getPrice((stepTx.data as IBCBackwardsData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'IBC transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'swap':
+                      value = getPrice((stepTx.data as SwapData).from);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Swap USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'addliquidity':
+                      value = getPrice((stepTx.data as AddLiquidityData).coinA);
+
+                      let valueB = getPrice((stepTx.data as AddLiquidityData).coinB);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Add Liquidity USD volume',
+                          event_category: 'volume',
+                          value: value.value + valueB.value,
+                        });
+                      });
+                      break;
+                    case 'withdrawliquidity':
+                      value = getPrice((stepTx.data as WithdrawLiquidityData).poolCoin);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Withdraw Liquidity USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'transfer':
+                      value = getPrice((stepTx.data as TransferData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                  }
                   await txToResolve.value['promise'];
                 } catch (e) {
                   console.error(e);
@@ -848,7 +924,7 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
-                  event('failed_tx_' + stepTx.name, {
+                  event('failed_tx', {
                     event_label: 'Failed ' + stepTx.name + ' tx',
                     event_category: 'transactions',
                   });

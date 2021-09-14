@@ -91,7 +91,7 @@ export default defineComponent({
     watch(
       () => [form.balance.amount, form.balance.denom, form.chain_name],
       async () => {
-        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '') {
+        if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '' && step.value != 'review') {
           const precision =
             store.getters['demeris/getDenomPrecision']({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
@@ -118,7 +118,7 @@ export default defineComponent({
       },
     );
     const generateSteps = async () => {
-      event('review_send_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
+      event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
       goToStep('review');
     };
 
