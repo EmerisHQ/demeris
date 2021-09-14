@@ -262,7 +262,11 @@
         variant="primary"
         :click-function="
           () => {
-            status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
+            status == 'keplr-reject' || status == 'failed' || txResult.swappedPercent === 0
+              ? emitRetry()
+              : isFinal
+                ? emitDone()
+                : emitNext();
           }
         "
       />
@@ -274,7 +278,7 @@
         :click-function="unknownHandler"
       />
       <Button
-        v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
+        v-if="(secondaryButton && tx.name === 'swap' && status !== 'complete') || txResult.swappedPercent === 0"
         :name="secondaryButton"
         variant="link"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
@@ -544,6 +548,8 @@ export default defineComponent({
                   title.value = t('components.txHandlingModal.swapActionComplete');
                 } else if (props.txResult.swappedPercent === 0) {
                   title.value = t('components.txHandlingModal.swapActionFail');
+                  primaryButton.value = t('components.txHandlingModal.tryAgain');
+                  secondaryButton.value = t('generic_cta.cancel');
                 } else {
                   title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
