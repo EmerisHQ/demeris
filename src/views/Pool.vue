@@ -274,7 +274,7 @@ export default defineComponent({
     });
 
     const metaSource = computed(() => ({
-      title: pairName.value,
+      title: pairName.value ? pairName.value : 'Gravity DEX Pool',
     }));
     useMeta(metaSource);
 
