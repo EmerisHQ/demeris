@@ -1,5 +1,5 @@
 <template>
-  <AmountInput :max-decimals="2" :model-value="usdValue" @update:model-value="onInput" />
+  <AmountInput :model-value="usdValue" @update:model-value="onInput" />
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
