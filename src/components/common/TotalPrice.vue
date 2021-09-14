@@ -56,7 +56,7 @@ export default defineComponent({
         if (stakedDenom.length > 0) {
           if (store.getters['demeris/getPrice']({ denom: stakedDenom[0].name })) {
             let totalValue =
-              parseInt(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name });
+              parseInt(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name }) ?? 0;
             let precision = Math.pow(
               10,
               parseInt(

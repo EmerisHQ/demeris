@@ -191,7 +191,7 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core';
+import { computed, onMounted, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -248,7 +248,7 @@ export default {
 
     const actionSteps = ref([]);
     pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
-    const poolId = computed(() => route.params.id);
+    const poolId = computed(() => route.params.id as string);
 
     const { getPoolName } = usePools();
     const { balancesByDenom } = useAccount();
@@ -290,16 +290,31 @@ export default {
       return result;
     });
 
-    const {
-      pool,
-      pairName,
-      getPoolWithdrawBalances,
-      calculateSupplyTokenAmount,
-      reserveBaseDenoms,
-      reserveBalances,
-      totalSupply,
-    } = usePool(computed(() => poolId.value as string));
-
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    watch(
+      () => poolId.value,
+      async () => {
+        const inst = usePool(poolId);
+        await inst.initPromise;
+        usePoolInstance.value = inst;
+      },
+      { immediate: true },
+    );
+    const pool = computed(() => {
+      return unref(usePoolInstance.value?.pool);
+    });
+    const pairName = computed(() => {
+      return unref(usePoolInstance.value?.pairName);
+    });
+    const reserveBaseDenoms = computed(() => {
+      return unref(usePoolInstance.value?.reserveBaseDenoms);
+    });
+    const reserveBalances = computed(() => {
+      return unref(usePoolInstance.value?.reserveBalances);
+    });
+    const totalSupply = computed(() => {
+      return unref(usePoolInstance.value?.totalSupply);
+    });
     const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom);
     const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);
     const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
@@ -330,11 +345,11 @@ export default {
 
     // TODO: Fetch from API the wallet available amount
     const balances = computed(() => {
-      return balancesByDenom(pool.value.pool_coin_denom);
+      return balancesByDenom(pool.value?.pool_coin_denom);
     });
 
     const needsTransferToHub = computed(() => {
-      if (state.selectedAsset.on_chain !== dexChain.value) {
+      if (state.selectedAsset?.on_chain !== dexChain.value) {
         return true;
       }
 
@@ -354,7 +369,7 @@ export default {
     });
 
     const hasPrices = computed(() => {
-      if (!reserveBaseDenoms.value.length) {
+      if (!reserveBaseDenoms.value?.length) {
         return false;
       }
 
@@ -391,7 +406,10 @@ export default {
       }
       const coinA = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
       const coinB = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
-      const result = calculateSupplyTokenAmount(coinA * 10 ** (-1 * precisionDiffs.value.coinB), coinB);
+      const result = usePoolInstance.value.calculateSupplyTokenAmount(
+        coinA * 10 ** (-1 * precisionDiffs.value.coinB),
+        coinB,
+      );
       state.amount = (+result.toFixed(6)).toString();
     };
 
@@ -429,7 +447,7 @@ export default {
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = getPoolWithdrawBalances(poolCoinAmount.toNumber());
+      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
       state.receiveAmounts.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
@@ -473,7 +491,7 @@ export default {
 
     const coinPoolChangeHandler = () => {
       state.isMaximumAmountChecked = false;
-      const result = getPoolWithdrawBalances(+state.amount);
+      const result = usePoolInstance.value.getPoolWithdrawBalances(+state.amount);
       state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
         .shiftedBy(precisionDiffs.value.coinB)
         .decimalPlaces(6)
@@ -505,10 +523,11 @@ export default {
     };
 
     const goToReview = () => {
-      event('review_withdraw_liquidity_tx', {
+      event('review_tx', {
         event_label: 'Reviewing withdraw liquidity tx',
         event_category: 'transactions',
       });
+
       goToStep('review');
     };
 
@@ -524,7 +543,7 @@ export default {
           poolCoin: {
             amount: {
               denom: state.selectedAsset.base_denom,
-              amount: (+state.amount * 1e6).toString(),
+              amount: new BigNumber(state.amount).shiftedBy(6).toString(),
             },
             chain_name: state.selectedAsset.on_chain,
           },
@@ -567,7 +586,7 @@ export default {
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          const result = getPoolWithdrawBalances(+state.amount);
+          const result = usePoolInstance.value.getPoolWithdrawBalances(+state.amount);
           state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
             .shiftedBy(precisionDiffs.value.coinB)
             .decimalPlaces(6)

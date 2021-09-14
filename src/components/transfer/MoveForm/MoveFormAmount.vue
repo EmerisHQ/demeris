@@ -62,6 +62,7 @@
                   @update:price="state.usdValue = $event"
                   @update:modelValue="
                     ($event) => {
+                      state.isMaximumAmountChecked = false;
                       if (state.isUSDInputChecked) {
                         form.balance.amount = $event;
                       }
@@ -254,7 +255,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -495,6 +496,21 @@ export default defineComponent({
       router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
     };
 
+    const findDefaultDestinationChain = () => {
+      if (state.chainsModalSource === 'from') {
+        const dexChain = store.getters['demeris/getDexChain'];
+        const nativeChain = nativeBalances.value.find(
+          (item) => item.base_denom === state.currentAsset?.base_denom,
+        )?.on_chain;
+
+        if (form.on_chain === nativeChain && nativeChain !== dexChain) {
+          form.to_chain = dexChain;
+        } else if (form.on_chain !== nativeChain) {
+          form.to_chain = nativeChain;
+        }
+      }
+    };
+
     const setCurrentAsset = async (asset: Record<string, unknown>) => {
       const dexChain = store.getters['demeris/getDexChain'];
       const targetChains = Object.values(store.getters['demeris/getChains']).filter(
@@ -502,11 +518,11 @@ export default defineComponent({
       );
 
       state.currentAsset = asset;
-
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
       form.on_chain = asset.on_chain as string;
       form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
 
+      findDefaultDestinationChain();
       state.assetTicker = await getTicker(asset.base_denom, dexChain);
     };
 
@@ -547,32 +563,6 @@ export default defineComponent({
           }
 
           setCurrentAsset(asset);
-        }
-      },
-      { immediate: true },
-    );
-
-    const { on_chain: onChain, to_chain: toChain } = toRefs(form);
-    watch(
-      [onChain, toChain],
-      ([onChainNew, toChainNew], [onChainOld]) => {
-        if (onChainNew === toChainNew) {
-          if (onChainOld !== onChainNew) {
-            form.to_chain = onChainOld;
-          } else {
-            form.to_chain = undefined;
-          }
-        } else if (state.chainsModalSource === 'from') {
-          const dexChain = store.getters['demeris/getDexChain'];
-          const nativeChain = nativeBalances.value.find(
-            (item) => item.base_denom === state.currentAsset?.base_denom,
-          )?.on_chain;
-
-          if (onChainNew === nativeChain && nativeChain !== dexChain) {
-            form.to_chain = dexChain;
-          } else if (onChainNew !== nativeChain) {
-            form.to_chain = nativeChain;
-          }
         }
       },
       { immediate: true },
