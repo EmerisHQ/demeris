@@ -1,5 +1,6 @@
 import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
+import { WalletType } from '@/wallet-manager';
 
 import { DemerisConfig } from './actions';
 
@@ -48,6 +49,7 @@ export type UserData = {
   hasSeenRedeem?: boolean;
   slippagePerc?: number;
   isDemoAccount?: boolean;
+  connectedWallets?: WalletType[];
   theme?: string;
   updateDT: number;
 };

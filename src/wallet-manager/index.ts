@@ -1,1 +1,1 @@
-export const walletTypes = ['keplr', 'terrastation', 'walletConnect'];
+export type WalletType = 'keplr' | 'metamask' | 'terrastation' | 'walletconnect';

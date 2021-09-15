@@ -558,6 +558,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         gasPriceLevel: GasPriceLevel.AVERAGE,
         hasSeenRedeem: false,
         slippagePerc: 0.1,
+        connectedWallets: ['keplr'],
         updateDT: Date.now(),
         isDemoAccount,
       };
