@@ -189,7 +189,7 @@
       </p>
 
       <p v-if="status === 'unknown'" class="mt-4">
-        <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
+        <a href="https://emeris.com/support" target="_blank" class="font-medium text-link hover:text-link-hover">
           {{ $t('components.txHandlingModal.contactSupport') }}
         </a>
       </p>
