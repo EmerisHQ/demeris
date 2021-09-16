@@ -40,7 +40,8 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { IBCForwardsData, Step, TransferData } from '@/types/actions';
+import useAccount from '@/composables/useAccount';
+import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -62,6 +63,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
 
@@ -133,7 +135,24 @@ export default defineComponent({
           description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
           break;
         case 'transfer':
-          description = t('components.transferToHub.transferDescription');
+          if (props.steps[0].transactions.length > 1) {
+            const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+            const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+
+            const fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
+            const toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+            const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
+            const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
+
+            description = t('components.transferToHub.transferDescriptionMultiple', {
+              denom: denoms.value[0],
+              fromChain,
+              toChain,
+              nativeChain,
+            });
+          } else {
+            description = t('components.transferToHub.transferDescription');
+          }
           break;
       }
 
