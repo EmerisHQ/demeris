@@ -10,7 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Fixes
 
-- Add an asset send button on the swap complete modal
+- Added an asset send button on the swap complete modal
+- Fixed swap widget empty state switch button not working
+- Fixed keplr account switching makes a swap button not working
+- Added a correct tooltip for no pool status
+- Improved empty wallet balance error handling
 
 ### Perfomance
 
