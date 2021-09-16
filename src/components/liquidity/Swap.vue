@@ -487,7 +487,11 @@ export default defineComponent({
 
       return assets.filter((asset) => {
         const isInPayAssets = assetsToPay.value.find((payAsset) => payAsset.denom === asset.denom);
-        if (isInPayAssets === undefined && asset.base_denom !== data.receiveCoinData?.base_denom) {
+        if (
+          isInPayAssets === undefined &&
+          parseInt(parseCoins(asset.amount)[0].amount) > 0 &&
+          asset.base_denom !== data.receiveCoinData?.base_denom
+        ) {
           return true;
         } else {
           return false;
