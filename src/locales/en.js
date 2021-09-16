@@ -266,6 +266,10 @@ export const messages = {
           feesLbl: 'Fees',
           txToSignHint:
             'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
+          txToSignMemoHint:
+            'The asset you are trying to send is not on its native chain and you specified a memo. As a result, three transactions are required to perform this transfer',
+          txToSignMemoNoRedeemHint:
+            'You are sending an asset to another chain and specified a memo. As a result, two transactions are required to perform this transfer',
           receiveLbl: 'Receive',
           recipientGotLbl: 'Recipient got',
           includedFee: 'included',
@@ -331,6 +335,9 @@ export const messages = {
       },
       moonpay: {
         cta: 'Add crypto to your account',
+      },
+      transaction: {
+        viewOnExplorer: 'View on explorer',
       },
       assets: {
         title: 'Assets',

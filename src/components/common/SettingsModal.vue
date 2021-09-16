@@ -33,7 +33,7 @@
 
         <div class="py-2">
           <a
-            href="https://t.me/EmerisHQ"
+            href="https://emeris.com/support"
             target="_blank"
             class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
           >

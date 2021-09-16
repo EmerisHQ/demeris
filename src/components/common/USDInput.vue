@@ -1,9 +1,9 @@
 <template>
-  <AmountInput v-model="usdValue" />
+  <AmountInput :model-value="usdValue" @update:model-value="onInput" />
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, ref, toRefs, watch } from 'vue';
+import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
 
 import AmountInput from '@/components/ui/AmountInput.vue';
 import { useStore } from '@/store';
@@ -22,35 +22,44 @@ export default defineComponent({
     const store = useStore();
     // Should not observe price changes
     const price = ref(store.getters['demeris/getPrice']({ denom: props.denom }));
-
     const usdValue = ref('');
+    const previousInput = ref('');
 
-    const trueValue = computed(() => {
-      return new BigNumber(usdValue.value).dividedBy(price.value).decimalPlaces(6).toString();
-    });
+    const onInput = (value: string) => {
+      setUsdValue(value);
 
-    watch(usdValue, () => emit('update:price', usdValue.value));
+      const bnValue = new BigNumber(value);
+      const amount = bnValue.isFinite() ? bnValue.dividedBy(price.value).decimalPlaces(6).toString() : '';
+      previousInput.value = amount;
+      emit('update:modelValue', amount);
+    };
+
+    const setUsdValue = (value: string) => {
+      usdValue.value = value;
+      emit('update:price', value);
+    };
 
     watch(
       props,
       () => {
+        // Do not format values manually entered by the user
+        if (props.modelValue === previousInput.value) {
+          return;
+        }
+
         const value = new BigNumber(props.modelValue);
 
         nextTick(() => {
           if (value.isFinite()) {
-            usdValue.value = new BigNumber(props.modelValue).multipliedBy(price.value).toFixed(2);
+            setUsdValue(value.multipliedBy(price.value).toFixed(2));
             return;
           }
 
-          usdValue.value = '';
+          setUsdValue('');
         });
       },
       { immediate: true },
     );
-
-    watch(trueValue, () => {
-      emit('update:modelValue', new BigNumber(trueValue.value).isFinite() ? trueValue.value : '');
-    });
 
     const { denom } = toRefs(props);
     watch(denom, (newDenom, oldDenom) => {
@@ -59,7 +68,7 @@ export default defineComponent({
       }
     });
 
-    return { usdValue };
+    return { usdValue, onInput };
   },
 });
 </script>
