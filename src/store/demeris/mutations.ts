@@ -59,7 +59,10 @@ export type Mutations<S = State> = {
 export const mutations: MutationTree<State> & Mutations = {
   // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
-    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+    state.balances[(payload.params as API.AddrReq).address] = (payload.value as API.Balances).map((balance) => ({
+      ...balance,
+      wallet_type: (payload.params as API.AddrReq).walletType,
+    }));
   },
   [MutationTypes.SET_POOL_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;

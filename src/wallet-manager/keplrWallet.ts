@@ -19,6 +19,7 @@ export class KeplrWallet extends Wallet {
   async connect(chain_list: string[]): Promise<boolean> {
     this._chainList = chain_list;
     if (window.keplr) {
+      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain_id of this._chainList) {
         try {
           await window.keplr.enable(chain_id);

@@ -12,6 +12,7 @@ import { validPools } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
+import { getWalletInstance } from '@/wallet-manager';
 
 import {
   DemerisActionParams,
@@ -406,7 +407,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = getters['getKeyhashes'];
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+        await dispatch(DemerisActionTypes.GET_BALANCES, {
+          subscribe: true,
+          params: { address: keyHash.keyHash, walletType: keyHash.walletType },
+        });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -550,6 +554,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const newData = { ...JSON.parse(data), updateDT: Date.now() };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
+      return newData;
     } else {
       const newData = {
         customSlippage: false,
@@ -564,6 +569,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
+      return newData;
     }
     commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
   },
@@ -633,9 +639,24 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.SIGN_OUT);
 
       const chains = getters['getChains'];
-      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
+      const chain_ids = (Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id);
       for (const chain in chains) {
-        await addChain(chain);
+        if ((chains[chain] as ChainData).supported_wallets.includes('keplr')) {
+          await addChain(chain);
+        }
+      }
+      const session = await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, {
+        walletName: 'emeris',
+        isDemoAccount: false,
+      });
+      for (const walletType of (session as UserData).connectedWallets) {
+        const wallet = getWalletInstance(walletType);
+        const result = await wallet.connect(chain_ids);
+        if (result) {
+          commit('SET_WALLET_MANAGER', { walletType, wallet });
+        } else {
+          console.error(new SpVuexError('Could not instantiate: ' + walletType));
+        }
       }
       await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
       const paths = new Set();

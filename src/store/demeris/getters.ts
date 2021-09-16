@@ -5,6 +5,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
+import { getWalletInstance } from '@/wallet-manager';
 
 import { ChainData, State } from './state';
 
@@ -228,8 +229,16 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
   },
   getKeyhashes: (state) => {
-    if (state.keplr && state.keplr.keyHashes) {
-      return state.keplr.keyHashes;
+    const keyHashes = [];
+    if (state._Session && state._Session.connectedWallets) {
+      for (const walletType of state._Session.connectedWallets) {
+        if (state._WalletManagers[walletType]) {
+          for (const walletKeyHash of state._WalletManagers[walletType].getKeyHashes()) {
+            keyHashes.push({ keyHash: walletKeyHash, walletType: walletType });
+          }
+        }
+      }
+      return keyHashes;
     } else {
       return null;
     }
