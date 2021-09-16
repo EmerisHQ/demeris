@@ -523,10 +523,11 @@ export default {
     };
 
     const goToReview = () => {
-      event('review_withdraw_liquidity_tx', {
+      event('review_tx', {
         event_label: 'Reviewing withdraw liquidity tx',
         event_category: 'transactions',
       });
+
       goToStep('review');
     };
 
