@@ -458,7 +458,6 @@ export default defineComponent({
                     }),
                   );
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
-                  amount: Math.trunc(Number(sendAmount.value) * 100) / 100,
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
                     store.getters['demeris/getDexChain'],
