@@ -1,2 +1,2 @@
-[context.staging]
+[context.staging2]
   command = "npm run build:staging"
