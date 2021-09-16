@@ -253,7 +253,7 @@
       <Button
         v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
         :name="secondaryButton"
-        variant="secondary"
+        variant="link"
         :click-function="
           () => {
             router.push(`/send/move?base_denom=${sendBaseDenom}&amount=${sendAmount}`);
