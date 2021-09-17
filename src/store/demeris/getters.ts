@@ -226,6 +226,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
       ) ?? null
     );
   },
+  getWallet: (state) => (walletType) => {
+    return state._WalletManagers[walletType] ?? null;
+  },
   getKeplrAddress: (state) => {
     if (state.keplr) {
       return keyHashfromAddress(state.keplr.bech32Address);

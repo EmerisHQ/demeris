@@ -590,44 +590,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
     try {
-      let chain = getters['getChain']({
-        chain_name,
-      }) as ChainData;
-      if (!chain || !chain.node_info) {
-        chain = await dispatch(DemerisActionTypes.GET_CHAIN, {
-          subscribe: true,
-          params: {
-            chain_name,
-          },
-        });
-      }
-      // await addChain(chain_name);
+      const wallet = getters['getWallet']('keplr');
+      if (!wallet) throw new SpVuexError('Wallet unavailable: Keplr');
 
-      await window.keplr.enable(chain.node_info.chain_id);
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-      const [account] = await offlineSigner.getAccounts();
-
-      const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
-
-      const numbers = await dispatch(DemerisActionTypes.GET_NUMBERS_CHAIN, {
-        subscribe: false,
-        params: {
-          address: keyHashfromAddress(account.address),
-          chain_name: chain_name,
-        },
-      });
-
-      const signerData = numbers;
-      const cosmjsSignerData = {
-        chainId: chain.node_info.chain_id,
-        accountNumber: parseInt(signerData.account_number),
-        sequence: parseInt(signerData.sequence_number),
-      };
-      const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
-
-      const tx_data = Buffer.from(tx).toString('base64');
-      //console.log(Buffer.from(tx).toString('hex'));
-      return { tx: tx_data, chain_name, address: account.address };
+      return await wallet.requestSignature({ msgs, chain_name, fee, registry, memo });
     } catch (e) {
       console.error(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
