@@ -2,6 +2,7 @@ import { MutationTree } from 'vuex';
 
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
+import { ImplementedWallet } from '@/wallet-manager/implementations';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
@@ -28,6 +29,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
   [MutationTypes.SET_VERIFIED_DENOMS](state: S, payload: { value: API.VerifiedDenoms }): void;
   [MutationTypes.SET_VALID_POOLS](state: S, payload: Pool[]): void;
+  [MutationTypes.SET_WALLET_MANAGER](state: S, payload: ImplementedWallet): void;
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
@@ -93,6 +95,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_VALID_POOLS](state: State, pools: Pool[]) {
     state.validPools = pools;
+  },
+  [MutationTypes.SET_WALLET_MANAGER](state: State, wallet: ImplementedWallet) {
+    state._WalletManagers[wallet.getType()] = wallet;
   },
   [MutationTypes.SET_CHAINS](state: State, payload: DemerisMutations) {
     state.chains = {};

@@ -653,33 +653,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
         const wallet = getWalletInstance(walletType);
         const result = await wallet.connect(chain_ids);
         if (result) {
-          commit('SET_WALLET_MANAGER', { walletType, wallet });
+          commit('SET_WALLET_MANAGER', wallet);
         } else {
           console.error(new SpVuexError('Could not instantiate: ' + walletType));
         }
       }
-      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
-      const paths = new Set();
-      const toQuery = [];
-      for (const chain_name in chains) {
-        const chain = chains[chain_name];
-        if (paths.has(chain.derivation_path)) {
-          continue;
-        }
-        paths.add(chain.derivation_path);
-        toQuery.push(chain);
-      }
-      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
-      await window.keplr.enable(dexchain.node_info.chain_id);
-      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
-      commit(DemerisMutationTypes.SET_KEPLR, key);
-      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
-      for (const chain of toQuery) {
-        await window.keplr.enable(chain.node_info.chain_id);
-        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-      }
+      event('sign_in', { event_label: 'Sign in with Wallet', event_category: 'authentication' });
       dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
 
       dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
@@ -688,6 +667,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       });
       return true;
     } catch (e) {
+      console.log(e);
       console.error(e);
       return false;
     }
@@ -916,7 +896,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
-        commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
+        if (!response.data.chain.supported_wallets) {
+          commit(DemerisMutationTypes.SET_CHAIN, {
+            params,
+            value: { ...response.data.chain, supported_wallets: ['keplr'] },
+          });
+        } else {
+          commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
+        }
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
         }

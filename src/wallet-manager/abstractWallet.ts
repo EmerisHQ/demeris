@@ -6,6 +6,9 @@ export abstract class Wallet extends EventEmmiter {
   constructor(public type: WalletType) {
     super();
   }
+  getType(): string {
+    return this.type;
+  }
   abstract connect(chain_list: string[]): void;
   abstract disconnect(): void;
   abstract getKeyHashes(): void;

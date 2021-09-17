@@ -5,7 +5,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
-import { getWalletInstance } from '@/wallet-manager';
+import { WalletType } from '@/wallet-manager';
 
 import { ChainData, State } from './state';
 
@@ -13,7 +13,7 @@ export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances | null };
   getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances | null };
   getNumbers(state: State): { (params: API.APIRequests): API.Numbers | null };
-  getAllBalances(state: State): API.Balances | null;
+  getAllBalances(state: State, getters): API.Balances | null;
   getAllStakingBalances(state: State): API.StakingBalances | null;
   getAllNumbers(state: State): API.Numbers | null;
   getFeeAddresses(state: State): API.FeeAddresses | null;
@@ -48,7 +48,7 @@ export type Getters = {
   getAllValidPools(state: State): Pool[];
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
-  getKeyhashes(state: State): string[];
+  getKeyhashes(state: State): { keyHash: string; walletType: WalletType }[];
   getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
   getKeplrAccountName(state: State): string | null;
   isDemoAccount(state: State): boolean;
@@ -77,15 +77,15 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getStakingBalances: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
-  getAllBalances: (state) => {
-    if (!state.keplr) {
+  getAllBalances: (state, getters) => {
+    if (Object.keys(state._Session).length === 0) {
       return null;
     }
-
+    const keyHashes = getters.getKeyhashes.map((x) => x.keyHash);
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
-      .filter((balance) => state.keplr.keyHashes.indexOf(balance.address) > -1)
+      .filter((balance) => keyHashes.indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
@@ -202,7 +202,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.endpoint;
   },
   isSignedIn: (state) => {
-    return state.keplr ? true : false;
+    return Object.keys(state._Session).length !== 0;
   },
   getKeplrAccountName: (state) => {
     return state.keplr?.name ?? null;
@@ -238,7 +238,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
           }
         }
       }
-      return keyHashes;
+      return Array.from(new Set(keyHashes));
     } else {
       return null;
     }

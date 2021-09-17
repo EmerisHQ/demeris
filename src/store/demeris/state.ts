@@ -1,7 +1,6 @@
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { WalletType } from '@/wallet-manager';
-import { Wallet } from '@/wallet-manager/abstractWallet';
 import { ImplementedWallet } from '@/wallet-manager/implementations';
 
 import { KeplrKeyData, UserData } from './mutation-types';
