@@ -104,10 +104,16 @@ export default defineComponent({
       let result = '';
 
       if (currentAction.value === 'transfer') {
-        const data = props.steps[0].transactions[0].data as IBCForwardsData;
-        const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
-        const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
-        return t('components.transferToHub.transferSubtitle', { from: chainFrom, to: chainTo });
+        const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+        let fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
+        let toChain = store.getters['demeris/getDisplayChain']({ name: backwardData.to_chain });
+
+        if (props.steps[0].transactions.length > 1) {
+          const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+          toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+        }
+
+        return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
       }
 
       return result;
