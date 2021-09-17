@@ -7,6 +7,7 @@ import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 import { WalletType } from '@/wallet-manager';
 
+import { UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
 export type Getters = {
@@ -44,13 +45,14 @@ export type Getters = {
   isVerified(state: State): {
     (params: { denom: string; chain_name: string }): boolean;
   };
+  getSession(state: State): UserData | Record<string, never>;
   getEndpoint(state: State): string;
   getAllValidPools(state: State): Pool[];
   isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
-  getKeyhashes(state: State): { keyHash: string; walletType: WalletType }[];
+  getKeyhashes(state: State): Record<string, Set<WalletType>> | Record<string, never>;
   getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
-  getKeplrAccountName(state: State): string | null;
+  getWalletName(state: State): string | null;
   isDemoAccount(state: State): boolean;
   hasSeenReedem(state: State): boolean;
   viewUnverified(state: State): boolean;
@@ -81,7 +83,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     if (Object.keys(state._Session).length === 0) {
       return null;
     }
-    const keyHashes = getters.getKeyhashes.map((x) => x.keyHash);
+    const keyHashes = Object.keys(getters.getKeyhashes);
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
@@ -130,6 +132,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   allowCustomSlippage: (state) => {
     return state._Session.customSlippage;
+  },
+  getSession: (state) => {
+    return state._Session;
   },
   viewUnverified: (state) => {
     return state._Session.viewUnverified;
@@ -204,8 +209,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
   isSignedIn: (state) => {
     return Object.keys(state._Session).length !== 0;
   },
-  getKeplrAccountName: (state) => {
-    return state.keplr?.name ?? null;
+  getWalletName: (state) => {
+    return state._Session.walletName;
   },
   getDexChain: (state) => {
     return state.hub_chain;
@@ -229,16 +234,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
   },
   getKeyhashes: (state) => {
-    const keyHashes = [];
+    const keyHashes = {};
     if (state._Session && state._Session.connectedWallets) {
       for (const walletType of state._Session.connectedWallets) {
         if (state._WalletManagers[walletType]) {
           for (const walletKeyHash of state._WalletManagers[walletType].getKeyHashes()) {
-            keyHashes.push({ keyHash: walletKeyHash, walletType: walletType });
+            keyHashes[walletKeyHash]
+              ? keyHashes[walletKeyHash].add(walletType)
+              : (keyHashes[walletKeyHash] = new Set([walletType]));
           }
         }
       }
-      return Array.from(new Set(keyHashes));
+      return keyHashes;
     } else {
       return null;
     }

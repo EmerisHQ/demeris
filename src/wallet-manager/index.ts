@@ -1,15 +1,19 @@
+import { DemoWallet } from './demoWallet';
 import { ImplementedWallet } from './implementations';
 import { KeplrWallet } from './keplrWallet';
 
-export type WalletType = 'keplr' | 'metamask' | 'terrastation' | 'walletconnect';
+export type WalletType = 'keplr' | 'metamask' | 'terrastation' | 'walletconnect' | 'demo';
 
 export function getWalletInstance(type: WalletType): ImplementedWallet {
   switch (type) {
     case 'keplr':
       return new KeplrWallet();
-      break;
+
+    case 'demo':
+      return new DemoWallet();
+
     default:
-      return new KeplrWallet();
+      return new DemoWallet();
       break;
   }
 }

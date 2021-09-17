@@ -5,7 +5,6 @@ import * as Base from './base';
 // Params object for actions requiring a BECH32 decoded address as param
 export type AddrReq = {
   address: string;
-  walletType?: WalletType;
 };
 export type ChainAddrReq = {
   chain_name: string;
@@ -86,7 +85,7 @@ export type Balance = {
   amount: string;
   on_chain: string;
   ibc: IbcInfo | Record<string, never>;
-  wallet_type?: WalletType;
+  wallet_types?: WalletType[];
 };
 export type Balances = Array<Balance>;
 export type BalancesResponse = {

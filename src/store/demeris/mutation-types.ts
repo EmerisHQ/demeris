@@ -53,6 +53,7 @@ export type UserData = {
   connectedWallets?: WalletType[];
   theme?: string;
   updateDT: number;
+  walletName: string;
 };
 export type UserSession = {
   walletName: string;
@@ -85,6 +86,7 @@ export type DemerisMutationArgs =
 export type DemerisMutations = {
   params?: API.APIRequests;
   value: DemerisMutationArgs;
+  walletTypes?: WalletType[];
 };
 export type KeplrKeyData = {
   name: string;

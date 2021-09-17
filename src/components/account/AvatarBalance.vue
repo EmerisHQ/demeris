@@ -51,7 +51,7 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const keplrAccountName = computed(() => {
-      return store.getters['demeris/getKeplrAccountName'];
+      return store.getters['demeris/getWalletName'];
     });
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];

@@ -68,7 +68,7 @@ export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
-    { subscribe, params }: DemerisActionsByAddressParams,
+    { subscribe, params, walletTypes }: DemerisActionsByAddressParams,
   ): Promise<API.Balances>;
   [DemerisActionTypes.GET_POOL_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
@@ -327,7 +327,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params, walletTypes }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -347,15 +347,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
           getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
         );
 
-        commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
+        commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances, walletTypes });
         if (subscribe) {
-          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params, walletTypes } });
         }
       } catch (e) {
         commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
         rejecter(e);
         if (subscribe) {
-          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params, walletTypes } });
         }
         throw new SpVuexError('Demeris:GetBalances', 'Could not perform API query.');
       }
@@ -406,10 +406,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
-      for (const keyHash of keyHashes) {
+      for (const keyHash in keyHashes) {
         await dispatch(DemerisActionTypes.GET_BALANCES, {
           subscribe: true,
-          params: { address: keyHash.keyHash, walletType: keyHash.walletType },
+          params: { address: keyHash },
+          walletTypes: Array.from(keyHashes[keyHash]),
         });
       }
     } catch (e) {
@@ -420,7 +421,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
-      for (const keyHash of keyHashes) {
+      for (const keyHash in keyHashes) {
         await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
@@ -516,7 +517,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }) {
     try {
       const keyHashes = getters['getKeyhashes'];
-      for (const keyHash of keyHashes) {
+      for (const keyHash in keyHashes) {
         await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
@@ -551,10 +552,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
     if (data) {
-      const newData = { ...JSON.parse(data), updateDT: Date.now() };
+      const newData = { ...JSON.parse(data), updateDT: Date.now(), walletName };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
-      return newData;
     } else {
       const newData = {
         customSlippage: false,
@@ -563,26 +563,26 @@ export const actions: ActionTree<State, RootState> & Actions = {
         gasPriceLevel: GasPriceLevel.AVERAGE,
         hasSeenRedeem: false,
         slippagePerc: 0.1,
-        connectedWallets: ['keplr'],
+        connectedWallets: isDemoAccount ? ['demo'] : ['keplr'],
         updateDT: Date.now(),
         isDemoAccount,
+        walletName,
       };
       window.localStorage.setItem(walletName, JSON.stringify(newData));
       commit('SET_SESSION_DATA', newData);
-      return newData;
     }
     commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
   },
   async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
     if (data) {
       window.localStorage.setItem(
-        getters['getKeplrAccountName'],
+        getters['getWalletName'],
         JSON.stringify({ ...state._Session, ...data, updateDT: Date.now() }),
       );
       commit('SET_SESSION_DATA', { ...data, updateDT: Date.now() });
     } else {
       window.localStorage.setItem(
-        getters['getKeplrAccountName'],
+        getters['getWalletName'],
         JSON.stringify({ ...state._Session, updateDT: Date.now() }),
       );
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
@@ -645,10 +645,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
           await addChain(chain);
         }
       }
-      const session = await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, {
-        walletName: 'emeris',
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, {
+        walletName: 'Emeris',
         isDemoAccount: false,
       });
+      const session = getters['getSession'];
       for (const walletType of (session as UserData).connectedWallets) {
         const wallet = getWalletInstance(walletType);
         const result = await wallet.connect(chain_ids);
@@ -673,15 +674,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, getters, dispatch }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
-      const key = demoAccount;
-      commit(DemerisMutationTypes.SET_KEPLR, { ...key });
-      for (const hash of key.keyHashes) {
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
+      const chains = getters['getChains'];
+      const chain_ids = (Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id);
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: 'Demo Account', isDemoAccount: true });
+      const session = getters['getSession'];
+      for (const walletType of (session as UserData).connectedWallets) {
+        const wallet = getWalletInstance(walletType);
+        const result = await wallet.connect(chain_ids);
+        if (result) {
+          commit('SET_WALLET_MANAGER', wallet);
+        } else {
+          console.error(new SpVuexError('Could not instantiate: ' + walletType));
+        }
       }
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
       dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
@@ -899,7 +907,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         if (!response.data.chain.supported_wallets) {
           commit(DemerisMutationTypes.SET_CHAIN, {
             params,
-            value: { ...response.data.chain, supported_wallets: ['keplr'] },
+            value: { ...response.data.chain, supported_wallets: ['demo', 'keplr'] },
           });
         } else {
           commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });

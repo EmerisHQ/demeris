@@ -1,4 +1,5 @@
 import * as API from '@/types/api';
+import { WalletType } from '@/wallet-manager';
 export enum DemerisActionTypes {
   // Cross-chain endpoint actions
   GET_BALANCES = 'GET_BALANCES',
@@ -94,6 +95,7 @@ export type DemerisActionParams = {
 export type DemerisActionsByAddressParams = {
   subscribe: boolean;
   params?: API.AddrReq;
+  walletTypes?: WalletType[];
 };
 export type DemerisActionsByChainAddressParams = {
   subscribe: boolean;
