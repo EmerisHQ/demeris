@@ -110,14 +110,40 @@
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️</a>
         </template>
         <template v-else-if="tx.name === 'withdrawliquidity'">
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️
+          </a>
         </template>
         <template
           v-else-if="isFinal && (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')"
         >
           <PreviewTransfer :response="txResult" :fees="txResult.fees" />
+          <a
+            v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+            :href="getExplorerLink(txResult.hashes[0])"
+            rel="noopener noreferrer"
+            target="_blank"
+            class="inline-block mt-5 p-2"
+          >
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️
+          </a>
         </template>
       </div>
       <template v-if="status !== 'complete' || !isFinal">
@@ -128,10 +154,30 @@
         </div>
         <div class="status__detail-path mt-0.5 mb-6 text-muted" :class="{ 'mb-12': status === 'complete' }">
           <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-            <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            <div class="my-3">
+              <ChainName :name="tx.data.from_chain" /> &rarr; <ChainName :name="tx.data.to_chain" /> chain
+            </div>
           </template>
           <template v-if="tx.name == 'transfer'"> <ChainName :name="tx.data.chain_name" /> chain </template>
         </div>
+      </template>
+
+      <template
+        v-if="
+          !isFinal &&
+            status === 'complete' &&
+            (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')
+        "
+      >
+        <a
+          v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
+          :href="getExplorerLink(txResult.hashes[0])"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="inline-block p-2"
+        >
+          {{ $t('context.transaction.viewOnExplorer') }} ↗️
+        </a>
       </template>
     </div>
 
@@ -143,7 +189,7 @@
       </p>
 
       <p v-if="status === 'unknown'" class="mt-4">
-        <a href="https://t.me/EmerisHQ" target="_blank" class="font-medium text-link hover:text-link-hover">
+        <a href="https://emeris.com/support" target="_blank" class="font-medium text-link hover:text-link-hover">
           {{ $t('components.txHandlingModal.contactSupport') }}
         </a>
       </p>
@@ -204,6 +250,16 @@
       v-if="secondaryButton || primaryButton"
       class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
     >
+      <Button
+        v-if="secondaryButton && tx.name === 'swap' && status === 'complete'"
+        :name="secondaryButton"
+        variant="link"
+        :click-function="
+          () => {
+            router.push(`/send/move?base_denom=${sendBaseDenom}&amount=${sendAmount}`);
+          }
+        "
+      />
       <Button
         v-if="primaryButton"
         :name="primaryButton"
@@ -355,6 +411,8 @@ export default defineComponent({
     const secondaryButton = ref(t('generic_cta.cancel'));
     const primaryButton = ref('');
     const baseDenoms = reactive({});
+    const sendBaseDenom = ref('');
+    const sendAmount = ref(0);
 
     const isIBC = computed(() => {
       return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
@@ -362,6 +420,25 @@ export default defineComponent({
 
     const getDenom = (denom: string) => {
       return baseDenoms[denom] || denom;
+    };
+
+    const getExplorerLink = (tx: { txhash: string; chain_name: string }) => {
+      const chainMintScanMap = {
+        'cosmos-hub': 'cosmos',
+        akash: 'akash',
+        'crypto-org': 'crypto-org',
+        iris: 'iris',
+        osmosis: 'osmosis',
+        persistence: 'persistence',
+        sentinel: 'sentinel',
+      };
+      const chain = chainMintScanMap[tx.chain_name];
+
+      if (!chain) {
+        return;
+      }
+
+      return `https://www.mintscan.io/${chain}/txs/${tx.txhash}`;
     };
 
     // Watch for status changes
@@ -436,17 +513,21 @@ export default defineComponent({
             if (props.isFinal && !props.hasMore) {
               primaryButton.value = t('generic_cta.done');
               if (props.tx.name === 'swap' && props.txResult) {
-                secondaryButton.value = `Send ${
-                  Math.trunc(
-                    (Number(props.txResult.demandCoinSwappedAmount) * 100) /
-                      Math.pow(
-                        10,
-                        store.getters['demeris/getDenomPrecision']({
-                          name: await getBaseDenom(props.txResult.demandCoinDenom),
-                        }),
-                      ),
-                  ) / 100
-                } ${await getDisplayName(props.txResult.demandCoinDenom, store.getters['demeris/getDexChain'])} \u2192`;
+                sendBaseDenom.value = await getBaseDenom(props.txResult.demandCoinDenom);
+                sendAmount.value =
+                  props.txResult.demandCoinSwappedAmount /
+                  Math.pow(
+                    10,
+                    store.getters['demeris/getDenomPrecision']({
+                      name: sendBaseDenom.value,
+                    }),
+                  );
+                secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
+                  displayName: await getDisplayName(
+                    props.txResult.demandCoinDenom,
+                    store.getters['demeris/getDexChain'],
+                  ),
+                });
               } else {
                 secondaryButton.value = t('components.txHandlingModal.reset');
               }
@@ -569,6 +650,7 @@ export default defineComponent({
       }
     }
     return {
+      getExplorerLink,
       emitNext,
       emitRetry,
       emitClose,
@@ -582,6 +664,8 @@ export default defineComponent({
       secondaryButton,
       primaryButton,
       router,
+      sendBaseDenom,
+      sendAmount,
       unknownHandler,
     };
   },

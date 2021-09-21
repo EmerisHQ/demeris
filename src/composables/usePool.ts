@@ -5,7 +5,9 @@ import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import usePools from './usePools';
 
-export default function usePool(id?: string | ComputedRef<string>) {
+const usePoolInstances = {};
+
+function usePool(id: string) {
   const store = useAllStores();
   let initialized;
   const initPromise = new Promise((resolve) => {
@@ -117,4 +119,11 @@ export default function usePool(id?: string | ComputedRef<string>) {
     totalLiquidityPrice,
     initPromise,
   };
+}
+export default function usePoolFactory(id: string | ComputedRef<string>) {
+  const realId = unref(id);
+  if (!usePoolInstances[realId]) {
+    usePoolInstances[realId] = usePool(realId);
+  }
+  return usePoolInstances[realId];
 }

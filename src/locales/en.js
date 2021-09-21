@@ -123,7 +123,7 @@ export const messages = {
       denomSelect: {
         select: 'Select asset',
         otherAssets: 'Other assets',
-        unavailableSwapPair: 'Unvailable to swap with {pair}',
+        unavailableSwapPair: 'Unavailable to swap with {pair}',
       },
       feeLevelSelector: {
         feesIncl: 'Fees (included)',
@@ -215,6 +215,7 @@ export const messages = {
         reset: 'Send another',
         next: 'Next transaction',
 
+        sendAfterSwap: 'Send {displayName} \u2192',
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
@@ -235,6 +236,16 @@ export const messages = {
         payHeader: 'Pay {amount}',
         receiveHeader: 'Receive {amount}',
         priceAlert: 'Prices have changed',
+        noPool: 'No pool for this pair',
+        swapLimit: 'Swap limit reached',
+        insufficentFunds: 'Insufficent funds',
+        unAvailable: 'Swap unavailable',
+        updatePrice: 'Update prices',
+        review: 'Review',
+        swap: 'Swap',
+        tooltipSwapLimit: `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`,
+        tooltipNoPool: 'Currently there is no pool for this pair, please select other pair',
+        tooltipChainDown: 'Cosmos Hub appears to be down, swap is temporarily unavailable',
       },
       transferToHub: {
         swap: 'Assets are swapped on the Cosmos Hub',
@@ -272,6 +283,10 @@ export const messages = {
           feesLbl: 'Fees',
           txToSignHint:
             'The asset you are trying to send is not on its native chain. As a result, two transactions are required to perform this transfer',
+          txToSignMemoHint:
+            'The asset you are trying to send is not on its native chain and you specified a memo. As a result, three transactions are required to perform this transfer',
+          txToSignMemoNoRedeemHint:
+            'You are sending an asset to another chain and specified a memo. As a result, two transactions are required to perform this transfer',
           receiveLbl: 'Receive',
           recipientGotLbl: 'Recipient got',
           includedFee: 'included',
@@ -337,6 +352,9 @@ export const messages = {
       },
       moonpay: {
         cta: 'Add crypto to your account',
+      },
+      transaction: {
+        viewOnExplorer: 'View on explorer',
       },
       assets: {
         title: 'Assets',

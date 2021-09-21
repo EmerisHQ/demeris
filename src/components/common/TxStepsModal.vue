@@ -19,7 +19,7 @@
       <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
         <TransferInterstitialConfirmation
           :action="actionName"
-          :step="data[0]"
+          :steps="data"
           @continue="
             isTransferConfirmationOpen = false;
             interstitialProceed = true;
@@ -274,19 +274,29 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { FeeTotals, GasPriceLevel, IBCBackwardsData, IBCForwardsData, Step } from '@/types/actions';
-import { Balances, TransactionDetailResponse } from '@/types/api';
+import {
+  AddLiquidityData,
+  FeeTotals,
+  GasPriceLevel,
+  IBCBackwardsData,
+  IBCForwardsData,
+  Step,
+  SwapData,
+  TransferData,
+  WithdrawLiquidityData,
+} from '@/types/actions';
+import { Balances } from '@/types/api';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
-  getStepTransactionDetailFromResponse,
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -514,6 +524,7 @@ export default defineComponent({
     const allTransactionResponses = ref({
       responses: [],
       fees: {},
+      hashes: [],
     });
     const nextTx = () => {
       txToResolve.value['resolver']();
@@ -640,9 +651,9 @@ export default defineComponent({
               } else {
                 hasMore.value = false;
               }
-              isTxHandlingModalOpen.value = true;
               await nextTick();
               txstatus.value = 'keplr-sign';
+              isTxHandlingModalOpen.value = true;
               let txToResolveResolver;
               const txToResolvePromise = {
                 promise: new Promise((resolve) => {
@@ -667,7 +678,7 @@ export default defineComponent({
                 gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
-              event('confirm_tx_' + stepTx.name, {
+              event('confirm_tx', {
                 event_label: 'Confirmed ' + stepTx.name + ' tx',
                 event_category: 'transactions',
               });
@@ -689,7 +700,7 @@ export default defineComponent({
                 continue;
               }
               if (tx) {
-                event('signed_tx_' + stepTx.name, {
+                event('signed_tx', {
                   event_label: 'Signed ' + stepTx.name + ' tx',
                   event_category: 'transactions',
                 });
@@ -718,8 +729,11 @@ export default defineComponent({
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
-                  let delayStatus = null;
-                  let failStatus = null;
+                  let delayTimeout = setTimeout(() => {
+                    txstatus.value = 'delay';
+                  }, 60000);
+
+                  let stuck = false;
 
                   while (
                     txResultData.status != 'complete' &&
@@ -734,22 +748,19 @@ export default defineComponent({
                       ticket: result.ticket,
                     });
 
-                    if (stepTx.name.startsWith('ibc')) {
-                      if (txResultData.status === 'transit') {
-                        delayStatus = setTimeout(() => {
-                          txstatus.value = 'delay';
-                        }, 60000);
-                        failStatus = setTimeout(() => {
-                          txstatus.value = 'unknown';
-                        }, 310000);
-                      } else if (txResultData.status === 'IBC_receive_failed') {
-                        txstatus.value = 'IBC_receive_failed';
-                        clearTimeout(delayStatus);
-                      } else {
-                        clearTimeout(delayStatus);
-                        clearTimeout(failStatus);
-                      }
+                    if (txResultData.status.startsWith('stuck')) {
+                      txstatus.value = 'unknown';
+                      stuck = true;
+                      break;
+                    } else if (txResultData.status === 'IBC_receive_failed') {
+                      txstatus.value = 'IBC_receive_failed';
                     }
+                  }
+
+                  clearTimeout(delayTimeout);
+
+                  if (stuck) {
+                    return;
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -779,32 +790,27 @@ export default defineComponent({
                     chain_name = res.chain_name;
                   }
 
+                  allTransactionResponses.value.hashes.push({ txhash, chain_name });
+
                   // sleep
                   await new Promise((r) => setTimeout(r, 750));
-
-                  const txsResponse: TransactionDetailResponse = await store.dispatch(
-                    GlobalDemerisActionTypes.GET_TXS,
-                    { txhash, chain_name },
-                  );
-
-                  allTransactionResponses.value.responses.push(txsResponse);
-                  allTransactionResponses.value.fees[chain_name] = txsResponse?.tx.auth_info.fee.amount.reduce(
-                    (acc, item) => {
-                      acc[item.denom] = item.amount;
-                      return acc;
-                    },
-                    {},
-                  );
 
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
                       //Get end block events
                       let endBlockEvent = null;
-                      while (!endBlockEvent) {
-                        endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
-                          height: txResultData.height,
-                          stepType: currentData.value.data.name,
-                        });
+                      let retries = 0;
+                      while (retries < 10) {
+                        try {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                            height: txResultData.height,
+                            stepType: currentData.value.data.name,
+                          });
+                          break;
+                        } catch {
+                          retries++;
+                          await new Promise((r) => setTimeout(r, 2000));
+                        }
                       }
 
                       if (endBlockEvent) {
@@ -828,27 +834,89 @@ export default defineComponent({
 
                         txResult.value = resultData;
                       }
-                    } else if (txsResponse) {
-                      txResult.value = {
-                        name: currentData.value.data.name,
-                        transactions: allTransactionResponses.value.responses.map((item) => ({
-                          data: getStepTransactionDetailFromResponse(item),
-                          //@ts-ignore
-                          name: currentData.value.data.transactions[i].name,
-                        })),
-                      };
+                    } else {
+                      txResult.value = { ...currentData.value.data };
                     }
 
-                    txResult.value.fees = allTransactionResponses.value.fees;
+                    txResult.value = {
+                      ...txResult.value,
+                      hashes: allTransactionResponses.value.hashes,
+                      fees: { ...fees.value[currentStep.value] },
+                    };
                   }
 
                   // TODO: deal with status here
                   emit('complete');
                   txstatus.value = 'complete';
-                  event('completed_tx_' + stepTx.name, {
+                  event('completed_tx', {
                     event_label: 'Completed ' + stepTx.name + ' tx',
                     event_category: 'transactions',
                   });
+                  let value;
+                  switch (stepTx.name) {
+                    case 'ibc_forward':
+                      value = getPrice((stepTx.data as IBCForwardsData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'IBC transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'ibc_backward':
+                      value = getPrice((stepTx.data as IBCBackwardsData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'IBC transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'swap':
+                      value = getPrice((stepTx.data as SwapData).from);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Swap USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'addliquidity':
+                      value = getPrice((stepTx.data as AddLiquidityData).coinA);
+
+                      let valueB = getPrice((stepTx.data as AddLiquidityData).coinB);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Add Liquidity USD volume',
+                          event_category: 'volume',
+                          value: value.value + valueB.value,
+                        });
+                      });
+                      break;
+                    case 'withdrawliquidity':
+                      value = getPrice((stepTx.data as WithdrawLiquidityData).poolCoin);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Withdraw Liquidity USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                    case 'transfer':
+                      value = getPrice((stepTx.data as TransferData).amount);
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Transfer USD volume',
+                          event_category: 'volume',
+                          value: value.value,
+                        });
+                      });
+                      break;
+                  }
                   await txToResolve.value['promise'];
                 } catch (e) {
                   console.error(e);
@@ -856,7 +924,7 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
-                  event('failed_tx_' + stepTx.name, {
+                  event('failed_tx', {
                     event_label: 'Failed ' + stepTx.name + ' tx',
                     event_category: 'transactions',
                   });

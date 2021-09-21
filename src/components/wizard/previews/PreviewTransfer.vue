@@ -37,7 +37,13 @@
         })
       "
       direction="col"
-      :hint="$t('components.previews.transfer.txToSignHint')"
+      :hint="
+        currentStep.transactions.length > 2
+          ? $t('components.previews.transfer.txToSignMemoHint')
+          : currentStep.memo && currentStep.memo != ''
+            ? $t('components.previews.transfer.txToSignMemoNoRedeemHint')
+            : $t('components.previews.transfer.txToSignHint')
+      "
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
