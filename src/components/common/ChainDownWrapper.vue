@@ -1,5 +1,8 @@
 <template>
-  <div v-if="currentDownChain" class="bg-negative text-text -text-1 flex items-center justify-center space-x-2 h-10">
+  <div
+    v-if="isHubDown"
+    class="bg-negative text-text -text-1 flex items-center justify-center space-x-2 h-10 fixed w-full top-0 z-50"
+  >
     <span>
       <Icon name="BanIcon" :icon-size="1.0" />
     </span>
@@ -7,12 +10,15 @@
     <span class="font-bold">
       <i18n-t keypath="components.chainDown.appearsDown">
         <template #chain>
-          <ChainName :name="currentDownChain" />
+          <ChainName :name="dexChain" />
         </template>
       </i18n-t>
     </span>
 
     <span>{{ $t('components.chainDown.assetsUnavailable') }}</span>
+  </div>
+  <div :class="{ 'mt-10': isHubDown }">
+    <slot />
   </div>
 </template>
 
@@ -22,7 +28,6 @@ import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
 
 export default defineComponent({
   components: {
@@ -32,22 +37,14 @@ export default defineComponent({
 
   setup() {
     const store = useStore();
-    const { balances } = useAccount();
 
-    const currentDownChain = computed(() => {
-      const uniqueUsedChains = [...new Set(balances.value.map((item) => item.on_chain))];
+    const dexChain = store.getters['demeris/getDexChain'];
 
-      for (const chain of uniqueUsedChains) {
-        const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
-        if (!status) {
-          return chain;
-        }
-      }
-
-      return undefined;
+    const isHubDown = computed(() => {
+      return store.getters['demeris/getChainStatus']({ chain_name: dexChain });
     });
 
-    return { currentDownChain };
+    return { dexChain, isHubDown };
   },
 });
 </script>
