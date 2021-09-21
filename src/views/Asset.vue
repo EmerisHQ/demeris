@@ -33,8 +33,9 @@
             <div class="inline-flex items-center text-muted">
               <AmountDisplay :amount="{ amount: totalAmount, denom }" />
               <ChainDownWarning
-                v-if="Object.keys(unavaibaleChains).length"
-                v-bind="Object.values(unavaibaleChains)[0]"
+                v-if="Object.keys(unavailableChains).length"
+                v-bind="Object.values(unavailableChains)[0]"
+                :chains="Object.keys(unavailableChains)"
                 class="ml-2"
                 :icon-size="1.2"
               />
@@ -86,7 +87,9 @@
             >
               <div class="w-1/3 flex items-center min-w-0">
                 <CircleSymbol :denom="denom" :chain-name="asset.on_chain" size="lg" :glow="false" variant="chain" />
-                <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"><ChainName :name="asset.on_chain" /></span>
+                <span class="flex-grow ml-4 font-medium whitespace-nowrap overflow-hidden overflow-ellipsis">
+                  <ChainName :name="asset.on_chain" />
+                </span>
               </div>
               <div class="w-1/3 ml-4 text-muted text-right">
                 <AmountDisplay
@@ -104,8 +107,8 @@
                   <Price v-else :amount="{ amount: asset.amount, denom }" />
                 </span>
                 <ChainDownWarning
-                  v-if="unavaibaleChains[asset.on_chain]"
-                  v-bind="unavaibaleChains[asset.on_chain]"
+                  v-if="unavailableChains[asset.on_chain]"
+                  v-bind="unavailableChains[asset.on_chain]"
                   class="ml-4"
                 />
               </div>
@@ -223,7 +226,7 @@ export default defineComponent({
     });
 
     const assets = computed(() => balancesByDenom(denom.value));
-    const unavaibaleChains = computed(() => {
+    const unavailableChains = computed(() => {
       const result = {};
       for (const asset of assets.value) {
         const status = store.getters['demeris/getChainStatus']({ chain_name: asset.on_chain });
@@ -358,7 +361,7 @@ export default defineComponent({
       assetConfig,
       denom,
       assets,
-      unavaibaleChains,
+      unavailableChains,
       poolsDisplay,
       poolsInvestedWithAsset,
       availableAmount,

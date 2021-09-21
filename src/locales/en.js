@@ -93,6 +93,7 @@ export const messages = {
         appearsDown: '{chain} appears to be down',
         partUnavailable: '{chain} appears to be down. Part of your {denom} may be temporarily unavailable.',
         fullUnavailable: 'Your {denom} on {chain} is unavailable right now.',
+        fullUnavailableMultiple: 'Your {denom} on {chains} are unavailable right now.',
       },
       cookieConsent: {
         message: 'By using this website, you agree to our',
