@@ -254,6 +254,8 @@ export const messages = {
           'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
         transferDescriptionMultiple:
           'You are about to send {denom} from {fromChain} to {toChain}. Because your {denom} are not on their native chain ({nativeChain}), they will need to be transferred back to {nativeChain} before they can be sent to {toChain}. This means you will need to sign two transactions.',
+        transferDescriptionMultipleMemo:
+          'You are about to send {denom} from {fromChain} to {toChain}. Because your {denom} are not on their native chain ({nativeChain}), they will need to be transferred back to {nativeChain} before they can be sent to {toChain} and you specified a memo. This means you will need to sign three transactions.',
       },
       previews: {
         addWithdrawLiquidity: {

@@ -150,7 +150,10 @@ export default defineComponent({
             const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
             const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
 
-            description = t('components.transferToHub.transferDescriptionMultiple', {
+            const translateKeyPath =
+              props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultipe';
+
+            description = t(`components.transferToHub.${translateKeyPath}`, {
               denom: denoms.value[0],
               fromChain,
               toChain,
