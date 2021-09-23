@@ -66,7 +66,14 @@
               </div>
             </td>
             <td class="mt-0.5 pl-4 group-hover:bg-fg transition">
-              <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
+              <div class="flex items-center justify-center space-x-3">
+                <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
+                <ChainDownWarning
+                  v-if="Object.values(getUnavailableChains(asset)).length"
+                  v-bind="Object.values(getUnavailableChains(asset))[0]"
+                  :chains="Object.keys(getUnavailableChains(asset))"
+                />
+              </div>
             </td>
           </tr>
         </template>
@@ -146,6 +153,7 @@ import { computed, defineComponent, PropType, ref } from 'vue';
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
@@ -164,7 +172,18 @@ type TableStyleType = 'full' | 'balance';
 export default defineComponent({
   name: 'AssetsTable',
 
-  components: { AmountDisplay, AssetChains, CircleSymbol, Denom, Button, Icon, LPAsset, Price, Ticker },
+  components: {
+    AmountDisplay,
+    AssetChains,
+    ChainDownWarning,
+    CircleSymbol,
+    Denom,
+    Button,
+    Icon,
+    LPAsset,
+    Price,
+    Ticker,
+  },
 
   props: {
     variant: {
@@ -310,6 +329,32 @@ export default defineComponent({
       return balances;
     });
 
+    const getUnavailableChains = (asset) => {
+      const result = {};
+      const statusMap = asset.chainsNames.reduce((acc, chain) => {
+        acc[chain] = store.getters['demeris/getChainStatus']({ chain_name: chain });
+        return acc;
+      }, {});
+
+      for (const chain of asset.chainsNames) {
+        if (!statusMap[chain]) {
+          result[chain] = {
+            chain: chain,
+            denom: asset.denom,
+            unavailable: 'part',
+          };
+        }
+      }
+
+      const isFullUnavailable = Object.values(statusMap).every((item) => item === false);
+
+      if (isFullUnavailable) {
+        result[Object.keys(result)[0]].unavailable = 'full';
+      }
+
+      return result;
+    };
+
     const orderUserBalances = (balances) => {
       let tokens = orderBy(balances, [(x) => x.value.value, 'name'], ['desc', 'asc']);
       return tokens.slice(0, currentLimit.value);
@@ -355,6 +400,7 @@ export default defineComponent({
       viewAllHandler,
       orderUserBalances,
       orderAllBalances,
+      getUnavailableChains,
     };
   },
 });

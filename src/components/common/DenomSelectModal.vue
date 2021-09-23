@@ -20,7 +20,7 @@
             <CoinList
               v-if="keywordFilteredAssets[0].length > 0"
               :data="keywordFilteredAssets[0]"
-              :type="title === 'Receive' ? 'receive' : 'pay'"
+              :type="title === 'Receive' ? 'receive' : type || 'pay'"
               :show-balance="showBalance"
               :keyword="keyword"
               @select="coinListselectHandler"
@@ -36,7 +36,7 @@
               </div>
               <CoinList
                 :data="keywordFilteredAssets[1]"
-                :type="title === 'Receive' ? 'receive' : 'pay'"
+                :type="title === 'Receive' ? 'receive' : type || 'pay'"
                 :show-balance="showBalance"
                 :keyword="keyword"
                 @select="coinListselectHandler"
@@ -70,6 +70,7 @@ export default defineComponent({
     WhiteOverlay,
   },
   props: {
+    type: { type: String, default: undefined },
     assets: { type: Object, required: true },
     otherAssets: {
       type: Object,
