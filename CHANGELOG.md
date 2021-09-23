@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed keplr account switching makes a swap button not working
 - Added a correct tooltip for no pool status
 - Improved empty wallet balance error handling
+- Fixed 'still transferring' status active condition
 
 ### Perfomance
 
