@@ -23,7 +23,12 @@
 
     <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
       {{ description }}
-      <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="text-link hover:text-link-hover">
+      <a
+        v-if="action !== 'addliquidity'"
+        href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
+        target="_blank"
+        class="text-link hover:text-link-hover"
+      >
         {{ $t('generic_cta.learnMore') }} &#x2197;
       </a>
     </p>
