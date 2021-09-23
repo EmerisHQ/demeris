@@ -52,8 +52,8 @@ export default defineComponent({
       const precision = store.getters['demeris/getDenomPrecision']({
         name: props.denom,
       });
-      const balance = walletBalances.value.find((b) => b.denom === props.denom);
-      let balanceAmount = new BigNumber(balance.amount).shiftedBy(-precision);
+      const balance = walletBalances.value?.find((b) => b.denom === props.denom);
+      let balanceAmount = new BigNumber(balance?.amount).shiftedBy(-precision);
       return balanceAmount.toFixed(6);
     });
 

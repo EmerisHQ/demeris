@@ -138,6 +138,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -201,6 +202,7 @@ export default defineComponent({
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
     const slippage = ref(0);
+    const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
@@ -219,6 +221,12 @@ export default defineComponent({
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
+    });
+
+    onUnmounted(() => {
+      if (setIntervalId.value) {
+        clearInterval(setIntervalId.value);
+      }
     });
 
     // REFACTOR STARTS HERE
@@ -538,7 +546,7 @@ export default defineComponent({
           data.receiveCoinAmount = null;
         }
 
-        if (!isInit.value && watchValues[0].length) {
+        if (!isInit.value) {
           data.receiveCoinData = null;
           if (!isSignedIn.value) {
             //no-wallet
@@ -565,7 +573,6 @@ export default defineComponent({
               data.receiveCoinData = assetToReceive;
             }
           }
-
           isInit.value = true;
         }
       },
@@ -579,37 +586,41 @@ export default defineComponent({
       //conditional-text-start
       buttonName: computed(() => {
         if (data.isBothSelected) {
-          if (data.selectedPoolData === null) {
-            return 'No pool for this pair';
+          if (!data.selectedPoolData) {
+            return t('components.swap.noPool');
           } else if (data.isNotEnoughLiquidity) {
-            return 'Swap limit reached';
+            return t('components.swap.swapLimit');
           } else if (data.isOver) {
-            return 'Insufficent funds';
+            return t('components.swap.insufficentFunds');
           } else if (!dexStatus.value) {
-            return 'Swap unavailable';
+            return t('components.swap.unAvailable');
           } else {
             if (data.isPriceChanged) {
-              return 'Update prices';
+              return t('components.swap.updatePrice');
             } else {
               if (data.buttonStatus === 'active' && !data.buttonDisabled) {
-                return 'Review';
+                return t('components.swap.review');
               }
-              return 'Swap';
+              return t('components.swap.swap');
             }
           }
         } else {
-          return 'Swap';
+          return t('components.swap.swap');
         }
       }),
       buttonTooltipText: computed(() => {
-        if (data.buttonName === 'Swap limit reached') {
-          return `You cannot swap more than 10% of the pool's available liquidity. Try swapping a smaller amount.`;
-        } else {
-          if (!dexStatus.value) {
-            return 'Cosmos Hub appears to be down, swap is temporarily unavailable';
+        if (data.isNotEnoughLiquidity) {
+          return t('components.swap.tooltipSwapLimit');
+        } else if (data.isBothSelected) {
+          if (!data.selectedPoolData) {
+            return t('components.swap.tooltipNoPool');
+          } else if (!dexStatus.value) {
+            return t('components.swap.tooltipChainDown');
           } else {
             return '';
           }
+        } else {
+          return '';
         }
       }),
       buttonStatus: computed(() => {
@@ -821,18 +832,21 @@ export default defineComponent({
               );
             });
 
-            poolId.value = pool.id;
-            const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await getReserveBalances(pool);
-            const poolPrice = await getPoolPrice(pool);
+            if (pool) {
+              poolId.value = pool.id;
+              const reserves = await getReserveBaseDenoms(pool);
+              const reserveBalances = await getReserveBalances(pool);
+              const poolPrice = await getPoolPrice(pool);
 
-            data.selectedPoolData = {
-              pool,
-              poolPrice,
-              reserves,
-              reserveBalances,
-            };
-            setCounterPairCoinAmount('Pay');
+              data.selectedPoolData = {
+                pool,
+                poolPrice,
+                reserves,
+                reserveBalances,
+              };
+              setCounterPairCoinAmount('Pay');
+            }
+
             data.isLoading = false;
           } catch (e) {
             poolId.value = null;
@@ -868,9 +882,6 @@ export default defineComponent({
         }
       },
     );
-    onUnmounted(() => {
-      clearInterval(setIntervalId.value);
-    });
 
     //set actionHandlerResult when swapable
     watch(
@@ -910,7 +921,9 @@ export default defineComponent({
     function switchPayToReceive() {
       const originPayCoinData = JSON.parse(JSON.stringify(data.payCoinData));
       const originReceiveCoinData = JSON.parse(JSON.stringify(data.receiveCoinData));
-      originPayCoinData.on_chain = store.getters['demeris/getDexChain'];
+      if (originPayCoinData) {
+        originPayCoinData.on_chain = store.getters['demeris/getDexChain'];
+      }
 
       const sortedBalance =
         allBalances.value
@@ -979,10 +992,6 @@ export default defineComponent({
 
     function setChildModalOpenStatus(payload) {
       data.isChildModalOpen = payload;
-    }
-
-    function gobackFunc() {
-      alert('goback');
     }
 
     function setCounterPairCoinAmount(e) {
@@ -1061,7 +1070,6 @@ export default defineComponent({
       setChildModalOpenStatus,
       isOpen,
       reviewModalToggle,
-      gobackFunc,
       setCounterPairCoinAmount,
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
