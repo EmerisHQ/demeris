@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Added a correct tooltip for no pool status
 - Improved empty wallet balance error handling
 - Pre-select default asset in Send form
+- Excluded a 0 amount asset on the chain select modal
 
 ### Perfomance
 
