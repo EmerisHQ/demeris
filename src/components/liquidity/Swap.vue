@@ -26,7 +26,7 @@
           reset();
         }
       "
-      @goback="gobackFunc"
+      @goback="() => reviewModalToggle()"
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
