@@ -23,7 +23,12 @@
 
     <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
       {{ description }}
-      <a v-if="action !== 'addliquidity'" href="#" target="_blank" class="text-link hover:text-link-hover">
+      <a
+        v-if="action !== 'addliquidity'"
+        href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
+        target="_blank"
+        class="text-link hover:text-link-hover"
+      >
         {{ $t('generic_cta.learnMore') }} &#x2197;
       </a>
     </p>
@@ -40,7 +45,8 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { IBCForwardsData, Step, TransferData } from '@/types/actions';
+import useAccount from '@/composables/useAccount';
+import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -62,6 +68,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
 
@@ -102,10 +109,16 @@ export default defineComponent({
       let result = '';
 
       if (currentAction.value === 'transfer') {
-        const data = props.steps[0].transactions[0].data as IBCForwardsData;
-        const chainFrom = store.getters['demeris/getDisplayChain']({ name: data.from_chain });
-        const chainTo = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
-        return t('components.transferToHub.transferSubtitle', { from: chainFrom, to: chainTo });
+        const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+        let fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
+        let toChain = store.getters['demeris/getDisplayChain']({ name: backwardData.to_chain });
+
+        if (props.steps[0].transactions.length > 1) {
+          const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+          toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+        }
+
+        return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
       }
 
       return result;
@@ -133,7 +146,27 @@ export default defineComponent({
           description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
           break;
         case 'transfer':
-          description = t('components.transferToHub.transferDescription');
+          if (props.steps[0].transactions.length > 1) {
+            const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+            const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+
+            const fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
+            const toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+            const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
+            const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
+
+            const translateKeyPath =
+              props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultipe';
+
+            description = t(`components.transferToHub.${translateKeyPath}`, {
+              denom: denoms.value[0],
+              fromChain,
+              toChain,
+              nativeChain,
+            });
+          } else {
+            description = t('components.transferToHub.transferDescription');
+          }
           break;
       }
 
