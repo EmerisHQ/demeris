@@ -536,7 +536,7 @@ export default defineComponent({
       },
       (watchValues, oldWatchValues) => {
         //when wallet connected/disconnected set again
-        if (watchValues[1].length !== oldWatchValues[1].length) {
+        if (watchValues[0].length !== oldWatchValues[0].length || watchValues[1].length !== oldWatchValues[1].length) {
           isInit.value = false;
           data.payCoinAmount = null;
           data.receiveCoinAmount = null;
