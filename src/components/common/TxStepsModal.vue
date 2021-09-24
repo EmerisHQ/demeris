@@ -944,11 +944,13 @@ export default defineComponent({
                       });
                       break;
                     case 'addliquidity':
-                      value = getPrice((stepTx.data as AddLiquidityData).coinA);
+                      let coins = parseCoins(txResult.value.accepted_coins);
 
-                      let valueB = getPrice((stepTx.data as AddLiquidityData).coinB);
-                      base_denom = await getBaseDenom((stepTx.data as AddLiquidityData).coinA.denom);
-                      let base_denomB = await getBaseDenom((stepTx.data as AddLiquidityData).coinB.denom);
+                      value = getPrice(coins[0]);
+
+                      let valueB = getPrice(coins[1]);
+                      base_denom = await getBaseDenom(coins[0].denom);
+                      let base_denomB = await getBaseDenom(coins[1].denom);
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Add Liquidity USD volume',
@@ -958,12 +960,12 @@ export default defineComponent({
                         event('denom_volume', {
                           event_label: 'Add Liquidity ' + base_denom + ' volume',
                           event_category: 'volume',
-                          value: (stepTx.data as AddLiquidityData).coinA.amount,
+                          value: coins[0].amount,
                         });
                         event('denom_volume', {
                           event_label: 'Add Liquidity ' + base_denomB + ' volume',
                           event_category: 'volume',
-                          value: (stepTx.data as AddLiquidityData).coinB.amount,
+                          value: coins[1].amount,
                         });
                       });
                       break;
