@@ -323,7 +323,6 @@ import {
 } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
-import { getOwnAddress } from '@/utils/basic';
 
 type Status =
   | 'keplr-sign'
@@ -396,7 +395,6 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const { updatePool } = usePools();
-    const ownAddress = ref('');
 
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
@@ -660,16 +658,6 @@ export default defineComponent({
         emitAnother();
       }
     }
-
-    watch(
-      () => props.txResult,
-      async () => {
-        if (props.txResult.hashes?.length) {
-          ownAddress.value = await getOwnAddress({ chain_name: props.txResult.hashes[0].chain_name });
-        }
-      },
-      { immediate: true },
-    );
 
     return {
       getExplorerTx,
