@@ -931,10 +931,10 @@ export default {
       const isReverse = reserveBalances.value[0].base_denom !== form.coinA.asset.base_denom;
 
       const totalA = new BigNumber(reserveBalances.value[0].amount)
-        .shiftedBy(-precisionA)
+        .shiftedBy(isReverse ? -precisionB : -precisionA)
         .multipliedBy(isReverse ? priceB : priceA);
       const totalB = new BigNumber(reserveBalances.value[1].amount)
-        .shiftedBy(-precisionB)
+        .shiftedBy(isReverse ? -precisionA : -precisionB)
         .multipliedBy(isReverse ? priceA : priceB);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
