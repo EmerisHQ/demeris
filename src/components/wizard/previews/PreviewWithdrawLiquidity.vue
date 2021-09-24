@@ -13,7 +13,7 @@
 
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
         <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
-        <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
+        <AmountDisplay :amount="{ amount: receiveAmount.ratio * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
       </ListItem>
     </div>
 
@@ -125,6 +125,7 @@ export default defineComponent({
       return {
         coinA: result[0],
         coinB: result[1],
+        ratio: Number(result[1].amount) / Number(result[0].amount),
       };
     });
 
