@@ -111,8 +111,8 @@
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -122,8 +122,8 @@
         <template v-else-if="tx.name === 'withdrawliquidity'">
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -136,8 +136,8 @@
         >
           <PreviewTransfer :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="txResult?.hashes.length && getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -170,8 +170,8 @@
         "
       >
         <a
-          v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
-          :href="getExplorerLink(txResult.hashes[0])"
+          v-if="txResult?.hashes.length && getExplorerTx(txResult.hashes[0])"
+          :href="getExplorerTx(txResult.hashes[0])"
           rel="noopener noreferrer"
           target="_blank"
           class="inline-block p-2"
@@ -189,6 +189,10 @@
       </p>
 
       <p v-if="status === 'unknown'" class="mt-4">
+        <a v-if="ownAddress" :href="getExplorerTx()" rel="noopener noreferrer" target="_blank" class="inline-block p-2">
+          {{ $t('context.transaction.viewOnExplorer') }} ↗️
+        </a>
+
         <a href="https://emeris.com/support" target="_blank" class="font-medium text-link hover:text-link-hover">
           {{ $t('components.txHandlingModal.contactSupport') }}
         </a>
@@ -319,6 +323,7 @@ import {
 } from '@/types/actions';
 import { getDisplayName } from '@/utils/actionHandler';
 import { getBaseDenom } from '@/utils/actionHandler';
+import { getOwnAddress } from '@/utils/basic';
 
 type Status =
   | 'keplr-sign'
@@ -391,6 +396,8 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const { updatePool } = usePools();
+    const ownAddress = ref('');
+
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
@@ -422,7 +429,7 @@ export default defineComponent({
       return baseDenoms[denom] || denom;
     };
 
-    const getExplorerLink = (tx: { txhash: string; chain_name: string }) => {
+    const getExplorerLink = (chainName: string) => {
       const chainMintScanMap = {
         'cosmos-hub': 'cosmos',
         akash: 'akash',
@@ -432,13 +439,17 @@ export default defineComponent({
         persistence: 'persistence',
         sentinel: 'sentinel',
       };
-      const chain = chainMintScanMap[tx.chain_name];
+      const chain = chainMintScanMap[chainName];
 
       if (!chain) {
         return;
       }
 
-      return `https://www.mintscan.io/${chain}/txs/${tx.txhash}`;
+      return `https://www.mintscan.io/${chain}`;
+    };
+
+    const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
+      return `${getExplorerLink(tx.chain_name)}/tx/${tx.txhash}`;
     };
 
     // Watch for status changes
@@ -649,8 +660,19 @@ export default defineComponent({
         emitAnother();
       }
     }
+
+    watch(
+      () => props.txResult,
+      async () => {
+        if (props.txResult.hashes?.length) {
+          ownAddress.value = await getOwnAddress({ chain_name: props.txResult.hashes[0].chain_name });
+        }
+      },
+      { immediate: true },
+    );
+
     return {
-      getExplorerLink,
+      getExplorerTx,
       emitNext,
       emitRetry,
       emitClose,
