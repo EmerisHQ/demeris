@@ -90,6 +90,9 @@
                 <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
+                  <div class="-text-1 font-normal text-muted mt-0.5">
+                    <ChainName :name="asset.chainsNames[0]" />
+                  </div>
                 </div>
               </div>
             </td>
@@ -154,6 +157,7 @@ import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vu
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
@@ -176,6 +180,7 @@ export default defineComponent({
     AmountDisplay,
     AssetChains,
     ChainDownWarning,
+    ChainName,
     CircleSymbol,
     Denom,
     Button,
