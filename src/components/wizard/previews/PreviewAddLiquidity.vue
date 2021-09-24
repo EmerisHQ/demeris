@@ -190,9 +190,8 @@ export default defineComponent({
         };
       }
 
-      const isReverse = data.value.coinA.denom !== reserveBalances.value[0].denom;
-      console.log(isReverse);
       if (reserveBalances.value?.length) {
+        const isReverse = data.value.coinA.denom !== reserveBalances.value[0].denom;
         return {
           coinA,
           coinB: new BigNumber(reserveBalances.value[isReverse ? 0 : 1].amount)
