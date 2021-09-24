@@ -928,15 +928,21 @@ export default {
       const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
       const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
 
-      const totalA = new BigNumber(reserveBalances.value[0].amount).shiftedBy(-precisionA).multipliedBy(priceA);
-      const totalB = new BigNumber(reserveBalances.value[1].amount).shiftedBy(-precisionB).multipliedBy(priceB);
+      const isReverse = reserveBalances.value[0].base_denom !== form.coinA.asset.base_denom;
+
+      const totalA = new BigNumber(reserveBalances.value[0].amount)
+        .shiftedBy(-precisionA)
+        .multipliedBy(isReverse ? priceB : priceA);
+      const totalB = new BigNumber(reserveBalances.value[1].amount)
+        .shiftedBy(-precisionB)
+        .multipliedBy(isReverse ? priceA : priceB);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
       const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.toNumber());
 
-      form.coinA.amount = new BigNumber(result[0].amount).decimalPlaces(6).toString();
-      form.coinB.amount = new BigNumber(result[1].amount).decimalPlaces(6).toString();
+      form.coinA.amount = new BigNumber(result[isReverse ? 1 : 0].amount).decimalPlaces(6).toString();
+      form.coinB.amount = new BigNumber(result[isReverse ? 0 : 1].amount).decimalPlaces(6).toString();
       updateReceiveAmount();
     };
 
