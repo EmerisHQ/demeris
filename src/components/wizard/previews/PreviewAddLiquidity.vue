@@ -190,11 +190,13 @@ export default defineComponent({
         };
       }
 
+      const isReverse = data.value.coinA.denom !== reserveBalances.value[0].denom;
+      console.log(isReverse);
       if (reserveBalances.value?.length) {
         return {
           coinA,
-          coinB: new BigNumber(reserveBalances.value[1].amount)
-            .dividedBy(reserveBalances.value[0].amount)
+          coinB: new BigNumber(reserveBalances.value[isReverse ? 0 : 1].amount)
+            .dividedBy(reserveBalances.value[isReverse ? 1 : 0].amount)
             .shiftedBy(precisions.value.coinB + precisionDiff)
             .toNumber(),
         };
