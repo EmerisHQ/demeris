@@ -152,8 +152,8 @@
 
             <div v-if="exchangeAmount" class="mt-2 w-full max-w-sm mx-auto">
               <ListItem inset size="md" label="Pool price">
-                <AmountDisplay :amount="{ amount: 1e6, denom: reserveBaseDenoms[1] }" /> =
-                <AmountDisplay :amount="{ amount: exchangeAmount, denom: reserveBaseDenoms[0] }" />
+                <AmountDisplay :amount="{ amount: 1e6, denom: reserveBaseDenoms[0] }" /> =
+                <AmountDisplay :amount="{ amount: exchangeAmount, denom: reserveBaseDenoms[1] }" />
               </ListItem>
               <div class="mt-6 mb-2">
                 <FeeLevelSelector
