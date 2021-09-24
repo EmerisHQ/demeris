@@ -189,7 +189,13 @@
       </p>
 
       <p v-if="status === 'unknown'" class="mt-4">
-        <a v-if="ownAddress" :href="getExplorerTx()" rel="noopener noreferrer" target="_blank" class="inline-block p-2">
+        <a
+          v-if="ownAddress"
+          :href="getExplorerTx({ tx_hash: errorDetails.ticket, chain_name: errorDetails.chain_name })"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="inline-block p-2"
+        >
           {{ $t('context.transaction.viewOnExplorer') }} ↗️
         </a>
 

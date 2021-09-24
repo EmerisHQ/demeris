@@ -720,6 +720,7 @@ export default defineComponent({
                   errorDetails.value = {
                     message: e?.message,
                     ticket: result?.ticket,
+                    chain_name: res.chain_name,
                   };
                   emit('failed');
                   txstatus.value = 'failed';
@@ -771,6 +772,7 @@ export default defineComponent({
                     const details = {
                       status: txResultData.status,
                       ticket: result.ticket,
+                      chain_name: res.chain_name,
                     };
 
                     if (txResultData.error) {
