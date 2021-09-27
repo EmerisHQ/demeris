@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Updates
 
+- Added additional data-tracking analytics
+- Added notification components and tooltips for offline/unavailable chains
+
 ### Fixes
 
 - Added an asset send button on the swap complete modal
@@ -17,6 +20,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Improved empty wallet balance error handling
 - Pre-select default asset in Send form
 - Excluded a 0 amount asset on the chain select modal
+- Added missing IBC info URL
+- Fixed multi-tx transfer interstitial disclaimer
+- Fixed add/withdraw liquidity dollar amount calculations
 
 ### Perfomance
 
