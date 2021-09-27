@@ -251,6 +251,7 @@
   </div>
 </template>
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
@@ -276,6 +277,7 @@ import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
   AddLiquidityData,
+  CreatePoolData,
   FeeTotals,
   GasPriceLevel,
   IBCBackwardsData,
@@ -291,6 +293,8 @@ import {
   ensureTraceChannel,
   feeForStep,
   feeForStepTransaction,
+  getBaseDenom,
+  getDisplayName,
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
@@ -853,34 +857,105 @@ export default defineComponent({
                     event_category: 'transactions',
                   });
                   let value;
+                  let base_denom;
+                  let display_denom;
+                  let precision;
                   switch (stepTx.name) {
                     case 'ibc_forward':
                       value = getPrice((stepTx.data as IBCForwardsData).amount);
+                      base_denom = await getBaseDenom((stepTx.data as IBCForwardsData).amount.denom);
+                      display_denom = await getDisplayName(base_denom);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
                         });
+                        event('denom_volume', {
+                          event_label: 'IBC transfer ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as IBCForwardsData).amount.amount).shiftedBy(-precision),
+                        });
                       });
+
                       break;
                     case 'ibc_backward':
                       value = getPrice((stepTx.data as IBCBackwardsData).amount);
+                      base_denom = await getBaseDenom((stepTx.data as IBCBackwardsData).amount.denom);
+                      display_denom = await getDisplayName(base_denom);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
+                        });
+                        event('denom_volume', {
+                          event_label: 'IBC transfer ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as IBCBackwardsData).amount.amount).shiftedBy(-precision),
                         });
                       });
                       break;
                     case 'swap':
                       value = getPrice((stepTx.data as SwapData).from);
+                      base_denom = await getBaseDenom((stepTx.data as SwapData).from.denom);
+                      display_denom = await getDisplayName(base_denom);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
+                      let to_denom = await getDisplayName(await getBaseDenom((stepTx.data as SwapData).to.denom));
+
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Swap USD volume',
                           event_category: 'volume',
                           value: value.value,
+                        });
+                        event('denom_volume', {
+                          event_label: 'Swap ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber(
+                            Math.floor(
+                              (parseInt((stepTx.data as SwapData).from.amount) * txResult.value.swappedPercent) / 100,
+                            ),
+                          ).shiftedBy(-precision),
+                        });
+                        event('denom_volume', {
+                          event_label: 'Swap ' + display_denom + ' -> ' + to_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber(
+                            Math.floor(
+                              (parseInt((stepTx.data as SwapData).from.amount) * txResult.value.swappedPercent) / 100,
+                            ),
+                          ).shiftedBy(-precision),
+                        });
+                      });
+                      break;
+                    case 'createpool':
+                      value = getPrice((stepTx.data as CreatePoolData).coinA);
+
+                      let cvalueB = getPrice((stepTx.data as CreatePoolData).coinB);
+                      base_denom = await getBaseDenom((stepTx.data as CreatePoolData).coinA.denom);
+                      display_denom = await getDisplayName(base_denom);
+                      let cbase_denomB = await getBaseDenom((stepTx.data as CreatePoolData).coinB.denom);
+                      let cdisplay_denomB = await getDisplayName(cbase_denomB);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
+                      let cprecisionB = store.getters['demeris/getDenomPrecision']({ name: cbase_denomB }) ?? '6';
+                      nextTick(() => {
+                        event('usd_volume', {
+                          event_label: 'Create Pool USD volume',
+                          event_category: 'volume',
+                          value: value.value + cvalueB.value,
+                        });
+                        event('denom_volume', {
+                          event_label: 'Create Pool ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as CreatePoolData).coinA.amount).shiftedBy(-precision),
+                        });
+                        event('denom_volume', {
+                          event_label: 'Create Pool ' + cdisplay_denomB + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as CreatePoolData).coinB.amount).shiftedBy(-cprecisionB),
                         });
                       });
                       break;
@@ -888,31 +963,67 @@ export default defineComponent({
                       value = getPrice((stepTx.data as AddLiquidityData).coinA);
 
                       let valueB = getPrice((stepTx.data as AddLiquidityData).coinB);
+                      base_denom = await getBaseDenom((stepTx.data as AddLiquidityData).coinA.denom);
+                      display_denom = await getDisplayName(base_denom);
+                      let base_denomB = await getBaseDenom((stepTx.data as AddLiquidityData).coinB.denom);
+                      let display_denomB = await getDisplayName(base_denomB);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
+                      let precisionB = store.getters['demeris/getDenomPrecision']({ name: base_denomB }) ?? '6';
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Add Liquidity USD volume',
                           event_category: 'volume',
                           value: value.value + valueB.value,
                         });
+                        event('denom_volume', {
+                          event_label: 'Add Liquidity ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as AddLiquidityData).coinA.amount).shiftedBy(-precision),
+                        });
+                        event('denom_volume', {
+                          event_label: 'Add Liquidity ' + display_denomB + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as AddLiquidityData).coinB.amount).shiftedBy(-precisionB),
+                        });
                       });
                       break;
                     case 'withdrawliquidity':
                       value = getPrice((stepTx.data as WithdrawLiquidityData).poolCoin);
+
+                      base_denom = await getDisplayName(
+                        await getBaseDenom((stepTx.data as WithdrawLiquidityData).poolCoin.denom),
+                      );
+
+                      display_denom = await getDisplayName(base_denom);
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Withdraw Liquidity USD volume',
                           event_category: 'volume',
                           value: value.value,
                         });
+                        event('denom_volume', {
+                          event_label: 'Withdraw Liquidity ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as WithdrawLiquidityData).poolCoin.amount).shiftedBy(-6),
+                        });
                       });
                       break;
                     case 'transfer':
                       value = getPrice((stepTx.data as TransferData).amount);
+                      base_denom = await getBaseDenom((stepTx.data as TransferData).amount.denom);
+
+                      display_denom = await getDisplayName(base_denom);
+                      precision = store.getters['demeris/getDenomPrecision']({ name: base_denom }) ?? '6';
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
+                        });
+                        event('denom_volume', {
+                          event_label: 'Transfer ' + display_denom + ' volume',
+                          event_category: 'volume',
+                          value: new BigNumber((stepTx.data as TransferData).amount.amount).shiftedBy(-precision),
                         });
                       });
                       break;
