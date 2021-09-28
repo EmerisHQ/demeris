@@ -1,5 +1,15 @@
 import { SpVuexError } from '@starport/vuex';
-import { Extension, Wallet as TerraStationWallet } from '@terra-money/terra.js';
+import {
+  Coin,
+  Coins,
+  CreateTxOptions,
+  Extension,
+  Msg,
+  StdFee,
+  Wallet as TerraStationWallet,
+} from '@terra-money/terra.js';
+Coins.fromData();
+import { AminoTypes } from '@cosmjs/stargate';
 
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -8,8 +18,10 @@ import { ChainData } from '@/store/demeris/state';
 import { keyHashfromAddress } from '@/utils/basic';
 
 import { Wallet } from './abstractWallet';
-import { KeplrTransaction, SignedKeplrTransaction } from './types';
+import { liquidityTypes } from './liquidityTypes';
+import { SignedTerraTransaction,TerraTransaction } from './types';
 
+const aminoTypes = new AminoTypes({ additions: liquidityTypes, prefix: null });
 export class TerraWallet extends Wallet {
   protected _currentChain: string;
   protected _chainList: string[] = [];
@@ -45,6 +57,7 @@ export class TerraWallet extends Wallet {
   }
   async requestSignature(transaction: TerraTransaction): Promise<SignedTerraTransaction> {
     const store = useStore();
+
     try {
       let chain = store.getters['demeris/getChain']({
         chain_name: transaction.chain_name,
@@ -71,20 +84,20 @@ export class TerraWallet extends Wallet {
           chain_name: transaction.chain_name,
         },
       });
-
-      const signerData = numbers;
-      const cosmjsSignerData = {
-        chainId: chain.node_info.chain_id,
-        accountNumber: parseInt(signerData.account_number),
-        sequence: parseInt(signerData.sequence_number),
+      const msgs = transaction.msgs
+        .map((msg) => aminoTypes.toAmino(msg))
+        .map((aminoMsg) => Msg.fromData(aminoMsg as Msg.Data));
+      const options: CreateTxOptions = {
+        msgs: msgs,
+        fee: new StdFee(
+          parseInt(transaction.fee.gas),
+          Coins.fromData(transaction.fee.amount.map((coin) => Coin.fromData(coin).toData())),
+        ),
+        memo: transaction.memo,
+        account_number: parseInt(numbers.account_number),
+        sequence: parseInt(numbers.sequence_number),
       };
-      const tx = await (client as DemerisSigningClient).signWMeta(
-        account.address,
-        transaction.msgs,
-        transaction.fee,
-        transaction.memo,
-        cosmjsSignerData,
-      );
+      this._extension.sign(options);
 
       const tx_data = Buffer.from(tx).toString('base64');
       //console.log(Buffer.from(tx).toString('hex'));

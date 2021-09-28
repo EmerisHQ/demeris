@@ -14,4 +14,17 @@ export type SignedKeplrTransaction = {
   chain_name: string;
   address: string;
 };
-export type WalletTransaction = KeplrTransaction;
+
+export type TerraTransaction = {
+  msgs: EncodeObject[];
+  chain_name: string;
+  fee: GasFee;
+  registry: Registry;
+  memo: string;
+};
+export type SignedTerraTransaction = {
+  tx: string;
+  chain_name: string;
+  address: string;
+};
+export type WalletTransaction = KeplrTransaction | TerraTransaction;
