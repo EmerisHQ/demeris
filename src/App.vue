@@ -4,7 +4,9 @@
   </metainfo>
   <div v-if="initialized">
     <CookieConsent />
-    <router-view />
+    <ChainDownWrapper>
+      <router-view />
+    </ChainDownWrapper>
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -17,6 +19,7 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
@@ -30,6 +33,7 @@ export default defineComponent({
 
   components: {
     EphemerisSpinner,
+    ChainDownWrapper,
     CookieConsent,
   },
 

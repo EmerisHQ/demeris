@@ -69,6 +69,10 @@ const routes: Array<RouteRecordRaw> = [
     path: '/styles',
     component: () => import('../views/Styles.vue'),
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: 'Portfolio' },
+  },
 ];
 
 const router = createRouter({

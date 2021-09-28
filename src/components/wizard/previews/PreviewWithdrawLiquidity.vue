@@ -13,7 +13,7 @@
 
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
         <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
-        <AmountDisplay :amount="{ amount: price * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
+        <AmountDisplay :amount="{ amount: receiveAmount.ratio * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
       </ListItem>
     </div>
 
@@ -100,9 +100,8 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const price = ref(1);
 
-    const { getPoolPrice, getPoolById } = usePools();
+    const { getPoolById } = usePools();
 
     const data = computed(() => {
       if (props.response) {
@@ -122,20 +121,17 @@ export default defineComponent({
 
     const receiveAmount = computed(() => {
       const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
+      const isReverse = data.value.pool.reserve_coin_denoms[0] !== result[0].denom;
       return {
         coinA: result[0],
         coinB: result[1],
+        ratio: Number(result[isReverse ? 0 : 1].amount) / Number(result[isReverse ? 1 : 0].amount),
       };
-    });
-
-    watch(props.step as Actions.Step, async () => {
-      price.value = await getPoolPrice(pool.value);
     });
 
     return {
       chainName,
       data,
-      price,
       pool,
       pairName,
       receiveAmount,
