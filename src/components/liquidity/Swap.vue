@@ -536,23 +536,25 @@ export default defineComponent({
       },
       (watchValues, oldWatchValues) => {
         //when wallet connected/disconnected set again
-        if (watchValues[0].length !== oldWatchValues[0].length || watchValues[1].length !== oldWatchValues[1].length) {
+        if (watchValues[1].length !== oldWatchValues[1].length) {
           isInit.value = false;
           data.payCoinAmount = null;
           data.receiveCoinAmount = null;
         }
 
         if (!isInit.value) {
+          const defaultPayCoin = {
+            amount: '0uatom',
+            base_denom: 'uatom',
+            denom: 'uatom',
+            display_name: 'ATOM',
+            on_chain: store.getters['demeris/getDexChain'],
+          };
           data.receiveCoinData = null;
+
           if (!isSignedIn.value) {
             //no-wallet
-            data.payCoinData = {
-              amount: '0uatom',
-              base_denom: 'uatom',
-              denom: 'uatom',
-              display_name: 'ATOM',
-              on_chain: store.getters['demeris/getDexChain'],
-            };
+            data.payCoinData = defaultPayCoin;
           } else {
             //with-wallet
             let assetToReceive = null;
@@ -564,9 +566,13 @@ export default defineComponent({
                 assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
             }
 
-            data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
-            if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
-              data.receiveCoinData = assetToReceive;
+            if (assetsToPay.value.length > 0) {
+              data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
+              if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
+                data.receiveCoinData = assetToReceive;
+              }
+            } else {
+              data.payCoinData = defaultPayCoin;
             }
           }
           isInit.value = true;
