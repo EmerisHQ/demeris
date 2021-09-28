@@ -88,6 +88,13 @@ export const messages = {
       },
     },
     components: {
+      chainDown: {
+        assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
+        appearsDown: '{chain} appears to be down',
+        partUnavailable: '{chain} appears to be down. Part of your {denom} may be temporarily unavailable.',
+        fullUnavailable: 'Your {denom} on {chain} is unavailable right now.',
+        fullUnavailableMultiple: 'Your {denom} on {chains} are unavailable right now.',
+      },
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
@@ -112,6 +119,7 @@ export const messages = {
       coinList: {
         tooltip: '{asset} on {chain}',
         available: ' available',
+        unavailable: ' unavailable',
       },
       denomSelect: {
         select: 'Select asset',
@@ -252,6 +260,10 @@ export const messages = {
         transferSubtitle: '{from} to {to}',
         transferDescription:
           'Emeris gives you the ability to transfer your assets to different chains. This is made possible through a brand new protocol for inter-blockchain communication.',
+        transferDescriptionMultiple:
+          'You are about to send {denom} from {fromChain} to {toChain}. Because your {denom} are not on their native chain ({nativeChain}), they will need to be transferred back to {nativeChain} before they can be sent to {toChain}. This means you will need to sign two transactions.',
+        transferDescriptionMultipleMemo:
+          'You are about to send {denom} from {fromChain} to {toChain}. Because your {denom} are not on their native chain ({nativeChain}), they will need to be transferred back to {nativeChain} before they can be sent to {toChain} and you specified a memo. This means you will need to sign three transactions.',
       },
       previews: {
         addWithdrawLiquidity: {

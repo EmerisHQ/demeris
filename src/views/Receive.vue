@@ -18,6 +18,7 @@
           <DenomSelectModal
             :title="$t('pages.receive.select')"
             class="denom-select-modal h-full"
+            type="receive"
             :assets="balances"
             :show-balance="true"
             :show-back-button="false"
