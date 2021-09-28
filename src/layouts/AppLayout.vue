@@ -18,7 +18,7 @@ export default defineComponent({
       () => route.meta,
       async meta => {
         try {
-          const component = await import(`@/layouts/${meta.layout}.vue`);
+          const component = await import(`../layouts/${meta.layout}.vue`);
           layout.value = component?.default || DefaultLayout;
         } catch (e) {
           layout.value = DefaultLayout;

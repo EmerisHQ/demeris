@@ -266,18 +266,12 @@ export default defineComponent({
       };
     });
 
-    const symbolImage = computed(() => {
-      if (isPoolCoin.value) {
-        return require(`@/assets/svg/symbols/gdex.svg`);
-      }
-
-      return undefined;
-    });
-
+    const symbolImage = ref(undefined);
     watch(
       () => toRefs(props),
       async () => {
         if (isPoolCoin.value) {
+          symbolImage.value= await import(`@/assets/svg/symbols/gdex.svg`);
           let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
 
           if (existingPool) {
@@ -286,6 +280,7 @@ export default defineComponent({
             denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
           }
         } else {
+          symbolImage.value= undefined;
           let baseDenom = props.denom;
           try {
             baseDenom = await getBaseDenom(props.denom as string, props.chainName);

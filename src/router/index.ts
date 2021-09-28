@@ -14,52 +14,52 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/welcome',
     name: 'Welcome',
-    component: () => import('@/views/Welcome.vue'),
+    component: () => import('../views/Welcome.vue'),
   },
   {
     path: '/assets/:tab?',
     name: 'Assets',
-    component: () => import('@/views/Assets.vue'),
+    component: () => import('../views/Assets.vue'),
   },
   {
     path: '/send/:type?',
     name: 'Send',
-    component: () => import('@/views/Send.vue'),
+    component: () => import('../views/Send.vue'),
   },
   {
     path: '/receive',
     name: 'Receive',
-    component: () => import('@/views/Receive.vue'),
+    component: () => import('../views/Receive.vue'),
   },
   {
     path: '/pools',
     name: 'Pools',
-    component: () => import('@/views/Pools.vue'),
+    component: () => import('../views/Pools.vue'),
   },
   {
     path: '/asset/:denom',
     name: 'Asset',
-    component: () => import('@/views/Asset.vue'),
+    component: () => import('../views/Asset.vue'),
   },
   {
     path: '/pool/:id?',
     name: 'Pool',
-    component: () => import('@/views/Pool.vue'),
+    component: () => import('../views/Pool.vue'),
   },
   {
     path: '/pools/add/:id?',
     name: 'AddLiquidity',
-    component: () => import('@/views/AddLiquidity.vue'),
+    component: () => import('../views/AddLiquidity.vue'),
   },
   {
     path: '/pools/withdraw/:id',
     name: 'WithdrawLiquidity',
-    component: () => import('@/views/WithdrawLiquidity.vue'),
+    component: () => import('../views/WithdrawLiquidity.vue'),
   },
   {
     path: '/redeem',
     name: 'Redeem',
-    component: () => import('@/views/Redeem.vue'),
+    component: () => import('../views/Redeem.vue'),
   },
   {
     path: '/playground',

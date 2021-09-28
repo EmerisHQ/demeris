@@ -1,9 +1,7 @@
 {
-  "name": "emeris-web",
-  "version": "0.1.1",
-  "private": true,
-  "author": "Tendermint, Inc <hello@tendermint.com>",
-  "homepage": "https://github.com/tendermint/vue",  "scripts": {
+  "name": "emeris",
+  "version": "0.0.0",
+  "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",

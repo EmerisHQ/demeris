@@ -25,7 +25,7 @@ export default defineComponent({
   setup(props) {
     const currentIcon = shallowRef('');
     const isReady = ref(false);
-    import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
+    import(`../common/Icons/${props.name}.vue`).then((val) => {
       currentIcon.value = val.default;
       isReady.value = true;
     });
