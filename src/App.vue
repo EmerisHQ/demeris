@@ -52,7 +52,7 @@ export default defineComponent({
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
       await store.dispatch(GlobalDemerisActionTypes.INIT, {
-        endpoint: 'https://dev.demeris.io/v1',
+        endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
         gas_limit: gasLimit,
@@ -87,7 +87,7 @@ export default defineComponent({
       }
       status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
-        apiNode: 'https://dev.demeris.io/v1/liquidity',
+        apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
         rpcNode: null,
         wsNode: null,
         chainId: 'cosmos-hub',
