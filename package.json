@@ -88,7 +88,7 @@
     "vue-jest": "^5.0.0-alpha.10"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx lint-staged --allow-empty"
   },
   "lint-staged": {
     "*.{scss,css,html,json,md}": [
