@@ -12,6 +12,7 @@
     <div v-if="iconType" class="flex items-center justify-center my-6">
       <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
       <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+      <Icon v-else-if="iconType === 'unknown'" name="QuestionIcon" :icon-size="3" class="text-warning" />
       <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
     </div>
     <div
@@ -19,7 +20,7 @@
       class="swapped-image bg-center bg-no-repeat bg-cover -mt-6 -mx-6"
     />
     <div class="text-muted">
-      <template v-if="status == 'failed' || status == 'unknown'">
+      <template v-if="status == 'failed'">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
         </template>
@@ -188,21 +189,20 @@
         </a>
       </p>
 
-      <p v-if="status === 'unknown'" class="mt-4">
+      <div v-if="status === 'unknown'">
+        <p class="mx-auto max-w-sm leading-copy text-muted my-2">
+          {{ subtitle }}
+        </p>
+
         <a
-          v-if="ownAddress"
-          :href="getExplorerTx({ tx_hash: errorDetails.ticket, chain_name: errorDetails.chain_name })"
+          :href="getExplorerTx({ txhash: errorDetails.ticket, chain_name: errorDetails.chain_name })"
           rel="noopener noreferrer"
           target="_blank"
           class="inline-block p-2"
         >
           {{ $t('context.transaction.viewOnExplorer') }} ↗️
         </a>
-
-        <a href="https://emeris.com/support" target="_blank" class="font-medium text-link hover:text-link-hover">
-          {{ $t('components.txHandlingModal.contactSupport') }}
-        </a>
-      </p>
+      </div>
       <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           Your
@@ -281,12 +281,6 @@
         "
       />
       {{ router?.pathname }}
-      <Button
-        v-if="status === 'unknown'"
-        variant="link"
-        :name="$t('components.txHandlingModal.backToPortfolio')"
-        :click-function="unknownHandler"
-      />
       <Button
         v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
         :name="secondaryButton"
@@ -409,7 +403,10 @@ export default defineComponent({
       if (props.status == 'keplr-reject') {
         return 'warning';
       }
-      if (props.status == 'failed' || props.status == 'unknown') {
+      if (props.status == 'unknown') {
+        return 'unknown';
+      }
+      if (props.status == 'failed') {
         return 'error';
       }
       return null;
@@ -453,7 +450,7 @@ export default defineComponent({
     };
 
     const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
-      return `${getExplorerLink(tx.chain_name)}/tx/${tx.txhash}`;
+      return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`;
     };
 
     // Watch for status changes
@@ -481,7 +478,9 @@ export default defineComponent({
             secondaryButton.value = '';
             break;
           case 'unknown':
-            title.value = t('components.txHandlingModal.somethingWentWrong');
+            title.value = t('components.txHandlingModal.couldNotFetchTransactionResult');
+            subtitle.value = t('components.txHandlingModal.checkTransactionOnBlockExplorer');
+            primaryButton.value = t('generic_cta.done');
             overline.value = '';
             break;
           case 'IBC_receive_failed':

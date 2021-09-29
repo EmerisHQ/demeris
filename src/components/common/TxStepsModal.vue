@@ -764,10 +764,6 @@ export default defineComponent({
 
                   clearTimeout(delayTimeout);
 
-                  if (stuck) {
-                    return;
-                  }
-
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
                     const details = {
                       status: txResultData.status,
@@ -839,6 +835,14 @@ export default defineComponent({
                         }
 
                         txResult.value = resultData;
+                      } else {
+                        txstatus.value = 'unknown';
+                        errorDetails.value = {
+                          status: txResultData.status,
+                          ticket: txhash,
+                          chain_name,
+                        };
+                        throw new Error('Could not fetch transaction response');
                       }
                     } else {
                       txResult.value = { ...currentData.value.data };
@@ -1037,11 +1041,13 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
-                  event('failed_tx', {
-                    event_label: 'Failed ' + stepTx.name + ' tx',
-                    event_category: 'transactions',
-                  });
-                  txstatus.value = 'failed';
+                  if (txstatus.value !== 'unknown') {
+                    event('failed_tx', {
+                      event_label: 'Failed ' + stepTx.name + ' tx',
+                      event_category: 'transactions',
+                    });
+                    txstatus.value = 'failed';
+                  }
                   await txToResolve.value['promise'];
                   abort = true;
                   continue;
@@ -1049,6 +1055,7 @@ export default defineComponent({
               }
             } while (retry.value);
           }
+          debugger;
           isTxHandlingModalOpen.value = false;
         }
         if (currentStep.value == (adjustedFeeData.value as Step[]).length - 1) {

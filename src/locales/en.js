@@ -194,8 +194,9 @@ export const messages = {
           'Your transaction appears to be taking longer than expected. If the transfer is not complete in 4 minutes, it will be reverted.',
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
-        somethingWentWrong:
-          "We couldn't fetch your transaction result. Please check your transaction on a block explorer.",
+        somethingWentWrong: 'Something went wrong',
+        couldNotFetchTransactionResult: "Couldn't fetch your transaction result",
+        checkTransactionOnBlockExplorer: 'Please check your transaction result on a block explorer.',
         chainDown: 'Transaction failed, the chain is unavailable',
         chainDownDesc:
           'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
