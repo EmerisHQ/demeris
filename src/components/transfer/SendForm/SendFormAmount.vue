@@ -70,7 +70,6 @@
               :name="$t('generic_cta.max')"
               class="flex"
               :class="{ 'text-negative-text': !hasSufficientFunds }"
-              :disabled="!hasPrice"
               size="sm"
               variant="secondary"
               rounded

@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Added missing IBC info URL
 - Fixed multi-tx transfer interstitial disclaimer
 - Fixed add/withdraw liquidity dollar amount calculations
+- Fixed a max button without fiat
+- Fixed set a default coin for an empty wallet
 
 ### Perfomance
 

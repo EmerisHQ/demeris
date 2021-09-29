@@ -26,7 +26,7 @@
           reset();
         }
       "
-      @goback="gobackFunc"
+      @goback="() => reviewModalToggle()"
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -547,16 +547,18 @@ export default defineComponent({
         }
 
         if (!isInit.value) {
+          const defaultPayCoin = {
+            amount: '0uatom',
+            base_denom: 'uatom',
+            denom: 'uatom',
+            display_name: 'ATOM',
+            on_chain: store.getters['demeris/getDexChain'],
+          };
           data.receiveCoinData = null;
+
           if (!isSignedIn.value) {
             //no-wallet
-            data.payCoinData = {
-              amount: '0uatom',
-              base_denom: 'uatom',
-              denom: 'uatom',
-              display_name: 'ATOM',
-              on_chain: store.getters['demeris/getDexChain'],
-            };
+            data.payCoinData = defaultPayCoin;
           } else {
             //with-wallet
             let assetToReceive = null;
@@ -568,9 +570,13 @@ export default defineComponent({
                 assetsToReceive.value.find((coin) => coin.base_denom === props.defaultAsset.base_denom) || defaultAsset;
             }
 
-            data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
-            if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
-              data.receiveCoinData = assetToReceive;
+            if (assetsToPay.value.length > 0) {
+              data.payCoinData = orderBalancesByPrice(assetsToPay.value)[0];
+              if (data.payCoinData?.base_denom !== assetToReceive?.base_denom) {
+                data.receiveCoinData = assetToReceive;
+              }
+            } else {
+              data.payCoinData = defaultPayCoin;
             }
           }
           isInit.value = true;

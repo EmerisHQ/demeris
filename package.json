@@ -6,7 +6,9 @@
   "homepage": "https://github.com/tendermint/vue",
   "scripts": {
     "serve": "vue-cli-service serve",
+    "serve:staging": "vue-cli-service serve --mode staging",
     "build": "vue-cli-service build",
+    "build:staging": "vue-cli-service build --mode staging",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "prepare": "simple-git-hooks"
@@ -86,7 +88,7 @@
     "vue-jest": "^5.0.0-alpha.10"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx lint-staged --allow-empty"
   },
   "lint-staged": {
     "*.{scss,css,html,json,md}": [
