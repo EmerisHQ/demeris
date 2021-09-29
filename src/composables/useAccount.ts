@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -98,18 +99,26 @@ export default function useAccount() {
 
       result.push({
         ...asset,
-        amount: '' + totalAmount + asset.denom,
+        amount: '' + totalAmount + asset.base_denom,
         displayName: verifiedDenom.display_name,
+        precision: store.getters['demeris/getDenomPrecision']({ name: asset.base_denom }) ?? 6,
       });
     }
 
-    result.sort((a, b) => {
-      const coinA = parseCoins(a.amount)[0];
-      const coinB = parseCoins(b.amount)[0];
-      return +coinB.amount - +coinA.amount || a.displayName.localeCompare(b.displayName);
-    });
-
-    return result;
+    return orderBy(
+      result,
+      [
+        (asset) => +parseCoins(asset.amount)[0].amount / Math.pow(10, asset.precision),
+        // Convert 'Gravity 7' to 'Gravity 07', otherwise sorting by string will consider it as 'Gravity 70'
+        (asset) => {
+          if (asset.base_denom.startsWith('pool')) {
+            return asset.displayName.match(/(\d+)/g)[0].padStart(2, 0);
+          }
+          return asset.displayName;
+        },
+      ],
+      ['desc'],
+    );
   };
 
   const stakingBalances = computed<StakingBalances>(() => {
