@@ -738,8 +738,6 @@ export default defineComponent({
                     txstatus.value = 'delay';
                   }, 60000);
 
-                  let stuck = false;
-
                   while (
                     txResultData.status != 'complete' &&
                     txResultData.status != 'failed' &&
@@ -755,7 +753,6 @@ export default defineComponent({
 
                     if (txResultData.status.startsWith('stuck')) {
                       txstatus.value = 'unknown';
-                      stuck = true;
                       break;
                     } else if (txResultData.status === 'IBC_receive_failed') {
                       txstatus.value = 'IBC_receive_failed';
@@ -1055,7 +1052,7 @@ export default defineComponent({
               }
             } while (retry.value);
           }
-          debugger;
+
           isTxHandlingModalOpen.value = false;
         }
         if (currentStep.value == (adjustedFeeData.value as Step[]).length - 1) {
