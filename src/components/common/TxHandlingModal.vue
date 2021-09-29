@@ -256,6 +256,15 @@
         </Collapse>
       </div>
     </div>
+    <a
+      v-if="tx.name === 'swap' && status === 'complete' && getExplorerTx(txResult.hashes[0])"
+      :href="getExplorerTx(txResult.hashes[0])"
+      rel="noopener noreferrer"
+      target="_blank"
+      class="block -text-1 font-medium mt-6 p-2"
+    >
+      {{ $t('context.transaction.viewOnExplorer') }} ↗️
+    </a>
     <div
       v-if="secondaryButton || primaryButton"
       class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
