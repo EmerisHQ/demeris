@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## 0.1.2 - TBD
+## 0.1.2 - 2021-09-29
 
 ### Updates
 
@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed add/withdraw liquidity dollar amount calculations
 - Fixed a max button without fiat
 - Fixed set a default coin for an empty wallet
+- Added support URLs
+- Added 404 redirects
 
 ### Perfomance
 
