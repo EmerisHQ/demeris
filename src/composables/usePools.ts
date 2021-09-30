@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
-import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 let usePoolsInstance = null;
@@ -81,9 +81,11 @@ function usePools() {
     }
     return (
       await Promise.all(
-        pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
+        pool.reserve_coin_denoms.map(async (item) => await getTicker(item, store.getters['demeris/getDexChain'])),
       )
-    ).join(' · ');
+    )
+      .sort()
+      .join(' · ');
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
