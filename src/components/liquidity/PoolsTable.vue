@@ -38,8 +38,14 @@
         >
           <td class="py-5 flex items-center group-hover:bg-fg transition">
             <div class="inline-flex items-center mr-4">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" class="w-8 h-8 rounded-full bg-fg z-1" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" class="w-8 h-8 rounded-full bg-fg z-0 -ml-1.5" />
+              <CircleSymbol
+                :denom="pool.reserve_coin_denoms[pool.isPoolNameReverse ? 0 : 1]"
+                class="w-8 h-8 rounded-full bg-fg z-1"
+              />
+              <CircleSymbol
+                :denom="pool.reserve_coin_denoms[pool.isPoolNameReverse ? 1 : 0]"
+                class="w-8 h-8 rounded-full bg-fg z-0 -ml-1.5"
+              />
             </div>
             <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
               {{ pool.displayName }}
@@ -91,7 +97,7 @@ export default {
     const renderedPools = ref([]);
     const poolsWithTotalLiquidityPrice = ref([]);
 
-    const { getPoolName, getReserveBaseDenoms, getLiquidityShare } = usePools();
+    const { getPoolName, getReserveBaseDenoms, getLiquidityShare, getIsPoolNameReverse } = usePools();
     const { balancesByDenom } = useAccount();
     watch(
       () => props.pools,
@@ -101,6 +107,7 @@ export default {
             props.pools.map(async (pool: any) => {
               pool.displayName = await getPoolName(pool);
               pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
+              pool.isPoolNameReverse = await getIsPoolNameReverse(pool, pool.displayName);
               return pool;
             }),
           );

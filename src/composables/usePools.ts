@@ -92,6 +92,12 @@ function usePools() {
     return await Promise.all(pool?.reserve_coin_denoms.map((denom) => getBaseDenom(denom)) ?? []);
   };
 
+  const getIsPoolNameReverse = async (pool: Pool, poolName: string) => {
+    return (
+      poolName.split(' · ')[0] === (await getTicker(pool?.reserve_coin_denoms[0], store.getters['demeris/getDexChain']))
+    );
+  };
+
   // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
   const filterPoolsByDenom = (denom: string) => {
     return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
@@ -195,6 +201,7 @@ function usePools() {
     getPoolById,
     updatePool,
     getPoolName,
+    getIsPoolNameReverse,
     getReserveBaseDenoms,
     filterPoolsByDenom,
     getPoolPrice,
