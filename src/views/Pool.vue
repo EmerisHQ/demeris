@@ -6,8 +6,8 @@
           <div class="text-muted mb-4">Gravity DEX Pool</div>
           <div class="sm:flex items-center flex-wrap gap-y-2">
             <div class="flex -space-x-1.5 mr-3 self-center">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 1 : 0]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 0]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
@@ -272,6 +272,9 @@ export default defineComponent({
     const totalLiquidityPrice = computed(() => {
       return unref(usePoolInstance.value?.totalLiquidityPrice);
     });
+    const isReversePairName = computed(() => {
+      return unref(usePoolInstance.value?.isReversePairName);
+    });
 
     const metaSource = computed(() => ({
       title: pairName.value ? pairName.value : 'Gravity DEX Pool',
@@ -375,6 +378,7 @@ export default defineComponent({
       toUSD,
       openAssetPage,
       exchangeAmount,
+      isReversePairName,
     };
   },
 });

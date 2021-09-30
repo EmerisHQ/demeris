@@ -92,9 +92,16 @@ function usePools() {
     return await Promise.all(pool?.reserve_coin_denoms.map((denom) => getBaseDenom(denom)) ?? []);
   };
 
-  const getIsPoolNameReverse = async (pool: Pool, poolName: string) => {
+  /*
+    compare an order of reserve denoms to an order of tickers 
+    ex: basecro, uatom <=> ATOM, CRO (true)
+  */
+  const getIsReversePairName = async (pool: Pool, poolName: string) => {
+    if (!pool?.reserve_coin_denoms[0] || !pool) {
+      return;
+    }
     return (
-      poolName.split(' · ')[0] === (await getTicker(pool?.reserve_coin_denoms[0], store.getters['demeris/getDexChain']))
+      poolName?.split(' · ')[0] !== (await getTicker(pool.reserve_coin_denoms[0], store.getters['demeris/getDexChain']))
     );
   };
 
@@ -201,7 +208,7 @@ function usePools() {
     getPoolById,
     updatePool,
     getPoolName,
-    getIsPoolNameReverse,
+    getIsReversePairName,
     getReserveBaseDenoms,
     filterPoolsByDenom,
     getPoolPrice,
