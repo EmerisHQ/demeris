@@ -108,6 +108,7 @@ export default function useAccount() {
     return orderBy(
       result,
       [
+        // Consider coin precision to sort by amount, as for CRO it can be high due to its precision
         (asset) => +parseCoins(asset.amount)[0].amount / Math.pow(10, asset.precision),
         // Convert 'Gravity 7' to 'Gravity 07', otherwise sorting by string will consider it as 'Gravity 70'
         (asset) => {
