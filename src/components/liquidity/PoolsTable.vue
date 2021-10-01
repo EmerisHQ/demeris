@@ -97,7 +97,7 @@ export default {
     const renderedPools = ref([]);
     const poolsWithTotalLiquidityPrice = ref([]);
 
-    const { getPairName, getReserveBaseDenoms, getLiquidityShare, getIsReversePairName } = usePools();
+    const { getPoolName, getReserveBaseDenoms, getLiquidityShare, getIsReversePairName } = usePools();
     const { balancesByDenom } = useAccount();
     watch(
       () => props.pools,
@@ -105,7 +105,7 @@ export default {
         if (newVal.length > 0) {
           renderedPools.value = await Promise.all(
             props.pools.map(async (pool: any) => {
-              pool.displayName = await getPairName(pool);
+              pool.displayName = await getPoolName(pool);
               pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
               pool.isReversePairName = await getIsReversePairName(pool, pool.displayName);
               return pool;
@@ -162,7 +162,7 @@ export default {
       keyword,
       rowClickHandler,
       openAddLiqudityPage,
-      getPairName,
+      getPoolName,
       orderPools,
       poolsWithTotalLiquidityPrice,
     };

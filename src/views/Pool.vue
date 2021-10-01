@@ -227,7 +227,7 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
-    const { getPairName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
+    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
     const hasPrices = computed(() => {
       let baseDenoms = denoms.value;
@@ -372,7 +372,7 @@ export default defineComponent({
       totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
-      getPairName,
+      getPoolName,
       ownShare,
       toUSD,
       openAssetPage,

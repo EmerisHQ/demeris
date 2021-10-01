@@ -13,7 +13,7 @@ function usePool(id: string) {
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
   });
-  const { getPoolById, getPairName, getPoolPrice, getReserveBaseDenoms, getWithdrawBalances, getIsReversePairName } =
+  const { getPoolById, getPoolName, getPoolPrice, getReserveBaseDenoms, getWithdrawBalances, getIsReversePairName } =
     usePools();
   const pool = computed(() => getPoolById(unref(id)));
   const reserveBaseDenoms = ref([]);
@@ -26,7 +26,7 @@ function usePool(id: string) {
     return await getPoolPrice(unref(pool));
   };
   const init = async () => {
-    pairName.value = await getPairName(pool.value);
+    pairName.value = await getPoolName(pool.value);
     isReversePairName.value = await getIsReversePairName(pool.value, pairName.value);
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 

@@ -250,7 +250,7 @@ export default {
     pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
     const poolId = computed(() => route.params.id as string);
 
-    const { getPairName } = usePools();
+    const { getPoolName } = usePools();
     const { balancesByDenom } = useAccount();
 
     const steps = ['amount', 'review', 'send'];
@@ -627,7 +627,7 @@ export default {
       toggleChainsModal,
       goToReview,
       goToStep,
-      getPairName,
+      getPoolName,
       goBack,
       onClose,
       resetHandler,
