@@ -90,7 +90,6 @@
                 :name="$t('generic_cta.max')"
                 class="flex"
                 :class="{ 'text-negative-text': !hasSufficientFunds }"
-                :disabled="!hasPrice"
                 size="sm"
                 variant="secondary"
                 rounded
@@ -519,7 +518,11 @@ export default defineComponent({
 
       state.currentAsset = asset;
       form.balance.denom = parseCoins(asset.amount as string)[0].denom;
-      form.on_chain = asset.on_chain as string;
+      if (location.search) {
+        form.on_chain = dexChain;
+      } else {
+        form.on_chain = asset.on_chain as string;
+      }
       form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
 
       findDefaultDestinationChain();
@@ -550,6 +553,11 @@ export default defineComponent({
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
           let asset;
+          if (location.search) {
+            const params = new URL(location.href).searchParams;
+            form.balance.denom = params.get('base_denom');
+            form.balance.amount = params.get('amount');
+          }
 
           if (form.balance.denom) {
             asset = props.balances.find((item) => {
