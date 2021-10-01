@@ -35,9 +35,6 @@
                 </th>
               </tr>
             </thead>
-            {{
-              reserveBalances[0].denom
-            }}
             <tbody>
               <tr
                 v-for="(balance, index) of reserveBalances"
