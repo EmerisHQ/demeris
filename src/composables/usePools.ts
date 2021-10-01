@@ -75,7 +75,7 @@ function usePools() {
       params: { address: hashAddress },
     });
   };
-  const getPoolName = async (pool: Pool) => {
+  const getPairName = async (pool: Pool) => {
     if (!pool) {
       return '-/-';
     }
@@ -207,7 +207,7 @@ function usePools() {
     getLiquidityShare,
     getPoolById,
     updatePool,
-    getPoolName,
+    getPairName,
     getIsReversePairName,
     getReserveBaseDenoms,
     filterPoolsByDenom,

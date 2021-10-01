@@ -7,7 +7,7 @@
           <div class="sm:flex items-center flex-wrap gap-y-2">
             <div class="flex -space-x-1.5 mr-3 self-center">
               <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 1 : 0]" size="md" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 0]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
@@ -35,7 +35,9 @@
                 </th>
               </tr>
             </thead>
-
+            {{
+              reserveBalances[0].denom
+            }}
             <tbody>
               <tr
                 v-for="(balance, index) of reserveBalances"
@@ -47,7 +49,7 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="balance.denom" /></span>
+                      <span class="font-medium"><Ticker :name="balance.denom" /></span>
                     </div>
                   </div>
                 </td>
@@ -87,12 +89,12 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                      <span class="font-medium"><Ticker :name="walletBalances.poolCoin.denom" /></span>
                     </div>
                   </div>
                 </td>
                 <td class="py-5 align-middle text-center group-hover:bg-fg transition">
-                  <Ticker :name="walletBalances.poolCoin.denom" />
+                  <Denom :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
@@ -228,7 +230,7 @@ export default defineComponent({
       return formatter.format(Number.isNaN(value) ? 0 : value);
     };
     const { balancesByDenom } = useAccount();
-    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
+    const { getPairName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
     const hasPrices = computed(() => {
       let baseDenoms = denoms.value;
@@ -373,7 +375,7 @@ export default defineComponent({
       totalLiquidityPrice,
       addLiquidityHandler,
       withdrawLiquidityHandler,
-      getPoolName,
+      getPairName,
       ownShare,
       toUSD,
       openAssetPage,
