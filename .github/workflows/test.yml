@@ -5,7 +5,6 @@ on:
     types: [ready_for_review, synchronize, opened]
   push:
     branches:
-      - main
       - develop
 
 jobs:

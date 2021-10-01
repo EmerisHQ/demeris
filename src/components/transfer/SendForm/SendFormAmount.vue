@@ -70,7 +70,6 @@
               :name="$t('generic_cta.max')"
               class="flex"
               :class="{ 'text-negative-text': !hasSufficientFunds }"
-              :disabled="!hasPrice"
               size="sm"
               variant="secondary"
               rounded
@@ -210,6 +209,7 @@
 <script lang="ts">
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
+import orderBy from 'lodash.orderby';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -411,6 +411,7 @@ export default defineComponent({
       const sortedBalances = [...availableBalances.value].sort((a, b) =>
         +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
       );
+
       const chains: Chain[] = Object.values(store.getters['demeris/getChains']);
 
       try {
@@ -423,7 +424,8 @@ export default defineComponent({
         }
 
         const availableAssets = [];
-        for (const nativeDenom of chain.denoms) {
+        const sortedDenoms = orderBy(chain.denoms, (item) => (item.name.startsWith('pool') ? 1 : -1));
+        for (const nativeDenom of sortedDenoms) {
           let asset = sortedBalances.find(
             (item) => item.on_chain === chain.chain_name && item.base_denom === nativeDenom.name,
           );

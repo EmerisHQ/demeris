@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.2 - 2021-09-29
+
+### Updates
+
+- Added additional data-tracking analytics
+- Added notification components and tooltips for offline/unavailable chains
+
+### Fixes
+
+- Added an asset send button on the swap complete modal
+- Fixed swap widget empty state switch button not working
+- Fixed keplr account switching makes a swap button not working
+- Added a correct tooltip for no pool status
+- Improved empty wallet balance error handling
+- Pre-select default asset in Send form
+- Excluded a 0 amount asset on the chain select modal
+- Added missing IBC info URL
+- Fixed multi-tx transfer interstitial disclaimer
+- Fixed add/withdraw liquidity dollar amount calculations
+- Fixed a max button without fiat
+- Fixed set a default coin for an empty wallet
+- Added support URLs
+- Added 404 redirects
+
+### Perfomance
+
 ## 0.1.1 - 2021-09-01
 
 ### Updates
