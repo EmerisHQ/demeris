@@ -262,8 +262,17 @@ export default defineComponent({
     const pairName = computed(() => {
       return unref(usePoolInstance.value?.pairName);
     });
+    const isReverse = computed(() => {
+      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
+      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
+      return firstDenom !== reserveBalanceFirstDenom;
+    });
     const reserveBalances = computed(() => {
-      return unref(usePoolInstance.value?.reserveBalances);
+      return unref(
+        isReverse.value
+          ? [...usePoolInstance.value?.reserveBalances].reverse()
+          : usePoolInstance.value?.reserveBalances,
+      );
     });
     const totalSupply = computed(() => {
       return unref(usePoolInstance.value?.totalSupply);
@@ -292,7 +301,9 @@ export default defineComponent({
         base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = isReverse.value
+        ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
+        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
