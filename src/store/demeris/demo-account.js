@@ -64,6 +64,7 @@ export const demoAccount = {
     '7ee143fd1d91345128da542f27ccd8d0e3d78fc0',
     '124a68d218eb1891421dcf2aaabc8c9a509e5071',
     '863ea62ff1f8c10bec4f377219dedf0e90ac4767',
+    'ffa2a069d1531f0301fc685ad3c9b24c4753125c',
   ],
 };
 export const demoAddresses = {
@@ -76,4 +77,7 @@ export const demoAddresses = {
   'crypto-org': 'cro1scl2vtl3lrqshmz0xaepnhklp6g2c3m8mc8738',
   'crypto-com': 'cro1scl2vtl3lrqshmz0xaepnhklp6g2c3m8mc8738',
   persistence: 'persistence1zf9x35scavvfzssaeu4240yvnfgfu5r3tsh34m',
+  ixo: 'ixo10ms58lgajy69z2x62shj0nxc6r3a0r7qkqx3gy',
+  starname: 'star1l732q6w32v0sxq0udpdd8jdjf3r4xyjuj2mukz',
+  microtick: 'micro10ms58lgajy69z2x62shj0nxc6r3a0r7qmd9y4r',
 };
