@@ -5,13 +5,16 @@
     :show-close-button="variant === 'modal' ? false : null"
     class="text-center m-auto w-full max-w-lg"
     :body-class="
-      variant === 'modal' ? [{ 'bg-brand dark:theme-inverse text-text': status === 'complete' }, 'p-6'] : null
+      variant === 'modal'
+        ? [{ 'bg-brand dark:theme-inverse text-text': status === 'complete' && txResult?.swappedPercent }, 'p-6']
+        : null
     "
     @close="emitClose"
   >
-    <div v-if="iconType" class="flex items-center justify-center my-6">
+    <div v-if="iconType || txResult?.swappedPercent === 0" class="flex items-center justify-center my-6">
       <SpinnerIcon v-if="iconType === 'pending'" :size="3" />
       <Icon v-else-if="iconType === 'warning'" name="ExclamationIcon" :icon-size="3" class="text-warning" />
+      <Icon v-else-if="iconType === 'unknown'" name="QuestionIcon" :icon-size="3" class="text-warning" />
       <Icon v-else name="WarningTriangleIcon" :icon-size="3" class="text-negative" />
     </div>
     <div
@@ -19,7 +22,7 @@
       class="swapped-image bg-center bg-no-repeat bg-cover -mt-6 -mx-6"
     />
     <div class="text-muted">
-      <template v-if="status == 'failed' || status == 'unknown'">
+      <template v-if="status == 'failed'">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           <ChainName :name="getDenom(tx.data.from_chain)" /> &rarr; <ChainName :name="tx.data.to_chain" />
         </template>
@@ -90,29 +93,34 @@
       </div>
       <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
-          You received
-          <span class="font-bold"><AmountDisplay
-            :amount="{
-              denom: txResult?.demandCoinDenom,
-              amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
-            }"
-          /></span>
-          <br />
-          on <ChainName :name="'cosmos-hub'" />.
+          <span v-if="txResult?.swappedPercent !== 0">
+            You received
+            <span class="font-bold">
+              <AmountDisplay
+                :amount="{
+                  denom: txResult?.demandCoinDenom,
+                  amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
+                }"
+              />
+            </span>
+            <br />
+            on <ChainName :name="'cosmos-hub'" />.
+          </span>
           <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+            Your
             <span class="font-bold">
               <AmountDisplay
                 :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
               />
             </span>
-            not swapped
+            on <ChainName :name="'cosmos-hub'" /> was not swapped.
           </div>
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
           <PreviewAddLiquidity :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -122,8 +130,8 @@
         <template v-else-if="tx.name === 'withdrawliquidity'">
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -136,8 +144,8 @@
         >
           <PreviewTransfer :response="txResult" :fees="txResult.fees" />
           <a
-            v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
-            :href="getExplorerLink(txResult.hashes[0])"
+            v-if="txResult?.hashes.length && getExplorerTx(txResult.hashes[0])"
+            :href="getExplorerTx(txResult.hashes[0])"
             rel="noopener noreferrer"
             target="_blank"
             class="inline-block mt-5 p-2"
@@ -170,8 +178,8 @@
         "
       >
         <a
-          v-if="txResult?.hashes.length && getExplorerLink(txResult.hashes[0])"
-          :href="getExplorerLink(txResult.hashes[0])"
+          v-if="txResult?.hashes.length && getExplorerTx(txResult.hashes[0])"
+          :href="getExplorerTx(txResult.hashes[0])"
           rel="noopener noreferrer"
           target="_blank"
           class="inline-block p-2"
@@ -188,11 +196,20 @@
         </a>
       </p>
 
-      <p v-if="status === 'unknown'" class="mt-4">
-        <a href="https://emeris.com/support" target="_blank" class="font-medium text-link hover:text-link-hover">
-          {{ $t('components.txHandlingModal.contactSupport') }}
+      <div v-if="status === 'unknown'">
+        <p class="mx-auto max-w-sm leading-copy text-muted my-2">
+          {{ subtitle }}
+        </p>
+
+        <a
+          :href="getExplorerTx({ txhash: errorDetails.ticket, chain_name: errorDetails.chain_name })"
+          rel="noopener noreferrer"
+          target="_blank"
+          class="inline-block p-2"
+        >
+          {{ $t('context.transaction.viewOnExplorer') }} ↗️
         </a>
-      </p>
+      </div>
       <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           Your
@@ -246,6 +263,15 @@
         </Collapse>
       </div>
     </div>
+    <a
+      v-if="tx.name === 'swap' && status === 'complete' && getExplorerTx(txResult.hashes[0])"
+      :href="getExplorerTx(txResult.hashes[0])"
+      rel="noopener noreferrer"
+      target="_blank"
+      class="block -text-1 font-medium mt-6 p-2"
+    >
+      {{ $t('context.transaction.viewOnExplorer') }} ↗️
+    </a>
     <div
       v-if="secondaryButton || primaryButton"
       class="max-w-sm mx-auto mt-10 gap-y-6 w-full flex flex-col items-stretch"
@@ -266,7 +292,11 @@
         variant="primary"
         :click-function="
           () => {
-            status == 'keplr-reject' || status == 'failed' ? emitRetry() : isFinal ? emitDone() : emitNext();
+            status == 'keplr-reject' || status == 'failed' || txResult.swappedPercent === 0
+              ? emitRetry()
+              : isFinal
+                ? emitDone()
+                : emitNext();
           }
         "
       />
@@ -278,7 +308,7 @@
         :click-function="unknownHandler"
       />
       <Button
-        v-if="secondaryButton && tx.name === 'swap' && status !== 'complete'"
+        v-if="(secondaryButton && tx.name === 'swap' && status !== 'complete') || txResult.swappedPercent === 0"
         :name="secondaryButton"
         variant="link"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
@@ -391,6 +421,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const { updatePool } = usePools();
+
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
         return 'pending';
@@ -398,7 +429,10 @@ export default defineComponent({
       if (props.status == 'keplr-reject') {
         return 'warning';
       }
-      if (props.status == 'failed' || props.status == 'unknown') {
+      if (props.status == 'unknown') {
+        return 'unknown';
+      }
+      if (props.status == 'failed') {
         return 'error';
       }
       return null;
@@ -422,7 +456,7 @@ export default defineComponent({
       return baseDenoms[denom] || denom;
     };
 
-    const getExplorerLink = (tx: { txhash: string; chain_name: string }) => {
+    const getExplorerLink = (chainName: string) => {
       const chainMintScanMap = {
         'cosmos-hub': 'cosmos',
         akash: 'akash',
@@ -432,13 +466,17 @@ export default defineComponent({
         persistence: 'persistence',
         sentinel: 'sentinel',
       };
-      const chain = chainMintScanMap[tx.chain_name];
+      const chain = chainMintScanMap[chainName];
 
       if (!chain) {
         return;
       }
 
-      return `https://www.mintscan.io/${chain}/txs/${tx.txhash}`;
+      return `https://www.mintscan.io/${chain}`;
+    };
+
+    const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
+      return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`;
     };
 
     // Watch for status changes
@@ -466,7 +504,9 @@ export default defineComponent({
             secondaryButton.value = '';
             break;
           case 'unknown':
-            title.value = t('components.txHandlingModal.somethingWentWrong');
+            title.value = t('components.txHandlingModal.couldNotFetchTransactionResult');
+            subtitle.value = t('components.txHandlingModal.checkTransactionOnBlockExplorer');
+            primaryButton.value = t('generic_cta.done');
             overline.value = '';
             break;
           case 'IBC_receive_failed':
@@ -550,12 +590,16 @@ export default defineComponent({
                 break;
               case 'swap':
                 updatePool(((props.tx as StepTransaction).data as SwapData).pool);
-                if (props.txResult.swappedPercent !== 100) {
+                if (props.txResult.swappedPercent === 100) {
+                  title.value = t('components.txHandlingModal.swapActionComplete');
+                } else if (props.txResult.swappedPercent === 0) {
+                  title.value = t('components.txHandlingModal.swapActionFail');
+                  primaryButton.value = t('components.txHandlingModal.tryAgain');
+                  secondaryButton.value = t('generic_cta.cancel');
+                } else {
                   title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
                   });
-                } else {
-                  title.value = t('components.txHandlingModal.swapActionComplete');
                 }
                 break;
               case 'addliquidity':
@@ -649,8 +693,9 @@ export default defineComponent({
         emitAnother();
       }
     }
+
     return {
-      getExplorerLink,
+      getExplorerTx,
       emitNext,
       emitRetry,
       emitClose,
