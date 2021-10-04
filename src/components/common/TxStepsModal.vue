@@ -733,9 +733,13 @@ export default defineComponent({
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
-                  let delayTimeout = setTimeout(() => {
-                    txstatus.value = 'delay';
-                  }, 60000);
+                  let delayTimeout;
+
+                  if (stepTx.name.startsWith('ibc')) {
+                    delayTimeout = setTimeout(() => {
+                      txstatus.value = 'delay';
+                    }, 60000);
+                  }
 
                   let stuck = false;
 
@@ -761,7 +765,9 @@ export default defineComponent({
                     }
                   }
 
-                  clearTimeout(delayTimeout);
+                  if (delayTimeout) {
+                    clearTimeout(delayTimeout);
+                  }
 
                   if (stuck) {
                     return;
