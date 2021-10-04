@@ -1,5 +1,9 @@
 <template>
-  <i18n-n tag="span" :value="value" format="currency">
+  <template v-if="!hasValue && showDash">
+    <span>-</span>
+  </template>
+
+  <i18n-n v-else tag="span" :value="value" format="currency">
     <template #currency="slotProps">
       <span>{{ slotProps.currency }}</span>
     </template>
@@ -16,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 export default defineComponent({
   props: {
@@ -28,6 +32,14 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    showDash: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props) {
+    const hasValue = computed(() => !!props.value);
+    return { hasValue };
   },
 });
 </script>
