@@ -11,10 +11,14 @@
       <span>{{ slotProps.integer }}</span>
     </template>
     <template #decimal="slotProps">
-      <span :class="{ 'text-0 sm:text-1 lg:text-2': smallDecimals }">{{ slotProps.decimal }}</span>
+      <span key="decimal" :class="[{ 'text-0 sm:text-1 lg:text-2': smallDecimals }]">
+        {{ slotProps.decimal }}
+      </span>
     </template>
     <template #fraction="slotProps">
-      <span :class="{ 'text-0 sm:text-1 lg:text-2': smallDecimals }">{{ slotProps.fraction }}</span>
+      <span key="fraction" :class="[{ 'text-0 sm:text-1 lg:text-2': smallDecimals }]">
+        {{ slotProps.fraction }}
+      </span>
     </template>
   </i18n-n>
 </template>

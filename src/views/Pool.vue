@@ -18,7 +18,12 @@
               <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
-          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
+          <CurrencyDisplay
+            v-if="hasPrices.all"
+            class="text-4 font-bold mt-3"
+            :value="totalLiquidityPrice"
+            small-decimals
+          />
         </header>
 
         <section v-if="reserveBalances && walletBalances" class="mt-16">
@@ -187,6 +192,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -201,6 +207,7 @@ export default defineComponent({
     AmountDisplay,
     AppLayout,
     CircleSymbol,
+    CurrencyDisplay,
     Denom,
     Button,
     Pools,
