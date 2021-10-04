@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ toUSD((ownShare / 100) * totalLiquidityPrice) }}
+    <CurrencyDisplay :value="(ownShare / 100) * totalLiquidityPrice" />
     <span v-if="showShare">{{ ' (' + ownShare.toFixed(2) + '%)' }}</span>
   </span>
 </template>
@@ -15,10 +15,12 @@ import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
+import CurrencyDisplay from '../ui/CurrencyDisplay.vue';
+
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
 export default defineComponent({
-  name: 'OwnLiquidityPrice',
+  components: { CurrencyDisplay },
 
   //components: { TrendingUpIcon },
 
@@ -56,22 +58,6 @@ export default defineComponent({
       return true;
     });
 
-    const toUSD = (value) => {
-      if (!hasPrices.value) {
-        return '-';
-      }
-
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-      return formatter.format(Number.isNaN(value) ? 0 : value);
-    };
-
     const ownShare = computed(() => {
       if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {
         return 0;
@@ -102,7 +88,7 @@ export default defineComponent({
       };
     });
 
-    return { ownShare, totalLiquidityPrice, toUSD };
+    return { ownShare, totalLiquidityPrice };
   },
 });
 </script>

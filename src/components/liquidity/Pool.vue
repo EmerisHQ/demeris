@@ -29,7 +29,7 @@
         </div>
       </div>
       <div v-if="hasPrices" class="mt-0.5 text-muted -text-1">
-        {{ toUSD(totalLiquidityPrice) }}
+        <CurrencyDisplay :value="totalLiquidityPrice" />
       </div>
       <OwnLiquidityPrice :pool="pool" class="block font-medium text-1 mt-auto" />
     </div>
@@ -46,10 +46,12 @@ import usePool from '@/composables/usePool';
 import { Pool } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
+import CurrencyDisplay from '../ui/CurrencyDisplay.vue';
+
 export default defineComponent({
   name: 'Pool',
 
-  components: { CircleSymbol, OwnLiquidityPrice },
+  components: { CircleSymbol, OwnLiquidityPrice, CurrencyDisplay },
 
   props: {
     pool: {
@@ -139,19 +141,7 @@ export default defineComponent({
       { immediate: true },
     );
 
-    const toUSD = (value) => {
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-      return formatter.format(Number.isNaN(value) ? 0 : value);
-    };
-
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice, toUSD };
+    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice };
   },
 });
 </script>

@@ -106,7 +106,7 @@
             </td>
 
             <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-              {{ formatUsd(getMarketCap(asset.denom)) }}
+              <CurrencyDisplay :value="getMarketCap(asset.denom)" show-dash />
             </td>
           </tr>
         </template>
@@ -163,6 +163,7 @@ import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
@@ -188,6 +189,7 @@ export default defineComponent({
     LPAsset,
     Price,
     Ticker,
+    CurrencyDisplay,
   },
 
   props: {
@@ -376,14 +378,6 @@ export default defineComponent({
       let marketCap = price * supply;
       return marketCap;
     };
-    const formatUsd = (amount: number) => {
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-
-      return amount ? formatter.format(amount) : '-';
-    };
 
     const viewAllHandler = () => {
       currentLimit.value = undefined;
@@ -400,7 +394,6 @@ export default defineComponent({
       balancesWithName,
       balancesWithMarketCap,
       getMarketCap,
-      formatUsd,
       handleClick,
       viewAllHandler,
       orderUserBalances,
