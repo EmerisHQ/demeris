@@ -1,16 +1,18 @@
 <template>
   <div class="total-price">
-    {{ displayPrice[0] }}<span :class="{ 'text-0 sm:text-1 lg:text-2': smallDecimals }">.{{ displayPrice[1] }}</span>
+    <CurrencyDisplay :value="displayPrice" :small-decimals="smallDecimals" />
   </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Balances } from '@/types/api';
+
 export default defineComponent({
-  name: 'TotalPrice',
+  components: { CurrencyDisplay },
   props: {
     balances: {
       type: Array as PropType<Balances>,
@@ -77,15 +79,7 @@ export default defineComponent({
         }
       }, 0);
       const value = liquidValue + stakedValue;
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-      return formatter.format(Number.isFinite(value) ? value : 0).split('.');
+      return Number.isFinite(value) ? value : 0;
     });
     return { displayPrice };
   },
