@@ -195,6 +195,8 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
+        couldNotFetchTransactionResult: "Couldn't fetch your transaction result",
+        checkTransactionOnBlockExplorer: 'Please check your transaction result on a block explorer.',
         chainDown: 'Transaction failed, the chain is unavailable',
         chainDownDesc:
           'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
