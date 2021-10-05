@@ -64,7 +64,7 @@
               :assets="balances"
               :selected-denom="pool.pool_coin_denom"
               :func="() => toggleChainsModal()"
-              @select="toggleChainsModal()"
+              @select="toggleChainsModal($event)"
             />
 
             <fieldset class="bg-surface shadow-card rounded-2xl">
@@ -213,6 +213,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -509,7 +510,10 @@ export default {
       updateTotalCurrencyPrice();
     };
 
-    const toggleChainsModal = () => {
+    const toggleChainsModal = (asset?: Balance) => {
+      if (asset) {
+        state.selectedAsset = asset;
+      }
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
@@ -569,7 +573,9 @@ export default {
     watch(
       balances,
       () => {
-        state.selectedAsset = balances.value[0];
+        if (!state.selectedAsset) {
+          state.selectedAsset = balances.value[0];
+        }
       },
       { immediate: true },
     );
