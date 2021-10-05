@@ -107,7 +107,12 @@ export default defineComponent({
       if (props.response) {
         const pool = getPoolById(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
-        return { pool, poolCoin };
+        const precisions = {
+          coinA: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[0] }) ?? 6,
+          coinB: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[1] }) ?? 6,
+        };
+
+        return { pool, poolCoin, precisions };
       }
 
       return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
