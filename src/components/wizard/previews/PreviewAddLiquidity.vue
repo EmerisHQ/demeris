@@ -126,7 +126,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { pools } = usePools();
+    const { pools, getReserveBaseDenoms } = usePools();
     const poolInfo = reactive({
       pairName: '-/-',
       denom: '-',
@@ -209,6 +209,7 @@ export default defineComponent({
         const pool = (data.value as Actions.AddLiquidityData).pool;
         poolInfo.pairName = await getPoolName(pool);
         poolInfo.denom = pool.pool_coin_denom;
+        poolInfo.denoms = await getReserveBaseDenoms(pool);
         return;
       }
 
