@@ -85,6 +85,7 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
+import orderBy from 'lodash.orderby';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 
@@ -121,6 +122,10 @@ export default {
     );
 
     const { nativeBalances } = useAccount();
+
+    const assetsList = computed(() => {
+      return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
+    });
 
     const state = reactive({
       selectedAsset: undefined,
@@ -167,7 +172,7 @@ export default {
       }
     });
 
-    return { balances: nativeBalances, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
+    return { balances: assetsList, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
   },
 };
 </script>
