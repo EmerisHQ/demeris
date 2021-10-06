@@ -152,8 +152,16 @@
 
             <div v-if="exchangeAmount" class="mt-2 w-full max-w-sm mx-auto">
               <ListItem inset size="md" label="Pool price">
-                <AmountDisplay :amount="{ amount: 1e6, denom: reserveBaseDenoms[0] }" /> =
-                <AmountDisplay :amount="{ amount: exchangeAmount, denom: reserveBaseDenoms[1] }" />
+                <AmountDisplay
+                  :amount="{
+                    amount: 10 ** store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms[0] }),
+                    denom: reserveBaseDenoms[0],
+                  }"
+                />
+                =
+                <AmountDisplay
+                  :amount="{ amount: exchangeAmount * 10 ** precisionDiff, denom: reserveBaseDenoms[1] }"
+                />
               </ListItem>
               <div class="mt-6 mb-2">
                 <FeeLevelSelector
@@ -329,6 +337,13 @@ export default {
         coinA: 6 - precisionA.value,
         coinB: 6 - precisionB.value,
       };
+    });
+
+    const precisionDiff = computed(() => {
+      return (
+        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) -
+        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] })
+      );
     });
 
     const exchangeAmount = computed(() => {
@@ -631,6 +646,8 @@ export default {
       goBack,
       onClose,
       resetHandler,
+      store,
+      precisionDiff,
     };
   },
 };
