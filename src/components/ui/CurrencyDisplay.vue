@@ -3,7 +3,7 @@
     <span>-</span>
   </template>
 
-  <i18n-n v-else tag="span" :value="inputValue" format="currency">
+  <i18n-n v-else tag="span" :value="value" :format="{ key: 'currency', maximumFractionDigits }">
     <template #currency="slotProps">
       <span>{{ slotProps.currency }}</span>
     </template>
@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
   props: {
@@ -45,32 +45,31 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    precision: {
+      type: Number,
+      default: 6,
+    },
   },
   setup(props) {
     const hasValue = computed(() => !!props.value);
+    const maximumFractionDigits = ref(2);
 
-    const inputValue = computed(() => {
-      if (!props.preventZero) {
-        return props.value;
-      }
+    watch(
+      () => [props.value, props.precision],
+      () => {
+        const bgValue = new BigNumber(props.value);
 
-      const bgValue = new BigNumber(props.value);
-
-      let decimalPlaces = 2;
-      const maxDecimalPlaces = 8;
-
-      // This will prevent formatting smaller values like 0.0001 to 0.00
-      while (bgValue.decimalPlaces(decimalPlaces).isZero()) {
-        decimalPlaces++;
-        if (decimalPlaces === maxDecimalPlaces) {
-          break;
+        // This will prevent formatting smaller values like 0.0001 to 0.00
+        if (bgValue.decimalPlaces(2).isZero()) {
+          maximumFractionDigits.value = props.precision;
+        } else {
+          maximumFractionDigits.value = 2;
         }
-      }
+      },
+      { immediate: true },
+    );
 
-      return bgValue.decimalPlaces(decimalPlaces).toNumber();
-    });
-
-    return { hasValue, inputValue };
+    return { hasValue, maximumFractionDigits };
   },
 });
 </script>
