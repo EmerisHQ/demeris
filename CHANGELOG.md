@@ -12,11 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Fixes
 
+- Improved pool name
 - Improved partial swap result
 - Fixed pool price display decimals
 - Fixed ability to change chain on Withdraw page
 
 ### Perfomance
+
+### Perfomance
+
 
 ## 0.1.2 - 2021-09-29
 

@@ -6,8 +6,8 @@
           <div class="text-muted mb-4">Gravity DEX Pool</div>
           <div class="sm:flex items-center flex-wrap gap-y-2">
             <div class="flex -space-x-1.5 mr-3 self-center">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 1 : 0]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
@@ -35,7 +35,6 @@
                 </th>
               </tr>
             </thead>
-
             <tbody>
               <tr
                 v-for="(balance, index) of reserveBalances"
@@ -47,7 +46,7 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="balance.denom" /></span>
+                      <span class="font-medium"><Ticker :name="balance.denom" /></span>
                     </div>
                   </div>
                 </td>
@@ -87,12 +86,12 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                      <span class="font-medium"><Ticker :name="walletBalances.poolCoin.denom" /></span>
                     </div>
                   </div>
                 </td>
                 <td class="py-5 align-middle text-center group-hover:bg-fg transition">
-                  <Ticker :name="walletBalances.poolCoin.denom" />
+                  <Denom :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
@@ -263,14 +262,26 @@ export default defineComponent({
     const pairName = computed(() => {
       return unref(usePoolInstance.value?.pairName);
     });
+    const isReverse = computed(() => {
+      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
+      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
+      return firstDenom !== reserveBalanceFirstDenom;
+    });
     const reserveBalances = computed(() => {
-      return unref(usePoolInstance.value?.reserveBalances);
+      return unref(
+        isReverse.value
+          ? [...usePoolInstance.value?.reserveBalances].reverse()
+          : usePoolInstance.value?.reserveBalances,
+      );
     });
     const totalSupply = computed(() => {
       return unref(usePoolInstance.value?.totalSupply);
     });
     const totalLiquidityPrice = computed(() => {
       return unref(usePoolInstance.value?.totalLiquidityPrice);
+    });
+    const isReversePairName = computed(() => {
+      return unref(usePoolInstance.value?.isReversePairName);
     });
 
     const metaSource = computed(() => ({
@@ -290,7 +301,9 @@ export default defineComponent({
         base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = isReverse.value
+        ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
+        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
@@ -375,6 +388,7 @@ export default defineComponent({
       toUSD,
       openAssetPage,
       exchangeAmount,
+      isReversePairName,
     };
   },
 });
