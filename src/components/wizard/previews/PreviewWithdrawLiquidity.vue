@@ -12,8 +12,10 @@
       </ListItem>
 
       <ListItem :description="$t('components.previews.addWithdrawLiquidity.priceLbl')" inset>
-        <AmountDisplay :amount="{ amount: 1e6, denom: data.pool.reserve_coin_denoms[0] }" /> =
-        <AmountDisplay :amount="{ amount: receiveAmount.ratio * 1e6, denom: data.pool.reserve_coin_denoms[1] }" />
+        <AmountDisplay :amount="{ amount: 10 ** precisions[0], denom: data.pool.reserve_coin_denoms[0] }" /> =
+        <AmountDisplay
+          :amount="{ amount: receiveAmount.ratio * 10 ** precisions[0], denom: data.pool.reserve_coin_denoms[1] }"
+        />
       </ListItem>
     </div>
 
@@ -101,13 +103,18 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { getPoolById } = usePools();
+    const { getPoolById, getReserveBaseDenoms } = usePools();
 
     const data = computed(() => {
       if (props.response) {
         const pool = getPoolById(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
-        return { pool, poolCoin };
+        const precisions = {
+          coinA: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[0] }) ?? 6,
+          coinB: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[1] }) ?? 6,
+        };
+
+        return { pool, poolCoin, precisions };
       }
 
       return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
@@ -118,6 +125,13 @@ export default defineComponent({
     });
 
     const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
+
+    const precisions = computed(() => {
+      return [
+        store.getters['demeris/getDenomPrecision']({ name: pool.value.reserveBaseDenoms[0] }) ?? 6,
+        store.getters['demeris/getDenomPrecision']({ name: pool.value.reserveBaseDenoms[1] }) ?? 6,
+      ];
+    });
 
     const receiveAmount = computed(() => {
       const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
@@ -135,6 +149,7 @@ export default defineComponent({
       pool,
       pairName,
       receiveAmount,
+      precisions,
     };
   },
 });
