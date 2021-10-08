@@ -20,7 +20,7 @@
     <div class="fees-detail__info flex items-center justify-between">
       <div class="fees-detail__info-key">{{ $t('components.feeLevelSelector.transactionFee', { txCount }) }}</div>
       <div class="fees-detail__info-value">
-        {{ formatAmount(fees[gasPriceLevel] * txCount) }}
+        <CurrencyDisplay :value="fees[gasPriceLevel] * txCount" prevent-zero />
       </div>
     </div>
 
@@ -47,7 +47,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatAmount(fees[GasPriceLevel.LOW]) }}
+          <CurrencyDisplay :value="fees[GasPriceLevel.LOW]" prevent-zero />
         </div>
       </button>
       <button
@@ -72,7 +72,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatAmount(fees[GasPriceLevel.AVERAGE]) }}
+          <CurrencyDisplay :value="fees[GasPriceLevel.AVERAGE]" prevent-zero />
         </div>
       </button>
       <button
@@ -97,7 +97,7 @@
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
-          {{ formatAmount(fees[GasPriceLevel.HIGH]) }}
+          <CurrencyDisplay :value="fees[GasPriceLevel.HIGH]" prevent-zero />
         </div>
       </button>
     </div>
@@ -130,6 +130,7 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 import { useStore } from 'vuex';
 
 import Alert from '@/components/ui/Alert.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
@@ -140,6 +141,7 @@ export default defineComponent({
   components: {
     Alert,
     Icon,
+    CurrencyDisplay,
   },
   props: {
     steps: {
@@ -386,7 +388,6 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
-      formatAmount,
       txCount,
       fees,
       swapFee,

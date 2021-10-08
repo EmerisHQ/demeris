@@ -105,7 +105,7 @@
               }"
             />
             <div v-else-if="hasPrice" class="text-muted mt-3 text-center">
-              {{ displayUSDValue }}
+              <CurrencyDisplay :value="state.usdValue" />
             </div>
           </div>
         </div>
@@ -267,6 +267,7 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -293,6 +294,7 @@ export default defineComponent({
     Price,
     USDInput,
     FeeLevelSelector,
+    CurrencyDisplay,
   },
 
   props: {
@@ -340,15 +342,6 @@ export default defineComponent({
       }
 
       return result;
-    });
-
-    const displayUSDValue = computed(() => {
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-
-      return formatter.format(+state.usdValue);
     });
 
     const hasPrice = computed(() => {
@@ -578,7 +571,6 @@ export default defineComponent({
 
     return {
       availableBalances,
-      displayUSDValue,
       form,
       hasFunds,
       onSubmit,

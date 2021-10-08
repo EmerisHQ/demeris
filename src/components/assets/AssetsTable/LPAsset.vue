@@ -3,13 +3,6 @@
     <p class="-text-1 font-normal text-muted">
       LP <Ticker :name="walletBalances.coinA.denom" /> &middot; <Ticker :name="walletBalances.coinB.denom" />
     </p>
-    <!--
-    <p>Display Name: <Denom :name="walletBalances.poolCoin.denom" /></p>
-    <p>Ticker: <Ticker :name="walletBalances.poolCoin.denom" /></p>
-    <p>Balance: <AmountDisplay :amount="walletBalances.poolCoin" /></p>
-    <p>Balance USD: {{ toUSD(ownLiquidityPrice) }}</p>
-    {{ walletBalances.poolCoin.denom }}
-    -->
   </div>
 </template>
 
@@ -17,13 +10,10 @@
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
-// import AmountDisplay from '@/components/common/AmountDisplay.vue';
-// import Denom from '@/components/common/Denom.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useAllStores } from '@/store';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
@@ -31,8 +21,6 @@ import { isNative } from '@/utils/basic';
 export default defineComponent({
   name: 'LPAsset',
   components: {
-    // AmountDisplay,
-    // Denom,
     Ticker,
   },
   props: {
@@ -44,13 +32,6 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const toUSD = (value) => {
-      let formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-      return formatter.format(value);
-    };
     const { balancesByDenom } = useAccount();
     const { pools } = usePools();
     const validPool = computed(() => {
@@ -170,7 +151,6 @@ export default defineComponent({
       reserveBalances,
       walletBalances,
       ownLiquidityPrice,
-      toUSD,
     };
   },
 });

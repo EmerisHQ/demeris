@@ -18,7 +18,12 @@
               <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
-          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
+          <CurrencyDisplay
+            v-if="hasPrices.all"
+            class="text-4 font-bold mt-3"
+            :value="totalLiquidityPrice"
+            small-decimals
+          />
         </header>
 
         <section v-if="reserveBalances && walletBalances" class="mt-16">
@@ -97,7 +102,7 @@
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice) }}</span>
+                  <CurrencyDisplay v-if="hasPrices.all" class="font-medium" :value="totalLiquidityPrice" />
                   <span v-else>–</span>
                 </td>
               </tr>
@@ -128,7 +133,7 @@
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
             <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
-              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0) }}
+              <CurrencyDisplay :value="hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0" />
             </p>
             <p class="text-muted mt-1">
               <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
@@ -186,6 +191,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -200,6 +206,7 @@ export default defineComponent({
     AmountDisplay,
     AppLayout,
     CircleSymbol,
+    CurrencyDisplay,
     Denom,
     Button,
     Pools,
@@ -215,17 +222,7 @@ export default defineComponent({
     pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
 
     const poolId = computed(() => route.params.id as string);
-    const toUSD = (value) => {
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
 
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-      return formatter.format(Number.isNaN(value) ? 0 : value);
-    };
     const { balancesByDenom } = useAccount();
     const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
@@ -385,7 +382,6 @@ export default defineComponent({
       withdrawLiquidityHandler,
       getPoolName,
       ownShare,
-      toUSD,
       openAssetPage,
       exchangeAmount,
       isReversePairName,
