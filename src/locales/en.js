@@ -153,6 +153,7 @@ export const messages = {
           'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
         memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
+        tooltip: 'Enter amount in {type}',
       },
       clipBoard: {
         copied: 'Copied!',

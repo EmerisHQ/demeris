@@ -37,7 +37,7 @@
                 size="sm"
                 variant="secondary"
                 rounded
-                :tooltip-text="`Enter amount in ${state.isUSDInputChecked ? 'crypto' : 'USD'}`"
+                :tooltip-text="$t('components.moveForm.tooltip', { type: state.isUSDInputChecked ? 'crypto' : 'USD' })"
               >
                 <Icon
                   name="SwapUDIcon"
