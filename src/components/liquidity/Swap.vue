@@ -851,6 +851,9 @@ export default defineComponent({
                 reserveBalances,
               };
               setCounterPairCoinAmount('Pay');
+            } else {
+              poolId.value = null;
+              data.selectedPoolData = null;
             }
 
             data.isLoading = false;
