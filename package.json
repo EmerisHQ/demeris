@@ -16,7 +16,7 @@
     "electron:pack": "electron-builder --dir",
     "electron:dev": "concurrently -k \"cross-env BROWSER=none npm run serve\" \"npm run electron\"",
     "electron:builder": "electron-builder",
-    "build:for:electron": "cross-env ELECTRON=true npm run build",
+    "build:for:electron": "cross-env VUE_APP_ELECTRON=true npm run build",
     "app:build": "npm run build:for:electron && npm run electron:builder"
   },
   "dependencies": {

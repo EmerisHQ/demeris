@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import Portfolio from '@/views/Portfolio.vue';
 
@@ -76,8 +76,9 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: process.env.VUE_APP_ELECTRON ? createWebHashHistory() : createWebHistory(),
   routes,
+  base: process.env.ELECTRON ? './' : '/',
   // @ts-ignore
   scrollBehavior(to, _, savedPosition) {
     if (savedPosition) {
@@ -91,5 +92,7 @@ const router = createRouter({
     }
   },
 });
+
+console.log('Electron ', process.env.VUE_APP_ELECTRON);
 
 export default router;
