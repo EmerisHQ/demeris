@@ -1,0 +1,17 @@
+{
+  "appId": "com.emeris.desktop",
+  "productName": "EmerisDesktop",
+  "copyright": "Copyright © 2021 Tendermint",
+  "mac": {
+    "category": "public.app-category.utilities"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true
+  },
+  "files": ["dist/**/*", "electron/**/*"],
+  "directories": {
+    "buildResources": "build-res",
+    "output": "dist_electron"
+  }
+}
