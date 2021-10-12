@@ -9,7 +9,13 @@
     "oneClick": false,
     "allowToChangeInstallationDirectory": true
   },
-  "files": ["dist/**/*", "electron/**/*"],
+  "files": [
+    "dist/**/*",
+    {
+      "from": "dist_electron_js",
+      "to": "electron"
+    }
+  ],
   "directories": {
     "buildResources": "build-res",
     "output": "dist_electron"

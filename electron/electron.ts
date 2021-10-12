@@ -1,6 +1,6 @@
 // electron/electron.js
-const path = require('path');
-const { app, BrowserWindow } = require('electron');
+import { app, BrowserWindow } from 'electron';
+import * as path from 'path';
 
 const isDev = process.env.IS_DEV == 'true' ? true : false;
 

@@ -17,7 +17,8 @@
     "electron:dev": "concurrently -k \"cross-env BROWSER=none npm run serve\" \"npm run electron\"",
     "electron:builder": "electron-builder",
     "build:for:electron": "cross-env VUE_APP_ELECTRON=true npm run build",
-    "app:build": "npm run build:for:electron && npm run electron:builder"
+    "compile:electron": "tsc --outDir dist_electron_js electron/*.ts",
+    "app:build": "npm run build:for:electron && npm run compile:electron && npm run electron:builder"
   },
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.14.5",
