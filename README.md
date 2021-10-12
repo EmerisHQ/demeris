@@ -32,3 +32,9 @@ npm run app:build
 ```
 
 The installation file will be located in `dist_electron`.
+
+To only rebuild Electron related code:
+
+```
+npm run compile:electron && npm run electron:builder
+```
