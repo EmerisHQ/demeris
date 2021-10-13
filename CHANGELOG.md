@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Replaced hardcoded text to i18n
 - Fixed No pool warning in Swap
 - Fixed balance check in Swap
+- Temporarily remove relayer status warnings
 
 ### Perfomance
 
