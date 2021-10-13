@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Fixes
 
+- Update Chain Down banner text
 - Improved pool name
 - Improved partial swap result
 - Fixed pool price display decimals
