@@ -12,7 +12,7 @@ import { validPools } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
-import { getWalletInstance } from '@/wallet-manager';
+import { getWalletInstance, WalletType } from '@/wallet-manager';
 
 import {
   DemerisActionParams,
@@ -57,6 +57,7 @@ export type DemerisSignParams = {
   fee: GasFee;
   registry: Registry;
   memo?: string;
+  wallet_type: WalletType;
 };
 export type DemerisSessionParams = {
   data: UserData;
@@ -182,6 +183,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { msgs, chain_name }: DemerisSignParams,
   ): Promise<DemerisTxParams>;
+  [DemerisActionTypes.SIGN_WITH_WALLET](
+    { commit, getters }: ActionContext<State, RootState>,
+    { msgs, chain_name }: DemerisSignParams,
+  ): Promise<DemerisTxParams>;
   [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
   [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({
     commit,
@@ -291,6 +296,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SIGN_WITH_KEPLR](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>;
+  [GlobalDemerisActionTypes.SIGN_WITH_WALLET](
+    ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_WALLET]>
+  ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_WALLET]>;
   [GlobalDemerisActionTypes.SIGN_IN](
     ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
   ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
@@ -563,7 +571,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         gasPriceLevel: GasPriceLevel.AVERAGE,
         hasSeenRedeem: false,
         slippagePerc: 0.1,
-        connectedWallets: isDemoAccount ? ['demo'] : ['keplr'],
+        connectedWallets: isDemoAccount ? ['demo'] : ['keplr', 'terrastation'],
         updateDT: Date.now(),
         isDemoAccount,
         walletName,
@@ -588,7 +596,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
+  async [DemerisActionTypes.SIGN_WITH_KEPLR](
+    { getters, dispatch },
+    { msgs, chain_name, fee, registry, memo, wallet_type = 'keplr' },
+  ) {
     try {
       const wallet = getters['getWallet']('keplr');
       if (!wallet) throw new SpVuexError('Wallet unavailable: Keplr');
@@ -600,6 +611,20 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.SIGN_WITH_WALLET](
+    { getters, dispatch },
+    { msgs, chain_name, fee, registry, memo, wallet_type },
+  ) {
+    try {
+      const wallet = getters['getWalletManager'](wallet_type);
+      if (!wallet) throw new SpVuexError('Wallet unavailable: Keplr');
+
+      return await wallet.requestSignature({ msgs, chain_name, fee, registry, memo });
+    } catch (e) {
+      console.error(e);
+      throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
+    }
+  },
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);

@@ -5,6 +5,7 @@ import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
 import { Chain } from '@/types/api';
+import { Wallet } from '@/wallet-manager/abstractWallet';
 
 import { demoAddresses } from '../store/demeris/demo-account';
 import { store } from '../store/index';
@@ -37,13 +38,14 @@ export function keyHashfromAddress(address: string): string {
 export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
-export async function getOwnAddress({ chain_name }) {
+export async function getOwnAddress({ chain_name, wallet_type = null }) {
   if (store.getters['demeris/isDemoAccount']) {
     return demoAddresses[chain_name];
   } else {
     const chain = store.getters['demeris/getChain']({ chain_name });
-    const key = await window.keplr.getKey(chain.node_info.chain_id);
-    return key.bech32Address;
+    const wm: Wallet = store.getters['demeris/getWalletManager'](wallet_type);
+    const address = await wm.getAddress({ chain_name, chain_id: chain.node_info.chain_id });
+    return address;
   }
 }
 export function isNative(denom: string) {

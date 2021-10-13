@@ -1,5 +1,7 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 
+import { WalletType } from '@/wallet-manager';
+
 import * as API from './api';
 import * as Base from './base';
 
@@ -68,6 +70,7 @@ export type IBCBackwardsData = {
   to_chain: string;
   to_address?: string;
   through: string;
+  wallet_type: WalletType;
 };
 export type IBCForwardsData = {
   amount: Base.Amount;
@@ -76,29 +79,35 @@ export type IBCForwardsData = {
   chain_fee?: FeeWDenom;
   to_address?: string;
   through: string;
+  wallet_type: WalletType;
 };
 export type TransferData = {
   amount: Base.Amount;
   chain_name: string;
   to_address: string;
+  wallet_type: WalletType;
 };
 export type SwapData = {
   from: Base.Amount;
   to: Base.Amount;
   pool: Pool;
+  wallet_type: WalletType;
 };
 export type AddLiquidityData = {
   coinA: Base.Amount;
   coinB: Base.Amount;
   pool: Pool;
+  wallet_type: WalletType;
 };
 export type CreatePoolData = {
   coinA: Base.Amount;
   coinB: Base.Amount;
+  wallet_type: WalletType;
 };
 export type WithdrawLiquidityData = {
   poolCoin: Base.Amount;
   pool: Pool;
+  wallet_type: WalletType;
 };
 export type StepTransaction = {
   name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';

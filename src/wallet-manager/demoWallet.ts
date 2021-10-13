@@ -1,6 +1,6 @@
 import { SpVuexError } from '@starport/vuex';
 
-import { demoAccount } from '@/store/demeris/demo-account';
+import { demoAccount, demoAddresses } from '@/store/demeris/demo-account';
 
 import { Wallet } from './abstractWallet';
 
@@ -18,6 +18,9 @@ export class DemoWallet extends Wallet {
   }
   disconnect(): void {
     throw new SpVuexError('Disconnect not implemented for Demo Account');
+  }
+  async getAddress({ chain_name }): Promise<string> {
+    return await demoAddresses[chain_name];
   }
   getKeyHashes(): string[] {
     return this._keyhashes;

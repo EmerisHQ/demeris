@@ -1,3 +1,4 @@
+import { AminoTypes } from '@cosmjs/stargate';
 import { SpVuexError } from '@starport/vuex';
 import {
   Coin,
@@ -8,8 +9,6 @@ import {
   StdFee,
   Wallet as TerraStationWallet,
 } from '@terra-money/terra.js';
-Coins.fromData();
-import { AminoTypes } from '@cosmjs/stargate';
 
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
@@ -17,9 +16,9 @@ import DemerisSigningClient from '@/store/demeris/demerisSigningClient';
 import { ChainData } from '@/store/demeris/state';
 import { keyHashfromAddress } from '@/utils/basic';
 
+import { liquidityTypes } from '../store/demeris/liquidityTypes';
 import { Wallet } from './abstractWallet';
-import { liquidityTypes } from './liquidityTypes';
-import { SignedTerraTransaction,TerraTransaction } from './types';
+import { SignedTerraTransaction, TerraTransaction } from './types';
 
 const aminoTypes = new AminoTypes({ additions: liquidityTypes, prefix: null });
 export class TerraWallet extends Wallet {
@@ -27,6 +26,7 @@ export class TerraWallet extends Wallet {
   protected _chainList: string[] = [];
   protected _keyhashes: string[] = [];
   protected _extension: Extension;
+  protected _address: string;
   constructor() {
     super('terrastation');
     this._extension = new Extension();
@@ -40,6 +40,7 @@ export class TerraWallet extends Wallet {
       });
       this._extension.on('onConnect', (w) => {
         this._keyhashes.push(keyHashfromAddress(w.address));
+        this._address = w.address;
         resolver(true);
       });
       this._extension.connect();
@@ -51,6 +52,10 @@ export class TerraWallet extends Wallet {
   }
   disconnect(): void {
     this.emit('disconnected', 'terrastation');
+  }
+
+  getAddress(): string {
+    return this._address;
   }
   getKeyHashes(): string[] {
     return this._keyhashes;
@@ -70,20 +75,16 @@ export class TerraWallet extends Wallet {
           },
         });
       }
-
-      await window.keplr.enable(chain.node_info.chain_id);
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-      const [account] = await offlineSigner.getAccounts();
-
-      const client = new DemerisSigningClient(undefined, offlineSigner, { registry: transaction.registry });
+      const account = this._address;
 
       const numbers = await store.dispatch(GlobalDemerisActionTypes.GET_NUMBERS_CHAIN, {
         subscribe: false,
         params: {
-          address: keyHashfromAddress(account.address),
+          address: keyHashfromAddress(account),
           chain_name: transaction.chain_name,
         },
       });
+      console.log(transaction.msgs.map((msg) => aminoTypes.toAmino(msg)));
       const msgs = transaction.msgs
         .map((msg) => aminoTypes.toAmino(msg))
         .map((aminoMsg) => Msg.fromData(aminoMsg as Msg.Data));
@@ -97,11 +98,11 @@ export class TerraWallet extends Wallet {
         account_number: parseInt(numbers.account_number),
         sequence: parseInt(numbers.sequence_number),
       };
-      this._extension.sign(options);
+      const tx = '' + this._extension.sign(options);
 
       const tx_data = Buffer.from(tx).toString('base64');
       //console.log(Buffer.from(tx).toString('hex'));
-      return { tx: tx_data, chain_name: transaction.chain_name, address: account.address };
+      return { tx: tx_data, chain_name: transaction.chain_name, address: account };
     } catch (e) {
       console.error(e);
       throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');

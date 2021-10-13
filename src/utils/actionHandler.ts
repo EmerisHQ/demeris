@@ -1205,7 +1205,7 @@ export async function msgFromStepTransaction(
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
-        fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
+        fromAddress: await getOwnAddress({ chain_name: data.chain_name, wallet_type: stepTx.data.wallet_type }),
       },
     });
     const registry = store.getters['cosmos.bank.v1beta1/getRegistry'];
@@ -1427,6 +1427,7 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
         to_chain: counterpartySource,
         to_address: packetData.receiver,
         through: message.packet.source_channel,
+        wallet_type: 'keplr',
       };
 
       return data;
@@ -1437,6 +1438,7 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
         amount: Array.isArray(message.amount) ? message.amount[0] : message.amount,
         to_address: message.to_address,
         chain_name: getChainFromAddress(message.from_address).chain_name,
+        wallet_type: 'keplr',
       };
 
       return data;
@@ -1446,6 +1448,7 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
       const data: Actions.CreatePoolData = {
         coinA: message.deposit_coins[0],
         coinB: message.deposit_coins[1],
+        wallet_type: 'keplr',
       };
 
       return data;
@@ -1730,7 +1733,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
 
   for (const balance of balances) {
-    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain, wallet_type: balance.wallet_types[0] });
     const hashAddress = keyHashfromAddress(ownAddress);
 
     if (balance.address !== hashAddress) {

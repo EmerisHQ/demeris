@@ -132,7 +132,7 @@ import Modal from '@/components/ui/Modal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
+import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction, TransferData } from '@/types/actions';
 import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 import { getOwnAddress } from '@/utils/basic';
 
@@ -207,18 +207,17 @@ export default defineComponent({
       */
 
       const stepTx = {
-        name: 'ibc_forward',
+        name: 'transfer',
         status: 'pending',
         data: {
           amount: {
             amount: '50000',
-            denom: 'ibc/3D543643452D8637B10EB31FBFCED62E154F9CF2CB71D50208C60D2A6718EA93',
+            denom: 'uluna',
           },
-          from_chain: 'akash',
-          to_chain: 'cosmos-hub',
-          to_address: await getOwnAddress({ chain_name: 'cosmos-hub' }),
-          through: 'channel-1',
-        } as IBCForwardsData,
+          chain_name: 'terra',
+          to_address: 'terra1gwk96n7w48e35shz3wdewmv5gpzfwdn28y9pkn',
+          wallet_type: 'terrastation',
+        } as TransferData,
       } as StepTransaction;
       /*
       const stepTx = {
@@ -254,12 +253,13 @@ export default defineComponent({
         gas: '300000',
       };
 
-      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+      let tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_WALLET, {
         msgs: [res.msg],
         chain_name: res.chain_name,
         fee,
         registry: res.registry,
         memo: 'a memo',
+        wallet_type: 'terrastation',
       });
 
       let result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);

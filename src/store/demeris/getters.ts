@@ -6,6 +6,7 @@ import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 import { WalletType } from '@/wallet-manager';
+import { Wallet } from '@/wallet-manager/abstractWallet';
 
 import { UserData } from './mutation-types';
 import { ChainData, State } from './state';
@@ -60,6 +61,7 @@ export type Getters = {
   allowCustomSlippage(state: State): boolean;
   getSlippagePerc(state: State): number;
   theme(state: State): string;
+  getWalletManager(state): { (wallet_type: WalletType): Wallet };
   getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
@@ -73,6 +75,9 @@ export type Getters = {
 };
 
 export const getters: GetterTree<State, RootState> & Getters = {
+  getWalletManager: (state) => (wallet_type) => {
+    return state._WalletManagers[wallet_type];
+  },
   getBalances: (state) => (params) => {
     return state.balances[(params as API.AddrReq).address] ?? null;
   },
@@ -225,9 +230,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
         state.keplr.bech32Address,
       ) ?? null
     );
-  },
-  getWallet: (state) => (walletType) => {
-    return state._WalletManagers[walletType] ?? null;
   },
   getKeplrAddress: (state) => {
     if (state.keplr) {

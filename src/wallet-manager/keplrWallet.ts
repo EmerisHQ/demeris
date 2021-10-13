@@ -41,6 +41,9 @@ export class KeplrWallet extends Wallet {
   disconnect(): void {
     this.emit('disconnected', 'keplr');
   }
+  async getAddress({ chain_id }): Promise<string> {
+    return (await window.keplr.getKey(chain_id)).bech32Address;
+  }
   getKeyHashes(): string[] {
     return this._keyhashes;
   }

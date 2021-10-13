@@ -12,6 +12,7 @@ export abstract class Wallet extends EventEmmiter {
   abstract connect(chain_list: string[]): void;
   abstract disconnect(): void;
   abstract getKeyHashes(): void;
+  abstract getAddress({ chain_name, chain_id }): void;
   abstract requestSignature(transaction: WalletTransaction): void;
   abstract useWithChain(chain_id: string): void;
 }
