@@ -80,4 +80,5 @@ export const demoAddresses = {
   ixo: 'ixo10ms58lgajy69z2x62shj0nxc6r3a0r7qkqx3gy',
   starname: 'star1l732q6w32v0sxq0udpdd8jdjf3r4xyjuj2mukz',
   microtick: 'micro10ms58lgajy69z2x62shj0nxc6r3a0r7qmd9y4r',
+  emoney: 'emoney10ms58lgajy69z2x62shj0nxc6r3a0r7qxkzhm2',
 };
