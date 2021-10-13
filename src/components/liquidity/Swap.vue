@@ -686,7 +686,7 @@ export default defineComponent({
       isOver: computed(() => {
         if (isSignedIn.value && data.payCoinData) {
           return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(assetsToPay?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
+            parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
               Math.pow(10, parseInt(store.getters['demeris/getDenomPrecision']({ name: data.payCoinData?.base_denom })))
             ? true
             : false;
@@ -851,6 +851,9 @@ export default defineComponent({
                 reserveBalances,
               };
               setCounterPairCoinAmount('Pay');
+            } else {
+              poolId.value = null;
+              data.selectedPoolData = null;
             }
 
             data.isLoading = false;
@@ -1002,7 +1005,7 @@ export default defineComponent({
 
     function setCounterPairCoinAmount(e) {
       if (data.isBothSelected) {
-        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData.reserves[0];
+        const isReverse = data.payCoinData.base_denom !== data.selectedPoolData?.reserves[0];
         const fromPrecision = store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom }) || 6;
         const toPrecision = store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData.base_denom });
         const precisionDiff = +fromPrecision - +toPrecision;

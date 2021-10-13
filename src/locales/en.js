@@ -140,6 +140,8 @@ export const messages = {
         from: 'From',
         to: 'To',
         selectChain: 'Select chain',
+        selectAsset: 'Select asset',
+        selectChainToSwap: 'Select the chain to swap',
       },
       sendForm: {
         title: 'Enter an address',
@@ -152,6 +154,7 @@ export const messages = {
           'If you are sending to a platform (like a centralized crypto exchange), a memo may be required to identify your transfer',
         memoPlaceholder: 'Add reference (memo)',
         agreeTerms: 'I have reviewed the address and understand that if it is incorrect, my sent funds may be lost.',
+        tooltip: 'Enter amount in {type}',
       },
       clipBoard: {
         copied: 'Copied!',
@@ -168,6 +171,7 @@ export const messages = {
         earnRewards: 'Earn rewards by staking',
         lockUp: 'Lock up your',
         andEarn: 'and earn continuous staking rewards.',
+        reward: 'Rewards',
         apy: '9.7% APY',
       },
       feeWarningModal: {
@@ -196,6 +200,8 @@ export const messages = {
         pleaseWait: 'Please wait',
         txProgress: 'Transaction in progress',
         somethingWentWrong: 'Something went wrong',
+        couldNotFetchTransactionResult: "Couldn't fetch your transaction result",
+        checkTransactionOnBlockExplorer: 'Please check your transaction result on a block explorer.',
         chainDown: 'Transaction failed, the chain is unavailable',
         chainDownDesc:
           'Unfortunately, the chain is unavailable. We are not able to do the transaction, please try later.',
@@ -226,12 +232,20 @@ export const messages = {
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
 
-        swapActionFail: 'Swap failed',
+        swapActionFail: 'Assets failed to be swapped',
         createPoolActionFail: 'Create pool failed',
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
         noRevert: 'Once executed, transactions cannot be reverted. By continuing, you agree to our',
+        received: 'You received {amount} on {chainName}.',
+        notSwapped: 'Your {amount} on {chainName} was not swapped.',
+        notTransferredAtoB: 'Your {amount} on {chainA} could not be transferred to {chainB}.',
+        notTransferred: 'Your {amount} on {chain} could not be transferred.',
+        failedSwap: 'Your {amount} could not be swapped to {denom} on the Cosmos Hub.',
+        failedAddLiquidity: 'Could not add liquidity to the {denomA} {denomB} pool on the Cosmos Hub.',
+        failedCreatePool: 'Could not create a {denomA} / {denomB} pool on the Cosmos Hub.',
+        failedWithdrawLiquidity: 'Could not withdraw liquidity from the {denom} on the Cosmos Hub.',
       },
       swap: {
         title: 'Swap',
@@ -345,6 +359,20 @@ export const messages = {
         warningViewUnverified: 'Be careful, being able to trade any asset is an advanced setting.',
         warningLPAssetPools: 'Be careful, being able to see and trade LP asset pools is an advanced setting.',
         warningSignificantLoss: 'This means that if you don’t know what you are doing, you may risk significant loss.',
+      },
+      poolBanner: {
+        title: 'What is {denom} ?',
+        body: `{denom} ({ticker}) is a liquidity pool (LP) asset. This token represents a share of
+        the {pairName} liquidity pool.`,
+        viewPool: 'View pool',
+      },
+      intro: {
+        welcomeTo: 'Welcome to',
+        introductoryGuide: 'Introductory guide',
+      },
+      moonpayBanner: {
+        title: 'Purchase {asset}',
+        poweredBy: 'Powered by Moonpay',
       },
     },
     context: {

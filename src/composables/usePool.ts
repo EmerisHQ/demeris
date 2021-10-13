@@ -13,10 +13,12 @@ function usePool(id: string) {
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
   });
-  const { getPoolById, getPoolName, getPoolPrice, getReserveBaseDenoms, getWithdrawBalances } = usePools();
+  const { getPoolById, getPoolName, getPoolPrice, getReserveBaseDenoms, getWithdrawBalances, getIsReversePairName } =
+    usePools();
   const pool = computed(() => getPoolById(unref(id)));
   const reserveBaseDenoms = ref([]);
   const pairName = ref('-/-');
+  const isReversePairName = ref(false);
 
   const totalLiquidityPrice = ref(0);
 
@@ -25,6 +27,7 @@ function usePool(id: string) {
   };
   const init = async () => {
     pairName.value = await getPoolName(pool.value);
+    isReversePairName.value = await getIsReversePairName(pool.value, pairName.value);
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 
     watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
@@ -110,6 +113,7 @@ function usePool(id: string) {
   return {
     pool,
     pairName,
+    isReversePairName,
     totalSupply,
     reserveBalances,
     reserveBaseDenoms,

@@ -22,7 +22,7 @@
               size="sm"
               variant="secondary"
               rounded
-              :tooltip-text="`Enter amount in ${state.isUSDInputChecked ? 'crypto' : 'USD'}`"
+              :tooltip-text="$t('components.sendForm.tooltip', { type: state.isUSDInputChecked ? 'crypto' : 'USD' })"
             >
               <Icon
                 name="SwapUDIcon"
@@ -86,7 +86,7 @@
             }"
           />
           <div v-else-if="!state.isUSDInputChecked && hasPrice" class="text-muted mt-3 text-center">
-            {{ displayUSDValue }}
+            <CurrencyDisplay :value="state.usdValue" />
           </div>
         </div>
       </div>
@@ -290,15 +290,6 @@ export default defineComponent({
       fees: {},
     });
 
-    const displayUSDValue = computed(() => {
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-
-      return formatter.format(+state.usdValue);
-    });
-
     const feesAmount = computed(() => {
       const result = {};
       if (state.fees) {
@@ -478,7 +469,6 @@ export default defineComponent({
       state,
       form,
       hasPrice,
-      displayUSDValue,
       hasSufficientFunds,
       denomDecimals,
       isValid,

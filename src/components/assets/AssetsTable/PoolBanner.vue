@@ -1,16 +1,32 @@
 <template>
   <Alert v-if="pool" status="info" class="mt-4" size="md" :show-icon="false">
-    <h5 class="font-bold text-text">What is <Denom :name="name" />?</h5>
+    <h5 class="font-bold text-text">
+      <i18n-t keypath="components.poolBanner.title">
+        <template #denom>
+          <Denom :name="name" />
+        </template>
+      </i18n-t>
+    </h5>
     <p class="mt-3 text-muted -text-1 leading-copy">
-      <Denom :name="name" /> (<Ticker :name="name" />) is a liquidity pool (LP) asset. This token represents a share of
-      the <strong>{{ pairName }}</strong> liquidity pool.
+      <i18n-t keypath="components.poolBanner.body">
+        <template #denom>
+          <Denom :name="name" />
+        </template>
+        <template #ticker>
+          <Ticker :name="name" />
+        </template>
+        <template #pairName>
+          <strong>{{ pairName }}</strong>
+        </template>
+      </i18n-t>
     </p>
     <p class="mt-3">
       <a
         class="font-medium cursor-pointer text-link hover:text-link-hover active:opacity-70 transition"
         href="#"
         @click="openPoolPage"
-      >View pool &rarr;</a>
+      >
+        {{ $t('components.poolBanner.viewPool') }} &rarr;</a>
     </p>
   </Alert>
 </template>

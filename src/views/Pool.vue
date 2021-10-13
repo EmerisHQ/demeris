@@ -6,8 +6,8 @@
           <div class="text-muted mb-4">Gravity DEX Pool</div>
           <div class="sm:flex items-center flex-wrap gap-y-2">
             <div class="flex -space-x-1.5 mr-3 self-center">
-              <CircleSymbol :denom="pool.reserve_coin_denoms[0]" size="md" />
-              <CircleSymbol :denom="pool.reserve_coin_denoms[1]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 1 : 0]" size="md" />
+              <CircleSymbol :denom="pool.reserve_coin_denoms[isReversePairName ? 0 : 1]" size="md" />
             </div>
             <h1 class="text-2 font-bold mt-4 sm:mt-0 sm:mr-3 flex-grow">{{ pairName }}</h1>
             <div class="text-muted mt-2">
@@ -18,7 +18,12 @@
               <template v-else> Ratio is loading&hellip; </template>
             </div>
           </div>
-          <div v-if="hasPrices.all" class="text-4 font-bold mt-3">{{ toUSD(totalLiquidityPrice) }}</div>
+          <CurrencyDisplay
+            v-if="hasPrices.all"
+            class="text-4 font-bold mt-3"
+            :value="totalLiquidityPrice"
+            small-decimals
+          />
         </header>
 
         <section v-if="reserveBalances && walletBalances" class="mt-16">
@@ -35,7 +40,6 @@
                 </th>
               </tr>
             </thead>
-
             <tbody>
               <tr
                 v-for="(balance, index) of reserveBalances"
@@ -47,7 +51,7 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="balance.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="balance.denom" /></span>
+                      <span class="font-medium"><Ticker :name="balance.denom" /></span>
                     </div>
                   </div>
                 </td>
@@ -87,18 +91,18 @@
                   <div class="flex items-center">
                     <CircleSymbol :denom="walletBalances.poolCoin.denom" class="assets-table__row__denom__avatar" />
                     <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
-                      <span class="font-medium"><Denom :name="walletBalances.poolCoin.denom" /></span>
+                      <span class="font-medium"><Ticker :name="walletBalances.poolCoin.denom" /></span>
                     </div>
                   </div>
                 </td>
                 <td class="py-5 align-middle text-center group-hover:bg-fg transition">
-                  <Ticker :name="walletBalances.poolCoin.denom" />
+                  <Denom :name="walletBalances.poolCoin.denom" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
                   <Price :amount="{ denom: walletBalances.poolCoin.denom, amount: 0 }" />
                 </td>
                 <td class="py-5 align-middle text-right group-hover:bg-fg transition">
-                  <span v-if="hasPrices.all" class="font-medium">{{ toUSD(totalLiquidityPrice) }}</span>
+                  <CurrencyDisplay v-if="hasPrices.all" class="font-medium" :value="totalLiquidityPrice" />
                   <span v-else>–</span>
                 </td>
               </tr>
@@ -129,7 +133,7 @@
               <CircleSymbol :denom="walletBalances.poolCoin.denom" size="md" />
             </div>
             <p v-if="hasPrices.all" class="mt-1 text-2 font-bold">
-              {{ toUSD(hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0) }}
+              <CurrencyDisplay :value="hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0" />
             </p>
             <p class="text-muted mt-1">
               <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
@@ -187,6 +191,7 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
@@ -201,6 +206,7 @@ export default defineComponent({
     AmountDisplay,
     AppLayout,
     CircleSymbol,
+    CurrencyDisplay,
     Denom,
     Button,
     Pools,
@@ -216,17 +222,7 @@ export default defineComponent({
     pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
 
     const poolId = computed(() => route.params.id as string);
-    const toUSD = (value) => {
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
 
-        // These options are needed to round to whole numbers if that's what you want.
-        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
-        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      });
-      return formatter.format(Number.isNaN(value) ? 0 : value);
-    };
     const { balancesByDenom } = useAccount();
     const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
 
@@ -263,14 +259,26 @@ export default defineComponent({
     const pairName = computed(() => {
       return unref(usePoolInstance.value?.pairName);
     });
+    const isReverse = computed(() => {
+      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
+      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
+      return firstDenom !== reserveBalanceFirstDenom;
+    });
     const reserveBalances = computed(() => {
-      return unref(usePoolInstance.value?.reserveBalances);
+      return unref(
+        isReverse.value
+          ? [...usePoolInstance.value?.reserveBalances].reverse()
+          : usePoolInstance.value?.reserveBalances,
+      );
     });
     const totalSupply = computed(() => {
       return unref(usePoolInstance.value?.totalSupply);
     });
     const totalLiquidityPrice = computed(() => {
       return unref(usePoolInstance.value?.totalLiquidityPrice);
+    });
+    const isReversePairName = computed(() => {
+      return unref(usePoolInstance.value?.isReversePairName);
     });
 
     const metaSource = computed(() => ({
@@ -290,7 +298,9 @@ export default defineComponent({
         base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
-      const withdrawBalances = usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
+      const withdrawBalances = isReverse.value
+        ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
+        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
 
       return {
         coinA: withdrawBalances[0],
@@ -372,9 +382,9 @@ export default defineComponent({
       withdrawLiquidityHandler,
       getPoolName,
       ownShare,
-      toUSD,
       openAssetPage,
       exchangeAmount,
+      isReversePairName,
     };
   },
 });

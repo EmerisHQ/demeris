@@ -64,7 +64,7 @@
               :assets="balances"
               :selected-denom="pool.pool_coin_denom"
               :func="() => toggleChainsModal()"
-              @select="toggleChainsModal()"
+              @select="toggleChainsModal($event)"
             />
 
             <fieldset class="bg-surface shadow-card rounded-2xl">
@@ -152,8 +152,16 @@
 
             <div v-if="exchangeAmount" class="mt-2 w-full max-w-sm mx-auto">
               <ListItem inset size="md" label="Pool price">
-                <AmountDisplay :amount="{ amount: 1e6, denom: reserveBaseDenoms[0] }" /> =
-                <AmountDisplay :amount="{ amount: exchangeAmount, denom: reserveBaseDenoms[1] }" />
+                <AmountDisplay
+                  :amount="{
+                    amount: 10 ** store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms[0] }),
+                    denom: reserveBaseDenoms[0],
+                  }"
+                />
+                =
+                <AmountDisplay
+                  :amount="{ amount: exchangeAmount * 10 ** precisionDiff, denom: reserveBaseDenoms[1] }"
+                />
               </ListItem>
               <div class="mt-6 mb-2">
                 <FeeLevelSelector
@@ -213,6 +221,7 @@ import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -329,6 +338,13 @@ export default {
         coinA: 6 - precisionA.value,
         coinB: 6 - precisionB.value,
       };
+    });
+
+    const precisionDiff = computed(() => {
+      return (
+        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) -
+        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] })
+      );
     });
 
     const exchangeAmount = computed(() => {
@@ -509,7 +525,10 @@ export default {
       updateTotalCurrencyPrice();
     };
 
-    const toggleChainsModal = () => {
+    const toggleChainsModal = (asset?: Balance) => {
+      if (asset) {
+        state.selectedAsset = asset;
+      }
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
@@ -569,7 +588,9 @@ export default {
     watch(
       balances,
       () => {
-        state.selectedAsset = balances.value[0];
+        if (!state.selectedAsset) {
+          state.selectedAsset = balances.value[0];
+        }
       },
       { immediate: true },
     );
@@ -631,6 +652,8 @@ export default {
       goBack,
       onClose,
       resetHandler,
+      store,
+      precisionDiff,
     };
   },
 };

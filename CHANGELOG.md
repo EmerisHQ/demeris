@@ -4,11 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## 0.1.3 - 2021-10-07
+## 0.1.3 - 2021-10-13
+
+### Updates
+
+- Improve asset order in Receive page
+- Add e-money support to demo account
 
 ### Fixes
 
 - Update Chain Down banner text
+- Improved pool name
+- Improved partial swap result
+- Fixed pool price display decimals
+- Fixed ability to change chain on Withdraw page
+- Replaced hardcoded text to i18n
+- Fixed No pool warning in Swap
+- Fixed balance check in Swap
+- Temporarily remove relayer status warnings
+
+### Perfomance
 
 ## 0.1.2 - 2021-09-29
 

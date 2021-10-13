@@ -720,6 +720,7 @@ export default defineComponent({
                   errorDetails.value = {
                     message: e?.message,
                     ticket: result?.ticket,
+                    chain_name: res.chain_name,
                   };
                   emit('failed');
                   txstatus.value = 'failed';
@@ -733,11 +734,13 @@ export default defineComponent({
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
 
-                  let delayTimeout = setTimeout(() => {
-                    txstatus.value = 'delay';
-                  }, 60000);
+                  let delayTimeout;
 
-                  let stuck = false;
+                  if (stepTx.name.startsWith('ibc')) {
+                    delayTimeout = setTimeout(() => {
+                      txstatus.value = 'delay';
+                    }, 60000);
+                  }
 
                   while (
                     txResultData.status != 'complete' &&
@@ -754,23 +757,21 @@ export default defineComponent({
 
                     if (txResultData.status.startsWith('stuck')) {
                       txstatus.value = 'unknown';
-                      stuck = true;
                       break;
                     } else if (txResultData.status === 'IBC_receive_failed') {
                       txstatus.value = 'IBC_receive_failed';
                     }
                   }
 
-                  clearTimeout(delayTimeout);
-
-                  if (stuck) {
-                    return;
+                  if (delayTimeout) {
+                    clearTimeout(delayTimeout);
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
                     const details = {
                       status: txResultData.status,
                       ticket: result.ticket,
+                      chain_name: res.chain_name,
                     };
 
                     if (txResultData.error) {
@@ -837,6 +838,14 @@ export default defineComponent({
                         }
 
                         txResult.value = resultData;
+                      } else {
+                        txstatus.value = 'unknown';
+                        errorDetails.value = {
+                          status: txResultData.status,
+                          ticket: txhash,
+                          chain_name,
+                        };
+                        throw new Error('Could not fetch transaction response');
                       }
                     } else {
                       txResult.value = { ...currentData.value.data };
@@ -1015,11 +1024,13 @@ export default defineComponent({
                     errorDetails.value = e.message;
                   }
                   emit('failed');
-                  event('failed_tx', {
-                    event_label: 'Failed ' + stepTx.name + ' tx',
-                    event_category: 'transactions',
-                  });
-                  txstatus.value = 'failed';
+                  if (txstatus.value !== 'unknown') {
+                    event('failed_tx', {
+                      event_label: 'Failed ' + stepTx.name + ' tx',
+                      event_category: 'transactions',
+                    });
+                    txstatus.value = 'failed';
+                  }
                   await txToResolve.value['promise'];
                   abort = true;
                   continue;
@@ -1027,6 +1038,7 @@ export default defineComponent({
               }
             } while (retry.value);
           }
+
           isTxHandlingModalOpen.value = false;
         }
         if (currentStep.value == (adjustedFeeData.value as Step[]).length - 1) {

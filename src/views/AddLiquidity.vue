@@ -33,9 +33,13 @@
 
                 <p v-if="!hasPair" class="mt-3 text-muted">{{ $t('pages.addLiquidity.selectCTA') }}</p>
                 <div v-else class="mt-3 text-muted">
-                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[0] : form.coinA.asset.base_denom" />
+                  <Ticker
+                    :name="hasPool ? pool.reserve_coin_denoms[isReversePairName ? 1 : 0] : form.coinA.asset.base_denom"
+                  />
                   <span class="mx-1">&middot;</span>
-                  <Ticker :name="hasPool ? pool.reserve_coin_denoms[1] : form.coinB.asset.base_denom" />
+                  <Ticker
+                    :name="hasPool ? pool.reserve_coin_denoms[isReversePairName ? 0 : 1] : form.coinB.asset.base_denom"
+                  />
                   {{ $t('pages.addLiquidity.pool') }}
                 </div>
               </div>
@@ -499,6 +503,9 @@ export default {
     });
     const totalSupply = computed(() => {
       return unref(usePoolInstance.value?.totalSupply);
+    });
+    const isReversePairName = computed(() => {
+      return unref(usePoolInstance.value?.isReversePairName);
     });
     const { balances: userBalances, getNativeBalances } = useAccount();
 
@@ -1108,6 +1115,7 @@ export default {
       onClose,
       tickerA,
       tickerB,
+      isReversePairName,
     };
   },
 };

@@ -20,9 +20,9 @@
       text-text
     "
   >
-    <h5 class="font-medium">Welcome to</h5>
+    <h5 class="font-medium">{{ $t('components.intro.welcomeTo') }}</h5>
     <LogoWordmark class="w-32 h-auto mt-1.5" alt="Emeris" />
-    <p class="-text-1 mt-16">Introductory guide</p>
+    <p class="-text-1 mt-16">{{ $t('components.intro.introductoryGuide') }}</p>
   </a>
 </template>
 <script lang="ts">

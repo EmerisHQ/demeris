@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
-import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 let usePoolsInstance = null;
@@ -81,13 +81,28 @@ function usePools() {
     }
     return (
       await Promise.all(
-        pool.reserve_coin_denoms.map(async (item) => await getDisplayName(item, store.getters['demeris/getDexChain'])),
+        pool.reserve_coin_denoms.map(async (item) => await getTicker(item, store.getters['demeris/getDexChain'])),
       )
-    ).join(' · ');
+    )
+      .sort()
+      .join(' · ');
   };
 
   const getReserveBaseDenoms = async (pool: Pool) => {
     return await Promise.all(pool?.reserve_coin_denoms.map((denom) => getBaseDenom(denom)) ?? []);
+  };
+
+  /*
+    compare an order of reserve denoms to an order of tickers 
+    ex: basecro, uatom <=> ATOM, CRO (true)
+  */
+  const getIsReversePairName = async (pool: Pool, poolName: string) => {
+    if (!pool?.reserve_coin_denoms[0] || !pool) {
+      return;
+    }
+    return (
+      poolName?.split(' · ')[0] !== (await getTicker(pool.reserve_coin_denoms[0], store.getters['demeris/getDexChain']))
+    );
   };
 
   // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
@@ -193,6 +208,7 @@ function usePools() {
     getPoolById,
     updatePool,
     getPoolName,
+    getIsReversePairName,
     getReserveBaseDenoms,
     filterPoolsByDenom,
     getPoolPrice,
