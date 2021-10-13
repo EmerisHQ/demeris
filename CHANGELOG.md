@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## 0.1.3 - TBD
+## 0.1.3 - 2021-10-13
 
 ### Updates
 
 - Improve asset order in Receive page
+- Add e-money support to demo account
 
 ### Fixes
 
@@ -20,8 +21,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed No pool warning in Swap
 - Fixed balance check in Swap
 - Temporarily remove relayer status warnings
-
-### Perfomance
 
 ### Perfomance
 
