@@ -31,7 +31,8 @@ export default defineComponent({
   props: {
     value: {
       type: [String, Number],
-      required: true,
+      required: false,
+      default: '',
     },
     smallDecimals: {
       type: Boolean,
