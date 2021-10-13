@@ -94,26 +94,36 @@
       <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
           <span v-if="txResult?.swappedPercent !== 0">
-            You received
-            <span class="font-bold">
-              <AmountDisplay
-                :amount="{
-                  denom: txResult?.demandCoinDenom,
-                  amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
-                }"
-              />
-            </span>
-            <br />
-            on <ChainName :name="'cosmos-hub'" />.
+            <i18n-t keypath="components.txHandlingModal.received">
+              <template #amount>
+                <span class="font-bold">
+                  <AmountDisplay
+                    :amount="{
+                      denom: txResult?.demandCoinDenom,
+                      amount: String(txResult?.demandCoinSwappedAmount > 0 ? txResult?.demandCoinSwappedAmount : 0),
+                    }"
+                  />
+                </span>
+                <br />
+              </template>
+              <template #chainName>
+                <ChainName :name="'cosmos-hub'" />
+              </template>
+            </i18n-t>
           </span>
           <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
-            Your
-            <span class="font-bold">
-              <AmountDisplay
-                :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
-              />
-            </span>
-            on <ChainName :name="'cosmos-hub'" /> was not swapped.
+            <i18n-t keypath="components.txHandlingModal.notSwapped">
+              <template #amount>
+                <span class="font-bold">
+                  <AmountDisplay
+                    :amount="{ denom: txResult?.offerCoinDenom, amount: String(txResult?.remainingOfferCoinAmount) }"
+                  />
+                </span>
+              </template>
+              <template #chainName>
+                <ChainName :name="'cosmos-hub'" />
+              </template>
+            </i18n-t>
           </div>
         </template>
         <template v-else-if="tx.name === 'addliquidity' || tx.name === 'createpool'">
@@ -212,31 +222,62 @@
       </div>
       <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-          Your
-          <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-          <ChainName :name="tx.data.from_chain" /> could not be transferred to
-          <ChainName :name="tx.data.to_chain" />
+          <i18n-t keypath="components.txHandlingModal.notTransferredAtoB">
+            <template #amount>
+              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+            </template>
+            <template #chainA>
+              <ChainName :name="tx.data.from_chain" />
+            </template>
+            <template #chainB>
+              <ChainName :name="tx.data.to_chain" />
+            </template>
+          </i18n-t>
         </template>
         <template v-if="tx.name == 'transfer'">
-          Your
-          <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" /> on
-          <ChainName :name="tx.data.chain_name" /> could not be transferred.
+          <i18n-t keypath="components.txHandlingModal.notTransferred">
+            <template #amount>
+              <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
+            </template>
+            <template #chain>
+              <ChainName :name="tx.data.chain_name" />
+            </template>
+          </i18n-t>
         </template>
         <template v-if="tx.name == 'swap'">
-          Your
-          <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" /> could not be
-          swapped to <Denom :name="getDenom(tx.data.to.denom)" /> on the Cosmos Hub.
+          <i18n-t keypath="components.txHandlingModal.failedSwap">
+            <template #amount>
+              <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" />
+            </template>
+            <template #denom>
+              <Denom :name="getDenom(tx.data.to.denom)" />
+            </template>
+          </i18n-t>
         </template>
         <template v-if="tx.name == 'addliquidity'">
-          Could not add liquidity to the <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot;
-          <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
+          <i18n-t keypath="components.txHandlingModal.failedAddLiquidity">
+            <template #denomA> <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; </template>
+            <template #denomB>
+              <Denom :name="getDenom(tx.data.coinB.denom)" />
+            </template>
+          </i18n-t>
         </template>
         <template v-if="tx.name == 'createpool'">
-          Could not create a <Denom :name="getDenom(tx.data.coinA.denom)" /> /
-          <Denom :name="getDenom(tx.data.coinB.denom)" /> pool on the Cosmos Hub.
+          <i18n-t keypath="components.txHandlingModal.failedCreatePool">
+            <template #denomA>
+              <Denom :name="getDenom(tx.data.coinA.denom)" />
+            </template>
+            <template #denomB>
+              <Denom :name="getDenom(tx.data.coinB.denom)" />
+            </template>
+          </i18n-t>
         </template>
         <template v-if="tx.name == 'withdrawliquidity'">
-          Could not withdraw liquidity from the <Denom :name="getDenom(tx.data.poolCoin.denom)" /> on the Cosmos Hub.
+          <i18n-t keypath="components.txHandlingModal.failedWithdrawLiquidity">
+            <template #denom>
+              <Denom :name="getDenom(tx.data.poolCoin.denom)" />
+            </template>
+          </i18n-t>
         </template>
         <Collapse
           v-if="errorDetails"

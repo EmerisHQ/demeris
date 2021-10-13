@@ -58,7 +58,7 @@ export default defineComponent({
 
     <template v-else>
       <div class="stake__rewards">
-        <span class="stake__rewards__label">Rewards</span>
+        <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
         <span class="stake__rewards__label__amount">0.495 ATOM</span>
         <span class="stake__rewards__label__balance">+$10.15</span>
       </div>

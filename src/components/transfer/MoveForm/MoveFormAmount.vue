@@ -3,7 +3,7 @@
     <DenomSelectModal
       v-if="state.isDenomModalOpen"
       class="fixed inset-0 z-30 bg-bg"
-      title="Select asset"
+      :title="$t('components.moveForm.selectAsset')"
       :assets="availableBalances"
       :func="() => toggleDenomModal()"
       @select="toggleDenomModal"
@@ -12,7 +12,7 @@
     <ChainSelectModal
       v-if="state.isChainsModalOpen"
       class="fixed inset-0 z-30 bg-bg"
-      title="Select chain"
+      :title="$t('components.moveForm.selectChain')"
       :show-subtitle="false"
       :assets="availableChains"
       :selected-denom="state.currentAsset.base_denom"
@@ -20,7 +20,7 @@
       @select="toggleChainsModal"
     >
       <template #description>
-        Select the chain to swap {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
+        {{ $t('components.moveForm.selectChainToSwap') }} {{ state.chainsModalSource === 'to' ? 'to' : 'from' }}.
       </template>
     </ChainSelectModal>
     <template v-if="true">
@@ -37,7 +37,7 @@
                 size="sm"
                 variant="secondary"
                 rounded
-                :tooltip-text="`Enter amount in ${state.isUSDInputChecked ? 'crypto' : 'USD'}`"
+                :tooltip-text="$t('components.moveForm.tooltip', { type: state.isUSDInputChecked ? 'crypto' : 'USD' })"
               >
                 <Icon
                   name="SwapUDIcon"
@@ -131,7 +131,7 @@
                 v-if="state.currentAsset"
                 :name="state.currentAsset?.base_denom || form.balance.denom || 'Select asset'"
               />
-              <template v-else>Select asset</template>
+              <template v-else>{{ $t('components.moveForm.selectAsset') }}</template>
             </span>
           </div>
 

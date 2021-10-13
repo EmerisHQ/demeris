@@ -22,8 +22,8 @@
     ]"
     @click="goMoon"
   >
-    <p class="text-text text-1 font-bold">{{ title }}</p>
-    <p class="text-muted -text-1 mt-14">Powered by Moonpay</p>
+    <p class="text-text text-1 font-bold">{{ $t('components.moonpayBanner.title', { asset: asset }) }}</p>
+    <p class="text-muted -text-1 mt-14">{{ $t('components.moonpayBanner.poweredBy') }}</p>
   </button>
 </template>
 
@@ -37,9 +37,9 @@ export default defineComponent({
   name: 'MoonpayBanner',
 
   props: {
-    title: {
+    asset: {
       type: String,
-      default: 'Purchase ATOM',
+      default: 'ATOM',
     },
     size: {
       type: String as PropType<'large' | 'small'>,
