@@ -1,22 +1,21 @@
 <template>
   <div>
-    <template v-if="Array.isArray(displayPrice)">
-      {{ displayPrice[0] }}<span>.{{ displayPrice[1] }}</span>
-    </template>
-    <template v-else>
-      {{ displayPrice }}
-    </template>
+    <CurrencyDisplay :value="displayPrice" show-dash />
   </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import { useStore } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'Price',
+  components: {
+    CurrencyDisplay,
+  },
   props: {
     amount: {
       type: Object as PropType<Amount>,
@@ -48,21 +47,15 @@ export default defineComponent({
           name: denom.value,
         }) ?? '6';
       let value;
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
 
       if ((props.amount as Amount).amount) {
         value = price.value
-          ? formatter
-              .format((price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision)))
-              .split('.')
-          : '–';
+          ? (price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision))
+          : 0;
       } else if (!props.showZero) {
-        value = price.value ? formatter.format(price.value).split('.') : '–';
+        value = price.value;
       } else {
-        value = formatter.format(0);
+        value = 0;
       }
 
       return value;

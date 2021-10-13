@@ -23,6 +23,15 @@ const i18n = createI18n({
   locale: 'en',
   fallbackLocale: 'en',
   messages,
+  numberFormats: {
+    en: {
+      currency: {
+        style: 'currency',
+        currency: 'USD',
+        notation: 'standard',
+      },
+    },
+  },
 });
 const emitter = mitt();
 

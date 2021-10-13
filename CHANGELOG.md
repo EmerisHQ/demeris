@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed pool price display decimals
 - Fixed ability to change chain on Withdraw page
 - Replaced hardcoded text to i18n
+- Fixed No pool warning in Swap
+- Fixed balance check in Swap
 
 ### Perfomance
 
