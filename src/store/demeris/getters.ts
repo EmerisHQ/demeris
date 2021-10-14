@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
@@ -190,9 +191,75 @@ export const getters: GetterTree<State, RootState> & Getters = {
   isVerified: (state) => (params) => {
     return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
+  getExchangeAmountFromATOMPool: (state, getters) => (base_denom: string) => {
+    const traces = getters['getAllVerifiedTraces'];
+    const pools = getters['getAllValidPools'];
+
+    let referencePool = null;
+    let reserveBaseDenoms = [];
+
+    for (const pool of pools) {
+      reserveBaseDenoms = [];
+
+      for (const coinDenom of pool.reserve_coin_denoms) {
+        reserveBaseDenoms.push(traces[coinDenom.split('/')[1]]?.base_denom ?? coinDenom);
+      }
+
+      if (reserveBaseDenoms.includes('uatom') && reserveBaseDenoms.includes(base_denom)) {
+        referencePool = pool;
+        break;
+      }
+    }
+
+    if (!referencePool) {
+      return;
+    }
+
+    const reserveBalances = getters['getBalances']({
+      address: keyHashfromAddress(referencePool.reserve_account_address),
+    });
+
+    if (!reserveBalances) {
+      return;
+    }
+
+    const amounts = reserveBaseDenoms.sort().reduce((acc, baseDenom) => {
+      const balance = reserveBalances.find((item) => item.base_denom === baseDenom);
+      return [
+        ...acc,
+        {
+          ...parseCoins(balance.amount)[0],
+          base_denom: baseDenom,
+          precision: getters['getDenomPrecision']({ name: baseDenom }) ?? 6,
+        },
+      ];
+    }, []);
+
+    const targetIndex = amounts.findIndex((item) => item.base_denom === base_denom);
+    const counterpartIndex = targetIndex === 0 ? 1 : 0;
+
+    const exchangeAmount = new BigNumber(amounts[counterpartIndex].amount)
+      .dividedBy(amounts[targetIndex].amount)
+      .toNumber();
+
+    return exchangeAmount;
+  },
   getPrice: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
-    return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
+    const marketPrice = state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
+
+    if (marketPrice) {
+      return marketPrice;
+    }
+
+    const exchangeAmountFromPool = getters['getExchangeAmountFromATOMPool'](params.denom);
+
+    if (exchangeAmountFromPool) {
+      const ATOMPrice = getters['getPrice']({ denom: 'uatom' });
+      return exchangeAmountFromPool * ATOMPrice;
+    }
+
+    return null;
   },
   getSupply: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
@@ -247,6 +314,16 @@ export const getters: GetterTree<State, RootState> & Getters = {
     } else {
       return null;
     }
+  },
+  getAllVerifiedTraces: (state) => {
+    let result = {};
+    for (const chain of Object.values(state.chains)) {
+      result = {
+        ...result,
+        ...chain.verifiedTraces,
+      };
+    }
+    return result;
   },
   getFeeAddress: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.demeris_addresses[0] ?? null;
