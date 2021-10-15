@@ -204,12 +204,7 @@
 
       <div class="w-full max-w-sm mx-auto mt-8">
         <div class="mb-2">
-          <FeeLevelSelector
-            v-if="steps.length > 0"
-            v-model:gasPriceLevel="state.gasPrice"
-            :steps="steps"
-            @update:fees="state.fees = $event"
-          />
+          <FeeLevelSelector v-if="steps.length > 0" :steps="steps" @update:fees="state.fees = $event" />
         </div>
         <Button
           :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
