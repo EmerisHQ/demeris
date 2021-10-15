@@ -44,6 +44,8 @@ export default defineComponent({
             let value = totalValue / precision;
             if (value) {
               return total + value;
+            } else {
+              return total;
             }
           } else {
             return total;
@@ -70,6 +72,8 @@ export default defineComponent({
             let value = totalValue / precision;
             if (value) {
               return total + value;
+            } else {
+              return total;
             }
           } else {
             return total;
