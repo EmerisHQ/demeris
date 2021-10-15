@@ -11,7 +11,7 @@ let usePoolsInstance = null;
 
 function usePools() {
   const stores = useAllStores();
-
+  let init = false;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
     return stores.getters['demeris/getAllValidPools'] ?? [];
@@ -22,13 +22,15 @@ function usePools() {
      a. pools is ONLY updated if the list of pools changes to avoid expensive recalculations/rerenders
      b. we get the pool's reserve account balances for any newly added pools
   */
+
   const pools = ref(allPools.value);
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
-      if (!oldPools) {
+      if (!oldPools && init) {
         return;
       }
+      init = true;
       let oldIds = [];
       if (oldPools) {
         oldIds = oldPools.map((x) => x.id);
