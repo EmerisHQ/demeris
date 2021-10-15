@@ -32,7 +32,7 @@ export default defineComponent({
         if (balance.verified) {
           if (store.getters['demeris/getPrice']({ denom: balance.base_denom })) {
             let totalValue =
-              parseFloat(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom });
+              parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom });
             let precision = Math.pow(
               10,
               parseInt(
@@ -60,8 +60,7 @@ export default defineComponent({
         if (stakedDenom.length > 0) {
           if (store.getters['demeris/getPrice']({ denom: stakedDenom[0].name })) {
             let totalValue =
-              parseFloat(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name }) ??
-              0;
+              parseInt(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name }) ?? 0;
             let precision = Math.pow(
               10,
               parseInt(
