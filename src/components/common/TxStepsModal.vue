@@ -869,8 +869,14 @@ export default defineComponent({
                   let base_denom;
                   switch (stepTx.name) {
                     case 'ibc_forward':
-                      value = getPrice((stepTx.data as IBCForwardsData).amount);
-                      base_denom = await getBaseDenom((stepTx.data as IBCForwardsData).amount.denom);
+                      value = getPrice({
+                        ...(stepTx.data as IBCForwardsData).amount,
+                        chain_name: (stepTx.data as IBCForwardsData).from_chain,
+                      });
+                      base_denom = await getBaseDenom(
+                        (stepTx.data as IBCForwardsData).amount.denom,
+                        (stepTx.data as IBCForwardsData).from_chain,
+                      );
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
@@ -886,8 +892,14 @@ export default defineComponent({
 
                       break;
                     case 'ibc_backward':
-                      value = getPrice((stepTx.data as IBCBackwardsData).amount);
-                      base_denom = await getBaseDenom((stepTx.data as IBCBackwardsData).amount.denom);
+                      value = getPrice({
+                        ...(stepTx.data as IBCBackwardsData).amount,
+                        chain_name: (stepTx.data as IBCBackwardsData).from_chain,
+                      });
+                      base_denom = await getBaseDenom(
+                        (stepTx.data as IBCBackwardsData).amount.denom,
+                        (stepTx.data as IBCBackwardsData).from_chain,
+                      );
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
@@ -1000,8 +1012,14 @@ export default defineComponent({
                       });
                       break;
                     case 'transfer':
-                      value = getPrice((stepTx.data as TransferData).amount);
-                      base_denom = await getBaseDenom((stepTx.data as TransferData).amount.denom);
+                      value = getPrice({
+                        ...(stepTx.data as TransferData).amount,
+                        chain_name: (stepTx.data as TransferData).chain_name,
+                      });
+                      base_denom = await getBaseDenom(
+                        (stepTx.data as TransferData).amount.denom,
+                        (stepTx.data as TransferData).chain_name,
+                      );
 
                       nextTick(() => {
                         event('usd_volume', {
