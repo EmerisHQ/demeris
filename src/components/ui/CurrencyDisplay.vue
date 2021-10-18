@@ -3,7 +3,7 @@
     <span>-</span>
   </template>
 
-  <i18n-n v-else tag="span" :value="value" :format="{ key: 'currency', maximumFractionDigits }">
+  <i18n-n v-else tag="span" :value="inputValue" :format="{ key: 'currency', maximumFractionDigits }">
     <template #currency="slotProps">
       <span>{{ slotProps.currency }}</span>
     </template>
@@ -54,6 +54,7 @@ export default defineComponent({
   setup(props) {
     const hasValue = computed(() => !!props.value);
     const maximumFractionDigits = ref(2);
+    const inputValue = computed(() => Number(props.value));
 
     watch(
       () => [props.value, props.precision],
@@ -70,7 +71,7 @@ export default defineComponent({
       { immediate: true },
     );
 
-    return { hasValue, maximumFractionDigits };
+    return { hasValue, maximumFractionDigits, inputValue };
   },
 });
 </script>
