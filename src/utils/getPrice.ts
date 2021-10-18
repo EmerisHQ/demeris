@@ -34,7 +34,9 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
   watch(
     () => amount as Amount,
     async (value) => {
-      denom.value = await getBaseDenom((value as Amount).denom);
+      denom.value = value.chain_name
+        ? await getBaseDenom((value as Amount).denom, value.chain_name)
+        : await getBaseDenom((value as Amount).denom);
       if (!isLoaded.value) {
         price.value = priceObserver.value;
       }
