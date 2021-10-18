@@ -150,7 +150,7 @@ import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';

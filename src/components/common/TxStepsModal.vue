@@ -275,7 +275,6 @@ import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
-  AddLiquidityData,
   CreatePoolData,
   FeeTotals,
   GasPriceLevel,
