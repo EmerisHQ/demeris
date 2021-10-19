@@ -14,12 +14,18 @@
       <div v-else class="avatar__demo relative rounded-full overflow-hidden w-full h-full"></div>
     </div>
 
-    <div class="ml-3 flex-grow" :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }">
+    <div
+      v-tippy
+      class="ml-3 flex-grow"
+      :class="{ 'hidden sm:block': !walletName, 'mr-3': keplrAccountName == 'Demo Account' }"
+      :content="isPriceApiAvailable ? '' : $t('components.avatar.priceApiDown')"
+    >
       <div class="-text-1 slashed-zero" :class="[walletName ? 'font-bold mb-0.5' : 'leading-none mb-1']">
         {{ keplrAccountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
-        <TotalPrice class="inline" :balances="balances" />
+        <TotalPrice v-if="isPriceApiAvailable" class="inline" :balances="balances" />
+        <div v-else class="text-center">-</div>
         <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
       </div>
     </div>
@@ -56,11 +62,15 @@ export default defineComponent({
     const keplrAddress = computed(() => {
       return store.getters['demeris/getKeplrAddress'];
     });
+    const isPriceApiAvailable = computed(() => {
+      return store.getters['demeris/getPrices'].Fiats.length > 0 ? true : false;
+    });
 
     return {
       balances,
       keplrAddress,
       keplrAccountName,
+      isPriceApiAvailable,
     };
   },
   methods: {
