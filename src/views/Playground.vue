@@ -133,7 +133,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { GasPriceLevel, IBCForwardsData, Pool, StepTransaction } from '@/types/actions';
-import { actionHandler, feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
+import { feeForStepTransaction, msgFromStepTransaction } from '@/utils/actionHandler';
 import { getOwnAddress } from '@/utils/basic';
 
 export default defineComponent({

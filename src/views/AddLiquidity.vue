@@ -337,7 +337,7 @@ import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
-import { AddLiquidityAction, CreatePoolAction, Pool, Step } from '@/types/actions';
+import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
