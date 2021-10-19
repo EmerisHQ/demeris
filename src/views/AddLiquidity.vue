@@ -254,8 +254,7 @@
 
                 <div class="mt-6 mb-2">
                   <FeeLevelSelector
-                    v-if="actionSteps.length > 0 && gasPrice"
-                    v-model:gasPriceLevel="gasPrice"
+                    v-if="actionSteps.length > 0"
                     :steps="actionSteps"
                     @update:fees="state.fees = $event"
                   />
@@ -300,7 +299,6 @@
         <template v-else>
           <TxStepsModal
             :data="actionSteps"
-            :gas-price-level="gasPrice"
             action-name="addliquidity"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
@@ -387,10 +385,6 @@ export default {
       receiveAmount: '',
       poolBaseDenoms: [],
       fees: {},
-    });
-
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
     });
 
     const creationFee = computed(() => {
@@ -1082,7 +1076,6 @@ export default {
 
     return {
       pageTitle,
-      gasPrice,
       creationFee,
       actionSteps,
       balances,
