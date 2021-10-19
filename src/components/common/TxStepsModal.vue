@@ -160,6 +160,7 @@
                 :click-function="
                   () => {
                     feeWarning.feeWarning = false;
+                    emitHandler('close');
                   }
                 "
               />
