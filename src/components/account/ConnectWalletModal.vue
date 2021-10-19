@@ -56,7 +56,6 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
 import AgreeWarning from '@/components/account/AgreeWarning.vue';
 import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
@@ -106,7 +105,6 @@ export default defineComponent({
   emits: ['close'],
 
   setup(_, { emit }) {
-    const router = useRouter();
     const connectKeplrRef = ref(null);
     const agreeWarningRef = ref(null);
     const getKeplrRef = ref(null);

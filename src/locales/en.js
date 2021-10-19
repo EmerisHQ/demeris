@@ -142,6 +142,7 @@ export const messages = {
         selectChain: 'Select chain',
         selectAsset: 'Select asset',
         selectChainToSwap: 'Select the chain to swap',
+        tooltip: 'Enter amount in {type}',
       },
       sendForm: {
         title: 'Enter an address',

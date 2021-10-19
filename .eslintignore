@@ -1,2 +1,4 @@
 node_modules
-**/*.js
+build
+dist
+vue.config.js

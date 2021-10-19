@@ -8,7 +8,6 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
@@ -36,27 +35,11 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pool, reserveBalances, getPoolWithdrawBalances, totalLiquidityPrice, reserveBaseDenoms, totalSupply } =
-      usePool((props.pool as Pool).id);
-
-    const store = useStore();
+    const { pool, reserveBalances, getPoolWithdrawBalances, totalLiquidityPrice, totalSupply } = usePool(
+      (props.pool as Pool).id,
+    );
 
     const { balancesByDenom } = useAccount();
-
-    const hasPrices = computed(() => {
-      let baseDenoms = reserveBaseDenoms.value;
-      if (!baseDenoms) {
-        baseDenoms = props.pool.reserve_coin_denoms;
-      }
-      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
-
-      if (!priceA || !priceB) {
-        return false;
-      }
-
-      return true;
-    });
 
     const ownShare = computed(() => {
       if (!pool.value || !totalSupply.value || !walletBalances.value?.poolCoin?.amount) {

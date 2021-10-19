@@ -1,12 +1,12 @@
 {
   "name": "emeris-web",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "homepage": "https://github.com/tendermint/vue",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "serve:staging": "vue-cli-service serve --mode staging",
+    "serve:staging": "NODE_ENV=development vue-cli-service serve --mode staging",
     "build": "vue-cli-service build",
     "build:staging": "vue-cli-service build --mode staging",
     "test:unit": "vue-cli-service test:unit",

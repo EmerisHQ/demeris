@@ -141,15 +141,13 @@ export default defineComponent({
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
     },
-    gasPriceLevel: {
-      type: String as PropType<Actions.GasPriceLevel>,
-      required: true,
-    },
   },
 
   setup(props) {
     const store = useStore();
     const denomName = ref('-');
+
+    const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
 
     const currentStep = computed(() => {
       return props.response || props.step;
@@ -195,7 +193,7 @@ export default defineComponent({
       if (firstTransaction.addFee) {
         fromAmount = (
           parseInt(fromAmount) +
-          parseFloat(firstTransaction.feeToAdd[0].amount[props.gasPriceLevel]) * store.getters['demeris/getGasLimit']
+          parseFloat(firstTransaction.feeToAdd[0].amount[gasPriceLevel.value]) * store.getters['demeris/getGasLimit']
         ).toString();
       }
       const from = {

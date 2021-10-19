@@ -87,7 +87,6 @@ import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { Balance } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
-import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
   name: 'CoinList',
@@ -167,12 +166,6 @@ export default defineComponent({
       return modifiedData;
     }
 
-    const getAmount = (amount: number | string, denom: string) => {
-      const value = amount.toString().replace(denom, '');
-      const result = parseInt(value.replace('undefined', ''));
-      return result;
-    };
-
     const getUnavailableChains = ({ base_denom, on_chain }: Partial<Balance>) => {
       const result = [];
       let uniqueChainsList: string[] = [on_chain];
@@ -196,49 +189,6 @@ export default defineComponent({
       }
 
       return result;
-    };
-
-    const sortLocale = (a, b) => {
-      if (a && b) {
-        return a.localeCompare(b, 0, { numeric: true, sensitivity: 'base' });
-      }
-      return;
-    };
-
-    const coinsWithValue = computed(() => {
-      let coins = modifiedData.value;
-      coins.map((b) => {
-        let denom = b.base_denom;
-        if (b.amount) {
-          let amount = getAmount(b.amount, b.base_denom).toString();
-          if (parseInt(amount) > 0) {
-            let value = getPrice({ denom, amount });
-            b.value = value;
-          }
-        }
-        return b;
-      });
-      return coins;
-    });
-
-    const orderCoins = (coins) => {
-      let tokens = [];
-      let zeroTokens = [];
-      let zeroLpTokens = [];
-      coins.map((c) => {
-        if (c.amount && getAmount(c.amount, c.base_denom)) {
-          tokens.push(c);
-        } else if (c.display_name?.includes('Gravity')) {
-          zeroLpTokens.push(c);
-        } else {
-          zeroTokens.push(c);
-        }
-      });
-      tokens = orderBy(tokens, [(c) => c.value], ['desc']);
-      zeroTokens = zeroTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
-      zeroLpTokens = zeroLpTokens.sort((a, b) => sortLocale(a.display_name, b.display_name));
-      tokens = tokens.concat(zeroTokens).concat(zeroLpTokens);
-      return tokens;
     };
 
     const coinsByType = computed(() => {
