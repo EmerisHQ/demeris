@@ -62,10 +62,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Redeem.vue'),
   },
   {
-    path: '/playground',
-    component: () => import('../views/Playground.vue'),
-  },
-  {
     path: '/styles',
     component: () => import('../views/Styles.vue'),
   },

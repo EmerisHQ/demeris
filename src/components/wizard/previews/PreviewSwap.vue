@@ -155,7 +155,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { getReserveBalances, getReserveBaseDenoms, getPoolById } = usePools();
+    const { getReserveBalances, getReserveBaseDenoms } = usePools();
     const { getSwapPrice } = useCalculation();
     const swapFeeRate = computed(() => {
       const feeRate =
