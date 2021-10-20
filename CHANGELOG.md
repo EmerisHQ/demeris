@@ -4,12 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## 0.1.4 - TBD
+## 0.1.4 - 2021-10-19
+
+### Updates
+
+- Added fallback price calculation from relevant ATOM pool
+- Refactored gas-price-level access
 
 ### Fixes
 
 - Fixed total balance with staking decimal amounts
 - Fixed user balance when price API is down
+- Fixed getPrice for IBC denoms on chains other than cosmos-hub
+- Added missing tooltip
+- Cleaned up console and linting warnings
 
 ## 0.1.3 - 2021-10-13
 

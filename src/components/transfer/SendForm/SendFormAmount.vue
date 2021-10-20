@@ -159,12 +159,7 @@
 
     <fieldset class="w-full max-w-sm mx-auto mt-8">
       <div class="mb-2">
-        <FeeLevelSelector
-          v-if="steps.length > 0"
-          v-model:gasPriceLevel="state.gasPrice"
-          :steps="steps"
-          @update:fees="state.fees = $event"
-        />
+        <FeeLevelSelector v-if="steps.length > 0" :steps="steps" @update:fees="state.fees = $event" />
       </div>
       <Button
         :name="hasSufficientFunds ? $t('generic_cta.continue') : $t('generic_cta.noFunds')"
@@ -223,6 +218,7 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import USDInput from '@/components/common/USDInput.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -238,6 +234,7 @@ export default defineComponent({
     AmountDisplay,
     ChainName,
     CircleSymbol,
+    CurrencyDisplay,
     Denom,
     FeeLevelSelector,
     Button,

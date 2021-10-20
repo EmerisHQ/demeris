@@ -68,7 +68,7 @@
               </div>
 
               <div class="redeem__list__item__fees">
-                <FeeLevelSelector v-if="asset.steps" :gas-price-level="gasPrice" :steps="asset.steps" />
+                <FeeLevelSelector v-if="asset.steps" :steps="asset.steps" />
                 <!--<p class="redeem__list__item__fees__label -text-1">Fees</p>
                 <span class="redeem__list__item__fees__amount">0.08 ATOM</span>//-->
               </div>
@@ -85,7 +85,6 @@
         <div class="redeem__content">
           <TxStepsModal
             :data="state.selectedAsset.steps"
-            :gas-price-level="gasPrice"
             @transacting="goToStep('transfer')"
             @failed="goToStep('review')"
             @reset="resetHandler"
@@ -97,7 +96,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, watch } from 'vue';
+import { defineComponent, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -132,10 +131,6 @@ export default defineComponent({
     });
 
     const augmentedBalances = ref([]);
-
-    const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
-    });
 
     watch(
       () => redeemableBalances.value,
@@ -237,7 +232,6 @@ export default defineComponent({
       goBack,
       goToStep,
       parseCoins,
-      gasPrice,
       getRoute,
       resetHandler,
     };

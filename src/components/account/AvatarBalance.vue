@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center" :class="{ 'py-3 px-6': walletName }">
     <div class="avatar relative w-8 h-8">
-      <!-- eslint-disable-next-line vue/no-v-html -->
+      <!-- eslint-disable vue/no-v-html -->
       <div
         class="absolute rounded-full overflow-hidden w-full h-full opacity-50 filter blur-md top-1"
         v-html="getAvatar(keplrAccountName)"

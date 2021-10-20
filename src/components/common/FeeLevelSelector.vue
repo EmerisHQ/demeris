@@ -43,7 +43,7 @@
             ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
             : 'bg-fg font-normal'
         "
-        @click="setGasPriceLevel(GasPriceLevel.LOW)"
+        @click="gasPriceLevel = GasPriceLevel.LOW"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.low') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
@@ -68,7 +68,7 @@
             ? 'bg-brand dark:theme-inverse text-text font-medium'
             : 'bg-fg font-normal'
         "
-        @click="setGasPriceLevel(GasPriceLevel.AVERAGE)"
+        @click="gasPriceLevel = GasPriceLevel.AVERAGE"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.average') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
@@ -93,7 +93,7 @@
             ? 'bg-brand dark:theme-inverse text-text font-medium'
             : 'bg-fg font-normal'
         "
-        @click="setGasPriceLevel(GasPriceLevel.HIGH)"
+        @click="gasPriceLevel = GasPriceLevel.HIGH"
       >
         <div class="fees-detail__selector-block-level">{{ $t('context.feeLevels.high') }}</div>
         <div class="fees-detail__selector-block-value font-normal -text-1 mt-0.5">
@@ -148,12 +148,8 @@ export default defineComponent({
       type: Array as PropType<Step[]>,
       required: true,
     },
-    gasPriceLevel: {
-      type: String as PropType<GasPriceLevel>,
-      required: true,
-    },
   },
-  emits: ['update:gasPriceLevel', 'update:fees'],
+  emits: ['update:fees'],
   setup(props, { emit }) {
     const lowFee = ref({});
     const avgFee = ref({});
@@ -335,25 +331,29 @@ export default defineComponent({
     const totalFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
         return (
-          formatAmount(swapDollarFee.value + fees.value[props.gasPriceLevel]) +
+          formatAmount(swapDollarFee.value + fees.value[gasPriceLevel.value]) +
           `${poolCoinSwapFees.value[0] ? ` + ${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]}` : ''} ${
             poolCoinSwapFees.value[1] ? ` + ${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''
           }`
         );
       } else {
-        return formatAmount(swapDollarFee.value + fees.value[props.gasPriceLevel] * txCount.value);
+        return formatAmount(swapDollarFee.value + fees.value[gasPriceLevel.value] * txCount.value);
       }
+    });
+
+    const gasPriceLevel = computed({
+      get: () => store.getters['demeris/getPreferredGasPriceLevel'],
+      set: (level: GasPriceLevel) => {
+        store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
+      },
     });
 
     const data = reactive({
       isFeesOpen: false,
-      setGasPriceLevel: (level: GasPriceLevel) => {
-        emit('update:gasPriceLevel', level);
-        store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
-      },
       toggle: () => {
         data.isFeesOpen = !data.isFeesOpen;
       },
+      gasPriceLevel,
       GasPriceLevel,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
     });
@@ -364,7 +364,7 @@ export default defineComponent({
         [GasPriceLevel.AVERAGE]: avgFee.value,
         [GasPriceLevel.HIGH]: highFee.value,
       };
-      emit('update:fees', feeMap[props.gasPriceLevel]);
+      emit('update:fees', feeMap[gasPriceLevel.value]);
     });
 
     const formatAmount = (value: number | string) => {

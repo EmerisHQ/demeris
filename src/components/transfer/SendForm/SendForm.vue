@@ -13,7 +13,6 @@
     <template v-else>
       <TxStepsModal
         :data="steps"
-        :gas-price-level="state.gasPrice"
         :back-route="{ name: 'Portfolio' }"
         action-name="transfer"
         @transacting="goToStep('send')"
@@ -79,7 +78,6 @@ export default defineComponent({
     });
 
     const state = reactive({
-      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
       fees: {},
     });
 

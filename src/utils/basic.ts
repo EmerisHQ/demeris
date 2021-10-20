@@ -1,7 +1,6 @@
 import { Coin } from '@cosmjs/amino';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
-import { Uint64 } from '@cosmjs/math';
 import { bech32 } from 'bech32';
 
 import { Chain } from '@/types/api';
@@ -64,7 +63,6 @@ export function autoLogin() {
 }
 export function autoLoginDemo() {
   const returning = window.localStorage.getItem('isReturnUser');
-  const last = window.localStorage.getItem('lastEmerisSession');
   if (returning) {
     return true;
   } else {

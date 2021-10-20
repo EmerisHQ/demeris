@@ -63,7 +63,6 @@
               v-else
               :step="currentData.data"
               :fees="currentData.fees"
-              :gas-price-level="gasPriceLevel"
               :context="variant"
               :class="{ '-text-1': variant === 'widget' }"
             />
@@ -276,7 +275,6 @@ import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
-  AddLiquidityData,
   CreatePoolData,
   FeeTotals,
   GasPriceLevel,
@@ -330,10 +328,6 @@ export default defineComponent({
       type: Array as PropType<Step[]>,
       required: true,
     },
-    gasPriceLevel: {
-      type: String as PropType<GasPriceLevel>,
-      required: true,
-    },
     backRoute: {
       type: [Object, String] as PropType<RouteLocationRaw>,
       default: undefined,
@@ -348,6 +342,9 @@ export default defineComponent({
     const emitter = useEmitter();
 
     const { t } = useI18n({ useScope: 'global' });
+
+    const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
+
     const isSignedIn = computed(() => {
       return store.getters['demeris/isSignedIn'];
     });
@@ -430,7 +427,7 @@ export default defineComponent({
       chainsStatus.value = await chainStatusForSteps(props.data);
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
-          return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
+          return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
         }),
       );
     });
@@ -453,14 +450,14 @@ export default defineComponent({
             });
             if (sourceBalance) {
               const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
-              const fee = parseInt(stepTx.feeToAdd[0].amount[props.gasPriceLevel]);
+              const fee = parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]);
               const txAmount = parseInt((stepTx.data as IBCBackwardsData).amount.amount);
               if (txAmount + fee > amount) {
                 if (txAmount == amount) {
                   stepTx.feeToAdd = [];
                   stepTx.addFee = false;
                 } else {
-                  stepTx.feeToAdd[0].amount[props.gasPriceLevel] = amount - fee + '';
+                  stepTx.feeToAdd[0].amount[gasPriceLevel.value] = amount - fee + '';
                 }
               }
             }
@@ -474,7 +471,7 @@ export default defineComponent({
             });
             if (baseDenomBalance) {
               const amount = parseCoins(baseDenomBalance.amount)[0];
-              if (parseInt(stepTx.feeToAdd[0].amount[props.gasPriceLevel]) < parseInt(amount.amount)) {
+              if (parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]) < parseInt(amount.amount)) {
                 stepTx.feeToAdd = [];
                 stepTx.addFee = false;
               }
@@ -490,7 +487,7 @@ export default defineComponent({
               }
             });
             const fee =
-              parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[props.gasPriceLevel]) *
+              parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[gasPriceLevel.value]) *
               store.getters['demeris/getGasLimit'];
             const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
             if (baseDenomBalance) {
@@ -513,7 +510,7 @@ export default defineComponent({
         chainsStatus.value = await chainStatusForSteps(props.data);
         fees.value = await Promise.all(
           (newData as Step[])?.map(async (step) => {
-            return await feeForStep(step, props.gasPriceLevel as GasPriceLevel);
+            return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
           }),
         );
       },
@@ -586,7 +583,7 @@ export default defineComponent({
               adjustedFeeData.value,
               toCheckBalances,
               newData,
-              props.gasPriceLevel,
+              gasPriceLevel.value,
             );
             feeWarning.value.feeWarning = true;
           } else {
@@ -594,7 +591,7 @@ export default defineComponent({
               adjustedFeeData.value,
               toCheckBalances,
               newData,
-              props.gasPriceLevel,
+              gasPriceLevel.value,
             );
           }
           interstitialProceed.value = false;
@@ -667,14 +664,14 @@ export default defineComponent({
               };
 
               txToResolve.value = txToResolvePromise;
-              let res = await msgFromStepTransaction(stepTx, props.gasPriceLevel);
+              let res = await msgFromStepTransaction(stepTx, gasPriceLevel.value);
               const feeOptions = await feeForStepTransaction(stepTx);
               const fee = {
                 amount: [
                   {
                     amount:
                       '' +
-                      parseFloat(feeOptions[0].amount[props.gasPriceLevel as GasPriceLevel]) *
+                      parseFloat(feeOptions[0].amount[gasPriceLevel.value as GasPriceLevel]) *
                         store.getters['demeris/getGasLimit'],
                     denom: feeOptions[0].denom,
                   },
