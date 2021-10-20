@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -103,7 +103,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { getPoolById, getReserveBaseDenoms } = usePools();
+    const { getPoolById } = usePools();
 
     const data = computed(() => {
       if (props.response) {

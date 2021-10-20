@@ -40,7 +40,6 @@ import Ticker from '@/components/common/Ticker.vue';
 import Alert from '@/components/ui/Alert.vue';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useAllStores } from '@/store';
 
 export default defineComponent({
   name: 'PoolBanner',

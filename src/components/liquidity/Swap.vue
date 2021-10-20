@@ -16,7 +16,6 @@
     <ReviewModal
       v-if="isOpen && !isSlippageSettingModalOpen"
       :data="actionHandlerResult"
-      :gas-price-level="gasPrice"
       action-name="swap"
       variant="widget"
       @close="reviewModalToggle"
@@ -127,11 +126,7 @@
       </div>
 
       <div class="-text-1 px-6">
-        <FeeLevelSelector
-          v-if="actionHandlerResult && actionHandlerResult.length > 0"
-          v-model:gasPriceLevel="gasPrice"
-          :steps="actionHandlerResult"
-        />
+        <FeeLevelSelector v-if="actionHandlerResult && actionHandlerResult.length > 0" :steps="actionHandlerResult" />
       </div>
     </div>
   </div>
@@ -155,7 +150,7 @@ import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { GasPriceLevel, SwapAction } from '@/types/actions';
+import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
@@ -210,14 +205,8 @@ export default defineComponent({
     const dexStatus = computed(() => {
       return store.getters['demeris/getChainStatus']({ chain_name: store.getters['demeris/getDexChain'] });
     });
-    const gasPrice = ref('');
-    watch(
-      () => store.getters['demeris/getPreferredGasPriceLevel'],
-      () => {
-        gasPrice.value = store.getters['demeris/getPreferredGasPriceLevel'] || GasPriceLevel.AVERAGE;
-      },
-      { immediate: true },
-    );
+
+    const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
 
     const verifiedDenoms = computed(() => {
       return store.getters['demeris/getVerifiedDenoms'] ?? [];
@@ -746,7 +735,7 @@ export default defineComponent({
         if (data.payCoinData?.denom.startsWith('ibc') || data.payCoinData?.denom === 'uatom') {
           const fees = await getFeeForChain(data.payCoinData.on_chain);
           txFee.value =
-            fees[0].amount[gasPrice.value] *
+            fees[0].amount[gasPriceLevel.value] *
             10 ** store.getters['demeris/getDenomPrecision']({ name: data.payCoinData.base_denom });
         } else {
           return (txFee.value = 0);
@@ -1083,7 +1072,6 @@ export default defineComponent({
       isSlippageSettingModalOpen,
       slippageSettingModalToggle,
       getDisplayPrice,
-      gasPrice,
       availablePaySide,
       otherAssetsToPay,
       otherAssetsToReceive,

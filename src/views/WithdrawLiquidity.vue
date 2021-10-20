@@ -166,7 +166,6 @@
               <div class="mt-6 mb-2">
                 <FeeLevelSelector
                   v-if="actionSteps.length > 0"
-                  v-model:gasPriceLevel="state.gasPrice"
                   :steps="actionSteps"
                   @update:fees="state.fees = $event"
                 />
@@ -186,7 +185,6 @@
         <template v-else>
           <TxStepsModal
             :data="actionSteps"
-            :gas-price-level="state.gasPrice"
             action-name="withdrawliquidity"
             @transacting="goToStep('send')"
             @failed="goToStep('review')"
@@ -199,7 +197,7 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
+import { computed, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -271,7 +269,6 @@ export default {
       isMaximumAmountChecked: false,
       selectedAsset: undefined,
       fees: {},
-      gasPrice: store.getters['demeris/getPreferredGasPriceLevel'],
       totalEstimatedPrice: '',
       receiveAmounts: {
         coinA: {
