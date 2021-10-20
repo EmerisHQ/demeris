@@ -111,7 +111,7 @@
               </template>
             </i18n-t>
           </span>
-          <div v-if="txResult.swappedPercent < 100" style="margin: 1.6rem 0">
+          <div v-if="txResult?.swappedPercent < 100" style="margin: 1.6rem 0">
             <i18n-t keypath="components.txHandlingModal.notSwapped">
               <template #amount>
                 <span class="font-bold">
@@ -333,7 +333,7 @@
         variant="primary"
         :click-function="
           () => {
-            status == 'keplr-reject' || status == 'failed' || txResult.swappedPercent === 0
+            status == 'keplr-reject' || status == 'failed' || txResult?.swappedPercent === 0
               ? emitRetry()
               : isFinal
                 ? emitDone()
@@ -349,7 +349,7 @@
         :click-function="unknownHandler"
       />
       <Button
-        v-if="(secondaryButton && tx.name === 'swap' && status !== 'complete') || txResult.swappedPercent === 0"
+        v-if="(secondaryButton && tx.name === 'swap' && status !== 'complete') || txResult?.swappedPercent === 0"
         :name="secondaryButton"
         variant="link"
         :click-function="status == 'complete' && isFinal ? emitAnother : emitClose"
