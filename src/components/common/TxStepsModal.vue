@@ -159,6 +159,7 @@
                 :click-function="
                   () => {
                     feeWarning.feeWarning = false;
+                    emitHandler('reset');
                   }
                 "
               />
