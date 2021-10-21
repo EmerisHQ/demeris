@@ -7,6 +7,7 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
+    <TransactionsCenter />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -23,6 +24,7 @@ import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
+import TransactionsCenter from '@/features/transactions/TransactionsCenter.vue';
 import { useAllStores } from '@/store';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
@@ -35,6 +37,7 @@ export default defineComponent({
     EphemerisSpinner,
     ChainDownWrapper,
     CookieConsent,
+    TransactionsCenter,
   },
 
   setup() {
