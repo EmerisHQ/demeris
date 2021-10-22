@@ -1,31 +1,3 @@
-<script lang="tsx">
-import type { PropType } from 'vue';
-import { defineComponent } from 'vue';
-
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Button from '@/components/ui/Button.vue';
-import type { StakingBalance } from '@/types/api';
-
-export default defineComponent({
-  components: {
-    Button,
-    CircleSymbol,
-    Ticker,
-  },
-  props: {
-    denom: {
-      type: String,
-      required: true,
-    },
-    stakingBalances: {
-      type: Array as PropType<StakingBalance[]>,
-      default: () => [],
-    },
-  },
-});
-</script>
-
 <template>
   <div>
     <template v-if="!stakingBalances.length">
@@ -47,8 +19,14 @@ export default defineComponent({
             {{ $t('components.stakeTable.lockUp') }} <Ticker :name="denom" /> {{ $t('components.stakeTable.andEarn') }}
           </p>
         </div>
-
-        <Button variant="secondary" name="Coming soon" class="mt-8" disabled :full-width="false" />
+        {{ isStakingAvailable }}
+        <Button
+          variant="secondary"
+          :name="$t('components.stakeTable.comingSoon')"
+          class="mt-8"
+          disabled
+          :full-width="false"
+        />
 
         <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
           <CircleSymbol :denom="denom" size="xl" />
@@ -80,8 +58,43 @@ export default defineComponent({
     </template>
   </div>
 </template>
+<script lang="tsx">
+import { computed, PropType } from 'vue';
+import { defineComponent } from 'vue';
 
-<style lang="scss">
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Ticker from '@/components/common/Ticker.vue';
+import Button from '@/components/ui/Button.vue';
+import type { StakingBalance } from '@/types/api';
+
+export default defineComponent({
+  components: {
+    Button,
+    CircleSymbol,
+    Ticker,
+  },
+  props: {
+    denom: {
+      type: String,
+      required: true,
+    },
+    stakingBalances: {
+      type: Array as PropType<StakingBalance[]>,
+      default: () => [],
+    },
+  },
+  setup() {
+    const isStakingAvailable = computed(() => {
+      return true;
+    });
+
+    return {
+      isStakingAvailable,
+    };
+  },
+});
+</script>
+<style lang="scss" scoped>
 .stake {
   &__banner {
     background-image: url('~@/assets/images/gold-ephemeris-ring-1.png'),

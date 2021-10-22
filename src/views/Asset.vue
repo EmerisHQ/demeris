@@ -116,6 +116,14 @@
           </ul>
         </section>
 
+        <!-- Staking -->
+
+        <section v-if="assetConfig?.stakable" class="mt-16">
+          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
+
+          <StakeTable class="mt-8" :denom="denom" />
+        </section>
+
         <!-- Pools -->
 
         <section v-if="poolsDisplay.length" class="mt-16">
@@ -130,14 +138,6 @@
           </header>
 
           <Pools :pools="poolsDisplay" class="mt-8" />
-        </section>
-
-        <!-- Staking -->
-
-        <section v-if="assetConfig?.stakable" class="mt-16">
-          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
-
-          <StakeTable class="mt-8" :denom="denom" />
         </section>
       </main>
 
