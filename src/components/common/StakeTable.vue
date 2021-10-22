@@ -29,9 +29,10 @@
 
         <Button
           variant="secondary"
-          :name="$t('components.stakeTable.comingSoon')"
+          :name="stakingButtonName"
           class="mt-8"
-          disabled
+          :disabled="!isStakingAvailable"
+          :click-function="stakeAsset"
           :full-width="false"
         />
 
@@ -68,10 +69,12 @@
 <script lang="tsx">
 import { computed, PropType } from 'vue';
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
+import useDenoms from '@/composables/useDenoms';
 import type { StakingBalance } from '@/types/api';
 
 export default defineComponent({
@@ -90,13 +93,34 @@ export default defineComponent({
       default: () => [],
     },
   },
-  setup() {
+  setup(props) {
+    const { useDenom } = useDenoms();
+    const { t } = useI18n({ useScope: 'global' });
+
     const isStakingAvailable = computed(() => {
+      /*
+        if we gurantee staking is always available
+        this value is needless
+
+        TODO: implement staking availablility check
+      */
       return true;
     });
 
+    const stakingButtonName = computed(() => {
+      return isStakingAvailable.value
+        ? t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value })
+        : t('components.stakeTable.comingSoon');
+    });
+
+    const stakeAsset = () => {
+      alert('test');
+    };
+
     return {
       isStakingAvailable,
+      stakingButtonName,
+      stakeAsset,
     };
   },
 });

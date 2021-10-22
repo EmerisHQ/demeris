@@ -174,6 +174,7 @@ export const messages = {
         lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
         apy: 'APY',
         reward: 'Rewards',
+        stakeAsset: 'Stake {ticker}S',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
