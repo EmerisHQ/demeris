@@ -1,6 +1,22 @@
 <template>
   <div>
-    <template v-if="!stakingBalances.length">
+    <!-- Title -->
+    <div class="flex">
+      <h2 class="text-2 font-bold" :class="isStakingSelected ? '' : 'text-inactive'" @click="selectTab(1)">
+        {{ $t('components.stakeTable.staking') }}
+      </h2>
+      <h2
+        v-if="isUnstakingAssetExist"
+        class="text-2 font-bold ml-6"
+        :class="!isStakingSelected ? '' : 'text-inactive'"
+        @click="selectTab"
+      >
+        {{ $t('components.stakeTable.unstaking') }}
+      </h2>
+    </div>
+
+    <!-- TEST-CODE: false -->
+    <template v-if="false && !stakingBalances.length">
       <div
         class="
           stake__banner
@@ -21,7 +37,7 @@
                 <Ticker :name="denom" />
               </template>
               <template #apy>
-                <strong>{{ 9.7 }}% {{ $t('components.stakeTable.apy') }}.</strong>
+                <strong>{{ assetStakingAPY }}% {{ $t('components.stakeTable.apy') }}.</strong>
               </template>
             </i18n-t>
           </p>
@@ -43,32 +59,35 @@
     </template>
 
     <template v-else>
-      <div class="stake__rewards">
-        <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
-        <span class="stake__rewards__label__amount">0.495 ATOM</span>
-        <span class="stake__rewards__label__balance">+$10.15</span>
+      <div v-show="isStakingSelected">
+        <div class="stake__rewards">
+          <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
+          <span class="stake__rewards__label__amount">0.495 ATOM</span>
+          <span class="stake__rewards__label__balance">+$10.15</span>
+        </div>
+
+        <ul class="stake__list">
+          <li class="stake__list__item">
+            <div class="stake__list__item__validator">
+              <span class="stake__list__item__validator__avatar"> N </span>
+              <span class="stake__list__item__validator__name"> nylira </span>
+            </div>
+
+            <span class="stake__list__item__amount"> 82.46 ATOM </span>
+
+            <div class="stake__list__item__balance">
+              <span class="stake__list__item__balance__value">$1,690.50</span>
+            </div>
+          </li>
+        </ul>
       </div>
-
-      <ul class="stake__list">
-        <li class="stake__list__item">
-          <div class="stake__list__item__validator">
-            <span class="stake__list__item__validator__avatar"> N </span>
-            <span class="stake__list__item__validator__name"> nylira </span>
-          </div>
-
-          <span class="stake__list__item__amount"> 82.46 ATOM </span>
-
-          <div class="stake__list__item__balance">
-            <span class="stake__list__item__balance__value">$1,690.50</span>
-          </div>
-        </li>
-      </ul>
+      <div v-show="!isStakingSelected">unstaking</div>
     </template>
   </div>
 </template>
 <script lang="tsx">
 import { computed, PropType } from 'vue';
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -97,12 +116,18 @@ export default defineComponent({
     const { useDenom } = useDenoms();
     const { t } = useI18n({ useScope: 'global' });
 
+    const isStakingSelected = ref(true);
+
     const isStakingAvailable = computed(() => {
       /*
-        if we gurantee staking is always available
-        this value is needless
-
         TODO: implement staking availablility check
+      */
+      return true;
+    });
+
+    const isUnstakingAssetExist = computed(() => {
+      /*
+        TODO: implement unstaking asset check
       */
       return true;
     });
@@ -113,14 +138,31 @@ export default defineComponent({
         : t('components.stakeTable.comingSoon');
     });
 
+    const assetStakingAPY = computed(() => {
+      // TODO
+      return 9.7;
+    });
+
     const stakeAsset = () => {
       alert('test');
     };
 
+    const selectTab = (tab?: number): void => {
+      if (tab === 1) {
+        isStakingSelected.value = true;
+      } else {
+        isStakingSelected.value = false;
+      }
+    };
+
     return {
+      isStakingSelected,
       isStakingAvailable,
+      isUnstakingAssetExist,
       stakingButtonName,
+      assetStakingAPY,
       stakeAsset,
+      selectTab,
     };
   },
 });

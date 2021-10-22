@@ -169,6 +169,8 @@ export const messages = {
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
       },
       stakeTable: {
+        staking: 'Staking',
+        unstaking: 'Unstaking',
         earnRewards: 'Earn rewards by staking',
         comingSoon: 'Coming soon',
         lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
@@ -444,7 +446,6 @@ export const messages = {
         chains: 'Chains',
         pools: 'Pools',
         pooled: 'Pooled',
-        staking: 'Staking',
       },
       assets: {
         assets: 'Assets',

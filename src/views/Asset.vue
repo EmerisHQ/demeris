@@ -119,8 +119,6 @@
         <!-- Staking -->
 
         <section v-if="assetConfig?.stakable" class="mt-16">
-          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
-
           <StakeTable class="mt-8" :denom="denom" />
         </section>
 
