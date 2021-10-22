@@ -16,10 +16,17 @@
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            {{ $t('components.stakeTable.lockUp') }} <Ticker :name="denom" /> {{ $t('components.stakeTable.andEarn') }}
+            <i18n-t keypath="components.stakeTable.lockUpAndEarnRewards">
+              <template #ticker>
+                <Ticker :name="denom" />
+              </template>
+              <template #apy>
+                <strong>{{ 9.7 }}% {{ $t('components.stakeTable.apy') }}.</strong>
+              </template>
+            </i18n-t>
           </p>
         </div>
-        {{ isStakingAvailable }}
+
         <Button
           variant="secondary"
           :name="$t('components.stakeTable.comingSoon')"

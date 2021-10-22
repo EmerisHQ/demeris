@@ -169,12 +169,11 @@ export const messages = {
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
       },
       stakeTable: {
-        comingSoon: 'Coming soon',
         earnRewards: 'Earn rewards by staking',
-        lockUp: 'Lock up your',
-        andEarn: 'and earn continuous staking rewards.',
+        comingSoon: 'Coming soon',
+        lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
+        apy: 'APY',
         reward: 'Rewards',
-        apy: '9.7% APY',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
