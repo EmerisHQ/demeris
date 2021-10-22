@@ -274,6 +274,7 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
   CreatePoolData,
@@ -341,6 +342,8 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
+    const { createTransactionMachine } = useTransactionsStore();
+    const transactionMachine = createTransactionMachine(props.actionName, props.data);
 
     const { t } = useI18n({ useScope: 'global' });
 
@@ -1099,6 +1102,7 @@ export default defineComponent({
     // }, 10000)
 
     return {
+      transactionMachine,
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,

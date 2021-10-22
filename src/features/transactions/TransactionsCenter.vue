@@ -1,5 +1,8 @@
 <template>
-  <section class="w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg shadow-dropwdown rounded-t-lg">
+  <section
+    v-if="pendingTransactions.length"
+    class="w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg shadow-dropwdown rounded-t-lg"
+  >
     <header class="flex items-center space-between py-4 px-6">
       <p class="font-bold flex-1">Transactions</p>
       <div class="flex items-center space-x-4">
@@ -12,7 +15,7 @@
       </div>
     </header>
 
-    <ul>
+    <ul class="py-4 flex flex-col space-y-4">
       <li v-for="[key, service] of pendingTransactions" :key="key">
         <TransactionStepsProcessor :service="service" />
       </li>
@@ -36,8 +39,4 @@ const transactions = useTransactionsStore();
 const rowsLimit = 3;
 const pendingTransactions = computed(() => Object.entries(transactions.pending).slice(0, rowsLimit));
 const hasMore = computed(() => Object.entries(transactions.pending).length > rowsLimit);
-
-transactions.createTransactionMachine('addliquidity', [
-    { x: 1 }
-])
 </script>

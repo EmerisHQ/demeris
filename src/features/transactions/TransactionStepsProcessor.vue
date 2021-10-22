@@ -19,10 +19,9 @@
 import { defineComponent } from '@vue/runtime-core';
 import { useActor } from '@xstate/vue';
 
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-
-import Button from '../../components/ui/Button.vue';
 
 const props = defineProps({
   service: {
@@ -33,9 +32,8 @@ const props = defineProps({
 // @ts-ignore
 const { state, send } = useActor(props.service);
 
-send({ type: 'SET_DATA', action: 'addliquidity', steps: [{ x: 1 }] });
-
 const StateIcon = defineComponent({
+  name: 'StateIcon',
   setup() {
     return () => {
       if (state.value.matches('failed')) {
@@ -56,6 +54,7 @@ const StateIcon = defineComponent({
 });
 
 const StateDescription = defineComponent({
+  name: 'StateDescription',
   setup() {
     return () => {
       if (state.value.matches('validating')) {
@@ -64,7 +63,11 @@ const StateDescription = defineComponent({
 
       if (state.value.matches('waitingSignature')) {
         if (state.value.context.steps.length > 1) {
-          return <p>{(state.value.context.currentIndex + 1) / state.value.context.steps.length} Waiting to sign</p>;
+          return (
+            <p>
+              {state.value.context.currentIndex + 1}/{state.value.context.steps.length} Waiting to sign
+            </p>
+          );
         }
         return <p>Waiting signature</p>;
       }
@@ -85,6 +88,7 @@ const StateDescription = defineComponent({
 });
 
 const StateControls = defineComponent({
+  name: 'StateControls',
   setup() {
     return () => {
       if (state.value.can('RETRY')) {

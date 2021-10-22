@@ -129,10 +129,11 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
             },
           },
           confirming: {
-            initial: 'pending',
+            initial: 'active',
             after: {
-              5000: { target: '.delayed' },
-              10000: { target: '#unknown' },
+              5000: { target: '.pending' },
+              10000: { target: '.delayed' },
+              50000: { target: '#unknown' },
             },
             on: {
               // @ts-ignore
@@ -145,6 +146,7 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
               src: 'fetchTransactionResponse',
             },
             states: {
+              active: {},
               pending: {},
               delayed: {},
             },
@@ -235,7 +237,12 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
     guards: {
       hasSteps: (context) => context.steps.length > 0,
       hasMoreSteps: (context) => context.steps.length > context.currentIndex,
-      needsTransferToHub: () => false,
+      needsTransferToHub: (context) => {
+        if (context.action === 'move') {
+          return true;
+        }
+        return false;
+      },
 
       hasMissingFees: (_, event: any) => event.missingFees?.length > 0,
       hasIBCFeeWarning: (_, event: any) => event.ibcWarning === true,
