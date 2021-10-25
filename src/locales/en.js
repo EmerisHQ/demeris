@@ -172,7 +172,6 @@ export const messages = {
         staking: 'Staking',
         unstaking: 'Unstaking',
         earnRewards: 'Earn rewards by staking',
-        comingSoon: 'Coming soon',
         lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
         apy: 'APY',
         reward: 'Rewards',

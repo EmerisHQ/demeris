@@ -1,21 +1,23 @@
 <template>
   <div>
     <!-- Title -->
-    <div class="flex">
-      <h2 class="text-2 font-bold" :class="isStakingSelected ? '' : 'text-inactive'" @click="selectTab(1)">
+    <!-- TEST-CODE -->
+    <div v-if="true || stakingBalances.length" class="flex">
+      <h2 class="text-2 font-bold" :class="selectedTab === 1 ? '' : 'text-inactive'" @click="selectTab(1)">
         {{ $t('components.stakeTable.staking') }}
       </h2>
       <h2
         v-if="isUnstakingAssetExist"
         class="text-2 font-bold ml-6"
-        :class="!isStakingSelected ? '' : 'text-inactive'"
-        @click="selectTab"
+        :class="selectedTab === 2 ? '' : 'text-inactive'"
+        @click="selectTab(2)"
       >
         {{ $t('components.stakeTable.unstaking') }}
       </h2>
     </div>
 
-    <!-- TEST-CODE: false -->
+    <!-- Staking info banner -->
+    <!-- TEST-CODE -->
     <template v-if="false && !stakingBalances.length">
       <div
         class="
@@ -47,7 +49,6 @@
           variant="secondary"
           :name="stakingButtonName"
           class="mt-8"
-          :disabled="!isStakingAvailable"
           :click-function="stakeAsset"
           :full-width="false"
         />
@@ -59,7 +60,7 @@
     </template>
 
     <template v-else>
-      <div v-show="isStakingSelected">
+      <div v-show="selectedTab === 1">
         <div class="stake__rewards">
           <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
           <span class="stake__rewards__label__amount">0.495 ATOM</span>
@@ -81,7 +82,7 @@
           </li>
         </ul>
       </div>
-      <div v-show="!isStakingSelected">unstaking</div>
+      <div v-show="selectedTab === 2">unstaking</div>
     </template>
   </div>
 </template>
@@ -116,14 +117,7 @@ export default defineComponent({
     const { useDenom } = useDenoms();
     const { t } = useI18n({ useScope: 'global' });
 
-    const isStakingSelected = ref(true);
-
-    const isStakingAvailable = computed(() => {
-      /*
-        TODO: implement staking availablility check
-      */
-      return true;
-    });
+    const selectedTab = ref<number>(1);
 
     const isUnstakingAssetExist = computed(() => {
       /*
@@ -133,9 +127,7 @@ export default defineComponent({
     });
 
     const stakingButtonName = computed(() => {
-      return isStakingAvailable.value
-        ? t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value })
-        : t('components.stakeTable.comingSoon');
+      return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
     });
 
     const assetStakingAPY = computed(() => {
@@ -147,20 +139,15 @@ export default defineComponent({
       alert('test');
     };
 
-    const selectTab = (tab?: number): void => {
-      if (tab === 1) {
-        isStakingSelected.value = true;
-      } else {
-        isStakingSelected.value = false;
-      }
+    const selectTab = (tabNumber?: number): void => {
+      selectedTab.value = tabNumber;
     };
 
     return {
-      isStakingSelected,
-      isStakingAvailable,
       isUnstakingAssetExist,
       stakingButtonName,
       assetStakingAPY,
+      selectedTab,
       stakeAsset,
       selectTab,
     };
