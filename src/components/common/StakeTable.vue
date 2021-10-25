@@ -1,24 +1,28 @@
 <template>
   <div>
     <!-- Title -->
-    <!-- TEST-CODE -->
-    <div v-if="true || stakingBalances.length" class="flex">
-      <h2 class="text-2 font-bold" :class="selectedTab === 1 ? '' : 'text-inactive'" @click="selectTab(1)">
+    <div v-if="isStakingAssetExist" class="flex">
+      <h2 class="text-2 font-bold cursor-pointer" :class="tabClassHandler(1)" @click="selectTab(1)">
         {{ $t('components.stakeTable.staking') }}
+        <div class="text-0 font-normal text-muted">
+          <CurrencyDisplay :value="stakingAssetTotalValue" />
+        </div>
       </h2>
       <h2
         v-if="isUnstakingAssetExist"
-        class="text-2 font-bold ml-6"
-        :class="selectedTab === 2 ? '' : 'text-inactive'"
+        class="text-2 font-bold ml-6 cursor-pointer"
+        :class="tabClassHandler(2)"
         @click="selectTab(2)"
       >
         {{ $t('components.stakeTable.unstaking') }}
+        <div class="text-0 font-normal text-muted">
+          <CurrencyDisplay :value="unstakingAssetValue" />
+        </div>
       </h2>
     </div>
 
     <!-- Staking info banner -->
-    <!-- TEST-CODE -->
-    <template v-if="false && !stakingBalances.length">
+    <template v-if="!isStakingAssetExist">
       <div
         class="
           stake__banner
@@ -87,13 +91,13 @@
   </div>
 </template>
 <script lang="tsx">
-import { computed, PropType } from 'vue';
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useDenoms from '@/composables/useDenoms';
 import type { StakingBalance } from '@/types/api';
 
@@ -102,6 +106,7 @@ export default defineComponent({
     Button,
     CircleSymbol,
     Ticker,
+    CurrencyDisplay,
   },
   props: {
     denom: {
@@ -116,38 +121,52 @@ export default defineComponent({
   setup(props) {
     const { useDenom } = useDenoms();
     const { t } = useI18n({ useScope: 'global' });
-
     const selectedTab = ref<number>(1);
 
+    //computeds
+    const isStakingAssetExist = computed(() => {
+      return props.stakingBalances.length > 0;
+    });
     const isUnstakingAssetExist = computed(() => {
-      /*
-        TODO: implement unstaking asset check
-      */
+      // TODO: implement unstaking asset check
       return true;
     });
-
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
     });
-
     const assetStakingAPY = computed(() => {
       // TODO
       return 9.7;
     });
+    const stakingAssetTotalValue = computed(() => {
+      //TODO: this value includes a staking reward too
+      return 100;
+    });
+    const unstakingAssetValue = computed(() => {
+      //TODO
+      return 77;
+    });
 
+    //functions
     const stakeAsset = () => {
       alert('test');
     };
-
     const selectTab = (tabNumber?: number): void => {
       selectedTab.value = tabNumber;
+    };
+    const tabClassHandler = (tabNumber: number): string => {
+      return selectedTab.value === tabNumber ? '' : 'text-inactive';
     };
 
     return {
       isUnstakingAssetExist,
+      isStakingAssetExist,
       stakingButtonName,
-      assetStakingAPY,
       selectedTab,
+      stakingAssetTotalValue,
+      unstakingAssetValue,
+      assetStakingAPY,
+      tabClassHandler,
       stakeAsset,
       selectTab,
     };
