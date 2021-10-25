@@ -8,12 +8,32 @@ export async function addChain(chain_name: string): Promise<void> {
   const chain = store.getters['demeris/getChain']({
     chain_name,
   }) as ChainData;
-
+  let rpc;
+  let rest;
+  if (chain.chain_name == 'terra') {
+    rpc = 'https://rpc-columbus.keplr.app';
+    rest = 'https://lcd-columbus.keplr.app';
+  } else if (chain.chain_name == 'microtick') {
+    rpc = 'https://microtick.chorus.one';
+    rest = 'https://microtick-lcd.chorus.one';
+  } else if (chain.chain_name == 'bitcanna') {
+    rpc = 'https://rpc.bitcanna.io';
+    rest = 'https://lcd.bitcanna.io';
+  } else if (chain.chain_name == 'juno') {
+    rpc = 'https://rpc-juno.nodes.guru';
+    rest = 'https://api-juno.nodes.guru';
+  } else if (chain.chain_name == 'likecoin') {
+    rpc = 'https://mainnet-node.like.co/rpc';
+    rest = 'https://mainnet-node.like.co';
+  } else {
+    rpc = 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
+    rest = 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
+  }
   await window.keplr.experimentalSuggestChain({
     chainId: chain.node_info.chain_id,
     chainName: chain.display_name,
-    rpc: 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
-    rest: 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud',
+    rpc,
+    rest,
     stakeCurrency: {
       coinDenom: chain.denoms.filter((x) => x.stakable)[0].display_name,
       coinMinimalDenom: chain.denoms.filter((x) => x.stakable)[0].name,
