@@ -375,6 +375,9 @@ export const messages = {
         title: 'Purchase {asset}',
         poweredBy: 'Powered by Moonpay',
       },
+      avatar: {
+        priceApiDown: 'Asset prices are currently unavailable.',
+      },
     },
     context: {
       feeLevels: {

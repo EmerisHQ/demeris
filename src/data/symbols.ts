@@ -73,6 +73,58 @@ const Ion: SymbolConfig = {
   },
 };
 
+const Terra: SymbolConfig = {
+  colors: {
+    primary: '#253D77',
+    secondary: '#344D8C',
+    tertiary: '#FFE14B',
+  },
+};
+
+const Ixo: SymbolConfig = {
+  colors: {
+    primary: '#233F88',
+    secondary: '#739FE0',
+  },
+};
+
+const EMoney: SymbolConfig = {
+  colors: {
+    primary: '#023B40',
+    secondary: '#0C919D',
+  },
+};
+
+const Microtick: SymbolConfig = {
+  colors: {
+    primary: '#BAE941',
+    secondary: '#F3FFE4',
+  },
+};
+
+const Starname: SymbolConfig = {
+  colors: {
+    primary: '#FDCC03',
+    secondary: '#8FBC9D',
+    tertiary: '#00AAFB',
+  },
+};
+
+const Sifchain: SymbolConfig = {
+  colors: {
+    primary: '#F9C82A',
+    secondary: '#FFF824',
+  },
+};
+
+const Injective: SymbolConfig = {
+  colors: {
+    primary: '#1C1E25',
+    secondary: '#3D477B',
+    tertiary: '#05ACE8',
+  },
+};
+
 const GravityDex: SymbolConfig = {
   colors: {
     primary: '#E88CFE',
@@ -87,6 +139,13 @@ const chains: Record<string, SymbolConfig> = {
   persistence: Persistence,
   sentinel: Sentinel,
   regen: Regen,
+  terra: Terra,
+  starname: Starname,
+  microtick: Microtick,
+  ixo: Ixo,
+  emoney: EMoney,
+  sifchain: Sifchain,
+  injective: Injective,
 };
 
 const denoms: Record<string, SymbolConfig> = {
@@ -99,6 +158,13 @@ const denoms: Record<string, SymbolConfig> = {
   basecro: CryptoOrg,
   uregen: Regen,
   uion: Ion,
+  uiov: Starname,
+  utick: Microtick,
+  uixo: Ixo,
+  ungm: EMoney,
+  uluna: Terra,
+  uinj: Injective,
+  rowan: Sifchain,
 };
 
 const protocols: Record<string, SymbolConfig> = {

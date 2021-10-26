@@ -159,6 +159,7 @@
                 :click-function="
                   () => {
                     feeWarning.feeWarning = false;
+                    emitHandler('reset');
                   }
                 "
               />
@@ -251,7 +252,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -636,7 +637,8 @@ export default defineComponent({
         }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
-            const isLastTransaction = i === currentData.value.data.transactions.length - 1;
+            const currentDataRaw = toRaw(currentData.value);
+            const isLastTransaction = i === currentDataRaw.data.transactions.length - 1;
             const isLastStep = currentStep.value === adjustedFeeData.value.length - 1;
 
             if (isLastTransaction && isLastStep) {
@@ -647,7 +649,7 @@ export default defineComponent({
             do {
               retry.value = false;
               transaction.value = stepTx;
-              if (currentData.value.data.transactions.length > i + 1) {
+              if (currentDataRaw.data.transactions.length > i + 1) {
                 hasMore.value = true;
               } else {
                 hasMore.value = false;
@@ -689,7 +691,7 @@ export default defineComponent({
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
-                  memo: currentData.value.data.memo ?? '',
+                  memo: currentDataRaw.data.memo ?? '',
                 });
               } catch (e) {
                 console.error(e);
@@ -798,7 +800,7 @@ export default defineComponent({
                   await new Promise((r) => setTimeout(r, 750));
 
                   if (!txResultData.error) {
-                    if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentData.value.data.name)) {
+                    if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentDataRaw.data.name)) {
                       //Get end block events
                       let endBlockEvent = null;
                       let retries = 0;
@@ -806,7 +808,7 @@ export default defineComponent({
                         try {
                           endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
-                            stepType: currentData.value.data.name,
+                            stepType: currentDataRaw.data.name,
                           });
                           break;
                         } catch {
@@ -818,7 +820,7 @@ export default defineComponent({
                       if (endBlockEvent) {
                         let resultData = endBlockEvent;
 
-                        switch (currentData.value.data.name) {
+                        switch (currentDataRaw.data.name) {
                           case 'swap':
                             resultData = {
                               swappedPercent:
@@ -845,7 +847,7 @@ export default defineComponent({
                         throw new Error('Could not fetch transaction response');
                       }
                     } else {
-                      txResult.value = { ...currentData.value.data };
+                      txResult.value = { ...currentDataRaw.data };
                     }
 
                     txResult.value = {

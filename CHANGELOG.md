@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.5 - 2021-10-26
+
+- Includes 0.1.4 hotfixes
+
+### Updates
+
+- Added additional asset colors
+
+### Fixes
+
+- Fix inaccurate values on transaction receipt under certain conditions
+- Show dash instead of 0 for assets lacking a price feed.
+- Display balances when prices API is down
+- Fixes in UX flow when operation is cancelled
+
+## Hotfix - 2021-10-24
+
+- Added endpoints for terra, microtick, bitcanna, juno and likecoin Keplr support
+
 ## Hotfix - 2021-10-20
 
 - Fixed disappearing tx handling modal in certain cases
@@ -18,9 +37,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Fixes
 
 - Fixed total balance with staking decimal amounts
+- Fixed user balance when price API is down
 - Fixed getPrice for IBC denoms on chains other than cosmos-hub
 - Added missing tooltip
 - Cleaned up console and linting warnings
+- Improved cancel flow
 
 ## 0.1.3 - 2021-10-13
 

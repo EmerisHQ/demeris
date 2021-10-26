@@ -78,7 +78,7 @@ export default defineComponent({
   setup(props) {
     const maximumFractionDigits = ref(2);
     const inputValue = computed(() => Number(props.value));
-    const hasValue = computed(() => !isNaN(inputValue.value) && isFinite(inputValue.value));
+    const hasValue = computed(() => !isNaN(inputValue.value) && isFinite(inputValue.value) && inputValue.value > 0);
     const i18n = useI18n({ useScope: 'global' });
     watch(
       () => [props.value, props.precision],
