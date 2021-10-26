@@ -2,7 +2,7 @@
   <div>
     <!-- Title -->
     <div v-if="isStakingAssetExist" class="flex">
-      <h2 class="text-2 font-bold cursor-pointer" :class="tabClassHandler(1)" @click="selectTab(1)">
+      <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
         {{ $t('components.stakeTable.staking') }}
         <div class="text-0 font-normal text-muted">
           <CurrencyDisplay :value="stakingAssetTotalValue" />
@@ -11,7 +11,7 @@
       <h2
         v-if="isUnstakingAssetExist"
         class="text-2 font-bold ml-6 cursor-pointer"
-        :class="tabClassHandler(2)"
+        :class="getTabClass(2)"
         @click="selectTab(2)"
       >
         {{ $t('components.stakeTable.unstaking') }}
@@ -91,8 +91,9 @@
   </div>
 </template>
 <script lang="tsx">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -120,6 +121,7 @@ export default defineComponent({
   },
   setup(props) {
     const { useDenom } = useDenoms();
+    const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const selectedTab = ref<number>(1);
 
@@ -149,12 +151,12 @@ export default defineComponent({
 
     //functions
     const stakeAsset = () => {
-      alert('test');
+      router.push(`/stake/${props.denom}`);
     };
     const selectTab = (tabNumber?: number): void => {
       selectedTab.value = tabNumber;
     };
-    const tabClassHandler = (tabNumber: number): string => {
+    const getTabClass = (tabNumber: number): string => {
       return selectedTab.value === tabNumber ? '' : 'text-inactive';
     };
 
@@ -166,7 +168,7 @@ export default defineComponent({
       stakingAssetTotalValue,
       unstakingAssetValue,
       assetStakingAPY,
-      tabClassHandler,
+      getTabClass,
       stakeAsset,
       selectTab,
     };

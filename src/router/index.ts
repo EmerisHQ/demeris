@@ -69,6 +69,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:pathMatch(.*)*',
     redirect: { name: 'Portfolio' },
   },
+  {
+    path: '/stake/:denom',
+    name: 'Stake',
+    component: () => import('@/views/Stake.vue'),
+  },
 ];
 
 const router = createRouter({
