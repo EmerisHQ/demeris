@@ -2,17 +2,11 @@
   <div class="send relative flex w-full min-h-screen justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <header class="flex items-center justify-between py-6 h-24">
-        <Button
-          v-if="showBackButton"
-          variant="link"
-          :full-width="false"
-          :disabled="['move', 'send'].includes(currentStep)"
-          :click-function="backToPreviousStep"
-        >
+        <Button v-if="isDisplayBackButton" variant="link" :full-width="false" :click-function="backToPreviousStep">
           <Icon name="ArrowLeftIcon" :icon-size="1.5" />
         </Button>
 
-        <nav v-if="transferType" class="flex-1 flex items-center justify-center space-x-12">
+        <nav class="flex-1 flex items-center justify-center space-x-12">
           <span
             v-for="label of stakeSteps"
             :key="label"
@@ -28,55 +22,47 @@
         </Button>
       </header>
 
-      <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
-        <template v-if="!transferType">
+      <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
+        <!-- Validator -->
+        <template v-if="currentStepIndex === 0">
+          <ValidatorTable :pools="pools" />
+        </template>
+
+        <!-- Amount -->
+        <template v-if="currentStepIndex === 1">
+          1
           <div class="max-w-3xl">
             <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
-            <div class="mt-8 pb-8 flex space-x-8">
-              <router-link
-                :to="{ name: 'Send', params: { type: 'address' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
-              >
-                <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.sendToAddress') }}</h4>
-                <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
-                  <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
-                  ></span>
-                  <Icon class="relative" name="SendIcon" :icon-size="1.5" />
-                </div>
-                <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
-                  {{ $t('components.send.sendToAddressDescription') }}
-                </p>
-              </router-link>
-            </div>
+            <div class="mt-8 pb-8 flex space-x-8"></div>
           </div>
         </template>
+
+        <!-- Review -->
+        <template v-if="currentStepIndex === 2">
+          2
+          <div class="max-w-3xl">
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
+            <div class="mt-8 pb-8 flex space-x-8"></div>
+          </div>
+        </template>
+
+        <!-- Stake -->
+        <template v-if="currentStepIndex === 3">
+          3
+          <div class="max-w-3xl">
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
+            <div class="mt-8 pb-8 flex space-x-8"></div>
+          </div>
+        </template>
+        <button
+          @click="
+            () => {
+              currentStep = stakeSteps[currentStepIndex + 1];
+            }
+          "
+        >
+          GO NEXT
+        </button>
       </main>
     </div>
   </div>
@@ -90,16 +76,21 @@ import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
+import ValidatorTable from '@/components/stake/ValidatorTable.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import usePools from '@/composables/usePools';
 import { pageview } from '@/utils/analytics';
 
 export default {
   name: 'Stake',
-  components: { Button, Icon },
+  components: { Button, Icon, ValidatorTable },
 
   setup() {
+    //test
+    const { pools } = usePools();
+
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
     const { balances } = useAccount();
@@ -116,10 +107,10 @@ export default {
 
     /* variables */
     const stakeSteps: stakeStepsType[] = ['Validator', 'Amount', 'Review', 'Stake'];
-    const currentStep = ref<stakeStepsType>(stakeSteps[2]);
+    const currentStep = ref<stakeStepsType>(stakeSteps[0]);
 
     /* computeds */
-    const showBackButton = computed(() => {
+    const isDisplayBackButton = computed(() => {
       return currentStep.value !== stakeSteps[0];
     });
     const transferType = computed(() => 'address');
@@ -138,10 +129,11 @@ export default {
       transferType,
       currentStep,
       stakeSteps,
-      showBackButton,
+      isDisplayBackButton,
       currentStepIndex,
       backToPreviousStep,
       backToAssetPage,
+      pools,
     };
   },
 };

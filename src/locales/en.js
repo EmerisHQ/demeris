@@ -176,6 +176,8 @@ export const messages = {
         apy: 'APY',
         reward: 'Rewards',
         stakeAsset: 'Stake {ticker}S',
+        selectValidator: 'Select a validator',
+        searchValidator: 'Search validator',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
