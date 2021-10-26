@@ -21,8 +21,11 @@
           :action="actionName"
           :steps="data"
           @continue="
-            isTransferConfirmationOpen = false;
-            interstitialProceed = true;
+            () => {
+              isTransferConfirmationOpen = false;
+              interstitialProceed = true;
+              transactionMachine.send('IBC_NOTICE_CONFIRM');
+            }
           "
         />
       </template>
@@ -252,7 +255,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -621,6 +624,7 @@ export default defineComponent({
         connectModalOpen.value = true;
         return;
       }
+      transactionMachine.send('SIGN');
       let abort = false;
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;

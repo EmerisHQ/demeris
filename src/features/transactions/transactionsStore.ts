@@ -17,7 +17,7 @@ export const useTransactionsStore = defineStore('transactions', {
       send({ type: 'SET_DATA', action, steps });
 
       const listener = service.subscribe((actor) => {
-        if (actor.matches('transacting.confirming.pending')) {
+        if (actor.matches('transacting')) {
           this.pending[stepHash] = service;
           listener.unsubscribe();
         }

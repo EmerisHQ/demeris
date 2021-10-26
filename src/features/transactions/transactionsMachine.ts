@@ -236,7 +236,7 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
 
     guards: {
       hasSteps: (context) => context.steps.length > 0,
-      hasMoreSteps: (context) => context.steps.length > context.currentIndex,
+      hasMoreSteps: (context) => context.steps.length > context.currentIndex + 1,
       needsTransferToHub: (context) => {
         if (context.action === 'move') {
           return true;
