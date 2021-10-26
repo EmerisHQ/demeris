@@ -6,24 +6,24 @@
           v-if="showBackButton"
           variant="link"
           :full-width="false"
-          :disabled="['move', 'send'].includes(step)"
-          :click-function="goBack"
+          :disabled="['move', 'send'].includes(currentStep)"
+          :click-function="backToPreviousStep"
         >
           <Icon name="ArrowLeftIcon" :icon-size="1.5" />
         </Button>
 
         <nav v-if="transferType" class="flex-1 flex items-center justify-center space-x-12">
           <span
-            v-for="label of allSteps[transferType]"
+            v-for="label of stakeSteps"
             :key="label"
             class="capitalize font-medium cursor-default"
-            :class="step === label ? 'text-text' : 'text-inactive'"
+            :class="currentStep === label ? 'text-text' : 'text-inactive'"
           >
             {{ label }}
           </span>
         </nav>
 
-        <Button class="ml-auto" variant="link" :full-width="false" :click-function="onClose">
+        <Button class="ml-auto" variant="link" :full-width="false" :click-function="backToAssetPage">
           <Icon name="CloseIcon" :icon-size="1.5" />
         </Button>
       </header>
@@ -74,127 +74,75 @@
                   {{ $t('components.send.sendToAddressDescription') }}
                 </p>
               </router-link>
-
-              <router-link
-                :to="{ name: 'Send', params: { type: 'move' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
-              >
-                <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.moveAssets') }}</h4>
-                <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
-                  <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
-                  ></span>
-                  <Icon class="relative" name="SwapLRIcon" :icon-size="1.5" />
-                </div>
-                <p class="relative z-10 text-muted dark:group-hover:text-inverse leading-copy mt-8">
-                  {{ $t('components.send.moveAssetsDescription') }}
-                </p>
-              </router-link>
             </div>
           </div>
         </template>
-
-        <div v-else class="w-full max-w-lg">
-          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
-          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
-        </div>
       </main>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+type stakeStepsType = 'Validator' | 'Amount' | 'Review' | 'Stake';
+
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
-import MoveForm from '@/components/transfer/MoveForm';
-import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { pageview } from '@/utils/analytics';
 
-type TransferType = 'address' | 'move';
-
 export default {
-  name: 'Send',
-  components: { Button, SendForm, MoveForm, Icon },
+  name: 'Stake',
+  components: { Button, Icon },
 
   setup() {
+    /* hooks */
     const { t } = useI18n({ useScope: 'global' });
+    const { balances } = useAccount();
     const router = useRouter();
     const route = useRoute();
-    const transferType = computed(() => 'address');
-    const step = ref(undefined);
-    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
-    const { balances } = useAccount();
 
+    /* meta & GA */
+    pageview({ page_title: 'Stake: ' + route.params.denom, page_path: '/stake/' + route.params.denom });
+    useMeta(
+      computed(() => ({
+        title: t('context.stake.title'),
+      })),
+    );
+
+    /* variables */
+    const stakeSteps: stakeStepsType[] = ['Validator', 'Amount', 'Review', 'Stake'];
+    const currentStep = ref<stakeStepsType>(stakeSteps[2]);
+
+    /* computeds */
     const showBackButton = computed(() => {
-      return !!transferType.value;
+      return currentStep.value !== stakeSteps[0];
     });
+    const transferType = computed(() => 'address');
+    const currentStepIndex = computed(() => stakeSteps?.indexOf(currentStep.value));
 
-    const allSteps = {
-      address: ['Validator', 'Amount', 'Review', 'Stake'],
-      move: ['amount', 'review', 'move'],
+    /* functions */
+    const backToPreviousStep = () => {
+      currentStep.value = stakeSteps[currentStepIndex.value - 1];
+    };
+    const backToAssetPage = () => {
+      router.push(`/asset/${route.params.denom}`);
     };
 
-    const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value));
-
-    const metaSource = computed(() => {
-      let title = t('components.send.send');
-      if (transferType.value) {
-        title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
-      }
-
-      return {
-        title,
-      };
-    });
-    useMeta(metaSource);
-
-    const goBack = () => {
-      if (currentStepIndex.value > 0) {
-        step.value = allSteps[transferType.value][currentStepIndex.value - 1];
-        return;
-      }
-
-      step.value = undefined;
-      router.back();
+    return {
+      balances,
+      transferType,
+      currentStep,
+      stakeSteps,
+      showBackButton,
+      currentStepIndex,
+      backToPreviousStep,
+      backToAssetPage,
     };
-
-    const onClose = () => {
-      router.push('/');
-    };
-
-    return { balances, transferType, step, allSteps, goBack, showBackButton, onClose };
   },
 };
 </script>

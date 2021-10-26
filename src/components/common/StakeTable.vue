@@ -125,7 +125,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const selectedTab = ref<number>(1);
 
-    //computeds
+    /* computeds */
     const isStakingAssetExist = computed(() => {
       return props.stakingBalances.length > 0;
     });
@@ -149,7 +149,7 @@ export default defineComponent({
       return 77;
     });
 
-    //functions
+    /* functions */
     const stakeAsset = () => {
       router.push(`/stake/${props.denom}`);
     };

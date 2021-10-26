@@ -418,6 +418,9 @@ export const messages = {
         empty: 'Pools you add liquidity to will appear here.',
         explore: 'Explore pools',
       },
+      stake: {
+        title: 'Stake',
+      },
     },
     pages: {
       addLiquidity: {
