@@ -25,7 +25,7 @@
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
         <TotalPrice v-if="isPriceApiAvailable" class="inline" :balances="balances" />
-        <div v-else class="text-center">-</div>
+        <div v-else>-</div>
         <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
       </div>
     </div>
