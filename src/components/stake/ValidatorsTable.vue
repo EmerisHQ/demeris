@@ -81,7 +81,7 @@ import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
 export default {
-  name: 'PoolsTable',
+  name: 'ValidatorTable',
   components: { Search, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
 
   props: {
