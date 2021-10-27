@@ -65,6 +65,7 @@ export const demoAccount = {
     '124a68d218eb1891421dcf2aaabc8c9a509e5071',
     '863ea62ff1f8c10bec4f377219dedf0e90ac4767',
     'ffa2a069d1531f0301fc685ad3c9b24c4753125c',
+    '43ac5d4fcea9f31a42e28b9b976d94404497366a',
   ],
 };
 export const demoAddresses = {
@@ -81,4 +82,6 @@ export const demoAddresses = {
   starname: 'star1l732q6w32v0sxq0udpdd8jdjf3r4xyjuj2mukz',
   microtick: 'micro10ms58lgajy69z2x62shj0nxc6r3a0r7qmd9y4r',
   emoney: 'emoney10ms58lgajy69z2x62shj0nxc6r3a0r7qxkzhm2',
+  terra: 'terra1gwk96n7w48e35shz3wdewmv5gpzfwdn28y9pkn',
+  likecoin: 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
 };
