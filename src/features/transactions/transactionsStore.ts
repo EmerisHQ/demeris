@@ -1,5 +1,5 @@
-import { useMachine } from '@xstate/vue';
 import { defineStore } from 'pinia';
+import { interpret } from 'xstate';
 
 import { hashObject } from '@/utils/basic';
 
@@ -7,23 +7,37 @@ import { transactionsMachine } from './transactionsMachine';
 
 export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
-    pending: [],
+    transactions: {},
+    pending: {},
   }),
 
+  getters: {
+    isPending: (state) => (stepHash: string) => stepHash in state.pending,
+  },
+
   actions: {
-    createTransactionMachine(action: string, steps: any[]) {
-      const { service, send } = useMachine(transactionsMachine);
+    findOrCreateTransactionMachine(action: string, steps: any[]): [string, any] {
       const stepHash = hashObject(steps);
-      send({ type: 'SET_DATA', action, steps });
+
+      if (stepHash in this.transactions) {
+        return [stepHash, this.transactions[stepHash]];
+      }
+
+      const service = interpret(transactionsMachine, { devTools: true });
+      service.start();
+      service.send({ type: 'SET_DATA', action, steps });
 
       const listener = service.subscribe((actor) => {
+        // console.log(actor);
         if (actor.matches('transacting')) {
           this.pending[stepHash] = service;
           listener.unsubscribe();
         }
       });
 
-      return service;
+      this.transactions[stepHash] = service;
+
+      return [stepHash, service];
     },
   },
 });

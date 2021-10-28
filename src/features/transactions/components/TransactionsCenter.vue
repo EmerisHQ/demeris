@@ -17,7 +17,7 @@
 
     <ul class="py-4 flex flex-col space-y-4">
       <li v-for="[key, service] of pendingTransactions" :key="key">
-        <TransactionStepsProcessor :service="service" />
+        <TransactionProcessItem :service="service" />
       </li>
     </ul>
 
@@ -32,8 +32,8 @@ import { computed } from "@vue/reactivity";
 
 import Icon from "@/components/ui/Icon.vue";
 
-import { useTransactionsStore } from "./transactionsStore";
-import TransactionStepsProcessor from './TransactionStepsProcessor.vue';
+import { useTransactionsStore } from "../transactionsStore";
+import TransactionProcessItem from './TransactionProcessItem.vue';
 
 const transactions = useTransactionsStore();
 const rowsLimit = 3;

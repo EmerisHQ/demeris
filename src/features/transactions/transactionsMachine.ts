@@ -80,7 +80,7 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
           traceChannel: {
             invoke: {
               src: 'validateTraceChannel',
-              onDone: '#waitingSignature',
+              onDone: '#review',
               onError: '#failed',
             },
           },
@@ -99,19 +99,27 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
           },
         },
       },
-      waitingSignature: {
-        id: 'waitingSignature',
+      review: {
+        id: 'review',
         on: {
           SIGN: { target: 'signing' },
         },
       },
       signing: {
         id: 'signing',
+        initial: 'active',
+        after: {
+          5000: '.delayed',
+        },
         entry: { type: 'logEvent', key: 'confirm_tx' },
         invoke: {
           src: 'signTransaction',
           onDone: 'transacting',
           onError: 'failed.sign',
+        },
+        states: {
+          active: {},
+          delayed: {},
         },
       },
       transacting: {
@@ -155,7 +163,7 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
       },
       next: {
         id: 'next',
-        always: [{ target: 'waitingSignature', cond: 'hasMoreSteps', actions: ['goNextStep'] }, { target: 'success' }],
+        always: [{ target: 'review', cond: 'hasMoreSteps', actions: ['goNextStep'] }, { target: 'success' }],
       },
       aborted: {
         type: 'final',
@@ -214,7 +222,10 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
             callback({ type: 'GOT_RESPONSE', data: 'hello' });
           }
         };
+
         const id = setInterval(request, 1000);
+        request();
+
         return () => clearInterval(id);
       },
     },
