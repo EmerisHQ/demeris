@@ -84,4 +84,5 @@ export const demoAddresses = {
   emoney: 'emoney10ms58lgajy69z2x62shj0nxc6r3a0r7qxkzhm2',
   terra: 'terra1gwk96n7w48e35shz3wdewmv5gpzfwdn28y9pkn',
   likecoin: 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
+  juno: 'juno10ms58lgajy69z2x62shj0nxc6r3a0r7ql8mctt',
 };
