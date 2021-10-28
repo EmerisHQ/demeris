@@ -66,7 +66,7 @@
 
 <script lang="ts">
 import { ref } from '@vue/reactivity';
-import { computed, PropType, watch } from '@vue/runtime-core';
+import { computed, onMounted, PropType, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
@@ -77,6 +77,8 @@ import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import { useStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
@@ -93,12 +95,19 @@ export default {
   },
   setup(props) {
     const router = useRouter();
+    const store = useStore();
     const keyword = ref<string>('');
     const renderedPools = ref([]);
     const poolsWithTotalLiquidityPrice = ref([]);
 
     const { getPoolName, getReserveBaseDenoms, getLiquidityShare, getIsReversePairName } = usePools();
     const { balancesByDenom } = useAccount();
+
+    onMounted(async () => {
+      const validators = await store.dispatch(GlobalDemerisActionTypes.GET_VALIDATORS, { chain_name: 'cosmos-hub' });
+      console.log('validators', validators);
+    });
+
     watch(
       () => props.pools,
       async (newVal) => {

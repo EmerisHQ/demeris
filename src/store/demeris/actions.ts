@@ -63,6 +63,9 @@ export type DemerisSessionParams = {
 export type TicketResponse = {
   ticket: string;
 };
+export type DemerisGetValidatorsParam = {
+  chain_name: string;
+};
 export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
@@ -187,11 +190,15 @@ export interface Actions {
     getters,
     dispatch,
   }: ActionContext<State, RootState>): Promise<boolean>;
-  // Internal module actions
+  [DemerisActionTypes.GET_VALIDATORS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetValidatorsParam,
+  ): Promise<unknown>;
   [DemerisActionTypes.SET_GAS_LIMIT](
     { commit }: ActionContext<State, RootState>,
     { gasLimit }: { gasLimit: number },
   ): Promise<void>;
+  // Internal module actions
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
@@ -299,6 +306,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.SET_GAS_LIMIT](
     ...args: Parameters<Actions[DemerisActionTypes.SET_GAS_LIMIT]>
   ): ReturnType<Actions[DemerisActionTypes.SET_GAS_LIMIT]>;
+  [GlobalDemerisActionTypes.GET_VALIDATORS](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_VALIDATORS]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_VALIDATORS]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -1059,6 +1069,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
     } catch (e) {
       throw new SpVuexError('Demeris: GET_END_BLOCK_EVENTS', 'Could not GET_END_BLOCK_EVENTS.' + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_VALIDATORS]({ getters }, { chain_name }: DemerisGetValidatorsParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetValidators', `Could not get ${chain_name} validators.` + e.message);
     }
   },
 
