@@ -1,30 +1,30 @@
 <template>
-  <section
-    v-if="pendingTransactions.length"
-    class="w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg shadow-dropwdown rounded-t-lg"
-  >
-    <header class="flex items-center space-between py-4 px-6">
-      <p class="font-bold flex-1">Transactions</p>
-      <div class="flex items-center space-x-4">
-        <button>
-          <Icon name="CaretDownIcon" />
-        </button>
-        <button>
-          <Icon name="CloseIcon" />
-        </button>
-      </div>
-    </header>
+  <div v-if="pendingTransactions.length">
+    <TransactionsCenterActionButton
+      v-if="transactionsStore.isBottomSheetMinimized"
+      class="fixed bottom-8 right-8 z-50"
+    />
+    <section v-else class="w-96 fixed bottom-0 right-8 z-50 bg-surface shadow-dropwdown rounded-t-lg">
+      <header class="flex items-center space-between py-4 px-6">
+        <p class="font-bold flex-1 text-1">Transactions</p>
+        <div class="flex items-center space-x-4">
+          <button @click="transactionsStore.toggleBottomSheet">
+            <Icon name="CaretDownIcon" :icon-size="1.4" />
+          </button>
+        </div>
+      </header>
 
-    <ul class="py-4 flex flex-col space-y-4">
-      <li v-for="[key, service] of pendingTransactions" :key="key">
-        <TransactionProcessItem :service="service" />
-      </li>
-    </ul>
+      <ul class="py-4 flex flex-col space-y-4">
+        <li v-for="[key, service] of pendingTransactions" :key="key">
+          <TransactionProcessItem :service="service" />
+        </li>
+      </ul>
 
-    <footer v-if="hasMore" class="flex justify-center py-4">
-      <p>See all transactions</p>
-    </footer>
-  </section>
+      <footer v-if="hasMore" class="flex justify-center py-4">
+        <p>See all transactions</p>
+      </footer>
+    </section>
+  </div>
 </template>
 
 <script type="ts" setup>
@@ -34,9 +34,11 @@ import Icon from "@/components/ui/Icon.vue";
 
 import { useTransactionsStore } from "../transactionsStore";
 import TransactionProcessItem from './TransactionProcessItem.vue';
+import TransactionsCenterActionButton from "./TransactionsCenterActionButton.vue";
 
-const transactions = useTransactionsStore();
+const transactionsStore = useTransactionsStore();
 const rowsLimit = 3;
-const pendingTransactions = computed(() => Object.entries(transactions.pending).slice(0, rowsLimit));
-const hasMore = computed(() => Object.entries(transactions.pending).length > rowsLimit);
+
+const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit));
+const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit);
 </script>

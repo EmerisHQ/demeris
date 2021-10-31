@@ -40,6 +40,10 @@ const StateIcon = defineComponent({
         return <Icon name="WarningTriangleIcon" class="text-negative" />;
       }
 
+      if (state.value.matches('success')) {
+        return <Icon name="WarningTriangleIcon" class="text-positive" />;
+      }
+
       if (state.value.matches('transacting') || state.value.matches('validating')) {
         return (
           <div style="transform: scale(0.5)">

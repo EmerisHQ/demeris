@@ -9,6 +9,7 @@ export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
     transactions: {},
     pending: {},
+    isBottomSheetMinimized: false,
   }),
 
   getters: {
@@ -16,6 +17,10 @@ export const useTransactionsStore = defineStore('transactions', {
   },
 
   actions: {
+    toggleBottomSheet() {
+      this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
+    },
+
     findOrCreateTransactionMachine(action: string, steps: any[]): [string, any] {
       const stepHash = hashObject(steps);
 
