@@ -51,6 +51,8 @@ export default defineComponent({
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
+      await store.dispatch('demerisTX/RESET_STATE');
+
       await store.dispatch(GlobalDemerisActionTypes.INIT, {
         endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
         hub_chain: 'cosmos-hub',
