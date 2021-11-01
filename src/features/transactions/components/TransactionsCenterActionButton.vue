@@ -1,12 +1,39 @@
 <template>
-  <button class="w-12 h-12 rounded-full shadow-button bg-surface" @click="handleClick">
-    <div v-if="state.showBadge" class="w-2 h-2 bg-negative rounded-full absolute right-2 top-0" />
-    <Icon name="MenuIcon" />
-  </button>
+  <tippy ref="tippyRef" trigger="manual" placement="left">
+    <button class="w-12 h-12 rounded-full shadow-button bg-surface" @click="handleClick">
+      <div
+        v-if="state.notificationCount"
+        class="
+          flex
+          items-center
+          justify-center
+          w-5
+          h-5
+          bg-negative
+          rounded-full
+          absolute
+          right-0
+          -top-1
+          font-medium
+          -text-1
+          text-text
+        "
+      >
+        <span v-if="state.notificationCount > 3">3+</span>
+        <span v-else>{{ state.notificationCount }}</span>
+      </div>
+      <Icon name="MenuIcon" />
+    </button>
+
+    <template #content>
+      <TransactionProcessItem v-if="lastPendingTransaction" :service="lastPendingTransaction" hide-controls />
+    </template>
+  </tippy>
 </template>
 
 <script type="tsx" setup>
-import { reactive,watch } from "vue";
+import { useActor } from "@xstate/vue";
+import { computed,reactive, ref,watch } from "vue";
 
 import Icon from "@/components/ui/Icon.vue";
 
@@ -14,17 +41,27 @@ import { useTransactionsStore } from "../transactionsStore";
 import TransactionProcessItem from './TransactionProcessItem.vue';
 
 const transactionsStore = useTransactionsStore();
+const pendingsCount = computed(() => Object.keys(transactionsStore.pending).length);
+const lastPendingTransaction = computed(() => Object.values(transactionsStore.pending)[pendingsCount.value - 1]);
 
+const { state: serviceState, send } = useActor(lastPendingTransaction);
+console.log({ serviceState })
+const tippyRef = ref(null);
 const state = reactive({
-    showBadge: false
+  notificationCount: 0
 });
 
 const handleClick = () => {
-    transactionsStore.toggleBottomSheet();
-    state.showBadge = false;
+  transactionsStore.toggleBottomSheet();
+  state.notificationCount = 0;
 }
 
-watch(transactionsStore.pending, () => {
-    state.showBadge = true;
+watch(pendingsCount, () => {
+  state.notificationCount = state.notificationCount + 1;
+  tippyRef.value.show();
 });
+
+watch(() => serviceState.value.value, () => {
+  tippyRef.value.show();
+})
 </script>

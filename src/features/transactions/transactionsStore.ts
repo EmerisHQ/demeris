@@ -3,7 +3,7 @@ import { interpret } from 'xstate';
 
 import { hashObject } from '@/utils/basic';
 
-import { transactionsMachine } from './transactionsMachine';
+import { transactionProcessMachine } from './transactionProcessMachine';
 
 export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
@@ -28,7 +28,20 @@ export const useTransactionsStore = defineStore('transactions', {
         return [stepHash, this.transactions[stepHash]];
       }
 
-      const service = interpret(transactionsMachine, { devTools: true });
+      const service = interpret(
+        transactionProcessMachine.withConfig({
+          actions: {
+            async validatePreviousTransaction() {
+              return Promise.resolve(true);
+            },
+            async signTransaction(context) {
+              return Promise.resolve(true);
+            },
+          },
+        }),
+        { devTools: true },
+      );
+
       service.start();
       service.send({ type: 'SET_DATA', action, steps });
 

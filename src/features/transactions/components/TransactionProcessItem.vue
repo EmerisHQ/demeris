@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full items-center space-x-4 px-6">
+  <button class="flex w-full items-center space-x-4 px-6">
     <div>
       <StateIcon />
     </div>
@@ -10,9 +10,9 @@
     </div>
 
     <div>
-      <StateControls />
+      <StateControls v-if="hideControls" />
     </div>
-  </div>
+  </button>
 </template>
 
 <script lang="tsx" setup>
@@ -27,6 +27,10 @@ const props = defineProps({
   service: {
     type: Object,
     required: true,
+  },
+  hideControls: {
+    type: Boolean,
+    default: true,
   },
 });
 // @ts-ignore

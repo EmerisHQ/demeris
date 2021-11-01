@@ -4,8 +4,8 @@ import { Step } from '@/types/actions';
 
 interface TranscationsMachineContext {
   action: string;
-  currentIndex: number;
-  currentData: Record<string, string>;
+  currentStepIndex: number;
+  currentTransactionIndex: number;
   steps: Step[];
   responses: any[];
 }
@@ -16,16 +16,17 @@ type TransactionsMachineEvents =
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
-  | { type: 'RETRY' };
+  | { type: 'RETRY' }
+  | { type: 'CONTINUE' };
 
-export const transactionsMachine = createMachine<TranscationsMachineContext, TransactionsMachineEvents>(
+export const transactionProcessMachine = createMachine<TranscationsMachineContext, TransactionsMachineEvents>(
   {
-    id: 'transactionsMachine',
+    id: 'transactionProcessMachine',
     initial: 'idle',
     context: {
       action: undefined,
-      currentIndex: 0,
-      currentData: {},
+      currentStepIndex: 0,
+      currentTransactionIndex: 0,
       steps: [],
       responses: [],
     },
@@ -84,6 +85,13 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
               onError: '#failed',
             },
           },
+          previousTransaction: {
+            invoke: {
+              src: 'validatePreviousTransaction',
+              onDone: '#review',
+              onError: '#waitingPreviousTransaction',
+            },
+          },
         },
       },
       feeWarning: {
@@ -97,6 +105,12 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
           missingFees: {
             type: 'final',
           },
+        },
+      },
+      waitingPreviousTransaction: {
+        id: 'waitingPreviousTransaction',
+        on: {
+          CONTINUE: '#validating.previousTransaction',
         },
       },
       review: {
@@ -163,7 +177,11 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
       },
       next: {
         id: 'next',
-        always: [{ target: 'review', cond: 'hasMoreSteps', actions: ['goNextStep'] }, { target: 'success' }],
+        always: [
+          { target: 'review', cond: 'hasMoreTransactions', actions: ['goNextTransaction'] },
+          { target: 'review', cond: 'hasMoreSteps', actions: ['goNextStep'] },
+          { target: 'success' },
+        ],
       },
       aborted: {
         type: 'final',
@@ -236,8 +254,11 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
         action: (_, event: any) => event.action,
       }),
       goNextStep: assign({
-        currentIndex: (context: TranscationsMachineContext) => context.currentIndex + 1,
-        currentData: {},
+        currentStepIndex: (context: TranscationsMachineContext) => context.currentStepIndex + 1,
+        currentTransactionIndex: 0,
+      }),
+      goNextTransaction: assign({
+        currentTransactionIndex: (context: TranscationsMachineContext) => context.currentTransactionIndex + 1,
       }),
       addTransactionResponse: assign({
         responses: (context, event: any) => [...context.responses, event.data],
@@ -247,7 +268,9 @@ export const transactionsMachine = createMachine<TranscationsMachineContext, Tra
 
     guards: {
       hasSteps: (context) => context.steps.length > 0,
-      hasMoreSteps: (context) => context.steps.length > context.currentIndex + 1,
+      hasMoreSteps: (context) => context.steps.length > context.currentStepIndex + 1,
+      hasMoreTransactions: (context) =>
+        context.steps[context.currentStepIndex].transactions.length > context.currentTransactionIndex,
       needsTransferToHub: (context) => {
         if (context.action === 'move') {
           return true;
