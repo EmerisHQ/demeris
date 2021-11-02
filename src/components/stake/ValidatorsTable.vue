@@ -98,6 +98,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { getValidatorsByBaseDenom } = useStaking();
+    const validatorList = ref<Array<unknown>>([]);
     const keyword = ref<string>('');
     const renderedPools = ref([]);
     const poolsWithTotalLiquidityPrice = ref([]);
@@ -107,9 +108,8 @@ export default {
     const { balancesByDenom } = useAccount();
 
     onMounted(async () => {
-      console.log(baseDenom);
-      const test = await getValidatorsByBaseDenom(baseDenom);
-      console.log('test', test);
+      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
+      console.log('validatorList.value', validatorList.value);
     });
 
     watch(

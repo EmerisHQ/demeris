@@ -1075,7 +1075,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_VALIDATORS]({ getters }, { chain_name }: DemerisGetValidatorsParam) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
-      return response.data;
+      return response.data?.validators;
     } catch (e) {
       throw new SpVuexError('Demeris:GetValidators', `Could not get ${chain_name} validators.` + e.message);
     }

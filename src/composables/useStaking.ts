@@ -1,10 +1,10 @@
-import axios from 'axios';
-import { computed, ref, watch } from 'vue';
+// import axios from 'axios';
+// import { computed, ref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Chains } from '@/types/api';
-const useStakingInstance = null;
+// const useStakingInstance = null;
 
 export default function useStaking() {
   const store = useAllStores();
@@ -16,24 +16,27 @@ export default function useStaking() {
       return chain.denoms.find((denom) => denom.name === base_denom);
     }).chain_name;
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.GET_VALIDATORS, { chain_name });
-    const validatorsWithKeybaseData = await Promise.all(
-      rawValidators.validators.map(async (validator) => {
-        validator.keybaseData = null;
-        if (validator.identity) {
-          try {
-            const keybaseData = await axios.get(
-              `https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${validator.identity}`,
-            );
-            validator.keybaseData = keybaseData.data?.them?.[0];
-          } catch {
-            //
-          }
-        }
-        return validator;
-      }),
-    );
 
-    return validatorsWithKeybaseData;
+    const reducer = (accumulator, validator) => {
+      if (validator.status === 3) {
+        // Get info from keybase
+        // validator.keybaseData = null;
+        // try {
+        //   const keybaseData = await axios.get(
+        //     `https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${validator.identity}`,
+        //   );
+        //   validator.keybaseData = keybaseData.data?.them?.[0];
+
+        // } catch {
+        //   //
+        // }
+        accumulator.push(validator);
+      }
+      return accumulator;
+    };
+
+    const curatedValidatorList = await Promise.all(rawValidators.reduce(reducer, []));
+    return curatedValidatorList;
   };
 
   return { getValidatorsByBaseDenom };
