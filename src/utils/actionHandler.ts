@@ -1758,7 +1758,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         continue;
       }
 
-      if (!verifyTrace.verified) {
+      if (!verifyTrace && !verifyTrace.verified) {
         continue;
       }
 
