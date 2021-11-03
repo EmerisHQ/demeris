@@ -25,7 +25,7 @@
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
         <!-- Validator -->
         <template v-if="currentStepIndex === 0">
-          <ValidatorsTable :pools="pools" />
+          <ValidatorsTable />
         </template>
 
         <!-- Amount -->
@@ -80,7 +80,6 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import usePools from '@/composables/usePools';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -88,9 +87,6 @@ export default {
   components: { Button, Icon, ValidatorsTable },
 
   setup() {
-    //test
-    const { pools } = usePools();
-
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
     const { balances } = useAccount();
@@ -133,7 +129,6 @@ export default {
       currentStepIndex,
       backToPreviousStep,
       backToAssetPage,
-      pools,
     };
   },
 };

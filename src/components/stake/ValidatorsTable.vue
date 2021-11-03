@@ -1,5 +1,6 @@
 <template>
   <section class="flex flex-col">
+    <!-- search -->
     <div class="w-full">
       <h1 class="text-3 font-bold text-left">{{ $t('components.stakeTable.selectValidator') }}</h1>
       <Search
@@ -9,55 +10,61 @@
       />
     </div>
 
+    <!-- validator table -->
     <table class="pools-table table-fixed -ml-6">
       <colgroup>
-        <col width="34%" />
-        <col width="33%" />
-        <col width="33%" />
+        <col width="25%" />
+        <col width="25%" />
+        <col width="10%" />
+        <col width="25%" />
+        <col width="15%" />
       </colgroup>
 
+      <!-- table header -->
       <thead class="hidden md:table-header-group text-muted">
         <tr>
           <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-left transition">
-            {{ $t('context.pools.pair') }}
+            {{ $t('components.validatorTable.validator') }}
           </th>
           <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
-            {{ $t('context.pools.liquidity') }}
+            {{ $t('components.validatorTable.votingPower') }}
           </th>
-          <!--<th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">APY</th>//-->
           <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
-            {{ $t('context.pools.share') }}
+            {{ $t('components.validatorTable.commission') }}
           </th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
+            {{ $t('components.validatorTable.staked') }}
+          </th>
+          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"></th>
         </tr>
       </thead>
 
+      <!-- table body -->
       <tbody>
         <tr
-          v-for="pool of orderPools(filteredPools)"
-          :key="pool.id"
+          v-for="validator of validatorList"
+          :key="validator.operator_address"
           class="group cursor-pointer"
-          @click="rowClickHandler(pool)"
+          @click="rowClickHandler(validator)"
         >
           <td class="py-5 flex items-center group-hover:bg-fg transition">
             <div class="inline-flex items-center mr-4">
-              <CircleSymbol
-                :denom="pool.reserve_coin_denoms[pool.isReversePairName ? 1 : 0]"
-                class="w-8 h-8 rounded-full bg-fg z-1"
-              />
-              <CircleSymbol
-                :denom="pool.reserve_coin_denoms[pool.isReversePairName ? 0 : 1]"
-                class="w-8 h-8 rounded-full bg-fg z-0 -ml-1.5"
-              />
+              <!-- TODO: get logo url -->
+              <CircleSymbol :denom="baseDenom" class="w-8 h-8 rounded-full bg-fg z-1" />
             </div>
             <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
-              {{ pool.displayName }}
+              {{ validator.moniker }}
             </span>
           </td>
           <td class="text-right group-hover:bg-fg transition">
-            <TotalLiquidityPrice :pool="pool" />
+            {{ showDisplayValue('votingPower', validator.tokens) }} <Ticker :name="baseDenom" />
+            <div class="-text-1 text-muted">{{ showDisplayValue('votingPowerPercentage', validator.tokens) }}</div>
           </td>
-          <!--<td class="text-right">10%</td>//-->
-          <td class="text-right group-hover:bg-fg transition"><OwnLiquidityPrice :pool="pool" :show-share="true" /></td>
+          <td class="text-right group-hover:bg-fg transition">
+            {{ showDisplayValue('commission', validator.commission_rate) }}
+          </td>
+          <td class="text-right group-hover:bg-fg transition">test 1</td>
+          <td class="text-right group-hover:bg-fg transition">test2</td>
         </tr>
       </tbody>
     </table>
@@ -66,86 +73,68 @@
 
 <script lang="ts">
 import { ref } from '@vue/reactivity';
-import { computed, onMounted, PropType, watch } from '@vue/runtime-core';
+import { computed, onBeforeMount, PropType, watch } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import Search from '@/components/common/Search.vue';
-import TotalLiquidityPrice from '@/components/common/TotalLiquidityPrice.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
-import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
-import { parseCoins } from '@/utils/basic';
 
+type DisplayValue = 'commission' | 'votingPower' | 'votingPowerPercentage';
+//TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
-  components: { Search, CircleSymbol, TotalLiquidityPrice, OwnLiquidityPrice },
+  components: { Search, CircleSymbol, Ticker },
 
-  props: {
-    pools: {
-      type: Array as PropType<Pool[]>,
-      required: true,
-      default: () => [],
-    },
-  },
+  // props: {
+  //   pools: {
+  //     type: Array as PropType<Pool[]>,
+  //     required: true,
+  //     default: () => [],
+  //   },
+  // },
   setup(props) {
+    /* hooks */
+    const { getValidatorsByBaseDenom } = useStaking();
     const router = useRouter();
     const store = useStore();
-    const { getValidatorsByBaseDenom } = useStaking();
-    const validatorList = ref<Array<unknown>>([]);
-    const keyword = ref<string>('');
-    const renderedPools = ref([]);
-    const poolsWithTotalLiquidityPrice = ref([]);
+    const { stakingBalances } = useAccount();
+    /* preset variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
+    const precision = store.getters['demeris/getDenomPrecision']({ name: baseDenom });
 
-    const { getPoolName, getReserveBaseDenoms, getLiquidityShare, getIsReversePairName } = usePools();
-    const { balancesByDenom } = useAccount();
+    /* variables */
+    const validatorList = ref<Array<unknown>>([]);
+    const totalStakedAmount = ref<number>(0);
+    const keyword = ref<string>('');
 
-    onMounted(async () => {
+    /* life cycle */
+    onBeforeMount(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
-      console.log('validatorList.value', validatorList.value);
+      validatorList.value.forEach((validator: any) => {
+        totalStakedAmount.value += Number(validator.tokens);
+      });
+      console.log('valilist', validatorList.value);
+      console.log('stakingBalance', stakingBalances.value);
     });
 
-    watch(
-      () => props.pools,
-      async (newVal) => {
-        if (newVal.length > 0) {
-          renderedPools.value = await Promise.all(
-            props.pools.map(async (pool: any) => {
-              pool.displayName = await getPoolName(pool);
-              pool.reserveBaseDenoms = await getReserveBaseDenoms(pool);
-              pool.isReversePairName = await getIsReversePairName(pool, pool.displayName);
-              return pool;
-            }),
-          );
-          poolsWithTotalLiquidityPrice.value = await Promise.all(
-            renderedPools.value.map(async (pool) => {
-              const { totalLiquidityPrice, initPromise } = usePool(pool.id);
-              await initPromise;
-              const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
-              const poolCoinAmount = poolCoinBalances.reduce(
-                (acc, item) => acc + +parseCoins(item.amount)[0].amount,
-                0,
-              );
-
-              const ownShare = getLiquidityShare(pool, poolCoinAmount);
-              pool.totalLiquidityPrice = totalLiquidityPrice;
-              pool.ownShare = totalLiquidityPrice.value * ownShare;
-
-              return pool;
-            }),
-          );
-        }
-      },
-      { immediate: true },
-    );
-
+    /* functions */
+    const showDisplayValue = (type: DisplayValue, value) => {
+      if (type === 'commission') {
+        return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
+      } else if (type === 'votingPower') {
+        return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
+      } else {
+        // type: votingPowerPercentage
+        return Math.trunc((value / totalStakedAmount.value) * 10000) / 100 + '%';
+      }
+    };
     const orderPools = (unorderedPools) => {
       return orderBy(
         unorderedPools,
@@ -153,31 +142,28 @@ export default {
         ['desc', 'desc', 'asc'],
       );
     };
-
-    const filteredPools = computed(() => {
-      const query = keyword.value.toLowerCase();
-      return poolsWithTotalLiquidityPrice.value.filter(
-        (pool) =>
-          pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
-      );
-    });
-
     const openAddLiqudityPage = () => {
       router.push({ name: 'AddLiquidity' });
     };
-
     const rowClickHandler = (pool: Pool) => {
       router.push({ name: 'Pool', params: { id: pool.id } });
     };
+    // const filteredPools = computed(() => {
+    //   const query = keyword.value.toLowerCase();
+    //   return poolsWithTotalLiquidityPrice.value.filter(
+    //     (pool) =>
+    //       pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
+    //   );
+    // });
 
     return {
-      filteredPools,
+      baseDenom,
+      validatorList,
       keyword,
       rowClickHandler,
+      showDisplayValue,
       openAddLiqudityPage,
-      getPoolName,
       orderPools,
-      poolsWithTotalLiquidityPrice,
     };
   },
 };

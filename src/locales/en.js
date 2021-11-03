@@ -179,6 +179,12 @@ export const messages = {
         selectValidator: 'Select a validator',
         searchValidator: 'Search validator',
       },
+      validatorTable: {
+        validator: 'Validator',
+        votingPower: 'Voting power',
+        commission: 'Commission',
+        staked: 'Staked',
+      },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
         missingOneText: 'Lorem ipsum',
