@@ -1758,7 +1758,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         continue;
       }
 
-      if (!verifyTrace.verified) {
+      if (!verifyTrace || !verifyTrace.verified) {
         continue;
       }
 
@@ -2746,7 +2746,9 @@ export async function isValidIBCReserveDenom(
   } catch (e) {
     return false;
   }
-
+  if (!verifyTrace) {
+    return false;
+  }
   if (verifyTrace.path.split('/').length > 2) {
     return false;
   }

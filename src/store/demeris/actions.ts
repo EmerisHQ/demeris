@@ -841,7 +841,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
             '/denom/verify_trace/' +
             (params as API.VerifyTraceReq).hash,
         );
-        commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
+        if (response && response.data && response.data.verify_trace) {
+          commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
+        }
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
         }
