@@ -2746,7 +2746,9 @@ export async function isValidIBCReserveDenom(
   } catch (e) {
     return false;
   }
-
+  if (!verifyTrace) {
+    return false;
+  }
   if (verifyTrace.path.split('/').length > 2) {
     return false;
   }
