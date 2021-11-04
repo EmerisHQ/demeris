@@ -57,16 +57,18 @@
             </span>
           </td>
           <td class="text-right group-hover:bg-fg transition">
-            {{ showDisplayValue('amount', validator.tokens) }} <Ticker :name="baseDenom" />
-            <div class="-text-1 text-muted">{{ showDisplayValue('votingPowerPercentage', validator.tokens) }}</div>
+            {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
+            <div class="-text-1 text-muted">
+              {{ getVotingPowerPercDisplayValue(validator.tokens) }}
+            </div>
           </td>
           <td class="text-right group-hover:bg-fg transition">
-            {{ showDisplayValue('commission', validator.commission_rate) }}
+            {{ getCommissionDisplayValue(validator.commission_rate) }}
           </td>
           <td class="text-right group-hover:bg-fg transition">
             <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
             <div class="-text-1 text-muted">
-              {{ showDisplayValue('amount', validator.stakedAmount) }} <Ticker :name="baseDenom" />
+              {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
             </div>
           </td>
           <td class="text-right group-hover:bg-fg transition">
@@ -162,16 +164,20 @@ export default {
     });
 
     /* functions */
-    const showDisplayValue = (type: DisplayValue, value) => {
-      if (type === 'commission') {
-        return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
-      } else if (type === 'amount') {
-        return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
-      } else {
-        // type: votingPowerPercentage
-        return Math.trunc((value / totalStakedAmount.value) * 10000) / 100 + '%';
-      }
+    const filteredValidatorList = computed(() => {
+      const query = keyword.value.toLowerCase();
+      return validatorList.value.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+    });
+    const getCommissionDisplayValue = (value) => {
+      return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
     };
+    const getAmountDisplayValue = (value) => {
+      return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
+    };
+    const getVotingPowerPercDisplayValue = (value) => {
+      return Math.trunc((value / totalStakedAmount.value) * 10000) / 100 + '%';
+    };
+
     const orderPools = (unorderedPools) => {
       return orderBy(
         unorderedPools,
@@ -185,17 +191,15 @@ export default {
     const rowClickHandler = (pool: Pool) => {
       router.push({ name: 'Pool', params: { id: pool.id } });
     };
-    const filteredValidatorList = computed(() => {
-      const query = keyword.value.toLowerCase();
-      return validatorList.value.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
-    });
 
     return {
       baseDenom,
       filteredValidatorList,
       keyword,
       rowClickHandler,
-      showDisplayValue,
+      getCommissionDisplayValue,
+      getAmountDisplayValue,
+      getVotingPowerPercDisplayValue,
       openAddLiqudityPage,
       orderPools,
     };
