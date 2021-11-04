@@ -7,12 +7,13 @@
           flex
           items-center
           justify-center
-          w-5
-          h-5
+          w-6
+          h-6
+          border-2 border-bg
           bg-negative
           rounded-full
           absolute
-          right-0
+          -right-1
           -top-1
           font-medium
           -text-1
@@ -26,7 +27,12 @@
     </button>
 
     <template #content>
-      <TransactionProcessItem v-if="lastPendingTransaction" :service="lastPendingTransaction" hide-controls />
+      <TransactionProcessItem
+        v-if="lastPendingTransaction"
+        class="px-2"
+        :service="lastPendingTransaction"
+        hide-controls
+      />
     </template>
   </tippy>
 </template>

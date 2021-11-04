@@ -24,7 +24,7 @@
             () => {
               isTransferConfirmationOpen = false;
               interstitialProceed = true;
-              transactionMachine.send('IBC_NOTICE_CONFIRM');
+              transactionMachine.send('CONTINUE');
             }
           "
         />

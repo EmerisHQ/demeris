@@ -21,6 +21,10 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
     },
 
+    removePendingTransaction(stepHash: string) {
+      delete this.pending[stepHash];
+    },
+
     findOrCreateTransactionMachine(action: string, steps: any[]): [string, any] {
       const stepHash = hashObject(steps);
 

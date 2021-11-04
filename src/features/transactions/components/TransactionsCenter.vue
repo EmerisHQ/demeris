@@ -15,9 +15,9 @@
         </div>
       </header>
 
-      <ul class="py-4 flex flex-col space-y-4">
+      <ul class="flex flex-col space-y-1">
         <li v-for="[key, service] of pendingTransactions" :key="key">
-          <TransactionProcessItem :service="service" @click="selectItem(key)" />
+          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(key)" />
         </li>
       </ul>
 
@@ -29,7 +29,7 @@
 
   <teleport to="body">
     <Modal :open="isModalOpen" variant="takeover" fullscreen show-close-button @close="closeModal">
-      <TransactionProcessViewer :step-hash="state.selectedItem" />
+      <TransactionProcessViewer :step-hash="state.selectedItem" @close="closeModal" />
     </Modal>
   </teleport>
 </template>

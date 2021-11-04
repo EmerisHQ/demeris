@@ -1,12 +1,12 @@
 <template>
-  <button class="flex w-full items-center space-x-4 px-6">
+  <button class="flex w-full items-center space-x-3 hover:bg-fg">
     <div>
       <StateIcon />
     </div>
 
     <div class="flex-1 text-left flex flex-col">
-      <p class="font-medium">Title</p>
-      <p class="-text-1 text-muted"><StateDescription /></p>
+      <p class="font-medium"><StateTitle /></p>
+      <p class="-text-1 opacity-60"><StateDescription /></p>
     </div>
 
     <div>
@@ -106,16 +106,41 @@ const StateDescription = defineComponent({
 const StateControls = defineComponent({
   name: 'StateControls',
   setup() {
+    const dispatch = (action: any) => (event: Event) => {
+      event.stopPropagation();
+      send(action);
+    };
+
     return () => {
       if (state.value.can('RETRY')) {
-        return <Button name="Try again" onClick={() => send('RETRY')} size="sm" />;
+        return <Button name="Try again" onClick={dispatch('RETRY')} size="sm" />;
       }
 
       if (state.value.can('SIGN')) {
-        return <Button name="Sign" onClick={() => send('SIGN')} size="sm" />;
+        return <Button name="Sign" onClick={dispatch('SIGN')} size="sm" />;
       }
 
       return null;
+    };
+  },
+});
+
+const StateTitle = defineComponent({
+  name: 'StateTitle',
+  setup() {
+    const currentTransaction =
+      state.value.context.steps[state.value.context.currentStepIndex].transactions[
+        state.value.context.currentTransactionIndex
+      ];
+    const name = currentTransaction.name;
+
+    return () => {
+      switch (name) {
+        case 'transfer':
+          return <span>Transfer</span>;
+        default:
+          return <span>{name}</span>;
+      }
     };
   },
 });

@@ -4,8 +4,9 @@
     <StateReview v-else-if="state.matches('review')" />
     <StateSigning v-else-if="state.matches('signing')" />
     <StateTransacting v-else-if="state.matches('transacting')" />
-    <StateSuccess v-else-if="state.matches('success')" />
+    <StateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
     <StateFailed v-else-if="state.matches('failed')" />
+    <div v-else-if="state.matches('aborted')">Aborted</div>
     <div v-else>Loading</div>
   </div>
 
@@ -18,6 +19,8 @@
 import { useActor } from '@xstate/vue';
 import { computed, defineComponent, defineProps } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
+
 import { useTransactionsStore } from '../transactionsStore';
 
 const props = defineProps({
@@ -26,6 +29,8 @@ const props = defineProps({
     default: undefined,
   },
 });
+
+const emits = defineEmits(['close']);
 
 const transactionStore = useTransactionsStore();
 const transactionService = computed(() => transactionStore.transactions[props.stepHash]);
@@ -40,7 +45,7 @@ const StateIBCConfirmation = defineComponent({
     return () => (
       <div>
         <h1>Cross Chain Transfer</h1>
-        <button onClick={() => send('IBC_NOTICE_CONFIRM')}>Confirm</button>
+        <button onClick={() => send('CONTINUE')}>Confirm</button>
       </div>
     );
   },
@@ -68,21 +73,37 @@ const StateSigning = defineComponent({
 const StateTransacting = defineComponent({
   name: 'StateTransacting',
   setup() {
+    const onCancel = () => {
+      send('CANCEL');
+    };
+
     return () => (
       <div>
         <h1>Transferring</h1>
         <p>This may take up to 1 minute.</p>
+        {state.value.can('CANCEL') && <Button onClick={onCancel}>Cancel</Button>}
       </div>
     );
   },
 });
 
-const StateSuccess = defineComponent({
-  name: 'StateSuccess',
+const StateReceipt = defineComponent({
+  name: 'StateReceipt',
   setup() {
+    const onDone = () => {
+      transactionStore.removePendingTransaction(props.stepHash);
+      emits('close');
+    };
+
+    const onNext = () => {
+      send('CONTINUE');
+    };
+
     return () => (
       <div>
         <h1>Receipt</h1>
+        {state.value.matches('receipt') && <Button onClick={onNext}>Next</Button>}
+        {state.value.matches('success') && <Button onClick={onDone}>Done</Button>}
       </div>
     );
   },

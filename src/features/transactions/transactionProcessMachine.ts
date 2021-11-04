@@ -12,7 +12,6 @@ interface TranscationsMachineContext {
 
 type TransactionsMachineEvents =
   | { type: 'SET_DATA'; steps: any[]; action: string }
-  | { type: 'IBC_NOTICE_CONFIRM' }
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -45,7 +44,7 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
       },
       ibcConfirmation: {
         on: {
-          IBC_NOTICE_CONFIRM: 'validating',
+          CONTINUE: 'validating',
         },
       },
       validating: {
@@ -178,10 +177,15 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
       next: {
         id: 'next',
         always: [
-          { target: 'review', cond: 'hasMoreTransactions', actions: ['goNextTransaction'] },
-          { target: 'review', cond: 'hasMoreSteps', actions: ['goNextStep'] },
+          { target: 'receipt', cond: 'hasMoreTransactions' },
+          { target: 'receipt', cond: 'hasMoreSteps' },
           { target: 'success' },
         ],
+      },
+      receipt: {
+        on: {
+          CONTINUE: 'review',
+        },
       },
       aborted: {
         type: 'final',
@@ -270,7 +274,7 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
       hasSteps: (context) => context.steps.length > 0,
       hasMoreSteps: (context) => context.steps.length > context.currentStepIndex + 1,
       hasMoreTransactions: (context) =>
-        context.steps[context.currentStepIndex].transactions.length > context.currentTransactionIndex,
+        context.steps[context.currentStepIndex].transactions.length > context.currentTransactionIndex + 1,
       needsTransferToHub: (context) => {
         if (context.action === 'move') {
           return true;
