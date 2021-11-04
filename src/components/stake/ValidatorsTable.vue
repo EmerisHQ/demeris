@@ -42,7 +42,7 @@
       <!-- table body -->
       <tbody>
         <tr
-          v-for="validator of validatorList"
+          v-for="validator of filteredValidatorList"
           :key="validator.operator_address"
           class="group cursor-pointer"
           @click="rowClickHandler(validator)"
@@ -148,17 +148,14 @@ export default {
     const rowClickHandler = (pool: Pool) => {
       router.push({ name: 'Pool', params: { id: pool.id } });
     };
-    // const filteredPools = computed(() => {
-    //   const query = keyword.value.toLowerCase();
-    //   return poolsWithTotalLiquidityPrice.value.filter(
-    //     (pool) =>
-    //       pool.reserveBaseDenoms.join().indexOf(query) !== -1 || pool.displayName.toLowerCase().indexOf(query) !== -1,
-    //   );
-    // });
+    const filteredValidatorList = computed(() => {
+      const query = keyword.value.toLowerCase();
+      return validatorList.value.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+    });
 
     return {
       baseDenom,
-      validatorList,
+      filteredValidatorList,
       keyword,
       rowClickHandler,
       showDisplayValue,
