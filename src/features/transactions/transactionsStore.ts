@@ -34,9 +34,6 @@ export const useTransactionsStore = defineStore('transactions', {
             async validatePreviousTransaction() {
               return Promise.resolve(true);
             },
-            async signTransaction(context) {
-              return Promise.resolve(true);
-            },
           },
         }),
         { devTools: true },

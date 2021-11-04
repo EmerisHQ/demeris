@@ -4,13 +4,13 @@
       <StateIcon />
     </div>
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 text-left flex flex-col">
       <p class="font-medium">Title</p>
       <p class="-text-1 text-muted"><StateDescription /></p>
     </div>
 
     <div>
-      <StateControls v-if="hideControls" />
+      <StateControls v-if="!hideControls" />
     </div>
   </button>
 </template>
@@ -30,7 +30,7 @@ const props = defineProps({
   },
   hideControls: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 });
 // @ts-ignore
@@ -84,6 +84,14 @@ const StateDescription = defineComponent({
         return <p>Transaction in progress...</p>;
       }
 
+      if (state.value.matches('review')) {
+        return (
+          <p>
+            Sign in Keplr ({state.value.context.currentStepIndex + 1}/{state.value.context.steps.length})
+          </p>
+        );
+      }
+
       if (state.value.matches('failed.sign')) {
         return <p>Transaction not signed</p>;
       }
@@ -100,11 +108,11 @@ const StateControls = defineComponent({
   setup() {
     return () => {
       if (state.value.can('RETRY')) {
-        return <Button name="Try again" onClick={() => send('RETRY')} />;
+        return <Button name="Try again" onClick={() => send('RETRY')} size="sm" />;
       }
 
       if (state.value.can('SIGN')) {
-        return <Button name="Sign" onClick={() => send('SIGN')} />;
+        return <Button name="Sign" onClick={() => send('SIGN')} size="sm" />;
       }
 
       return null;

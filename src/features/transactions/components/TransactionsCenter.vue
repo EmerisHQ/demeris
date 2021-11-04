@@ -1,9 +1,10 @@
 <template>
-  <div v-if="pendingTransactions.length">
+  <div v-if="pendingTransactions.length && !isModalOpen">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
       class="fixed bottom-8 right-8 z-50"
     />
+
     <section v-else class="w-96 fixed bottom-0 right-8 z-50 bg-surface shadow-dropwdown rounded-t-lg">
       <header class="flex items-center space-between py-4 px-6">
         <p class="font-bold flex-1 text-1">Transactions</p>
@@ -16,7 +17,7 @@
 
       <ul class="py-4 flex flex-col space-y-4">
         <li v-for="[key, service] of pendingTransactions" :key="key">
-          <TransactionProcessItem :service="service" />
+          <TransactionProcessItem :service="service" @click="selectItem(key)" />
         </li>
       </ul>
 
@@ -25,20 +26,41 @@
       </footer>
     </section>
   </div>
+
+  <teleport to="body">
+    <Modal :open="isModalOpen" variant="takeover" fullscreen show-close-button @close="closeModal">
+      <TransactionProcessViewer :step-hash="state.selectedItem" />
+    </Modal>
+  </teleport>
 </template>
 
 <script type="ts" setup>
-import { computed } from "@vue/reactivity";
+import { computed, reactive } from "@vue/reactivity";
 
 import Icon from "@/components/ui/Icon.vue";
+import Modal from '@/components/ui/Modal.vue';
 
 import { useTransactionsStore } from "../transactionsStore";
 import TransactionProcessItem from './TransactionProcessItem.vue';
+import TransactionProcessViewer from "./TransactionProcessViewer.vue";
 import TransactionsCenterActionButton from "./TransactionsCenterActionButton.vue";
 
 const transactionsStore = useTransactionsStore();
 const rowsLimit = 3;
 
+const state = reactive({
+  selectedItem: null
+})
+
+const selectItem = (stepHash) => {
+  state.selectedItem = stepHash;
+}
+
+const closeModal = () => {
+  state.selectedItem = null;
+}
+
+const isModalOpen = computed(() => !!state.selectedItem);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit));
 const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit);
 </script>

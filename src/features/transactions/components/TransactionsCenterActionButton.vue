@@ -45,7 +45,7 @@ const pendingsCount = computed(() => Object.keys(transactionsStore.pending).leng
 const lastPendingTransaction = computed(() => Object.values(transactionsStore.pending)[pendingsCount.value - 1]);
 
 const { state: serviceState, send } = useActor(lastPendingTransaction);
-console.log({ serviceState })
+
 const tippyRef = ref(null);
 const state = reactive({
   notificationCount: 0
@@ -56,9 +56,15 @@ const handleClick = () => {
   state.notificationCount = 0;
 }
 
-watch(pendingsCount, () => {
+const showNotification = () => {
   state.notificationCount = state.notificationCount + 1;
   tippyRef.value.show();
+}
+
+watch(() => serviceState.value.nextEvents, (nextEvents) => {
+  if (nextEvents.length > 1) {
+    showNotification();
+  }
 });
 
 watch(() => serviceState.value.value, () => {
