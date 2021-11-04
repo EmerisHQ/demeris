@@ -57,20 +57,25 @@
             </span>
           </td>
           <td class="text-right group-hover:bg-fg transition">
-            {{ showDisplayValue('votingPower', validator.tokens) }} <Ticker :name="baseDenom" />
+            {{ showDisplayValue('amount', validator.tokens) }} <Ticker :name="baseDenom" />
             <div class="-text-1 text-muted">{{ showDisplayValue('votingPowerPercentage', validator.tokens) }}</div>
           </td>
           <td class="text-right group-hover:bg-fg transition">
             {{ showDisplayValue('commission', validator.commission_rate) }}
           </td>
-          <td class="text-right group-hover:bg-fg transition">test 1</td>
+          <td class="text-right group-hover:bg-fg transition">
+            <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
+            <div class="-text-1 text-muted">
+              {{ showDisplayValue('amount', validator.stakedAmount) }} <Ticker :name="baseDenom" />
+            </div>
+          </td>
           <td class="text-right group-hover:bg-fg transition">
             <div class="flex justify-center">
               <Button
                 variant="secondary"
                 class="ml-8"
                 :name="$t('components.validatorTable.stake')"
-                :click-function="stakeAsset"
+                :click-function="() => {}"
                 :full-width="false"
               />
               <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
@@ -89,6 +94,7 @@ import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Price from '@/components/common/Price.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
@@ -96,14 +102,14 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Pool } from '@/types/actions';
+import { keyHashfromAddress } from '@/utils/basic';
 
-type DisplayValue = 'commission' | 'votingPower' | 'votingPowerPercentage';
+type DisplayValue = 'commission' | 'amount' | 'votingPowerPercentage';
 //TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
-  components: { Search, CircleSymbol, Ticker, Button, Icon },
+  components: { Search, CircleSymbol, Ticker, Button, Icon, Price },
 
   // props: {
   //   pools: {
@@ -118,6 +124,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { stakingBalances } = useAccount();
+
     /* preset variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = store.getters['demeris/getDenomPrecision']({ name: baseDenom });
@@ -130,9 +137,26 @@ export default {
     /* life cycle */
     onBeforeMount(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
-      validatorList.value.forEach((validator: any) => {
-        totalStakedAmount.value += Number(validator.tokens);
-      });
+      if (stakingBalances.value.length) {
+        validatorList.value.forEach((vali: any) => {
+          const stakedValidator = stakingBalances.value.find(
+            (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
+          );
+          totalStakedAmount.value += Number(vali.tokens);
+          if (stakedValidator) {
+            // TEST:  real amount x 1000000
+            vali.stakedAmount = parseInt(stakedValidator.amount) * 1000000;
+          } else {
+            vali.stakedAmount = 0;
+          }
+        });
+      } else {
+        validatorList.value.forEach((vali: any) => {
+          totalStakedAmount.value += Number(vali.tokens);
+          vali.stakedAmount = 0;
+        });
+      }
+
       console.log('valilist', validatorList.value);
       console.log('stakingBalance', stakingBalances.value);
     });
@@ -141,7 +165,7 @@ export default {
     const showDisplayValue = (type: DisplayValue, value) => {
       if (type === 'commission') {
         return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
-      } else if (type === 'votingPower') {
+      } else if (type === 'amount') {
         return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
       } else {
         // type: votingPowerPercentage
