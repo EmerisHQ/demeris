@@ -45,7 +45,11 @@ const StateIcon = defineComponent({
       }
 
       if (state.value.matches('success')) {
-        return <Icon name="WarningTriangleIcon" class="text-positive" />;
+        return <Icon name="SuccessIcon" class="text-positive" />;
+      }
+
+      if (state.value.matches('waitingPreviousTransaction')) {
+        return <Icon name="TimeIcon" class="opacity-60" />;
       }
 
       if (state.value.matches('transacting') || state.value.matches('validating')) {
@@ -90,6 +94,10 @@ const StateDescription = defineComponent({
             Sign in Keplr ({state.value.context.currentStepIndex + 1}/{state.value.context.steps.length})
           </p>
         );
+      }
+
+      if (state.value.matches('waitingPreviousTransaction')) {
+        return <p>Pending</p>;
       }
 
       if (state.value.matches('failed.sign')) {

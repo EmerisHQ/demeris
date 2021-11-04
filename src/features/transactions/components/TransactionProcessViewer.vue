@@ -7,6 +7,7 @@
     <StateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
     <StateFailed v-else-if="state.matches('failed')" />
     <div v-else-if="state.matches('aborted')">Aborted</div>
+    <div v-else-if="state.matches('waitingPreviousTransaction')">Pending</div>
     <div v-else>Loading</div>
   </div>
 

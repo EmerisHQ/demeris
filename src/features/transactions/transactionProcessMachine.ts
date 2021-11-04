@@ -80,7 +80,7 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
           traceChannel: {
             invoke: {
               src: 'validateTraceChannel',
-              onDone: '#review',
+              onDone: 'previousTransaction',
               onError: '#failed',
             },
           },
