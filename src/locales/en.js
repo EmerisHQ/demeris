@@ -184,6 +184,7 @@ export const messages = {
         votingPower: 'Voting power',
         commission: 'Commission',
         staked: 'Staked',
+        stake: 'Stake',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',

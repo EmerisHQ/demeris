@@ -64,7 +64,18 @@
             {{ showDisplayValue('commission', validator.commission_rate) }}
           </td>
           <td class="text-right group-hover:bg-fg transition">test 1</td>
-          <td class="text-right group-hover:bg-fg transition">test2</td>
+          <td class="text-right group-hover:bg-fg transition">
+            <div class="flex justify-center">
+              <Button
+                variant="secondary"
+                class="ml-8"
+                :name="$t('components.validatorTable.stake')"
+                :click-function="stakeAsset"
+                :full-width="false"
+              />
+              <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -80,6 +91,8 @@ import { useRouter } from 'vue-router';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
@@ -90,7 +103,7 @@ type DisplayValue = 'commission' | 'votingPower' | 'votingPowerPercentage';
 //TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
-  components: { Search, CircleSymbol, Ticker },
+  components: { Search, CircleSymbol, Ticker, Button, Icon },
 
   // props: {
   //   pools: {
