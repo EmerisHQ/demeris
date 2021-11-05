@@ -25,15 +25,20 @@
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
         <!-- Validator -->
         <template v-if="currentStepIndex === 0">
-          <ValidatorsTable />
+          <ValidatorsTable
+            :validator-list="validatorList"
+            :total-staked-amount="totalStakedAmount"
+            @selectValidator="addValidator"
+          />
         </template>
 
         <!-- Amount -->
         <template v-if="currentStepIndex === 1">
-          1
           <div class="max-w-3xl">
-            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
-            <div class="mt-8 pb-8 flex space-x-8"></div>
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.enterAmount') }}</h1>
+            <div class="mt-8 pb-8 flex space-x-8">
+              <ValidatorAmountForm />
+            </div>
           </div>
         </template>
 
@@ -71,39 +76,70 @@
 <script lang="ts">
 type stakeStepsType = 'Validator' | 'Amount' | 'Review' | 'Stake';
 
-import { computed, ref } from 'vue';
+import { computed, onBeforeMount,ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
+import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import useStaking from '@/composables/useStaking';
 import { pageview } from '@/utils/analytics';
-
+import { keyHashfromAddress } from '@/utils/basic';
 export default {
   name: 'Stake',
-  components: { Button, Icon, ValidatorsTable },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm },
 
   setup() {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
+    const { stakingBalances } = useAccount();
     const { balances } = useAccount();
     const router = useRouter();
     const route = useRoute();
+    const { getValidatorsByBaseDenom } = useStaking();
 
     /* meta & GA */
     pageview({ page_title: 'Stake: ' + route.params.denom, page_path: '/stake/' + route.params.denom });
-    useMeta(
-      computed(() => ({
-        title: t('context.stake.title'),
-      })),
-    );
+    useMeta({ title: t('context.stake.title') });
 
     /* variables */
     const stakeSteps: stakeStepsType[] = ['Validator', 'Amount', 'Review', 'Stake'];
     const currentStep = ref<stakeStepsType>(stakeSteps[0]);
+    const baseDenom = router.currentRoute.value.params.denom as string;
+    const validatorList = ref<Array<unknown>>([]);
+    const totalStakedAmount = ref<number>(0);
+    const selectedValidators = ref([]);
+
+    /* life cycle */
+    onBeforeMount(async () => {
+      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
+      if (stakingBalances.value.length) {
+        validatorList.value.forEach((vali: any) => {
+          const stakedValidator = stakingBalances.value.find(
+            (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
+          );
+          totalStakedAmount.value += Number(vali.tokens);
+          if (stakedValidator) {
+            // TEST:  real amount x 1000000
+            vali.stakedAmount = parseInt(stakedValidator.amount) * 1000000;
+          } else {
+            vali.stakedAmount = 0;
+          }
+        });
+      } else {
+        validatorList.value.forEach((vali: any) => {
+          totalStakedAmount.value += Number(vali.tokens);
+          vali.stakedAmount = 0;
+        });
+      }
+
+      console.log('valilist f', validatorList.value);
+      console.log('stakingBalance f', stakingBalances.value);
+    });
 
     /* computeds */
     const isDisplayBackButton = computed(() => {
@@ -119,9 +155,16 @@ export default {
     const backToAssetPage = () => {
       router.push(`/asset/${route.params.denom}`);
     };
+    const addValidator = (vali) => {
+      selectedValidators.value.push(vali);
+      currentStep.value = stakeSteps[currentStepIndex.value + 1];
+      console.log('selectedValidators', selectedValidators.value);
+    };
 
     return {
       balances,
+      validatorList,
+      totalStakedAmount,
       transferType,
       currentStep,
       stakeSteps,
@@ -129,6 +172,7 @@ export default {
       currentStepIndex,
       backToPreviousStep,
       backToAssetPage,
+      addValidator,
     };
   },
 };

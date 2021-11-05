@@ -77,8 +77,8 @@
                 variant="secondary"
                 class="ml-8"
                 :name="$t('components.validatorTable.stake')"
-                :click-function="() => {}"
                 :full-width="false"
+                @click.stop="() => selectValidator(validator)"
               />
               <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
             </div>
@@ -104,69 +104,41 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
-import { Pool } from '@/types/actions';
 import { keyHashfromAddress } from '@/utils/basic';
 
-type DisplayValue = 'commission' | 'amount' | 'votingPowerPercentage';
 //TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
   components: { Search, CircleSymbol, Ticker, Button, Icon, Price },
-
-  // props: {
-  //   pools: {
-  //     type: Array as PropType<Pool[]>,
-  //     required: true,
-  //     default: () => [],
-  //   },
-  // },
-  setup(props) {
+  props: {
+    validatorList: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    totalStakedAmount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+  },
+  emits: ['selectValidator'],
+  setup(props, { emit }) {
     /* hooks */
-    const { getValidatorsByBaseDenom } = useStaking();
     const router = useRouter();
     const store = useStore();
-    const { stakingBalances } = useAccount();
 
     /* preset variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = store.getters['demeris/getDenomPrecision']({ name: baseDenom });
 
     /* variables */
-    const validatorList = ref<Array<unknown>>([]);
-    const totalStakedAmount = ref<number>(0);
     const keyword = ref<string>('');
-
-    /* life cycle */
-    onBeforeMount(async () => {
-      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
-      if (stakingBalances.value.length) {
-        validatorList.value.forEach((vali: any) => {
-          const stakedValidator = stakingBalances.value.find(
-            (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
-          );
-          totalStakedAmount.value += Number(vali.tokens);
-          if (stakedValidator) {
-            // TEST:  real amount x 1000000
-            vali.stakedAmount = parseInt(stakedValidator.amount) * 1000000;
-          } else {
-            vali.stakedAmount = 0;
-          }
-        });
-      } else {
-        validatorList.value.forEach((vali: any) => {
-          totalStakedAmount.value += Number(vali.tokens);
-          vali.stakedAmount = 0;
-        });
-      }
-
-      console.log('valilist', validatorList.value);
-      console.log('stakingBalance', stakingBalances.value);
-    });
 
     /* functions */
     const filteredValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
-      return validatorList.value.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+      return props.validatorList.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
     });
     const getCommissionDisplayValue = (value) => {
       return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
@@ -175,7 +147,10 @@ export default {
       return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
     };
     const getVotingPowerPercDisplayValue = (value) => {
-      return Math.trunc((value / totalStakedAmount.value) * 10000) / 100 + '%';
+      return Math.trunc((value / props.totalStakedAmount) * 10000) / 100 + '%';
+    };
+    const selectValidator = (vali) => {
+      emit('selectValidator', vali);
     };
 
     const orderPools = (unorderedPools) => {
@@ -188,7 +163,7 @@ export default {
     const openAddLiqudityPage = () => {
       router.push({ name: 'AddLiquidity' });
     };
-    const rowClickHandler = (pool: Pool) => {
+    const rowClickHandler = (pool) => {
       router.push({ name: 'Pool', params: { id: pool.id } });
     };
 
@@ -200,6 +175,7 @@ export default {
       getCommissionDisplayValue,
       getAmountDisplayValue,
       getVotingPowerPercDisplayValue,
+      selectValidator,
       openAddLiqudityPage,
       orderPools,
     };
