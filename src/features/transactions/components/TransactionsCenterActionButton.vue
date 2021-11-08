@@ -2,7 +2,7 @@
   <tippy ref="tippyRef" trigger="manual" placement="left">
     <button class="w-12 h-12 rounded-full shadow-button bg-surface" @click="handleClick">
       <div
-        v-if="state.notificationCount"
+        v-if="notificationsCount"
         class="
           flex
           items-center
@@ -20,60 +20,85 @@
           text-text
         "
       >
-        <span v-if="state.notificationCount > 3">3+</span>
-        <span v-else>{{ state.notificationCount }}</span>
+        <span v-if="notificationsCount > 3">3+</span>
+        <span v-else>{{ notificationsCount }}</span>
       </div>
       <Icon name="MenuIcon" />
     </button>
 
     <template #content>
       <TransactionProcessItem
-        v-if="lastPendingTransaction"
+        v-if="state.lastUpdatedService"
         class="px-2"
-        :service="lastPendingTransaction"
+        :service="state.lastUpdatedService"
         hide-controls
       />
     </template>
   </tippy>
 </template>
 
-<script type="tsx" setup>
-import { useActor } from "@xstate/vue";
-import { computed,reactive, ref,watch } from "vue";
+<script lang="tsx" setup>
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 
-import Icon from "@/components/ui/Icon.vue";
+import Icon from '@/components/ui/Icon.vue';
 
-import { useTransactionsStore } from "../transactionsStore";
+import { TransactionProcessState } from '../transactionProcessMachine';
+import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessItem from './TransactionProcessItem.vue';
 
 const transactionsStore = useTransactionsStore();
-const pendingsCount = computed(() => Object.keys(transactionsStore.pending).length);
-const lastPendingTransaction = computed(() => Object.values(transactionsStore.pending)[pendingsCount.value - 1]);
-
-const { state: serviceState, send } = useActor(lastPendingTransaction);
 
 const tippyRef = ref(null);
 const state = reactive({
-  notificationCount: 0
+  notifications: {},
+  lastUpdatedHash: undefined,
+  lastUpdatedService: undefined,
 });
+
+const pendingsCount = computed(() => Object.keys(transactionsStore.pending).length);
+const notificationsCount = computed(() => Object.keys(state.notifications).length);
 
 const handleClick = () => {
   transactionsStore.toggleBottomSheet();
-  state.notificationCount = 0;
-}
+  state.notifications = [];
+};
 
-const showNotification = () => {
-  state.notificationCount = state.notificationCount + 1;
+const showTippy = async () => {
+  await nextTick();
   tippyRef.value.show();
-}
+};
 
-watch(() => serviceState.value.nextEvents, (nextEvents) => {
-  if (nextEvents.length > 1) {
-    showNotification();
+const showNotification = (hash: string) => {
+  state.notifications[hash] = null;
+  showTippy();
+};
+
+watch(pendingsCount, (value, oldValue, onCleanup) => {
+  if (value > oldValue) {
+    const lastPendingHash = Object.keys(transactionsStore.pending)[0];
+    const lastPendingService = transactionsStore.pending[lastPendingHash];
+
+    const onUpdate = (emitted: TransactionProcessState) => {
+      state.lastUpdatedService = lastPendingService;
+      state.lastUpdatedHash = lastPendingHash;
+
+      const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event);
+
+      if (emitted.nextEvents.some(needsAction)) {
+        showNotification(lastPendingHash);
+      } else {
+        showTippy();
+      }
+    };
+
+    const unsubscribe = lastPendingService.subscribe({
+      next: onUpdate,
+      error: () => void 0,
+      complete: () => void 0,
+    });
+
+    showNotification(lastPendingHash);
+    onCleanup(unsubscribe);
   }
 });
-
-watch(() => serviceState.value.value, () => {
-  tippyRef.value.show();
-})
 </script>

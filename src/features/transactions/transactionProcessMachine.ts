@@ -1,4 +1,4 @@
-import { assign, createMachine } from 'xstate';
+import { assign, createMachine, State } from 'xstate';
 
 import { Step } from '@/types/actions';
 
@@ -184,7 +184,10 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
       },
       receipt: {
         on: {
-          CONTINUE: 'review',
+          CONTINUE: {
+            target: 'review',
+            actions: 'goNextTransaction',
+          },
         },
       },
       aborted: {
@@ -257,12 +260,13 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
         steps: (_, event: any) => event.steps || [],
         action: (_, event: any) => event.action,
       }),
-      goNextStep: assign({
-        currentStepIndex: (context: TranscationsMachineContext) => context.currentStepIndex + 1,
-        currentTransactionIndex: 0,
-      }),
-      goNextTransaction: assign({
-        currentTransactionIndex: (context: TranscationsMachineContext) => context.currentTransactionIndex + 1,
+      goNextTransaction: assign((context: TranscationsMachineContext) => {
+        const hasCompletedStep =
+          context.currentTransactionIndex >= context.steps[context.currentStepIndex].transactions.length - 1;
+        return {
+          currentStepIndex: hasCompletedStep ? context.currentStepIndex + 1 : context.currentStepIndex,
+          currentTransactionIndex: hasCompletedStep ? 0 : context.currentTransactionIndex + 1,
+        };
       }),
       addTransactionResponse: assign({
         responses: (context, event: any) => [...context.responses, event.data],
@@ -287,3 +291,5 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
     },
   },
 );
+
+export type TransactionProcessState = State<TranscationsMachineContext, TransactionsMachineEvents>;

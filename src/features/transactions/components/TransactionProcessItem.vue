@@ -1,5 +1,5 @@
 <template>
-  <button class="flex w-full items-center space-x-3 hover:bg-fg">
+  <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div>
       <StateIcon />
     </div>
@@ -100,6 +100,18 @@ const StateDescription = defineComponent({
         return <p>Pending</p>;
       }
 
+      if (state.value.matches('success')) {
+        return <p>Transaction completed</p>;
+      }
+
+      if (state.value.matches('receipt')) {
+        return (
+          <p>
+            Partially completed ({state.value.context.currentStepIndex + 1}/{state.value.context.steps.length})
+          </p>
+        );
+      }
+
       if (state.value.matches('failed.sign')) {
         return <p>Transaction not signed</p>;
       }
@@ -126,6 +138,21 @@ const StateControls = defineComponent({
 
       if (state.value.can('SIGN')) {
         return <Button name="Sign" onClick={dispatch('SIGN')} size="sm" />;
+      }
+
+      if (state.value.matches('waitingPreviousTransaction')) {
+        return (
+          <Button
+            name="Sign"
+            size="sm"
+            tooltipText="Waiting for other transactions to complete on the Cosmos Hub."
+            disabled
+          />
+        );
+      }
+
+      if (state.value.matches('receipt')) {
+        return <Button name="Next" size="sm" onClick={dispatch('CONTINUE')} />;
       }
 
       return null;

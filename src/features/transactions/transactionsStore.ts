@@ -36,7 +36,7 @@ export const useTransactionsStore = defineStore('transactions', {
         transactionProcessMachine.withConfig({
           services: {
             async validatePreviousTransaction() {
-              throw new Error('Failed');
+              return Promise.resolve(true);
             },
           },
         }),
@@ -49,7 +49,10 @@ export const useTransactionsStore = defineStore('transactions', {
       const listener = service.subscribe((actor) => {
         // console.log(actor);
         if (actor.matches('transacting') || actor.matches('waitingPreviousTransaction')) {
-          this.pending[stepHash] = service;
+          this.pending = {
+            [stepHash]: service,
+            ...this.pending,
+          };
           listener.unsubscribe();
         }
       });
