@@ -2,7 +2,7 @@ import { assign, createMachine, State } from 'xstate';
 
 import { Step } from '@/types/actions';
 
-interface TranscationsMachineContext {
+export interface TransactionProcessContext {
   action: string;
   currentStepIndex: number;
   currentTransactionIndex: number;
@@ -10,7 +10,7 @@ interface TranscationsMachineContext {
   responses: any[];
 }
 
-type TransactionsMachineEvents =
+type TransactionProcessEvents =
   | { type: 'SET_DATA'; steps: any[]; action: string }
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
@@ -18,7 +18,7 @@ type TransactionsMachineEvents =
   | { type: 'RETRY' }
   | { type: 'CONTINUE' };
 
-export const transactionProcessMachine = createMachine<TranscationsMachineContext, TransactionsMachineEvents>(
+export const transactionProcessMachine = createMachine<TransactionProcessContext, TransactionProcessEvents>(
   {
     id: 'transactionProcessMachine',
     initial: 'idle',
@@ -237,7 +237,7 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
       broadcastTransaction: () => {
         return Promise.resolve(true);
       },
-      fetchTransactionResponse: (context: TranscationsMachineContext) => (callback) => {
+      fetchTransactionResponse: (context: TransactionProcessContext) => (callback) => {
         console.log('fetching');
         let count = 0;
         const request = () => {
@@ -260,7 +260,7 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
         steps: (_, event: any) => event.steps || [],
         action: (_, event: any) => event.action,
       }),
-      goNextTransaction: assign((context: TranscationsMachineContext) => {
+      goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
           context.currentTransactionIndex >= context.steps[context.currentStepIndex].transactions.length - 1;
         return {
@@ -292,4 +292,4 @@ export const transactionProcessMachine = createMachine<TranscationsMachineContex
   },
 );
 
-export type TransactionProcessState = State<TranscationsMachineContext, TransactionsMachineEvents>;
+export type TransactionProcessState = State<TransactionProcessContext, TransactionProcessEvents>;

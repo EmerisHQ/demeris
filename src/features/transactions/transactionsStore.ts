@@ -3,7 +3,7 @@ import { interpret } from 'xstate';
 
 import { hashObject } from '@/utils/basic';
 
-import { transactionProcessMachine } from './transactionProcessMachine';
+import { TransactionProcessContext, transactionProcessMachine } from './transactionProcessMachine';
 
 export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
@@ -35,7 +35,7 @@ export const useTransactionsStore = defineStore('transactions', {
       const service = interpret(
         transactionProcessMachine.withConfig({
           services: {
-            async validatePreviousTransaction() {
+            async validatePreviousTransaction(context: TransactionProcessContext) {
               return Promise.resolve(true);
             },
           },

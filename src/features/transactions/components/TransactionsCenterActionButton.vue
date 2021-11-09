@@ -73,30 +73,34 @@ const showNotification = (hash: string) => {
   showTippy();
 };
 
+const subscriber = (pendingHash: string) => {
+  const lastPendingService = transactionsStore.pending[pendingHash];
+
+  const onUpdate = (emitted: TransactionProcessState) => {
+    state.lastUpdatedService = lastPendingService;
+    state.lastUpdatedHash = pendingHash;
+
+    const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event);
+
+    if (emitted.nextEvents.some(needsAction)) {
+      showNotification(pendingHash);
+    } else {
+      showTippy();
+    }
+  };
+
+  return lastPendingService.subscribe({
+    next: onUpdate,
+    error: () => void 0,
+    complete: () => void 0,
+  });
+};
+
 watch(pendingsCount, (value, oldValue, onCleanup) => {
-  if (value > oldValue) {
+  if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];
-    const lastPendingService = transactionsStore.pending[lastPendingHash];
 
-    const onUpdate = (emitted: TransactionProcessState) => {
-      state.lastUpdatedService = lastPendingService;
-      state.lastUpdatedHash = lastPendingHash;
-
-      const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event);
-
-      if (emitted.nextEvents.some(needsAction)) {
-        showNotification(lastPendingHash);
-      } else {
-        showTippy();
-      }
-    };
-
-    const unsubscribe = lastPendingService.subscribe({
-      next: onUpdate,
-      error: () => void 0,
-      complete: () => void 0,
-    });
-
+    const unsubscribe = subscriber(lastPendingHash);
     showNotification(lastPendingHash);
     onCleanup(unsubscribe);
   }
