@@ -27,7 +27,7 @@ import { IBCForwardsData, SwapData, TransferData } from '@/types/actions';
 
 import {
   getCurrentTransaction,
-  getCurrentTransactionOffset,
+  getOffsetFromCurrentTransaction,
   getTransactionsLength,
 } from '../transactionProcessSelectors';
 
@@ -102,7 +102,7 @@ const StateDescription = defineComponent({
     };
 
     const transactionsLength = getTransactionsLength(state.value.context);
-    const transactionOffset = getCurrentTransactionOffset(state.value.context) + 1;
+    const transactionOffset = getOffsetFromCurrentTransaction(state.value.context) + 1;
 
     return () => {
       if (state.value.value in textResultMap) {
@@ -129,6 +129,8 @@ const StateDescription = defineComponent({
           </p>
         );
       }
+
+      return null;
     };
   },
 });

@@ -40,6 +40,7 @@ export const useTransactionsStore = defineStore('transactions', {
 
     findOrCreateTransactionMachine(action: string, steps: any[]): [string, any] {
       const stepHash = hashObject(steps);
+      const pendingTransactions = this.pending;
 
       if (stepHash in this.transactions) {
         return [stepHash, this.transactions[stepHash]];
@@ -52,7 +53,7 @@ export const useTransactionsStore = defineStore('transactions', {
               const currentTransaction = getCurrentTransaction(context);
               const currentSourceChain = getSourceChainFromTransaction(currentTransaction);
 
-              const hasPendingInChain = Object.values(this.pending).some((item: TransactionProcessService) => {
+              const hasPendingInChain = Object.values(pendingTransactions).some((item: TransactionProcessService) => {
                 const snapshot = item.getSnapshot();
                 const itemTransaction = getCurrentTransaction(snapshot.context);
                 const itemSourceChain = getSourceChainFromTransaction(itemTransaction);

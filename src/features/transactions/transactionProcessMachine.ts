@@ -193,6 +193,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             target: 'review',
             actions: 'goNextTransaction',
           },
+          SIGN: {
+            target: 'signing',
+            actions: 'goNextTransaction',
+          },
         },
       },
       aborted: {
@@ -272,7 +276,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
-          context.currentTransactionIndex >= context.steps[context.currentStepIndex].transactions.length - 1;
+          context.currentTransactionIndex + 1 >= context.steps[context.currentStepIndex].transactions.length;
         return {
           currentStepIndex: hasCompletedStep ? context.currentStepIndex + 1 : context.currentStepIndex,
           currentTransactionIndex: hasCompletedStep ? 0 : context.currentTransactionIndex + 1,
