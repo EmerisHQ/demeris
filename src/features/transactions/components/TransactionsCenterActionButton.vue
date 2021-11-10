@@ -100,7 +100,7 @@ watch(pendingsCount, (value, oldValue, onCleanup) => {
   if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];
 
-    const unsubscribe = subscriber(lastPendingHash);
+    const unsubscribe = subscriber(lastPendingHash).unsubscribe;
     showNotification(lastPendingHash);
     onCleanup(unsubscribe);
   }

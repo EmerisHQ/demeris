@@ -37,7 +37,6 @@ const transactionStore = useTransactionsStore();
 const transactionService = computed(() => transactionStore.transactions[props.stepHash]);
 const hasFoundService = computed(() => !!transactionService.value);
 
-// @ts-ignore
 const { state, send } = useActor(transactionService.value);
 
 const StateIBCConfirmation = defineComponent({
@@ -75,14 +74,14 @@ const StateTransacting = defineComponent({
   name: 'StateTransacting',
   setup() {
     const onCancel = () => {
-      send('CANCEL');
+      send('ABORT');
     };
 
     return () => (
       <div>
         <h1>Transferring</h1>
         <p>This may take up to 1 minute.</p>
-        {state.value.can('CANCEL') && <Button onClick={onCancel}>Cancel</Button>}
+        {state.value.can('ABORT') && <Button onClick={onCancel}>Cancel</Button>}
       </div>
     );
   },

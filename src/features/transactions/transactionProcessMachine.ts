@@ -1,9 +1,13 @@
-import { assign, createMachine, State } from 'xstate';
+import { assign, createMachine, Interpreter, State } from 'xstate';
 
-import { Step } from '@/types/actions';
+import { GasPriceLevel, Step } from '@/types/actions';
+import { chainStatusForSteps, ensureTraceChannel, msgFromStepTransaction } from '@/utils/actionHandler';
+
+import { getCurrentTransaction } from './transactionProcessSelectors';
 
 export interface TransactionProcessContext {
   action: string;
+  gasPriceLevel: GasPriceLevel;
   currentStepIndex: number;
   currentTransactionIndex: number;
   steps: Step[];
@@ -11,7 +15,7 @@ export interface TransactionProcessContext {
 }
 
 type TransactionProcessEvents =
-  | { type: 'SET_DATA'; steps: any[]; action: string }
+  | { type: 'SET_DATA'; steps: any[]; action: string; gasPriceLevel: string }
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -24,6 +28,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     initial: 'idle',
     context: {
       action: undefined,
+      gasPriceLevel: undefined,
       currentStepIndex: 0,
       currentTransactionIndex: 0,
       steps: [],
@@ -222,22 +227,27 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
   },
   {
     services: {
-      validateFees: () => {
+      validateFees: async (context) => {
         return Promise.resolve(true);
       },
-      validateChainStatus: () => {
-        return new Promise((resolve) => setTimeout(resolve, 3000));
+      validateChainStatus: async (context) => {
+        const result = await chainStatusForSteps(context.steps);
+        if (!result.status) {
+          throw result;
+        }
+        return result;
       },
-      validateTraceChannel: () => {
-        return Promise.resolve(true);
+      validateTraceChannel: (context) => {
+        return ensureTraceChannel(getCurrentTransaction(context));
       },
-      signTransaction: () => {
+      signTransaction: async (context) => {
+        const result = await msgFromStepTransaction(getCurrentTransaction(context), context.gasPriceLevel);
         return Promise.resolve(true);
       },
       broadcastTransaction: () => {
         return Promise.resolve(true);
       },
-      fetchTransactionResponse: (context: TransactionProcessContext) => (callback) => {
+      fetchTransactionResponse: (context) => (callback) => {
         console.log('fetching');
         let count = 0;
         const request = () => {
@@ -293,3 +303,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 );
 
 export type TransactionProcessState = State<TransactionProcessContext, TransactionProcessEvents>;
+export type TransactionProcessService = Interpreter<
+  TransactionProcessContext,
+  TransactionProcessState,
+  TransactionProcessEvents
+>;
