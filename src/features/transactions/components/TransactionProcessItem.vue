@@ -16,8 +16,8 @@
 </template>
 
 <script lang="tsx" setup>
-import { defineComponent } from '@vue/runtime-core';
 import { useActor } from '@xstate/vue';
+import { defineComponent, PropType } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Button from '@/components/ui/Button.vue';
@@ -25,6 +25,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 import { IBCForwardsData, SwapData, TransferData } from '@/types/actions';
 
+import { TransactionProcessService } from '../transactionProcessMachine';
 import {
   getCurrentTransaction,
   getOffsetFromCurrentTransaction,
@@ -33,7 +34,7 @@ import {
 
 const props = defineProps({
   service: {
-    type: Object,
+    type: Object as PropType<TransactionProcessService>,
     required: true,
   },
   hideControls: {
@@ -41,21 +42,21 @@ const props = defineProps({
     default: false,
   },
 });
-// @ts-ignore
+
 const { state, send } = useActor(props.service);
 
 const StateIcon = defineComponent({
   name: 'StateIcon',
   setup() {
     return () => {
-      const iconResult = {
+      const iconResultMap = {
         failed: <Icon name="WarningTriangleIcon" class="text-negative" />,
         success: <Icon name="SuccessIcon" class="text-positive" />,
         waitingPreviousTransaction: <Icon name="TimeIcon" class="opacity-60" />,
       };
 
-      if (state.value.value in iconResult) {
-        return iconResult[state.value.value];
+      if (Object.keys(iconResultMap).some(state.value.matches)) {
+        return iconResultMap[state.value.value as string];
       }
 
       if (state.value.matches('review')) {
@@ -105,8 +106,8 @@ const StateDescription = defineComponent({
     const transactionOffset = getOffsetFromCurrentTransaction(state.value.context) + 1;
 
     return () => {
-      if (state.value.value in textResultMap) {
-        return <p>{textResultMap[state.value.value]}</p>;
+      if (Object.keys(textResultMap).some(state.value.matches)) {
+        return <p>{textResultMap[state.value.value as string]}</p>;
       }
 
       if (state.value.matches('review')) {
@@ -175,10 +176,7 @@ const StateControls = defineComponent({
 const StateTitle = defineComponent({
   name: 'StateTitle',
   setup() {
-    const currentTransaction =
-      state.value.context.steps[state.value.context.currentStepIndex].transactions[
-        state.value.context.currentTransactionIndex
-      ];
+    const currentTransaction = getCurrentTransaction(state.value.context);
     const name = currentTransaction.name;
 
     return () => {

@@ -82,6 +82,7 @@ export const useTransactionsStore = defineStore('transactions', {
         action,
         steps,
         gasPriceLevel: globalStore.getters['demeris/getPreferredGasPriceLevel'],
+        gasLimit: globalStore.getters['demeris/getGasLimit'],
       });
 
       const listener = service.subscribe((actor) => {

@@ -4,20 +4,20 @@ import { IBCForwardsData, Step, StepTransaction, TransferData } from '@/types/ac
 import { TransactionProcessContext } from './transactionProcessMachine';
 
 export const getCurrentStep = (context: TransactionProcessContext): Step => {
-  return context.steps[context.currentStepIndex];
+  return context.input.steps[context.currentStepIndex];
 };
 
 export const getCurrentTransaction = (context: TransactionProcessContext): StepTransaction => {
-  return context.steps[context.currentStepIndex].transactions[context.currentTransactionIndex];
+  return context.input.steps[context.currentStepIndex].transactions[context.currentTransactionIndex];
 };
 
 export const getTransactionsLength = (context: TransactionProcessContext): number => {
-  return context.steps.reduce((acc, item) => acc + item.transactions.length, 0);
+  return context.input.steps.reduce((acc, item) => acc + item.transactions.length, 0);
 };
 
 export const getOffsetFromCurrentTransaction = (context: TransactionProcessContext) => {
   return Math.ceil(
-    context.currentStepIndex + context.currentStepIndex / context.steps.length + context.currentTransactionIndex,
+    context.currentStepIndex + context.currentStepIndex / context.input.steps.length + context.currentTransactionIndex,
   );
 };
 
@@ -35,3 +35,5 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
       return dexChain;
   }
 };
+
+export type DoneEventData<T> = { type: string; data: T };
