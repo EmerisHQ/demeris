@@ -404,9 +404,9 @@ export default defineComponent({
         let paySide = availablePairs.value.filter(
           (x) => x.receive.denom == data.receiveCoinData?.denom || x.receive.denom == data.receiveCoinData?.base_denom,
         );
-        return paySide;
+        return paySide ?? [];
       } else {
-        return availablePairs.value;
+        return availablePairs.value ?? [];
       }
     });
     const availableReceiveSide = computed(() => {
@@ -455,8 +455,10 @@ export default defineComponent({
     const assetsToPay = computed(() => {
       const hasBalance = balances.value.length > 0;
       let payAssets = allBalances.value.filter((x) => {
-        return availablePaySide.value.find(
-          (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
+        return (
+          availablePaySide.value?.find(
+            (y) => y.pay.base_denom == x.base_denom && (parseInt(parseCoins(x.amount)[0].amount) > 0 || !hasBalance),
+          ) ?? undefined
         );
       });
       return payAssets;

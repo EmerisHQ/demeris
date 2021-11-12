@@ -1,6 +1,7 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
+import { Buffer } from 'buffer';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';

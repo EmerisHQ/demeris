@@ -136,7 +136,8 @@
               <CurrencyDisplay :value="hasPrices.all ? (ownShare / 100) * totalLiquidityPrice : 0" />
             </p>
             <p class="text-muted mt-1">
-              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span><span> {{ ownShare.toFixed(2) }}% of pool </span>
+              <AmountDisplay :amount="walletBalances.poolCoin" class="text-text" /><span class="mx-1.5">&middot;</span
+              ><span> {{ ownShare.toFixed(2) }}% of pool </span>
             </p>
 
             <div v-if="walletBalances.poolCoin?.amount > 0" class="mt-8">

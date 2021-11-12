@@ -1,0 +1,17 @@
+// body for specificity - probably should create a 'theme' for tippy instead.
+body {
+  .tippy-box {
+    background: var(--text);
+    color: var(--inverse);
+    font-size: 0.8125rem;
+    line-height: 1.625;
+    border-radius: 0.6125rem;
+    @apply shadow-dropdown;
+  }
+  .tippy-arrow {
+    color: var(--text);
+  }
+  .tippy-content {
+    padding: 0.5rem 0.75rem;
+  }
+}

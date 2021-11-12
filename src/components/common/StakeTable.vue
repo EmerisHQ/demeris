@@ -84,8 +84,7 @@ export default defineComponent({
 <style lang="scss">
 .stake {
   &__banner {
-    background-image: url('~@/assets/images/gold-ephemeris-ring-1.png'),
-      url('~@/assets/images/gold-ephemeris-ring-2.png');
+    background-image: url('/assets/images/gold-ephemeris-ring-1.png'), url('/assets/images/gold-ephemeris-ring-2.png');
     background-size: 230px, 290px;
     background-position: 88%, 93%;
   }

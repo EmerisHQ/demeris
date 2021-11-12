@@ -1,13 +1,9 @@
+/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-  moduleFileExtensions: ['js', 'vue', 'ts'],
-  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
-  testMatch: ['**/src/**/*.spec.[jt]s?(x)'],
+  preset: 'ts-jest',
+  testEnvironment: 'node',
   transform: {
-    '^.+\\.(ts|js)$': 'babel-jest',
-    '.*\\.(vue)$': 'vue-jest',
+    '^.+\\.vue$': 'vue3-jest',
   },
-  setupFiles: ['<rootDir>/tests/unit/jest.setup.js'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
+  moduleFileExtensions: ['json', 'js', 'jsx', 'ts', 'tsx', 'vue'],
 };

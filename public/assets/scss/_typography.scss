@@ -1,0 +1,67 @@
+@layer base {
+  /* Importing everything temporarily */
+  @import 'https://rsms.me/inter/inter.css';
+
+  :root {
+    font-family: 'Inter', sans-serif;
+  }
+  @supports (font-variation-settings: normal) {
+    :root {
+      font-family: 'Inter var', sans-serif;
+    }
+  }
+
+  /* TODO: only import the necessary font weights + variable font - see WIP code below */
+
+  //   /*
+  //   Font families:
+  //
+  //   - "Inter"            static "traditional" font for older web browsers
+  //   - "Inter var"        single-axis variable font for all modern browsers
+  //
+  //   Individual font import declarations from https://rsms.me/inter/inter.css
+  //
+  //   */
+  //
+  //   $font-path-inter: 'https://raw.githubusercontent.com/rsms/inter/master/docs/font-files';
+  //
+  //   /*------------------------- static ------------------------- */
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 400;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Regular.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Regular.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 500;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Medium.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Medium.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   @font-face {
+  //     font-family: 'Inter';
+  //     font-style: normal;
+  //     font-weight: 700;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-Bold.woff2?v=3.19') format('woff2'),
+  //       url('$font-path-inter/Inter-Bold.woff?v=3.19') format('woff');
+  //   }
+  //
+  //   /* ----------------------- variable ----------------------- */
+  //
+  //   @font-face {
+  //     font-family: 'Inter var';
+  //     font-style: normal;
+  //     font-weight: 100 900;
+  //     font-display: swap;
+  //     src: url('$font-path-inter/Inter-roman.var.woff2?v=3.19') format('woff2');
+  //     font-named-instance: 'Regular';
+  //   }
+}

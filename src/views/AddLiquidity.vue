@@ -240,7 +240,8 @@
                       size="sm"
                       class="mr-3"
                     />
-                    <span class="font-medium">{{ state.receiveAmount }}
+                    <span class="font-medium"
+                      >{{ state.receiveAmount }}
                       <span class="font-bold">
                         <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
                       </span>

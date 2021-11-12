@@ -31,7 +31,7 @@
           height="1"
           width="1"
           preserveAspectRatio="xMidYMid slice"
-          xlink:href="~@/assets/images/texture-gold-circular.jpg"
+          xlink:href="/assets/images/texture-gold-circular.jpg"
         ></image>
       </pattern>
     </defs>

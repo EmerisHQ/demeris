@@ -1,5 +1,6 @@
 import './assets/scss/index.scss';
 import 'tippy.js/dist/tippy.css';
+import 'regenerator-runtime/runtime';
 
 import vueLib from '@starport/vue';
 import mitt from 'mitt';

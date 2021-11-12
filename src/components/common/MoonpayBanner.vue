@@ -90,7 +90,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .moonpay-banner {
   min-height: 5rem;
-  background-image: url('~@/assets/images/buy-atom-card-big.png');
+  background-image: url('/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;
   background-position: top 30% left 120%;
   background-size: 70% auto;

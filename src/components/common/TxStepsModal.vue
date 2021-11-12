@@ -70,7 +70,8 @@
 
           <div class="max-w-md mx-auto -text-1 text-muted text-center leading-copy px-6">
             {{ $t('components.txHandlingModal.noRevert') }}
-            <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">{{ $t('components.settingsMenu.tos') }}.
+            <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer"
+              >{{ $t('components.settingsMenu.tos') }}.
             </a>
           </div>
 
@@ -175,7 +176,7 @@
             <template
               v-if="
                 feeWarning.missingFees.length > 1 ||
-                  (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
+                (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
               "
             >
               <ModalButton
@@ -252,7 +253,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';

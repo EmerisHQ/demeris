@@ -2,10 +2,10 @@ import { encodeSecp256k1Pubkey, makeSignDoc as makeSignDocAmino, OfflineAminoSig
 import { fromBase64 } from '@cosmjs/encoding';
 import { Int53 } from '@cosmjs/math';
 import { EncodeObject, encodePubkey, makeAuthInfoBytes, TxBodyEncodeObject } from '@cosmjs/proto-signing';
-import { SignMode } from '@cosmjs/proto-signing/build/codec/cosmos/tx/signing/v1beta1/signing';
 import { AminoTypes } from '@cosmjs/stargate';
 import { SignerData, SigningStargateClient } from '@cosmjs/stargate';
-import { TxRaw } from '@cosmjs/stargate/build/codec/cosmos/tx/v1beta1/tx';
+import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { liquidityTypes } from './liquidityTypes';
 

@@ -135,7 +135,8 @@
             target="_blank"
             class="inline-block mt-5 p-2"
           >
-            {{ $t('context.transaction.viewOnExplorer') }} ↗️</a>
+            {{ $t('context.transaction.viewOnExplorer') }} ↗️</a
+          >
         </template>
         <template v-else-if="tx.name === 'withdrawliquidity'">
           <PreviewWithdrawLiquidity :response="txResult" :fees="txResult.fees" />
@@ -183,8 +184,8 @@
       <template
         v-if="
           !isFinal &&
-            status === 'complete' &&
-            (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')
+          status === 'complete' &&
+          (tx.name === 'ibc_forward' || tx.name === 'ibc_backward' || tx.name === 'transfer')
         "
       >
         <a
@@ -336,8 +337,8 @@
             status == 'keplr-reject' || status == 'failed' || txResult?.swappedPercent === 0
               ? emitRetry()
               : isFinal
-                ? emitDone()
-                : emitNext();
+              ? emitDone()
+              : emitNext();
           }
         "
       />
@@ -760,17 +761,17 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .swapped-image {
-  background-image: url('~@/assets/images/swap-result.png');
+  background-image: url('/assets/images/swap-result.png');
   height: 13rem;
 }
 
 .transferred-image {
-  background-image: url('~@/assets/images/silver-surfer-1-light.png');
+  background-image: url('/assets/images/silver-surfer-1-light.png');
 }
 
 @media (prefers-color-scheme: dark) {
   .transferred-image {
-    background-image: url('~@/assets/images/silver-surfer-1-dark.png');
+    background-image: url('/assets/images/silver-surfer-1-dark.png');
   }
 }
 

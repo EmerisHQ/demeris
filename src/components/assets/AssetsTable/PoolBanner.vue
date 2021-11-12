@@ -26,7 +26,8 @@
         href="#"
         @click="openPoolPage"
       >
-        {{ $t('components.poolBanner.viewPool') }} &rarr;</a>
+        {{ $t('components.poolBanner.viewPool') }} &rarr;</a
+      >
     </p>
   </Alert>
 </template>
