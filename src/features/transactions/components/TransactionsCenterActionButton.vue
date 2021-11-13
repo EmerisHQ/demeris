@@ -38,7 +38,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, nextTick, onMounted,reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 
@@ -48,6 +48,7 @@ import TransactionProcessItem from './TransactionProcessItem.vue';
 
 const transactionsStore = useTransactionsStore();
 
+const subscriptions = ref({});
 const tippyRef = ref(null);
 const state = reactive({
   notifications: {},
@@ -73,7 +74,11 @@ const showNotification = (hash: string) => {
   showTippy();
 };
 
-const subscriber = (pendingHash: string) => {
+const subscribe = (pendingHash: string) => {
+  if (subscriptions.value[pendingHash]) {
+    return;
+  }
+
   const lastPendingService = transactionsStore.pending[pendingHash];
 
   const onUpdate = (emitted: TransactionProcessState) => {
@@ -89,24 +94,32 @@ const subscriber = (pendingHash: string) => {
     }
   };
 
-  return lastPendingService.subscribe({
+  const subscription = lastPendingService.subscribe({
     next: onUpdate,
     error: () => void 0,
     complete: () => void 0,
   });
+
+  subscriptions.value[pendingHash] = subscription;
 };
 
-watch(pendingsCount, (value, oldValue, onCleanup) => {
+watch(pendingsCount, (value, oldValue) => {
   if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];
-
-    const unsubscribe = subscriber(lastPendingHash).unsubscribe;
     showNotification(lastPendingHash);
-    onCleanup(unsubscribe);
   }
 });
 
 onMounted(() => {
-  console.log('mounted');
+  for (const hash of Object.keys(transactionsStore.pending)) {
+    subscribe(hash);
+  }
+});
+
+onUnmounted(() => {
+  for (const subscription of Object.values(subscriptions.value)) {
+    // @ts-ignore
+    subscription.unsubscribe();
+  }
 });
 </script>

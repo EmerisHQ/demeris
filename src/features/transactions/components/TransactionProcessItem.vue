@@ -17,7 +17,7 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed,defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -25,6 +25,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 import { IBCForwardsData, SwapData, TransferData } from '@/types/actions';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { TransactionProcessService } from '../transactionProcessMachine';
 import {
@@ -182,17 +183,19 @@ const StateTitle = defineComponent({
 
     return () => {
       if (name.value === 'transfer') {
+        const denom = (currentTransaction.value.data as TransferData).amount.denom;
         return (
           <div>
-            Send <Ticker name={(currentTransaction.value.data as TransferData).amount.denom} />
+            Send <Ticker name={getBaseDenomSync(denom)} />
           </div>
         );
       }
 
       if (name.value.startsWith('ibc')) {
+        const denom = (currentTransaction.value.data as TransferData).amount.denom;
         return (
           <div>
-            Move <Ticker name={(currentTransaction.value.data as IBCForwardsData).amount.denom} />
+            Move <Ticker name={getBaseDenomSync(denom)} />
           </div>
         );
       }
