@@ -17,9 +17,10 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { defineComponent, PropType } from 'vue';
+import { computed,defineComponent, PropType } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
@@ -176,16 +177,27 @@ const StateControls = defineComponent({
 const StateTitle = defineComponent({
   name: 'StateTitle',
   setup() {
-    const currentTransaction = getCurrentTransaction(state.value.context);
-    const name = currentTransaction.name;
+    const currentTransaction = computed(() => getCurrentTransaction(state.value.context));
+    const name = computed(() => currentTransaction.value.name);
 
     return () => {
-      switch (name) {
-        case 'transfer':
-          return <span>Transfer</span>;
-        default:
-          return <span>{name}</span>;
+      if (name.value === 'transfer') {
+        return (
+          <div>
+            Send <Ticker name={(currentTransaction.value.data as TransferData).amount.denom} />
+          </div>
+        );
       }
+
+      if (name.value.startsWith('ibc')) {
+        return (
+          <div>
+            Move <Ticker name={(currentTransaction.value.data as IBCForwardsData).amount.denom} />
+          </div>
+        );
+      }
+
+      return name;
     };
   },
 });

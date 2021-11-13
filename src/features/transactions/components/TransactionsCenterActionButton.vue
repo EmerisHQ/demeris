@@ -38,7 +38,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted,reactive, ref, watch } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 
@@ -104,5 +104,9 @@ watch(pendingsCount, (value, oldValue, onCleanup) => {
     showNotification(lastPendingHash);
     onCleanup(unsubscribe);
   }
+});
+
+onMounted(() => {
+  console.log('mounted');
 });
 </script>

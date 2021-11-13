@@ -18,7 +18,7 @@ import {
   getSourceChainFromTransaction,
 } from './transactionProcessSelectors';
 
-interface ContextInput {
+interface ContextInputSchema {
   action: string;
   gasPriceLevel: GasPriceLevel;
   gasLimit: number;
@@ -26,17 +26,19 @@ interface ContextInput {
 }
 
 export interface TransactionProcessContext {
-  input: ContextInput;
+  input: ContextInputSchema;
   currentStepIndex: number;
   currentTransactionIndex: number;
-  result: {
-    hash: string;
-    response: any;
-  };
+  results: {
+    txhash: string;
+    chain_name: string;
+    status: any;
+    endBlock: any;
+  }[];
 }
 
 type TransactionProcessEvents =
-  | ({ type: 'SET_DATA' } & ContextInput)
+  | ({ type: 'SET_DATA' } & ContextInputSchema)
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -56,10 +58,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       currentStepIndex: 0,
       currentTransactionIndex: 0,
-      result: {
-        hash: undefined,
-        response: undefined,
-      },
+      results: [],
     },
     states: {
       idle: {
@@ -185,8 +184,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             initial: 'active',
             after: {
               5000: { target: '.pending' },
-              10000: { target: '.delayed' },
-              50000: { target: '#unknown' },
+              60000: { target: '.delayed' },
+              300000: { target: '#failed.unknown' },
             },
             on: {
               // @ts-ignore
@@ -194,9 +193,13 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 target: '#next',
                 actions: ['addTransactionResponse'],
               },
+              GOT_UNKNOWN: {
+                target: '#failed.unknown',
+              },
             },
             invoke: {
               src: 'fetchTransactionResponse',
+              onError: '#failed.confirmations',
             },
             states: {
               active: {},
@@ -245,7 +248,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             },
           },
           unknown: {
-            id: 'unknown',
             type: 'final',
           },
         },
@@ -301,6 +303,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         return globalStore.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, event.data);
       },
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
+        const currentStep = getCurrentStep(context);
         const currentTransaction = getCurrentTransaction(context);
         const sourceChain = getSourceChainFromTransaction(currentTransaction);
 
@@ -310,19 +313,41 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         });
 
         let shouldRetry = true;
-        let resultData = undefined;
 
-        const breakStatuses = [
-          'complete',
-          'failed',
-          'stuck',
-          'IBC_receive_failed',
-          'IBC_receive_success',
-          'Tokens_unlocked_timeout',
-          'Tokens_unlocked_ack',
-        ];
+        const fetchEndBlock = async (height: number) => {
+          let retries = 0;
+          let endBlockEvent = undefined;
+
+          if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentStep.name)) {
+            while (retries < 10 && shouldRetry) {
+              try {
+                endBlockEvent = await globalStore.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                  height: height,
+                  stepType: currentStep.name,
+                });
+                break;
+              } catch {
+                retries++;
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            }
+          }
+
+          return endBlockEvent;
+        };
 
         const fetchStatus = async () => {
+          let resultData = undefined;
+          const breakStatuses = [
+            'complete',
+            'failed',
+            'stuck',
+            'IBC_receive_failed',
+            'IBC_receive_success',
+            'Tokens_unlocked_timeout',
+            'Tokens_unlocked_ack',
+          ];
+
           while (!breakStatuses.includes(resultData?.status) && shouldRetry) {
             resultData = await globalStore.getters['demeris/getTxStatus']({
               chain_name: sourceChain,
@@ -330,10 +355,28 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             });
             await new Promise((resolve) => setTimeout(resolve, 750));
           }
-          // { status, height }
+
+          if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
+            throw new Error(resultData.error || 'error');
+          }
+
+          if (resultData.status === 'stuck') {
+            // @ts-ignore
+            return callback({ type: 'GOT_UNKNOWN' });
+          }
+
+          let txhash = event.data.ticket;
+
+          if (resultData.status === 'IBC_receive_success') {
+            const ticketData = resultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
+            txhash = ticketData.TxHash;
+          }
+
+          const endBlockResult = await fetchEndBlock(resultData.height);
+          const responseData = { txhash, chain_name: sourceChain, status: resultData, endBlock: endBlockResult };
 
           // @ts-ignore
-          callback({ type: 'GOT_RESPONSE', data: resultData });
+          callback({ type: 'GOT_RESPONSE', data: responseData });
         };
 
         setTimeout(fetchStatus, 0);
@@ -344,7 +387,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
     actions: {
       setData: assign({
-        input: (_, event: any) => ({
+        input: (_, event: ContextInputSchema & { type: string }) => ({
           steps: event.steps,
           action: event.action,
           gasLimit: event.gasLimit,
@@ -360,9 +403,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
       }),
       addTransactionResponse: assign({
-        result: (context, event) => {
-          return { hash: undefined, response: undefined };
-        },
+        results: (context, event: DoneEventData<any>) => [...context.results, event.data],
       }),
       logEvent: (_, __, meta) => console.log(meta.action),
     },
@@ -371,11 +412,22 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       hasSteps: (context) => context.input.steps.length > 0,
       hasMoreSteps: (context) => context.input.steps.length > context.currentStepIndex + 1,
       hasMoreTransactions: (context) =>
-        context.input.steps[context.currentStepIndex].transactions.length > context.currentTransactionIndex + 1,
+        getCurrentStep(context).transactions.length > context.currentTransactionIndex + 1,
       needsTransferToHub: (context) => {
         if (context.input.action === 'move') {
           return true;
         }
+
+        if (context.input.action === 'transfer') {
+          if (getCurrentStep(context).transactions[0].name.includes('ibc')) {
+            return true;
+          }
+        }
+
+        if (['swap', 'addliquidity'].includes(context.input.action) && context.input.steps.length > 1) {
+          return true;
+        }
+
         return false;
       },
 
