@@ -5,11 +5,11 @@ import Long from 'long';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { ChainData } from '@/store/demeris/state';
 import * as Actions from '@/types/actions';
-import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import * as API from '@/types/api';
+import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
 
-import { store } from '../store/index';
+import { useAllStores, useStore } from '../store/index';
 import {
   generateDenomHash,
   getChannel,
@@ -19,6 +19,9 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
+
+const store = useStore();
+const libStore = useAllStores();
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
@@ -47,7 +50,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
           hash: amount.denom.split('/')[1],
         }) ??
         (await store.dispatch(
-          'demeris/GET_VERIFY_TRACE',
+          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
           {
             subscribe: false,
             params: {
@@ -132,7 +135,7 @@ export async function memoTransfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -168,7 +171,7 @@ export async function memoTransfer({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
+        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -184,7 +187,7 @@ export async function memoTransfer({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        'demeris/GET_PRIMARY_CHANNEL',
+        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -294,7 +297,7 @@ export async function memoTransfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -375,7 +378,7 @@ export async function transfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -403,7 +406,7 @@ export async function transfer({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
+        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -419,7 +422,7 @@ export async function transfer({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        'demeris/GET_PRIMARY_CHANNEL',
+        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -512,7 +515,7 @@ export async function transfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -574,7 +577,7 @@ export async function move({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -600,7 +603,7 @@ export async function move({
             destination_chain_name: chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
@@ -624,7 +627,7 @@ export async function move({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
+        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -639,7 +642,7 @@ export async function move({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        'demeris/GET_PRIMARY_CHANNEL',
+        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -685,7 +688,7 @@ export async function move({
           destination_chain_name: chain_name,
         }) ??
         (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
+          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
           {
             subscribe: true,
             params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
@@ -729,7 +732,7 @@ export async function move({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -757,7 +760,7 @@ export async function move({
             destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await store.dispatch(
-            'demeris/GET_PRIMARY_CHANNEL',
+            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -812,8 +815,8 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
     },
   };
   const liquidityPools =
-    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -861,8 +864,8 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
     },
   };
   const liquidityPools =
-    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -897,8 +900,8 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
     },
   };
   const liquidityPools =
-    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -1201,14 +1204,14 @@ export async function msgFromStepTransaction(
 ): Promise<Actions.MsgMeta> {
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
-    const msg = await store.dispatch('cosmos.bank.v1beta1/MsgSend', {
+    const msg = await libStore.dispatch('cosmos.bank.v1beta1/MsgSend', {
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
         fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
       },
     });
-    const registry = store.getters['cosmos.bank.v1beta1/getRegistry'];
+    const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
     return { msg, chain_name: data.chain_name, registry };
   }
 
@@ -1220,7 +1223,7 @@ export async function msgFromStepTransaction(
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
-    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -1231,7 +1234,7 @@ export async function msgFromStepTransaction(
         token: { ...data.amount },
       },
     });
-    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
 
@@ -1250,7 +1253,7 @@ export async function msgFromStepTransaction(
         parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
       ).toString();
     }
-    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -1260,11 +1263,11 @@ export async function msgFromStepTransaction(
         token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
-    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.AddLiquidityData;
     let depositCoins;
     if (data.coinA.denom > data.coinB.denom) {
@@ -1272,31 +1275,31 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
         depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins,
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         poolCoin: { ...data.poolCoin },
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demeris/getDexChain'];
     const data = stepTx.data as Actions.CreatePoolData;
     let depositCoins;
     if (data.coinA.denom > data.coinB.denom) {
@@ -1304,21 +1307,21 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
         depositCoins: depositCoins,
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
     const data = stepTx.data as Actions.SwapData;
     const chain_name = store.getters['demeris/getDexChain'];
     const slippage = (store.getters['demeris/getSlippagePerc'] || 0.5) / 100;
-    const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+    const swapFeeRate = libStore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
     let isReverse = false;
     if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
       isReverse = true;
@@ -1328,7 +1331,7 @@ export async function msgFromStepTransaction(
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
@@ -1345,7 +1348,7 @@ export async function msgFromStepTransaction(
           .replace(/(^0+)/, ''),
       }),
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
 }
@@ -1381,7 +1384,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
   if (!trace) {
     trace = await store.dispatch(
-      'demeris/GET_VERIFY_TRACE',
+      GlobalDemerisActionTypes.GET_VERIFY_TRACE,
       { subscribe: false, params: { chain_name, hash } },
       { root: true },
     );
@@ -1498,7 +1501,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
     try {
       for (const denom of ibcDenoms) {
         await store.dispatch(
-          'demeris/GET_VERIFY_TRACE',
+          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
           {
             subscribe: false,
             cache: false,
@@ -1538,7 +1541,7 @@ export async function getDisplayName(name, chain_name = null) {
       verifyTrace =
         store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
-          'demeris/GET_VERIFY_TRACE',
+          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
@@ -1563,7 +1566,7 @@ export async function getTicker(name, chain_name = null) {
       verifyTrace =
         store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
-          'demeris/GET_VERIFY_TRACE',
+          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
@@ -1581,7 +1584,7 @@ export async function isLive(chain_name) {
       chain_name,
     }) ??
     (await store.dispatch(
-      'demeris/GET_CHAIN_STATUS',
+      GlobalDemerisActionTypes.GET_CHAIN_STATUS,
       {
         subscribe: false,
         params: {
@@ -1700,7 +1703,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
         verifyTrace =
           store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
+            GlobalDemerisActionTypes.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
             { root: true },
           ));
@@ -1714,7 +1717,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
+          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
           {
             subscribe: true,
             params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
@@ -1754,7 +1757,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         verifyTrace =
           store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
+            GlobalDemerisActionTypes.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
             { root: true },
           ));
@@ -1772,7 +1775,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
-          'demeris/GET_PRIMARY_CHANNEL',
+          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
           {
             subscribe: false,
             params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
@@ -2743,7 +2746,7 @@ export async function isValidIBCReserveDenom(
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
-        'demeris/GET_VERIFY_TRACE',
+        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
         { root: true },
       ));
@@ -2767,7 +2770,7 @@ export async function isValidIBCReserveDenom(
       destination_chain_name: verifyTrace.trace[0].counterparty_name,
     }) ??
     (await store.dispatch(
-      'demeris/GET_PRIMARY_CHANNEL',
+      GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
       {
         subscribe: false,
         params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },

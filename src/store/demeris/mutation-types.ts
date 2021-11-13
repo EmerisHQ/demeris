@@ -49,7 +49,7 @@ export type UserData = {
   slippagePerc?: number;
   isDemoAccount?: boolean;
   theme?: string;
-  updateDT: number;
+  updateDT?: number;
 };
 export type UserSession = {
   walletName: string;

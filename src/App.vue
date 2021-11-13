@@ -23,9 +23,10 @@ import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
-import { useAllStores } from '@/store';
+import { useAllStores, useStore } from '@/store';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
+import { GlobalDemerisActionTypes as GlobalDemerisTXActionTypes } from './store/demeris-tx/action-types';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -39,7 +40,8 @@ export default defineComponent({
 
   setup() {
     useTheme({ updateOnChange: true });
-    const store = useAllStores();
+    const store = useStore();
+    const libStore = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
 
@@ -51,7 +53,8 @@ export default defineComponent({
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
-      await store.dispatch('demerisTX/RESET_STATE');
+      await store.dispatch(GlobalDemerisTXActionTypes.RESET_STATE);
+      // GlobalDemerisTXActionTypes.RESET_STATE
 
       await store.dispatch(GlobalDemerisActionTypes.INIT, {
         endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
@@ -88,7 +91,7 @@ export default defineComponent({
         });
       }
       status.value = t('appInit.status.liquidityConfigure');
-      await store.dispatch('common/env/config', {
+      await libStore.dispatch('common/env/config', {
         apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
         rpcNode: null,
         wsNode: null,
@@ -101,11 +104,11 @@ export default defineComponent({
       });
       status.value = t('appInit.status.poolFetching');
       try {
-        await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+        await libStore.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
         });
-        await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-        await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
+        await libStore.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
+        await libStore.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
       } catch (e) {
         console.error(e);
       }
