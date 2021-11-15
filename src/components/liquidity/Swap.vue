@@ -1011,13 +1011,17 @@ export default defineComponent({
           : data.selectedPoolData.reserveBalances.balanceA;
         if (e.includes('Pay')) {
           data.receiveCoinAmount = parseFloat(
-            (
-              getReceiveCoinAmount(
-                { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-                balanceA,
-                balanceB,
-              ) / (isReverse ? equalizer : 1)
-            ).toFixed(4),
+            '' +
+              Math.trunc(
+                (getReceiveCoinAmount(
+                  { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+                  balanceA,
+                  balanceB,
+                ) *
+                  10000) /
+                  (isReverse ? equalizer : 1),
+              ) /
+                10000,
           );
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;

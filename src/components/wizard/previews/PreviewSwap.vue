@@ -185,23 +185,17 @@ export default defineComponent({
         const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await getReserveBalances(pool);
+        const inputAmount = parseInt(String(Number(data.value.from.amount) * swapFeeRate.value));
         toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
         fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
+
         let swapPrice = null;
 
         if (reserveDenoms[1] === toCoinBaseDenom.value) {
-          swapPrice = getSwapPrice(
-            parseInt(data.value.from.amount),
-            reserveBalances.balanceA,
-            reserveBalances.balanceB,
-          );
+          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
         } else {
           //reverse
-          swapPrice = getSwapPrice(
-            parseInt(data.value.from.amount),
-            reserveBalances.balanceB,
-            reserveBalances.balanceA,
-          );
+          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
         }
 
         const fromPrecision = store.getters['demeris/getDenomPrecision']({
