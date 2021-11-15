@@ -40,7 +40,9 @@ export default function useCalculation() {
     const swapFeeRate = 1;
     const receiveCoinBaseDenomDecimalDigits =
       store.getters['demeris/getDenomPrecision']({ name: receiveCoinData.base_denom }) ?? 6; //?? alert('Error: getDenomPrecision');
-    const receiveCoinBaseDenomAmount = Math.trunc(receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits);
+    const receiveCoinBaseDenomAmount = Math.trunc(
+      receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits * 1.00150225,
+    );
     const payCoinAmount =
       Number(BigInt(payCoinPoolAmount * precisionDigits) / BigInt(receiveCoinPoolAmount)) /
       (swapFeeRate / receiveCoinBaseDenomAmount - 2 / receiveCoinPoolAmount);
