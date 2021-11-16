@@ -36,4 +36,12 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
   }
 };
 
+export const matchesStateObject = <T>(obj: Record<string, T>, callback: (key: string) => boolean) => {
+  return Object.entries(obj).find(([key, value]) => {
+    if (callback(key)) {
+      return value;
+    }
+  })?.[1];
+};
+
 export type DoneEventData<T> = { type: string; data: T };

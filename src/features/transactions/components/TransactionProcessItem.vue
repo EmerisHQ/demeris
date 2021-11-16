@@ -32,6 +32,7 @@ import {
   getCurrentTransaction,
   getOffsetFromCurrentTransaction,
   getTransactionsLength,
+  matchesStateObject,
 } from '../transactionProcessSelectors';
 
 const props = defineProps({
@@ -56,6 +57,11 @@ const StateIcon = defineComponent({
         success: <Icon name="SuccessIcon" class="text-positive" />,
         waitingPreviousTransaction: <Icon name="TimeIcon" class="opacity-60" />,
       };
+
+      const staticIcon = matchesStateObject(iconResultMap, state.value.matches);
+      if (staticIcon) {
+        return staticIcon;
+      }
 
       if (Object.keys(iconResultMap).some(state.value.matches)) {
         return iconResultMap[state.value.value as string];
@@ -98,6 +104,7 @@ const StateDescription = defineComponent({
     const textResultMap = {
       validating: 'Preparing transaction...',
       transacting: 'Transaction in progress...',
+      signing: 'Signing...',
       waitingPreviousTransaction: 'Pending',
       success: 'Transaction completed',
       'failed.sign': 'Transaction not signed',
@@ -108,8 +115,9 @@ const StateDescription = defineComponent({
     const transactionOffset = getOffsetFromCurrentTransaction(state.value.context) + 1;
 
     return () => {
-      if (Object.keys(textResultMap).some(state.value.matches)) {
-        return <p>{textResultMap[state.value.value as string]}</p>;
+      const staticValue = matchesStateObject(textResultMap, state.value.matches);
+      if (staticValue) {
+        return staticValue;
       }
 
       if (state.value.matches('review')) {
