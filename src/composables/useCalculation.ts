@@ -22,9 +22,10 @@ export default function useCalculation() {
         1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003) / 2;
       const payCoinBaseDenomDecimalDigits =
         store.getters['demeris/getDenomPrecision']({ name: payCoinData.base_denom }) ?? 6;
-      const payCoinBaseDenomAmount = Math.trunc(payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits * feeRate);
+      const payCoinBaseDenomAmount = Math.trunc(payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits);
       const swapPrice = Number(getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
-      const receiveCoinAmount = BigInt(payCoinBaseDenomAmount * precisionDigits) / BigInt(swapPrice);
+      const receiveCoinAmount = Number(BigInt(payCoinBaseDenomAmount * precisionDigits) / BigInt(swapPrice)) * feeRate;
+
       return Number(receiveCoinAmount) / precisionDigits;
     } else {
       return 0;
