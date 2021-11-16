@@ -18,7 +18,11 @@
         </div>
       </header>
 
-      <ul class="flex flex-col space-y-1 overflow-visible" :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'">
+      <ul
+        class="flex flex-col space-y-1 overflow-y-auto"
+        :style="{ maxHeight: '300px' }"
+        :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
+      >
         <li v-for="[key, service] of pendingTransactions" :key="key">
           <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(key)" />
         </li>

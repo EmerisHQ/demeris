@@ -85,13 +85,24 @@ export const useTransactionsStore = defineStore('transactions', {
         gasLimit: globalStore.getters['demeris/getGasLimit'],
       });
 
-      const listener = service.subscribe((actor) => {
-        if (actor.matches('transacting') || actor.matches('waitingPreviousTransaction')) {
-          this.pending = {
-            [stepHash]: service,
-            ...this.pending,
-          };
-          listener.unsubscribe();
+      service.subscribe((state) => {
+        // Add transaction to the floating widget list
+        if (state.matches('transacting') || state.matches('waitingPreviousTransaction')) {
+          if (!(stepHash in this.pending)) {
+            this.pending = {
+              [stepHash]: service,
+              ...this.pending,
+            };
+          }
+        }
+
+        // Notify all waiting services when this completes
+        if (state.done) {
+          Object.values(this.pending).forEach((itemService: TransactionProcessService) => {
+            if (itemService.state.matches('waitingPreviousTransaction')) {
+              itemService.send('CONTINUE');
+            }
+          });
         }
       });
 

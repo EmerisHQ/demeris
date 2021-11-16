@@ -1,12 +1,12 @@
 <template>
   <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div>
+    <div class="w-6">
       <StateIcon />
     </div>
 
     <div class="flex-1 text-left flex flex-col">
       <p class="font-medium"><StateTitle /></p>
-      <p class="-text-1 opacity-60"><StateDescription /></p>
+      <p class="-text-1 opacity-75"><StateDescription /></p>
     </div>
 
     <div>
@@ -17,7 +17,7 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, toRefs, watch } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -46,7 +46,8 @@ const props = defineProps({
   },
 });
 
-const { state, send } = useActor(props.service);
+const { service } = toRefs(props);
+const { state, send } = useActor(service);
 
 const StateIcon = defineComponent({
   name: 'StateIcon',
@@ -67,7 +68,7 @@ const StateIcon = defineComponent({
         return iconResultMap[state.value.value as string];
       }
 
-      if (state.value.matches('review')) {
+      if (state.value.matches('review') || state.value.matches('receipt')) {
         const transaction = getCurrentTransaction(state.value.context);
         const name = transaction.name;
 
@@ -85,9 +86,9 @@ const StateIcon = defineComponent({
         }
       }
 
-      if (state.value.matches('transacting') || state.value.matches('validating')) {
+      if (['transacting', 'validating', 'signing'].some(state.value.matches)) {
         return (
-          <div style="transform: scale(0.5)">
+          <div style="transform: scale(0.5) translateX(-0.75rem);">
             <Spinner size={2.5} />
           </div>
         );
