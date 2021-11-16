@@ -3,7 +3,7 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 import { store as globalStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { DemerisTxParams, TicketResponse } from '@/store/demeris/actions';
-import { GasPriceLevel, Step } from '@/types/actions';
+import { GasPriceLevel, Step, StepTransaction } from '@/types/actions';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -34,7 +34,9 @@ export interface TransactionProcessContext {
     chain_name: string;
     status: any;
     endBlock: any;
+    transaction: StepTransaction;
   }[];
+  error: undefined;
 }
 
 type TransactionProcessEvents =
@@ -59,6 +61,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       currentStepIndex: 0,
       currentTransactionIndex: 0,
       results: [],
+      error: undefined,
     },
     states: {
       idle: {
@@ -105,7 +108,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'validateChainStatus',
               onDone: 'traceChannel',
-              onError: '#failed',
+              onError: '#failed.chainStatus',
             },
           },
           traceChannel: {
@@ -170,6 +173,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'broadcastTransaction',
               onDone: 'confirming',
+              onError: '#failed',
             },
           },
           confirming: {
@@ -222,21 +226,35 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         },
       },
       aborted: {
+        id: 'aborted',
         type: 'final',
       },
       failed: {
         id: 'failed',
         initial: 'default',
+        entry: ['setError'],
         states: {
-          default: {},
+          default: {
+            on: {
+              ABORT: '#aborted',
+            },
+          },
+          chainStatus: {
+            on: {
+              RETRY: '#validating',
+              ABORT: '#aborted',
+            },
+          },
           sign: {
             on: {
               RETRY: { target: '#signing' },
+              ABORT: '#aborted',
             },
           },
           confirmations: {
             on: {
               RETRY: { target: '#transacting.confirming' },
+              ABORT: '#aborted',
             },
           },
           unknown: {
@@ -386,6 +404,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           gasPriceLevel: event.gasPriceLevel,
         }),
       }),
+      setError: assign({
+        error: (_, event: any) => event,
+      }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
           context.currentTransactionIndex + 1 >= context.input.steps[context.currentStepIndex].transactions.length;
@@ -395,7 +416,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
       }),
       addTransactionResponse: assign({
-        results: (context, event: DoneEventData<any>) => [...context.results, event.data],
+        results: (context, event: DoneEventData<any>) => [
+          ...context.results,
+          { ...event.data, transaction: getCurrentTransaction(context) },
+        ],
       }),
       logEvent: (_, __, meta) => console.log(meta.action),
     },

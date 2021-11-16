@@ -79,22 +79,24 @@ const subscribe = (pendingHash: string) => {
     return;
   }
 
-  const lastPendingService = transactionsStore.pending[pendingHash];
+  const pendingService = transactionsStore.pending[pendingHash];
 
   const onUpdate = (emitted: TransactionProcessState) => {
-    state.lastUpdatedService = lastPendingService;
+    state.lastUpdatedService = pendingService;
     state.lastUpdatedHash = pendingHash;
 
     const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event);
 
-    if (emitted.nextEvents.some(needsAction)) {
-      showNotification(pendingHash);
-    } else {
-      showTippy();
-    }
+    nextTick(() => {
+      if (emitted.nextEvents.some(needsAction)) {
+        showNotification(pendingHash);
+      } else {
+        showTippy();
+      }
+    });
   };
 
-  const subscription = lastPendingService.subscribe({
+  const subscription = pendingService.subscribe({
     next: onUpdate,
     error: () => void 0,
     complete: () => void 0,
@@ -106,6 +108,7 @@ const subscribe = (pendingHash: string) => {
 watch(pendingsCount, (value, oldValue) => {
   if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];
+    subscribe(lastPendingHash);
     showNotification(lastPendingHash);
   }
 });

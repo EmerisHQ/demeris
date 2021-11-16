@@ -55,7 +55,7 @@ export default defineComponent({
   },
   props: {
     action: {
-      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
+      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer' | string>,
       default: 'swap',
     },
     steps: {
@@ -156,7 +156,9 @@ export default defineComponent({
             const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
 
             const translateKeyPath =
-              props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultipe';
+              props.steps[0].transactions.length > 2
+                ? 'transferDescriptionMultipleMemo'
+                : 'transferDescriptionMultiple';
 
             description = t(`components.transferToHub.${translateKeyPath}`, {
               denom: denoms.value[0],

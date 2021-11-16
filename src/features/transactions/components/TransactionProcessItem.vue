@@ -108,7 +108,7 @@ const StateDescription = defineComponent({
       waitingPreviousTransaction: 'Pending',
       success: 'Transaction completed',
       'failed.sign': 'Transaction not signed',
-      'failed.confirmation': 'Transaction failed',
+      failed: <span class="text-negative">Transaction failed</span>,
     };
 
     const transactionsLength = getTransactionsLength(state.value.context);

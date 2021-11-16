@@ -10,7 +10,7 @@
       <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="generateSteps" />
     </template>
 
-    <template v-else>
+    <template v-else-if="['review', 'send'].includes(step)">
       <!-- <TxStepsModal
         :data="steps"
         :back-route="{ name: 'Portfolio' }"

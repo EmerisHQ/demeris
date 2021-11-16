@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasFoundService">
+  <div v-if="hasFoundService" class="flex items-center justify-center">
     <StateIBCConfirmation v-if="state.matches('ibcConfirmation')" />
     <StateReview v-else-if="state.matches('review')" />
     <StateSigning v-else-if="state.matches('signing')" />
@@ -21,6 +21,7 @@ import { useActor } from '@xstate/vue';
 import { computed, defineComponent, defineProps } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
+import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 
 import { useTransactionsStore } from '../transactionsStore';
 
@@ -44,8 +45,11 @@ const StateIBCConfirmation = defineComponent({
   setup() {
     return () => (
       <div>
-        <h1>Cross Chain Transfer</h1>
-        <button onClick={() => send('CONTINUE')}>Confirm</button>
+        <TransferInterstitialConfirmation
+          action={state.value.context.input.action}
+          steps={state.value.context.input.steps}
+          onContinue={() => send('CONTINUE')}
+        />
       </div>
     );
   },
@@ -112,7 +116,17 @@ const StateReceipt = defineComponent({
 const StateFailed = defineComponent({
   name: 'StateFailed',
   setup() {
-    return () => <h1>Failed</h1>;
+    const onAbort = () => {
+      transactionStore.removePendingTransaction(props.stepHash);
+      emits('close');
+    };
+
+    return () => (
+      <div>
+        <h1>Failed</h1>
+        {state.value.can('ABORT') && <button onClick={onAbort}>Cancel</button>}
+      </div>
+    );
   },
 });
 </script>
