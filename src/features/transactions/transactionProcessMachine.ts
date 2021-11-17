@@ -35,6 +35,7 @@ export interface TransactionProcessContext {
     status: any;
     endBlock: any;
     transaction: StepTransaction;
+    stepIndex: number;
   }[];
   error: undefined;
 }
@@ -315,7 +316,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
         const currentStep = getCurrentStep(context);
         const currentTransaction = getCurrentTransaction(context);
-        const sourceChain = getSourceChainFromTransaction(currentTransaction);
+        let sourceChain = getSourceChainFromTransaction(currentTransaction);
 
         globalStore.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
           subscribe: true,
@@ -380,6 +381,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           if (resultData.status === 'IBC_receive_success') {
             const ticketData = resultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
             txhash = ticketData.TxHash;
+            sourceChain = ticketData.Chain;
           }
 
           const endBlockResult = await fetchEndBlock(resultData.height);
@@ -418,7 +420,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       addTransactionResponse: assign({
         results: (context, event: DoneEventData<any>) => [
           ...context.results,
-          { ...event.data, transaction: getCurrentTransaction(context) },
+          { ...event.data, transaction: getCurrentTransaction(context), stepIndex: context.currentStepIndex },
         ],
       }),
       logEvent: (_, __, meta) => console.log(meta.action),

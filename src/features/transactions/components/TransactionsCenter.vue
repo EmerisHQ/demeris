@@ -7,7 +7,7 @@
 
     <section
       v-else
-      class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface shadow-dropwdown rounded-t-lg"
+      class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface shadow-dropdown rounded-t-lg"
     >
       <header class="flex items-center space-between py-4 px-6">
         <p class="font-bold flex-1 text-1">Transactions</p>
@@ -47,7 +47,7 @@
   </div>
 
   <teleport to="body">
-    <Modal :open="isModalOpen" variant="takeover" fullscreen show-close-button @close="closeModal">
+    <Modal :open="isModalOpen" variant="takeover" class="bg-surface" fullscreen show-close-button @close="closeModal">
       <TransactionProcessViewer :step-hash="state.selectedItem" @close="closeModal" />
     </Modal>
   </teleport>

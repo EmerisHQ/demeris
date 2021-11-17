@@ -19,10 +19,18 @@
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
 import { computed, defineComponent, defineProps } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
+import Collapse from '@/components/ui/Collapse.vue';
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
+import { IBCForwardsData, TransferData } from '@/types/actions';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 
+import { getExplorerTx } from '../transactionProcessSelectors';
 import { useTransactionsStore } from '../transactionsStore';
 
 const props = defineProps({
@@ -94,6 +102,21 @@ const StateTransacting = defineComponent({
 const StateReceipt = defineComponent({
   name: 'StateReceipt',
   setup() {
+    const { t } = useI18n({ useScope: 'global' });
+    const lastResult = computed(() => state.value.context.results.slice(-1)[0]);
+    const transaction = computed(() => lastResult.value.transaction);
+    const name = computed(() => transaction.value.name);
+
+    const titleMap = {
+      ibc_backward: t('components.txHandlingModal.transferred'),
+      ibc_forward: t('components.txHandlingModal.transferred'),
+      transfer: t('components.txHandlingModal.transferred'),
+      swap: t('components.txHandlingModal.swapActionComplete'),
+      addliquidity: t('components.txHandlingModal.addLiqActionComplete'),
+      withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
+      createpool: t('components.txHandlingModal.createPoolActionComplete'),
+    };
+
     const onDone = () => {
       transactionStore.removePendingTransaction(props.stepHash);
       emits('close');
@@ -104,10 +127,66 @@ const StateReceipt = defineComponent({
     };
 
     return () => (
-      <div>
-        <h1>Receipt</h1>
-        {state.value.matches('receipt') && <Button onClick={onNext}>Next</Button>}
-        {state.value.matches('success') && <Button onClick={onDone}>Done</Button>}
+      <div class="max-w-lg flex flex-col space-y-5 items-center w-full pb-16">
+        <img src={require('@/assets/images/silver-surfer-1-light.png')} class="w-36 transform" />
+        <h1 class="text-3 font-bold">{titleMap[name.value]}</h1>
+
+        <div class="flex flex-col items-center justify-center">
+          {name.value === 'transfer' ||
+            (name.value.startsWith('ibc') && (
+              <>
+                <p class="font-medium text-1">
+                  <AmountDisplay
+                    amount={{
+                      amount: (transaction.value.data as TransferData).amount.amount,
+                      denom: getBaseDenomSync((transaction.value.data as TransferData).amount.denom),
+                    }}
+                  />
+                </p>
+
+                {name.value.startsWith('ibc') && (
+                  <div class="mt-0.5 text-muted">
+                    <ChainName name={(transaction.value.data as IBCForwardsData).from_chain} /> &rarr;&nbsp;
+                    <ChainName name={(transaction.value.data as IBCForwardsData).to_chain} />
+                  </div>
+                )}
+              </>
+            ))}
+        </div>
+
+        {state.value.matches('success') && (
+          <Collapse labelOpen="Show details" labelHide="Hide details" class="items-center pt-5 w-full">
+            <div class="border border-border rounded-lg w-full py-4 px-6 flex flex-col">
+              <PreviewTransfer
+                response={state.value.context.input.steps[lastResult.value.stepIndex]}
+                fees={{}}
+                bordered={false}
+                class="border-b"
+              />
+
+              {!!getExplorerTx(lastResult.value) && (
+                <a
+                  href={getExplorerTx(lastResult.value)}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  class="self-center mt-8 mb-4 p-2 font-medium"
+                >
+                  {t('context.transaction.viewOnExplorer')} ↗️
+                </a>
+              )}
+            </div>
+          </Collapse>
+        )}
+
+        <div class="pt-5 flex flex-col space-y-3 w-full px-16">
+          {state.value.matches('receipt') && <Button onClick={onNext}>Next</Button>}
+          {state.value.matches('success') && (
+            <Button variant="secondary" onClick={onDone}>
+              Send another asset &rarr;
+            </Button>
+          )}
+          {state.value.matches('success') && <Button onClick={onDone}>Done</Button>}
+        </div>
       </div>
     );
   },

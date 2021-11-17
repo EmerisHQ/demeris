@@ -17,7 +17,7 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed, defineComponent, PropType, toRefs, watch } from 'vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';

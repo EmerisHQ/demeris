@@ -44,4 +44,27 @@ export const matchesStateObject = <T>(obj: Record<string, T>, callback: (key: st
   })?.[1];
 };
 
+export const getExplorerLink = (chainName: string) => {
+  const chainMintScanMap = {
+    'cosmos-hub': 'cosmos',
+    akash: 'akash',
+    'crypto-org': 'crypto-org',
+    iris: 'iris',
+    osmosis: 'osmosis',
+    persistence: 'persistence',
+    sentinel: 'sentinel',
+  };
+  const chain = chainMintScanMap[chainName];
+
+  if (!chain) {
+    return;
+  }
+
+  return `https://www.mintscan.io/${chain}`;
+};
+
+export const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
+  return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`;
+};
+
 export type DoneEventData<T> = { type: string; data: T };
