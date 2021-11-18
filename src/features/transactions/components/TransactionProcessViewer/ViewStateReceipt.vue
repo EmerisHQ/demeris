@@ -29,7 +29,8 @@
     <template v-if="state.matches('success')">
       <Collapse label-open="Show details" label-hide="Hide details" class="items-center pt-5 w-full">
         <div class="border border-border rounded-lg w-full py-4 px-6 flex flex-col">
-          <PreviewTransfer
+          <component
+            :is="previewComponentMap[transaction.name]"
             :response="state.context.input.steps[lastResult.stepIndex]"
             :bordered="false"
             :fees="{}"
@@ -62,36 +63,25 @@
 </template>
 
 <script lang="ts" setup>
-import { useActor } from '@xstate/vue';
-import { computed, PropType, toRefs } from 'vue';
+import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { TransactionProcessService } from '../../transactionProcessMachine';
-import { getExplorerTx } from '../../transactionProcessSelectors';
+import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
 import { useTransactionsStore } from '../../transactionsStore';
 
-const props = defineProps({
-  stepHash: {
-    type: String,
-    required: true,
-  },
-  service: {
-    type: Object as PropType<TransactionProcessService>,
-    required: true,
-  },
-});
+const injects = inject(ProvideViewerKey);
 
-const emits = defineEmits(['close']);
-
-const { service } = toRefs(props);
-const { state, send } = useActor(service);
+const { state, send } = injects.actor;
 const { t } = useI18n({ useScope: 'global' });
 const transactionStore = useTransactionsStore();
 
@@ -108,9 +98,19 @@ const titleMap = {
   createpool: t('components.txHandlingModal.createPoolActionComplete'),
 };
 
+const previewComponentMap = {
+  ibc_backward: PreviewTransfer,
+  ibc_forward: PreviewTransfer,
+  transfer: PreviewTransfer,
+  swap: PreviewSwap,
+  addliquidity: PreviewAddLiquidity,
+  withdrawliquidity: PreviewWithdrawLiquidity,
+  createpool: PreviewAddLiquidity,
+};
+
 const onDone = () => {
-  transactionStore.removePendingTransaction(props.stepHash);
-  emits('close');
+  transactionStore.removePendingTransaction(injects.stepHash);
+  injects.closeModal();
 };
 
 const onNext = () => {

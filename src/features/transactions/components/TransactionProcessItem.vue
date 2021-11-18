@@ -32,7 +32,7 @@ import {
   getCurrentTransaction,
   getOffsetFromCurrentTransaction,
   getTransactionsLength,
-  matchesStateObject,
+  matchesObject,
 } from '../transactionProcessSelectors';
 
 const props = defineProps({
@@ -59,7 +59,7 @@ const StateIcon = defineComponent({
         waitingPreviousTransaction: <Icon name="TimeIcon" class="opacity-60" />,
       };
 
-      const staticIcon = matchesStateObject(iconResultMap, state.value.matches);
+      const staticIcon = matchesObject(iconResultMap, state.value.matches);
       if (staticIcon) {
         return staticIcon;
       }
@@ -116,7 +116,7 @@ const StateDescription = defineComponent({
     const transactionOffset = getOffsetFromCurrentTransaction(state.value.context) + 1;
 
     return () => {
-      const staticValue = matchesStateObject(textResultMap, state.value.matches);
+      const staticValue = matchesObject(textResultMap, state.value.matches);
       if (staticValue) {
         return staticValue;
       }

@@ -1,7 +1,14 @@
+import { InjectionKey, Ref } from 'vue';
+import { Sender } from 'xstate';
+
 import { store as globalStore } from '@/store';
 import { IBCForwardsData, Step, StepTransaction, TransferData } from '@/types/actions';
 
-import { TransactionProcessContext } from './transactionProcessMachine';
+import {
+  TransactionProcessContext,
+  TransactionProcessEvents,
+  TransactionProcessState,
+} from './transactionProcessMachine';
 
 export const getCurrentStep = (context: TransactionProcessContext): Step => {
   return context.input.steps[context.currentStepIndex];
@@ -36,7 +43,7 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
   }
 };
 
-export const matchesStateObject = <T>(obj: Record<string, T>, callback: (key: string) => boolean) => {
+export const matchesObject = <T>(obj: Record<string, T>, callback: (key: string) => boolean) => {
   return Object.entries(obj).find(([key, value]) => {
     if (callback(key)) {
       return value;
@@ -66,5 +73,16 @@ export const getExplorerLink = (chainName: string) => {
 export const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
   return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`;
 };
+
+export type ProvideViewerSchema = {
+  actor: {
+    state: Ref<TransactionProcessState>;
+    send: Sender<TransactionProcessEvents>;
+  };
+  stepHash: string;
+  closeModal: () => void;
+};
+
+export const ProvideViewerKey: InjectionKey<ProvideViewerSchema> = Symbol('processViewer');
 
 export type DoneEventData<T> = { type: string; data: T };

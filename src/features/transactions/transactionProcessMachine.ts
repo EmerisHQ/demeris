@@ -40,7 +40,7 @@ export interface TransactionProcessContext {
   error: undefined;
 }
 
-type TransactionProcessEvents =
+export type TransactionProcessEvents =
   | ({ type: 'SET_DATA' } & ContextInputSchema)
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
