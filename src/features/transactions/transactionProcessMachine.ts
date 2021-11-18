@@ -155,11 +155,26 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       signing: {
         id: 'signing',
+        initial: 'active',
         entry: { type: 'logEvent', key: 'confirm_tx' },
+        on: {
+          ABORT: 'failed.sign',
+        },
+        after: {
+          15000: '.delayed',
+        },
         invoke: {
           src: 'signTransaction',
           onDone: 'transacting',
           onError: 'failed.sign',
+        },
+        states: {
+          active: {},
+          delayed: {
+            on: {
+              SIGN: '#signing.delayed',
+            },
+          },
         },
       },
       transacting: {

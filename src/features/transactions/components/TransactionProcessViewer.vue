@@ -2,7 +2,7 @@
   <div v-if="hasFoundService" class="flex items-center justify-center">
     <ViewStateIBCConfirmation v-if="state.matches('ibcConfirmation')" />
     <ViewStateReview v-else-if="state.matches('review')" />
-    <StateSigning v-else-if="state.matches('signing')" />
+    <ViewStateSigning v-else-if="state.matches('signing')" />
     <StateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
     <StateFailed v-else-if="state.matches('failed')" />
@@ -28,6 +28,7 @@ import { ProvideViewerKey } from '../transactionProcessSelectors';
 import { useTransactionsStore } from '../transactionsStore';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
+import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
 
 const props = defineProps({
   stepHash: {
@@ -59,13 +60,6 @@ const ViewStateIBCConfirmation = defineComponent({
         />
       </div>
     );
-  },
-});
-
-const StateSigning = defineComponent({
-  name: 'StateSigning',
-  setup() {
-    return () => <h2>Signing</h2>;
   },
 });
 
