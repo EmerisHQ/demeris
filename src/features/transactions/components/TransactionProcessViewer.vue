@@ -1,9 +1,14 @@
 <template>
   <div v-if="hasFoundService" class="flex items-center justify-center">
-    <ViewStateIBCConfirmation v-if="state.matches('ibcConfirmation')" />
+    <TransferInterstitialConfirmation
+      v-if="state.matches('ibcConfirmation')"
+      :action="state.context.input.action"
+      :steps="state.context.input.steps"
+      @continue="() => send('CONTINUE')"
+    />
     <ViewStateReview v-else-if="state.matches('review')" />
     <ViewStateSigning v-else-if="state.matches('signing')" />
-    <StateTransacting v-else-if="state.matches('transacting')" />
+    <ViewStateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
     <StateFailed v-else-if="state.matches('failed')" />
     <div v-else-if="state.matches('aborted')">Aborted</div>
@@ -20,7 +25,6 @@
 import { useActor } from '@xstate/vue';
 import { computed, defineComponent, defineProps, provide } from 'vue';
 
-import Button from '@/components/ui/Button.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 
 import { TransactionProcessService } from '../transactionProcessMachine';
@@ -29,6 +33,7 @@ import { useTransactionsStore } from '../transactionsStore';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
 import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
+import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransacting.vue';
 import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
 
 const props = defineProps({
@@ -53,38 +58,6 @@ const removeTransactionAndClose = () => {
   transactionStore.removePendingTransaction(props.stepHash);
   closeModal();
 };
-
-const ViewStateIBCConfirmation = defineComponent({
-  name: 'ViewStateIBConfirmation',
-  setup() {
-    return () => (
-      <div>
-        <TransferInterstitialConfirmation
-          action={state.value.context.input.action}
-          steps={state.value.context.input.steps}
-          onContinue={() => send('CONTINUE')}
-        />
-      </div>
-    );
-  },
-});
-
-const StateTransacting = defineComponent({
-  name: 'StateTransacting',
-  setup() {
-    const onCancel = () => {
-      send('ABORT');
-    };
-
-    return () => (
-      <div>
-        <h1>Transferring</h1>
-        <p>This may take up to 1 minute.</p>
-        {state.value.can('ABORT') && <Button onClick={onCancel}>Cancel</Button>}
-      </div>
-    );
-  },
-});
 
 const StateFailed = defineComponent({
   name: 'StateFailed',

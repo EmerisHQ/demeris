@@ -19,7 +19,7 @@
 
         <template v-if="transaction.name.startsWith('ibc')">
           <div class="mt-0.5 text-muted">
-            <ChainName :name="transaction.data.from_chain" /> &rarr;&nbsp;
+            <ChainName :name="transaction.data.from_chain" /> &rarr;
             <ChainName :name="transaction.data.to_chain" />
           </div>
         </template>
@@ -69,7 +69,7 @@
           <Button variant="secondary">Send TODO</Button>
         </template>
 
-        <Button @click="onDone">Done</Button>
+        <Button @click="injects.removeTransactionAndClose()">Done</Button>
       </template>
     </div>
   </div>
@@ -90,13 +90,11 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
-import { useTransactionsStore } from '../../transactionsStore';
 
 const injects = inject(ProvideViewerKey);
 
 const { state, send } = injects.actor;
 const { t } = useI18n({ useScope: 'global' });
-const transactionStore = useTransactionsStore();
 
 const lastResult = computed(() => state.value.context.results.slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
@@ -119,11 +117,6 @@ const previewComponentMap = {
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
-};
-
-const onDone = () => {
-  transactionStore.removePendingTransaction(injects.stepHash);
-  injects.closeModal();
 };
 
 const onNext = () => {

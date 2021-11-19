@@ -52,12 +52,11 @@ import { useTransactionsStore } from '../../transactionsStore';
 const transactionsStore = useTransactionsStore();
 const store = useStore();
 
-const injects = inject(ProvideViewerKey);
-const { state, send } = injects.actor;
+const { actor, isSwapComponent } = inject(ProvideViewerKey);
+const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
 
 const isDemoAccount = computed(() => store.getters['demeris/isDemoAccount']);
-const isSwapComponent = injects.isSwapComponent;
 
 const previewComponentMap = {
   transfer: PreviewTransfer,
