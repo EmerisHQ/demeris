@@ -1,4 +1,4 @@
-import { InjectionKey, Ref } from 'vue';
+import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
 import { store as globalStore } from '@/store';
@@ -23,7 +23,7 @@ export const getTransactionsLength = (context: TransactionProcessContext): numbe
 };
 
 export const getOffsetFromCurrentTransaction = (context: TransactionProcessContext) => {
-  return Math.ceil(
+  return Math.floor(
     context.currentStepIndex + context.currentStepIndex / context.input.steps.length + context.currentTransactionIndex,
   );
 };
@@ -41,6 +41,10 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
     default:
       return dexChain;
   }
+};
+
+export const isSwapAction = (context: TransactionProcessContext) => {
+  return context.input.action === 'swap';
 };
 
 export const matchesObject = <T>(obj: Record<string, T>, callback: (key: string) => boolean) => {
@@ -79,7 +83,9 @@ export type ProvideViewerSchema = {
     state: Ref<TransactionProcessState>;
     send: Sender<TransactionProcessEvents>;
   };
+  isSwapComponent: ComputedRef<boolean>;
   stepHash: string;
+  removeTransactionAndClose: () => void;
   closeModal: () => void;
 };
 

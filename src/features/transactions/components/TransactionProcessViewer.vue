@@ -7,7 +7,7 @@
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
     <StateFailed v-else-if="state.matches('failed')" />
     <div v-else-if="state.matches('aborted')">Aborted</div>
-    <div v-else-if="state.matches('waitingPreviousTransaction')">Pending</div>
+    <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
     <div v-else>Loading</div>
   </div>
 
@@ -24,11 +24,12 @@ import Button from '@/components/ui/Button.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 
 import { TransactionProcessService } from '../transactionProcessMachine';
-import { ProvideViewerKey } from '../transactionProcessSelectors';
+import { isSwapAction, ProvideViewerKey } from '../transactionProcessSelectors';
 import { useTransactionsStore } from '../transactionsStore';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
 import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
+import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
 
 const props = defineProps({
   stepHash: {
@@ -42,11 +43,16 @@ const emits = defineEmits(['close']);
 const transactionStore = useTransactionsStore();
 const transactionService = computed(() => transactionStore.transactions[props.stepHash] as TransactionProcessService);
 const hasFoundService = computed(() => !!transactionService.value);
+const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionStore.isViewerModalOpen);
 
 const actor = useActor(transactionService);
 const { state, send } = actor;
 
 const closeModal = () => emits('close');
+const removeTransactionAndClose = () => {
+  transactionStore.removePendingTransaction(props.stepHash);
+  closeModal();
+};
 
 const ViewStateIBCConfirmation = defineComponent({
   name: 'ViewStateIBConfirmation',
@@ -100,6 +106,8 @@ const StateFailed = defineComponent({
 provide(ProvideViewerKey, {
   actor,
   closeModal,
+  removeTransactionAndClose,
+  isSwapComponent,
   stepHash: props.stepHash,
 });
 </script>

@@ -145,6 +145,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         id: 'waitingPreviousTransaction',
         on: {
           CONTINUE: '#validating.previousTransaction',
+          ABORT: '#aborted',
         },
       },
       review: {

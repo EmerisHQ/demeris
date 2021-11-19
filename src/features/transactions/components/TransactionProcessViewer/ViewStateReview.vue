@@ -1,11 +1,24 @@
 <template>
-  <div class="max-w-lg flex flex-col space-y-6 items-center w-full pb-16">
-    <h1 class="text-3 font-bold pb-4">
+  <div
+    class="max-w-lg flex flex-col items-center w-full"
+    :class="isSwapComponent ? 'space-y-4 pb-6' : 'space-y-6 pb-16'"
+  >
+    <h1 class="font-bold" :class="isSwapComponent ? 'text-2 pb-0 px-6' : 'text-3 pb-4'">
       {{ titleMap[step.name] }}
     </h1>
 
-    <div class="border border-border rounded-lg w-full py-4 px-6 flex flex-col">
-      <component :is="previewComponentMap[step.name]" :step="step" :bordered="false" :fees="{}" />
+    <div
+      class="rounded-lg w-full px-6 flex flex-col"
+      :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
+    >
+      <component
+        :is="previewComponentMap[step.name]"
+        :step="step"
+        :bordered="isSwapComponent"
+        :fees="{}"
+        :context="isSwapComponent ? 'widget' : 'default'"
+        :class="{ '-text-1': isSwapComponent }"
+      />
     </div>
 
     <p class="px-8 text-center text-muted -text-1">
@@ -15,8 +28,9 @@
       </a>
     </p>
 
-    <div class="pt-4 flex flex-col space-y-3 w-full px-16">
-      <Button @click="onContinue">Confirm and continue</Button>
+    <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
+      <Button v-if="isDemoAccount" @click="onConnectWallet">Connect Wallet</Button>
+      <Button v-else @click="onContinue">Confirm and continue</Button>
     </div>
   </div>
 </template>
@@ -30,12 +44,20 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
+import { useStore } from '@/store';
 
 import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { useTransactionsStore } from '../../transactionsStore';
+
+const transactionsStore = useTransactionsStore();
+const store = useStore();
 
 const injects = inject(ProvideViewerKey);
 const { state, send } = injects.actor;
 const { t } = useI18n({ useScope: 'global' });
+
+const isDemoAccount = computed(() => store.getters['demeris/isDemoAccount']);
+const isSwapComponent = injects.isSwapComponent;
 
 const previewComponentMap = {
   transfer: PreviewTransfer,
@@ -57,7 +79,6 @@ const titleMap = {
 
 const step = computed(() => getCurrentStep(state.value.context));
 
-const onContinue = () => {
-  send('SIGN');
-};
+const onContinue = () => send('SIGN');
+const onConnectWallet = () => transactionsStore.toggleConnectWalletModal();
 </script>

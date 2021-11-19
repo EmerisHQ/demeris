@@ -15,6 +15,8 @@ type State = {
   transactions: Record<string, TransactionProcessService>;
   pending: Record<string, TransactionProcessService>;
   isBottomSheetMinimized: boolean;
+  isViewerModalOpen: boolean;
+  isConnectWalletModalOpen: boolean;
 };
 
 export const useTransactionsStore = defineStore('transactions', {
@@ -22,7 +24,9 @@ export const useTransactionsStore = defineStore('transactions', {
     ({
       transactions: {},
       pending: {},
+      isViewerModalOpen: false,
       isBottomSheetMinimized: false,
+      isConnectWalletModalOpen: false,
     } as State),
 
   getters: {
@@ -34,11 +38,19 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
     },
 
+    toggleConnectWalletModal() {
+      this.isConnectWalletModalOpen = !this.isConnectWalletModalOpen;
+    },
+
+    toggleViewerModal() {
+      this.isViewerModalOpen = !this.isViewerModalOpen;
+    },
+
     removePendingTransaction(stepHash: string) {
       delete this.pending[stepHash];
     },
 
-    findOrCreateTransactionMachine(action: string, steps: any[]): [string, any] {
+    findOrCreateTransactionMachine(action: string, steps: any[]): [string, TransactionProcessService] {
       const stepHash = hashObject(steps);
       const pendingTransactions = this.pending;
 

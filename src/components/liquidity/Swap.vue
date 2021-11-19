@@ -13,19 +13,13 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <ReviewModal
+    <TransactionProcessCreator
       v-if="isOpen && !isSlippageSettingModalOpen"
-      :data="actionHandlerResult"
-      action-name="swap"
-      variant="widget"
+      :steps="actionHandlerResult"
+      action="swap"
+      class="overflow-hidden bg-surface shadow-panel rounded-2xl"
+      @pending="reviewModalToggle"
       @close="reviewModalToggle"
-      @reset="
-        () => {
-          reviewModalToggle();
-          reset();
-        }
-      "
-      @goback="() => reviewModalToggle()"
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -137,7 +131,6 @@ import { useI18n } from 'vue-i18n';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -148,6 +141,7 @@ import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { SwapAction } from '@/types/actions';
@@ -164,10 +158,10 @@ export default defineComponent({
     DenomSelect,
     Icon,
     IconButton,
-    ReviewModal,
     Alert,
     SlippageSettingModal,
     FeeLevelSelector,
+    TransactionProcessCreator,
   },
 
   props: {

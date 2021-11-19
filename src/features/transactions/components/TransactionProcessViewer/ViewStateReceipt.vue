@@ -24,6 +24,10 @@
           </div>
         </template>
       </template>
+
+      <template v-if="transaction.name === 'swap'">
+        <p class="text-muted">Swapped on the Cosmos Hub</p>
+      </template>
     </div>
 
     <template v-if="state.matches('success')">
@@ -32,6 +36,8 @@
           <component
             :is="previewComponentMap[transaction.name]"
             :response="state.context.input.steps[lastResult.stepIndex]"
+            :step="state.context.input.steps[lastResult.stepIndex]"
+            :context="state.context.input.action === 'swap' ? 'widget' : 'default'"
             :bordered="false"
             :fees="{}"
             class="border-b"
@@ -55,7 +61,14 @@
       <Button v-if="state.matches('receipt')" @click="onNext">Next</Button>
 
       <template v-if="state.matches('success')">
-        <Button variant="secondary" @click="onNext">Send another asset &rarr;</Button>
+        <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
+          <Button variant="secondary" @click="onNext">Send another asset &rarr;</Button>
+        </template>
+
+        <template v-if="transaction.name === 'swap'">
+          <Button variant="secondary">Send TODO</Button>
+        </template>
+
         <Button @click="onDone">Done</Button>
       </template>
     </div>

@@ -209,7 +209,11 @@ const StateTitle = defineComponent({
         );
       }
 
-      return name;
+      if (name.value === 'swap') {
+        return <p>Swap</p>;
+      }
+
+      return <p>{name}</p>;
     };
   },
 });

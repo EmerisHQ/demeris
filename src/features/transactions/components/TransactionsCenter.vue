@@ -76,17 +76,19 @@ const rowsLimit = computed(() => state.viewAll ? undefined : 3);
 
 const selectItem = (stepHash) => {
   state.selectedItem = stepHash;
+  transactionsStore.toggleViewerModal();
 }
 
 const closeModal = () => {
   state.selectedItem = null;
+  transactionsStore.toggleViewerModal();
 }
 
 const toggleViewAll = () => {
   state.viewAll = !state.viewAll;
 }
 
-const isModalOpen = computed(() => !!state.selectedItem);
+const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit.value));
 const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit.value);
 </script>

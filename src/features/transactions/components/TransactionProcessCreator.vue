@@ -1,9 +1,24 @@
 <template>
-  <TransactionProcessViewer v-if="stepHash" :step-hash="stepHash" />
+  <div>
+    <GobackWithClose
+      v-if="action === 'swap'"
+      :class="{ invisible: service.state.matches('signing') }"
+      @goback="emits('close')"
+      @close="emits('close')"
+    />
+    <TransactionProcessViewer v-if="stepHash" :step-hash="stepHash" />
+    <ConnectWalletModal
+      :open="transactionsStore.isConnectWalletModalOpen"
+      @close="transactionsStore.toggleConnectWalletModal"
+    />
+  </div>
 </template>
 
 <script lang="tsx" setup>
 import { computed, watch } from '@vue/runtime-core';
+
+import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
+import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
 
 import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessViewer from './TransactionProcessViewer.vue';
@@ -19,10 +34,10 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['pending']);
+const emits = defineEmits(['pending', 'close']);
 
 const transactionsStore = useTransactionsStore();
-const [stepHash] = transactionsStore.findOrCreateTransactionMachine(props.action, props.steps);
+const [stepHash, service] = transactionsStore.findOrCreateTransactionMachine(props.action, props.steps);
 const isPending = computed(() => transactionsStore.isPending(stepHash));
 
 watch(isPending, (value) => {

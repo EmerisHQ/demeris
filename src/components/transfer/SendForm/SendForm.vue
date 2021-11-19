@@ -11,15 +11,6 @@
     </template>
 
     <template v-else-if="['review', 'send'].includes(step)">
-      <!-- <TxStepsModal
-        :data="steps"
-        :back-route="{ name: 'Portfolio' }"
-        action-name="transfer"
-        @transacting="goToStep('send')"
-        @failed="goToStep('review')"
-        @reset="resetHandler"
-        @finish="resetHandler"
-      /> -->
       <TransactionProcessCreator :steps="steps" action="transfer" @pending="closeModal" />
     </template>
   </div>
@@ -31,7 +22,6 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useRouter } from 'vue-router';
 
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-// import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
@@ -48,7 +38,6 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    // TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
     TransactionProcessCreator,
