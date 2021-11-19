@@ -191,6 +191,13 @@ export default defineComponent({
 
         let swapPrice = null;
 
+        const fromPrecision = store.getters['demeris/getDenomPrecision']({
+          name: fromCoinBaseDenom.value,
+        });
+        const toPrecision = store.getters['demeris/getDenomPrecision']({
+          name: toCoinBaseDenom.value,
+        });
+
         if (reserveDenoms[1] === toCoinBaseDenom.value) {
           swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
         } else {
@@ -198,12 +205,6 @@ export default defineComponent({
           swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
         }
 
-        const fromPrecision = store.getters['demeris/getDenomPrecision']({
-          name: fromCoinBaseDenom.value,
-        });
-        const toPrecision = store.getters['demeris/getDenomPrecision']({
-          name: toCoinBaseDenom.value,
-        });
         const precisionDiff = fromPrecision - toPrecision < 0 ? Math.abs(fromPrecision - toPrecision) : 0;
 
         minReceivedAmount.value = {
@@ -212,8 +213,7 @@ export default defineComponent({
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
-            (1 - slippageTolerance.value / 100) *
-            10 ** (toPrecision - precisionDiff),
+            (1 - slippageTolerance.value / 100),
         };
 
         limitPrice.value =
@@ -226,8 +226,7 @@ export default defineComponent({
                   }),
               ) *
               swapFeeRate.value ** 2 *
-              (1 - slippageTolerance.value / 100) *
-              10 ** (toPrecision - precisionDiff)) /
+              (1 - slippageTolerance.value / 100)) /
               10000,
           ) * 10000;
       },

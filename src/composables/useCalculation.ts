@@ -2,14 +2,11 @@ import { useStore } from '@/store';
 
 export default function useCalculation() {
   // precision setting (0.000000 level precision below than this decimal digits will be truncated)
-  const precisionDigits = 10 ** 6;
+  const precisionDigits = 10 ** 9;
   const store = useStore();
 
   function getSwapPrice(payCoinAmount: number, payCoinPoolAmount: number, receiveCoinPoolAmount: number) {
-    const swapPrice =
-      ((BigInt(payCoinPoolAmount) + BigInt(2 * payCoinAmount)) * BigInt(precisionDigits)) /
-      BigInt(receiveCoinPoolAmount);
-    return swapPrice;
+    return (payCoinPoolAmount + 2 * payCoinAmount) / receiveCoinPoolAmount;
   }
 
   function getReceiveCoinAmount(
@@ -23,10 +20,10 @@ export default function useCalculation() {
       const payCoinBaseDenomDecimalDigits =
         store.getters['demeris/getDenomPrecision']({ name: payCoinData.base_denom }) ?? 6;
       const payCoinBaseDenomAmount = Math.trunc(payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits);
-      const swapPrice = Number(getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
-      const receiveCoinAmount = Number(BigInt(payCoinBaseDenomAmount * precisionDigits) / BigInt(swapPrice)) * feeRate;
+      const swapPrice = getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount);
+      const receiveCoinAmount = Number(payCoinBaseDenomAmount / swapPrice) * feeRate;
 
-      return Number(receiveCoinAmount) / precisionDigits;
+      return Math.trunc(receiveCoinAmount);
     } else {
       return 0;
     }
