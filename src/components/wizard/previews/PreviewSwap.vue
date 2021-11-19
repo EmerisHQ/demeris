@@ -185,7 +185,7 @@ export default defineComponent({
         const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await getReserveBalances(pool);
-        const inputAmount = parseInt(String(Number(data.value.from.amount) * swapFeeRate.value));
+        const inputAmount = parseInt(String(Number(data.value.from.amount)));
         toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
         fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
 
@@ -204,8 +204,6 @@ export default defineComponent({
           //reverse
           swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
         }
-
-        const precisionDiff = fromPrecision - toPrecision < 0 ? Math.abs(fromPrecision - toPrecision) : 0;
 
         minReceivedAmount.value = {
           denom: toCoinBaseDenom.value,
