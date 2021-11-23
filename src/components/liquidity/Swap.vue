@@ -18,8 +18,12 @@
       :steps="actionHandlerResult"
       action="swap"
       class="overflow-hidden bg-surface shadow-panel rounded-2xl"
-      @pending="reviewModalToggle"
-      @close="reviewModalToggle"
+      @pending="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"

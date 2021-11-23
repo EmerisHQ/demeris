@@ -47,7 +47,16 @@
   </div>
 
   <teleport to="body">
-    <Modal :open="isModalOpen" variant="takeover" class="bg-surface" fullscreen show-close-button @close="closeModal">
+    <Modal
+      :open="isModalOpen"
+      variant="takeover"
+      class="bg-surface"
+      body-class="w-full flex flex-col"
+      content-class="flex-1 flex items-center justify-center"
+      fullscreen
+      show-close-button
+      @close="closeModal"
+    >
       <TransactionProcessViewer :step-hash="state.selectedItem" @close="closeModal" />
     </Modal>
   </teleport>

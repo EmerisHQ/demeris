@@ -50,13 +50,9 @@ export const useTransactionsStore = defineStore('transactions', {
       delete this.pending[stepHash];
     },
 
-    findOrCreateTransactionMachine(action: string, steps: any[]): [string, TransactionProcessService] {
-      const stepHash = hashObject(steps);
+    createTransactionMachine(action: string, steps: any[]): [string, TransactionProcessService] {
+      const stepHash = `${hashObject(steps)}-${Date.now()}`;
       const pendingTransactions = this.pending;
-
-      if (stepHash in this.transactions) {
-        return [stepHash, this.transactions[stepHash]];
-      }
 
       const service = interpret(
         transactionProcessMachine.withConfig({

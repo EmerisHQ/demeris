@@ -37,7 +37,8 @@ const props = defineProps({
 const emits = defineEmits(['pending', 'close']);
 
 const transactionsStore = useTransactionsStore();
-const [stepHash, service] = transactionsStore.findOrCreateTransactionMachine(props.action, props.steps);
+
+const [stepHash, service] = transactionsStore.createTransactionMachine(props.action, props.steps);
 const isPending = computed(() => transactionsStore.isPending(stepHash));
 
 watch(isPending, (value) => {

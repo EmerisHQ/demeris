@@ -208,6 +208,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               },
               GOT_UNKNOWN: {
                 target: '#failed.unknown',
+                actions: ['addTransactionResponse'],
               },
             },
             invoke: {
@@ -332,7 +333,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
         const currentStep = getCurrentStep(context);
         const currentTransaction = getCurrentTransaction(context);
-        let sourceChain = getSourceChainFromTransaction(currentTransaction);
+
+        const sourceChain = getSourceChainFromTransaction(currentTransaction);
+
+        const responseData = {
+          txhash: event.data.ticket,
+          chain_name: sourceChain,
+          status: undefined,
+          endBlock: undefined,
+        };
 
         globalStore.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
           subscribe: true,
@@ -357,6 +366,11 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 retries++;
                 await new Promise((r) => setTimeout(r, 2000));
               }
+            }
+
+            if (!endBlockEvent) {
+              // @ts-ignore
+              return callback({ type: 'GOT_UNKNOWN', data: responseData });
             }
           }
 
@@ -389,19 +403,18 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           if (resultData.status === 'stuck') {
             // @ts-ignore
-            return callback({ type: 'GOT_UNKNOWN' });
+            return callback({ type: 'GOT_UNKNOWN', data: responseData });
           }
-
-          let txhash = event.data.ticket;
 
           if (resultData.status === 'IBC_receive_success') {
             const ticketData = resultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
-            txhash = ticketData.TxHash;
-            sourceChain = ticketData.Chain;
+            responseData.txhash = ticketData.TxHash;
+            responseData.chain_name = ticketData.Chain;
           }
 
           const endBlockResult = await fetchEndBlock(resultData.height);
-          const responseData = { txhash, chain_name: sourceChain, status: resultData, endBlock: endBlockResult };
+          responseData.status = resultData;
+          responseData.endBlock = endBlockResult;
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });

@@ -345,9 +345,6 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
-    const { findOrCreateTransactionMachine } = useTransactionsStore();
-    const [, transactionMachine] = findOrCreateTransactionMachine(props.actionName, props.data);
-
     const { t } = useI18n({ useScope: 'global' });
 
     const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
@@ -624,8 +621,6 @@ export default defineComponent({
         connectModalOpen.value = true;
         return;
       }
-      //@ts-ignore
-      transactionMachine.send('SIGN');
       let abort = false;
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
         feeWarning.value.feeWarning = true;
@@ -1108,7 +1103,6 @@ export default defineComponent({
     // }, 10000)
 
     return {
-      transactionMachine,
       isTransferConfirmationOpen,
       emitHandler,
       txstatus,

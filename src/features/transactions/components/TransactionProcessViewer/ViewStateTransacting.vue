@@ -3,11 +3,17 @@
     class="max-w-lg flex flex-col items-center justify-center h-full w-full"
     :class="isSwapComponent ? 'space-y-2 pb-8' : 'space-y-3 pb-16'"
   >
-    <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">Transferring</h1>
+    <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">{{ titleMap[transaction.name] }}</h1>
 
-    <p class="text-muted">This may take up to 1 minute.</p>
+    <p class="text-muted">{{ subtitle }}</p>
 
     <div class="w-full max-w-lg flex items-center justify-center -space-x-8">
+      <template v-if="transaction.name == 'swap'">
+        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
+        <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.to.denom)" />
+      </template>
+
       <template v-if="transaction.name == 'addliquidity' || transaction.name == 'createpool'">
         <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinA.denom)" />
         <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
@@ -65,6 +71,7 @@
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -74,10 +81,27 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessSelectors';
 
+const { t } = useI18n({ useScope: 'global' });
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state } = actor;
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
+const titleMap = {
+  transfer: t('components.txHandlingModal.transferAction'),
+  ibc_forward: t('components.txHandlingModal.transferAction'),
+  ibc_backward: t('components.txHandlingModal.transferAction'),
+  swap: t('components.txHandlingModal.pleaseWait'),
+  addliquidity: t('components.txHandlingModal.addLiqAction'),
+  withdrawliquidity: t('components.txHandlingModal.withdrawing'),
+  createpool: t('components.txHandlingModal.createPoolAction'),
+};
+
+const subtitle = computed(() => {
+  if (transaction.value.name.startsWith('ibc')) {
+    return t('components.txHandlingModal.ibcTransferSubtitle');
+  }
+  return t('components.txHandlingModal.txProgress');
+});
 </script>
 
 <style scoped>

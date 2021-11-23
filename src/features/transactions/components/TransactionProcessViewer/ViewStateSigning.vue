@@ -1,7 +1,7 @@
 <template>
   <div
     class="max-w-lg flex flex-col items-center justify-center h-full w-full"
-    :class="isSwapComponent ? 'space-y-3 pb-8' : 'space-y-5 pb-16'"
+    :class="isSwapComponent ? 'space-y-3 pb-8' : 'space-y-5'"
   >
     <Spinner :size="2.5" />
 
@@ -20,7 +20,7 @@
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
       <Button v-if="state.matches('signing.delayed')" @click="() => send('SIGN')"> Open Keplr </Button>
-      <Button variant="secondary" @click="() => send('ABORT')">Cancel</Button>
+      <Button variant="link" @click="() => send('ABORT')">Cancel</Button>
     </div>
   </div>
 </template>

@@ -1,8 +1,14 @@
 <template>
-  <div class="max-w-lg flex flex-col space-y-5 items-center w-full pb-16">
-    <div class="transferred-image block bg-no-repeat bg-center bg-contain w-44 h-44" />
+  <div
+    class="max-w-lg flex flex-col items-center w-full"
+    :class="isSwapComponent ? 'space-y-4 pb-6' : 'space-y-6 pb-16'"
+  >
+    <div
+      class="transferred-image block bg-no-repeat bg-center bg-contain"
+      :class="isSwapComponent ? 'w-36 h-36' : 'w-44 h-44'"
+    />
 
-    <h1 class="text-3 font-bold">
+    <h1 class="font-bold" :class="isSwapComponent ? 'text-2 px-6' : 'text-3'">
       {{ titleMap[transaction.name] }}
     </h1>
 
@@ -32,13 +38,17 @@
 
     <template v-if="state.matches('success')">
       <Collapse label-open="Show details" label-hide="Hide details" class="items-center pt-5 w-full">
-        <div class="border border-border rounded-lg w-full py-4 px-6 flex flex-col">
+        <div
+          class="rounded-lg w-full px-6 flex flex-col"
+          :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
+        >
           <component
             :is="previewComponentMap[transaction.name]"
             :response="state.context.input.steps[lastResult.stepIndex]"
             :step="state.context.input.steps[lastResult.stepIndex]"
-            :context="state.context.input.action === 'swap' ? 'widget' : 'default'"
-            :bordered="false"
+            :context="isSwapComponent ? 'widget' : 'default'"
+            :class="{ '-text-1': isSwapComponent }"
+            :bordered="isSwapComponent"
             :fees="{}"
             class="border-b"
           />
@@ -57,12 +67,12 @@
       </Collapse>
     </template>
 
-    <div class="pt-5 flex flex-col space-y-3 w-full px-16">
+    <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
       <Button v-if="state.matches('receipt')" @click="onNext">Next</Button>
 
       <template v-if="state.matches('success')">
         <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
-          <Button variant="secondary" @click="onNext">Send another asset &rarr;</Button>
+          <Button variant="link" @click="onNext">Send another asset &rarr;</Button>
         </template>
 
         <template v-if="transaction.name === 'swap'">
@@ -91,9 +101,9 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
 
-const injects = inject(ProvideViewerKey);
+const { actor, isSwapComponent } = inject(ProvideViewerKey);
 
-const { state, send } = injects.actor;
+const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
 
 const lastResult = computed(() => state.value.context.results.slice(-1)[0]);

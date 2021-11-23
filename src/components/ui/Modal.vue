@@ -43,10 +43,13 @@
 
       <section
         class="modal__content"
-        :class="{
-          'pt-6 px-5 sm:pt-8 sm:px-8': variant === 'dialog',
-          'pb-6 sm:pb-8': variant === 'dialog' && !$slots.buttons,
-        }"
+        :class="[
+          contentClass,
+          {
+            'pt-6 px-5 sm:pt-8 sm:px-8': variant === 'dialog',
+            'pb-6 sm:pb-8': variant === 'dialog' && !$slots.buttons,
+          },
+        ]"
       >
         <slot />
       </section>
@@ -100,6 +103,10 @@ export default defineComponent({
       default: 'max-w-4xl',
     },
     bodyClass: {
+      type: [String, Array, Object],
+      default: undefined,
+    },
+    contentClass: {
       type: [String, Array, Object],
       default: undefined,
     },

@@ -210,7 +210,13 @@ const StateTitle = defineComponent({
       }
 
       if (name.value === 'swap') {
-        return <p>Swap</p>;
+        const denomA = (currentTransaction.value.data as SwapData).from.denom;
+        const denomB = (currentTransaction.value.data as SwapData).to.denom;
+        return (
+          <p>
+            Swap <Ticker name={getBaseDenomSync(denomA)} /> &rarr; <Ticker name={getBaseDenomSync(denomB)} />
+          </p>
+        );
       }
 
       return <p>{name}</p>;

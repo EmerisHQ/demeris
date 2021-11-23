@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasFoundService" class="flex items-center justify-center">
+  <div v-if="hasFoundService" class="flex items-center justify-center w-full">
     <TransferInterstitialConfirmation
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"
@@ -10,7 +10,7 @@
     <ViewStateSigning v-else-if="state.matches('signing')" />
     <ViewStateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
-    <StateFailed v-else-if="state.matches('failed')" />
+    <ViewStateFailed v-else-if="state.matches('failed')" />
     <div v-else-if="state.matches('aborted')">Aborted</div>
     <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
     <div v-else>Loading</div>
@@ -30,6 +30,7 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import { TransactionProcessService } from '../transactionProcessMachine';
 import { isSwapAction, ProvideViewerKey } from '../transactionProcessSelectors';
 import { useTransactionsStore } from '../transactionsStore';
+import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
 import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
