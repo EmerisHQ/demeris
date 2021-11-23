@@ -110,8 +110,8 @@ export default defineComponent({
         const pool = getPoolById(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
         const precisions = {
-          coinA: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[0] }) ?? 6,
-          coinB: store.getters['demeris/getDenomPrecision']({ name: pool.denoms[1] }) ?? 6,
+          coinA: store.getters['demeris/getDenomPrecision']({ name: pool.reserveBaseDenoms[0] }) ?? 6,
+          coinB: store.getters['demeris/getDenomPrecision']({ name: pool.reserveBaseDenoms[1] }) ?? 6,
         };
 
         return { pool, poolCoin, precisions };
