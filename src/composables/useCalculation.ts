@@ -2,30 +2,28 @@ import { useStore } from '@/store';
 
 export default function useCalculation() {
   // precision setting (0.000000 level precision below than this decimal digits will be truncated)
-  const precisionDigits = 10 ** 6;
+  const precisionDigits = 10 ** 9;
   const store = useStore();
 
   function getSwapPrice(payCoinAmount: number, payCoinPoolAmount: number, receiveCoinPoolAmount: number) {
-    const swapPrice =
-      ((BigInt(payCoinPoolAmount) + BigInt(2 * payCoinAmount)) * BigInt(precisionDigits)) /
-      BigInt(receiveCoinPoolAmount);
-    return swapPrice;
+    return (payCoinPoolAmount + 2 * payCoinAmount) / receiveCoinPoolAmount;
   }
 
   function getReceiveCoinAmount(
     payCoinData: { base_denom: string; amount: number },
     payCoinPoolAmount: number,
     receiveCoinPoolAmount: number,
-    maxDecimal = 4,
   ) {
     if (payCoinData.amount) {
+      const feeRate =
+        1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003) / 2;
       const payCoinBaseDenomDecimalDigits =
         store.getters['demeris/getDenomPrecision']({ name: payCoinData.base_denom }) ?? 6;
       const payCoinBaseDenomAmount = Math.trunc(payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits);
-      const decimalMaxDigits = 10 ** maxDecimal;
-      const swapPrice = Number(getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount));
-      const receiveCoinAmount = BigInt(payCoinBaseDenomAmount * precisionDigits) / BigInt(swapPrice);
-      return Math.trunc((Number(receiveCoinAmount) / precisionDigits) * decimalMaxDigits) / decimalMaxDigits;
+      const swapPrice = getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount);
+      const receiveCoinAmount = Number(payCoinBaseDenomAmount / swapPrice) * feeRate;
+
+      return Math.trunc(receiveCoinAmount);
     } else {
       return 0;
     }
@@ -40,7 +38,9 @@ export default function useCalculation() {
     const swapFeeRate = 1;
     const receiveCoinBaseDenomDecimalDigits =
       store.getters['demeris/getDenomPrecision']({ name: receiveCoinData.base_denom }) ?? 6; //?? alert('Error: getDenomPrecision');
-    const receiveCoinBaseDenomAmount = Math.trunc(receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits);
+    const receiveCoinBaseDenomAmount = Math.trunc(
+      receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits * 1.00150225,
+    );
     const payCoinAmount =
       Number(BigInt(payCoinPoolAmount * precisionDigits) / BigInt(receiveCoinPoolAmount)) /
       (swapFeeRate / receiveCoinBaseDenomAmount - 2 / receiveCoinPoolAmount);

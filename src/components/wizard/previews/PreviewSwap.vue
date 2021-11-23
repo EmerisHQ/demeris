@@ -185,24 +185,11 @@ export default defineComponent({
         const pool = ((props.step as Actions.Step).transactions[0].data as Actions.SwapData).pool;
         const reserveDenoms = await getReserveBaseDenoms(pool);
         const reserveBalances = await getReserveBalances(pool);
+        const inputAmount = parseInt(String(Number(data.value.from.amount)));
         toCoinBaseDenom.value = await getBaseDenom(data.value.to.denom as string, dexChainName.value);
         fromCoinBaseDenom.value = await getBaseDenom(data.value.from.denom as string, dexChainName.value);
-        let swapPrice = null;
 
-        if (reserveDenoms[1] === toCoinBaseDenom.value) {
-          swapPrice = getSwapPrice(
-            parseInt(data.value.from.amount),
-            reserveBalances.balanceA,
-            reserveBalances.balanceB,
-          );
-        } else {
-          //reverse
-          swapPrice = getSwapPrice(
-            parseInt(data.value.from.amount),
-            reserveBalances.balanceB,
-            reserveBalances.balanceA,
-          );
-        }
+        let swapPrice = null;
 
         const fromPrecision = store.getters['demeris/getDenomPrecision']({
           name: fromCoinBaseDenom.value,
@@ -210,7 +197,13 @@ export default defineComponent({
         const toPrecision = store.getters['demeris/getDenomPrecision']({
           name: toCoinBaseDenom.value,
         });
-        const precisionDiff = fromPrecision - toPrecision < 0 ? Math.abs(fromPrecision - toPrecision) : 0;
+
+        if (reserveDenoms[1] === toCoinBaseDenom.value) {
+          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
+        } else {
+          //reverse
+          swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceB, reserveBalances.balanceA);
+        }
 
         minReceivedAmount.value = {
           denom: toCoinBaseDenom.value,
@@ -218,8 +211,7 @@ export default defineComponent({
             (1 / Number(swapPrice)) *
             Number(data.value.from.amount) *
             swapFeeRate.value ** 2 *
-            (1 - slippageTolerance.value / 100) *
-            10 ** (toPrecision - precisionDiff),
+            (1 - slippageTolerance.value / 100),
         };
 
         limitPrice.value =
@@ -232,8 +224,7 @@ export default defineComponent({
                   }),
               ) *
               swapFeeRate.value ** 2 *
-              (1 - slippageTolerance.value / 100) *
-              10 ** (toPrecision - precisionDiff)) /
+              (1 - slippageTolerance.value / 100)) /
               10000,
           ) * 10000;
       },

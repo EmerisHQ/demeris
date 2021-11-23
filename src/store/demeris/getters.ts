@@ -254,8 +254,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
     const exchangeAmountFromPool = getters['getExchangeAmountFromATOMPool'](params.denom);
 
     if (exchangeAmountFromPool) {
+      const exchangedDenomPrecision = getters['getDenomPrecision']({
+        name: params.denom,
+      });
       const ATOMPrice = getters['getPrice']({ denom: 'uatom' });
-      return exchangeAmountFromPool * ATOMPrice;
+
+      return exchangeAmountFromPool * ATOMPrice * 10 ** (exchangedDenomPrecision - 6);
     }
 
     return null;
