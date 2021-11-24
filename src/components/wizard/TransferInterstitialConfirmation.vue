@@ -113,7 +113,7 @@ export default defineComponent({
         let fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
         let toChain = store.getters['demeris/getDisplayChain']({ name: backwardData.to_chain });
 
-        if (props.steps[0].transactions.length > 1) {
+        if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
           const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
           toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
         }
@@ -146,7 +146,7 @@ export default defineComponent({
           description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
           break;
         case 'transfer':
-          if (props.steps[0].transactions.length > 1) {
+          if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
             const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
             const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
 
@@ -156,7 +156,9 @@ export default defineComponent({
             const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
 
             const translateKeyPath =
-              props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultipe';
+              props.steps[0].transactions.length > 2
+                ? 'transferDescriptionMultipleMemo'
+                : 'transferDescriptionMultiple';
 
             description = t(`components.transferToHub.${translateKeyPath}`, {
               denom: denoms.value[0],
