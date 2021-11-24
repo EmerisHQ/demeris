@@ -66,6 +66,9 @@ export type TicketResponse = {
 export type DemerisGetValidatorsParam = {
   chain_name: string;
 };
+export type DemerisGetInflationParam = {
+  chain_name: string;
+};
 export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
@@ -194,6 +197,10 @@ export interface Actions {
     { getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetValidatorsParam,
   ): Promise<unknown>;
+  [DemerisActionTypes.GET_INFLATION](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetValidatorsParam,
+  ): Promise<unknown>;
   [DemerisActionTypes.SET_GAS_LIMIT](
     { commit }: ActionContext<State, RootState>,
     { gasLimit }: { gasLimit: number },
@@ -309,6 +316,9 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_VALIDATORS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_VALIDATORS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_VALIDATORS]>;
+  [GlobalDemerisActionTypes.GET_INFLATION](
+    ...args: Parameters<Actions[DemerisActionTypes.GET_INFLATION]>
+  ): ReturnType<Actions[DemerisActionTypes.GET_INFLATION]>;
   [GlobalDemerisActionTypes.SET_SESSION_DATA](
     ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
   ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
@@ -1079,7 +1089,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
       return response.data?.validators;
     } catch (e) {
-      throw new SpVuexError('Demeris:GetValidators', `Could not get ${chain_name} validators.` + e.message);
+      throw new SpVuexError('Demeris:GET_VALIDATORS', `Could not get ${chain_name} validators.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_INFLATION]({ getters }, { chain_name }: DemerisGetInflationParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/mint/inflation');
+      return Number(response.data?.inflation);
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
     }
   },
 

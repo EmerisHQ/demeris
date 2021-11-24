@@ -13,15 +13,13 @@ export default function useStaking() {
   const chains: Chains = store.getters['demeris/getChains'];
 
   const getValidatorsByBaseDenom = async (base_denom: string, status: ValidatorStatus[] = [3]) => {
-    //TODO: have our own curated DB for validators
-    const chain_name = Object.values(chains).find((chain) => {
-      return chain.denoms.find((denom) => denom.name === base_denom);
-    }).chain_name;
+    //TODO: have our own curated DB for validator list
+    const chain_name = getChainNameByBaseDenom(base_denom);
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.GET_VALIDATORS, { chain_name });
 
     const reducer = (accumulator, validator) => {
       if (status.includes(validator.status)) {
-        // TEST: Get info from keybase
+        // TEST: Get a validator data(profile pic url) from keybase
         // validator.keybaseData = null;
         // try {
         //   const keybaseData = await axios.get(
@@ -43,5 +41,19 @@ export default function useStaking() {
     return [...curatedValidatorList];
   };
 
-  return { getValidatorsByBaseDenom };
+  const getChainInflationByBaseDenom = async (base_denom: string): Promise<number> => {
+    const chain_name = getChainNameByBaseDenom(base_denom);
+    const inflation = await store.dispatch(GlobalDemerisActionTypes.GET_INFLATION, { chain_name });
+    console.log(inflation);
+    return Math.trunc(inflation * 10000) / 100;
+  };
+
+  //helpers
+  function getChainNameByBaseDenom(base_denom: string): string {
+    return Object.values(chains).find((chain) => {
+      return chain.denoms.find((denom) => denom.name === base_denom);
+    }).chain_name;
+  }
+
+  return { getValidatorsByBaseDenom, getChainInflationByBaseDenom };
 }

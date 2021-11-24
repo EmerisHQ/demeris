@@ -76,7 +76,7 @@
 <script lang="ts">
 type stakeStepsType = 'Validator' | 'Amount' | 'Review' | 'Stake';
 
-import { computed, onBeforeMount,ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
@@ -114,8 +114,8 @@ export default {
     const totalStakedAmount = ref<number>(0);
     const selectedValidators = ref([]);
 
-    /* life cycle */
-    onBeforeMount(async () => {
+    /* created */
+    (async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
       if (stakingBalances.value.length) {
         validatorList.value.forEach((vali: any) => {
@@ -139,7 +139,7 @@ export default {
 
       console.log('valilist f', validatorList.value);
       console.log('stakingBalance f', stakingBalances.value);
-    });
+    })();
 
     /* computeds */
     const isDisplayBackButton = computed(() => {

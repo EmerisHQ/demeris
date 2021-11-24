@@ -37,6 +37,7 @@ export enum DemerisActionTypes {
   SIGN_IN_WITH_WATCHER = 'SIGN_IN_WITH_WATCHER',
   SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   GET_VALIDATORS = 'GET_VALIDATORS',
+  GET_INFLATION = 'GET_INFLATION',
   // Internal module actions
   INIT = 'INIT',
   SIGN_OUT = 'SIGN_OUT',
@@ -82,6 +83,7 @@ export enum GlobalDemerisActionTypes {
   SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
   SET_GAS_LIMIT = 'demeris/SET_GAS_LIMIT',
   GET_VALIDATORS = 'demeris/GET_VALIDATORS',
+  GET_INFLATION = 'demeris/GET_INFLATION',
   // Internal module actions
   INIT = 'demeris/INIT',
   SIGN_OUT = 'demeris/SIGN_OUT',

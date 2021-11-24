@@ -100,6 +100,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useDenoms from '@/composables/useDenoms';
+import useStaking from '@/composables/useStaking';
 import type { StakingBalance } from '@/types/api';
 
 export default defineComponent({
@@ -121,9 +122,19 @@ export default defineComponent({
   },
   setup(props) {
     const { useDenom } = useDenoms();
+    const { getChainInflationByBaseDenom } = useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
+    const baseDenom = router.currentRoute.value.params.denom as string;
+
+    /* created */
+    (async () => {
+      assetStakingAPY.value = await getChainInflationByBaseDenom(baseDenom);
+    })();
+
+    /* variables */
     const selectedTab = ref<number>(1);
+    const assetStakingAPY = ref<number | string>('-');
 
     /* computeds */
     const isStakingAssetExist = computed(() => {
@@ -135,10 +146,6 @@ export default defineComponent({
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
-    });
-    const assetStakingAPY = computed(() => {
-      // TODO
-      return 9.7;
     });
     const stakingAssetTotalValue = computed(() => {
       //TODO: this value includes a staking reward too
