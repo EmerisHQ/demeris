@@ -23,7 +23,7 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed, defineComponent, defineProps, provide } from 'vue';
+import { computed, defineProps, provide } from 'vue';
 
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 
@@ -38,7 +38,7 @@ import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransactin
 import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
 
 const props = defineProps({
-  stepHash: {
+  stepId: {
     type: String,
     default: undefined,
   },
@@ -47,7 +47,7 @@ const props = defineProps({
 const emits = defineEmits(['close']);
 
 const transactionStore = useTransactionsStore();
-const transactionService = computed(() => transactionStore.transactions[props.stepHash] as TransactionProcessService);
+const transactionService = computed(() => transactionStore.transactions[props.stepId] as TransactionProcessService);
 const hasFoundService = computed(() => !!transactionService.value);
 const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionStore.isViewerModalOpen);
 
@@ -56,32 +56,15 @@ const { state, send } = actor;
 
 const closeModal = () => emits('close');
 const removeTransactionAndClose = () => {
-  transactionStore.removePendingTransaction(props.stepHash);
+  transactionStore.removePendingTransaction(props.stepId);
   closeModal();
 };
-
-const StateFailed = defineComponent({
-  name: 'StateFailed',
-  setup() {
-    const onAbort = () => {
-      transactionStore.removePendingTransaction(props.stepHash);
-      emits('close');
-    };
-
-    return () => (
-      <div>
-        <h1>Failed</h1>
-        {state.value.can('ABORT') && <button onClick={onAbort}>Cancel</button>}
-      </div>
-    );
-  },
-});
 
 provide(ProvideViewerKey, {
   actor,
   closeModal,
   removeTransactionAndClose,
   isSwapComponent,
-  stepHash: props.stepHash,
+  stepId: props.stepId,
 });
 </script>

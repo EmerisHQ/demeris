@@ -22,10 +22,12 @@ export const getTransactionsLength = (context: TransactionProcessContext): numbe
   return context.input.steps.reduce((acc, item) => acc + item.transactions.length, 0);
 };
 
-export const getOffsetFromCurrentTransaction = (context: TransactionProcessContext) => {
-  return Math.floor(
-    context.currentStepIndex + context.currentStepIndex / context.input.steps.length + context.currentTransactionIndex,
-  );
+export const formatTransactionOffset = (context: TransactionProcessContext) => {
+  if (getTransactionsLength(context) <= 1) {
+    return '';
+  }
+
+  return `(${context.cursor + 1}/${context.input.steps.length})`;
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
@@ -41,6 +43,14 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
     default:
       return dexChain;
   }
+};
+
+export const getTransactionFromAction = (context: TransactionProcessContext): StepTransaction => {
+  if (context.input.action === 'move') {
+    return context.input.steps[0].transactions[0];
+  }
+
+  return context.input.steps.find((item) => item.name === context.input.action).transactions[0];
 };
 
 export const isSwapAction = (context: TransactionProcessContext) => {
@@ -84,7 +94,7 @@ export type ProvideViewerSchema = {
     send: Sender<TransactionProcessEvents>;
   };
   isSwapComponent: ComputedRef<boolean>;
-  stepHash: string;
+  stepId: string;
   removeTransactionAndClose: () => void;
   closeModal: () => void;
 };

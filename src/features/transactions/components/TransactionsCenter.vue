@@ -23,8 +23,8 @@
         :style="{ maxHeight: '300px' }"
         :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
       >
-        <li v-for="[key, service] of pendingTransactions" :key="key">
-          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(key)" />
+        <li v-for="[id, service] of pendingTransactions" :key="id">
+          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(id)" />
         </li>
       </ul>
 
@@ -57,7 +57,7 @@
       show-close-button
       @close="closeModal"
     >
-      <TransactionProcessViewer :step-hash="state.selectedItem" @close="closeModal" />
+      <TransactionProcessViewer :step-id="transactionsStore.selectedId" @close="closeModal" />
     </Modal>
   </teleport>
 </template>
@@ -77,20 +77,17 @@ import TransactionsCenterActionButton from "./TransactionsCenterActionButton.vue
 const transactionsStore = useTransactionsStore();
 
 const state = reactive({
-  selectedItem: null,
   viewAll: false
 })
 
 const rowsLimit = computed(() => state.viewAll ? undefined : 3);
 
-const selectItem = (stepHash) => {
-  state.selectedItem = stepHash;
-  transactionsStore.toggleViewerModal();
+const selectItem = (stepId) => {
+  transactionsStore.setSelectedId(stepId);
 }
 
 const closeModal = () => {
-  state.selectedItem = null;
-  transactionsStore.toggleViewerModal();
+  transactionsStore.setSelectedId(undefined);
 }
 
 const toggleViewAll = () => {

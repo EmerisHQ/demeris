@@ -11,7 +11,16 @@
     </template>
 
     <template v-else-if="['review', 'send'].includes(step)">
-      <TransactionProcessCreator :steps="steps" action="transfer" @pending="closeModal" />
+      <TransactionProcessCreator
+        :steps="steps"
+        action="transfer"
+        @pending="
+          () => {
+            closeModal();
+            resetHandler();
+          }
+        "
+      />
     </template>
   </div>
 </template>
@@ -74,7 +83,6 @@ export default defineComponent({
 
     const state = reactive({
       fees: {},
-      stepHash: undefined,
     });
 
     const step = computed({

@@ -29,6 +29,7 @@ export interface TransactionProcessContext {
   input: ContextInputSchema;
   currentStepIndex: number;
   currentTransactionIndex: number;
+  cursor: number;
   results: {
     txhash: string;
     chain_name: string;
@@ -59,6 +60,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         gasLimit: undefined,
         steps: [],
       },
+      cursor: 0,
       currentStepIndex: 0,
       currentTransactionIndex: 0,
       results: [],
@@ -198,7 +200,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             after: {
               5000: { target: '.pending' },
               60000: { target: '.delayed' },
-              300000: { target: '#failed.unknown' },
+              600000: { target: '#failed.unknown' },
             },
             on: {
               // @ts-ignore
@@ -397,13 +399,13 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             await new Promise((resolve) => setTimeout(resolve, 750));
           }
 
-          if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
-            throw new Error(resultData.error || 'error');
-          }
-
           if (resultData.status === 'stuck') {
             // @ts-ignore
             return callback({ type: 'GOT_UNKNOWN', data: responseData });
+          }
+
+          if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
+            throw new Error(resultData.error || 'error');
           }
 
           if (resultData.status === 'IBC_receive_success') {
@@ -442,6 +444,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         const hasCompletedStep =
           context.currentTransactionIndex + 1 >= context.input.steps[context.currentStepIndex].transactions.length;
         return {
+          cursor: context.cursor + 1,
           currentStepIndex: hasCompletedStep ? context.currentStepIndex + 1 : context.currentStepIndex,
           currentTransactionIndex: hasCompletedStep ? 0 : context.currentTransactionIndex + 1,
         };

@@ -6,7 +6,7 @@
       @goback="emits('close')"
       @close="emits('close')"
     />
-    <TransactionProcessViewer v-if="stepHash" :step-hash="stepHash" />
+    <TransactionProcessViewer v-if="stepId" :step-id="stepId" />
     <ConnectWalletModal
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
@@ -38,8 +38,8 @@ const emits = defineEmits(['pending', 'close']);
 
 const transactionsStore = useTransactionsStore();
 
-const [stepHash, service] = transactionsStore.createTransactionMachine(props.action, props.steps);
-const isPending = computed(() => transactionsStore.isPending(stepHash));
+const [stepId, service] = transactionsStore.createTransactionMachine(props.action, props.steps);
+const isPending = computed(() => transactionsStore.isPending(stepId));
 
 watch(isPending, (value) => {
   if (value) {

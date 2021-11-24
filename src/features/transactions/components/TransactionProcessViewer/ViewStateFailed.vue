@@ -20,16 +20,33 @@
       {{ title }}
     </h1>
 
-    <p></p>
+    <p v-if="subtitle" class="text-center px-6">
+      {{ subtitle }}
+    </p>
+
+    <template v-if="lastResult.txhash && getExplorerTx(lastResult)">
+      <a
+        :href="getExplorerTx(lastResult)"
+        rel="noopener noreferrer"
+        target="_blank"
+        class="self-center mt-8 mb-4 p-2 font-medium"
+      >
+        {{ $t('context.transaction.viewOnExplorer') }} ↗️
+      </a>
+    </template>
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
-      <Button v-if="state.done" @click="removeTransactionAndClose">{{ t('generic_cta.done') }}</Button>
-      <Button v-if="state.can('RETRY')" @click="() => send('RETRY')">
-        {{
-          t('components.txHandlingModal.tryAgain')
-        }}
+      <Button v-if="state.matches('failed.unknown')" @click="removeTransactionAndClose">
+        {{ t('generic_cta.done') }}
       </Button>
-      <Button v-if="state.can('ABORT')" variant="link" @click="onCancel">{{ t('generic_cta.cancel') }}</Button>
+
+      <Button v-if="state.can('RETRY')" @click="() => send('RETRY')">
+        {{ t('components.txHandlingModal.tryAgain') }}
+      </Button>
+
+      <Button v-if="state.can('ABORT')" variant="link" @click="onCancel">
+        {{ t('generic_cta.cancel') }}
+      </Button>
     </div>
   </div>
 </template>
@@ -43,7 +60,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
 
 const { t } = useI18n({ useScope: 'global' });
 
@@ -64,6 +81,10 @@ const titleMap = {
 };
 
 const title = computed(() => {
+  if (lastResult.value.status === 'IBC_receive_failed') {
+    return t('components.txHandlingModal.somethingWentWrong');
+  }
+
   if (state.value.matches('failed.unknown')) {
     return t('components.txHandlingModal.couldNotFetchTransactionResult');
   }
@@ -72,7 +93,23 @@ const title = computed(() => {
     return t('components.txHandlingModal.signError');
   }
 
-  return titleMap[transaction.value.name];
+  if (titleMap[transaction.value.name]) {
+    return titleMap[transaction.value.name];
+  }
+
+  return t('components.txHandlingModal.somethingWentWrong');
+});
+
+const subtitle = computed(() => {
+  if (lastResult.value.status === 'IBC_receive_failed') {
+    return t('components.txHandlingModal.revertTx');
+  }
+
+  if (state.value.matches('failed.unknown')) {
+    return t('components.txHandlingModal.checkTransactionOnBlockExplorer');
+  }
+
+  return undefined;
 });
 
 const onCancel = () => {

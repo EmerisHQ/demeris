@@ -120,7 +120,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  for (const subscription of Object.values(subscriptions.value)) {
+  for (const subscription of Object.values(subscriptions.value).reverse()) {
     // @ts-ignore
     subscription.unsubscribe();
   }

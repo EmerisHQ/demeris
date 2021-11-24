@@ -79,7 +79,7 @@
           <Button variant="secondary">Send TODO</Button>
         </template>
 
-        <Button @click="injects.removeTransactionAndClose()">Done</Button>
+        <Button @click="removeTransactionAndClose()">Done</Button>
       </template>
     </div>
   </div>
@@ -101,7 +101,7 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
 
-const { actor, isSwapComponent } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
 
 const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });

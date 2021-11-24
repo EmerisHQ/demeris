@@ -24,14 +24,14 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { IBCForwardsData, SwapData, TransferData } from '@/types/actions';
+import { AddLiquidityData, IBCForwardsData, SwapData, TransferData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { TransactionProcessService } from '../transactionProcessMachine';
 import {
+  formatTransactionOffset,
   getCurrentTransaction,
-  getOffsetFromCurrentTransaction,
-  getTransactionsLength,
+  getTransactionFromAction,
   matchesObject,
 } from '../transactionProcessSelectors';
 
@@ -112,8 +112,7 @@ const StateDescription = defineComponent({
       failed: <span class="text-negative">Transaction failed</span>,
     };
 
-    const transactionsLength = getTransactionsLength(state.value.context);
-    const transactionOffset = getOffsetFromCurrentTransaction(state.value.context) + 1;
+    const transactionOffset = computed(() => formatTransactionOffset(state.value.context));
 
     return () => {
       const staticValue = matchesObject(textResultMap, state.value.matches);
@@ -122,24 +121,11 @@ const StateDescription = defineComponent({
       }
 
       if (state.value.matches('review')) {
-        return (
-          <p>
-            Sign in Keplr
-            {transactionsLength > 1 && (
-              <span>
-                &nbsp;({transactionOffset}/{transactionsLength})
-              </span>
-            )}
-          </p>
-        );
+        return <p>Sign in Keplr {transactionOffset.value}</p>;
       }
 
       if (state.value.matches('receipt')) {
-        return (
-          <p>
-            Partially completed ({transactionOffset}/{transactionsLength})
-          </p>
-        );
+        return <p>Partially completed {transactionOffset.value}</p>;
       }
 
       return null;
@@ -187,12 +173,12 @@ const StateControls = defineComponent({
 const StateTitle = defineComponent({
   name: 'StateTitle',
   setup() {
-    const currentTransaction = computed(() => getCurrentTransaction(state.value.context));
-    const name = computed(() => currentTransaction.value.name);
+    const action = computed(() => state.value.context.input.action);
+    const transaction = computed(() => getTransactionFromAction(state.value.context));
 
     return () => {
-      if (name.value === 'transfer') {
-        const denom = (currentTransaction.value.data as TransferData).amount.denom;
+      if (action.value === 'transfer') {
+        const denom = (transaction.value.data as TransferData).amount.denom;
         return (
           <div>
             Send <Ticker name={getBaseDenomSync(denom)} />
@@ -200,8 +186,8 @@ const StateTitle = defineComponent({
         );
       }
 
-      if (name.value.startsWith('ibc')) {
-        const denom = (currentTransaction.value.data as TransferData).amount.denom;
+      if (action.value.startsWith('move')) {
+        const denom = (transaction.value.data as TransferData).amount.denom;
         return (
           <div>
             Move <Ticker name={getBaseDenomSync(denom)} />
@@ -209,9 +195,9 @@ const StateTitle = defineComponent({
         );
       }
 
-      if (name.value === 'swap') {
-        const denomA = (currentTransaction.value.data as SwapData).from.denom;
-        const denomB = (currentTransaction.value.data as SwapData).to.denom;
+      if (action.value === 'swap') {
+        const denomA = (transaction.value.data as SwapData).from.denom;
+        const denomB = (transaction.value.data as SwapData).to.denom;
         return (
           <p>
             Swap <Ticker name={getBaseDenomSync(denomA)} /> &rarr; <Ticker name={getBaseDenomSync(denomB)} />
@@ -219,7 +205,17 @@ const StateTitle = defineComponent({
         );
       }
 
-      return <p>{name}</p>;
+      if (action.value === 'addliquidity') {
+        const denomA = (transaction.value.data as AddLiquidityData).coinA.denom;
+        const denomB = (transaction.value.data as AddLiquidityData).coinB.denom;
+        return (
+          <p>
+            Add <Ticker name={getBaseDenomSync(denomA)} /> &middot; <Ticker name={getBaseDenomSync(denomB)} />
+          </p>
+        );
+      }
+
+      return <p>{action.value}</p>;
     };
   },
 });

@@ -17,6 +17,7 @@ type State = {
   isBottomSheetMinimized: boolean;
   isViewerModalOpen: boolean;
   isConnectWalletModalOpen: boolean;
+  selectedId: string;
 };
 
 export const useTransactionsStore = defineStore('transactions', {
@@ -24,13 +25,14 @@ export const useTransactionsStore = defineStore('transactions', {
     ({
       transactions: {},
       pending: {},
-      isViewerModalOpen: false,
       isBottomSheetMinimized: false,
       isConnectWalletModalOpen: false,
+      selectedId: undefined,
     } as State),
 
   getters: {
-    isPending: (state) => (stepHash: string) => stepHash in state.pending,
+    isPending: (state) => (stepId: string) => stepId in state.pending,
+    isViewerModalOpen: (state) => !!state.selectedId,
   },
 
   actions: {
@@ -42,16 +44,16 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isConnectWalletModalOpen = !this.isConnectWalletModalOpen;
     },
 
-    toggleViewerModal() {
-      this.isViewerModalOpen = !this.isViewerModalOpen;
+    setSelectedId(selectedId: string | undefined) {
+      this.selectedId = selectedId;
     },
 
-    removePendingTransaction(stepHash: string) {
-      delete this.pending[stepHash];
+    removePendingTransaction(stepId: string) {
+      delete this.pending[stepId];
     },
 
     createTransactionMachine(action: string, steps: any[]): [string, TransactionProcessService] {
-      const stepHash = `${hashObject(steps)}-${Date.now()}`;
+      const stepId = `${hashObject(steps)}-${Date.now()}`;
       const pendingTransactions = this.pending;
 
       const service = interpret(
@@ -96,9 +98,9 @@ export const useTransactionsStore = defineStore('transactions', {
       service.subscribe((state) => {
         // Add transaction to the floating widget list
         if (state.matches('transacting') || state.matches('waitingPreviousTransaction')) {
-          if (!(stepHash in this.pending)) {
+          if (!(stepId in this.pending)) {
             this.pending = {
-              [stepHash]: service,
+              [stepId]: service,
               ...this.pending,
             };
           }
@@ -114,9 +116,9 @@ export const useTransactionsStore = defineStore('transactions', {
         }
       });
 
-      this.transactions[stepHash] = service;
+      this.transactions[stepId] = service;
 
-      return [stepHash, service];
+      return [stepId, service];
     },
   },
 });
