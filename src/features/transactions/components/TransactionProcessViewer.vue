@@ -3,7 +3,7 @@
     <TransferInterstitialConfirmation
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"
-      :steps="state.context.input.steps"
+      :steps="state.context.formattedSteps"
       @continue="() => send('CONTINUE')"
     />
     <ViewStateReview v-else-if="state.matches('review')" />
@@ -27,8 +27,8 @@ import { computed, defineProps, provide } from 'vue';
 
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 
+import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
-import { isSwapAction, ProvideViewerKey } from '../transactionProcessSelectors';
 import { useTransactionsStore } from '../transactionsStore';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';

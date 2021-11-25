@@ -27,13 +27,13 @@ import Spinner from '@/components/ui/Spinner.vue';
 import { AddLiquidityData, IBCForwardsData, SwapData, TransferData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { TransactionProcessService } from '../transactionProcessMachine';
 import {
   formatTransactionOffset,
   getCurrentTransaction,
   getTransactionFromAction,
   matchesObject,
-} from '../transactionProcessSelectors';
+} from '../transactionProcessHelpers';
+import { TransactionProcessService } from '../transactionProcessMachine';
 
 const props = defineProps({
   service: {

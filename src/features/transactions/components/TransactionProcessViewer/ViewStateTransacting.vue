@@ -79,7 +79,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { t } = useI18n({ useScope: 'global' });
 const { actor, isSwapComponent } = inject(ProvideViewerKey);

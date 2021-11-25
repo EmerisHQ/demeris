@@ -2,14 +2,16 @@ import { defineStore } from 'pinia';
 import { interpret } from 'xstate';
 
 import { store as globalStore } from '@/store';
+import { Step } from '@/types/actions';
+import { Balance } from '@/types/api';
 import { hashObject } from '@/utils/basic';
 
+import { getCurrentTransaction, getSourceChainFromTransaction } from './transactionProcessHelpers';
 import {
   TransactionProcessContext,
   transactionProcessMachine,
   TransactionProcessService,
 } from './transactionProcessMachine';
-import { getCurrentTransaction, getSourceChainFromTransaction } from './transactionProcessSelectors';
 
 type State = {
   transactions: Record<string, TransactionProcessService>;
@@ -52,7 +54,7 @@ export const useTransactionsStore = defineStore('transactions', {
       delete this.pending[stepId];
     },
 
-    createTransactionMachine(action: string, steps: any[]): [string, TransactionProcessService] {
+    createTransactionMachine(action: string, steps: Step[], balances: Balance[]): [string, TransactionProcessService] {
       const stepId = `${hashObject(steps)}-${Date.now()}`;
       const pendingTransactions = this.pending;
 
@@ -89,6 +91,7 @@ export const useTransactionsStore = defineStore('transactions', {
       service.start();
       service.send({
         type: 'SET_DATA',
+        balances,
         action,
         steps,
         gasPriceLevel: globalStore.getters['demeris/getPreferredGasPriceLevel'],

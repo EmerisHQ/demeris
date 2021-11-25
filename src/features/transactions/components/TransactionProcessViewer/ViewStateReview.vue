@@ -46,7 +46,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { useStore } from '@/store';
 
-import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
 
 const transactionsStore = useTransactionsStore();

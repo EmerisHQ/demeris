@@ -32,7 +32,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 
-import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state, send } = actor;

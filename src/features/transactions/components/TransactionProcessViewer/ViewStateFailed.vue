@@ -60,7 +60,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { t } = useI18n({ useScope: 'global' });
 

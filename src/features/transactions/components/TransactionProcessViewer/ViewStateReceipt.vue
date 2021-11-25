@@ -44,8 +44,8 @@
         >
           <component
             :is="previewComponentMap[transaction.name]"
-            :response="state.context.input.steps[lastResult.stepIndex]"
-            :step="state.context.input.steps[lastResult.stepIndex]"
+            :response="state.context.formattedSteps[lastResult.stepIndex]"
+            :step="state.context.formattedSteps[lastResult.stepIndex]"
             :context="isSwapComponent ? 'widget' : 'default'"
             :class="{ '-text-1': isSwapComponent }"
             :bordered="isSwapComponent"
@@ -99,7 +99,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
-import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessSelectors';
+import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
 

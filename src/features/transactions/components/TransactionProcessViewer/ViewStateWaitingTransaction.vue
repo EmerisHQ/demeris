@@ -26,7 +26,7 @@ import {
   getCurrentTransaction,
   getSourceChainFromTransaction,
   ProvideViewerKey,
-} from '../../transactionProcessSelectors';
+} from '../../transactionProcessHelpers';
 
 const injects = inject(ProvideViewerKey);
 const { state } = injects.actor;

@@ -15,17 +15,19 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, watch } from '@vue/runtime-core';
+import { computed, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
+import useAccount from '@/composables/useAccount';
+import { Step } from '@/types/actions';
 
 import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessViewer from './TransactionProcessViewer.vue';
 
 const props = defineProps({
   steps: {
-    type: Array,
+    type: Array as PropType<Step[]>,
     required: true,
   },
   action: {
@@ -38,7 +40,8 @@ const emits = defineEmits(['pending', 'close']);
 
 const transactionsStore = useTransactionsStore();
 
-const [stepId, service] = transactionsStore.createTransactionMachine(props.action, props.steps);
+const { balances } = useAccount();
+const [stepId, service] = transactionsStore.createTransactionMachine(props.action, props.steps, balances.value);
 const isPending = computed(() => transactionsStore.isPending(stepId));
 
 watch(isPending, (value) => {

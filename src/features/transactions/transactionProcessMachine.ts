@@ -4,6 +4,7 @@ import { store as globalStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { DemerisTxParams, TicketResponse } from '@/store/demeris/actions';
 import { GasPriceLevel, Step, StepTransaction } from '@/types/actions';
+import { Balance } from '@/types/api';
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -13,10 +14,11 @@ import {
 
 import {
   DoneEventData,
+  formatStepsWithFee,
   getCurrentStep,
   getCurrentTransaction,
   getSourceChainFromTransaction,
-} from './transactionProcessSelectors';
+} from './transactionProcessHelpers';
 
 interface ContextInputSchema {
   action: string;
@@ -27,6 +29,7 @@ interface ContextInputSchema {
 
 export interface TransactionProcessContext {
   input: ContextInputSchema;
+  formattedSteps: Step[];
   currentStepIndex: number;
   currentTransactionIndex: number;
   cursor: number;
@@ -42,7 +45,7 @@ export interface TransactionProcessContext {
 }
 
 export type TransactionProcessEvents =
-  | ({ type: 'SET_DATA' } & ContextInputSchema)
+  | ({ type: 'SET_DATA'; balances: Balance[] } & ContextInputSchema)
   | { type: 'PROCEED_FEE' }
   | { type: 'SIGN' }
   | { type: 'ABORT' }
@@ -64,6 +67,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       currentStepIndex: 0,
       currentTransactionIndex: 0,
       results: [],
+      formattedSteps: [],
       error: undefined,
     },
     states: {
@@ -75,7 +79,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         on: {
           SET_DATA: {
             target: 'idle',
-            actions: ['setData'],
+            actions: ['setData', 'formatSteps'],
           },
         },
       },
@@ -294,7 +298,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         return Promise.resolve(true);
       },
       validateChainStatus: async (context) => {
-        const result = await chainStatusForSteps(context.input.steps);
+        const result = await chainStatusForSteps(context.formattedSteps);
         if (!result.status) {
           throw result;
         }
@@ -429,14 +433,17 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
     },
 
     actions: {
-      setData: assign({
-        input: (_, event: ContextInputSchema & { type: string }) => ({
+      setData: assign((_, event: ContextInputSchema & { type: string }) => ({
+        input: {
           steps: event.steps,
           action: event.action,
           gasLimit: event.gasLimit,
           gasPriceLevel: event.gasPriceLevel,
-        }),
-      }),
+        },
+      })),
+      formatSteps: assign((context, event: { type: string; balances: Balance[] }) => ({
+        formattedSteps: formatStepsWithFee(context, event.balances),
+      })),
       setError: assign({
         error: (_, event: any) => event,
       }),
