@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.6 - 2021-11-24
+
+### Updates
+
+- Likecoin, Bitcanna, Juno added to demo account
+- Updated API endpoints & production deployment
+- Updated descriptions for cross-chain transfers with Memo
+
+### Fixes
+
+- Correct pool asset price on pools with reserves of differing precision
+- Fix swap calcuilation for pools with very small swap ratio
+- Fix withdraw liquidity summary page
+- Null checks for IBC reserve denom information
+
 ## 0.1.5 - 2021-10-26
 
 - Includes 0.1.4 hotfixes
