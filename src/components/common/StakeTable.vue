@@ -91,7 +91,7 @@
   </div>
 </template>
 <script lang="tsx">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -99,9 +99,9 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
+import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
-import type { StakingBalance } from '@/types/api';
 
 export default defineComponent({
   components: {
@@ -115,21 +115,19 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    stakingBalances: {
-      type: Array as PropType<StakingBalance[]>,
-      default: () => [],
-    },
   },
   setup(props) {
     const { useDenom } = useDenoms();
-    const { getChainInflationByBaseDenom } = useStaking();
+    const { getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom } = useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const baseDenom = router.currentRoute.value.params.denom as string;
+    const { stakingBalancesByChain } = useAccount();
 
     /* created */
     (async () => {
-      assetStakingAPY.value = await getChainInflationByBaseDenom(baseDenom);
+      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(baseDenom);
+      console.log('test', await getStakingRewardsByBaseDenom(baseDenom));
     })();
 
     /* variables */
@@ -137,8 +135,12 @@ export default defineComponent({
     const assetStakingAPY = ref<number | string>('-');
 
     /* computeds */
+    const stakingBalances = computed(() => {
+      return stakingBalancesByChain(getChainNameByBaseDenom(baseDenom));
+    });
     const isStakingAssetExist = computed(() => {
-      return props.stakingBalances.length > 0;
+      console.log(stakingBalances.value);
+      return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
       // TODO: implement unstaking asset check
@@ -149,6 +151,7 @@ export default defineComponent({
     });
     const stakingAssetTotalValue = computed(() => {
       //TODO: this value includes a staking reward too
+
       return 100;
     });
     const unstakingAssetValue = computed(() => {

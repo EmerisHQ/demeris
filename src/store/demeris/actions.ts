@@ -69,6 +69,9 @@ export type DemerisGetValidatorsParam = {
 export type DemerisGetInflationParam = {
   chain_name: string;
 };
+export type DemerisGetRewardsParam = {
+  chain_name: string;
+};
 export interface Actions {
   // Cross-chain endpoint actions
   [DemerisActionTypes.GET_BALANCES](
@@ -199,7 +202,11 @@ export interface Actions {
   ): Promise<unknown>;
   [DemerisActionTypes.GET_INFLATION](
     { getters }: ActionContext<State, RootState>,
-    { chain_name }: DemerisGetValidatorsParam,
+    { chain_name }: DemerisGetInflationParam,
+  ): Promise<unknown>;
+  [DemerisActionTypes.GET_STAKING_REWARDS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetRewardsParam,
   ): Promise<unknown>;
   [DemerisActionTypes.SET_GAS_LIMIT](
     { commit }: ActionContext<State, RootState>,
@@ -1099,6 +1106,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return Number(response.data?.inflation);
     } catch (e) {
       throw new SpVuexError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters }, { chain_name }: DemerisGetRewardsParam) {
+    try {
+      const address = keyHashfromAddress(getters['getOwnAddress']({ chain_name }));
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + address + '/delegatorrewards/' + chain_name,
+      );
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_REWARDS', `Could not get ${chain_name} rewards.` + e.message);
     }
   },
 

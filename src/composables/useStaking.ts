@@ -41,11 +41,15 @@ export default function useStaking() {
     return [...curatedValidatorList];
   };
 
-  const getChainInflationByBaseDenom = async (base_denom: string): Promise<number> => {
+  const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
     const chain_name = getChainNameByBaseDenom(base_denom);
     const inflation = await store.dispatch(GlobalDemerisActionTypes.GET_INFLATION, { chain_name });
-    console.log(inflation);
     return Math.trunc(inflation * 10000) / 100;
+  };
+
+  const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
+    const chain_name = getChainNameByBaseDenom(base_denom);
+    return await store.dispatch(GlobalDemerisActionTypes.GET_STAKING_REWARDS, { chain_name });
   };
 
   //helpers
@@ -55,5 +59,10 @@ export default function useStaking() {
     }).chain_name;
   }
 
-  return { getValidatorsByBaseDenom, getChainInflationByBaseDenom };
+  return {
+    getValidatorsByBaseDenom,
+    getChainDisplayInflationByBaseDenom,
+    getStakingRewardsByBaseDenom,
+    getChainNameByBaseDenom,
+  };
 }

@@ -91,7 +91,7 @@
 
 <script lang="ts">
 import { ref } from '@vue/reactivity';
-import { computed, onBeforeMount, PropType, watch } from '@vue/runtime-core';
+import { computed } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
@@ -101,10 +101,7 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
-import { keyHashfromAddress } from '@/utils/basic';
 
 //TODO: implement type for validator list
 export default {

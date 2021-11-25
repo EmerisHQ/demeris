@@ -38,6 +38,7 @@ export enum DemerisActionTypes {
   SET_GAS_LIMIT = 'SET_GAS_LIMIT',
   GET_VALIDATORS = 'GET_VALIDATORS',
   GET_INFLATION = 'GET_INFLATION',
+  GET_STAKING_REWARDS = 'GET_STAKING_REWARDS',
   // Internal module actions
   INIT = 'INIT',
   SIGN_OUT = 'SIGN_OUT',
@@ -84,6 +85,7 @@ export enum GlobalDemerisActionTypes {
   SET_GAS_LIMIT = 'demeris/SET_GAS_LIMIT',
   GET_VALIDATORS = 'demeris/GET_VALIDATORS',
   GET_INFLATION = 'demeris/GET_INFLATION',
+  GET_STAKING_REWARDS = 'demeris/GET_STAKING_REWARDS',
   // Internal module actions
   INIT = 'demeris/INIT',
   SIGN_OUT = 'demeris/SIGN_OUT',
