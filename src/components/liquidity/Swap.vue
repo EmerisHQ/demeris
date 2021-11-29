@@ -1008,15 +1008,25 @@ export default defineComponent({
           ? data.selectedPoolData.reserveBalances.balanceB
           : data.selectedPoolData.reserveBalances.balanceA;
         if (e.includes('Pay')) {
-          data.receiveCoinAmount = parseFloat(
-            (
-              getReceiveCoinAmount(
-                { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
-                balanceA,
-                balanceB,
-              ) / (isReverse ? equalizer : 1)
-            ).toFixed(4),
+          const receiveCoinPrecisionDecimalDigits = Math.pow(
+            10,
+            parseInt(store.getters['demeris/getDenomPrecision']({ name: data.receiveCoinData?.base_denom })),
           );
+          data.receiveCoinAmount = parseFloat(
+            String(
+              Math.trunc(
+                (getReceiveCoinAmount(
+                  { base_denom: data.payCoinData.base_denom, amount: data.payCoinAmount },
+                  balanceA,
+                  balanceB,
+                ) /
+                  receiveCoinPrecisionDecimalDigits) *
+                  10 ** 4,
+              ) /
+                10 ** 4,
+            ),
+          );
+
           if (data.payCoinAmount + data.receiveCoinAmount === 0) {
             slippage.value = 0;
           }
