@@ -21,8 +21,11 @@
           :action="actionName"
           :steps="data"
           @continue="
-            isTransferConfirmationOpen = false;
-            interstitialProceed = true;
+            () => {
+              isTransferConfirmationOpen = false;
+              interstitialProceed = true;
+              transactionMachine.send('CONTINUE');
+            }
           "
         />
       </template>
@@ -252,7 +255,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -274,6 +277,7 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
   CreatePoolData,
@@ -341,7 +345,6 @@ export default defineComponent({
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
     const emitter = useEmitter();
-
     const { t } = useI18n({ useScope: 'global' });
 
     const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);

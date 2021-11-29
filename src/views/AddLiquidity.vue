@@ -297,12 +297,15 @@
         </template>
 
         <template v-else>
-          <TxStepsModal
-            :data="actionSteps"
-            action-name="addliquidity"
-            @transacting="goToStep('send')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
+          <TransactionProcessCreator
+            :steps="actionSteps"
+            action="addliquidity"
+            @pending="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
           />
         </template>
       </main>
@@ -325,7 +328,6 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
@@ -336,6 +338,7 @@ import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -359,7 +362,7 @@ export default {
     FlexibleAmountInput,
     Icon,
     ListItem,
-    TxStepsModal,
+    TransactionProcessCreator,
   },
 
   setup() {
@@ -439,6 +442,10 @@ export default {
     const previewPoolCoinDenom = computed(() => {
       return `G` + getNextPoolId();
     });
+
+    const closeModal = () => {
+      router.push('/');
+    };
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -1075,6 +1082,7 @@ export default {
     );
 
     return {
+      closeModal,
       pageTitle,
       creationFee,
       actionSteps,

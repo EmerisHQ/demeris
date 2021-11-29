@@ -55,7 +55,7 @@ export default defineComponent({
   },
   props: {
     action: {
-      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
+      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer' | string>,
       default: 'swap',
     },
     steps: {
