@@ -4,9 +4,7 @@
     <div v-if="isStakingAssetExist" class="flex">
       <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
         {{ $t('components.stakeTable.staking') }}
-        <div class="text-0 font-normal text-muted">
-          <Price :amount="{ denom: denom, amount: totalRewardsAmount }" />
-        </div>
+        <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
       </h2>
       <h2
         v-if="isUnstakingAssetExist"
@@ -65,7 +63,8 @@
 
     <template v-else>
       <div v-show="selectedTab === 1">
-        <table class="w-full table-fixed mt-8">
+        <!-- staking reward table -->
+        <table class="w-full table-fixed mt-8 text-right">
           <colgroup>
             <col width="29%" />
             <col width="29%" />
@@ -75,8 +74,9 @@
 
           <!-- table body -->
           <tbody>
-            <tr v-if="totalRewardsAmount" class="group cursor-pointer shadow-card">
-              <td class="py-6 flex items-center group-hover:bg-fg transition">
+            <!-- claim rewards -->
+            <tr v-if="totalRewardsAmount" class="group cursor-pointer shadow-card rounded-xl">
+              <td class="py-6 flex items-center">
                 <div class="inline-flex items-center ml-6 mr-4">
                   <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
                 </div>
@@ -84,13 +84,40 @@
                   {{ $t('components.stakeTable.claimRewards') }}
                 </span>
               </td>
-              <td class="text-right group-hover:bg-fg transition">
-                {{ totalRewardsDisplayAmount }} <Ticker :name="denom" />
+              <td class="text-right text-muted">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
+              <td class="text-right font-medium">
+                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" /></div>
               </td>
-              <td class="text-right group-hover:bg-fg transition">
-                <Price :amount="{ denom: denom, amount: totalRewardsAmount }" />
+              <td class="text-right">
+                <Icon
+                  name="CaretRightIcon"
+                  :icon-size="1"
+                  class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+                />
               </td>
-              <td class="text-right group-hover:bg-fg transition">test4</td>
+            </tr>
+
+            <!-- staked validators -->
+            <tr v-for="validator of stakingBalances" :key="validator.address" class="group cursor-pointer">
+              <td class="py-6 flex items-center transition">
+                <div class="inline-flex items-center mr-4">
+                  <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
+                </div>
+                <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                  {{ getValidatorMoniker(validator.validator_address) }}
+                </span>
+              </td>
+              <td class="text-right text-muted">{{ getDisplayAmount(validator.amount) }} <Ticker :name="denom" /></td>
+              <td class="text-right font-medium">
+                <Price :amount="{ denom: denom, amount: validator.amount }" />
+              </td>
+              <td class="text-right">
+                <Icon
+                  name="ThreeDotsIcon"
+                  :icon-size="1"
+                  class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -109,10 +136,12 @@ import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
+import { keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
   components: {
@@ -121,6 +150,7 @@ export default defineComponent({
     Ticker,
     CurrencyDisplay,
     Price,
+    Icon,
   },
   props: {
     denom: {
@@ -130,7 +160,12 @@ export default defineComponent({
   },
   setup(props) {
     const { useDenom } = useDenoms();
-    const { getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom } = useStaking();
+    const {
+      getValidatorsByBaseDenom,
+      getChainDisplayInflationByBaseDenom,
+      getStakingRewardsByBaseDenom,
+      getChainNameByBaseDenom,
+    } = useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const { stakingBalancesByChain } = useAccount();
@@ -140,10 +175,13 @@ export default defineComponent({
     const selectedTab = ref<number>(1);
     const assetStakingAPY = ref<number | string>('-');
     const stakingRewardsData = ref(null);
+    const validatorList = ref<Array<any>>([]);
 
     /* created */
     (async () => {
       assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
+      validatorList.value = await getValidatorsByBaseDenom(props.denom);
+      console.log('val', validatorList.value);
     })();
 
     /* computeds */
@@ -159,6 +197,18 @@ export default defineComponent({
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(getChainNameByBaseDenom(props.denom));
+    });
+    const totalStakedAssetDisplayAmount = computed(() => {
+      // console.log(stakingBalances.value)
+      return (
+        Math.trunc(
+          (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
+            10 ** assetPrecision.value +
+            totalRewardsDisplayAmount.value) *
+            10 ** assetPrecision.value,
+        ) /
+        10 ** assetPrecision.value
+      );
     });
     const isStakingAssetExist = computed(() => {
       return stakingBalances.value.length > 0;
@@ -191,6 +241,21 @@ export default defineComponent({
     const getTabClass = (tabNumber: number): string => {
       return selectedTab.value === tabNumber ? '' : 'text-inactive';
     };
+    const getDisplayAmount = (amount: any): number => {
+      return Number(amount) / 10 ** assetPrecision.value;
+    };
+    const getValidatorMoniker = (address: string): string => {
+      let moniker;
+      validatorList.value.some((vali) => {
+        if (keyHashfromAddress(vali.operator_address) === address) {
+          moniker = vali.moniker;
+          return true;
+        } else {
+          return false;
+        }
+      });
+      return moniker;
+    };
 
     /* watch */
     watch(
@@ -209,7 +274,11 @@ export default defineComponent({
       totalRewardsAmount,
       totalRewardsDisplayAmount,
       unstakingAssetValue,
+      totalStakedAssetDisplayAmount,
       assetStakingAPY,
+      getDisplayAmount,
+      stakingBalances,
+      getValidatorMoniker,
       getTabClass,
       stakeAsset,
       selectTab,
