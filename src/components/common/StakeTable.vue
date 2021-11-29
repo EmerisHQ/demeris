@@ -14,7 +14,7 @@
       >
         {{ $t('components.stakeTable.unstaking') }}
         <div class="text-0 font-normal text-muted">
-          <CurrencyDisplay :value="unstakingAssetValue" />
+          <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
         </div>
       </h2>
     </div>
@@ -112,11 +112,29 @@
                 <Price :amount="{ denom: denom, amount: validator.amount }" />
               </td>
               <td class="text-right">
-                <Icon
-                  name="ThreeDotsIcon"
-                  :icon-size="1"
-                  class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
-                />
+                <tippy placement="right" trigger="click" :interactive="true" :arrow="false" :offset="[0, -20]">
+                  <Icon
+                    name="ThreeDotsIcon"
+                    :icon-size="1"
+                    class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+                  />
+                  <template #content>
+                    <div class="w-64 text-0 font-normal text-left">
+                      <div
+                        class="py-2.5 px-6 cursor-pointer"
+                        @click="
+                          () => {
+                            alert('t');
+                          }
+                        "
+                      >
+                        {{ $t('components.stakeTable.stake') }}
+                      </div>
+                      <div class="py-2.5 px-6 cursor-pointer">{{ $t('components.stakeTable.unstake') }}</div>
+                      <div class="py-2.5 px-6 cursor-pointer">{{ $t('components.stakeTable.switchValidator') }}</div>
+                    </div>
+                  </template>
+                </tippy>
               </td>
             </tr>
           </tbody>
@@ -135,7 +153,6 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
@@ -148,7 +165,6 @@ export default defineComponent({
     Button,
     CircleSymbol,
     Ticker,
-    CurrencyDisplay,
     Price,
     Icon,
   },
@@ -215,7 +231,7 @@ export default defineComponent({
     });
     const isUnstakingAssetExist = computed(() => {
       // TODO: implement unstaking asset check
-      return true;
+      return false;
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
@@ -286,98 +302,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.stake {
-  &__banner {
-    background-image: url('~@/assets/images/gold-ephemeris-ring-1.png'),
-      url('~@/assets/images/gold-ephemeris-ring-2.png');
-    background-size: 230px, 290px;
-    background-position: 88%, 93%;
-  }
-
-  // Moved from old styles in Asset.vue
-  &__rewards {
-    margin-top: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    background: var(--fg);
-    display: flex;
-    align-items: center;
-
-    &__label {
-      flex: 1;
-      font-weight: 600;
-    }
-
-    &__amount {
-      margin-left: 1rem;
-      color: var(--muted);
-    }
-
-    &__balance {
-      margin-left: 1rem;
-      font-weight: 600;
-      text-align: right;
-    }
-
-    &__button {
-      margin-left: 1rem;
-      padding: 0.75rem 1.5rem;
-      background-color: black;
-      color: white;
-      font-weight: 600;
-      border-radius: 1.25rem;
-    }
-  }
-
-  &__item {
-    &__validator {
-      flex: 1 1 0%;
-      display: flex;
-      align-items: center;
-
-      &__avatar {
-        border-radius: 0.5rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        background-color: rgba(0, 0, 0, 0.1);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      &__name {
-        margin-left: 1rem;
-        flex: 1 1 0%;
-        font-weight: bold;
-      }
-    }
-
-    &__amount {
-      margin-left: 1rem;
-      width: 33.33%;
-      text-align: right;
-      color: var(--muted);
-    }
-
-    &__balance {
-      margin-left: 1rem;
-      width: 33.33%;
-      display: flex;
-      align-items: center;
-
-      &__value {
-        flex: 1 1 0%;
-        text-align: right;
-        font-weight: 600;
-      }
-    }
-
-    &__more {
-      margin-left: 1rem;
-      padding: 0.25rem;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

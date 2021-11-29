@@ -179,6 +179,9 @@ export const messages = {
         selectValidator: 'Select a validator',
         searchValidator: 'Search validator',
         claimRewards: 'Claim rewards',
+        stake: 'Stake',
+        unstake: 'Unstake',
+        switchValidator: 'Switch validator',
       },
       validatorTable: {
         validator: 'Validator',
