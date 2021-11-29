@@ -1,7 +1,25 @@
 <template>
   <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div class="w-6">
-      <StateIcon />
+    <div class="w-8">
+      <Icon v-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
+      <Icon v-else-if="state.matches('success')" name="SuccessIcon" class="text-positive" />
+      <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
+      <div v-else-if="state.matches('review') || state.matches('receipt')" class="-space-x-3 inline-flex items-center">
+        <CircleSymbol
+          v-for="asset of getIconAssets()"
+          :key="asset.denom"
+          v-bind="asset"
+          size="sm"
+          class="z-0 first:z-10"
+        />
+      </div>
+      <div
+        v-else-if="['transacting', 'validating', 'signing'].some(state.matches)"
+        style="transform: scale(0.5) translateX(-0.75rem)"
+      >
+        <Spinner :size="2.5" />
+      </div>
+      <Icon v-else name="ExclamationIcon" class="text-warning" />
     </div>
 
     <div class="flex-1 text-left flex flex-col">
@@ -24,12 +42,13 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { AddLiquidityData, IBCForwardsData, SwapData, TransferData } from '@/types/actions';
+import { AddLiquidityData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import {
   formatTransactionOffset,
   getCurrentTransaction,
+  getSourceChainFromTransaction,
   getTransactionFromAction,
   matchesObject,
 } from '../transactionProcessHelpers';
@@ -49,55 +68,36 @@ const props = defineProps({
 const { service } = toRefs(props);
 const { state, send } = useActor(service);
 
-const StateIcon = defineComponent({
-  name: 'StateIcon',
-  setup() {
-    return () => {
-      const iconResultMap = {
-        failed: <Icon name="WarningTriangleIcon" class="text-negative" />,
-        success: <Icon name="SuccessIcon" class="text-positive" />,
-        waitingPreviousTransaction: <Icon name="TimeIcon" class="opacity-60" />,
-      };
+const transaction = computed(() => getCurrentTransaction(state.value.context));
 
-      const staticIcon = matchesObject(iconResultMap, state.value.matches);
-      if (staticIcon) {
-        return staticIcon;
-      }
+const getIconAssets = () => {
+  const name = transaction.value.name;
+  const assets = [];
 
-      if (Object.keys(iconResultMap).some(state.value.matches)) {
-        return iconResultMap[state.value.value as string];
-      }
+  if (name === 'transfer' || name.startsWith('ibc')) {
+    const denom = (transaction.value.data as TransferData).amount.denom;
+    const chainName = getSourceChainFromTransaction(transaction.value);
+    assets.push({ denom, chainName });
+  }
 
-      if (state.value.matches('review') || state.value.matches('receipt')) {
-        const transaction = getCurrentTransaction(state.value.context);
-        const name = transaction.name;
+  if (name === 'swap') {
+    const denom = (transaction.value.data as SwapData).to.denom;
+    assets.push({ denom });
+  }
 
-        if (name === 'transfer' || name.startsWith('ibc')) {
-          const denom = (transaction.data as TransferData).amount.denom;
-          const chain =
-            (transaction.data as TransferData).chain_name || (transaction.data as IBCForwardsData).from_chain;
+  if (name === 'addliquidity') {
+    const denomA = (transaction.value.data as AddLiquidityData).coinA.denom;
+    const denomB = (transaction.value.data as AddLiquidityData).coinB.denom;
+    assets.push({ denom: denomA }, { denom: denomB });
+  }
 
-          return <CircleSymbol denom={denom} chainName={chain} size="sm" />;
-        }
+  if (name === 'withdrawliquidity') {
+    const denoms = (transaction.value.data as WithdrawLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync);
+    assets.push(...denoms);
+  }
 
-        if (name === 'swap') {
-          const denom = (transaction.data as SwapData).to.denom;
-          return <CircleSymbol denom={denom} size="sm" />;
-        }
-      }
-
-      if (['transacting', 'validating', 'signing'].some(state.value.matches)) {
-        return (
-          <div style="transform: scale(0.5) translateX(-0.75rem);">
-            <Spinner size={2.5} />
-          </div>
-        );
-      }
-
-      return <Icon name="ExclamationIcon" class="text-warning" />;
-    };
-  },
-});
+  return assets;
+};
 
 const StateDescription = defineComponent({
   name: 'StateDescription',

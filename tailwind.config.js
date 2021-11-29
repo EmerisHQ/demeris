@@ -128,6 +128,7 @@ module.exports = {
       placeholderColor: ['hover'],
       ringWidth: ['focus-visible'],
       transform: ['active'],
+      zIndex: ['first'],
     },
   },
   corePlugins: {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasFoundService" class="flex items-center justify-center w-full">
+  <div class="flex items-center justify-center w-full">
     <TransferInterstitialConfirmation
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"
@@ -17,10 +17,6 @@
     <div v-else class="flex flex-col items-center justify-center h-full w-full py-20">
       <Spinner :size="2.5" />
     </div>
-  </div>
-
-  <div v-else>
-    <h1>Not found</h1>
   </div>
 </template>
 
@@ -52,7 +48,6 @@ const emits = defineEmits(['close']);
 
 const transactionStore = useTransactionsStore();
 const transactionService = computed(() => transactionStore.transactions[props.stepId] as TransactionProcessService);
-const hasFoundService = computed(() => !!transactionService.value);
 const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionStore.isViewerModalOpen);
 
 const actor = useActor(transactionService);
