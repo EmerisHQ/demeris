@@ -178,6 +178,7 @@ export const messages = {
         stakeAsset: 'Stake {ticker}S',
         selectValidator: 'Select a validator',
         searchValidator: 'Search validator',
+        claimRewards: 'Claim rewards',
       },
       validatorTable: {
         validator: 'Validator',

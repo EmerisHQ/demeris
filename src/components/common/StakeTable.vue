@@ -5,7 +5,7 @@
       <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
         {{ $t('components.stakeTable.staking') }}
         <div class="text-0 font-normal text-muted">
-          <CurrencyDisplay :value="stakingAssetTotalValue" />
+          <Price :amount="{ denom: denom, amount: totalRewardsAmount }" />
         </div>
       </h2>
       <h2
@@ -65,43 +65,54 @@
 
     <template v-else>
       <div v-show="selectedTab === 1">
-        <div class="stake__rewards">
-          <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
-          <span class="stake__rewards__label__amount">0.495 ATOM</span>
-          <span class="stake__rewards__label__balance">+$10.15</span>
-        </div>
+        <table class="w-full table-fixed mt-8">
+          <colgroup>
+            <col width="29%" />
+            <col width="29%" />
+            <col width="29%" />
+            <col width="13%" />
+          </colgroup>
 
-        <ul class="stake__list">
-          <li class="stake__list__item">
-            <div class="stake__list__item__validator">
-              <span class="stake__list__item__validator__avatar"> N </span>
-              <span class="stake__list__item__validator__name"> nylira </span>
-            </div>
-
-            <span class="stake__list__item__amount"> 82.46 ATOM </span>
-
-            <div class="stake__list__item__balance">
-              <span class="stake__list__item__balance__value">$1,690.50</span>
-            </div>
-          </li>
-        </ul>
+          <!-- table body -->
+          <tbody>
+            <tr v-if="totalRewardsAmount" class="group cursor-pointer shadow-card">
+              <td class="py-6 flex items-center group-hover:bg-fg transition">
+                <div class="inline-flex items-center ml-6 mr-4">
+                  <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
+                </div>
+                <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                  {{ $t('components.stakeTable.claimRewards') }}
+                </span>
+              </td>
+              <td class="text-right group-hover:bg-fg transition">
+                {{ totalRewardsDisplayAmount }} <Ticker :name="denom" />
+              </td>
+              <td class="text-right group-hover:bg-fg transition">
+                <Price :amount="{ denom: denom, amount: totalRewardsAmount }" />
+              </td>
+              <td class="text-right group-hover:bg-fg transition">test4</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-show="selectedTab === 2">unstaking</div>
     </template>
   </div>
 </template>
 <script lang="tsx">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
+import { useStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -109,6 +120,7 @@ export default defineComponent({
     CircleSymbol,
     Ticker,
     CurrencyDisplay,
+    Price,
   },
   props: {
     denom: {
@@ -121,25 +133,34 @@ export default defineComponent({
     const { getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom } = useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
-    const baseDenom = router.currentRoute.value.params.denom as string;
     const { stakingBalancesByChain } = useAccount();
-
-    /* created */
-    (async () => {
-      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(baseDenom);
-      console.log('test', await getStakingRewardsByBaseDenom(baseDenom));
-    })();
+    const store = useStore();
 
     /* variables */
     const selectedTab = ref<number>(1);
     const assetStakingAPY = ref<number | string>('-');
+    const stakingRewardsData = ref(null);
+
+    /* created */
+    (async () => {
+      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
+    })();
 
     /* computeds */
+    const isSignedIn = computed(() => {
+      return store.getters['demeris/isSignedIn'];
+    });
+    const assetPrecision = computed(() => {
+      return (
+        store.getters['demeris/getDenomPrecision']({
+          name: props.denom,
+        }) ?? '6'
+      );
+    });
     const stakingBalances = computed(() => {
-      return stakingBalancesByChain(getChainNameByBaseDenom(baseDenom));
+      return stakingBalancesByChain(getChainNameByBaseDenom(props.denom));
     });
     const isStakingAssetExist = computed(() => {
-      console.log(stakingBalances.value);
       return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
@@ -149,10 +170,11 @@ export default defineComponent({
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
     });
-    const stakingAssetTotalValue = computed(() => {
-      //TODO: this value includes a staking reward too
-
-      return 100;
+    const totalRewardsAmount = computed(() => {
+      return parseFloat(stakingRewardsData.value?.total);
+    });
+    const totalRewardsDisplayAmount = computed(() => {
+      return Math.trunc(totalRewardsAmount.value) / 10 ** assetPrecision.value;
     });
     const unstakingAssetValue = computed(() => {
       //TODO
@@ -170,12 +192,22 @@ export default defineComponent({
       return selectedTab.value === tabNumber ? '' : 'text-inactive';
     };
 
+    /* watch */
+    watch(
+      () => isSignedIn.value,
+      async () => {
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(props.denom);
+      },
+      { immediate: true },
+    );
+
     return {
       isUnstakingAssetExist,
       isStakingAssetExist,
       stakingButtonName,
       selectedTab,
-      stakingAssetTotalValue,
+      totalRewardsAmount,
+      totalRewardsDisplayAmount,
       unstakingAssetValue,
       assetStakingAPY,
       getTabClass,
