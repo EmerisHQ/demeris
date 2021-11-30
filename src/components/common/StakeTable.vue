@@ -51,7 +51,7 @@
           variant="secondary"
           :name="stakingButtonName"
           class="mt-8"
-          :click-function="stakeAsset"
+          :click-function="() => goStakeActionPage('stake')"
           :full-width="false"
         />
 
@@ -75,7 +75,11 @@
           <!-- table body -->
           <tbody>
             <!-- claim rewards -->
-            <tr v-if="totalRewardsAmount" class="group cursor-pointer shadow-card rounded-xl">
+            <tr
+              v-if="totalRewardsAmount"
+              class="group cursor-pointer shadow-card rounded-xl"
+              @click="goStakeActionPage('claim')"
+            >
               <td class="py-6 flex items-center">
                 <div class="inline-flex items-center ml-6 mr-4">
                   <img src="@/assets/svg/icons/reward.svg" />
@@ -122,18 +126,20 @@
                     <div class="w-64 text-0 font-normal text-left">
                       <div
                         class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
-                        @click="
-                          () => {
-                            stakeAsset(validator.validator_address);
-                          }
-                        "
+                        @click="goStakeActionPage('stake', validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.stake') }}
                       </div>
-                      <div class="py-2.5 px-6 cursor-pointer hover:text-text text-muted">
+                      <div
+                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
+                        @click="goStakeActionPage('unstake', validator.validator_address)"
+                      >
                         {{ $t('components.stakeTable.unstake') }}
                       </div>
-                      <div class="py-2.5 px-6 cursor-pointer hover:text-text text-muted">
+                      <div
+                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
+                        @click="goStakeActionPage('switch', validator.validator_address)"
+                      >
                         {{ $t('components.stakeTable.switchValidator') }}
                       </div>
                     </div>
@@ -252,9 +258,6 @@ export default defineComponent({
     });
 
     /* functions */
-    const stakeAsset = (validator_address = '') => {
-      router.push(`/stake/${props.denom}?validator=${validator_address}`);
-    };
     const selectTab = (tabNumber?: number): void => {
       selectedTab.value = tabNumber;
     };
@@ -276,7 +279,23 @@ export default defineComponent({
       });
       return moniker;
     };
-
+    const goStakeActionPage = (action: string, validatorAddress = '') => {
+      if (action === 'stake') {
+        router.push(
+          `/stake?action=stake${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+        );
+      } else if (action === 'unstake') {
+        router.push(
+          `/stake?action=unstake${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+        );
+      } else if (action === 'switch') {
+        router.push(
+          `/stake?action=switch${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+        );
+      } else {
+        router.push(`/stake/${props.denom}?action=claim`);
+      }
+    };
     /* watch */
     watch(
       () => isSignedIn.value,
@@ -298,9 +317,9 @@ export default defineComponent({
       assetStakingAPY,
       getDisplayAmount,
       stakingBalances,
+      goStakeActionPage,
       getValidatorMoniker,
       getTabClass,
-      stakeAsset,
       selectTab,
     };
   },
