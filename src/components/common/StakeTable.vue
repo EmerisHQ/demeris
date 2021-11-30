@@ -78,7 +78,7 @@
             <tr v-if="totalRewardsAmount" class="group cursor-pointer shadow-card rounded-xl">
               <td class="py-6 flex items-center">
                 <div class="inline-flex items-center ml-6 mr-4">
-                  <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
+                  <img src="@/assets/svg/icons/reward.svg" />
                 </div>
                 <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
                   {{ $t('components.stakeTable.claimRewards') }}
@@ -121,17 +121,21 @@
                   <template #content>
                     <div class="w-64 text-0 font-normal text-left">
                       <div
-                        class="py-2.5 px-6 cursor-pointer"
+                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
                         @click="
                           () => {
-                            alert('t');
+                            stakeAsset(validator.validator_address);
                           }
                         "
                       >
                         {{ $t('components.stakeTable.stake') }}
                       </div>
-                      <div class="py-2.5 px-6 cursor-pointer">{{ $t('components.stakeTable.unstake') }}</div>
-                      <div class="py-2.5 px-6 cursor-pointer">{{ $t('components.stakeTable.switchValidator') }}</div>
+                      <div class="py-2.5 px-6 cursor-pointer hover:text-text text-muted">
+                        {{ $t('components.stakeTable.unstake') }}
+                      </div>
+                      <div class="py-2.5 px-6 cursor-pointer hover:text-text text-muted">
+                        {{ $t('components.stakeTable.switchValidator') }}
+                      </div>
                     </div>
                   </template>
                 </tippy>
@@ -248,8 +252,8 @@ export default defineComponent({
     });
 
     /* functions */
-    const stakeAsset = () => {
-      router.push(`/stake/${props.denom}`);
+    const stakeAsset = (validator_address = '') => {
+      router.push(`/stake/${props.denom}?validator=${validator_address}`);
     };
     const selectTab = (tabNumber?: number): void => {
       selectedTab.value = tabNumber;
@@ -302,4 +306,9 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped></style>
+<style scoped>
+* >>> .tippy-box {
+  background: var(--inverse);
+  color: var(--text);
+}
+</style>
