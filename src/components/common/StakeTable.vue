@@ -78,7 +78,7 @@
             <tr
               v-if="totalRewardsAmount"
               class="group cursor-pointer shadow-card rounded-xl"
-              @click="goStakeActionPage('claim')"
+              @click="goStakeActionPage(StakingActions.CLAIM)"
             >
               <td class="py-6 flex items-center">
                 <div class="inline-flex items-center ml-6 mr-4">
@@ -126,19 +126,19 @@
                     <div class="w-64 text-0 font-normal text-left">
                       <div
                         class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
-                        @click="goStakeActionPage('stake', validator.validator_address)"
+                        @click="goStakeActionPage(StakingActions.STAKE, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.stake') }}
                       </div>
                       <div
                         class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
-                        @click="goStakeActionPage('unstake', validator.validator_address)"
+                        @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.unstake') }}
                       </div>
                       <div
                         class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
-                        @click="goStakeActionPage('switch', validator.validator_address)"
+                        @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.switchValidator') }}
                       </div>
@@ -168,6 +168,7 @@ import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
 import { useStore } from '@/store';
+import { StakingActions } from '@/types/actions';
 import { keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
@@ -280,22 +281,26 @@ export default defineComponent({
       return moniker;
     };
     const goStakeActionPage = (action: string, validatorAddress = '') => {
-      if (action === 'stake') {
+      if (action === StakingActions.STAKE) {
         router.push(
-          `/stake/${props.denom}?action=stake${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+          `/stake/${props.denom}?action=${StakingActions.STAKE}${
+            validatorAddress ? `&validator_address=${validatorAddress}` : ''
+          }`,
         );
-      } else if (action === 'unstake') {
+      } else if (action === StakingActions.UNSTAKE) {
         router.push(
-          `/stake/${props.denom}?action=unstake${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+          `/stake/${props.denom}?action=${StakingActions.UNSTAKE}${
+            validatorAddress ? `&validator_address=${validatorAddress}` : ''
+          }`,
         );
-      } else if (action === 'switch') {
+      } else if (action === StakingActions.SWITCH) {
         router.push(
-          `/stake/${props.denom}?action=switch${props.denom}${
+          `/stake/${props.denom}?action=${StakingActions.SWITCH}${
             validatorAddress ? `&validator_address=${validatorAddress}` : ''
           }`,
         );
       } else {
-        router.push(`/stake/${props.denom}?action=claim`);
+        router.push(`/stake/${props.denom}?action=${StakingActions.CLAIM}`);
       }
     };
     /* watch */
@@ -308,6 +313,7 @@ export default defineComponent({
     );
 
     return {
+      StakingActions,
       isUnstakingAssetExist,
       isStakingAssetExist,
       stakingButtonName,

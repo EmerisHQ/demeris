@@ -183,3 +183,19 @@ export type FeeWarning = {
     denom: string;
   };
 };
+export enum StakingActions {
+  STAKE = 'stake',
+  UNSTAKE = 'unstake',
+  SWITCH = 'switch',
+  CLAIM = 'claim',
+}
+export enum StakingActionSteps {
+  VALIDATOR = 'Validator',
+  AMOUNT = 'Amount',
+  REVIEW = 'Review',
+  STAKE = 'Stake',
+  RESTAKE = 'Restake',
+  UNSTAKE = 'Unstake',
+  TRANSFER = 'Transfer',
+  CLAIM = 'Claim',
+}

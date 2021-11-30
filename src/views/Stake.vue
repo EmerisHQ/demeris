@@ -8,7 +8,7 @@
 
         <nav class="flex-1 flex items-center justify-center space-x-12">
           <span
-            v-for="label of stakeSteps"
+            v-for="label of actionSteps"
             :key="label"
             class="capitalize font-medium cursor-default"
             :class="currentStep === label ? 'text-text' : 'text-inactive'"
@@ -23,8 +23,17 @@
       </header>
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
+        <!-- Claim -->
+        <template v-if="currentStep === StakingActionSteps.CLAIM">
+          3
+          <div class="max-w-3xl">
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
+            <div class="mt-8 pb-8 flex space-x-8"></div>
+          </div>
+        </template>
+
         <!-- Validator -->
-        <template v-if="currentStepIndex === 0">
+        <template v-if="currentStep === StakingActionSteps.VALIDATOR">
           <ValidatorsTable
             :validator-list="validatorList"
             :total-staked-amount="totalStakedAmount"
@@ -33,7 +42,7 @@
         </template>
 
         <!-- Amount -->
-        <template v-if="currentStepIndex === 1">
+        <template v-if="currentStep === StakingActionSteps.AMOUNT">
           <div class="max-w-3xl">
             <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.enterAmount') }}</h1>
             <div class="mt-8 pb-8 flex space-x-8">
@@ -43,7 +52,7 @@
         </template>
 
         <!-- Review -->
-        <template v-if="currentStepIndex === 2">
+        <template v-if="currentStep === StakingActionSteps.REVIEW">
           2
           <div class="max-w-3xl">
             <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
@@ -52,7 +61,7 @@
         </template>
 
         <!-- Stake -->
-        <template v-if="currentStepIndex === 3">
+        <template v-if="currentStep === StakingActionSteps.STAKE">
           3
           <div class="max-w-3xl">
             <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
@@ -62,7 +71,7 @@
         <button
           @click="
             () => {
-              currentStep = stakeSteps[currentStepIndex + 1];
+              currentStep = actionSteps[currentStepIndex + 1];
             }
           "
         >
@@ -74,8 +83,6 @@
 </template>
 
 <script lang="ts">
-type stakeStepsType = 'Validator' | 'Amount' | 'Review' | 'Stake';
-
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -87,6 +94,7 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
+import { StakingActions, StakingActionSteps } from '@/types/actions';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 export default {
@@ -107,8 +115,8 @@ export default {
     useMeta({ title: t('context.stake.title') });
 
     /* variables */
-    const stakeSteps: stakeStepsType[] = ['Validator', 'Amount', 'Review', 'Stake'];
-    const currentStep = ref<stakeStepsType>(stakeSteps[0]);
+    const actionSteps = ref<StakingActionSteps[]>([]);
+    const currentStep = ref<StakingActionSteps>(actionSteps.value[0]);
     const baseDenom = router.currentRoute.value.params.denom as string;
     const validatorList = ref<Array<unknown>>([]);
     const totalStakedAmount = ref<number>(0);
@@ -137,37 +145,65 @@ export default {
         });
       }
 
+      // Set steps, initial step, data for the step
+      console.log('params', route.query.action);
+      const action = route.query.action as StakingActions;
+      if (action === StakingActions.STAKE) {
+        actionSteps.value = [
+          StakingActionSteps.VALIDATOR,
+          StakingActionSteps.AMOUNT,
+          StakingActionSteps.REVIEW,
+          StakingActionSteps.STAKE,
+        ];
+        currentStep.value = actionSteps.value[0];
+      } else if (action === StakingActions.UNSTAKE) {
+        actionSteps.value = [StakingActionSteps.AMOUNT, StakingActionSteps.AMOUNT, StakingActionSteps.UNSTAKE];
+        currentStep.value = actionSteps.value[0];
+      } else if (action === StakingActions.SWITCH) {
+        actionSteps.value = [
+          StakingActionSteps.VALIDATOR,
+          StakingActionSteps.AMOUNT,
+          StakingActionSteps.REVIEW,
+          StakingActionSteps.RESTAKE,
+        ];
+        currentStep.value = actionSteps.value[0];
+      } else if (action === StakingActions.CLAIM) {
+        actionSteps.value = [];
+        currentStep.value = StakingActionSteps.CLAIM;
+      }
+
       console.log('valilist f', validatorList.value);
       console.log('stakingBalance f', stakingBalances.value);
     })();
 
     /* computeds */
     const isDisplayBackButton = computed(() => {
-      return currentStep.value !== stakeSteps[0];
+      return currentStep.value !== actionSteps.value[0] && currentStep.value !== StakingActionSteps.CLAIM;
     });
     const transferType = computed(() => 'address');
-    const currentStepIndex = computed(() => stakeSteps?.indexOf(currentStep.value));
+    const currentStepIndex = computed(() => actionSteps.value?.indexOf(currentStep.value));
 
     /* functions */
     const backToPreviousStep = () => {
-      currentStep.value = stakeSteps[currentStepIndex.value - 1];
+      currentStep.value = actionSteps.value[currentStepIndex.value - 1];
     };
     const backToAssetPage = () => {
       router.push(`/asset/${route.params.denom}`);
     };
     const addValidator = (vali) => {
       selectedValidators.value.push(vali);
-      currentStep.value = stakeSteps[currentStepIndex.value + 1];
+      currentStep.value = actionSteps[currentStepIndex.value + 1];
       console.log('selectedValidators', selectedValidators.value);
     };
 
     return {
+      StakingActionSteps,
       balances,
       validatorList,
       totalStakedAmount,
       transferType,
       currentStep,
-      stakeSteps,
+      actionSteps,
       isDisplayBackButton,
       currentStepIndex,
       backToPreviousStep,
