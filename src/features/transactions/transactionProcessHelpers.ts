@@ -24,12 +24,12 @@ export const getTransactionsLength = (context: TransactionProcessContext): numbe
   return context.formattedSteps.reduce((acc, item) => acc + item.transactions.length, 0);
 };
 
-export const formatTransactionOffset = (context: TransactionProcessContext) => {
+export const getTransactionOffset = (context: TransactionProcessContext) => {
   if (getTransactionsLength(context) <= 1) {
-    return '';
+    return undefined;
   }
 
-  return `(${context.cursor + 1}/${context.formattedSteps.length})`;
+  return { offset: context.cursor + 1, total: context.formattedSteps.length };
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {

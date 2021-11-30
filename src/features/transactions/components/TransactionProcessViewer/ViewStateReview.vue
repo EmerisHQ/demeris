@@ -3,7 +3,7 @@
     class="max-w-lg flex flex-col items-center w-full"
     :class="isSwapComponent ? 'space-y-4 pb-6' : 'space-y-6 pb-16'"
   >
-    <h1 class="font-bold text-center" :class="isSwapComponent ? 'text-2 pb-0 px-6' : 'text-3 pb-4'">
+    <h1 class="font-bold" :class="isSwapComponent ? 'text-2 pb-0 px-6' : 'text-center text-3 pb-4'">
       {{ titleMap[step.name] }}
     </h1>
 

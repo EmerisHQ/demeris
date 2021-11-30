@@ -416,6 +416,30 @@ export const messages = {
         empty: 'Pools you add liquidity to will appear here.',
         explore: 'Explore pools',
       },
+      transactions: {
+        widget: {
+          description: {
+            validating: 'Preparing transaction...',
+            transacting: 'Transaction in progress...',
+            signing: 'Signing...',
+            waitingPreviousTransaction: 'Pending',
+            success: 'Transaction completed',
+            review: 'Sign in Keplr',
+            reviewPartial: 'Sign in Keplr ({offset}/{total})',
+            receipt: 'Partially completed ({offset}/{total})',
+            failed: {
+              sign: 'Transaction not signed',
+              default: 'Transaction failed',
+            },
+          },
+          controls: {
+            tryAgain: 'Try again',
+            sign: 'Sign',
+            waitingTransactionTooltip: 'Waiting for other transactions to complete on the {chain}.',
+            next: 'Next',
+          },
+        },
+      },
     },
     pages: {
       addLiquidity: {

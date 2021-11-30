@@ -1,6 +1,6 @@
 <template>
   <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
-    <div class="w-8">
+    <div class="item-icon w-8">
       <Icon v-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
@@ -23,34 +23,115 @@
     </div>
 
     <div class="flex-1 text-left flex flex-col">
-      <p class="font-medium"><StateTitle /></p>
-      <p class="-text-1 opacity-75"><StateDescription /></p>
+      <p class="item-title font-medium truncate">
+        <template v-if="action === 'transfer'">
+          Send <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+        </template>
+        <template v-if="action === 'move'">
+          Move <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+        </template>
+        <template v-if="action === 'swap'">
+          Swap <Ticker :name="getBaseDenomSync(transactionAction.data.from.denom)" /> &rarr;
+          <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
+        </template>
+        <template v-if="action === 'addliquidity'">
+          Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
+          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+        </template>
+        <template v-if="action === 'addliquidity'">
+          Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
+          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+        </template>
+        <template v-if="action === 'createpool'">
+          Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
+          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+        </template>
+      </p>
+
+      <p class="item-description -text-1 opacity-75">
+        <i18n-t v-if="state.matches('validating')" keypath="context.transactions.widget.description.validating" />
+        <i18n-t
+          v-else-if="state.matches('transacting')"
+          keypath="context.transactions.widget.description.transacting"
+        />
+        <i18n-t v-else-if="state.matches('signing')" keypath="context.transactions.widget.description.signing" />
+        <i18n-t
+          v-else-if="state.matches('waitingPreviousTransaction')"
+          keypath="context.transactions.widget.description.waitingPreviousTransaction"
+        />
+        <i18n-t v-else-if="state.matches('success')" keypath="context.transactions.widget.description.success" />
+        <i18n-t
+          v-else-if="state.matches('failed.sign')"
+          keypath="context.transactions.widget.description.failed.sign"
+          tag="span"
+          class="text-negative"
+        />
+        <i18n-t
+          v-else-if="state.matches('failed')"
+          keypath="context.transactions.widget.description.failed.default"
+          tag="span"
+          class="text-negative"
+        />
+        <template v-else-if="state.matches('review') && transactionOffset">
+          {{ $t('context.transactions.widget.description.review', transactionOffset) }}
+        </template>
+        <i18n-t v-else-if="state.matches('review')" keypath="context.transactions.widget.description.review" />
+        <template v-else-if="state.matches('receipt')">
+          {{ $t('context.transactions.widget.description.receipt', transactionOffset) }}
+        </template>
+      </p>
     </div>
 
     <div>
-      <StateControls v-if="!hideControls" />
+      <template v-if="!hideControls">
+        <Button
+          v-if="state.can('RETRY')"
+          :name="$t('context.transactions.widget.controls.tryAgain')"
+          size="sm"
+          @click.stop="send('RETRY')"
+        />
+        <Button
+          v-if="state.can('SIGN')"
+          :name="$t('context.transactions.widget.controls.sign')"
+          size="sm"
+          @clic.stop="send('SIGN')"
+        />
+        <Button
+          v-if="state.matches('waitingPreviousTransaction')"
+          :name="$t('context.transactions.widget.controls.sign')"
+          size="sm"
+          :tooltip-text="$t('context.transactions.widget.controls.waitingTransactionTooltip', { chain: '' })"
+          disabled
+          @click.stop="void 0"
+        />
+        <Button
+          v-if="state.matches('receipt')"
+          :name="$t('context.transactions.widget.controls.next')"
+          size="sm"
+          @click.stop="send('CONTINUE')"
+        />
+      </template>
     </div>
   </button>
 </template>
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+import { computed, PropType, toRefs } from 'vue';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { AddLiquidityData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
+import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import {
-  formatTransactionOffset,
   getCurrentTransaction,
   getSourceChainFromTransaction,
   getTransactionFromAction,
-  matchesObject,
+  getTransactionOffset,
 } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 
@@ -69,6 +150,10 @@ const { service } = toRefs(props);
 const { state, send } = useActor(service);
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transactionAction = computed(() => getTransactionFromAction(state.value.context));
+const action = computed(() => state.value.context.input.action);
+
+const transactionOffset = computed(() => getTransactionOffset(state.value.context));
 
 const getIconAssets = () => {
   const name = transaction.value.name;
@@ -96,127 +181,12 @@ const getIconAssets = () => {
     assets.push(...denoms);
   }
 
+  if (name === 'createpool') {
+    const denomA = (transaction.value.data as CreatePoolData).coinA.denom;
+    const denomB = (transaction.value.data as CreatePoolData).coinB.denom;
+    assets.push({ denom: denomA }, { denom: denomB });
+  }
+
   return assets;
 };
-
-const StateDescription = defineComponent({
-  name: 'StateDescription',
-  setup() {
-    const textResultMap = {
-      validating: 'Preparing transaction...',
-      transacting: 'Transaction in progress...',
-      signing: 'Signing...',
-      waitingPreviousTransaction: 'Pending',
-      success: 'Transaction completed',
-      'failed.sign': 'Transaction not signed',
-      failed: <span class="text-negative">Transaction failed</span>,
-    };
-
-    const transactionOffset = computed(() => formatTransactionOffset(state.value.context));
-
-    return () => {
-      const staticValue = matchesObject(textResultMap, state.value.matches);
-      if (staticValue) {
-        return staticValue;
-      }
-
-      if (state.value.matches('review')) {
-        return <p>Sign in Keplr {transactionOffset.value}</p>;
-      }
-
-      if (state.value.matches('receipt')) {
-        return <p>Partially completed {transactionOffset.value}</p>;
-      }
-
-      return null;
-    };
-  },
-});
-
-const StateControls = defineComponent({
-  name: 'StateControls',
-  setup() {
-    const dispatch = (action: any) => (event: Event) => {
-      event.stopPropagation();
-      send(action);
-    };
-
-    return () => {
-      if (state.value.can('RETRY')) {
-        return <Button name="Try again" onClick={dispatch('RETRY')} size="sm" />;
-      }
-
-      if (state.value.can('SIGN')) {
-        return <Button name="Sign" onClick={dispatch('SIGN')} size="sm" />;
-      }
-
-      if (state.value.matches('waitingPreviousTransaction')) {
-        return (
-          <Button
-            name="Sign"
-            size="sm"
-            tooltipText="Waiting for other transactions to complete on the Cosmos Hub."
-            disabled
-          />
-        );
-      }
-
-      if (state.value.matches('receipt')) {
-        return <Button name="Next" size="sm" onClick={dispatch('CONTINUE')} />;
-      }
-
-      return null;
-    };
-  },
-});
-
-const StateTitle = defineComponent({
-  name: 'StateTitle',
-  setup() {
-    const action = computed(() => state.value.context.input.action);
-    const transaction = computed(() => getTransactionFromAction(state.value.context));
-
-    return () => {
-      if (action.value === 'transfer') {
-        const denom = (transaction.value.data as TransferData).amount.denom;
-        return (
-          <div>
-            Send <Ticker name={getBaseDenomSync(denom)} />
-          </div>
-        );
-      }
-
-      if (action.value.startsWith('move')) {
-        const denom = (transaction.value.data as TransferData).amount.denom;
-        return (
-          <div>
-            Move <Ticker name={getBaseDenomSync(denom)} />
-          </div>
-        );
-      }
-
-      if (action.value === 'swap') {
-        const denomA = (transaction.value.data as SwapData).from.denom;
-        const denomB = (transaction.value.data as SwapData).to.denom;
-        return (
-          <p>
-            Swap <Ticker name={getBaseDenomSync(denomA)} /> &rarr; <Ticker name={getBaseDenomSync(denomB)} />
-          </p>
-        );
-      }
-
-      if (action.value === 'addliquidity') {
-        const denomA = (transaction.value.data as AddLiquidityData).coinA.denom;
-        const denomB = (transaction.value.data as AddLiquidityData).coinB.denom;
-        return (
-          <p>
-            Add <Ticker name={getBaseDenomSync(denomA)} /> &middot; <Ticker name={getBaseDenomSync(denomB)} />
-          </p>
-        );
-      }
-
-      return <p>{action.value}</p>;
-    };
-  },
-});
 </script>
