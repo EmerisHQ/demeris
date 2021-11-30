@@ -1,6 +1,6 @@
 <template>
   <div class="logo flex items-center h-auto">
-    <Brandmark class="block w-12 h-12 transition-transform duration-300" />
+    <Brandmark class="block w-12 h-12 transition-transform duration-300" data-cy="navbar-logo" />
     <div class="bg-fg ml-2 py-1 px-2 rounded-full text-muted -text-2 text-center">Beta</div>
   </div>
 </template>

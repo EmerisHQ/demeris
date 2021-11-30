@@ -7,6 +7,16 @@ describe('Initial Test - check if page (local) is reachable and Cypress env fork
 
     cy.visit(Env.LOCAL);
 
-    // navbar.goToDashboard()
+    navbar.goToDashboard();
+  });
+
+  it('run browser with Keplr extension', function () {
+    cy.clearExtensionStorage('local');
+
+    let navbar = new Navbar();
+
+    cy.visit(Env.LOCAL);
+
+    navbar.goToDashboard();
   });
 });

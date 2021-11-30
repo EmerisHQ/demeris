@@ -11,12 +11,14 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
+import extensionLoader from 'cypress-browser-extension-plugin/loader';
 
 /**
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line no-unused-vars
-module.exports = (on, config) => {
+module.exports = (on) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
+  on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr'));
 };
