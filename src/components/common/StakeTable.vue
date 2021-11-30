@@ -282,15 +282,17 @@ export default defineComponent({
     const goStakeActionPage = (action: string, validatorAddress = '') => {
       if (action === 'stake') {
         router.push(
-          `/stake?action=stake${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+          `/stake/${props.denom}?action=stake${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
         );
       } else if (action === 'unstake') {
         router.push(
-          `/stake?action=unstake${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+          `/stake/${props.denom}?action=unstake${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
         );
       } else if (action === 'switch') {
         router.push(
-          `/stake?action=switch${props.denom}${validatorAddress ? `&validator_address=${validatorAddress}` : ''}`,
+          `/stake/${props.denom}?action=switch${props.denom}${
+            validatorAddress ? `&validator_address=${validatorAddress}` : ''
+          }`,
         );
       } else {
         router.push(`/stake/${props.denom}?action=claim`);
