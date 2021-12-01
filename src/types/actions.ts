@@ -100,8 +100,20 @@ export type WithdrawLiquidityData = {
   poolCoin: Base.Amount;
   pool: Pool;
 };
+export type ClaimData = {
+  total: string;
+  rewards: { reward: string; validator_address: string }[];
+};
 export type StepTransaction = {
-  name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+  name:
+    | 'ibc_forward'
+    | 'ibc_backward'
+    | 'swap'
+    | 'transfer'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'createpool'
+    | 'claim';
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
   feeToAdd?: FeeWDenom[];
@@ -112,10 +124,11 @@ export type StepTransaction = {
     | TransferData
     | AddLiquidityData
     | WithdrawLiquidityData
-    | CreatePoolData;
+    | CreatePoolData
+    | ClaimData;
 };
 export type Step = {
-  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
+  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move' | 'claim';
   description: string;
   memo?: string;
   output?: {

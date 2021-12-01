@@ -25,10 +25,15 @@
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
         <!-- Claim -->
         <template v-if="currentStep === StakingActionSteps.CLAIM">
-          3
           <div class="max-w-3xl">
-            <h1 class="text-3 font-bold py-8 text-center">{{ $t('pages.send.where') }}</h1>
-            <div class="mt-8 pb-8 flex space-x-8"></div>
+            <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.claimRewards') }}</h1>
+            <TxStepsModal
+              :action-name="'claim'"
+              :data="stepsData"
+              @transacting="() => {}"
+              @failed="() => {}"
+              @reset="resetHandler"
+            />
           </div>
         </template>
 
@@ -88,6 +93,7 @@ import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
@@ -99,7 +105,7 @@ import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 export default {
   name: 'Stake',
-  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TxStepsModal },
 
   setup() {
     /* hooks */
@@ -108,7 +114,7 @@ export default {
     const { balances } = useAccount();
     const router = useRouter();
     const route = useRoute();
-    const { getValidatorsByBaseDenom } = useStaking();
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking();
 
     /* meta & GA */
     pageview({ page_title: 'Stake: ' + route.params.denom, page_path: '/stake/' + route.params.denom });
@@ -121,6 +127,7 @@ export default {
     const validatorList = ref<Array<unknown>>([]);
     const totalStakedAmount = ref<number>(0);
     const selectedValidators = ref([]);
+    const stepsData = ref([]);
 
     /* created */
     (async () => {
@@ -146,7 +153,6 @@ export default {
       }
 
       // Set steps, initial step, data for the step
-      console.log('params', route.query.action);
       const action = route.query.action as StakingActions;
       if (action === StakingActions.STAKE) {
         actionSteps.value = [
@@ -170,6 +176,8 @@ export default {
       } else if (action === StakingActions.CLAIM) {
         actionSteps.value = [];
         currentStep.value = StakingActionSteps.CLAIM;
+        const rewardsData = await getStakingRewardsByBaseDenom(baseDenom);
+        stepsData.value = [{ name: 'claim', transactions: [{ name: 'claim', status: 'pending', data: rewardsData }] }];
       }
 
       console.log('valilist f', validatorList.value);
@@ -206,6 +214,7 @@ export default {
       actionSteps,
       isDisplayBackButton,
       currentStepIndex,
+      stepsData,
       backToPreviousStep,
       backToAssetPage,
       addValidator,

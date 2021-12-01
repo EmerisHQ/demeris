@@ -1,5 +1,6 @@
 <template>
   <div class="w-full">
+    {{ data }}
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
@@ -34,6 +35,13 @@
           </h1>
 
           <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
+            <PreviewClaim
+              v-if="currentData.data.name === 'claim'"
+              :step="currentData.data"
+              :fees="currentData.fees"
+              :context="variant"
+              :class="{ '-text-1': variant === 'widget' }"
+            />
             <PreviewSwap
               v-if="currentData.data.name === 'swap'"
               :step="currentData.data"
@@ -252,7 +260,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -267,6 +275,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
@@ -319,6 +328,7 @@ export default defineComponent({
     ConnectWalletModal,
     AmountDisplay,
     TransferInterstitialConfirmation,
+    PreviewClaim,
   },
   props: {
     actionName: {

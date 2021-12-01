@@ -434,6 +434,7 @@ export const messages = {
       stake: {
         title: 'Stake',
         enterAmount: 'Enter amount to stake',
+        claimRewards: 'Claim rewards',
       },
     },
     pages: {
