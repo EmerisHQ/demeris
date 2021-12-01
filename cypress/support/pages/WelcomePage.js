@@ -8,13 +8,13 @@ export class WelcomePage {
   }
 
   tryTheDemoButton() {
-    return this.centerContentWraper().contains('Try the demo');
+    return cy.get('[data-cy="tryTheDemoButton"]', { timeout: 12000 });
   }
 
   centerContentWraper() {
     // cy.waitUntil()
     //*[contains(@class, 'flex flex-col px-8 text-center py-8')]
     // '*[class^="flex flex-col px-8 text-center py-8"]'
-    return cy.get('*[class^="flex flex-col px-8 text-center py-8"]');
+    return cy.get('*[class^="flex flex-col px-8 text-center py-8"]', { timeout: 12000 });
   }
 }
