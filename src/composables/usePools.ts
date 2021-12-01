@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
-import { getBaseDenom, getTicker } from '@/utils/actionHandler';
+import { getBaseDenom, getBaseDenomSync, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 let usePoolsInstance = null;
@@ -158,6 +158,10 @@ function usePools() {
      */
 
     const hasParams = totalSupply && reserveBalances;
+    const precisionA =
+      store.getters['demeris/getDenomPrecision']({ name: getBaseDenomSync(reserveBalances[0]?.denom) }) ?? 6;
+    const precisionB =
+      store.getters['demeris/getDenomPrecision']({ name: getBaseDenomSync(reserveBalances[1]?.denom) }) ?? 6;
 
     const withdrawCoins = [
       {
@@ -166,6 +170,7 @@ function usePools() {
           : new BigNumber(poolCoinAmount)
               .multipliedBy(reserveBalances[0]?.amount || 0)
               .dividedBy(totalSupply)
+              .shiftedBy(-Math.max(precisionA - precisionB, 0))
               .decimalPlaces(6)
               .toNumber(),
         denom: reserveBalances[0]?.denom || '',
@@ -176,6 +181,7 @@ function usePools() {
           : new BigNumber(poolCoinAmount)
               .multipliedBy(reserveBalances[1]?.amount || 0)
               .dividedBy(totalSupply)
+              .shiftedBy(-Math.max(precisionB - precisionA, 0))
               .decimalPlaces(6)
               .toNumber(),
         denom: reserveBalances[1]?.denom || '',
