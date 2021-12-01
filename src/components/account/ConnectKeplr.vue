@@ -26,7 +26,7 @@
           <a
             v-if="type === 'welcome'"
             class="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"
-            data-cy="trydemo"
+            data-cy="tryTheDemoButton"
             @click="signInDemo"
           >
             {{ $t('generic_cta.tryTheDemo') }}

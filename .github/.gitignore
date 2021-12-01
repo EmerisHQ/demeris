@@ -1,1 +1,3 @@
 # ./cypress/plugins/extensions/Keplr
+cypress/screenshots/*
+cypress/videos/*

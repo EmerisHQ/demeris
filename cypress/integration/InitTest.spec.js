@@ -1,22 +1,26 @@
 import { Env } from '../support/Env';
 import { Navbar } from '../support/pages/Navbar';
+import { WelcomePage } from '../support/pages/WelcomePage';
 
 describe('Initial Test - check if page (local) is reachable and Cypress env forks', function () {
   it('log in', function () {
-    let navbar = new Navbar();
-
-    cy.visit(Env.LOCAL);
-
-    navbar.goToDashboard();
+    // let navbar = new Navbar();
+    // cy.visit(Env.LOCAL);
+    // navbar.goToDashboard();
   });
 
   it('run browser with Keplr extension', function () {
-    cy.clearExtensionStorage('local');
+    // cy.clearExtensionStorage('local');
+    // let navbar = new Navbar();
+    // cy.visit(Env.LOCAL);
+    // navbar.goToDashboard();
+  });
 
-    let navbar = new Navbar();
-
+  it('lounch demo version', function () {
     cy.visit(Env.LOCAL);
+    let welcomePage = new WelcomePage();
+    // welcomePage.centerContentWraper()
 
-    navbar.goToDashboard();
+    //cy.launchDemo()
   });
 });

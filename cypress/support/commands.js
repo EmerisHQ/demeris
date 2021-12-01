@@ -1,3 +1,5 @@
+import 'cypress-xpath';
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -23,7 +25,18 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-
 // cypress/support/command.js
 import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
+
+import { Env } from './Env';
 addExtensionCommands(Cypress);
+
+const tryTheDemoButtonXpath = '//*[contains(text(),"Try the demo")]';
+
+Cypress.Commands.add('launchDemo', () => {
+  cy.visit(Env.LOCAL);
+  // cy.wait(cy.xpath('//*[contains(text(),"Try the demo")]', {timeout: 20000}).should('be.visible'))
+  cy.wait(12000);
+  cy.xpath('//*[contains(text(),"Try the demo")]').should('be.visible');
+  cy.xpath('//*[contains(text(),"Try the demo")]').click();
+});
