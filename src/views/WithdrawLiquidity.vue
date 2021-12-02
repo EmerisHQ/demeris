@@ -417,12 +417,18 @@ export default {
         state.amount = '';
         return;
       }
-      const coinA = isReverse.value ? +state.receiveAmounts.coinB.amount : +state.receiveAmounts.coinA.amount;
-      const coinB = isReverse.value ? +state.receiveAmounts.coinA.amount : +state.receiveAmounts.coinB.amount;
-      const result = usePoolInstance.value.calculateSupplyTokenAmount(
-        new BigNumber(coinA).shiftedBy(precisionA.value).toNumber(),
-        new BigNumber(coinB).shiftedBy(precisionB.value).toNumber(),
-      );
+      const coinA = isReverse.value ? state.receiveAmounts.coinB : state.receiveAmounts.coinA;
+      const coinB = isReverse.value ? state.receiveAmounts.coinA : state.receiveAmounts.coinB;
+      const result = usePoolInstance.value.calculateSupplyTokenAmount([
+        {
+          amount: new BigNumber(coinA.amount).shiftedBy(precisionA.value).toNumber(),
+          denom: coinA.denom,
+        },
+        {
+          amount: new BigNumber(coinB.amount).shiftedBy(precisionB.value).toNumber(),
+          denom: coinB.denom,
+        },
+      ]);
       state.amount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString();
     };
 
@@ -618,13 +624,16 @@ export default {
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
           state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          const result = usePoolInstance.value.getPoolWithdrawBalances(+state.amount);
+          const result = usePoolInstance.value.getPoolWithdrawBalances(
+            new BigNumber(state.amount).shiftedBy(6).toNumber(),
+          );
+
           state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
-            .shiftedBy(precisionDiffs.value.coinB)
+            .shiftedBy(-precisionA.value)
             .decimalPlaces(6)
             .toString();
           state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
-            .shiftedBy(precisionDiffs.value.coinA)
+            .shiftedBy(-precisionB.value)
             .decimalPlaces(6)
             .toString();
           updateTotalCurrencyPrice();

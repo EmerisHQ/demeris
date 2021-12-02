@@ -554,10 +554,16 @@ export default {
         return;
       }
 
-      const result = usePoolInstance.value.calculateSupplyTokenAmount(
-        new BigNumber(form.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
-        new BigNumber(form.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
-      );
+      const result = usePoolInstance.value.calculateSupplyTokenAmount([
+        {
+          amount: new BigNumber(form.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
+          denom: form.coinA.asset.base_denom,
+        },
+        {
+          amount: new BigNumber(form.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
+          denom: form.coinB.asset.base_denom,
+        },
+      ]);
       state.receiveAmount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString();
     };
 
@@ -588,6 +594,7 @@ export default {
             .toNumber(),
         };
       }
+
       if (reserveBalances.value.length) {
         const baseDenomIndex = {};
         baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
@@ -780,13 +787,13 @@ export default {
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
-          // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
-          state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
 
           if (
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
+            // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+            state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
             if (poolIterator.id != route.params.id) {
               router.push('/pools/add/' + poolIterator.id);
             }
@@ -1065,20 +1072,10 @@ export default {
                 .shiftedBy(-precisionA + precisionDiff)
                 .decimalPlaces(precisionA)
                 .toString();
-
-              form.coinB.amount = bigAmountA
-                .multipliedBy(bigExchangeAmount)
-                .shiftedBy(-precisionB)
-                .decimalPlaces(precisionB)
-                .toString();
+              coinAChangeHandler();
             } else if (minAmount.isEqualTo(bigAmountBToA) && amountsPositive) {
               form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
-
-              form.coinA.amount = bigAmountB
-                .dividedBy(bigExchangeAmount)
-                .shiftedBy(-precisionA + precisionDiff)
-                .decimalPlaces(precisionA)
-                .toString();
+              coinBChangeHandler();
             } else {
               form.coinA.amount = '0';
               form.coinB.amount = '0';
