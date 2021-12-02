@@ -4,7 +4,19 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool' | 'memo-transfer';
+  name:
+    | 'swap'
+    | 'redeem'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'transfer'
+    | 'move'
+    | 'createpool'
+    | 'memo-transfer'
+    | 'claim'
+    | 'stake'
+    | 'unstake'
+    | 'switch';
   memo?: string;
 };
 export type SwapParams = {
@@ -38,6 +50,11 @@ export type CreatePoolParams = {
   coinA: Base.ChainAmount;
   coinB: Base.ChainAmount;
 };
+export type ClaimRewardsParams = {
+  rewards: { validator_address: string; reward: string }[];
+  total: string;
+  chain_name: string;
+};
 export type RedeemParams = Array<Base.ChainAmount>;
 export type SwapAction = BaseAction & { params: SwapParams };
 export type MoveAction = BaseAction & { params: MoveParams };
@@ -47,6 +64,7 @@ export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityPa
 export type TransferAction = BaseAction & { params: TransferParams };
 export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
+export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
 export type Any =
   | SwapAction
   | RedeemAction
@@ -54,7 +72,8 @@ export type Any =
   | AddLiquidityAction
   | WithdrawLiquidityAction
   | CreatePoolAction
-  | MoveAction;
+  | MoveAction
+  | ClaimRewardsAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -103,6 +122,7 @@ export type WithdrawLiquidityData = {
 export type ClaimData = {
   total: string;
   rewards: { reward: string; validator_address: string }[];
+  chain_name: string;
 };
 export type StepTransaction = {
   name:
@@ -113,7 +133,10 @@ export type StepTransaction = {
     | 'addliquidity'
     | 'withdrawliquidity'
     | 'createpool'
-    | 'claim';
+    | 'claim'
+    | 'stake'
+    | 'unstake'
+    | 'switch';
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
   feeToAdd?: FeeWDenom[];
@@ -128,7 +151,18 @@ export type StepTransaction = {
     | ClaimData;
 };
 export type Step = {
-  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move' | 'claim';
+  name:
+    | 'transfer'
+    | 'redeem'
+    | 'swap'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'createpool'
+    | 'move'
+    | 'claim'
+    | 'stake'
+    | 'unstake'
+    | 'switch';
   description: string;
   memo?: string;
   output?: {

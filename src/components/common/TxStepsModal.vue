@@ -1,6 +1,5 @@
 <template>
   <div class="w-full">
-    {{ data }}
     <ConnectWalletModal
       :open="connectModalOpen"
       @close="
@@ -33,7 +32,9 @@
           <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
             {{ currentData.title }}
           </h1>
-
+          <!-- TEST -->
+          {{ currentData }}
+          <!-- TEST -->
           <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
             <PreviewClaim
               v-if="currentData.data.name === 'claim'"
@@ -547,6 +548,7 @@ export default defineComponent({
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
       const currentStepData = adjustedFeeData.value[currentStep.value];
+      console.log('TxStepsModal 550', currentStepData);
       const modifiedData = {
         isSwap: false,
         title: '',
@@ -559,6 +561,7 @@ export default defineComponent({
         data: Step;
       };
       switch (currentStepData.name) {
+        //TODO: i18n
         case 'swap':
           modifiedData.isSwap = true;
           modifiedData.title = 'Review your swap details';
@@ -577,6 +580,9 @@ export default defineComponent({
           break;
         case 'createpool':
           modifiedData.title = 'Review your liquidity pool provision';
+          break;
+        case 'claim':
+          modifiedData.title = t('context.stake.claimRewards');
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];

@@ -26,7 +26,6 @@
         <!-- Claim -->
         <template v-if="currentStep === StakingActionSteps.CLAIM">
           <div class="max-w-3xl">
-            <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.claimRewards') }}</h1>
             <TxStepsModal
               :action-name="'claim'"
               :data="stepsData"
@@ -101,6 +100,8 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { StakingActions, StakingActionSteps } from '@/types/actions';
+import { ClaimRewardsAction } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 export default {
@@ -114,7 +115,7 @@ export default {
     const { balances } = useAccount();
     const router = useRouter();
     const route = useRoute();
-    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking();
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom } = useStaking();
 
     /* meta & GA */
     pageview({ page_title: 'Stake: ' + route.params.denom, page_path: '/stake/' + route.params.denom });
@@ -176,8 +177,14 @@ export default {
       } else if (action === StakingActions.CLAIM) {
         actionSteps.value = [];
         currentStep.value = StakingActionSteps.CLAIM;
-        const rewardsData = await getStakingRewardsByBaseDenom(baseDenom);
-        stepsData.value = [{ name: 'claim', transactions: [{ name: 'claim', status: 'pending', data: rewardsData }] }];
+        const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
+        const chainName = await getChainNameByBaseDenom(baseDenom);
+        rewardsData.chain_name = chainName;
+        const action = {
+          name: 'claim',
+          params: rewardsData,
+        } as ClaimRewardsAction;
+        stepsData.value = await actionHandler(action);
       }
 
       console.log('valilist f', validatorList.value);

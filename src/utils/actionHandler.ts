@@ -1188,6 +1188,15 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           transactions: [...withdrawLiquidityStep.steps],
         });
         break;
+      case 'claim':
+        params = (action as Actions.ClaimRewardsAction).params;
+        steps.push({
+          name: 'claim',
+          description: 'claim rewards',
+          memo: '',
+          transactions: [{ name: 'claim', status: 'pending', data: params }],
+        });
+        break;
     }
   } catch (e) {
     throw new Error('Unable to create action steps: ' + e);
@@ -1625,6 +1634,11 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
+  if (stepTx.name == 'claim') {
+    const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
 }
 export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasPriceLevel): Promise<Actions.FeeTotals> {
   const feeTotals = {};
@@ -1952,6 +1966,17 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'swap') {
         const chain_name = store.getters['demeris/getDexChain'];
+        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'claim') {
+        const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
         if (!store.getters['demeris/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
