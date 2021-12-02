@@ -1,6 +1,4 @@
-// export default class Navbar{}
-import 'cypress-wait-until';
-import 'cypress-wait-until';
+// import 'cypress-wait-until';
 
 import { Env } from '../Env';
 

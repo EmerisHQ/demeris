@@ -1,4 +1,4 @@
-import 'cypress-xpath';
+// import 'cypress-xpath';
 
 // ***********************************************
 // This example commands.js shows you how to
@@ -26,10 +26,10 @@ import 'cypress-xpath';
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 // cypress/support/command.js
-import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
+// import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
 
 import { Env } from './Env';
-addExtensionCommands(Cypress);
+// addExtensionCommands(Cypress);
 
 const tryTheDemoButtonXpath = '//*[contains(text(),"Try the demo")]';
 

@@ -1,5 +1,4 @@
 {
-  "ignorePatterns": ["**/cypress/plugins/extensions/Keplr/*"],
   "env": {
     "browser": true,
     "node": true
