@@ -1,3 +1,4 @@
+require('fs-extra');
 // <reference types="cypress" />
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
@@ -20,5 +21,5 @@
 module.exports = (on) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
-  // on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr'));
+  // on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr/'));
 };
