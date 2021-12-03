@@ -27,7 +27,6 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 // cypress/support/command.js
 // import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
-
 import { Env } from './Env';
 // addExtensionCommands(Cypress);
 
