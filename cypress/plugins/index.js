@@ -1,4 +1,5 @@
-require('fs-extra');
+import extensionLoader from 'cypress-browser-extension-plugin';
+
 // <reference types="cypress" />
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
@@ -25,6 +26,7 @@ module.exports = (on, config) => {
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line no-unused-vars
+
 export default (on) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config

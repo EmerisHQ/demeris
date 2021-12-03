@@ -22,13 +22,18 @@ export class Navbar {
     }
   }
 
-  navbar() {
-    cy.get("[role = 'navigation']", { timeout: 20000 }).should('be.visible');
-    return cy.get("[role = 'navigation']");
+  navbarLogo() {
+    return this.navbar().get('//*svg[xmlns="http://www.w3.org/2000/svg"]');
+    return cy.get('[data-cy=logo]');
   }
 
   navbarLogo() {
     return this.navbar().get('//*svg[xmlns="http://www.w3.org/2000/svg"]');
     return cy.get('[data-cy=logo]');
+  }
+
+  navbar() {
+    cy.get("[role = 'navigation']", { timeout: 20000 }).should('be.visible');
+    return cy.get("[role = 'navigation']");
   }
 }
