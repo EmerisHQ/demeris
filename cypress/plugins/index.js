@@ -11,13 +11,20 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
-import extensionLoader from 'cypress-browser-extension-plugin/loader';
+module.exports = (on, config) => {
+  on('before:browser:launch', (browser, launchOptions) => {
+    // supply the absolute path to an unpacked extension's folder
+    // NOTE: extensions cannot be loaded in headless Chrome
+    launchOptions.extensions.push('Keplr');
 
+    return launchOptions;
+  });
+};
 /**
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line no-unused-vars
-module.exports = (on) => {
+export default (on) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
   // on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr'));
