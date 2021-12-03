@@ -33,7 +33,7 @@
             {{ currentData.title }}
           </h1>
           <!-- TEST -->
-          {{ currentData }}
+          <!-- {{ currentData }} -->
           <!-- TEST -->
           <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
             <PreviewClaim
