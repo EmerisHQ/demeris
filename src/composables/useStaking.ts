@@ -7,6 +7,7 @@ type ValidatorStatus = 1 | 2 | 3;
 import { useAllStores } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import { Chains } from '@/types/api';
+import { keyHashfromAddress } from '@/utils/basic';
 
 export default function useStaking() {
   const store = useAllStores();
@@ -52,6 +53,19 @@ export default function useStaking() {
     return await store.dispatch(GlobalDemerisActionTypes.GET_STAKING_REWARDS, { chain_name });
   };
 
+  const getValidatorMoniker = (address: string, validator_list: any[]): string => {
+    let moniker;
+    validator_list.some((vali: any) => {
+      if (keyHashfromAddress(vali.operator_address) === address || vali.operator_address === address) {
+        moniker = vali.moniker;
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return moniker;
+  };
+
   //helpers
   function getChainNameByBaseDenom(base_denom: string): string {
     return Object.values(chains).find((chain) => {
@@ -60,6 +74,7 @@ export default function useStaking() {
   }
 
   return {
+    getValidatorMoniker,
     getValidatorsByBaseDenom,
     getChainDisplayInflationByBaseDenom,
     getStakingRewardsByBaseDenom,

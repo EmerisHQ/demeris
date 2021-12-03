@@ -123,6 +123,7 @@ module.exports = {
   },
   variants: {
     extend: {
+      margin: ['last'],
       borderRadius: ['focus'],
       opacity: ['active'],
       placeholderColor: ['hover'],

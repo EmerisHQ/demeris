@@ -350,6 +350,11 @@ export const messages = {
           swapFeeLbl: 'Swap fee',
           swapFeeLblHint: 'Swap fee paid to liquidity providers',
         },
+        claim: {
+          totalRewards: 'Total rewards',
+          validators: 'Validators',
+          rewards: 'rewards',
+        },
       },
       settingsMenu: {
         theme: 'Theme',

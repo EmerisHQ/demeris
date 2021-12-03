@@ -31,7 +31,7 @@
               :data="stepsData"
               @transacting="() => {}"
               @failed="() => {}"
-              @reset="resetHandler"
+              @reset="() => {}"
             />
           </div>
         </template>
@@ -115,7 +115,8 @@ export default {
     const { balances } = useAccount();
     const router = useRouter();
     const route = useRoute();
-    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom } = useStaking();
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom, getValidatorMoniker } =
+      useStaking();
 
     /* meta & GA */
     pageview({ page_title: 'Stake: ' + route.params.denom, page_path: '/stake/' + route.params.denom });
@@ -179,10 +180,14 @@ export default {
         currentStep.value = StakingActionSteps.CLAIM;
         const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
         const chainName = await getChainNameByBaseDenom(baseDenom);
+        const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
+          reward.moniker = getValidatorMoniker(reward.validator_address, validatorList.value);
+          return reward;
+        });
         rewardsData.chain_name = chainName;
         const action = {
           name: 'claim',
-          params: rewardsData,
+          params: { total: rewardsData.total, rewards: rewardsDataWithMoniker },
         } as ClaimRewardsAction;
         stepsData.value = await actionHandler(action);
       }
