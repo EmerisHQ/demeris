@@ -353,6 +353,7 @@ export const messages = {
         claim: {
           totalRewards: 'Total rewards',
           validators: 'Validators',
+          transactionFee: 'Transaction fee',
           rewards: 'rewards',
         },
       },

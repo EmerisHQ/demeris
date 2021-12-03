@@ -26,10 +26,23 @@
       >
         <div class="text-right">
           <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
-            <div class="text-text" :class="context === 'widget' ? 'text-0' : 'text-1'">test</div>
-            <AmountDisplay class="font-medium" :amount="{ amount: rewardsAmount, denom: rewardsDenom }" />
+            <div class="text-text text-0">
+              {{ vali.moniker }}
+            </div>
+            <AmountDisplay class="font-medium" :amount="{ amount: parseInt(vali.reward), denom: rewardsDenom }" />
             {{ $t(`components.previews.claim.rewards`) }}
           </div>
+        </div>
+        <!-- TODO -->
+        <!-- <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" /> -->
+      </div>
+    </ListItem>
+
+    <!-- Transaction fees -->
+    <ListItem :label="$t(`components.previews.claim.transactionFee`)">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay class="text-0" :amount="{ amount: fee, denom: rewardsDenom }" />
         </div>
         <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" />
       </div>
@@ -94,7 +107,11 @@ export default defineComponent({
       return parseInt(props.step.transactions[0].data.total);
     });
     const validators = computed(() => {
+      console.log('p', props);
       return props.step.transactions[0].data.rewards;
+    });
+    const fee = computed(() => {
+      return Object.values(Object.values(props.fees)[0]);
     });
 
     // const denomName = ref('-');
@@ -228,6 +245,7 @@ export default defineComponent({
       rewardsDenom,
       rewardsAmount,
       validators,
+      fee,
     };
   },
 });

@@ -184,10 +184,9 @@ export default {
           reward.moniker = getValidatorMoniker(reward.validator_address, validatorList.value);
           return reward;
         });
-        rewardsData.chain_name = chainName;
         const action = {
           name: 'claim',
-          params: { total: rewardsData.total, rewards: rewardsDataWithMoniker },
+          params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chain_name: chainName },
         } as ClaimRewardsAction;
         stepsData.value = await actionHandler(action);
       }
