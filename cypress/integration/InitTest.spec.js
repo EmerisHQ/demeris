@@ -1,3 +1,5 @@
+import cypress from 'cypress';
+
 import { Env } from '../support/Env';
 import { Navbar } from '../support/pages/Navbar';
 import { WelcomePage } from '../support/pages/WelcomePage';
@@ -19,7 +21,6 @@ describe('Initial Test - check if page (local) is reachable and Cypress env fork
 
   it('lounch demo version', function () {
     cy.visit(Env.LOCAL);
-
     let welcomePage = new WelcomePage();
     // welcomePage.tryTheDemoButtonIsVisible()
     welcomePage.tryTheDemoButton().click();

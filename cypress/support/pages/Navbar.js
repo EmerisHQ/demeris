@@ -1,5 +1,3 @@
-// import 'cypress-wait-until';
-
 import { Env } from '../Env';
 
 export class Navbar {
@@ -22,14 +20,12 @@ export class Navbar {
     }
   }
 
-  navbarLogo() {
-    return this.navbar().get('//*svg[xmlns="http://www.w3.org/2000/svg"]');
-    return cy.get('[data-cy=logo]');
+  portfolioTab() {
+    return this.navbar().contains('Portfolio');
   }
 
   navbarLogo() {
-    return this.navbar().get('//*svg[xmlns="http://www.w3.org/2000/svg"]');
-    return cy.get('[data-cy=logo]');
+    return this.navbar().get('[data-cy=logo]');
   }
 
   navbar() {
