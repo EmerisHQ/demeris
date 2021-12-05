@@ -20,6 +20,12 @@
             resetHandler();
           }
         "
+        @close="
+          () => {
+            closeModal();
+            resetHandler();
+          }
+        "
       />
     </template>
   </div>

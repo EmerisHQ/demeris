@@ -130,7 +130,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'validateChainStatus',
               onDone: 'traceChannel',
-              onError: '#failed.chainStatus',
+              onError: {
+                target: '#failed.chainStatus',
+                actions: 'setError',
+              },
             },
           },
           traceChannel: {
@@ -271,7 +274,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       failed: {
         id: 'failed',
         initial: 'default',
-        entry: ['setError'],
         states: {
           default: {
             on: {
@@ -291,6 +293,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             },
           },
           confirmations: {
+            entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
               RETRY: { target: '#transacting.confirming' },
               ABORT: '#aborted',
@@ -473,7 +476,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         formattedSteps: formatStepsWithFee(context, event.balances),
       })),
       setError: assign({
-        error: (_, event: any) => event,
+        error: (_, event: DoneEventData<any>) => event.data,
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =

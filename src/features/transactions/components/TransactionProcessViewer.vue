@@ -10,11 +10,17 @@
     <ViewStateSigning v-else-if="state.matches('signing')" />
     <ViewStateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
-    <ViewStateFailed v-else-if="state.matches('failed')" />
-    <div v-else-if="state.matches('aborted')">Aborted</div>
     <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
 
-    <div v-else class="flex flex-col items-center justify-center h-full w-full py-20">
+    <template v-else-if="state.matches('failed.chainStatus')">
+      <ModalChainDown />
+      <ViewStateReview />
+    </template>
+
+    <ViewStateFailed v-else-if="state.matches('failed')" />
+    <div v-else-if="state.matches('aborted')">Aborted</div>
+
+    <div v-else class="flex flex-col items-center justify-center h-full w-full py-28">
       <Spinner :size="2.5" />
     </div>
   </div>
@@ -30,6 +36,7 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 import { useTransactionsStore } from '../transactionsStore';
+import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';

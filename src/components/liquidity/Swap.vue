@@ -24,6 +24,12 @@
           reset();
         }
       "
+      @close="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"

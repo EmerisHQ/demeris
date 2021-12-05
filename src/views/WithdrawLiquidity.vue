@@ -192,6 +192,12 @@
                 resetHandler();
               }
             "
+            @close="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
           />
         </template>
       </main>

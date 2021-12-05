@@ -6,7 +6,7 @@
       @goback="emits('close')"
       @close="emits('close')"
     />
-    <TransactionProcessViewer v-if="stepId" :step-id="stepId" />
+    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="emits('close')" />
     <ConnectWalletModal
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"

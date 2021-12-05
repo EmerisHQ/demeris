@@ -6,7 +6,13 @@
     </template>
 
     <template v-else-if="['review', 'move'].includes(step)">
-      <TransactionProcessCreator v-if="steps.length" :steps="steps" action="move" @pending="closeModal" />
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="move"
+        @pending="closeModal"
+        @close="closeModal"
+      />
     </template>
   </div>
 </template>
