@@ -227,7 +227,17 @@ export default defineComponent({
         return +(props.response as AddLiquidityEndBlockResponse).pool_coin_amount;
       }
 
-      return calculateSupplyTokenAmount(+data.value.coinA.amount, +data.value.coinB.amount);
+      const result = calculateSupplyTokenAmount([
+        {
+          amount: new BigNumber(data.value.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
+          denom: data.value.coinA.denom,
+        },
+        {
+          amount: new BigNumber(data.value.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
+          denom: data.value.coinB.denom,
+        },
+      ]);
+      return new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toNumber();
     });
 
     const refundedAmount = computed(() => {
