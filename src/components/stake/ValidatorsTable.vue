@@ -161,7 +161,7 @@ export default {
       router.push({ name: 'AddLiquidity' });
     };
     const rowClickHandler = (pool) => {
-      router.push({ name: 'Pool', params: { id: pool.id } });
+      emit('selectValidator');
     };
 
     return {

@@ -51,7 +51,7 @@
           variant="secondary"
           :name="stakingButtonName"
           class="mt-8"
-          :click-function="() => goStakeActionPage('stake')"
+          :click-function="() => goStakeActionPage(StakingActions.STAKE)"
           :full-width="false"
         />
 

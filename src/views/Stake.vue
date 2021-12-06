@@ -141,8 +141,7 @@ export default {
           );
           totalStakedAmount.value += Number(vali.tokens);
           if (stakedValidator) {
-            // TEST:  real amount x 1000000
-            vali.stakedAmount = parseInt(stakedValidator.amount) * 1000000;
+            vali.stakedAmount = parseInt(stakedValidator.amount);
           } else {
             vali.stakedAmount = 0;
           }
@@ -157,6 +156,7 @@ export default {
       // Set steps, initial step, data for the step
       const action = route.query.action as StakingActions;
       if (action === StakingActions.STAKE) {
+        console.log(route.query.validator_address);
         actionSteps.value = [
           StakingActionSteps.VALIDATOR,
           StakingActionSteps.AMOUNT,
@@ -164,6 +164,9 @@ export default {
           StakingActionSteps.STAKE,
         ];
         currentStep.value = actionSteps.value[0];
+        if (route.query.validator_address) {
+          addValidator(route.query.validator_address);
+        }
       } else if (action === StakingActions.UNSTAKE) {
         actionSteps.value = [StakingActionSteps.AMOUNT, StakingActionSteps.AMOUNT, StakingActionSteps.UNSTAKE];
         currentStep.value = actionSteps.value[0];
@@ -211,7 +214,7 @@ export default {
     };
     const addValidator = (vali) => {
       selectedValidators.value.push(vali);
-      currentStep.value = actionSteps[currentStepIndex.value + 1];
+      currentStep.value = StakingActionSteps.AMOUNT;
       console.log('selectedValidators', selectedValidators.value);
     };
 
