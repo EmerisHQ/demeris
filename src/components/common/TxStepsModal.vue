@@ -69,7 +69,7 @@
               :context="variant"
             />
             <PreviewTransfer
-              v-else
+              v-else-if="currentData.data.name === 'transfer'"
               :step="currentData.data"
               :fees="currentData.fees"
               :context="variant"
