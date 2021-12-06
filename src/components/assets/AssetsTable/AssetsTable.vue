@@ -150,7 +150,6 @@
 
 <script lang="ts">
 import groupBy from 'lodash.groupby';
-import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -363,12 +362,27 @@ export default defineComponent({
     };
 
     const orderUserBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+      let tokens = balances.sort((a, b) => {
+        if (b.value.value > a.value.value) return 1;
+        if (b.value.value < a.value.value) return -1;
+
+        if (b.name > a.name) return -1;
+        if (b.name < a.name) return 1;
+      });
       return tokens.slice(0, currentLimit.value);
     };
 
     const orderAllBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
+      let tokens = balances.sort((a, b) => {
+        if (b.marketCap > a.marketCap) return 1;
+        if (b.marketCap < a.marketCap) return -1;
+
+        if (b.value.value > a.value.value) return 1;
+        if (b.value.value < a.value.value) return -1;
+
+        if (b.name > a.name) return -1;
+        if (b.name < a.name) return 1;
+      });
       return tokens.slice(0, currentLimit.value);
     };
 
