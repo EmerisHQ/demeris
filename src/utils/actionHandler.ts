@@ -1357,6 +1357,24 @@ export async function msgFromStepTransaction(
     const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
+  if (stepTx.name == 'claim') {
+    const data = stepTx.data as Actions.ClaimData;
+    const msg = await store.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
+      value: {
+        delegatorAddress: 'cosmos13s4qk72a06vlpeyxw2znlfs6gzkhwf9l3epvcu',
+        validatorAddress: 'cosmosvaloper10e4vsut6suau8tk9m6dnrm0slgd6npe3jx5xpv',
+      },
+      // value: {
+      //   amount: [data.amount],
+      //   toAddress: data.to_address,
+      //   fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
+      // },
+    });
+    console.log('data', data);
+    console.log('MSG', msg);
+    const registry = store.getters['cosmos.distribution.v1beta1/getRegistry'];
+    return { msg, chain_name: data.chain_name, registry };
+  }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
   const denoms = store.getters['demeris/getFeeTokens']({
