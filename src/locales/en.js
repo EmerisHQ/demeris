@@ -422,6 +422,9 @@ export const messages = {
         status: 'Status',
         ticket: 'Ticket',
         error: 'Error',
+        transacting: {
+          notifiedWhenCompletes: 'You will be notified when your swap completes.',
+        },
         review: {
           transfer: 'Review your transfer details',
           move: 'Review your move details',
@@ -472,6 +475,8 @@ export const messages = {
           connectWallet: 'Connect Wallet',
           done: 'Done',
           sendAnotherAsset: 'Send another asset',
+          swapAnotherAsset: 'Swap another asset',
+          backToPortfolio: 'Back to portfolio',
         },
       },
     },

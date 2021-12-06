@@ -1,6 +1,9 @@
 <template>
   <tippy ref="tippyRef" trigger="manual" placement="left">
-    <button class="w-12 h-12 rounded-full shadow-button bg-surface" @click="handleClick">
+    <button
+      class="w-12 h-12 rounded-full shadow-button bg-surface flex items-center justify-center"
+      @click="handleClick"
+    >
       <div
         v-if="notificationsCount"
         class="
@@ -23,7 +26,7 @@
         <span v-if="notificationsCount > 3">3+</span>
         <span v-else>{{ notificationsCount }}</span>
       </div>
-      <Icon name="MenuIcon" />
+      <Icon name="MenuIcon" :icon-size="7" />
     </button>
 
     <template #content>
@@ -67,6 +70,7 @@ const handleClick = () => {
 const showTippy = async () => {
   await nextTick();
   tippyRef.value.show();
+  setTimeout(() => tippyRef.value.hide(), 5000);
 };
 
 const showNotification = (hash: string) => {
@@ -105,6 +109,7 @@ const subscribe = (pendingHash: string) => {
   subscriptions.value[pendingHash] = subscription;
 };
 
+// Detects new transaction
 watch(pendingsCount, (value, oldValue) => {
   if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];

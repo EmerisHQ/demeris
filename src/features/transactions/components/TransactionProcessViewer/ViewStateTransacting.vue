@@ -1,7 +1,7 @@
 <template>
   <div
     class="max-w-lg flex flex-col items-center justify-center h-full w-full"
-    :class="isSwapComponent ? 'space-y-2 pb-8' : 'space-y-3 pb-16'"
+    :class="isSwapComponent ? 'space-y-2 pb-8 px-8' : 'space-y-3 pb-16'"
   >
     <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">{{ titleMap[transaction.name] }}</h1>
 
@@ -65,6 +65,21 @@
           </div>
         </template>
       </template>
+
+      <template v-if="transaction.name === 'swap'">
+        <p class="font-medium">
+          <Ticker :name="transaction.data.from.denom" /> &rarr;
+          <Ticker :name="transaction.data.to.denom" />
+        </p>
+      </template>
+
+      <Button variant="secondary" class="w-full mt-8" @click="closeModal">
+        <span v-if="transaction.name === 'swap'">
+          {{ $t('context.transactions.controls.swapAnotherAsset') }}
+        </span>
+        <span v-else>{{ $t('context.transactions.controls.swapAnotherAsset') }}</span>
+      </Button>
+      <p class="text-muted -text-1 px-4 mt-3">{{ $t('context.transactions.transacting.notifiedWhenCompletes') }}</p>
     </div>
   </div>
 </template>
@@ -76,13 +91,15 @@ import { useI18n } from 'vue-i18n';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Ticker from '@/components/common/Ticker.vue';
+import Button from '@/components/ui/Button.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { t } = useI18n({ useScope: 'global' });
-const { actor, isSwapComponent } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey);
 const { state } = actor;
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));

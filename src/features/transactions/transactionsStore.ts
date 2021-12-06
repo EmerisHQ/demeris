@@ -27,7 +27,7 @@ export const useTransactionsStore = defineStore('transactions', {
     ({
       transactions: {},
       pending: {},
-      isBottomSheetMinimized: false,
+      isBottomSheetMinimized: true,
       isConnectWalletModalOpen: false,
       selectedId: undefined,
     } as State),
@@ -52,6 +52,15 @@ export const useTransactionsStore = defineStore('transactions', {
 
     removePendingTransaction(stepId: string) {
       delete this.pending[stepId];
+    },
+
+    setTransactionAsPending(stepId: string) {
+      if (!(stepId in this.pending)) {
+        this.pending = {
+          [stepId]: this.transactions[stepId],
+          ...this.pending,
+        };
+      }
     },
 
     createTransactionMachine(action: string, steps: Step[], balances: Balance[]): [string, TransactionProcessService] {
@@ -107,21 +116,11 @@ export const useTransactionsStore = defineStore('transactions', {
       });
 
       service.subscribe((state) => {
-        // Add transaction to the floating widget list
-        if (state.matches('transacting') || state.matches('waitingPreviousTransaction')) {
-          if (!(stepId in this.pending)) {
-            this.pending = {
-              [stepId]: service,
-              ...this.pending,
-            };
-          }
-        }
-
         // Notify all waiting services when this completes
-        if (state.done) {
+        if (state.done || state.matches('receipt')) {
           Object.values(this.pending).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
-              itemService.send('CONTINUE');
+              itemService.send('VERIFY');
             }
           });
         }

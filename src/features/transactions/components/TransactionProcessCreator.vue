@@ -2,11 +2,11 @@
   <div>
     <GobackWithClose
       v-if="action === 'swap'"
-      :class="{ invisible: service.state.matches('signing') }"
-      @goback="emits('close')"
-      @close="emits('close')"
+      :class="{ invisible: !state.matches('review') }"
+      @goback="onBack"
+      @close="onBack"
     />
-    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="emits('close')" />
+    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onCloseViewer" />
     <ConnectWalletModal
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
@@ -15,6 +15,7 @@
 </template>
 
 <script lang="tsx" setup>
+import { useActor } from '@xstate/vue';
 import { computed, PropType, watch } from 'vue';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -43,6 +44,11 @@ const transactionsStore = useTransactionsStore();
 const { balances } = useAccount();
 const [stepId, service] = transactionsStore.createTransactionMachine(props.action, props.steps, balances.value);
 const isPending = computed(() => transactionsStore.isPending(stepId));
+
+const { state } = useActor(service);
+
+const onCloseViewer = () => transactionsStore.setTransactionAsPending(stepId);
+const onBack = () => emits('close');
 
 watch(isPending, (value) => {
   if (value) {

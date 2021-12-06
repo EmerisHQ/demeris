@@ -57,7 +57,8 @@ export type TransactionProcessEvents =
   | { type: 'SIGN' }
   | { type: 'ABORT' }
   | { type: 'RETRY' }
-  | { type: 'CONTINUE' };
+  | { type: 'CONTINUE' }
+  | { type: 'VERIFY' };
 
 export const transactionProcessMachine = createMachine<TransactionProcessContext, TransactionProcessEvents>(
   {
@@ -165,7 +166,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       waitingPreviousTransaction: {
         id: 'waitingPreviousTransaction',
         on: {
-          CONTINUE: '#validating.previousTransaction',
+          VERIFY: '#validating.previousTransaction',
           ABORT: '#aborted',
         },
       },
@@ -180,7 +181,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         initial: 'active',
         entry: { type: 'logEvent', key: 'confirm_tx' },
         on: {
-          ABORT: 'failed.sign',
+          ABORT: 'review',
         },
         after: {
           15000: '.delayed',
