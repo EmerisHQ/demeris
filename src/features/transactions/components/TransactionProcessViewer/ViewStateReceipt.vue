@@ -32,7 +32,7 @@
       </template>
 
       <template v-if="transaction.name === 'swap'">
-        <p class="text-muted">Swapped on the Cosmos Hub</p>
+        <p class="text-muted">{{ $t('context.transactions.receipt.swappedOnHub') }}</p>
       </template>
 
       <template v-if="transaction.name === 'withdrawliquidity'">
@@ -44,7 +44,11 @@
     </div>
 
     <template v-if="state.matches('success')">
-      <Collapse label-open="Show details" label-hide="Hide details" class="items-center pt-5 w-full">
+      <Collapse
+        :label-open="$t('generic_cta.showDetails')"
+        :label-hide="$t('generic_cta.hideDetails')"
+        class="items-center pt-5 w-full"
+      >
         <div
           class="rounded-lg w-full px-6 flex flex-col"
           :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
@@ -74,19 +78,21 @@
       </Collapse>
     </template>
 
-    <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <Button v-if="state.matches('receipt')" @click="onNext">Next</Button>
+    <div class="pt-4 flex flex-col space-y-5 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
+      <Button v-if="state.matches('receipt')" @click="onNext">{{ $t('context.transactions.controls.next') }}</Button>
 
       <template v-if="state.matches('success')">
         <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
-          <Button variant="link" @click="onNext">Send another asset &rarr;</Button>
+          <Button variant="link" @click="onNext">
+            {{ $t('context.transactions.controls.sendAnotherAsset') }} &rarr;
+          </Button>
         </template>
 
         <template v-if="transaction.name === 'swap'">
           <Button variant="secondary">Send TODO</Button>
         </template>
 
-        <Button @click="removeTransactionAndClose()">Done</Button>
+        <Button @click="removeTransactionAndClose()">{{ $t('context.transactions.controls.done') }}</Button>
       </template>
     </div>
   </div>

@@ -70,7 +70,15 @@ export const useTransactionsStore = defineStore('transactions', {
                 const itemTransaction = getCurrentTransaction(snapshot.context);
                 const itemSourceChain = getSourceChainFromTransaction(itemTransaction);
 
-                if (itemSourceChain === currentSourceChain && !snapshot.done) {
+                if (itemSourceChain === currentSourceChain) {
+                  if (snapshot.done) {
+                    return false;
+                  }
+
+                  if (snapshot.matches('receipt')) {
+                    return false;
+                  }
+
                   return true;
                 }
 

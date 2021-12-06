@@ -130,10 +130,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'validateChainStatus',
               onDone: 'traceChannel',
-              onError: {
-                target: '#failed.chainStatus',
-                actions: 'setError',
-              },
+              onError: '#failed.chainStatus',
             },
           },
           traceChannel: {
@@ -190,7 +187,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         },
         invoke: {
           src: 'signTransaction',
-          onDone: 'transacting',
+          onDone: {
+            target: 'transacting',
+            actions: { type: 'logEvent', key: 'signed_tx' },
+          },
           onError: 'failed.sign',
         },
         states: {
@@ -204,7 +204,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       transacting: {
         id: 'transacting',
-        entry: { type: 'logEvent', key: 'signed_tx' },
         on: {
           ABORT: { target: 'aborted' },
         },
@@ -214,7 +213,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'broadcastTransaction',
               onDone: 'confirming',
-              onError: '#failed',
+              onError: '#failed.broadcast',
             },
           },
           confirming: {
@@ -274,6 +273,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       failed: {
         id: 'failed',
         initial: 'default',
+        entry: 'setError',
         states: {
           default: {
             on: {
@@ -289,6 +289,13 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           sign: {
             on: {
               RETRY: { target: '#signing' },
+              ABORT: '#aborted',
+            },
+          },
+          broadcast: {
+            entry: { type: 'logEvent', key: 'failed_tx' },
+            on: {
+              RETRY: { target: '#transacting' },
               ABORT: '#aborted',
             },
           },
@@ -356,11 +363,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           memo: getCurrentStep(context).memo ?? '',
         });
       },
-      broadcastTransaction: (_, event: DoneEventData<DemerisTxParams>) => {
-        if (event.type !== 'done.invoke.signTransaction') {
-          throw new Error('Needs to be signed first');
-        }
-
+      broadcastTransaction: async (_, event: DoneEventData<DemerisTxParams>) => {
         return globalStore.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, event.data);
       },
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {

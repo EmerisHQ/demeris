@@ -2,15 +2,21 @@
   <div class="max-w-lg flex flex-col space-y-5 items-center justify-center pt-16 w-full pb-16">
     <Icon name="TimeIcon" class="opacity-60" :icon-size="3.5" />
 
-    <h1 class="text-3 font-bold pb-4">Pending {{ transactionNameMap[transaction.name] }}</h1>
+    <h1 class="text-3 font-bold pb-4">
+      {{ $t('context.transactions.waitingPrevious.title', { type: transactionNameMap[transaction.name] }) }}
+    </h1>
 
     <p class="text-muted text-center px-16">
-      Your {{ transactionNameMap[transaction.name] }} is pending, waiting for other transactions to complete on the
-      <ChainName :name="sourceChain" /> chain.
+      <i18n-t keypath="context.transactions.waitingPrevious.description">
+        <template #type>{{ transactionNameMap[transaction.name] }}</template>
+        <template #chain><ChainName :name="sourceChain" /></template>
+      </i18n-t>
     </p>
 
     <div class="pt-4 px-16 w-full">
-      <Button variant="secondary" @click="injects.removeTransactionAndClose">Cancel</Button>
+      <Button variant="secondary" @click="injects.removeTransactionAndClose">
+        {{ $t('context.transactions.controls.cancel') }}
+      </Button>
     </div>
   </div>
 </template>

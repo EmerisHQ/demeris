@@ -5,9 +5,11 @@
   >
     <Spinner :size="2.5" />
 
-    <p class="text-muted">Opening Keplr</p>
+    <p class="text-muted">{{ $t('components.txHandlingModal.openKeplr') }}</p>
 
-    <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">Sign transaction</h1>
+    <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">
+      {{ $t('components.txHandlingModal.signTx') }}
+    </h1>
 
     <template v-if="transaction.name.startsWith('ibc')">
       <div class="mt-0.5 text-muted">
@@ -16,11 +18,22 @@
       </div>
     </template>
 
-    <a v-if="state.matches('signing.delayed')" href="#" class="font-medium pt-2"> Having trouble opening Keplr? ↗️ </a>
+    <a
+      v-if="state.matches('signing.delayed')"
+      href="https://faq.keplr.app"
+      target="_blank"
+      class="font-medium text-link hover:text-link-hover pt-2"
+    >
+      {{ $t('components.txHandlingModal.keplrSupport') }}
+    </a>
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
-      <Button v-if="state.matches('signing.delayed')" @click="() => send('SIGN')"> Open Keplr </Button>
-      <Button variant="link" @click="() => send('ABORT')">Cancel</Button>
+      <Button v-if="state.matches('signing.delayed')" @click="() => send('SIGN')">
+        {{
+          $t('context.transactions.controls.tryAgain')
+        }}
+      </Button>
+      <Button variant="link" @click="() => send('ABORT')">{{ $t('context.transactions.controls.cancel') }}</Button>
     </div>
   </div>
 </template>

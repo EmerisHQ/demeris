@@ -37,6 +37,8 @@ export const messages = {
       tryTheDemo: 'Try the demo',
       chainDown: '{displayChain} chain appears to be down.',
       balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
+      showDetails: 'Show details',
+      hideDetails: 'Hide details',
     },
     navbar: {
       portfolio: 'Portfolio',
@@ -417,6 +419,33 @@ export const messages = {
         explore: 'Explore pools',
       },
       transactions: {
+        status: 'Status',
+        ticket: 'Ticket',
+        error: 'Error',
+        review: {
+          transfer: 'Review your transfer details',
+          move: 'Review your move details',
+          swap: 'Review your swap details',
+          addliquidity: 'Review your pool liquidity provision',
+          withdrawliquidity: 'Review your liquidity withdrawal',
+          createpool: 'Review your liquidity pool provision',
+        },
+        waitingPrevious: {
+          title: 'Pending {type}',
+          type: {
+            transfer: 'transfer',
+            ibc_forward: 'transfer',
+            ibc_backward: 'transfer',
+            swap: 'swap',
+            addliquidity: 'pool liquidity provision',
+            withdrawliquidity: 'liquidity withdrawal',
+            createpool: 'liquidity pool provision',
+          },
+          description: 'Your {type} is pending, waiting for other transactions to complete on the {chain} chain.',
+        },
+        receipt: {
+          swappedOnHub: 'Swapped on the Cosmos Hub',
+        },
         widget: {
           description: {
             validating: 'Preparing transaction...',
@@ -432,12 +461,17 @@ export const messages = {
               default: 'Transaction failed',
             },
           },
-          controls: {
-            tryAgain: 'Try again',
-            sign: 'Sign',
-            waitingTransactionTooltip: 'Waiting for other transactions to complete on the {chain}.',
-            next: 'Next',
-          },
+        },
+        controls: {
+          cancel: 'Cancel',
+          tryAgain: 'Try again',
+          sign: 'Sign',
+          waitingTransactionTooltip: 'Waiting for other transactions to complete on the {chain}.',
+          next: 'Next',
+          confirmAndContinue: 'Confirm and continue',
+          connectWallet: 'Connect Wallet',
+          done: 'Done',
+          sendAnotherAsset: 'Send another asset',
         },
       },
     },

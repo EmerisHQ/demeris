@@ -22,15 +22,18 @@
     </div>
 
     <p class="px-8 text-center text-muted -text-1">
-      Once executed, transactions cannot be reverted. By continuing, you agree to our
-      <a class="underline" href="https://emeris.com/terms" rel="noopener noreferral" target="_blank">
-        {{ $t('components.settingsMenu.tos') }}
-      </a>
+      {{ $t('components.txHandlingModal.noRevert') }}
+      <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
+        {{ $t('components.settingsMenu.tos') }} </a>.
     </p>
 
     <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <Button v-if="isDemoAccount" @click="onConnectWallet">Connect Wallet</Button>
-      <Button v-else @click="onContinue">Confirm and continue</Button>
+      <Button v-if="isDemoAccount" @click="onConnectWallet">
+        {{
+          $t('context.transactions.controls.connectWallet')
+        }}
+      </Button>
+      <Button v-else @click="onContinue">{{ $t('context.transactions.controls.confirmAndContinue') }}</Button>
     </div>
   </div>
 </template>
@@ -68,12 +71,12 @@ const previewComponentMap = {
 };
 
 const titleMap = {
-  transfer: 'Review your transfer details',
-  move: 'Review your move details',
-  swap: 'Review your swap details',
-  addliquidity: 'Review your pool liquidity provision',
-  withdrawliquidity: 'Review your liquidity withdrawal',
-  createpool: 'Review your liquidity pool provision',
+  transfer: t('context.transactions.review.transfer'),
+  move: t('context.transactions.review.move'),
+  swap: t('context.transactions.review.swap'),
+  addliquidity: t('context.transactions.review.addliquidity'),
+  withdrawliquidity: t('context.transactions.review.withdrawliquidity'),
+  createpool: t('context.transactions.review.createpool'),
 };
 
 const step = computed(() => getCurrentStep(state.value.context));

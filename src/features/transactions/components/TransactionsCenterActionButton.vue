@@ -114,13 +114,13 @@ watch(pendingsCount, (value, oldValue) => {
 });
 
 onMounted(() => {
-  for (const hash of Object.keys(transactionsStore.pending)) {
+  for (const hash of Object.keys(transactionsStore.pending).reverse()) {
     subscribe(hash);
   }
 });
 
 onUnmounted(() => {
-  for (const subscription of Object.values(subscriptions.value).reverse()) {
+  for (const subscription of Object.values(subscriptions.value)) {
     // @ts-ignore
     subscription.unsubscribe();
   }

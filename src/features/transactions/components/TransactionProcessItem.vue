@@ -86,27 +86,31 @@
       <template v-if="!hideControls">
         <Button
           v-if="state.can('RETRY')"
-          :name="$t('context.transactions.widget.controls.tryAgain')"
+          :name="$t('context.transactions.controls.tryAgain')"
           size="sm"
           @click.stop="send('RETRY')"
         />
         <Button
           v-if="state.can('SIGN')"
-          :name="$t('context.transactions.widget.controls.sign')"
+          :name="$t('context.transactions.controls.sign')"
           size="sm"
-          @clic.stop="send('SIGN')"
+          @click.stop="send('SIGN')"
         />
         <Button
-          v-if="state.matches('waitingPreviousTransaction')"
-          :name="$t('context.transactions.widget.controls.sign')"
+          v-else-if="state.matches('waitingPreviousTransaction')"
+          :name="$t('context.transactions.controls.sign')"
           size="sm"
-          :tooltip-text="$t('context.transactions.widget.controls.waitingTransactionTooltip', { chain: '' })"
+          :tooltip-text="
+            $t('context.transactions.controls.waitingTransactionTooltip', {
+              chain: globalStore.getters['demeris/getDisplayChain']({ name: chainName }),
+            })
+          "
           disabled
           @click.stop="void 0"
         />
         <Button
-          v-if="state.matches('receipt')"
-          :name="$t('context.transactions.widget.controls.next')"
+          v-else-if="state.matches('receipt')"
+          :name="$t('context.transactions.controls.next')"
           size="sm"
           @click.stop="send('CONTINUE')"
         />
@@ -124,6 +128,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
+import { store as globalStore } from '@/store';
 import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
@@ -152,6 +157,7 @@ const { state, send } = useActor(service);
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 const transactionAction = computed(() => getTransactionFromAction(state.value.context));
 const action = computed(() => state.value.context.input.action);
+const chainName = computed(() => getSourceChainFromTransaction(transaction.value));
 
 const transactionOffset = computed(() => getTransactionOffset(state.value.context));
 
