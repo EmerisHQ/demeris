@@ -1359,6 +1359,10 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   }
   return fees;
 }
+export function getBaseDenomSync(denom: string) {
+  const traces = store.getters['demeris/getAllVerifiedTraces'];
+  return traces[denom.split('/')[1]]?.base_denom ?? denom;
+}
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const chain_name = chainName || store.getters['demeris/getDexChain'];
   const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
