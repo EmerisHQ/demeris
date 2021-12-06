@@ -1,3 +1,4 @@
+import { EncodeObject } from '@cosmjs/proto-signing';
 import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import { bech32 } from 'bech32';
 import Long from 'long';
@@ -1359,21 +1360,19 @@ export async function msgFromStepTransaction(
   }
   if (stepTx.name == 'claim') {
     const data = stepTx.data as Actions.ClaimData;
-    const msg = await store.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
-      value: {
-        delegatorAddress: 'cosmos13s4qk72a06vlpeyxw2znlfs6gzkhwf9l3epvcu',
-        validatorAddress: 'cosmosvaloper10e4vsut6suau8tk9m6dnrm0slgd6npe3jx5xpv',
-      },
-      // value: {
-      //   amount: [data.amount],
-      //   toAddress: data.to_address,
-      //   fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
-      // },
-    });
-    console.log('data', data);
-    console.log('MSG', msg);
+    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
+    const msgs = await Promise.all(
+      data.rewards.map(async (rewardData) => {
+        return await store.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
+          value: {
+            delegatorAddress,
+            validatorAddress: rewardData.validator_address,
+          },
+        });
+      }),
+    );
     const registry = store.getters['cosmos.distribution.v1beta1/getRegistry'];
-    return { msg, chain_name: data.chain_name, registry };
+    return { msg: msgs, chain_name: data.chain_name, registry };
   }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {

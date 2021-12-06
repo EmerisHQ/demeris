@@ -701,9 +701,11 @@ export default defineComponent({
                 event_label: 'Confirmed ' + stepTx.name + ' tx',
                 event_category: 'transactions',
               });
+              //for supporting mutil msgs
+              const msgData = stepTx.name === 'claim' ? res.msg : [res.msg];
               try {
                 tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
-                  msgs: [res.msg],
+                  msgs: msgData,
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
