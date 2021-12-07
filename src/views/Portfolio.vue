@@ -16,16 +16,17 @@
             </router-link>
           </header>
 
-          <AssetsTable
+          <!-- <AssetsTable
             :balances="balances"
             :hide-zero-assets="true"
             variant="balance"
             :show-headers="false"
             :limit-rows="4"
             @row-click="openAssetPage"
-          />
+          /> -->
 
-          <MoonpayBanner v-if="!balances.length" :title="$t('context.moonpay.cta')" size="large" />
+          <!-- <MoonpayBanner v-if="balances.length" :title="$t('context.moonpay.cta')" size="large" /> -->
+          <SimplexBanner v-if="balances.length" :title="$t('context.moonpay.cta')" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
@@ -60,6 +61,7 @@ import { useRouter } from 'vue-router';
 import AssetsTable from '@/components/assets/AssetsTable';
 import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
+import SimplexBanner from '@/components/common/SimplexBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -74,10 +76,11 @@ export default {
   components: {
     AppLayout,
     Button,
-    MoonpayBanner,
+    // MoonpayBanner,
+    SimplexBanner,
     LiquiditySwap,
     TotalPrice,
-    AssetsTable,
+    // AssetsTable,
     Pools,
     Intro,
   },
