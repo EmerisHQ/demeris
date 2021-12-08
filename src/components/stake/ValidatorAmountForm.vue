@@ -15,29 +15,8 @@
               @select="toggleChainsModal($event, state.chainsModalSource)"
             />
 
-            <fieldset class="bg-surface shadow-card rounded-2xl mt-4">
-              <div class="w-full flex justify-between text-muted pt-6 px-5">
-                <span>{{ $t('pages.addLiquidity.supplyLbl') }}</span>
-
-                <span
-                  v-if="form.coinB.asset && hasFunds.coinB"
-                  :class="{ 'text-negative-text': !hasSufficientFunds.coinB }"
-                >
-                  <AmountDisplay
-                    :amount="{ amount: form.coinB.asset.amount || 0, denom: form.coinB.asset.base_denom }"
-                  />
-                  {{ $t('pages.addLiquidity.available') }}
-                </span>
-                <router-link
-                  v-else-if="form.coinB.asset"
-                  :to="{ name: 'Asset', params: { denom: form.coinB.asset.base_denom } }"
-                  class="font-medium text-link hover:text-link-hover focus:text-link-hover active:opacity-70 transition"
-                >
-                  <span>{{ $t('generic_cta.get') }}&nbsp;</span>
-                  <Denom :name="form.coinB.asset.base_denom" /> &rarr;
-                </router-link>
-              </div>
-              <DenomSelect
+            <fieldset class="bg-surface shadow-card rounded-2xl mt-4 pt-2">
+              <ValidatorSelect
                 v-model:amount="form.coinB.amount"
                 :input-header="`Pay`"
                 :selected-denom="form.coinB.asset"
@@ -145,11 +124,10 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
 import Alert from '@/components/ui/Alert.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
@@ -176,8 +154,7 @@ export default {
     ChainSelectModal,
     CircleSymbol,
     Ticker,
-    Denom,
-    DenomSelect,
+    ValidatorSelect,
     FeeLevelSelector,
 
     Icon,
@@ -663,6 +640,7 @@ export default {
       if (asset) {
         coinSelectHandler(source, asset);
       }
+      console.log('selectedAsset', asset);
       state.chainsModalSource = source;
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };

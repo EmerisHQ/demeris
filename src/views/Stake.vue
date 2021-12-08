@@ -47,12 +47,8 @@
 
         <!-- Amount -->
         <template v-if="currentStep === StakingActionSteps.AMOUNT">
-          <div class="max-w-3xl">
-            <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.enterAmount') }}</h1>
-            <div class="mt-8 pb-8 flex space-x-8">
-              <ValidatorAmountForm />
-            </div>
-          </div>
+          <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.enterAmount') }}</h1>
+          <ValidatorAmountForm />
         </template>
 
         <!-- Review -->
