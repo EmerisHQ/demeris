@@ -5,6 +5,11 @@ export class Navbar {
   //     this.path = "[role = 'navigation']"
   // }
 
+  //NOTE: {TODO}
+  // all pages classes can have method navigating to itself like:
+  // goToTHISPage(){
+  //navbar.thisTab().click}
+
   goToDashboard() {
     // wait for navbar logo to be visible
     cy.get(this.navbarLogo(), { timeout: 20000 }).should('be.visible');
@@ -20,12 +25,21 @@ export class Navbar {
     }
   }
 
+  // TABS
   portfolioTab() {
     return this.navbar().contains('Portfolio');
   }
 
+  assetsTab() {
+    return this.navbar().contains('Assets');
+  }
+
+  poolsTab() {
+    return this.navbar().contains('Pools');
+  }
+
   navbarLogo() {
-    return this.navbar().get('[data-cy=logo]');
+    return this.navbar().get('[data-cy=navbar-logo]');
   }
 
   navbar() {

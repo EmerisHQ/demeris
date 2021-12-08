@@ -1,5 +1,5 @@
 import { Env } from '../support/Env';
-import { WelcomePage } from '../support/pages/WelcomePage';
+import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Portfolio visual check', function () {
   beforeEach(() => {
