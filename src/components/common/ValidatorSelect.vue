@@ -14,22 +14,14 @@
       @click="toggleDenomSelectModal"
     >
       <CircleSymbol
-        :denom="'uatom' ?? 'empty'"
+        :denom="'uatom'"
         :chain-name="undefined"
         :size="size"
         :class="'mr-4'"
         @click="toggleDenomSelectModal"
       />
-      <div v-if="isSelected">
-        <div class="flex items-center font-medium" :class="showChain ? 'text-0' : 'text-1'">
-          <tippy
-            v-if="displayName.startsWith('Gravity')"
-            :id="`${selectedDenom.on_chain}/${selectedDenom.base_denom}`"
-            class="tippy-info"
-          >
-            <div class="max-display-width overflow-hidden overflow-ellipsis whitespace-nowrap">{{ displayName }}</div>
-            <template #content> {{ displayName }} </template>
-          </tippy>
+      <div>
+        <div class="flex items-center font-medium text-1">
           {{ 'MONIKER' }}
 
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
@@ -40,10 +32,6 @@
       </div>
     </div>
     <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
-      test
-      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
-        {{ inputHeader }}
-      </div>
       <AmountInput
         :model-value="amount"
         :readonly="readonly"
@@ -64,6 +52,10 @@
         min="0"
         @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
       />
+      test
+      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
+        {{ inputHeader }}
+      </div>
     </label>
   </div>
 </template>
