@@ -20,5 +20,7 @@ describe('Check availability of Assets page elements', function () {
 
     assets.aktRow().click();
     assets.atomRow().should('be.visible');
+
+    assets.checkVisabilityOfAllTableRows();
   });
 });
