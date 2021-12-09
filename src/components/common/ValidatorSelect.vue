@@ -22,7 +22,7 @@
       />
       <div>
         <div class="flex items-center font-medium text-1">
-          {{ 'MONIKER' }}
+          {{ validator.moniker }}
 
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
@@ -66,6 +66,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import useStaking from '@/composables/useStaking';
 import { store } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
@@ -87,6 +88,7 @@ export default defineComponent({
     readonly: { type: Boolean, default: false },
     showChain: { type: Boolean, default: false },
     size: { type: String, required: false, default: 'md' },
+    validator: { required: true, default: {} },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {

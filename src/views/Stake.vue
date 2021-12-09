@@ -48,7 +48,7 @@
         <!-- Amount -->
         <template v-if="currentStep === StakingActionSteps.AMOUNT">
           <h1 class="text-3 font-bold py-8 text-center">{{ $t('context.stake.enterAmount') }}</h1>
-          <ValidatorAmountForm />
+          <ValidatorAmountForm :validators="selectedValidators" />
         </template>
 
         <!-- Review -->
@@ -218,6 +218,7 @@ export default {
       StakingActionSteps,
       balances,
       validatorList,
+      selectedValidators,
       totalStakedAmount,
       transferType,
       currentStep,
