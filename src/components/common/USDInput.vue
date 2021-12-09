@@ -4,9 +4,9 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import AmountInput from '@/components/ui/AmountInput.vue';
-import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'USDInput',

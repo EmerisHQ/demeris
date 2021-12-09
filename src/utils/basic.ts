@@ -4,9 +4,9 @@ import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 
 import { Chain } from '@/types/api';
+import { useStore } from '@/utils/useStore';
 
 import { demoAddresses } from '../store/demeris/demo-account';
-import { store } from '../store/index';
 
 export function toHexString(byteArray) {
   return Array.prototype.map
@@ -16,6 +16,7 @@ export function toHexString(byteArray) {
     .join('');
 }
 export function getChainFromRecipient(recipient: string) {
+  const store = useStore();
   const prefix = bech32.decode(recipient).prefix;
   return (
     (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
@@ -37,6 +38,7 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
+  const store = useStore();
   if (store.getters['demeris/isDemoAccount']) {
     return demoAddresses[chain_name];
   } else {

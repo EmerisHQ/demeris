@@ -29,9 +29,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import useEmitter from '@/composables/useEmitter';
-import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'MoonpayBanner',

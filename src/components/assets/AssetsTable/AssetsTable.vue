@@ -152,6 +152,7 @@
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
@@ -166,7 +167,6 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';

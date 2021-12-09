@@ -39,11 +39,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 

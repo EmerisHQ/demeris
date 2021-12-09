@@ -9,9 +9,9 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import RedeemIcon from '@/components/common/Icons/RedeemIcon.vue';
-import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'RedeemButton',

@@ -251,6 +251,7 @@
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -266,7 +267,6 @@ import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 import { ChainData } from '@/store/demeris/state';
 import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';

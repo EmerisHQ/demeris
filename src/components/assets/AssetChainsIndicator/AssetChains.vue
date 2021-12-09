@@ -20,9 +20,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 

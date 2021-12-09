@@ -18,12 +18,13 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
-import { useAllStores } from '@/store';
+import { setStore } from '@/utils/useStore';
 
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin, autoLoginDemo } from './utils/basic';
@@ -39,9 +40,11 @@ export default defineComponent({
 
   setup() {
     useTheme({ updateOnChange: true });
-    const store = useAllStores();
+    const store = useStore();
     const initialized = ref(false);
     const router = useRouter();
+
+    setStore(store); // make store availabe in some composition functions used in the store itself
 
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));

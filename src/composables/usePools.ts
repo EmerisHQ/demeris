@@ -2,19 +2,20 @@ import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 let usePoolsInstance = null;
 
+// composables only work in the app context not in the store so we allow to provide the store
 function usePools() {
-  const stores = useAllStores();
+  const store = useStore();
   let init = false;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
-    return stores.getters['demeris/getAllValidPools'] ?? [];
+    return store.getters['demeris/getAllValidPools'] ?? [];
   });
 
   /*
@@ -43,10 +44,14 @@ function usePools() {
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
-          store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
-            subscribe: false,
-            params: { address: hashAddress },
-          });
+          store.dispatch(
+            GlobalDemerisActionTypes.GET_POOL_BALANCES,
+            {
+              subscribe: false,
+              params: { address: hashAddress },
+            },
+            { root: true },
+          ); // need to dispatch on root as when we pass the store in execution in the store we get the module context not the root store (see line 12)
         }
       }
     },

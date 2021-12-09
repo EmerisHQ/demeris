@@ -104,11 +104,11 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';

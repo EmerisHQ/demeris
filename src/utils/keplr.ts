@@ -2,9 +2,10 @@ import { ChainData } from '@/store/demeris/state';
 import { Denom } from '@/types/api';
 import { AmountWithMeta } from '@/types/base';
 
-import { store } from '../store/index';
+import { useStore } from './useStore';
 
 export async function addChain(chain_name: string): Promise<void> {
+  const store = useStore();
   const chain = store.getters['demeris/getChain']({
     chain_name,
   }) as ChainData;

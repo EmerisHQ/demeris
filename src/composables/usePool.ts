@@ -1,14 +1,14 @@
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
-import { useAllStores } from '@/store';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 import usePools from './usePools';
 
 const usePoolInstances = {};
 
 function usePool(id: string) {
-  const store = useAllStores();
+  const store = useStore();
   let initialized;
   const initPromise = new Promise((resolve) => {
     initialized = resolve;

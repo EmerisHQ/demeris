@@ -27,9 +27,9 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';

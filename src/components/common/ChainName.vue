@@ -3,8 +3,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-
-import { useStore } from '@/store';
+import { useStore } from 'vuex';
 export default defineComponent({
   name: 'ChainName',
   props: {

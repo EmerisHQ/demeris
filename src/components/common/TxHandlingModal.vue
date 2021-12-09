@@ -363,6 +363,7 @@
 import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -379,7 +380,6 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
 import {
   AddLiquidityData,
   CreatePoolData,

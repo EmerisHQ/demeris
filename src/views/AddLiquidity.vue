@@ -316,6 +316,7 @@ import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -336,7 +337,6 @@ import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';

@@ -1,6 +1,6 @@
 import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
-import { useStore } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 
