@@ -12,10 +12,13 @@ describe('Check availability of Assets page elements', function () {
     let welcomePage = new WelcomePage();
 
     // cy.wait('#tryTheDemoButton')
-    welcomePage.tryTheDemoButton().click();
+    welcomePage.tryTheDemoButton().click({ force: true });
 
     // go to Assets page
     let assets = new Assets();
     assets.goToAssertTab();
+
+    assets.aktRow().click();
+    assets.atomRow().should('be.visible');
   });
 });

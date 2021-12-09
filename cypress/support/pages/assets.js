@@ -11,11 +11,23 @@ export class Assets {
     cy.url().should('include', '/assets');
   }
 
-  tableTitlesRow() {
-    // this.tableOfAssets().find
+  aktRow() {
+    return this.tableAssetsRow('AKT');
+  }
+
+  atomRow() {
+    return this.tableAssetsRow('ATOM');
+  }
+
+  lunaRow() {
+    return this.tableAssetsRow('LUNA');
+  }
+
+  tableAssetsRow(assetCode) {
+    return this.tableOfAssets().contains('tr', assetCode);
   }
 
   tableOfAssets() {
-    return cy.get('//table');
+    return cy.get('table');
   }
 }

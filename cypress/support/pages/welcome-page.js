@@ -10,7 +10,8 @@ export class WelcomePage {
   tryTheDemoButton() {
     //cy.get('[data-cy="tryTheDemoButton"]', { timeout: 9900000 }).as('guzik')
     //cy.wait('@guzik')
-    return cy.get('[data-cy="tryTheDemoButton"]', { timeout: 999912000 });
+    // cy.get('[data-cy="tryTheDemoButton"]', { timeout: 9900000 }).eq(0)
+    return cy.get('[data-cy="tryTheDemoButton"]'); //, { timeout: 9900000 }
   }
 
   centerContentWraper() {
