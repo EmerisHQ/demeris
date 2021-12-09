@@ -48,7 +48,7 @@ export default {
         styleTag.id = 'simplex-css';
         let cssStyles =
           document.createTextNode(`.simplex-form{} .simplex-continue-button {background: #000000 !important;
-      border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
+      border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { width: 80px !important; color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
       .form-control { border-radius: 10px !important;} .simplex-input {border: 1px solid #ced4da !important;}
       `);
 

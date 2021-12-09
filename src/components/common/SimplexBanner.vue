@@ -58,7 +58,7 @@ export default defineComponent({
       return store.getters['demeris/isDemoAccount'];
     });
 
-    const mpDomain = ref('https://buy.moonpay.io');
+    const mpDomain = ref(`${window.location.href.split('?')[0]}simplex?crypto=ATOM&fiat=USD&amount=100`);
     const mpParams = computed(() => {
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
@@ -79,7 +79,8 @@ export default defineComponent({
       if (isSignedIn.value && !isDemoAccount.value) {
         window.open(mpUrl.value, '', 'height=480,width=320');
       } else {
-        emitter.emit('toggle-settings-modal');
+        window.open(mpUrl.value, '', 'height=480,width=320');
+        // emitter.emit('toggle-settings-modal');
       }
     };
     return { isSignedIn, goMoon, isDemoAccount };
