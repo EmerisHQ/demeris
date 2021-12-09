@@ -1,73 +1,69 @@
 <template>
-  <!-- <div id="simplex-form"></div> -->
-  <form id="simplex-form">
-    <div id="checkout-element"></div>
-  </form>
+  <div class="form-container">
+    <Brandmark class="mb-5" />
+    <form id="simplex-form">
+      <div id="checkout-element"></div>
+    </form>
+  </div>
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/reactivity';
 import { onMounted } from '@vue/runtime-core';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
 
-import AssetsTable from '@/components/assets/AssetsTable';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { pageview } from '@/utils/analytics';
+import Brandmark from '@/components/common/Brandmark.vue';
 
 export default {
   name: 'Simplex',
-  //   components: { AppLayout, AssetsTable },
+  components: { Brandmark },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-
     onMounted(() => {
-      let simplexScript = document.createElement('script');
-      let tn = document.createTextNode(`window.simplexAsyncFunction = function () {
+      if (!document.getElementById('simplex-exists')) {
+        let simplexScript = document.createElement('script');
+        simplexScript.id = 'simplex-exists';
+        // simplexScript.onload = () => {
+        // window.simplexAsyncFunction = function () {
+        //     Simplex.init({public_key: '<partner_public_key>'})
+        // };
+        // }
+        let simplexFunction = document.createTextNode(`window.simplexAsyncFunction = function () {
             Simplex.init({public_key: '<partner_public_key>'})
         };`);
-      simplexScript.appendChild(tn);
-      document.head.appendChild(simplexScript);
+        simplexScript.appendChild(simplexFunction);
+        document.head.appendChild(simplexScript);
 
-      let simplexCDNScript = document.createElement('script');
-      simplexCDNScript.setAttribute('src', 'https://cdn.test-simplexcc.com/sdk/v1/js/sdk.js');
-      document.head.appendChild(simplexCDNScript);
+        let simplexCDNScript = document.createElement('script');
+        simplexCDNScript.setAttribute('src', 'https://cdn.test-simplexcc.com/sdk/v1/js/sdk.js');
+        document.head.appendChild(simplexCDNScript);
 
-      document.head.insertAdjacentHTML('beforeend', `<style>body{background:red}</style>`);
+        let simplexIframeScript = document.createElement('script');
+        simplexIframeScript.setAttribute('src', 'https://iframe.sandbox.test-simplexcc.com/form-sdk.js');
+        document.body.appendChild(simplexIframeScript);
 
-      let simplexIframeScript = document.createElement('script');
-      simplexIframeScript.setAttribute('src', 'https://iframe.sandbox.test-simplexcc.com/form-sdk.js');
-      document.body.appendChild(simplexIframeScript);
+        simplexIframeScript.onload = () => {
+          window.simplex.createForm();
+        };
 
-      setTimeout(() => window.simplex.createForm(), 3000);
-      // window.simplex.createForm()
+        let styleTag = document.createElement('style');
+        styleTag.id = 'simplex-css';
+        let cssStyles =
+          document.createTextNode(`.simplex-form{} .simplex-continue-button {background: #000000 !important;
+      border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
+      .form-control { border-radius: 10px !important;} .simplex-input {border: 1px solid #ced4da !important;}
+      `);
+
+        styleTag.appendChild(cssStyles);
+        document.head.appendChild(styleTag);
+
+        // setTimeout(() => window.simplex.createForm(), 3000);
+      }
     });
-
-    useMeta(
-      computed(() => ({
-        title: t('context.assets.title'),
-      })),
-    );
-
-    const router = useRouter();
-    pageview({ page_title: 'Assets', page_path: '/assets' });
-    const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
-    };
-
-    return { openAssetPage };
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.simplex-continue-button {
-  background-color: green !important;
-}
-
-.simplex-dd {
-  background: red;
+.form-container {
+  margin: 15px;
 }
 </style>
