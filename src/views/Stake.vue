@@ -152,7 +152,7 @@ export default {
       // Set steps, initial step, data for the step
       const action = route.query.action as StakingActions;
       if (action === StakingActions.STAKE) {
-        console.log(route.query.validator_address);
+        const validatorAddressFromQuery = route.query.validator_address;
         actionSteps.value = [
           StakingActionSteps.VALIDATOR,
           StakingActionSteps.AMOUNT,
@@ -160,8 +160,11 @@ export default {
           StakingActionSteps.STAKE,
         ];
         currentStep.value = actionSteps.value[0];
-        if (route.query.validator_address) {
-          addValidator(route.query.validator_address);
+        if (validatorAddressFromQuery) {
+          const validatorFromQuery = validatorList.value.find((vali: any) => {
+            return keyHashfromAddress(vali.operator_address) === validatorAddressFromQuery;
+          });
+          addValidator(validatorFromQuery);
         }
       } else if (action === StakingActions.UNSTAKE) {
         actionSteps.value = [StakingActionSteps.AMOUNT, StakingActionSteps.AMOUNT, StakingActionSteps.UNSTAKE];
