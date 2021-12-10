@@ -13,6 +13,7 @@
             :func="() => toggleChainsModal()"
             @select="toggleChainsModal($event, state.chainsModalSource)"
           />
+
           <!-- Validator stake amount input -->
           <fieldset
             v-for="vali in validators"
@@ -23,8 +24,7 @@
               v-model:amount="validatorStakingAmounts"
               :validator="vali"
               :show-chain="false"
-              @select="coinSelectHandler('coinB', $event)"
-              @change="coinBChangeHandler"
+              @select="validatorSelectHandler"
             />
 
             <button
@@ -64,8 +64,10 @@
             <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
 
             <ListItem inset size="md" label="Total stake">
-              <AmountDisplay :amount="creationFee" />
-              <div class="text-muted">test</div>
+              <AmountDisplay :amount="{ amount: 100, denom: 'uatom' }" />
+              <div class="text-muted">
+                <Price :amount="{ denom: baseDenom, amount: 100 }" :show-zero="true" />
+              </div>
             </ListItem>
 
             <!-- Fee -->
@@ -88,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
+import { computed, reactive, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -97,6 +99,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import Price from '@/components/common/Price.vue';
 import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
 import Alert from '@/components/ui/Alert.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
@@ -113,6 +116,7 @@ export default {
   name: 'ValidatorAmountForm',
   components: {
     Alert,
+    Price,
     AmountDisplay,
     Button,
     ChainName,
@@ -124,6 +128,11 @@ export default {
   },
   props: {
     validators: { type: Array, required: true, default: () => [] },
+    totalStakedAmount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
 
   setup(props) {
@@ -187,19 +196,18 @@ export default {
 
       router.back();
     };
+    const validatorSelectHandler = (e) => {
+      console.log('TTTTT', e);
+    };
 
     const goToReview = () => {
-      goToStep('review');
+      console.log('GO TO REVIEW');
     };
 
     const toggleChainsModal = (asset?: Balance, source: 'coinA' | 'coinB' = 'coinA') => {
       console.log('selectedAsset', asset);
       state.chainsModalSource = source;
       state.isChainsModalOpen = !state.isChainsModalOpen;
-    };
-
-    const goToStep = (step: 'amount' | 'review' | 'send') => {
-      state.step = step;
     };
 
     return {
@@ -209,10 +217,11 @@ export default {
       steps,
       balances,
       precision,
+      baseDenom,
+      validatorSelectHandler,
       toggleChainsModal,
       goBack,
       goToReview,
-      goToStep,
     };
   },
 };

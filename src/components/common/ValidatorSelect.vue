@@ -9,15 +9,9 @@
     <div
       class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
       :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
-      @click="toggleDenomSelectModal"
+      @click="selectValidator"
     >
-      <CircleSymbol
-        :denom="'uatom'"
-        :chain-name="undefined"
-        :size="size"
-        :class="'mr-4'"
-        @click="toggleDenomSelectModal"
-      />
+      <CircleSymbol :denom="'uatom'" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
@@ -32,7 +26,6 @@
     <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
       <AmountInput
         :model-value="amount"
-        :readonly="readonly"
         class="
           denom-select__coin-amount-input
           text-text
@@ -50,27 +43,26 @@
         min="0"
         @input="$emit('update:amount', $event.target.value)"
       />
-      test21231
+      <Price :amount="{ denom: baseDenom, amount: amount * 10 ** precision }" />
     </label>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { store } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
+
 export default defineComponent({
   name: 'ValidatorSelect',
-  components: { AmountInput, Denom, CircleSymbol, Icon },
+  components: { AmountInput, Denom, CircleSymbol, Icon, Price },
   props: {
     amount: { type: [String, Number], required: false, default: null },
-    isOver: { type: Boolean, required: false, default: false },
-    readonly: { type: Boolean, default: false },
     showChain: { type: Boolean, default: false },
     size: { type: String, required: false, default: 'md' },
     validator: {
@@ -81,12 +73,8 @@ export default defineComponent({
       },
     },
   },
-  emits: ['update:amount', 'select', 'modalToggle', 'change'],
+  emits: ['update:amount', 'select'],
   setup(props, { emit }) {
-    const inputAmount = computed({
-      get: () => props.amount,
-      set: (value) => emit('update:amount', value),
-    });
     const router = useRouter();
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = computed(() =>
@@ -94,30 +82,20 @@ export default defineComponent({
         name: baseDenom,
       }),
     );
-
-    const isSelected = computed(() => {
-      return true;
+    const inputAmount = computed({
+      get: () => props.amount,
+      set: (value) => emit('update:amount', value),
     });
 
-    const isOpen = ref(false);
-
-    function toggleDenomSelectModal() {
-      isOpen.value = !isOpen.value;
-      emit('modalToggle', isOpen.value);
-    }
-
-    function denomSelectHandler(payload) {
-      emit('select', payload);
-      toggleDenomSelectModal();
-    }
+    const selectValidator = () => {
+      emit('select', props.validator);
+    };
 
     return {
+      selectValidator,
       inputAmount,
-      isSelected,
-      isOpen,
+      baseDenom,
       precision,
-      toggleDenomSelectModal,
-      denomSelectHandler,
     };
   },
 });
