@@ -45,7 +45,7 @@
           v-for="validator of filteredValidatorList"
           :key="validator.operator_address"
           class="group cursor-pointer"
-          @click="rowClickHandler(validator)"
+          @click="selectValidator(validator)"
         >
           <td class="py-5 flex items-center group-hover:bg-fg transition">
             <div class="inline-flex items-center mr-4">
@@ -157,23 +157,15 @@ export default {
         ['desc', 'desc', 'asc'],
       );
     };
-    const openAddLiqudityPage = () => {
-      router.push({ name: 'AddLiquidity' });
-    };
-    const rowClickHandler = (pool) => {
-      emit('selectValidator');
-    };
 
     return {
       baseDenom,
       filteredValidatorList,
       keyword,
-      rowClickHandler,
       getCommissionDisplayValue,
       getAmountDisplayValue,
       getVotingPowerPercDisplayValue,
       selectValidator,
-      openAddLiqudityPage,
       orderPools,
     };
   },

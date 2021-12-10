@@ -88,7 +88,13 @@ export default defineComponent({
     readonly: { type: Boolean, default: false },
     showChain: { type: Boolean, default: false },
     size: { type: String, required: false, default: 'md' },
-    validator: { required: true, default: {} },
+    validator: {
+      type: Object,
+      required: true,
+      default: () => {
+        return {};
+      },
+    },
   },
   emits: ['update:amount', 'select', 'modalToggle', 'change'],
   setup(props, { emit }) {

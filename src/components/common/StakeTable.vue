@@ -1,22 +1,35 @@
 <template>
   <div>
     <!-- Title -->
-    <div v-if="isStakingAssetExist" class="flex">
-      <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
-        {{ $t('components.stakeTable.staking') }}
-        <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
-      </h2>
-      <h2
-        v-if="isUnstakingAssetExist"
-        class="text-2 font-bold ml-6 cursor-pointer"
-        :class="getTabClass(2)"
-        @click="selectTab(2)"
-      >
-        {{ $t('components.stakeTable.unstaking') }}
-        <div class="text-0 font-normal text-muted">
+    <div v-if="isStakingAssetExist" class="flex justify-between">
+      <div class="flex">
+        <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
+          {{ $t('components.stakeTable.staking') }}
           <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
-        </div>
-      </h2>
+        </h2>
+        <h2
+          v-if="isUnstakingAssetExist"
+          class="text-2 font-bold ml-6 cursor-pointer"
+          :class="getTabClass(2)"
+          @click="selectTab(2)"
+        >
+          {{ $t('components.stakeTable.unstaking') }}
+          <div class="text-0 font-normal text-muted">
+            <div class="text-0 font-normal text-muted">
+              {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
+            </div>
+          </div>
+        </h2>
+      </div>
+
+      <Button
+        :name="$t('components.stakeTable.stake')"
+        variant="link"
+        :full-width="false"
+        @click="() => goStakeActionPage(StakingActions.STAKE)"
+      >
+        <Icon name="PlusIcon" :icon-size="2" />
+      </Button>
     </div>
 
     <!-- Staking info banner -->

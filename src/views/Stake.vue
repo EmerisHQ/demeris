@@ -209,7 +209,12 @@ export default {
       router.push(`/asset/${route.params.denom}`);
     };
     const addValidator = (vali) => {
-      selectedValidators.value.push(vali);
+      const isIncluded = selectedValidators.value.find((selectedVali) => {
+        return selectedVali.operator_address === vali.operator_address;
+      });
+      if (!isIncluded) {
+        selectedValidators.value.push(vali);
+      }
       currentStep.value = StakingActionSteps.AMOUNT;
       console.log('selectedValidators', selectedValidators.value);
     };
