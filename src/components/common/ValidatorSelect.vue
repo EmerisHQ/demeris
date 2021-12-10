@@ -2,8 +2,6 @@
   <div
     class="denom-select flex items-center"
     :class="{
-      'denom-select--readonly': readonly,
-      'denom-select--empty': !hasOptions,
       'py-4 px-6': size === 'sm',
       'py-6 px-5': size === 'md',
     }"
@@ -27,7 +25,7 @@
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
-          0 <Denom :name="'uatom'" /> staked
+          {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="'uatom'" /> staked
         </div>
       </div>
     </div>
@@ -50,39 +48,26 @@
         :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
-        @input="$emit('update:amount', $event.target.value), $emit('change', inputHeader)"
+        @input="$emit('update:amount', $event.target.value)"
       />
-      test
-      <div class="denom-select__coin-amount-type select-none" :class="{ '-text-1': size === 'sm' }">
-        {{ inputHeader }}
-      </div>
+      test21231
     </label>
   </div>
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import useStaking from '@/composables/useStaking';
 import { store } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'ValidatorSelect',
   components: { AmountInput, Denom, CircleSymbol, Icon },
   props: {
-    inputHeader: { type: String, required: true },
-    selectedDenom: { type: Object, required: false, default: null },
-    counterDenom: { type: Object, required: false, default: null },
-    assets: { type: Object, required: true },
-    otherAssets: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
     amount: { type: [String, Number], required: false, default: null },
     isOver: { type: Boolean, required: false, default: false },
     readonly: { type: Boolean, default: false },
@@ -102,52 +87,21 @@ export default defineComponent({
       get: () => props.amount,
       set: (value) => emit('update:amount', value),
     });
-
-    const isSelected = computed(() => {
-      return props?.selectedDenom === null ? false : true;
-    });
-
-    const hasOptions = computed(() => {
-      return props.assets.length > 0;
-    });
-
-    const displayName = ref('');
-    watch(
-      () => props.selectedDenom,
-      async () => {
-        if (props.selectedDenom?.base_denom) {
-          displayName.value = await getDisplayName(
-            props.selectedDenom.base_denom,
-            store.getters['demeris/getDexChain'],
-          );
-        }
-      },
+    const router = useRouter();
+    const baseDenom = router.currentRoute.value.params.denom as string;
+    const precision = computed(() =>
+      store.getters['demeris/getDenomPrecision']({
+        name: baseDenom,
+      }),
     );
 
-    const coinImage = computed(() => {
-      try {
-        const denom = displayName.value;
-        let denomIconName = 'empty';
-        if (denom.includes('Gravity')) {
-          denomIconName = 'pool';
-        } else {
-          //TODO adjust url
-          denomIconName = denom.toLowerCase();
-        }
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
-        return image;
-      } catch {
-        return require(`@/assets/coins/empty.png`);
-      }
+    const isSelected = computed(() => {
+      return true;
     });
 
     const isOpen = ref(false);
 
     function toggleDenomSelectModal() {
-      if (!hasOptions.value || props.readonly) {
-        return;
-      }
       isOpen.value = !isOpen.value;
       emit('modalToggle', isOpen.value);
     }
@@ -161,11 +115,9 @@ export default defineComponent({
       inputAmount,
       isSelected,
       isOpen,
-      coinImage,
-      hasOptions,
+      precision,
       toggleDenomSelectModal,
       denomSelectHandler,
-      displayName,
     };
   },
 });

@@ -13,7 +13,6 @@
             :func="() => toggleChainsModal()"
             @select="toggleChainsModal($event, state.chainsModalSource)"
           />
-
           <!-- Validator stake amount input -->
           <fieldset
             v-for="vali in validators"
@@ -22,10 +21,7 @@
           >
             <ValidatorSelect
               v-model:amount="validatorStakingAmounts"
-              :input-header="`Pay`"
-              :selected-denom="'uatom'"
               :validator="vali"
-              :assets="'uatom'"
               :show-chain="false"
               @select="coinSelectHandler('coinB', $event)"
               @change="coinBChangeHandler"
@@ -83,7 +79,7 @@
             </Alert>
 
             <!-- Continue button -->
-            <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
+            <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="goToReview" />
           </div>
         </div>
       </main>
@@ -107,12 +103,12 @@ import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
+import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
 import { Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
-
 export default {
   name: 'ValidatorAmountForm',
   components: {
@@ -127,7 +123,7 @@ export default {
     ListItem,
   },
   props: {
-    validators: { required: true, default: [] },
+    validators: { type: Array, required: true, default: () => [] },
   },
 
   setup(props) {
@@ -135,7 +131,7 @@ export default {
 
     const router = useRouter();
     const store = useStore();
-
+    const baseDenom = router.currentRoute.value.params.denom as string;
     const actionSteps = ref<Step[]>([]);
 
     const steps = ['amount', 'review', 'send'];
@@ -151,7 +147,33 @@ export default {
       poolBaseDenoms: [],
       fees: {},
     });
+    const { balances: userBalances, getNativeBalances } = useAccount();
+    const balances = computed(() => {
+      const nativeBalances = getNativeBalances();
+      const result = [...userBalances.value];
 
+      for (const nativeBalance of nativeBalances) {
+        const hasBalance = userBalances.value.some(
+          (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
+        );
+        if (!hasBalance) {
+          result.push(nativeBalance);
+        }
+      }
+
+      result.sort((a, b) => {
+        const coinA = parseCoins(a.amount)[0];
+        const coinB = parseCoins(b.amount)[0];
+        return +coinB.amount - +coinA.amount;
+      });
+
+      return result;
+    });
+    const precision = computed(() =>
+      store.getters['demeris/getDenomPrecision']({
+        name: baseDenom,
+      }),
+    );
     useMeta({ title: t('context.stake.title') });
 
     const validatorStakingAmounts = ref(0);
@@ -185,6 +207,8 @@ export default {
       actionSteps,
       state,
       steps,
+      balances,
+      precision,
       toggleChainsModal,
       goBack,
       goToReview,
