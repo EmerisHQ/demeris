@@ -7,8 +7,8 @@ export default function usePrice() {
   function getDisplayPrice(denom, amount) {
     const formatedValue = computed(() => {
       let value = 0;
-      if (store.getters['demeris/getPrice']({ denom })) {
-        value = parseFloat(amount) * store.getters['demeris/getPrice']({ denom });
+      if (store.getters['demerisAPI/getPrice']({ denom })) {
+        value = parseFloat(amount) * store.getters['demerisAPI/getPrice']({ denom });
         const formatter = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',

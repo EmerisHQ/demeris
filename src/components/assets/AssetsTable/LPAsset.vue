@@ -74,16 +74,16 @@ export default defineComponent({
         denom = walletBalances.value.coinA.denom;
       } else {
         const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
+          store.getters['demerisAPI/getVerifyTrace']({
+            chain_name: store.getters['demerisAPI/getDexChain'],
             hash: walletBalances.value.coinA.denom.split('/')[1],
           }) ??
           (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
+            'demerisAPI/GET_VERIFY_TRACE',
             {
               subscribe: false,
               params: {
-                chain_name: store.getters['demeris/getDexChain'],
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: walletBalances.value.coinA.denom.split('/')[1],
               },
             },
@@ -91,14 +91,14 @@ export default defineComponent({
           ));
         denom = (verifyTrace as VerifyTrace).base_denom;
       }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
+      if (store.getters['demerisAPI/getPrice']({ denom: denom })) {
         total =
           total +
-          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
+          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demerisAPI/getPrice']({ denom: denom })) /
             Math.pow(
               10,
               parseInt(
-                store.getters['demeris/getDenomPrecision']({
+                store.getters['demerisAPI/getDenomPrecision']({
                   name: denom,
                 }),
               ),
@@ -109,16 +109,16 @@ export default defineComponent({
         denom = walletBalances.value.coinB.denom;
       } else {
         const verifyTrace =
-          store.getters['demeris/getVerifyTrace']({
-            chain_name: store.getters['demeris/getDexChain'],
+          store.getters['demerisAPI/getVerifyTrace']({
+            chain_name: store.getters['demerisAPI/getDexChain'],
             hash: walletBalances.value.coinB.denom.split('/')[1],
           }) ??
           (await store.dispatch(
-            'demeris/GET_VERIFY_TRACE',
+            'demerisAPI/GET_VERIFY_TRACE',
             {
               subscribe: false,
               params: {
-                chain_name: store.getters['demeris/getDexChain'],
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: walletBalances.value.coinB.denom.split('/')[1],
               },
             },
@@ -126,14 +126,14 @@ export default defineComponent({
           ));
         denom = (verifyTrace as VerifyTrace).base_denom;
       }
-      if (store.getters['demeris/getPrice']({ denom: denom })) {
+      if (store.getters['demerisAPI/getPrice']({ denom: denom })) {
         total =
           total +
-          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
+          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demerisAPI/getPrice']({ denom: denom })) /
             Math.pow(
               10,
               parseInt(
-                store.getters['demeris/getDenomPrecision']({
+                store.getters['demerisAPI/getDenomPrecision']({
                   name: denom,
                 }),
               ),

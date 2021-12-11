@@ -21,19 +21,18 @@ export enum GlobalDemerisActionTypes {
    * re-evaluate once this is released:
    *     https://github.com/microsoft/TypeScript/issues/40793
    */
-  REDEEM_GET_HAS_SEEN = 'demeris/REDEEM_GET_HAS_SEEN',
-  REDEEM_SET_HAS_SEEN = 'demeris/REDEEM_SET_HAS_SEEN',
-  SET_SESSION_DATA = 'demeris/SET_SESSION_DATA',
-  LOAD_SESSION_DATA = 'demeris/LOAD_SESSION_DATA',
-  SIGN_IN = 'demeris/SIGN_IN',
-  SIGN_IN_WITH_WATCHER = 'demeris/SIGN_IN_WITH_WATCHER',
-  SET_GAS_LIMIT = 'demeris/SET_GAS_LIMIT',
-  SIGN_OUT = 'demeris/SIGN_OUT',
+  REDEEM_GET_HAS_SEEN = 'demerisUSER/REDEEM_GET_HAS_SEEN',
+  REDEEM_SET_HAS_SEEN = 'demerisUSER/REDEEM_SET_HAS_SEEN',
+  SET_SESSION_DATA = 'demerisUSER/SET_SESSION_DATA',
+  LOAD_SESSION_DATA = 'demerisUSER/LOAD_SESSION_DATA',
+  SIGN_IN = 'demerisUSER/SIGN_IN',
+  SIGN_IN_WITH_WATCHER = 'demerisUSER/SIGN_IN_WITH_WATCHER',
+  SET_GAS_LIMIT = 'demerisUSER/SET_GAS_LIMIT',
+  SIGN_OUT = 'demerisUSER/SIGN_OUT',
   // Internal module actions
-  INIT = 'demeris/INIT',
-  RESET_STATE = 'demeris/RESET_STATE',
-  UNSUBSCRIBE = 'demeris/UNSUBSCRIBE',
-  STORE_UPDATE = 'demeris/STORE_UPDATE',
+  RESET_STATE = 'demerisUSER/RESET_STATE',
+  UNSUBSCRIBE = 'demerisUSER/UNSUBSCRIBE',
+  STORE_UPDATE = 'demerisUSER/STORE_UPDATE',
 }
 export type DemerisActionParams = {
   subscribe: boolean;

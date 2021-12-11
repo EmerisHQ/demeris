@@ -95,7 +95,7 @@ export default defineComponent({
     };
 
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters['demerisUSER/isSignedIn'];
     });
 
     const trySignIn = () => {

@@ -19,7 +19,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = store.getters['demeris/getAllBalances'];
+    const balances = store.getters['demerisAPI/getAllBalances'];
     const redeemable = [];
     for (let balance of balances) {
       // TODO: check for redeemable

@@ -156,7 +156,7 @@ export default defineComponent({
         if (props.selectedDenom?.base_denom) {
           displayName.value = await getDisplayName(
             props.selectedDenom.base_denom,
-            store.getters['demeris/getDexChain'],
+            store.getters['demerisAPI/getDexChain'],
           );
         }
       },

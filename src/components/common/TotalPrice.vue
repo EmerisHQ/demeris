@@ -30,13 +30,13 @@ export default defineComponent({
     const displayPrice = computed(() => {
       const liquidValue = (props.balances as Balances).reduce((total, balance) => {
         if (balance.verified) {
-          if (store.getters['demeris/getPrice']({ denom: balance.base_denom })) {
+          if (store.getters['demerisAPI/getPrice']({ denom: balance.base_denom })) {
             let totalValue =
-              parseInt(balance.amount) * store.getters['demeris/getPrice']({ denom: balance.base_denom });
+              parseInt(balance.amount) * store.getters['demerisAPI/getPrice']({ denom: balance.base_denom });
             let precision = Math.pow(
               10,
               parseInt(
-                store.getters['demeris/getDenomPrecision']({
+                store.getters['demerisAPI/getDenomPrecision']({
                   name: balance.base_denom,
                 }) || 6,
               ),
@@ -54,17 +54,18 @@ export default defineComponent({
           return total;
         }
       }, 0);
-      const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+      const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
       const stakedValue = stakingBalances.value.reduce((total, stakingBalance) => {
         const stakedDenom = verifiedDenoms.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
         if (stakedDenom.length > 0) {
-          if (store.getters['demeris/getPrice']({ denom: stakedDenom[0].name })) {
+          if (store.getters['demerisAPI/getPrice']({ denom: stakedDenom[0].name })) {
             let totalValue =
-              parseInt(stakingBalance.amount) * store.getters['demeris/getPrice']({ denom: stakedDenom[0].name }) ?? 0;
+              parseInt(stakingBalance.amount) * store.getters['demerisAPI/getPrice']({ denom: stakedDenom[0].name }) ??
+              0;
             let precision = Math.pow(
               10,
               parseInt(
-                store.getters['demeris/getDenomPrecision']({
+                store.getters['demerisAPI/getDenomPrecision']({
                   name: stakedDenom[0].name,
                 }) || 6,
               ),

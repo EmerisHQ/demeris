@@ -49,11 +49,11 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters['demerisUSER/isSignedIn'];
     });
 
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters['demerisUSER/isDemoAccount'];
     });
     const toggleWalletModal = () => {
       isWalletModalOpen.value = !isWalletModalOpen.value;

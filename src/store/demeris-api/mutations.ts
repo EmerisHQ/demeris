@@ -5,17 +5,10 @@ import * as API from '@/types/api';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
-import {
-  APIPromise,
-  DemerisMutations,
-  DemerisMutationTypes as MutationTypes,
-  KeplrKeyData,
-  UserData,
-} from './mutation-types';
+import { APIPromise, DemerisMutations, DemerisMutationTypes as MutationTypes } from './mutation-types';
 import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
-  // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
   [MutationTypes.SET_POOL_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
   [MutationTypes.SET_STAKING_BALANCES](
@@ -30,7 +23,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_CHAINS](state: S, payload: { value: API.Chains }): void;
   [MutationTypes.SET_PRICES](state: S, payload: { value: API.Prices }): void;
   [MutationTypes.SET_TX_STATUS](state: S, payload: { value: API.Ticket }): void;
-  // Chain-specific endpoint mutations
+
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
   [MutationTypes.SET_BECH32_CONFIG](state: S, payload: { params: API.APIRequests; value: API.Bech32Config }): void;
@@ -42,8 +35,6 @@ export type Mutations<S = State> = {
   ): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
 
-  // Internal module mutations
-
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -53,7 +44,6 @@ export type Mutations<S = State> = {
 };
 
 export const mutations: MutationTree<State> & Mutations = {
-  // Cross-chain endpoint mutations
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
     state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
   },

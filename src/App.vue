@@ -70,7 +70,7 @@ export default defineComponent({
       });
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
-          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+          displayChain: store.getters['demerisAPI/getDisplayChain']({ name: chain }),
         });
         await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
           subscribe: true,
@@ -79,7 +79,7 @@ export default defineComponent({
           },
         });
         status.value = t('appInit.status.chainStatus', {
-          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+          displayChain: store.getters['demerisAPI/getDisplayChain']({ name: chain }),
         });
         await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
           subscribe: true,
@@ -128,7 +128,7 @@ export default defineComponent({
       }
       window.addEventListener('keplr_keystorechange', async () => {
         window.localStorage.setItem('lastEmerisSession', '');
-        if (store.getters['demeris/isSignedIn'] && !store.getters['demeris/isDemoAccount']) {
+        if (store.getters['demerisUSER/isSignedIn'] && !store.getters['demerisUSER/isDemoAccount']) {
           await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
         }
       });

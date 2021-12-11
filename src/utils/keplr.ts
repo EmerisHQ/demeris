@@ -5,7 +5,7 @@ import { AmountWithMeta } from '@/types/base';
 import { store } from '../store/index';
 
 export async function addChain(chain_name: string): Promise<void> {
-  const chain = store.getters['demeris/getChain']({
+  const chain = store.getters['demerisAPI/getChain']({
     chain_name,
   }) as ChainData;
   let rpc;

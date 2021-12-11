@@ -38,10 +38,10 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const dexChain = store.getters['demeris/getDexChain'];
+    const dexChain = store.getters['demerisAPI/getDexChain'];
 
     const isHubDown = computed(() => {
-      const status = store.getters['demeris/getChainStatus']({ chain_name: dexChain });
+      const status = store.getters['demerisAPI/getChainStatus']({ chain_name: dexChain });
       return status === false;
     });
 

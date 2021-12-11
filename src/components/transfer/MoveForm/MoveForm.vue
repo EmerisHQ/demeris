@@ -61,7 +61,7 @@ export default defineComponent({
     const steps = ref([]);
     const store = useStore();
     const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
+      return store.getters['demerisUSER/getPreferredGasPriceLevel'];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -87,8 +87,9 @@ export default defineComponent({
         step.value != 'review'
       ) {
         const precision =
-          store.getters['demeris/getDenomPrecision']({ name: await getBaseDenom(form.balance.denom, form.on_chain) }) ||
-          6;
+          store.getters['demerisAPI/getDenomPrecision']({
+            name: await getBaseDenom(form.balance.denom, form.on_chain),
+          }) || 6;
 
         const action: MoveAction = {
           name: 'move',

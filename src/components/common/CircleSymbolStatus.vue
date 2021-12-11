@@ -40,12 +40,12 @@ export default defineComponent({
     const store = useStore();
 
     const displayChain = computed(() => {
-      const displayName = store.getters['demeris/getDisplayChain']({ name: props.chainName });
+      const displayName = store.getters['demerisAPI/getDisplayChain']({ name: props.chainName });
       return displayName || props.chainName;
     });
 
     const chainDown = computed(() => {
-      const chainStatus = store.getters['demeris/getChainStatus']({ chain_name: props.chainName });
+      const chainStatus = store.getters['demerisAPI/getChainStatus']({ chain_name: props.chainName });
       return chainStatus.failed?.length > 0;
     });
 

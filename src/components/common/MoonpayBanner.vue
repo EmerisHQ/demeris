@@ -51,11 +51,11 @@ export default defineComponent({
     const emitter = useEmitter();
 
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters['demerisUSER/isSignedIn'];
     });
 
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters['demerisUSER/isDemoAccount'];
     });
 
     const mpDomain = ref('https://buy.moonpay.io');
@@ -63,7 +63,7 @@ export default defineComponent({
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+        walletAddress: store.getters['demerisAPI/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // baseCurrencyAmount: '50',
       };

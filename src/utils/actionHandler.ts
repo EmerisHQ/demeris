@@ -45,7 +45,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
     let verifyTrace;
     try {
       verifyTrace =
-        store.getters['demeris/getVerifyTrace']({
+        store.getters['demerisAPI/getVerifyTrace']({
           chain_name,
           hash: amount.denom.split('/')[1],
         }) ??
@@ -127,10 +127,10 @@ export async function memoTransfer({
       });
       return result;
     } else {
-      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+      if (store.getters['demerisAPI/isVerified']({ denom: amount.denom, chain_name })) {
         // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: chain_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -169,7 +169,7 @@ export async function memoTransfer({
   let verifyTrace;
   try {
     verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+      store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
@@ -182,7 +182,7 @@ export async function memoTransfer({
 
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
     const primaryChannel =
-      store.getters['demeris/getPrimaryChannel']({
+      store.getters['demerisAPI/getPrimaryChannel']({
         chain_name: chain_name,
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
@@ -292,7 +292,7 @@ export async function memoTransfer({
       }
       if (verifyTrace.trace[0].counterparty_name != destination_chain_name) {
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: verifyTrace.trace[0].counterparty_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -370,10 +370,10 @@ export async function transfer({
       });
       return result;
     } else {
-      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+      if (store.getters['demerisAPI/isVerified']({ denom: amount.denom, chain_name })) {
         // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: chain_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -404,7 +404,7 @@ export async function transfer({
   let verifyTrace;
   try {
     verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+      store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
@@ -417,7 +417,7 @@ export async function transfer({
 
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
     const primaryChannel =
-      store.getters['demeris/getPrimaryChannel']({
+      store.getters['demerisAPI/getPrimaryChannel']({
         chain_name: chain_name,
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
@@ -510,7 +510,7 @@ export async function transfer({
       }
       if (verifyTrace.trace[0].counterparty_name != destination_chain_name) {
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: verifyTrace.trace[0].counterparty_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -569,10 +569,10 @@ export async function move({
       result.output = { amount, chain_name };
       return result;
     } else {
-      if (store.getters['demeris/isVerified']({ denom: amount.denom, chain_name })) {
+      if (store.getters['demerisAPI/isVerified']({ denom: amount.denom, chain_name })) {
         // If verified denom on a different chain, ibc_forward through primary channel to the destination_chain_name
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: chain_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -598,7 +598,7 @@ export async function move({
         });
 
         const invPrimaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: destination_chain_name,
             destination_chain_name: chain_name,
           }) ??
@@ -625,7 +625,7 @@ export async function move({
   let verifyTrace;
   try {
     verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
+      store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
         GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
@@ -637,7 +637,7 @@ export async function move({
   }
   if (verifyTrace.trace.length == 1 && chain_name == destination_chain_name) {
     const primaryChannel =
-      store.getters['demeris/getPrimaryChannel']({
+      store.getters['demerisAPI/getPrimaryChannel']({
         chain_name: chain_name,
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
@@ -683,7 +683,7 @@ export async function move({
       });
 
       const invPrimaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
+        store.getters['demerisAPI/getPrimaryChannel']({
           chain_name: destination_chain_name,
           destination_chain_name: chain_name,
         }) ??
@@ -727,7 +727,7 @@ export async function move({
           },
         });
         const primaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: verifyTrace.trace[0].counterparty_name,
             destination_chain_name: destination_chain_name,
           }) ??
@@ -755,7 +755,7 @@ export async function move({
         });
 
         const invPrimaryChannel =
-          store.getters['demeris/getPrimaryChannel']({
+          store.getters['demerisAPI/getPrimaryChannel']({
             chain_name: destination_chain_name,
             destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
@@ -844,7 +844,7 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
         amount: 0,
         denom: to.denom,
       },
-      chain_name: store.getters['demeris/getDexChain'],
+      chain_name: store.getters['demerisAPI/getDexChain'],
     };
     return result;
   } else {
@@ -1036,7 +1036,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.from.amount.denom,
           },
           chain_name: params.from.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
         if (transferToHubStep.steps.length > 0) {
           steps.push({
@@ -1071,7 +1071,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
 
         if (transferCoinAtoHubCreate.steps.length) {
@@ -1089,7 +1089,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
 
         if (transferCoinBtoHubCreate.steps.length) {
@@ -1120,7 +1120,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
 
         if (transferCoinAtoHub.steps.length) {
@@ -1138,7 +1138,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
 
         if (transferCoinBtoHub.steps.length) {
@@ -1170,7 +1170,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.poolCoin.amount.denom,
           },
           chain_name: params.poolCoin.chain_name,
-          destination_chain_name: store.getters['demeris/getDexChain'],
+          destination_chain_name: store.getters['demerisAPI/getDexChain'],
         });
         if (transferPoolCointoHub.steps.length) {
           steps.push({
@@ -1250,7 +1250,7 @@ export async function msgFromStepTransaction(
     if (stepTx.addFee) {
       fromAmount = (
         parseInt(fromAmount) +
-        parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']
+        parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demerisUSER/getGasLimit']
       ).toString();
     }
     const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
@@ -1267,7 +1267,7 @@ export async function msgFromStepTransaction(
     return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
-    const chain_name = libStore.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demerisAPI/getDexChain'];
     const data = stepTx.data as Actions.AddLiquidityData;
     let depositCoins;
     if (data.coinA.denom > data.coinB.denom) {
@@ -1286,7 +1286,7 @@ export async function msgFromStepTransaction(
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = libStore.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demerisAPI/getDexChain'];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
     const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
@@ -1299,7 +1299,7 @@ export async function msgFromStepTransaction(
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
-    const chain_name = libStore.getters['demeris/getDexChain'];
+    const chain_name = libStore.getters['demerisAPI/getDexChain'];
     const data = stepTx.data as Actions.CreatePoolData;
     let depositCoins;
     if (data.coinA.denom > data.coinB.denom) {
@@ -1319,8 +1319,8 @@ export async function msgFromStepTransaction(
   }
   if (stepTx.name == 'swap') {
     const data = stepTx.data as Actions.SwapData;
-    const chain_name = store.getters['demeris/getDexChain'];
-    const slippage = (store.getters['demeris/getSlippagePerc'] || 0.5) / 100;
+    const chain_name = store.getters['demerisAPI/getDexChain'];
+    const slippage = (store.getters['demerisUSER/getSlippagePerc'] || 0.5) / 100;
     const swapFeeRate = libStore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
     let isReverse = false;
     if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
@@ -1353,7 +1353,7 @@ export async function msgFromStepTransaction(
   }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
-  const denoms = store.getters['demeris/getFeeTokens']({
+  const denoms = store.getters['demerisAPI/getFeeTokens']({
     chain_name,
   }) as Array<Denom>;
   const fees = [];
@@ -1363,12 +1363,12 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   return fees;
 }
 export function getBaseDenomSync(denom: string) {
-  const traces = store.getters['demeris/getAllVerifiedTraces'];
+  const traces = store.getters['demerisAPI/getAllVerifiedTraces'];
   return traces[denom.split('/')[1]]?.base_denom ?? denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
-  const chain_name = chainName || store.getters['demeris/getDexChain'];
-  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+  const chain_name = chainName || store.getters['demerisAPI/getDexChain'];
+  const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
 
   if (verifiedDenoms.find((item) => item.name === denom)) {
     return denom;
@@ -1380,7 +1380,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
     return denom;
   }
 
-  let trace = store.getters['demeris/getVerifyTrace']({ chain_name, hash });
+  let trace = store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash });
 
   if (!trace) {
     trace = await store.dispatch(
@@ -1399,7 +1399,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
 export function getStepTransactionDetailFromResponse(response: API.TransactionDetailResponse) {
   const getChainFromAddress = (address: string): API.Chain => {
-    const chains = Object.values(store.getters['demeris/getChains']);
+    const chains = Object.values(store.getters['demerisAPI/getChains']);
     const prefix = bech32.decode(address).prefix;
     // @ts-ignore
     return chains.find((item) => item.node_info.bech32_config.prefix_account == prefix);
@@ -1468,7 +1468,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
   let error: Error;
 
   let denoms = [];
-  const chain = store.getters['demeris/getDexChain'];
+  const chain = store.getters['demerisAPI/getDexChain'];
 
   switch (transaction.name) {
     case 'addliquidity':
@@ -1529,7 +1529,8 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
 export async function getDisplayName(name, chain_name = null) {
   if (isNative(name)) {
-    const displayName = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
+    const displayName =
+      store.getters['demerisAPI/getVerifiedDenoms']?.find((x) => x.name == name)?.display_name ?? null;
     if (displayName) {
       return displayName;
     }
@@ -1539,7 +1540,7 @@ export async function getDisplayName(name, chain_name = null) {
     let verifyTrace;
     try {
       verifyTrace =
-        store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
+        store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
           GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
@@ -1555,7 +1556,7 @@ export async function getDisplayName(name, chain_name = null) {
 }
 export async function getTicker(name, chain_name = null) {
   if (isNative(name)) {
-    const ticker = store.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == name)?.ticker ?? null;
+    const ticker = store.getters['demerisAPI/getVerifiedDenoms']?.find((x) => x.name == name)?.ticker ?? null;
     if (ticker) {
       return ticker;
     }
@@ -1564,7 +1565,7 @@ export async function getTicker(name, chain_name = null) {
     let verifyTrace;
     try {
       verifyTrace =
-        store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
+        store.getters['demerisAPI/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
           GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
@@ -1580,7 +1581,7 @@ export async function getTicker(name, chain_name = null) {
 
 export async function isLive(chain_name) {
   const status =
-    store.getters['demeris/getChainStatus']({
+    store.getters['demerisAPI/getChainStatus']({
       chain_name,
     }) ??
     (await store.dispatch(
@@ -1613,22 +1614,22 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'addliquidity') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = store.getters['demerisAPI/getDexChain'];
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'withdrawliquidity') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = store.getters['demerisAPI/getDexChain'];
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'createpool') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = store.getters['demerisAPI/getDexChain'];
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'swap') {
-    const chain_name = store.getters['demeris/getDexChain'];
+    const chain_name = store.getters['demerisAPI/getDexChain'];
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
@@ -1683,7 +1684,7 @@ export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Action
   const feeOption = fees[0];
   const used = {
     amount: {
-      amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demeris/getGasLimit']).toString(),
+      amount: (parseFloat(feeOption.amount[gasPriceLevel]) * store.getters['demerisUSER/getGasLimit']).toString(),
       denom: feeOption.denom,
     },
     chain_name: feeOption.chain_name,
@@ -1701,7 +1702,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
       let verifyTrace;
       try {
         verifyTrace =
-          store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
+          store.getters['demerisAPI/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
             GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
@@ -1712,7 +1713,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
       }
 
       const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
+        store.getters['demerisAPI/getPrimaryChannel']({
           chain_name: balance.on_chain,
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
@@ -1734,7 +1735,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 
 export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
-  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
+  const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
 
   for (const balance of balances) {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
@@ -1755,7 +1756,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
       let verifyTrace;
       try {
         verifyTrace =
-          store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
+          store.getters['demerisAPI/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
             GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
@@ -1770,7 +1771,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
       }
 
       const primaryChannel =
-        store.getters['demeris/getPrimaryChannel']({
+        store.getters['demerisAPI/getPrimaryChannel']({
           chain_name: balance.on_chain,
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
@@ -1792,8 +1793,8 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 
 export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
   const validPools = [];
-  const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
-  const dexChain = store.getters['demeris/getDexChain'];
+  const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
+  const dexChain = store.getters['demerisAPI/getDexChain'];
 
   for (const pool of pools) {
     const firstDenom = pool.reserve_coin_denoms[0];
@@ -1854,7 +1855,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
     for (const stepTx of step.transactions) {
       if (stepTx.name == 'transfer') {
         const chain_name = (stepTx.data as Actions.TransferData).chain_name;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1866,13 +1867,13 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
       if (stepTx.name == 'ibc_backward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
         const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
             failedChains.push(chain_name);
           }
         }
-        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name: dest_chain_name })) {
           allClear = false;
           if (failedChains.includes(dest_chain_name)) {
             continue;
@@ -1888,8 +1889,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           subscribe: false,
         });
         if (
-          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
-          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+          !store.getters['demerisAPI/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demerisAPI/getRelayerChainStatus']({ chain_name: dest_chain_name })
         ) {
           relayerStatus = false;
         }
@@ -1897,13 +1898,13 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
       if (stepTx.name == 'ibc_forward') {
         const chain_name = (stepTx.data as Actions.IBCBackwardsData).from_chain;
         const dest_chain_name = (stepTx.data as Actions.IBCBackwardsData).to_chain;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (!failedChains.includes(chain_name)) {
             failedChains.push(chain_name);
           }
         }
-        if (!store.getters['demeris/getChainStatus']({ chain_name: dest_chain_name })) {
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name: dest_chain_name })) {
           allClear = false;
           if (failedChains.includes(dest_chain_name)) {
             continue;
@@ -1918,15 +1919,15 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           subscribe: false,
         });
         if (
-          !store.getters['demeris/getRelayerChainStatus']({ chain_name }) ||
-          !store.getters['demeris/getRelayerChainStatus']({ chain_name: dest_chain_name })
+          !store.getters['demerisAPI/getRelayerChainStatus']({ chain_name }) ||
+          !store.getters['demerisAPI/getRelayerChainStatus']({ chain_name: dest_chain_name })
         ) {
           relayerStatus = false;
         }
       }
       if (stepTx.name == 'addliquidity') {
-        const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_name = store.getters['demerisAPI/getDexChain'];
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1936,8 +1937,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.name == 'withdrawliquidity') {
-        const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_name = store.getters['demerisAPI/getDexChain'];
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1947,8 +1948,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.name == 'createpool') {
-        const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_name = store.getters['demerisAPI/getDexChain'];
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1958,8 +1959,8 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.name == 'swap') {
-        const chain_name = store.getters['demeris/getDexChain'];
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        const chain_name = store.getters['demerisAPI/getDexChain'];
+        if (!store.getters['demerisAPI/getChainStatus']({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;
@@ -1993,7 +1994,7 @@ export async function validateStepFeeBalances(
       const data = stepTx.data as Actions.AddLiquidityData;
       const balanceA = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2012,7 +2013,7 @@ export async function validateStepFeeBalances(
       }
       const balanceB = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2034,7 +2035,7 @@ export async function validateStepFeeBalances(
       const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
       const feeBalance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == creationFee.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2043,7 +2044,7 @@ export async function validateStepFeeBalances(
 
       const balanceA = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2062,7 +2063,7 @@ export async function validateStepFeeBalances(
       }
       const balanceB = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2086,7 +2087,7 @@ export async function validateStepFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
-            chain_name: store.getters['demeris/getDexChain'],
+            chain_name: store.getters['demerisAPI/getDexChain'],
             denom: creationFee.denom,
           });
         }
@@ -2094,7 +2095,7 @@ export async function validateStepFeeBalances(
         feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + creationFee.amount,
-          chain_name: store.getters['demeris/getDexChain'],
+          chain_name: store.getters['demerisAPI/getDexChain'],
           denom: creationFee.denom,
         });
       }
@@ -2131,7 +2132,7 @@ export async function validateStepFeeBalances(
             let additionalFee = 0;
             if (stepTx.addFee) {
               additionalFee =
-                parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
+                parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demerisUSER/getGasLimit'];
             }
             if (rcptBalance) {
               const newIbcAmount =
@@ -2212,7 +2213,7 @@ export async function validateStepFeeBalances(
       } else {
         throw new Error('Insufficient balance: ' + data.amount.denom);
       }
-      const chain = store.getters['demeris/getChain']({ chain_name: data.to_chain });
+      const chain = store.getters['demerisAPI/getChain']({ chain_name: data.to_chain });
       const chainFeeDenom = (chain as ChainData).denoms.find((x) => x.fee_token)?.name;
 
       const ibcFeeBalance = balances.find((x) => {
@@ -2226,9 +2227,9 @@ export async function validateStepFeeBalances(
       if (!ibcFeeBalance || parseInt(parseCoins(ibcFeeBalance.amount)[0].amount) == 0) {
         feeWarning.feeWarning = false;
         feeWarning.ibcWarning = true;
-        feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+        feeWarning.ibcDetails.chain_name = store.getters['demerisAPI/getDisplayChain']({ name: data.to_chain });
         feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
-        feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
+        feeWarning.ibcDetails.denom = store.getters['demerisAPI/getChain']({
           chain_name: data.to_chain,
         }).denoms.find((x) => x.fee_token == true).display_name;
       }
@@ -2237,7 +2238,7 @@ export async function validateStepFeeBalances(
       const data = stepTx.data as Actions.SwapData;
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.from.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.from.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2266,7 +2267,7 @@ export async function validateStepFeeBalances(
         feeWarning.feeWarning = false;
         feeWarning.missingFees.push({
           amount: '' + swapFee.amount,
-          chain_name: store.getters['demeris/getDexChain'],
+          chain_name: store.getters['demerisAPI/getDexChain'],
           denom: swapFee.denom,
         });
       }
@@ -2299,7 +2300,7 @@ export async function validateStepFeeBalances(
 
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
-        if (amount.denom == data.poolCoin.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+        if (amount.denom == data.poolCoin.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
           return true;
         } else {
           return false;
@@ -2375,7 +2376,7 @@ export async function validateStepsFeeBalances(
         const data = stepTx.data as Actions.AddLiquidityData;
         const balanceA = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2394,7 +2395,7 @@ export async function validateStepsFeeBalances(
         }
         const balanceB = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2416,7 +2417,7 @@ export async function validateStepsFeeBalances(
         const creationFee = store.getters['tendermint.liquidity.v1beta1/getParams']().params.pool_creation_fee[0];
         const feeBalance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == creationFee.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == creationFee.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2425,7 +2426,7 @@ export async function validateStepsFeeBalances(
 
         const balanceA = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.coinA.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2444,7 +2445,7 @@ export async function validateStepsFeeBalances(
         }
         const balanceB = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.coinB.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2468,7 +2469,7 @@ export async function validateStepsFeeBalances(
             feeWarning.feeWarning = false;
             feeWarning.missingFees.push({
               amount: '' + creationFee.amount,
-              chain_name: store.getters['demeris/getDexChain'],
+              chain_name: store.getters['demerisAPI/getDexChain'],
               denom: creationFee.denom,
             });
           }
@@ -2476,7 +2477,7 @@ export async function validateStepsFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + creationFee.amount,
-            chain_name: store.getters['demeris/getDexChain'],
+            chain_name: store.getters['demerisAPI/getDexChain'],
             denom: creationFee.denom,
           });
         }
@@ -2513,7 +2514,7 @@ export async function validateStepsFeeBalances(
               let additionalFee = 0;
               if (stepTx.addFee) {
                 additionalFee =
-                  parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demeris/getGasLimit'];
+                  parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) * store.getters['demerisUSER/getGasLimit'];
               }
 
               if (rcptBalance) {
@@ -2595,7 +2596,7 @@ export async function validateStepsFeeBalances(
         } else {
           throw new Error('Insufficient balance: ' + data.amount.denom);
         }
-        const chain = store.getters['demeris/getChain']({ chain_name: data.to_chain });
+        const chain = store.getters['demerisAPI/getChain']({ chain_name: data.to_chain });
         const chainFeeDenom = (chain as ChainData).denoms.find((x) => x.fee_token)?.name;
 
         const ibcFeeBalance = balances.find((x) => {
@@ -2609,9 +2610,9 @@ export async function validateStepsFeeBalances(
         if (!ibcFeeBalance || parseInt(parseCoins(ibcFeeBalance.amount)[0].amount) == 0) {
           feeWarning.feeWarning = false;
           feeWarning.ibcWarning = true;
-          feeWarning.ibcDetails.chain_name = store.getters['demeris/getDisplayChain']({ name: data.to_chain });
+          feeWarning.ibcDetails.chain_name = store.getters['demerisAPI/getDisplayChain']({ name: data.to_chain });
           feeWarning.ibcDetails.ibcDenom = await getDisplayName(ibcBalance.base_denom);
-          feeWarning.ibcDetails.denom = store.getters['demeris/getChain']({
+          feeWarning.ibcDetails.denom = store.getters['demerisAPI/getChain']({
             chain_name: data.to_chain,
           }).denoms.find((x) => x.fee_token == true).display_name;
         }
@@ -2620,7 +2621,7 @@ export async function validateStepsFeeBalances(
         const data = stepTx.data as Actions.SwapData;
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.from.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.from.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2649,7 +2650,7 @@ export async function validateStepsFeeBalances(
           feeWarning.feeWarning = false;
           feeWarning.missingFees.push({
             amount: '' + swapFee.amount,
-            chain_name: store.getters['demeris/getDexChain'],
+            chain_name: store.getters['demerisAPI/getDexChain'],
             denom: swapFee.denom,
           });
         }
@@ -2682,7 +2683,7 @@ export async function validateStepsFeeBalances(
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.poolCoin.denom && x.on_chain == store.getters['demeris/getDexChain']) {
+          if (amount.denom == data.poolCoin.denom && x.on_chain == store.getters['demerisAPI/getDexChain']) {
             return true;
           } else {
             return false;
@@ -2744,7 +2745,7 @@ export async function isValidIBCReserveDenom(
 
   try {
     verifyTrace =
-      store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
+      store.getters['demerisAPI/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
         GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
@@ -2765,7 +2766,7 @@ export async function isValidIBCReserveDenom(
   }
 
   const primaryChannel =
-    store.getters['demeris/getPrimaryChannel']({
+    store.getters['demerisAPI/getPrimaryChannel']({
       chain_name: dexChain,
       destination_chain_name: verifyTrace.trace[0].counterparty_name,
     }) ??

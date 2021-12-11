@@ -125,10 +125,10 @@ export default defineComponent({
         denom: (lastTransaction.data.amount as Base.Amount).denom,
       };
 
-      from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
+      from.address = store.getters['demerisAPI/getOwnAddress']({ chain_name: from.chain });
 
       if (to.chain) {
-        to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
+        to.address = store.getters['demerisAPI/getOwnAddress']({ chain_name: to.chain });
       }
 
       if (stepType.value === 'transfer') {
@@ -142,12 +142,12 @@ export default defineComponent({
     });
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters['demeris/getDisplayChain']({ name });
+      const getName = (name: string) => store.getters['demerisAPI/getDisplayChain']({ name });
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
+      return 'Fees on ' + store.getters['demerisAPI/getDisplayChain']({ name });
     };
     return {
       stepType,

@@ -49,7 +49,7 @@ export default defineComponent({
     });
 
     const amount = computed(() => {
-      const precision = store.getters['demeris/getDenomPrecision']({
+      const precision = store.getters['demerisAPI/getDenomPrecision']({
         name: props.denom,
       });
       const balance = walletBalances.value?.find((b) => b.denom === props.denom);

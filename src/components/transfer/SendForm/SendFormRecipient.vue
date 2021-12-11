@@ -60,7 +60,7 @@ export default defineComponent({
     });
 
     const isValidAddress = computed(() => {
-      const chains = Object.values(store.getters['demeris/getChains']);
+      const chains = Object.values(store.getters['demerisAPI/getChains']);
 
       try {
         const prefix = bech32.decode(form.recipient).prefix;

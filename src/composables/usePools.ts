@@ -14,7 +14,7 @@ function usePools() {
   let init = false;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
-    return stores.getters['demeris/getAllValidPools'] ?? [];
+    return stores.getters['demerisAPI/getAllValidPools'] ?? [];
   });
 
   /*
@@ -83,7 +83,7 @@ function usePools() {
     }
     return (
       await Promise.all(
-        pool.reserve_coin_denoms.map(async (item) => await getTicker(item, store.getters['demeris/getDexChain'])),
+        pool.reserve_coin_denoms.map(async (item) => await getTicker(item, store.getters['demerisAPI/getDexChain'])),
       )
     )
       .sort()
@@ -103,7 +103,8 @@ function usePools() {
       return;
     }
     return (
-      poolName?.split(' · ')[0] !== (await getTicker(pool.reserve_coin_denoms[0], store.getters['demeris/getDexChain']))
+      poolName?.split(' · ')[0] !==
+      (await getTicker(pool.reserve_coin_denoms[0], store.getters['demerisAPI/getDexChain']))
     );
   };
 
@@ -113,7 +114,7 @@ function usePools() {
   };
 
   const getPoolPrice = async (pool: Pool) => {
-    const balances = store.getters['demeris/getBalances']({
+    const balances = store.getters['demerisAPI/getBalances']({
       address: keyHashfromAddress(pool.reserve_account_address),
     });
 
@@ -146,7 +147,7 @@ function usePools() {
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
     const reserveBalances = (
-      store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.reserve_account_address) }) || []
+      store.getters['demerisAPI/getBalances']({ address: keyHashfromAddress(pool.reserve_account_address) }) || []
     ).map((x) => {
       return parseCoins(x.amount)[0];
     });
@@ -188,7 +189,7 @@ function usePools() {
     return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
   };
   const getReserveBalances = async (pool: Pool) => {
-    const balances = store.getters['demeris/getBalances']({
+    const balances = store.getters['demerisAPI/getBalances']({
       address: keyHashfromAddress(pool.reserve_account_address),
     });
 

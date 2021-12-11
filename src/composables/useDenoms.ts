@@ -10,19 +10,19 @@ function useDenoms() {
   const store = useAllStores();
 
   const verifiedDenoms = computed(() => {
-    return store.getters['demeris/getVerifiedDenoms'];
+    return store.getters['demerisAPI/getVerifiedDenoms'];
   });
   const useDenomInstances = {};
 
   const useDenomFactory = (base_denom) => {
     const price = computed(() => {
-      return store.getters['demeris/getPrice']({ denom: base_denom });
+      return store.getters['demerisAPI/getPrice']({ denom: base_denom });
     });
     const displayName = ref('-');
     const tickerName = ref('-');
     const updateDenom = async () => {
-      tickerName.value = await getTicker(base_denom, store.getters['demeris/getDexChain']);
-      displayName.value = await getDisplayName(base_denom, store.getters['demeris/getDexChain']);
+      tickerName.value = await getTicker(base_denom, store.getters['demerisAPI/getDexChain']);
+      displayName.value = await getDisplayName(base_denom, store.getters['demerisAPI/getDexChain']);
     };
 
     watch(verifiedDenoms, updateDenom, { immediate: true });

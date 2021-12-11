@@ -178,7 +178,7 @@ export default defineComponent({
       }
 
       for (const chain of uniqueChainsList) {
-        const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
+        const status = store.getters['demerisAPI/getChainStatus']({ chain_name: chain });
         if (!status) {
           result.push({
             chain,

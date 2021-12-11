@@ -217,7 +217,7 @@ export default defineComponent({
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
+      const verifiedDenoms: VerifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
 
@@ -229,7 +229,7 @@ export default defineComponent({
     const unavailableChains = computed(() => {
       const result = {};
       for (const asset of assets.value) {
-        const status = store.getters['demeris/getChainStatus']({ chain_name: asset.on_chain });
+        const status = store.getters['demerisAPI/getChainStatus']({ chain_name: asset.on_chain });
         if (!status) {
           result[asset.on_chain] = {
             chain: asset.on_chain,
@@ -246,16 +246,16 @@ export default defineComponent({
     watch(
       denom,
       async () => {
-        const dexChain = store.getters['demeris/getDexChain'];
+        const dexChain = store.getters['demerisAPI/getDexChain'];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
-            store.getters['demeris/getPrimaryChannel']({
+            store.getters['demerisAPI/getPrimaryChannel']({
               chain_name: dexChain,
               destination_chain_name: assetConfig.value.chain_name,
             }) ??
             (await store.dispatch(
-              'demeris/GET_PRIMARY_CHANNEL',
+              'demerisAPI/GET_PRIMARY_CHANNEL',
               {
                 subscribe: true,
                 params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },

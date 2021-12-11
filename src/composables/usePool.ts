@@ -32,12 +32,20 @@ function usePool(id: string) {
     isReversePairName.value = await getIsReversePairName(pool.value, pairName.value);
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 
-    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] }), updateTotalLiquidityPrice, {
-      immediate: true,
-    });
-    watch(() => store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] }), updateTotalLiquidityPrice, {
-      immediate: true,
-    });
+    watch(
+      () => store.getters['demerisAPI/getPrice']({ denom: reserveBaseDenoms.value[0] }),
+      updateTotalLiquidityPrice,
+      {
+        immediate: true,
+      },
+    );
+    watch(
+      () => store.getters['demerisAPI/getPrice']({ denom: reserveBaseDenoms.value[1] }),
+      updateTotalLiquidityPrice,
+      {
+        immediate: true,
+      },
+    );
   };
 
   const totalSupply = computed(() => {
@@ -50,7 +58,8 @@ function usePool(id: string) {
       return [];
     }
     return (
-      store.getters['demeris/getBalances']({ address: keyHashfromAddress(pool.value?.reserve_account_address) }) || []
+      store.getters['demerisAPI/getBalances']({ address: keyHashfromAddress(pool.value?.reserve_account_address) }) ||
+      []
     ).map((item) => {
       return { ...parseCoins(item.amount)[0], base_denom: item.base_denom };
     });
@@ -82,8 +91,8 @@ function usePool(id: string) {
     const prices = [];
 
     baseDenoms.map((denom) => {
-      const price = store.getters['demeris/getPrice']({ denom });
-      const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) || 6;
+      const price = store.getters['demerisAPI/getPrice']({ denom });
+      const precision = store.getters['demerisAPI/getDenomPrecision']({ name: denom }) || 6;
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
       });

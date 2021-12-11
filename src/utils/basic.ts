@@ -18,7 +18,7 @@ export function toHexString(byteArray) {
 export function getChainFromRecipient(recipient: string) {
   const prefix = bech32.decode(recipient).prefix;
   return (
-    (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
+    (Object.values(store.getters['demerisAPI/getChains']) as Chain[]).find(
       (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
     )?.chain_name ?? null
   );
@@ -37,10 +37,10 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
-  if (store.getters['demeris/isDemoAccount']) {
+  if (store.getters['demerisAPI/isDemoAccount']) {
     return demoAddresses[chain_name];
   } else {
-    const chain = store.getters['demeris/getChain']({ chain_name });
+    const chain = store.getters['demerisAPI/getChain']({ chain_name });
     const key = await window.keplr.getKey(chain.node_info.chain_id);
     return key.bech32Address;
   }

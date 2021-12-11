@@ -14,7 +14,7 @@ export default defineComponent({
     const store = useStore();
 
     const displayChain = computed(() => {
-      const displayName = store.getters['demeris/getDisplayChain']({ name: props.name });
+      const displayName = store.getters['demerisAPI/getDisplayChain']({ name: props.name });
       return displayName || props.name;
     });
     return { displayChain };

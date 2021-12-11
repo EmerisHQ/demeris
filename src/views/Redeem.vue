@@ -140,12 +140,12 @@ export default defineComponent({
             let balance = { ...newBalance };
             balance.hops = [];
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
+              store.getters['demerisAPI/getVerifyTrace']({
                 chain_name: balance.on_chain,
                 hash: balance.ibc.hash,
               }) ??
               (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+                'demerisAPI/GET_VERIFY_TRACE',
                 {
                   subscribe: false,
                   params: {
@@ -180,7 +180,7 @@ export default defineComponent({
     };
 
     const getRoute = (hash, chain_name) => {
-      const verifyTrace = store.getters['demeris/getVerifyTrace']({
+      const verifyTrace = store.getters['demerisAPI/getVerifyTrace']({
         chain_name,
         hash,
       });

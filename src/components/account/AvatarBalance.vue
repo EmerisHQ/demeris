@@ -57,13 +57,13 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const keplrAccountName = computed(() => {
-      return store.getters['demeris/getKeplrAccountName'];
+      return store.getters['demerisUSER/getKeplrAccountName'];
     });
     const keplrAddress = computed(() => {
-      return store.getters['demeris/getKeplrAddress'];
+      return store.getters['demerisUSER/getKeplrAddress'];
     });
     const isPriceApiAvailable = computed(() => {
-      return store.getters['demeris/getPrices'].Fiats.length > 0 ? true : false;
+      return store.getters['demerisAPI/getPrices'].Fiats.length > 0 ? true : false;
     });
 
     return {

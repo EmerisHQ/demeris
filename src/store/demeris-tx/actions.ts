@@ -80,11 +80,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
     try {
-      let chain = getters['demeris/getChain']({
+      let chain = getters['demerisAPI/getChain']({
         chain_name,
       }) as ChainData;
       if (!chain || !chain.node_info) {
-        chain = await dispatch('demeris/GET_CHAINS', {
+        chain = await dispatch('demerisAPI/GET_CHAINS', {
           subscribe: true,
           params: {
             chain_name,
@@ -99,7 +99,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
-      const numbers = await dispatch('demeris/GET_NUMBERS_CHAIN', {
+      const numbers = await dispatch('demerisAPI/GET_NUMBERS_CHAIN', {
         subscribe: false,
         params: {
           address: keyHashfromAddress(account.address),
@@ -126,7 +126,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
     try {
-      const response = await axios.post(getters['demeris/getEndpoint'] + '/tx/' + chain_name, {
+      const response = await axios.post(getters['demerisAPI/getEndpoint'] + '/tx/' + chain_name, {
         tx_bytes: tx,
         address,
       });

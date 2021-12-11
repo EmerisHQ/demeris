@@ -11,7 +11,7 @@ export default function useTheme(props: Props = {}) {
 
   const theme = computed({
     get() {
-      return store.getters['demeris/theme'] || 'system';
+      return store.getters['demerisUSER/theme'] || 'system';
     },
     set(value: string) {
       store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { theme: value } });

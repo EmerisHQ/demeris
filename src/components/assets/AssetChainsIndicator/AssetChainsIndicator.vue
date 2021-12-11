@@ -65,14 +65,14 @@ export default defineComponent({
         parseInt(parseCoins(amount)[0].amount) /
         Math.pow(
           10,
-          store.getters['demeris/getDenomPrecision']({
+          store.getters['demerisAPI/getDenomPrecision']({
             name: props.denom,
           }),
         )
       );
     };
     const getChainName = (chain_name) => {
-      return store.getters['demeris/getDisplayChain']({
+      return store.getters['demerisAPI/getDisplayChain']({
         name: chain_name,
       });
     };

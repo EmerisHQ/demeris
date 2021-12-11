@@ -231,8 +231,8 @@ export default defineComponent({
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-      const coinA = !!store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const coinB = !!store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+      const coinA = !!store.getters['demerisAPI/getPrice']({ denom: baseDenoms[0] });
+      const coinB = !!store.getters['demerisAPI/getPrice']({ denom: baseDenoms[1] });
       const all = coinA && coinB;
 
       return {
@@ -316,9 +316,9 @@ export default defineComponent({
       }
 
       const fromPrecision =
-        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+        store.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
       const toPrecision =
-        store.getters['demeris/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
+        store.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {

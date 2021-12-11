@@ -74,8 +74,8 @@ export default defineComponent({
         baseDenoms = props.pool.reserve_coin_denoms;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+      const priceA = store.getters['demerisAPI/getPrice']({ denom: baseDenoms[0] });
+      const priceB = store.getters['demerisAPI/getPrice']({ denom: baseDenoms[1] });
 
       if (!priceA || !priceB) {
         return false;
@@ -92,16 +92,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              store.getters['demerisAPI/getVerifyTrace']({
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: newDenoms[0].split('/')[1],
               }) ??
               (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+                'demerisAPI/GET_VERIFY_TRACE',
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: store.getters['demerisAPI/getDexChain'],
                     hash: newDenoms[0].split('/')[1],
                   },
                 },
@@ -117,16 +117,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              store.getters['demerisAPI/getVerifyTrace']({
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: newDenoms[1].split('/')[1],
               }) ??
               (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+                'demerisAPI/GET_VERIFY_TRACE',
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: store.getters['demerisAPI/getDexChain'],
                     hash: newDenoms[1].split('/')[1],
                   },
                 },

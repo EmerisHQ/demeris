@@ -46,16 +46,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              store.getters['demerisAPI/getVerifyTrace']({
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: newDenoms[0].split('/')[1],
               }) ??
               (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+                'demerisAPI/GET_VERIFY_TRACE',
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: store.getters['demerisAPI/getDexChain'],
                     hash: newDenoms[0].split('/')[1],
                   },
                 },
@@ -71,16 +71,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              store.getters['demerisAPI/getVerifyTrace']({
+                chain_name: store.getters['demerisAPI/getDexChain'],
                 hash: newDenoms[1].split('/')[1],
               }) ??
               (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+                'demerisAPI/GET_VERIFY_TRACE',
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: store.getters['demerisAPI/getDexChain'],
                     hash: newDenoms[1].split('/')[1],
                   },
                 },

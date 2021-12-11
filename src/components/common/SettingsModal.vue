@@ -310,7 +310,7 @@ export default defineComponent({
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters['demerisUSER/isDemoAccount'];
     });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
@@ -325,21 +325,21 @@ export default defineComponent({
     const settings = reactive({
       theme,
       gasLimit: computed({
-        get: () => store.getters['demeris/getGasLimit'],
+        get: () => store.getters['demerisAPI/getGasLimit'],
         set: (value: number) => {
           store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
         },
       }),
       allowCustomSlippage: computed({
-        get: () => store.getters['demeris/allowCustomSlippage'],
+        get: () => store.getters['demerisUSER/allowCustomSlippage'],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters['demeris/viewUnverified'],
+        get: () => store.getters['demerisUSER/viewUnverified'],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters['demeris/viewLPAssetPools'],
+        get: () => store.getters['demerisUSER/viewLPAssetPools'],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });

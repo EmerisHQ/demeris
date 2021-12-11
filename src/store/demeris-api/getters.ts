@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { GasPriceLevel, Pool } from '@/types/actions';
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';

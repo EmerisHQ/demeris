@@ -344,10 +344,10 @@ export default defineComponent({
 
     const { t } = useI18n({ useScope: 'global' });
 
-    const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
+    const gasPriceLevel = computed(() => store.getters['demerisAPI/getPreferredGasPriceLevel']);
 
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters['demerisAPI/isSignedIn'];
     });
     const interstitialProceed = ref(false);
     const mpDomain = ref('https://buy.moonpay.io');
@@ -355,7 +355,7 @@ export default defineComponent({
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+        walletAddress: store.getters['demerisAPI/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // baseCurrencyAmount: '50',
       };
@@ -370,7 +370,7 @@ export default defineComponent({
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
-          store.getters['demeris/getDisplayChain']({
+          store.getters['demerisAPI/getDisplayChain']({
             name: x,
           }),
         )
@@ -489,7 +489,7 @@ export default defineComponent({
             });
             const fee =
               parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[gasPriceLevel.value]) *
-              store.getters['demeris/getGasLimit'];
+              store.getters['demerisUSER/getGasLimit'];
             const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
             if (baseDenomBalance) {
               const amount = parseCoins(baseDenomBalance.amount)[0];
@@ -611,7 +611,7 @@ export default defineComponent({
       },
     );
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters['demerisAPI/isDemoAccount'];
     });
     const confirm = async () => {
       if (isDemoAccount.value) {
@@ -674,11 +674,11 @@ export default defineComponent({
                     amount:
                       '' +
                       parseFloat(feeOptions[0].amount[gasPriceLevel.value as GasPriceLevel]) *
-                        store.getters['demeris/getGasLimit'],
+                        store.getters['demerisUSER/getGasLimit'],
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '' + store.getters['demeris/getGasLimit'],
+                gas: '' + store.getters['demerisUSER/getGasLimit'],
               };
               let tx;
               event('confirm_tx', {
@@ -749,7 +749,7 @@ export default defineComponent({
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
                   ) {
-                    txResultData = await store.getters['demeris/getTxStatus']({
+                    txResultData = await store.getters['demerisAPI/getTxStatus']({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });

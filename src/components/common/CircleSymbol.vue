@@ -169,8 +169,8 @@ export default defineComponent({
     });
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
-      const chains: Chains = store.getters['demeris/getChains'] || [];
+      const verifiedDenoms: VerifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'] || [];
+      const chains: Chains = store.getters['demerisAPI/getChains'] || [];
 
       const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
 

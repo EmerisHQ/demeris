@@ -58,12 +58,12 @@ export default defineComponent({
     const chainsNumber = ref(0);
     const store = useStore();
     onMounted(async () => {
-      selectedDenomDisplay.value = await getDisplayName(props.selectedDenom, store.getters['demeris/getDexChain']);
+      selectedDenomDisplay.value = await getDisplayName(props.selectedDenom, store.getters['demerisAPI/getDexChain']);
     });
     watch(
       () => props.selectedDenom,
       async (newName) => {
-        selectedDenomDisplay.value = await getDisplayName(newName, store.getters['demeris/getDexChain']);
+        selectedDenomDisplay.value = await getDisplayName(newName, store.getters['demerisAPI/getDexChain']);
       },
     );
     function filterAsset(assets, keyword) {

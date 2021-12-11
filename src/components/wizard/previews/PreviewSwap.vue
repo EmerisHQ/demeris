@@ -66,7 +66,7 @@
           :amount="{
             amount:
               10 **
-              store.getters['demeris/getDenomPrecision']({
+              store.getters['demerisAPI/getDenomPrecision']({
                 name: fromCoinBaseDenom,
               }),
             denom: data.from.denom,
@@ -169,7 +169,7 @@ export default defineComponent({
 
     //for receive coin chain_name(always cosmos hub)
     const dexChainName = computed(() => {
-      return store.getters['demeris/getDexChain'];
+      return store.getters['demerisAPI/getDexChain'];
     });
 
     // minReceivedAmount & limit price
@@ -191,10 +191,10 @@ export default defineComponent({
 
         let swapPrice = null;
 
-        const fromPrecision = store.getters['demeris/getDenomPrecision']({
+        const fromPrecision = store.getters['demerisAPI/getDenomPrecision']({
           name: fromCoinBaseDenom.value,
         });
-        const toPrecision = store.getters['demeris/getDenomPrecision']({
+        const toPrecision = store.getters['demerisAPI/getDenomPrecision']({
           name: toCoinBaseDenom.value,
         });
 
@@ -219,7 +219,7 @@ export default defineComponent({
             ((1 / Number(swapPrice)) *
               Number(
                 10 **
-                  store.getters['demeris/getDenomPrecision']({
+                  store.getters['demerisAPI/getDenomPrecision']({
                     name: fromCoinBaseDenom.value,
                   }),
               ) *
@@ -233,7 +233,7 @@ export default defineComponent({
 
     //user slippage tolerance
     const slippageTolerance = computed(() => {
-      return store.getters['demeris/getSlippagePerc'] || 0.5;
+      return store.getters['demerisAPI/getSlippagePerc'] || 0.5;
     });
 
     const payCoinChainName = ref('');
@@ -241,11 +241,11 @@ export default defineComponent({
       () => data.value.from.denom,
       async () => {
         if (isNative(data.value.from.denom)) {
-          payCoinChainName.value = store.getters['demeris/getDexChain'];
+          payCoinChainName.value = store.getters['demerisAPI/getDexChain'];
         } else {
           const verifyTrace =
-            store.getters['demeris/getVerifyTrace']({
-              chain_name: store.getters['demeris/getDexChain'],
+            store.getters['demerisAPI/getVerifyTrace']({
+              chain_name: store.getters['demerisAPI/getDexChain'],
               hash: data.value.from.denom.split('/')[1],
             }) ??
             (await store.dispatch(
@@ -253,7 +253,7 @@ export default defineComponent({
               {
                 subscribe: false,
                 params: {
-                  chain_name: store.getters['demeris/getDexChain'],
+                  chain_name: store.getters['demerisAPI/getDexChain'],
                   hash: data.value.from.denom.split('/')[1],
                 },
               },
@@ -267,7 +267,7 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[store.getters['demeris/getDexChain']]['uatom'];
+      return props.fees[store.getters['demerisAPI/getDexChain']]['uatom'];
     });
 
     const size = props.context === 'default' ? 'md' : 'sm';

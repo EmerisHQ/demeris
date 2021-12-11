@@ -599,14 +599,14 @@ export default defineComponent({
                   props.txResult.demandCoinSwappedAmount /
                   Math.pow(
                     10,
-                    store.getters['demeris/getDenomPrecision']({
+                    store.getters['demerisAPI/getDenomPrecision']({
                       name: sendBaseDenom.value,
                     }),
                   );
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
-                    store.getters['demeris/getDexChain'],
+                    store.getters['demerisAPI/getDexChain'],
                   ),
                 });
               } else {

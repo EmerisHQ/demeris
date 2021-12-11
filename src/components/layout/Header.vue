@@ -133,10 +133,10 @@ export default defineComponent({
         : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
     });
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters['demerisUSER/isDemoAccount'];
     });
     const showBadge = computed(() => {
-      return store.getters['demeris/hasSeenReedem'] ? false : true;
+      return store.getters['demerisUSER/hasSeenReedem'] ? false : true;
     });
     const settingsRef = ref(null);
 

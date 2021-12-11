@@ -158,13 +158,13 @@ export default defineComponent({
 
     const precisions = computed(() => {
       return {
-        coinA: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[0] }) ?? 6,
-        coinB: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[1] }) ?? 6,
+        coinA: store.getters['demerisAPI/getDenomPrecision']({ name: poolInfo.denoms[0] }) ?? 6,
+        coinB: store.getters['demerisAPI/getDenomPrecision']({ name: poolInfo.denoms[1] }) ?? 6,
       };
     });
 
     const chainName = computed(() => {
-      return store.getters['demeris/getDexChain'];
+      return store.getters['demerisAPI/getDexChain'];
     });
 
     const hasPool = computed(() => {

@@ -12,12 +12,12 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
   const price = ref();
 
   const priceObserver = computed(() => {
-    return store.getters['demeris/getPrice']({ denom: denom.value });
+    return store.getters['demerisAPI/getPrice']({ denom: denom.value });
   });
 
   const displayPrice = computed(() => {
     const precision =
-      store.getters['demeris/getDenomPrecision']({
+      store.getters['demerisAPI/getDenomPrecision']({
         name: denom.value,
       }) ?? '6';
     let value;
