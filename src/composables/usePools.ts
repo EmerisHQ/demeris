@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import { store, useAllStores } from '@/store/index';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
@@ -43,7 +43,7 @@ function usePools() {
         for (const addedPool of addedPools) {
           const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
 
-          store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
+          store.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
             subscribe: false,
             params: { address: hashAddress },
           });
@@ -58,7 +58,7 @@ function usePools() {
     Goal is to avoid declarations such as:
     helperFunction(pool: Pool) and  helperFunctionById(pool_id: string)
     but use:
-    helperFunction(pool) and helperFunction(poolById(pool_id)) 
+    helperFunction(pool) and helperFunction(poolById(pool_id))
     if necessary
   */
 
@@ -72,7 +72,7 @@ function usePools() {
   */
   const updatePool = (pool: Pool) => {
     const hashAddress = keyHashfromAddress(pool.reserve_account_address);
-    store.dispatch(GlobalDemerisActionTypes.GET_POOL_BALANCES, {
+    store.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
       subscribe: false,
       params: { address: hashAddress },
     });
@@ -95,7 +95,7 @@ function usePools() {
   };
 
   /*
-    compare an order of reserve denoms to an order of tickers 
+    compare an order of reserve denoms to an order of tickers
     ex: basecro, uatom <=> ATOM, CRO (true)
   */
   const getIsReversePairName = async (pool: Pool, poolName: string) => {

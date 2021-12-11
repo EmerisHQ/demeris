@@ -2,8 +2,8 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { ChainData } from '@/store/demeris/state';
+import { GlobalDemerisActionTypes } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 import * as Actions from '@/types/actions';
 import * as API from '@/types/api';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
@@ -50,7 +50,7 @@ export async function redeem({ amount, chain_name }: ChainAmount) {
           hash: amount.denom.split('/')[1],
         }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           {
             subscribe: false,
             params: {
@@ -135,7 +135,7 @@ export async function memoTransfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -171,7 +171,7 @@ export async function memoTransfer({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+        GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -187,7 +187,7 @@ export async function memoTransfer({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+        GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -297,7 +297,7 @@ export async function memoTransfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -378,7 +378,7 @@ export async function transfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -406,7 +406,7 @@ export async function transfer({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+        GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -422,7 +422,7 @@ export async function transfer({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+        GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -515,7 +515,7 @@ export async function transfer({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -577,7 +577,7 @@ export async function move({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: chain_name, destination_chain_name: destination_chain_name },
@@ -603,7 +603,7 @@ export async function move({
             destination_chain_name: chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
@@ -627,7 +627,7 @@ export async function move({
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name, hash: amount.denom.split('/')[1] }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+        GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name, hash: amount.denom.split('/')[1] } },
         { root: true },
       ));
@@ -642,7 +642,7 @@ export async function move({
         destination_chain_name: verifyTrace.trace[0].counterparty_name,
       }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+        GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
         {
           subscribe: true,
           params: {
@@ -688,7 +688,7 @@ export async function move({
           destination_chain_name: chain_name,
         }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
           {
             subscribe: true,
             params: { chain_name: destination_chain_name, destination_chain_name: chain_name },
@@ -732,7 +732,7 @@ export async function move({
             destination_chain_name: destination_chain_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -760,7 +760,7 @@ export async function move({
             destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
             {
               subscribe: true,
               params: {
@@ -1384,7 +1384,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 
   if (!trace) {
     trace = await store.dispatch(
-      GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+      GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
       { subscribe: false, params: { chain_name, hash } },
       { root: true },
     );
@@ -1501,7 +1501,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
     try {
       for (const denom of ibcDenoms) {
         await store.dispatch(
-          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           {
             subscribe: false,
             cache: false,
@@ -1541,7 +1541,7 @@ export async function getDisplayName(name, chain_name = null) {
       verifyTrace =
         store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
@@ -1566,7 +1566,7 @@ export async function getTicker(name, chain_name = null) {
       verifyTrace =
         store.getters['demeris/getVerifyTrace']({ chain_name, hash: name.split('/')[1] }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
           { subscribe: false, params: { chain_name, hash: name.split('/')[1] } },
           { root: true },
         ));
@@ -1584,7 +1584,7 @@ export async function isLive(chain_name) {
       chain_name,
     }) ??
     (await store.dispatch(
-      GlobalDemerisActionTypes.GET_CHAIN_STATUS,
+      GlobalDemerisActionTypes.API.GET_CHAIN_STATUS,
       {
         subscribe: false,
         params: {
@@ -1703,7 +1703,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
         verifyTrace =
           store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
             { root: true },
           ));
@@ -1717,7 +1717,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
           {
             subscribe: true,
             params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
@@ -1757,7 +1757,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         verifyTrace =
           store.getters['demeris/getVerifyTrace']({ chain_name: balance.on_chain, hash: balance.ibc.hash }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
             { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
             { root: true },
           ));
@@ -1775,7 +1775,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
           destination_chain_name: verifyTrace.trace[0].counterparty_name,
         }) ??
         (await store.dispatch(
-          GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
           {
             subscribe: false,
             params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
@@ -1881,10 +1881,10 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
 
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_RELAYER_STATUS, {
           subscribe: false,
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_RELAYER_BALANCES, {
           subscribe: false,
         });
         if (
@@ -1911,10 +1911,10 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
             failedChains.push(dest_chain_name);
           }
         }
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_STATUS, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_RELAYER_STATUS, {
           subscribe: false,
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_RELAYER_BALANCES, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_RELAYER_BALANCES, {
           subscribe: false,
         });
         if (
@@ -2746,7 +2746,7 @@ export async function isValidIBCReserveDenom(
     verifyTrace =
       store.getters['demeris/getVerifyTrace']({ chain_name: dexChain, hash: denom.split('/')[1] }) ??
       (await store.dispatch(
-        GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+        GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
         { subscribe: false, params: { chain_name: dexChain, hash: denom.split('/')[1] } },
         { root: true },
       ));
@@ -2770,7 +2770,7 @@ export async function isValidIBCReserveDenom(
       destination_chain_name: verifyTrace.trace[0].counterparty_name,
     }) ??
     (await store.dispatch(
-      GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL,
+      GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
       {
         subscribe: false,
         params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },

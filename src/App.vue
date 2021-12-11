@@ -25,8 +25,7 @@ import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { useAllStores, useStore } from '@/store';
 
-import { GlobalDemerisActionTypes as GlobalActionTypes } from './store';
-import { GlobalDemerisActionTypes } from './store/demeris/action-types';
+import { GlobalDemerisActionTypes } from './store';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -53,28 +52,27 @@ export default defineComponent({
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
-      await store.dispatch(GlobalActionTypes.TX.RESET_STATE);
-      // GlobalDemerisTXActionTypes.RESET_STATE
-
-      await store.dispatch(GlobalDemerisActionTypes.INIT, {
+      await store.dispatch(GlobalDemerisActionTypes.API.INIT, {
         endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
-        gas_limit: gasLimit,
+      });
+      await store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+        gasLimit: gasLimit,
       });
       status.value = t('appInit.status.assetLoading');
-      await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
+      await store.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
       status.value = t('appInit.status.chainLoading');
-      let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
+      let chains = await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
         subscribe: false,
       });
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
           displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
           subscribe: true,
           params: {
             chain_name: chain,
@@ -83,7 +81,7 @@ export default defineComponent({
         status.value = t('appInit.status.chainStatus', {
           displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
           subscribe: true,
           params: {
             chain_name: chain,
@@ -114,7 +112,7 @@ export default defineComponent({
       }
       status.value = t('appInit.status.priceFetching');
       try {
-        await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
+        await store.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
           subscribe: true,
         });
       } catch (e) {
@@ -122,16 +120,16 @@ export default defineComponent({
       }
       status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
-        await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+        await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
       } else {
         if (autoLoginDemo()) {
-          await store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+          await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
         }
       }
       window.addEventListener('keplr_keystorechange', async () => {
         window.localStorage.setItem('lastEmerisSession', '');
         if (store.getters['demeris/isSignedIn'] && !store.getters['demeris/isDemoAccount']) {
-          await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+          await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
         }
       });
       initialized.value = true;

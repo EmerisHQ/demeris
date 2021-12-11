@@ -122,7 +122,7 @@ import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -249,7 +249,7 @@ export default defineComponent({
               hash: data.value.from.denom.split('/')[1],
             }) ??
             (await store.dispatch(
-              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {

@@ -107,7 +107,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -123,7 +123,7 @@ export default defineComponent({
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
     const store = useStore();
     pageview({ page_title: 'Redeem', page_path: '/redeem' });
-    store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+    store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,

@@ -149,7 +149,7 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import { useStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
@@ -237,7 +237,7 @@ export default defineComponent({
               hash: pool.reserve_coin_denoms[0].split('/')[1],
             }) ??
             (await store.dispatch(
-              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
@@ -261,7 +261,7 @@ export default defineComponent({
               hash: pool.reserve_coin_denoms[1].split('/')[1],
             }) ??
             (await store.dispatch(
-              GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
               {
                 subscribe: false,
                 params: {
@@ -326,7 +326,7 @@ export default defineComponent({
                   hash: pool.reserve_coin_denoms[0].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {
@@ -350,7 +350,7 @@ export default defineComponent({
                   hash: pool.reserve_coin_denoms[1].split('/')[1],
                 }) ??
                 (await store.dispatch(
-                  GlobalDemerisActionTypes.GET_VERIFY_TRACE,
+                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                   {
                     subscribe: false,
                     params: {

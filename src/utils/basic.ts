@@ -5,7 +5,7 @@ import { bech32 } from 'bech32';
 
 import { Chain } from '@/types/api';
 
-import { demoAddresses } from '../store/demeris/demo-account';
+import { demoAddresses } from '../store/demeris-user/demo-account';
 import { store } from '../store/index';
 
 export function toHexString(byteArray) {

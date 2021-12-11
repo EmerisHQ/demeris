@@ -1,7 +1,7 @@
 import { computed, watch } from 'vue';
 import { useStore } from 'vuex';
 
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 
 type Props = {
   updateOnChange?: boolean;
@@ -14,7 +14,7 @@ export default function useTheme(props: Props = {}) {
       return store.getters['demeris/theme'] || 'system';
     },
     set(value: string) {
-      store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { theme: value } });
+      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { theme: value } });
     },
   });
 

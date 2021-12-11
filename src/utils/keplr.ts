@@ -1,4 +1,4 @@
-import { ChainData } from '@/store/demeris/state';
+import { ChainData } from '@/store/demeris-api/state';
 import { Denom } from '@/types/api';
 import { AmountWithMeta } from '@/types/base';
 

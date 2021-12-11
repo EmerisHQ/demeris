@@ -252,7 +252,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -274,7 +274,7 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import {
   CreatePoolData,
   FeeTotals,
@@ -686,7 +686,7 @@ export default defineComponent({
                 event_category: 'transactions',
               });
               try {
-                tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+                tx = await store.dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
                   msgs: [res.msg],
                   chain_name: res.chain_name,
                   fee,
@@ -713,7 +713,7 @@ export default defineComponent({
                 let result;
                 try {
                   await ensureTraceChannel(stepTx);
-                  result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
+                  result = await store.dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
@@ -728,7 +728,7 @@ export default defineComponent({
                   continue;
                 }
                 try {
-                  let txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+                  let txResultData = await store.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
@@ -806,7 +806,7 @@ export default defineComponent({
                       let retries = 0;
                       while (retries < 10) {
                         try {
-                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentDataRaw.data.name,
                           });

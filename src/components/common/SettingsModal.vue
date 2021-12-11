@@ -284,7 +284,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 
 export default defineComponent({
   name: 'SettingsModal',
@@ -319,7 +319,7 @@ export default defineComponent({
       (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { [key]: value } });
+      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
     };
 
     const settings = reactive({
@@ -327,7 +327,7 @@ export default defineComponent({
       gasLimit: computed({
         get: () => store.getters['demeris/getGasLimit'],
         set: (value: number) => {
-          store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: value });
+          store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
         },
       }),
       allowCustomSlippage: computed({
@@ -379,7 +379,7 @@ export default defineComponent({
       } else {
         emit('disconnect');
         window.localStorage.setItem('lastEmerisSession', '');
-        store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+        store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
       }
     };
 

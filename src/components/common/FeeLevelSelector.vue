@@ -132,7 +132,7 @@ import { useStore } from 'vuex';
 import Alert from '@/components/ui/Alert.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
 import { feeForSteps, getTicker } from '@/utils/actionHandler';
 
@@ -344,7 +344,7 @@ export default defineComponent({
     const gasPriceLevel = computed({
       get: () => store.getters['demeris/getPreferredGasPriceLevel'],
       set: (level: GasPriceLevel) => {
-        store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
+        store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },
     });
 

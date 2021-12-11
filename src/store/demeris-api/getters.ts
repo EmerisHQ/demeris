@@ -13,7 +13,7 @@ export type Getters = {
   getBalances(state: State): { (params: API.APIRequests): API.Balances | null };
   getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances | null };
   getNumbers(state: State): { (params: API.APIRequests): API.Numbers | null };
-  getAllBalances(state: State): API.Balances | null;
+  getAllBalances(state: State, getters, rootState): API.Balances | null;
   getAllStakingBalances(state: State): API.StakingBalances | null;
   getAllNumbers(state: State): API.Numbers | null;
   getFeeAddresses(state: State): API.FeeAddresses | null;
@@ -29,8 +29,6 @@ export type Getters = {
   getTicker(
     state: State,
     getters,
-    rootState,
-    rootGetters,
   ): {
     (params: { name: string }): string;
   };
@@ -44,7 +42,7 @@ export type Getters = {
   getAllValidPools(state: State): Pool[];
   getDexChain(state: State): string;
   getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
-  getOwnAddress(state: State): { (params: API.APIRequests): string | null };
+  getOwnAddress(state: State, getters, rootState): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
   getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config | null };
@@ -55,6 +53,11 @@ export type Getters = {
   getChainStatus(state: State): { (params: API.APIRequests): boolean };
 };
 
+function getKeplr(rootState) {
+  // FIXME: this is hacky, should use namespace constant
+  return rootState.demerisUSER.keplr;
+}
+
 export const getters: GetterTree<State, RootState> & Getters = {
   getBalances: (state) => (params) => {
     return state.balances[(params as API.AddrReq).address] ?? null;
@@ -62,15 +65,15 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getStakingBalances: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
-  getAllBalances: (state) => {
-    if (!state.keplr) {
+  getAllBalances: (state: State, getters, rootState) => {
+    if (!getKeplr(rootState)) {
       return null;
     }
 
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
-      .filter((balance) => state.keplr.keyHashes.indexOf(balance.address) > -1)
+      .filter((balance) => getKeplr(rootState).keyHashes.indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
@@ -88,9 +91,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getNumbersChain: (state) => (params) => {
     return state.chainnumbers[(params as API.ChainAddrReq).chain_name][(params as API.ChainAddrReq).address] ?? null;
-  },
-  getSlippagePerc: (state) => {
-    return state._Session.slippagePerc;
   },
   getRelayerStatus: (state) => {
     return state.relayer;
@@ -238,11 +238,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getTxStatus: (state) => (params) => {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
   },
-  getOwnAddress: (state) => (params) => {
+  getOwnAddress: (state: State, getters, rootState) => (params) => {
     return (
       chainAddressfromAddress(
         state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-        state.keplr.bech32Address,
+        getKeplr(rootState).bech32Address,
       ) ?? null
     );
   },

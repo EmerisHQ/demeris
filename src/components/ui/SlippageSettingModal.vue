@@ -120,7 +120,7 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
 import { store } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 
 type SwapData = {
@@ -234,7 +234,7 @@ export default defineComponent({
       validSlippageUpdater(value) {
         const slippage = Number(value);
         if (slippage > 0 && slippage <= 100) {
-          store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { slippagePerc: slippage } });
+          store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { slippagePerc: slippage } });
         }
       },
     });

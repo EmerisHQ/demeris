@@ -267,7 +267,7 @@ import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { useStore } from '@/store';
-import { ChainData } from '@/store/demeris/state';
+import { ChainData } from '@/store/demeris-api/state';
 import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
