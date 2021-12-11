@@ -19,13 +19,11 @@ export type TransactionItem = {
 export type State = {
   endpoint: string;
   hub_chain: string;
-  gas_limit: number;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
   numbers: Record<string, API.Numbers>;
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
   verifiedDenoms: API.VerifiedDenoms;
-  keplr: KeplrKeyData;
   prices: API.Prices;
   relayer: boolean;
   chains: Record<string, ChainData>;
@@ -33,20 +31,17 @@ export type State = {
   validPools: Pool[];
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
-  _Session: UserData | Record<string, never>;
 };
 export function getDefaultState(): State {
   return {
     endpoint: '',
     hub_chain: 'cosmoshub-4',
-    gas_limit: 500000,
     balances: {},
     stakingBalances: {},
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
     validPools: [],
-    keplr: null,
     prices: {
       Fiats: [],
       Tokens: [],
@@ -56,6 +51,5 @@ export function getDefaultState(): State {
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),
-    _Session: {},
   };
 }

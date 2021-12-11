@@ -9,9 +9,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
 import { hashObject, keyHashfromAddress } from '@/utils/basic';
-import { addChain } from '@/utils/keplr';
 
 import {
   DemerisActionParams,
@@ -25,8 +23,6 @@ import {
   DemerisSubscriptions,
   GlobalDemerisActionTypes,
 } from './action-types';
-import DemerisSigningClient from './demerisSigningClient';
-import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
@@ -73,11 +69,6 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.Balances>;
-  [DemerisActionTypes.REDEEM_GET_HAS_SEEN]({ commit, getters }: ActionContext<State, RootState>): Promise<boolean>;
-  [DemerisActionTypes.REDEEM_SET_HAS_SEEN](
-    { commit, getters }: ActionContext<State, RootState>,
-    seen: boolean,
-  ): Promise<void>;
   [DemerisActionTypes.GET_STAKING_BALANCES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
@@ -128,16 +119,6 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
   ): Promise<API.Prices>;
-
-  [DemerisActionTypes.SET_SESSION_DATA](
-    { commit, getters, state }: ActionContext<State, RootState>,
-    { data: UserData }: DemerisSessionParams,
-  ): Promise<void>;
-  [DemerisActionTypes.LOAD_SESSION_DATA](
-    { commit, getters }: ActionContext<State, RootState>,
-    { walletName, isDemoAccount }: { walletName: string; isDemoAccount: boolean },
-  ): Promise<void>;
-  // Chain-specific endpoint actions
   [DemerisActionTypes.GET_VERIFY_TRACE](
     { commit, getters, state }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsTraceParams,
@@ -166,37 +147,15 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<boolean>;
-
-  [DemerisActionTypes.BROADCAST_TX](
-    { commit, getters }: ActionContext<State, RootState>,
-    { tx, chain_name }: DemerisTxParams,
-  ): Promise<TicketResponse>;
-
   [DemerisActionTypes.GET_END_BLOCK_EVENTS](
     { commit, getters }: ActionContext<State, RootState>,
     { height }: DemerisTxResultParams,
   ): Promise<unknown>;
 
-  [DemerisActionTypes.SIGN_WITH_KEPLR](
-    { commit, getters }: ActionContext<State, RootState>,
-    { msgs, chain_name }: DemerisSignParams,
-  ): Promise<DemerisTxParams>;
-  [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }: ActionContext<State, RootState>): Promise<boolean>;
-  [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({
-    commit,
-    getters,
-    dispatch,
-  }: ActionContext<State, RootState>): Promise<boolean>;
-  // Internal module actions
-  [DemerisActionTypes.SET_GAS_LIMIT](
-    { commit }: ActionContext<State, RootState>,
-    { gasLimit }: { gasLimit: number },
-  ): Promise<void>;
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
-  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
@@ -212,12 +171,6 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_POOL_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_POOL_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_POOL_BALANCES]>;
-  [GlobalDemerisActionTypes.REDEEM_GET_HAS_SEEN](
-    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>
-  ): ReturnType<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>;
-  [GlobalDemerisActionTypes.REDEEM_SET_HAS_SEEN](
-    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>
-  ): ReturnType<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>;
   [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
     ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
   ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
@@ -281,36 +234,12 @@ export interface GlobalActions {
   [GlobalDemerisActionTypes.GET_CHAIN_STATUS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>;
-  [GlobalDemerisActionTypes.BROADCAST_TX](
-    ...args: Parameters<Actions[DemerisActionTypes.BROADCAST_TX]>
-  ): ReturnType<Actions[DemerisActionTypes.BROADCAST_TX]>;
   [GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS](
     ...args: Parameters<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>
   ): ReturnType<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>;
-  [GlobalDemerisActionTypes.SIGN_WITH_KEPLR](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>;
-  [GlobalDemerisActionTypes.SIGN_IN](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
-  [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
-  [GlobalDemerisActionTypes.SET_GAS_LIMIT](
-    ...args: Parameters<Actions[DemerisActionTypes.SET_GAS_LIMIT]>
-  ): ReturnType<Actions[DemerisActionTypes.SET_GAS_LIMIT]>;
-  [GlobalDemerisActionTypes.SET_SESSION_DATA](
-    ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
-  ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
-  [GlobalDemerisActionTypes.LOAD_SESSION_DATA](
-    ...args: Parameters<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>
-  ): ReturnType<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>;
   [GlobalDemerisActionTypes.INIT](
     ...args: Parameters<Actions[DemerisActionTypes.INIT]>
   ): ReturnType<Actions[DemerisActionTypes.INIT]>;
-  [GlobalDemerisActionTypes.SIGN_OUT](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_OUT]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_OUT]>;
   [GlobalDemerisActionTypes.RESET_STATE](
     ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
   ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
@@ -433,13 +362,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
-    const redeem = window.localStorage.getItem('redeem');
-    return redeem === 'true' ? true : false;
-  },
-  async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
-    seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
-  },
   async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
 
@@ -543,153 +465,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetFeeAddresses', 'Could not perform API query.');
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
-  },
-  async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
-    const data = window.localStorage.getItem(walletName);
-    if (data) {
-      const newData = { ...JSON.parse(data), updateDT: Date.now() };
-      window.localStorage.setItem(walletName, JSON.stringify(newData));
-      commit('SET_SESSION_DATA', newData);
-    } else {
-      const newData = {
-        customSlippage: false,
-        viewUnverified: false,
-        viewLPAssetPools: false,
-        gasPriceLevel: GasPriceLevel.AVERAGE,
-        hasSeenRedeem: false,
-        slippagePerc: 0.1,
-        updateDT: Date.now(),
-        isDemoAccount,
-      };
-      window.localStorage.setItem(walletName, JSON.stringify(newData));
-      commit('SET_SESSION_DATA', newData);
-    }
-    commit('SUBSCRIBE', { action: DemerisActionTypes.SET_SESSION_DATA, payload: { data: null } });
-  },
-  async [DemerisActionTypes.SET_SESSION_DATA]({ commit, getters, state }, { data }: DemerisSessionParams) {
-    if (data) {
-      window.localStorage.setItem(
-        getters['getKeplrAccountName'],
-        JSON.stringify({ ...state._Session, ...data, updateDT: Date.now() }),
-      );
-      commit('SET_SESSION_DATA', { ...data, updateDT: Date.now() });
-    } else {
-      window.localStorage.setItem(
-        getters['getKeplrAccountName'],
-        JSON.stringify({ ...state._Session, updateDT: Date.now() }),
-      );
-      commit('SET_SESSION_DATA', { updateDT: Date.now() });
-    }
-  },
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
-    try {
-      let chain = getters['getChain']({
-        chain_name,
-      }) as ChainData;
-      if (!chain || !chain.node_info) {
-        chain = await dispatch(DemerisActionTypes.GET_CHAIN, {
-          subscribe: true,
-          params: {
-            chain_name,
-          },
-        });
-      }
-      // await addChain(chain_name);
-
-      await window.keplr.enable(chain.node_info.chain_id);
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
-      const [account] = await offlineSigner.getAccounts();
-
-      const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
-
-      const numbers = await dispatch(DemerisActionTypes.GET_NUMBERS_CHAIN, {
-        subscribe: false,
-        params: {
-          address: keyHashfromAddress(account.address),
-          chain_name: chain_name,
-        },
-      });
-
-      const signerData = numbers;
-      const cosmjsSignerData = {
-        chainId: chain.node_info.chain_id,
-        accountNumber: parseInt(signerData.account_number),
-        sequence: parseInt(signerData.sequence_number),
-      };
-      const tx = await (client as DemerisSigningClient).signWMeta(account.address, msgs, fee, memo, cosmjsSignerData);
-
-      const tx_data = Buffer.from(tx).toString('base64');
-      //console.log(Buffer.from(tx).toString('hex'));
-      return { tx: tx_data, chain_name, address: account.address };
-    } catch (e) {
-      console.error(e);
-      throw new SpVuexError('Demeris:SignWithKeplr', 'Could not sign TX.');
-    }
-  },
-
-  async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
-    try {
-      await dispatch(DemerisActionTypes.SIGN_OUT);
-
-      const chains = getters['getChains'];
-      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
-      for (const chain in chains) {
-        await addChain(chain);
-      }
-      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
-      const paths = new Set();
-      const toQuery = [];
-      for (const chain_name in chains) {
-        const chain = chains[chain_name];
-        if (paths.has(chain.derivation_path)) {
-          continue;
-        }
-        paths.add(chain.derivation_path);
-        toQuery.push(chain);
-      }
-      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
-      await window.keplr.enable(dexchain.node_info.chain_id);
-      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
-      commit(DemerisMutationTypes.SET_KEPLR, key);
-      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
-      for (const chain of toQuery) {
-        await window.keplr.enable(chain.node_info.chain_id);
-        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
-      }
-      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
-
-      dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
-      dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
-        subscribe: true,
-      });
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-  },
-
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
-    try {
-      await dispatch(DemerisActionTypes.SIGN_OUT);
-      const key = demoAccount;
-      commit(DemerisMutationTypes.SET_KEPLR, { ...key });
-      for (const hash of key.keyHashes) {
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, hash);
-      }
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
-      dispatch('common/wallet/signIn', { keplr: null }, { root: true });
-      event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
-      dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
-      dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {
-        subscribe: true,
-      });
-      return true;
-    } catch (e) {
-      return false;
-    }
   },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state }, { subscribe = false }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
@@ -982,23 +757,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
-    try {
-      const response = await axios.post(getters['getEndpoint'] + '/tx/' + chain_name, { tx_bytes: tx, address });
-      return response.data;
-    } catch (e) {
-      const cause = e.response?.data?.cause || e.message;
-      throw new SpVuexError('Demeris:BroadcastTx', 'Could not broadcastTx.' + cause);
-    }
-  },
-  async [DemerisActionTypes.SET_GAS_LIMIT]({ commit }, { gasLimit }: { gasLimit: number }) {
-    try {
-      commit('SET_GAS_LIMIT', { value: gasLimit });
-    } catch (e) {
-      throw new SpVuexError('Demeris:SetGasLimit', 'Could not set Gas Limit');
-    }
-  },
-
   async [DemerisActionTypes.GET_TXS]({ getters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/txs/' + txhash);
@@ -1078,10 +836,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
-  },
-  [DemerisActionTypes.SIGN_OUT]({ commit }) {
-    event('sign_out', { event_label: 'Signed out', event_category: 'authentication' });
-    commit(DemerisMutationTypes.SIGN_OUT);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach(async (subscription_json) => {

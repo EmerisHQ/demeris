@@ -19,7 +19,6 @@ export type Getters = {
   getFeeAddresses(state: State): API.FeeAddresses | null;
   getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
   getChains(state: State): Record<string, ChainData>;
-  getGasLimit(state: State): number;
   getPrices(state: State): API.Prices;
   getPrice(
     state: State,
@@ -41,24 +40,10 @@ export type Getters = {
   getDenomPrecision(state: State): {
     (params: { name: string }): string;
   };
-  isVerified(state: State): {
-    (params: { denom: string; chain_name: string }): boolean;
-  };
   getEndpoint(state: State): string;
   getAllValidPools(state: State): Pool[];
-  isSignedIn(state: State): boolean;
   getDexChain(state: State): string;
-  getKeyhashes(state: State): string[];
   getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
-  getKeplrAccountName(state: State): string | null;
-  isDemoAccount(state: State): boolean;
-  hasSeenReedem(state: State): boolean;
-  viewUnverified(state: State): boolean;
-  viewLPAssetPools(state: State): boolean;
-  allowCustomSlippage(state: State): boolean;
-  getSlippagePerc(state: State): number;
-  theme(state: State): string;
-  getPreferredGasPriceLevel(state: State): GasPriceLevel;
   getOwnAddress(state: State): { (params: API.APIRequests): string | null };
   getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
@@ -116,27 +101,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getRelayerChainStatus: (state) => (params) => {
     return true || (state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer);
   },
-  isDemoAccount: (state) => {
-    return state._Session.isDemoAccount;
-  },
-  hasSeenReedem: (state) => {
-    return state._Session.hasSeenRedeem;
-  },
-  theme: (state) => {
-    return state._Session.theme;
-  },
-  getPreferredGasPriceLevel: (state) => {
-    return state._Session.gasPriceLevel;
-  },
-  allowCustomSlippage: (state) => {
-    return state._Session.customSlippage;
-  },
-  viewUnverified: (state) => {
-    return state._Session.viewUnverified;
-  },
-  viewLPAssetPools: (state) => {
-    return state._Session.viewLPAssetPools;
-  },
   getAllNumbers: (state) => {
     const numbers = Object.values(state.numbers).flat();
     return numbers.length > 0 ? numbers : null;
@@ -186,9 +150,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getPrices: (state) => {
     return state.prices;
-  },
-  isVerified: (state) => (params) => {
-    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
   getExchangeAmountFromATOMPool: (state, getters) => (base_denom: string) => {
     const traces = getters['getAllVerifiedTraces'];
@@ -271,12 +232,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   getEndpoint: (state) => {
     return state.endpoint;
   },
-  isSignedIn: (state) => {
-    return state.keplr ? true : false;
-  },
-  getKeplrAccountName: (state) => {
-    return state.keplr?.name ?? null;
-  },
   getDexChain: (state) => {
     return state.hub_chain;
   },
@@ -290,20 +245,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
         state.keplr.bech32Address,
       ) ?? null
     );
-  },
-  getKeplrAddress: (state) => {
-    if (state.keplr) {
-      return keyHashfromAddress(state.keplr.bech32Address);
-    } else {
-      return null;
-    }
-  },
-  getKeyhashes: (state) => {
-    if (state.keplr && state.keplr.keyHashes) {
-      return state.keplr.keyHashes;
-    } else {
-      return null;
-    }
   },
   getVerifyTrace: (state) => (params) => {
     if (
@@ -339,9 +280,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   getChain: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;
-  },
-  getGasLimit: (state) => {
-    return state.gas_limit;
   },
   getPrimaryChannel: (state) => (params) => {
     return (
