@@ -15,31 +15,6 @@ export type DemerisActionParams = {
   subscribe: boolean;
   params?: API.APIRequests;
 };
-export type DemerisActionsByAddressParams = {
-  subscribe: boolean;
-  params?: API.AddrReq;
-};
-export type DemerisActionsByChainAddressParams = {
-  subscribe: boolean;
-  params?: API.ChainAddrReq;
-};
-export type DemerisActionsByChainParams = {
-  subscribe: boolean;
-  params?: API.ChainReq;
-};
-export type DemerisActionsByTicketParams = {
-  subscribe: boolean;
-  params?: API.TicketReq;
-};
-export type DemerisActionsGetTxsParams = {
-  txhash: string;
-  chain_name: string;
-};
-export type DemerisActionsTraceParams = {
-  subscribe: boolean;
-  cache?: boolean;
-  params?: API.VerifyTraceReq;
-};
 export type DemerisSubscriptions = {
   action: Exclude<DemerisActionTypes, typeof DemerisActionTypes.BROADCAST_TX>;
   payload: Omit<DemerisActionParams, 'subscribe'>;

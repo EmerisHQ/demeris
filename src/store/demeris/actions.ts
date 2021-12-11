@@ -321,7 +321,7 @@ export interface GlobalActions {
     ...args: Parameters<Actions[DemerisActionTypes.STORE_UPDATE]>
   ): ReturnType<Actions[DemerisActionTypes.STORE_UPDATE]>;
 }
-//@ts-ignore
+
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 

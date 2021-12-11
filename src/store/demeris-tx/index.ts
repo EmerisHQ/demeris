@@ -10,7 +10,7 @@ import { getDefaultState } from './state';
 
 export { State };
 
-export type DemerisTXStore<S = State> = Omit<VuexStore<S>, 'getters' | 'commit' | 'dispatch'> & {
+export type DemerisStore<S> = Omit<VuexStore<S>, 'getters' | 'commit' | 'dispatch'> & {
   commit<K extends keyof Mutations, P extends Parameters<Mutations[K]>[1]>(
     key: K,
     payload: P,
@@ -37,3 +37,7 @@ export const module: Module<State, RootState> = {
   actions,
   namespaced: true,
 };
+
+import { GlobalDemerisActionTypes } from './action-types';
+
+export { GlobalDemerisActionTypes };

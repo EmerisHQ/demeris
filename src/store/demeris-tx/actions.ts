@@ -73,7 +73,7 @@ export interface GlobalActions {
     ...args: Parameters<Actions[DemerisActionTypes.UNSUBSCRIBE]>
   ): ReturnType<Actions[DemerisActionTypes.UNSUBSCRIBE]>;
 }
-//@ts-ignore
+
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 

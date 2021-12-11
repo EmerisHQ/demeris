@@ -25,8 +25,8 @@ import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { useAllStores, useStore } from '@/store';
 
+import { GlobalDemerisActionTypes as GlobalActionTypes } from './store';
 import { GlobalDemerisActionTypes } from './store/demeris/action-types';
-import { GlobalDemerisActionTypes as GlobalDemerisTXActionTypes } from './store/demeris-tx/action-types';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -53,7 +53,7 @@ export default defineComponent({
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
-      await store.dispatch(GlobalDemerisTXActionTypes.RESET_STATE);
+      await store.dispatch(GlobalActionTypes.TX.RESET_STATE);
       // GlobalDemerisTXActionTypes.RESET_STATE
 
       await store.dispatch(GlobalDemerisActionTypes.INIT, {
