@@ -9,18 +9,26 @@ import {
   namespace as namespaceTX,
   State as StateTX,
 } from '@/store/demeris-tx';
+import {
+  DemerisStore as DemerisStoreUSER,
+  GlobalDemerisActionTypes as GlobalDemerisActionTypesUSER,
+  module as moduleUSER,
+  namespace as namespaceUSER,
+  State as StateUSER,
+} from '@/store/demeris-user';
 
 import init from './config';
 
 export type RootState = {
   demeris: DemerisState;
   [namespaceTX]: StateTX;
+  [namespaceUSER]: StateUSER;
   [key: string]: unknown;
 };
 
-export type RootStore<S = State> = DemerisStore<S> & DemerisStoreTX<S>;
+export type RootStore<S = State> = DemerisStore<S> & DemerisStoreTX<S> & DemerisStoreUSER<S>;
 
-export type RootStoreType = RootStore<Pick<RootState, 'demeris' | typeof namespaceTX>>;
+export type RootStoreType = RootStore<Pick<RootState, 'demeris' | typeof namespaceTX | typeof namespaceUSER>>;
 
 // add all modules to vuex
 const initstore = createStore<RootState>({
@@ -28,6 +36,7 @@ const initstore = createStore<RootState>({
     // the name in this dictionary reflects the namespace of the store
     demeris,
     [namespaceTX]: moduleTX,
+    [namespaceUSER]: moduleUSER,
   },
 });
 
@@ -50,4 +59,5 @@ export function useAllStores(): VuexStore<any> {
 
 export const GlobalDemerisActionTypes = {
   TX: GlobalDemerisActionTypesTX,
+  USER: GlobalDemerisActionTypesUSER,
 };

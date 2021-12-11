@@ -28,7 +28,7 @@ export type DemerisStore<S = State> = Omit<VuexStore<S>, 'getters' | 'commit' | 
   };
 };
 
-export const namespace = 'demerisTX';
+export const namespace = 'demerisUSER';
 
 export const module: Module<State, RootState> = {
   state: getDefaultState(),
