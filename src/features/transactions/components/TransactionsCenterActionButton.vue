@@ -70,7 +70,7 @@ const handleClick = () => {
 const showTippy = async () => {
   await nextTick();
   tippyRef.value.show();
-  setTimeout(() => tippyRef.value.hide(), 5000);
+  setTimeout(() => tippyRef.value?.hide(), 5000);
 };
 
 const showNotification = (hash: string) => {

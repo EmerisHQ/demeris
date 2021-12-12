@@ -51,24 +51,33 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close']);
+const emits = defineEmits(['close', 'minimize']);
 
-const transactionStore = useTransactionsStore();
-const transactionService = computed(() => transactionStore.transactions[props.stepId] as TransactionProcessService);
-const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionStore.isViewerModalOpen);
+const transactionsStore = useTransactionsStore();
+const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
+const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionsStore.isViewerModalOpen);
 
 const actor = useActor(transactionService);
 const { state, send } = actor;
 
+const minimizeModal = () => {
+  transactionsStore.setTransactionAsPending();
+  if (transactionsStore.isViewerModalOpen) {
+    closeModal();
+  }
+};
+
 const closeModal = () => emits('close');
+
 const removeTransactionAndClose = () => {
-  transactionStore.removePendingTransaction(props.stepId);
+  transactionsStore.removeTransaction(props.stepId);
   closeModal();
 };
 
 provide(ProvideViewerKey, {
   actor,
   closeModal,
+  minimizeModal,
   removeTransactionAndClose,
   isSwapComponent,
   stepId: props.stepId,

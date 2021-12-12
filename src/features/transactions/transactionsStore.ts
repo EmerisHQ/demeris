@@ -19,7 +19,7 @@ type State = {
   isBottomSheetMinimized: boolean;
   isViewerModalOpen: boolean;
   isConnectWalletModalOpen: boolean;
-  selectedId: string;
+  currentId: string;
 };
 
 export const useTransactionsStore = defineStore('transactions', {
@@ -28,13 +28,13 @@ export const useTransactionsStore = defineStore('transactions', {
       transactions: {},
       pending: {},
       isBottomSheetMinimized: true,
+      isViewerModalOpen: false,
       isConnectWalletModalOpen: false,
-      selectedId: undefined,
+      currentId: undefined,
     } as State),
 
   getters: {
     isPending: (state) => (stepId: string) => stepId in state.pending,
-    isViewerModalOpen: (state) => !!state.selectedId,
   },
 
   actions: {
@@ -46,21 +46,29 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isConnectWalletModalOpen = !this.isConnectWalletModalOpen;
     },
 
-    setSelectedId(selectedId: string | undefined) {
-      this.selectedId = selectedId;
+    toggleViewerModal() {
+      this.isViewerModalOpen = !this.isViewerModalOpen;
     },
 
-    removePendingTransaction(stepId: string) {
-      delete this.pending[stepId];
+    setCurrentId(id: string | undefined) {
+      this.currentId = id;
     },
 
-    setTransactionAsPending(stepId: string) {
-      if (!(stepId in this.pending)) {
-        this.pending = {
-          [stepId]: this.transactions[stepId],
-          ...this.pending,
-        };
+    setTransactionAsPending() {
+      const stepId = this.currentId;
+      if (!this.transactions[stepId] || this.pending[stepId]) {
+        return;
       }
+
+      this.pending = {
+        [stepId]: this.transactions[stepId],
+        ...this.pending,
+      };
+    },
+
+    removeTransaction(stepId: string) {
+      delete this.pending[stepId];
+      delete this.transactions[stepId];
     },
 
     createTransactionMachine(action: string, steps: Step[], balances: Balance[]): [string, TransactionProcessService] {
@@ -118,7 +126,7 @@ export const useTransactionsStore = defineStore('transactions', {
       service.subscribe((state) => {
         // Notify all waiting services when this completes
         if (state.done || state.matches('receipt')) {
-          Object.values(this.pending).forEach((itemService: TransactionProcessService) => {
+          Object.values(this.transactions).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
               itemService.send('VERIFY');
             }
@@ -127,6 +135,7 @@ export const useTransactionsStore = defineStore('transactions', {
       });
 
       this.transactions[stepId] = service;
+      this.setCurrentId(stepId);
 
       return [stepId, service];
     },

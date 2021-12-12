@@ -1,20 +1,23 @@
 <template>
-  <div class="max-w-lg flex flex-col space-y-5 items-center justify-center pt-16 w-full pb-16">
+  <div
+    class="max-w-lg flex flex-col space-y-5 items-center justify-centerw-full"
+    :class="isSwapComponent ? 'pb-6' : 'pb-16'"
+  >
     <Icon name="TimeIcon" class="opacity-60" :icon-size="3.5" />
 
-    <h1 class="text-3 font-bold pb-4">
+    <h1 class="font-bold pb-4 text-center" :class="isSwapComponent ? 'text-2' : 'text-3'">
       {{ $t('context.transactions.waitingPrevious.title', { type: transactionNameMap[transaction.name] }) }}
     </h1>
 
-    <p class="text-muted text-center px-16">
+    <p class="text-muted text-center" :class="isSwapComponent ? 'px-8' : 'px-16'">
       <i18n-t keypath="context.transactions.waitingPrevious.description">
         <template #type>{{ transactionNameMap[transaction.name] }}</template>
         <template #chain><ChainName :name="sourceChain" /></template>
       </i18n-t>
     </p>
 
-    <div class="pt-4 px-16 w-full">
-      <Button variant="secondary" @click="injects.removeTransactionAndClose">
+    <div class="pt-4 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
+      <Button variant="secondary" @click="removeTransactionAndClose">
         {{ $t('context.transactions.controls.cancel') }}
       </Button>
     </div>
@@ -34,8 +37,8 @@ import {
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
 
-const injects = inject(ProvideViewerKey);
-const { state } = injects.actor;
+const { actor, removeTransactionAndClose, isSwapComponent } = inject(ProvideViewerKey);
+const { state } = actor;
 
 const transactionNameMap = {
   transfer: 'transfer',

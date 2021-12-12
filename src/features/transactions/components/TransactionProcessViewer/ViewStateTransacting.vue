@@ -73,11 +73,13 @@
         </p>
       </template>
 
-      <Button variant="secondary" class="w-full mt-8" @click="closeModal">
-        <span v-if="transaction.name === 'swap'">
+      <Button v-if="isSwapComponent" variant="secondary" class="w-full mt-8" @click="minimizeModal">
+        <span>
           {{ $t('context.transactions.controls.swapAnotherAsset') }}
         </span>
-        <span v-else>{{ $t('context.transactions.controls.swapAnotherAsset') }}</span>
+      </Button>
+      <Button v-else variant="primary" class="w-full mt-8" @click="navigateToPortfolio">
+        <span>{{ $t('context.transactions.controls.backToPortfolio') }}</span>
       </Button>
       <p class="text-muted -text-1 px-4 mt-3">{{ $t('context.transactions.transacting.notifiedWhenCompletes') }}</p>
     </div>
@@ -87,6 +89,7 @@
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -99,15 +102,16 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { t } = useI18n({ useScope: 'global' });
-const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, minimizeModal } = inject(ProvideViewerKey);
 const { state } = actor;
+const router = useRouter();
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 const titleMap = {
   transfer: t('components.txHandlingModal.transferAction'),
   ibc_forward: t('components.txHandlingModal.transferAction'),
   ibc_backward: t('components.txHandlingModal.transferAction'),
-  swap: t('components.txHandlingModal.pleaseWait'),
+  swap: t('components.txHandlingModal.swapAction'),
   addliquidity: t('components.txHandlingModal.addLiqAction'),
   withdrawliquidity: t('components.txHandlingModal.withdrawing'),
   createpool: t('components.txHandlingModal.createPoolAction'),
@@ -119,6 +123,11 @@ const subtitle = computed(() => {
   }
   return t('components.txHandlingModal.txProgress');
 });
+
+const navigateToPortfolio = () => {
+  router.push('/');
+  minimizeModal();
+};
 </script>
 
 <style scoped>

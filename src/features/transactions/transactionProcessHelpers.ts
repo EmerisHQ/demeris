@@ -166,6 +166,7 @@ export type ProvideViewerSchema = {
   stepId: string;
   removeTransactionAndClose: () => void;
   closeModal: () => void;
+  minimizeModal: () => void;
 };
 
 export const ProvideViewerKey: InjectionKey<ProvideViewerSchema> = Symbol('processViewer');

@@ -38,7 +38,7 @@
           Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
-        <template v-if="action === 'addliquidity'">
+        <template v-if="action === 'withdrawliquidity'">
           Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>

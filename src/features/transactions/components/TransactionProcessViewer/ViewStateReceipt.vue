@@ -3,9 +3,16 @@
     class="max-w-lg flex flex-col items-center w-full"
     :class="isSwapComponent ? 'space-y-4 pb-6' : 'space-y-6 pb-16'"
   >
+    <Icon
+      v-if="isSwapComponent && state.matches('success')"
+      name="SuccessIcon"
+      class="text-positive mx-auto"
+      :icon-size="2.5"
+    />
     <div
+      v-else
       class="transferred-image block bg-no-repeat bg-center bg-contain"
-      :class="isSwapComponent ? 'w-36 h-36' : 'w-44 h-44'"
+      :class="isSwapComponent ? 'w-32 h-32' : 'w-44 h-44'"
     />
 
     <h1 class="font-bold" :class="isSwapComponent ? 'text-2 px-6' : 'text-3'">
@@ -32,7 +39,29 @@
       </template>
 
       <template v-if="transaction.name === 'swap'">
-        <p class="text-muted">{{ $t('context.transactions.receipt.swappedOnHub') }}</p>
+        <p v-if="!isSwapComponent" class="text-muted">{{ $t('context.transactions.receipt.swappedOnHub') }}</p>
+        <p v-else>
+          <i18n-t keypath="components.txHandlingModal.received">
+            <template #amount>
+              <span class="font-bold">
+                <AmountDisplay
+                  :amount="{
+                    denom: lastResult.endBlock?.demand_coin_denom,
+                    amount: String(
+                      lastResult.endBlock?.exchanged_demand_coin_amount > 0
+                        ? lastResult.endBlock?.exchanged_demand_coin_amount
+                        : 0,
+                    ),
+                  }"
+                />
+              </span>
+              <br />
+            </template>
+            <template #chainName>
+              <ChainName :name="'cosmos-hub'" />
+            </template>
+          </i18n-t>
+        </p>
       </template>
 
       <template v-if="transaction.name === 'withdrawliquidity'">
@@ -43,7 +72,7 @@
       </template>
     </div>
 
-    <template v-if="state.matches('success')">
+    <template v-if="state.matches('success') && !isSwapComponent">
       <Collapse
         :label-open="$t('generic_cta.showDetails')"
         :label-hide="$t('generic_cta.hideDetails')"
@@ -92,7 +121,7 @@
           <Button variant="secondary">Send TODO</Button>
         </template>
 
-        <Button @click="removeTransactionAndClose()">{{ $t('context.transactions.controls.done') }}</Button>
+        <Button @click="removeTransactionAndClose">{{ $t('context.transactions.controls.done') }}</Button>
       </template>
     </div>
   </div>
@@ -108,6 +137,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
 import Collapse from '@/components/ui/Collapse.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
+import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';

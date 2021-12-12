@@ -2,11 +2,11 @@
   <div>
     <GobackWithClose
       v-if="action === 'swap'"
-      :class="{ invisible: !state.matches('review') }"
+      :class="{ invisible: !['review', 'waitingPreviousTransaction'].some(state.matches) }"
       @goback="onBack"
-      @close="onBack"
+      @close="handleCloseHeader"
     />
-    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onCloseViewer" />
+    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" />
     <ConnectWalletModal
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
@@ -47,8 +47,12 @@ const isPending = computed(() => transactionsStore.isPending(stepId));
 
 const { state } = useActor(service);
 
-const onCloseViewer = () => transactionsStore.setTransactionAsPending(stepId);
-const onBack = () => emits('close');
+const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
+const onClose = () => emits('close');
+const onBack = () => {
+  transactionsStore.removeTransaction(stepId);
+  emits('close');
+};
 
 watch(isPending, (value) => {
   if (value) {

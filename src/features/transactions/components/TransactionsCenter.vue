@@ -57,7 +57,7 @@
       show-close-button
       @close="closeModal"
     >
-      <TransactionProcessViewer :step-id="transactionsStore.selectedId" @close="closeModal" />
+      <TransactionProcessViewer :step-id="transactionsStore.currentId" @close="closeModal" />
     </Modal>
   </teleport>
 </template>
@@ -83,16 +83,13 @@ const state = reactive({
 const rowsLimit = computed(() => state.viewAll ? undefined : 3);
 
 const selectItem = (stepId) => {
-  transactionsStore.setSelectedId(stepId);
+  transactionsStore.setCurrentId(stepId);
+  transactionsStore.toggleViewerModal();
 }
 
-const closeModal = () => {
-  transactionsStore.setSelectedId(undefined);
-}
+const closeModal = () => selectItem(undefined);
 
-const toggleViewAll = () => {
-  state.viewAll = !state.viewAll;
-}
+const toggleViewAll = () => state.viewAll = !state.viewAll;
 
 const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit.value));
