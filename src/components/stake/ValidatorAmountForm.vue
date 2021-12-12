@@ -20,12 +20,7 @@
             :key="vali.operator_address"
             class="bg-surface shadow-card rounded-2xl mt-4 pt-2"
           >
-            <ValidatorSelect
-              v-model:amount="validatorStakingAmounts"
-              :validator="vali"
-              :show-chain="false"
-              @select="validatorSelectHandler"
-            />
+            <ValidatorSelect v-model:amount="vali.inputAmount" :validator="vali" @select="validatorSelectHandler" />
 
             <button
               class="
@@ -81,7 +76,7 @@
             </Alert>
 
             <!-- Continue button -->
-            <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="goToReview" />
+            <Button :name="$t('generic_cta.continue')" :disabled="false" @click="goToReview" />
           </div>
         </div>
       </main>
@@ -136,27 +131,26 @@ export default {
   },
 
   setup(props) {
+    /* hooks */
     const { t } = useI18n({ useScope: 'global' });
-
     const router = useRouter();
     const store = useStore();
+    const { balances: userBalances, getNativeBalances } = useAccount();
+
+    /* meta & GA */
+    useMeta({ title: t('context.stake.title') });
+
+    /* variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
     const actionSteps = ref<Step[]>([]);
-
-    const steps = ['amount', 'review', 'send'];
-
+    const validatorStakingAmounts = ref(0);
     const state = reactive({
-      step: 'amount',
-      isCreationConfirmationOpen: false,
       isChainsModalOpen: false,
       chainsModalSource: 'coinA',
-      isMaximumAmountChecked: false,
-      totalEstimatedPrice: '',
-      receiveAmount: '',
-      poolBaseDenoms: [],
       fees: {},
     });
-    const { balances: userBalances, getNativeBalances } = useAccount();
+
+    /* computeds */
     const balances = computed(() => {
       const nativeBalances = getNativeBalances();
       const result = [...userBalances.value];
@@ -183,27 +177,14 @@ export default {
         name: baseDenom,
       }),
     );
-    useMeta({ title: t('context.stake.title') });
 
-    const validatorStakingAmounts = ref(0);
-    const goBack = () => {
-      const currentStepIndex = steps.findIndex((item) => item === state.step);
-
-      if (currentStepIndex > 0) {
-        state.step = steps[currentStepIndex - 1];
-        return;
-      }
-
-      router.back();
-    };
+    /* functions */
     const validatorSelectHandler = (e) => {
-      console.log('TTTTT', e);
+      console.log('validatorSelectHandler', e);
     };
-
     const goToReview = () => {
       console.log('GO TO REVIEW');
     };
-
     const toggleChainsModal = (asset?: Balance, source: 'coinA' | 'coinB' = 'coinA') => {
       console.log('selectedAsset', asset);
       state.chainsModalSource = source;
@@ -214,13 +195,12 @@ export default {
       validatorStakingAmounts,
       actionSteps,
       state,
-      steps,
       balances,
       precision,
       baseDenom,
       validatorSelectHandler,
       toggleChainsModal,
-      goBack,
+
       goToReview,
     };
   },

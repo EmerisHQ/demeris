@@ -6,26 +6,21 @@
       'py-6 px-5': size === 'md',
     }"
   >
-    <div
-      class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer"
-      :class="isSelected ? 'flex-shrink-0' : 'flex-grow'"
-      @click="selectValidator"
-    >
-      <CircleSymbol :denom="'uatom'" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
+    <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow" @click="selectValidator">
+      <CircleSymbol :denom="baseDenom" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
-
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="'uatom'" /> staked
+          {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
         </div>
       </div>
     </div>
     <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
       <AmountInput
-        :model-value="amount"
+        :model-value="validator.inputAmount"
         class="
           denom-select__coin-amount-input
           text-text
@@ -43,7 +38,7 @@
         min="0"
         @input="$emit('update:amount', $event.target.value)"
       />
-      <Price :amount="{ denom: baseDenom, amount: amount * 10 ** precision }" />
+      <Price :amount="{ denom: baseDenom, amount: inputAmount * 10 ** precision }" />
     </label>
   </div>
 </template>
@@ -62,8 +57,6 @@ export default defineComponent({
   name: 'ValidatorSelect',
   components: { AmountInput, Denom, CircleSymbol, Icon, Price },
   props: {
-    amount: { type: [String, Number], required: false, default: null },
-    showChain: { type: Boolean, default: false },
     size: { type: String, required: false, default: 'md' },
     validator: {
       type: Object,
@@ -82,8 +75,9 @@ export default defineComponent({
         name: baseDenom,
       }),
     );
+
     const inputAmount = computed({
-      get: () => props.amount,
+      get: () => props.validator.inputAmount,
       set: (value) => emit('update:amount', value),
     });
 

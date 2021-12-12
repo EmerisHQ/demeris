@@ -193,8 +193,8 @@ export default {
         stepsData.value = await actionHandler(action);
       }
 
-      console.log('valilist f', validatorList.value);
-      console.log('stakingBalance f', stakingBalances.value);
+      console.log('validaorList', validatorList.value);
+      console.log('stakingBalance', stakingBalances.value);
     })();
 
     /* computeds */
@@ -216,6 +216,7 @@ export default {
         return selectedVali.operator_address === vali.operator_address;
       });
       if (!isIncluded) {
+        vali.inputAmount = 0;
         selectedValidators.value.push(vali);
       }
       currentStep.value = StakingActionSteps.AMOUNT;
