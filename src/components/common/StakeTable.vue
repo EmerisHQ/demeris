@@ -221,7 +221,7 @@ export default defineComponent({
     (async () => {
       assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
       validatorList.value = await getValidatorsByBaseDenom(props.denom);
-      console.log('val', validatorList.value);
+      console.log('validatorList', validatorList.value);
     })();
 
     /* computeds */
