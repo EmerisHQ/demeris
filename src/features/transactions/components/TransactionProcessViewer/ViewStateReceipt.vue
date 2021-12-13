@@ -36,6 +36,24 @@
             <ChainName :name="transaction.data.to_chain" />
           </div>
         </template>
+
+        <template v-if="transaction.name === 'swap'">
+          <div class="text-1 font-bold">
+            <AmountDisplay
+              :amount="{
+                amount: lastResult.endBlock?.exchanged_offer_coin_amount,
+                denom: lastResult.endBlock?.offer_coin_denom,
+              }"
+            />
+            &rarr;
+            <AmountDisplay
+              :amount="{
+                amount: lastResult.endBlock?.exchanged_demand_coin_amount,
+                denom: lastResult.endBlock?.demand_coin_denom,
+              }"
+            />
+          </div>
+        </template>
       </template>
 
       <template v-if="transaction.name === 'swap'">
@@ -55,7 +73,6 @@
                   }"
                 />
               </span>
-              <br />
             </template>
             <template #chainName>
               <ChainName :name="'cosmos-hub'" />

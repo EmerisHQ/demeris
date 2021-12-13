@@ -19,6 +19,7 @@ type State = {
   isBottomSheetMinimized: boolean;
   isViewerModalOpen: boolean;
   isConnectWalletModalOpen: boolean;
+  isCancelModalOpen: boolean;
   currentId: string;
 };
 
@@ -30,6 +31,7 @@ export const useTransactionsStore = defineStore('transactions', {
       isBottomSheetMinimized: true,
       isViewerModalOpen: false,
       isConnectWalletModalOpen: false,
+      isCancelModalOpen: false,
       currentId: undefined,
     } as State),
 
@@ -38,6 +40,10 @@ export const useTransactionsStore = defineStore('transactions', {
   },
 
   actions: {
+    toggleCancelModal() {
+      this.isCancelModalOpen = !this.isCancelModalOpen;
+    },
+
     toggleBottomSheet() {
       this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
     },
@@ -126,7 +132,7 @@ export const useTransactionsStore = defineStore('transactions', {
       service.subscribe((state) => {
         // Notify all waiting services when this completes
         if (state.done || state.matches('receipt')) {
-          Object.values(this.transactions).forEach((itemService: TransactionProcessService) => {
+          Object.values(this.pending).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
               itemService.send('VERIFY');
             }

@@ -24,6 +24,8 @@
       <Spinner :size="2.5" />
     </div>
   </div>
+
+  <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
 </template>
 
 <script lang="tsx" setup>
@@ -36,6 +38,7 @@ import TransferInterstitialConfirmation from '@/components/wizard/TransferInters
 import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 import { useTransactionsStore } from '../transactionsStore';
+import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
 import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';

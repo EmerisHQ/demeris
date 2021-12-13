@@ -155,11 +155,14 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         states: {
           notRequired: {
             on: {
+              ABORT: '#aborted',
               PROCEED_FEE: '#validating.chainDown',
             },
           },
           missingFees: {
-            type: 'final',
+            on: {
+              ABORT: '#aborted',
+            },
           },
         },
       },

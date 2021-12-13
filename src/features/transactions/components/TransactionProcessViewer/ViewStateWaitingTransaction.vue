@@ -17,7 +17,7 @@
     </p>
 
     <div class="pt-4 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <Button variant="secondary" @click="removeTransactionAndClose">
+      <Button variant="secondary" @click="transactionsStore.toggleCancelModal">
         {{ $t('context.transactions.controls.cancel') }}
       </Button>
     </div>
@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Button from '@/components/ui/Button.vue';
@@ -36,18 +37,21 @@ import {
   getSourceChainFromTransaction,
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
+import { useTransactionsStore } from '../../transactionsStore';
 
-const { actor, removeTransactionAndClose, isSwapComponent } = inject(ProvideViewerKey);
+const transactionsStore = useTransactionsStore();
+const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state } = actor;
+const { t } = useI18n({ useScope: 'global' });
 
 const transactionNameMap = {
-  transfer: 'transfer',
-  ibc_forward: 'transfer',
-  ibc_backward: 'transfer',
-  swap: 'swap',
-  addliquidity: 'pool liquidity provision',
-  withdrawliquidity: 'liquidity withdrawal',
-  createpool: 'liquidity pool provision',
+  transfer: t('context.transactions.type.transfer'),
+  ibc_forward: t('context.transactions.type.transfer'),
+  ibc_backward: t('context.transactions.type.transfer'),
+  swap: t('context.transactions.type.swap'),
+  addliquidity: t('context.transactions.type.addliquidity'),
+  withdrawliquidity: t('context.transactions.type.withdrawliquidity'),
+  createpool: t('context.transactions.type.createpool'),
 };
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));

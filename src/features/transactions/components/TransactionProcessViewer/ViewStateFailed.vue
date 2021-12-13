@@ -179,9 +179,11 @@ import Icon from '@/components/ui/Icon.vue';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getCurrentTransaction, getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { useTransactionsStore } from '../../transactionsStore';
 
 const { t } = useI18n({ useScope: 'global' });
 
+const transactionsStore = useTransactionsStore();
 const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey);
 const { state, send } = actor;
 
@@ -230,8 +232,5 @@ const subtitle = computed(() => {
   return undefined;
 });
 
-const onCancel = () => {
-  send('ABORT');
-  removeTransactionAndClose();
-};
+const onCancel = () => transactionsStore.toggleCancelModal();
 </script>

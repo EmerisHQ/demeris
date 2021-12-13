@@ -29,11 +29,13 @@
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
       <Button v-if="state.matches('signing.delayed')" @click="() => send('SIGN')">
+        {{ $t('context.transactions.controls.tryAgain') }}
+      </Button>
+      <Button variant="link" @click="transactionsStore.toggleCancelModal">
         {{
-          $t('context.transactions.controls.tryAgain')
+          $t('context.transactions.controls.cancel')
         }}
       </Button>
-      <Button variant="link" @click="() => send('ABORT')">{{ $t('context.transactions.controls.cancel') }}</Button>
     </div>
   </div>
 </template>
@@ -46,7 +48,9 @@ import Button from '@/components/ui/Button.vue';
 import Spinner from '@/components/ui/Spinner.vue';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { useTransactionsStore } from '../../transactionsStore';
 
+const transactionsStore = useTransactionsStore();
 const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state, send } = actor;
 

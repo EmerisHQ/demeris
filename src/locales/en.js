@@ -433,17 +433,23 @@ export const messages = {
           withdrawliquidity: 'Review your liquidity withdrawal',
           createpool: 'Review your liquidity pool provision',
         },
+        cancel: {
+          title: 'Cancel {type}?',
+          descriptionDenom:
+            'Your {type} is not complete. Would you like to cancel this transaction? Your {denom} will remain on {chain} chain.',
+          description: 'Your {type} is not complete. Would you like to cancel this transaction?',
+        },
+        type: {
+          transfer: 'transfer',
+          ibc_forward: 'transfer',
+          ibc_backward: 'transfer',
+          swap: 'swap',
+          addliquidity: 'pool liquidity provision',
+          withdrawliquidity: 'liquidity withdrawal',
+          createpool: 'liquidity pool provision',
+        },
         waitingPrevious: {
           title: 'Pending {type}',
-          type: {
-            transfer: 'transfer',
-            ibc_forward: 'transfer',
-            ibc_backward: 'transfer',
-            swap: 'swap',
-            addliquidity: 'pool liquidity provision',
-            withdrawliquidity: 'liquidity withdrawal',
-            createpool: 'liquidity pool provision',
-          },
           description: 'Your {type} is pending, waiting for other transactions to complete on the {chain} chain.',
         },
         receipt: {
