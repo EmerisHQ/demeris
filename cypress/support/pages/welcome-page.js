@@ -7,10 +7,10 @@ export class WelcomePage {
     return this.tryTheDemoButton().should('be.visible');
   }
   tryTheDemoButton() {
-    return cy.get('[data-cy="tryTheDemoButton"]', { timeout: 20000 }); 
+    return cy.get('[data-cy="tryTheDemoButton"]'); 
   }
 
   centerContentWraper() {
-    return cy.get('*[class^="flex flex-col px-8 text-center py-8"]', { timeout: 20000 });
+    return cy.get('*[class^="flex flex-col px-8 text-center py-8"]');
   }
 }
