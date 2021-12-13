@@ -39,5 +39,5 @@ export const module: Module<State, RootState> = {
 };
 
 import { GlobalDemerisActionTypes } from './action-types';
-
-export { GlobalDemerisActionTypes };
+import { GlobalGetterTypes } from './getter-types';
+export { GlobalDemerisActionTypes, GlobalGetterTypes };

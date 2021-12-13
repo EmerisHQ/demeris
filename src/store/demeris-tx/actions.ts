@@ -8,11 +8,14 @@ import { DemerisMutationTypes } from '@/store/demeris-tx/mutation-types';
 import { Amount } from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
 
-import { DemerisActionTypes, GlobalDemerisActionTypes } from './action-types';
+import { DemerisActionTypes } from './action-types';
 import { DemerisSubscriptions } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
 import { ChainData, State } from './state';
 
+type Namespaced<T, N extends string> = {
+  [P in keyof T & string as `${N}/${P}`]: T[P];
+};
 export type DemerisConfig = {
   endpoint: string;
   refreshTime?: number;
@@ -59,20 +62,8 @@ export interface Actions {
     subscription: DemerisSubscriptions,
   ): void;
 }
-export interface GlobalActions {
-  [GlobalDemerisActionTypes.BROADCAST_TX](
-    ...args: Parameters<Actions[DemerisActionTypes.BROADCAST_TX]>
-  ): ReturnType<Actions[DemerisActionTypes.BROADCAST_TX]>;
-  [GlobalDemerisActionTypes.SIGN_WITH_KEPLR](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_WITH_KEPLR]>;
-  [GlobalDemerisActionTypes.RESET_STATE](
-    ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
-  ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
-  [GlobalDemerisActionTypes.UNSUBSCRIBE](
-    ...args: Parameters<Actions[DemerisActionTypes.UNSUBSCRIBE]>
-  ): ReturnType<Actions[DemerisActionTypes.UNSUBSCRIBE]>;
-}
+
+export type GlobalActions = Namespaced<Actions, 'demerisTX'>;
 
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions

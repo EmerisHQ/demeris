@@ -3,6 +3,7 @@ import { createStore, Store as VuexStore } from 'vuex';
 import {
   DemerisStore as DemerisStoreAPI,
   GlobalDemerisActionTypes as GlobalDemerisActionTypesAPI,
+  GlobalGetterTypes as GlobalGetterTypesAPI,
   module as moduleAPI,
   namespace as namespaceAPI,
   State as StateAPI,
@@ -10,6 +11,7 @@ import {
 import {
   DemerisStore as DemerisStoreTX,
   GlobalDemerisActionTypes as GlobalDemerisActionTypesTX,
+  GlobalGetterTypes as GlobalGetterTypesTX,
   module as moduleTX,
   namespace as namespaceTX,
   State as StateTX,
@@ -17,6 +19,7 @@ import {
 import {
   DemerisStore as DemerisStoreUSER,
   GlobalDemerisActionTypes as GlobalDemerisActionTypesUSER,
+  GlobalGetterTypes as GlobalGetterTypesUSER,
   module as moduleUSER,
   namespace as namespaceUSER,
   State as StateUSER,
@@ -34,6 +37,10 @@ export type RootState = {
 export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStoreUSER<S>;
 
 export type RootStoreType = RootStore<Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>>;
+
+export type TypedAPIStore = RootStore<Pick<RootState, typeof namespaceAPI>>;
+export type TypedUSERStore = RootStore<Pick<RootState, typeof namespaceUSER>>;
+export type TypedTXStore = RootStore<Pick<RootState, typeof namespaceTX>>;
 
 // add all modules to vuex
 const initstore = createStore<RootState>({
@@ -61,9 +68,23 @@ export function useStore(): RootStoreType {
 export function useAllStores(): VuexStore<any> {
   return store as VuexStore<any>;
 }
+export function useEmerisAPIStore(): TypedAPIStore {
+  return store as TypedAPIStore;
+}
+export function useEmerisUSERStore(): TypedUSERStore {
+  return store as TypedUSERStore;
+}
+export function useEmerisTXStore(): TypedTXStore {
+  return store as TypedTXStore;
+}
 
 export const GlobalDemerisActionTypes = {
   TX: GlobalDemerisActionTypesTX,
   USER: GlobalDemerisActionTypesUSER,
   API: GlobalDemerisActionTypesAPI,
+};
+export const GlobalDemerisGetterTypes = {
+  TX: GlobalGetterTypesTX,
+  USER: GlobalGetterTypesUSER,
+  API: GlobalGetterTypesAPI,
 };

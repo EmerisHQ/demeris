@@ -5,11 +5,11 @@ import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
 import { RootState } from '@/store';
-import { GasPriceLevel, Pool } from '@/types/actions';
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
-import { hashObject, keyHashfromAddress } from '@/utils/basic';
+import { hashObject } from '@/utils/basic';
 
 import {
   DemerisActionParams,
@@ -21,7 +21,6 @@ import {
   DemerisActionsTraceParams,
   DemerisActionTypes,
   DemerisSubscriptions,
-  GlobalDemerisActionTypes,
 } from './action-types';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
@@ -58,6 +57,10 @@ export type DemerisSessionParams = {
 };
 export type TicketResponse = {
   ticket: string;
+};
+
+type Namespaced<T, N extends string> = {
+  [P in keyof T & string as `${N}/${P}`]: T[P];
 };
 export interface Actions {
   // Cross-chain endpoint actions
@@ -163,93 +166,8 @@ export interface Actions {
   ): void;
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }: ActionContext<State, RootState>): void;
 }
-export interface GlobalActions {
-  // Cross-chain endpoint actions
-  [GlobalDemerisActionTypes.GET_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_BALANCES]>;
-  [GlobalDemerisActionTypes.GET_POOL_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_POOL_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_POOL_BALANCES]>;
-  [GlobalDemerisActionTypes.GET_STAKING_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_STAKING_BALANCES]>;
-  [GlobalDemerisActionTypes.VALIDATE_POOLS](
-    ...args: Parameters<Actions[DemerisActionTypes.VALIDATE_POOLS]>
-  ): ReturnType<Actions[DemerisActionTypes.VALIDATE_POOLS]>;
-  [GlobalDemerisActionTypes.GET_ALL_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_BALANCES]>;
-  [GlobalDemerisActionTypes.GET_ALL_STAKING_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_STAKING_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_STAKING_BALANCES]>;
-  [GlobalDemerisActionTypes.GET_NUMBERS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS]>;
-  [GlobalDemerisActionTypes.GET_NUMBERS_CHAIN](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_NUMBERS_CHAIN]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_NUMBERS_CHAIN]>;
-  [GlobalDemerisActionTypes.GET_ALL_NUMBERS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_ALL_NUMBERS]>;
-  [GlobalDemerisActionTypes.GET_FEE_ADDRESSES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_ADDRESSES]>;
-  [GlobalDemerisActionTypes.GET_VERIFIED_DENOMS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_VERIFIED_DENOMS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_VERIFIED_DENOMS]>;
-  [GlobalDemerisActionTypes.GET_CHAINS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAINS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_CHAINS]>;
-  [GlobalDemerisActionTypes.GET_RELAYER_STATUS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_RELAYER_STATUS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_RELAYER_STATUS]>;
-  [GlobalDemerisActionTypes.GET_RELAYER_BALANCES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_RELAYER_BALANCES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_RELAYER_BALANCES]>;
-  [GlobalDemerisActionTypes.GET_PRICES](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_PRICES]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_PRICES]>;
-  [GlobalDemerisActionTypes.GET_TX_STATUS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_TX_STATUS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_TX_STATUS]>;
-  [GlobalDemerisActionTypes.GET_VERIFY_TRACE](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_VERIFY_TRACE]>;
-  [GlobalDemerisActionTypes.GET_FEE_ADDRESS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_FEE_ADDRESS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_FEE_ADDRESS]>;
-  [GlobalDemerisActionTypes.GET_BECH32_CONFIG](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_BECH32_CONFIG]>;
-  [GlobalDemerisActionTypes.GET_CHAIN](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN]>;
-  [GlobalDemerisActionTypes.GET_PRIMARY_CHANNEL](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_PRIMARY_CHANNEL]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_PRIMARY_CHANNEL]>;
-  [GlobalDemerisActionTypes.GET_PRIMARY_CHANNELS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_PRIMARY_CHANNELS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_PRIMARY_CHANNELS]>;
-  [GlobalDemerisActionTypes.GET_CHAIN_STATUS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_CHAIN_STATUS]>;
-  [GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS](
-    ...args: Parameters<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>
-  ): ReturnType<Actions[DemerisActionTypes.GET_END_BLOCK_EVENTS]>;
-  [GlobalDemerisActionTypes.INIT](
-    ...args: Parameters<Actions[DemerisActionTypes.INIT]>
-  ): ReturnType<Actions[DemerisActionTypes.INIT]>;
-  [GlobalDemerisActionTypes.RESET_STATE](
-    ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
-  ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
-  [GlobalDemerisActionTypes.UNSUBSCRIBE](
-    ...args: Parameters<Actions[DemerisActionTypes.UNSUBSCRIBE]>
-  ): ReturnType<Actions[DemerisActionTypes.UNSUBSCRIBE]>;
-  [GlobalDemerisActionTypes.STORE_UPDATE](
-    ...args: Parameters<Actions[DemerisActionTypes.STORE_UPDATE]>
-  ): ReturnType<Actions[DemerisActionTypes.STORE_UPDATE]>;
-}
+
+export type GlobalActions = Namespaced<Actions, 'demerisAPI'>;
 
 export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
@@ -358,6 +276,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const vp = await validPools(pools);
       commit('SET_VALID_POOLS', vp);
     } catch (e) {
+      console.log(e);
       throw new SpVuexError('Demeris:ValidatePools', 'Could not perform pool validation.');
     }
     return getters['getAllValidPools'];

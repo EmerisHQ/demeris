@@ -1,23 +1,22 @@
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
-import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
-import usePool from '@/composables/usePool';
-import { RootState } from '@/store';
-import { GasPriceLevel, Pool } from '@/types/actions';
-import * as API from '@/types/api';
+import { GlobalDemerisActionTypes, RootState } from '@/store';
+import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { validPools } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-import { hashObject, keyHashfromAddress } from '@/utils/basic';
+import { keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
-import { DemerisActionTypes, DemerisSubscriptions, GlobalDemerisActionTypes } from './action-types';
+import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
+type Namespaced<T, N extends string> = {
+  [P in keyof T & string as `${N}/${P}`]: T[P];
+};
 export type DemerisConfig = {
   endpoint: string;
   refreshTime?: number;
@@ -84,41 +83,8 @@ export interface Actions {
   ): void;
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }: ActionContext<State, RootState>): void;
 }
-export interface GlobalActions {
-  [GlobalDemerisActionTypes.REDEEM_GET_HAS_SEEN](
-    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>
-  ): ReturnType<Actions[DemerisActionTypes.REDEEM_GET_HAS_SEEN]>;
-  [GlobalDemerisActionTypes.REDEEM_SET_HAS_SEEN](
-    ...args: Parameters<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>
-  ): ReturnType<Actions[DemerisActionTypes.REDEEM_SET_HAS_SEEN]>;
-  [GlobalDemerisActionTypes.SIGN_IN](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN]>;
-  [GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_IN_WITH_WATCHER]>;
-  [GlobalDemerisActionTypes.SET_GAS_LIMIT](
-    ...args: Parameters<Actions[DemerisActionTypes.SET_GAS_LIMIT]>
-  ): ReturnType<Actions[DemerisActionTypes.SET_GAS_LIMIT]>;
-  [GlobalDemerisActionTypes.SET_SESSION_DATA](
-    ...args: Parameters<Actions[DemerisActionTypes.SET_SESSION_DATA]>
-  ): ReturnType<Actions[DemerisActionTypes.SET_SESSION_DATA]>;
-  [GlobalDemerisActionTypes.LOAD_SESSION_DATA](
-    ...args: Parameters<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>
-  ): ReturnType<Actions[DemerisActionTypes.LOAD_SESSION_DATA]>;
-  [GlobalDemerisActionTypes.SIGN_OUT](
-    ...args: Parameters<Actions[DemerisActionTypes.SIGN_OUT]>
-  ): ReturnType<Actions[DemerisActionTypes.SIGN_OUT]>;
-  [GlobalDemerisActionTypes.RESET_STATE](
-    ...args: Parameters<Actions[DemerisActionTypes.RESET_STATE]>
-  ): ReturnType<Actions[DemerisActionTypes.RESET_STATE]>;
-  [GlobalDemerisActionTypes.UNSUBSCRIBE](
-    ...args: Parameters<Actions[DemerisActionTypes.UNSUBSCRIBE]>
-  ): ReturnType<Actions[DemerisActionTypes.UNSUBSCRIBE]>;
-  [GlobalDemerisActionTypes.STORE_UPDATE](
-    ...args: Parameters<Actions[DemerisActionTypes.STORE_UPDATE]>
-  ): ReturnType<Actions[DemerisActionTypes.STORE_UPDATE]>;
-}
+
+export type GlobalActions = Namespaced<Actions, 'demerisUSER'>;
 
 export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.REDEEM_GET_HAS_SEEN]() {
@@ -198,10 +164,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
 
-      dispatch('DemerisActionTypes.GET_ALL_BALANCES', { subscribe: true });
-      dispatch('DemerisActionTypes.GET_ALL_STAKING_BALANCES', {
-        subscribe: true,
-      });
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
+      dispatch(
+        GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
+        {
+          subscribe: true,
+        },
+        { root: true },
+      );
       return true;
     } catch (e) {
       console.error(e);
@@ -219,10 +189,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
-      dispatch('DemerisActionTypes.GET_ALL_BALANCES', { subscribe: true });
-      dispatch('DemerisActionTypes.GET_ALL_STAKING_BALANCES', {
-        subscribe: true,
-      });
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
+      dispatch(
+        GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
+        {
+          subscribe: true,
+        },
+        { root: true },
+      );
       return true;
     } catch (e) {
       return false;

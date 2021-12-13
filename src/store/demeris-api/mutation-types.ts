@@ -70,20 +70,10 @@ export type DemerisMutationArgs =
   | API.RelayerBalances
   | API.VerifiedDenoms
   | DemerisConfig
-  | KeplrKeyData
   | string
   | Pool[];
 
 export type DemerisMutations = {
   params?: API.APIRequests;
   value: DemerisMutationArgs;
-};
-export type KeplrKeyData = {
-  name: string;
-  algo: string;
-  pubKey: Uint8Array;
-  address: Uint8Array;
-  bech32Address: string;
-  uid?: string;
-  keyHashes?: string[];
 };

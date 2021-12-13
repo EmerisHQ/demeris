@@ -6,8 +6,10 @@ import { bech32 } from 'bech32';
 import { Chain } from '@/types/api';
 
 import { demoAddresses } from '../store/demeris-user/demo-account';
-import { store } from '../store/index';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore, useEmerisUSERStore } from '../store/index';
 
+const apistore = useEmerisAPIStore();
+const userstore = useEmerisUSERStore();
 export function toHexString(byteArray) {
   return Array.prototype.map
     .call(byteArray, function (byte) {
@@ -18,7 +20,7 @@ export function toHexString(byteArray) {
 export function getChainFromRecipient(recipient: string) {
   const prefix = bech32.decode(recipient).prefix;
   return (
-    (Object.values(store.getters['demerisAPI/getChains']) as Chain[]).find(
+    (Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]) as Chain[]).find(
       (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
     )?.chain_name ?? null
   );
@@ -37,10 +39,10 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
-  if (store.getters['demerisAPI/isDemoAccount']) {
+  if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    const chain = store.getters['demerisAPI/getChain']({ chain_name });
+    const chain = apistore.getters['demerisAPI/getChain']({ chain_name });
     const key = await window.keplr.getKey(chain.node_info.chain_id);
     return key.bech32Address;
   }

@@ -23,9 +23,14 @@ import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
-import { useAllStores, useStore } from '@/store';
+import {
+  GlobalDemerisActionTypes,
+  GlobalDemerisGetterTypes,
+  useAllStores,
+  useEmerisAPIStore,
+  useEmerisUSERStore,
+} from '@/store';
 
-import { GlobalDemerisActionTypes } from './store';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -39,7 +44,8 @@ export default defineComponent({
 
   setup() {
     useTheme({ updateOnChange: true });
-    const store = useStore();
+    const apistore = useEmerisAPIStore();
+    const userstore = useEmerisUSERStore();
     const libStore = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
@@ -52,36 +58,36 @@ export default defineComponent({
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
-      await store.dispatch(GlobalDemerisActionTypes.API.INIT, {
+      await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
         endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
       });
-      await store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+      await apistore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
         gasLimit: gasLimit,
       });
       status.value = t('appInit.status.assetLoading');
-      await store.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
       status.value = t('appInit.status.chainLoading');
-      let chains = await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
+      let chains = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
         subscribe: false,
       });
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
-          displayChain: store.getters['demerisAPI/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters['demerisAPI/getDisplayChain']({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
           subscribe: true,
           params: {
             chain_name: chain,
           },
         });
         status.value = t('appInit.status.chainStatus', {
-          displayChain: store.getters['demerisAPI/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters['demerisAPI/getDisplayChain']({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
           subscribe: true,
           params: {
             chain_name: chain,
@@ -112,7 +118,7 @@ export default defineComponent({
       }
       status.value = t('appInit.status.priceFetching');
       try {
-        await store.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
           subscribe: true,
         });
       } catch (e) {
@@ -120,16 +126,19 @@ export default defineComponent({
       }
       status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
-        await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+        await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
       } else {
         if (autoLoginDemo()) {
-          await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
         }
       }
       window.addEventListener('keplr_keystorechange', async () => {
         window.localStorage.setItem('lastEmerisSession', '');
-        if (store.getters['demerisUSER/isSignedIn'] && !store.getters['demerisUSER/isDemoAccount']) {
-          await store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+        if (
+          userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] &&
+          !userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+        ) {
+          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
         }
       });
       initialized.value = true;

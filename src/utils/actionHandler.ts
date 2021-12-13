@@ -2,7 +2,7 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import * as Actions from '@/types/actions';
 import * as API from '@/types/api';
@@ -21,6 +21,7 @@ import {
 } from './basic';
 
 const store = useStore();
+
 const libStore = useAllStores();
 
 // Basic step-building blocks
@@ -1792,9 +1793,10 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 }
 
 export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
+  const apistore = useEmerisAPIStore();
   const validPools = [];
-  const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
-  const dexChain = store.getters['demerisAPI/getDexChain'];
+  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+  const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
   for (const pool of pools) {
     const firstDenom = pool.reserve_coin_denoms[0];
