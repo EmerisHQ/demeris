@@ -13,8 +13,6 @@ export class Assets {
 
   checkVisabilityOfAllTableRows() {
     return this.tableOfAssets().get('>tr').each().should('be.visible'); // Iterate through each 'tr'
-
-    // cy.get('>tr').each().should('be.visible') // Iterate through each 'tr'
   }
 
   aktRow() {
