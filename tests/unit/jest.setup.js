@@ -1,4 +1,11 @@
-import { config } from '@vue/test-utils';
-import VueTippy from 'vue-tippy';
+/* eslint-disable */
+const { config } = require('@vue/test-utils');
+const { createTestingPinia } = require('@pinia/testing');
+const router = require('../../src/router');
 
-config.global.plugins = [VueTippy];
+const pinia = createTestingPinia();
+
+global.scrollTo = jest.fn();
+config.global.plugins = [pinia, router.default];
+config.global.stubs = { tippy: true };
+config.renderStubDefaultSlot = true;

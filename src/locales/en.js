@@ -480,6 +480,7 @@ export const messages = {
           confirmAndContinue: 'Confirm and continue',
           connectWallet: 'Connect Wallet',
           done: 'Done',
+          sendAmount: 'Send {amount}',
           sendAnotherAsset: 'Send another asset',
           swapAnotherAsset: 'Swap another asset',
           backToPortfolio: 'Back to portfolio',

@@ -4,6 +4,7 @@
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"
       :steps="state.context.formattedSteps"
+      class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
     <ViewStateReview v-else-if="state.matches('review')" />

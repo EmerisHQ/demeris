@@ -36,29 +36,10 @@
             <ChainName :name="transaction.data.to_chain" />
           </div>
         </template>
-
-        <template v-if="transaction.name === 'swap'">
-          <div class="text-1 font-bold">
-            <AmountDisplay
-              :amount="{
-                amount: lastResult.endBlock?.exchanged_offer_coin_amount,
-                denom: lastResult.endBlock?.offer_coin_denom,
-              }"
-            />
-            &rarr;
-            <AmountDisplay
-              :amount="{
-                amount: lastResult.endBlock?.exchanged_demand_coin_amount,
-                denom: lastResult.endBlock?.demand_coin_denom,
-              }"
-            />
-          </div>
-        </template>
       </template>
 
       <template v-if="transaction.name === 'swap'">
-        <p v-if="!isSwapComponent" class="text-muted">{{ $t('context.transactions.receipt.swappedOnHub') }}</p>
-        <p v-else>
+        <template v-if="isSwapComponent">
           <i18n-t keypath="components.txHandlingModal.received">
             <template #amount>
               <span class="font-bold">
@@ -78,7 +59,26 @@
               <ChainName :name="'cosmos-hub'" />
             </template>
           </i18n-t>
-        </p>
+        </template>
+
+        <template v-else>
+          <div class="text-1 font-bold">
+            <AmountDisplay
+              :amount="{
+                amount: lastResult.endBlock?.exchanged_offer_coin_amount,
+                denom: lastResult.endBlock?.offer_coin_denom,
+              }"
+            />
+            &rarr;
+            <AmountDisplay
+              :amount="{
+                amount: lastResult.endBlock?.exchanged_demand_coin_amount,
+                denom: lastResult.endBlock?.demand_coin_denom,
+              }"
+            />
+          </div>
+          <p class="text-muted">{{ $t('context.transactions.receipt.swappedOnHub') }}</p>
+        </template>
       </template>
 
       <template v-if="transaction.name === 'withdrawliquidity'">
@@ -135,7 +135,19 @@
         </template>
 
         <template v-if="transaction.name === 'swap'">
-          <Button variant="secondary">Send TODO</Button>
+          <Button variant="secondary">
+            <i18n-t keypath="context.transactions.controls.sendAmount">
+              <template #amount>
+                <AmountDisplay
+                  :amount="{
+                    amount: lastResult.endBlock?.exchanged_demand_coin_amount,
+                    denom: lastResult.endBlock?.demand_coin_denom,
+                  }"
+                />
+                &rarr;
+              </template>
+            </i18n-t>
+          </Button>
         </template>
 
         <Button @click="removeTransactionAndClose">{{ $t('context.transactions.controls.done') }}</Button>
