@@ -1,5 +1,5 @@
 {
-  "update_url": "https://clients2.google.com/service/update2/crx",
+"update_url": "https://clients2.google.com/service/update2/crx",
 
   "manifest_version": 2,
 
@@ -35,5 +35,8 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["injectedScript.bundle.js", "assets/temp-icon.svg"]
+  "web_accessible_resources": [
+    "injectedScript.bundle.js",
+    "assets/temp-icon.svg"
+  ]
 }
