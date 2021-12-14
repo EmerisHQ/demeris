@@ -10,7 +10,6 @@ describe('Check availability of Assets page elements', function () {
     // go to demo from /welcome page
     let welcomePage = new WelcomePage();
 
-    // cy.wait('#tryTheDemoButton')
     welcomePage.tryTheDemoButton().click({ force: true });
 
     // go to Assets page

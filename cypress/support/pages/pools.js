@@ -7,6 +7,16 @@ export class Pools {
     navbar.poolsTab().click();
   }
 
+  // ADD LIQUIDITY
+  addLiquidityButton() {
+    return cy.get('span').contains('Add liquidity');
+  }
+
+  addLiquidityClick() {
+    addLiquidityButton().click();
+    cy.url().should('contain', 'pools/add');
+  }
+
   // SEARCH FIELD
   searchField() {
     return cy.get('input[placeholder="Search assets and pools"]');
