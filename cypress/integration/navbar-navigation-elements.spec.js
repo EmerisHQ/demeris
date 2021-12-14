@@ -3,8 +3,11 @@ import { Navbar } from '../support/pages/navbar';
 import { SubPagesPaths } from '../support/sub-pages-paths';
 
 describe('Navbar elements location and availibility', function () {
-  it('Navbar element ', function () {
+  beforeEach(() => {
     cy.visit(Env.LOCAL);
+  });
+
+  it('Navbar element ', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
