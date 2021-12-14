@@ -1,10 +1,6 @@
 import { Env } from '../Env';
 
 export class Navbar {
-  // constructor(){
-  //     this.path = "[role = 'navigation']"
-  // }
-
   //NOTE: {TODO}
   // all pages classes can have method navigating to itself like:
   // goToTHISPage(){
@@ -25,6 +21,11 @@ export class Navbar {
     }
   }
 
+  //Navbar logo visibility
+  navbarLogoIsVisible() {
+    return this.navbarLogo().should('be.visible');
+  }
+
   // TABS
   portfolioTab() {
     return this.navbar().contains('Portfolio');
@@ -43,7 +44,6 @@ export class Navbar {
   }
 
   navbar() {
-    cy.get("[role = 'navigation']", { timeout: 20000 }).should('be.visible');
     return cy.get("[role = 'navigation']");
   }
 }
