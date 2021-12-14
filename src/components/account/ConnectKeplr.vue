@@ -55,10 +55,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
 
 import Spinner from '../ui/Spinner.vue';
 
@@ -80,7 +79,7 @@ export default defineComponent({
   emits: ['cancel', 'connect', 'warning', 'try-demo'],
 
   setup(_, { emit }) {
-    const store = useStore();
+    const store = useEmerisUSERStore();
     const isConnecting = ref(false);
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);
@@ -95,7 +94,7 @@ export default defineComponent({
     };
 
     const isSignedIn = computed(() => {
-      return store.getters['demerisUSER/isSignedIn'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
 
     const trySignIn = () => {

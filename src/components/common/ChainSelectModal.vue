@@ -31,11 +31,11 @@
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'DenomSelectModal',
@@ -56,14 +56,20 @@ export default defineComponent({
   setup(props, { emit }) {
     const selectedDenomDisplay = ref(props.selectedDenom);
     const chainsNumber = ref(0);
-    const store = useStore();
+    const store = useEmerisAPIStore();
     onMounted(async () => {
-      selectedDenomDisplay.value = await getDisplayName(props.selectedDenom, store.getters['demerisAPI/getDexChain']);
+      selectedDenomDisplay.value = await getDisplayName(
+        props.selectedDenom,
+        store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+      );
     });
     watch(
       () => props.selectedDenom,
       async (newName) => {
-        selectedDenomDisplay.value = await getDisplayName(newName, store.getters['demerisAPI/getDexChain']);
+        selectedDenomDisplay.value = await getDisplayName(
+          newName,
+          store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+        );
       },
     );
     function filterAsset(assets, keyword) {

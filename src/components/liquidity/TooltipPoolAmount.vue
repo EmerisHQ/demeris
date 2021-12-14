@@ -7,10 +7,10 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
@@ -29,7 +29,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
+    const store = useEmerisAPIStore();
     const { pool, reserveBalances, getPoolWithdrawBalances } = usePool((props.pool as Pool).id);
 
     const { balancesByDenom } = useAccount();
@@ -49,7 +49,7 @@ export default defineComponent({
     });
 
     const amount = computed(() => {
-      const precision = store.getters['demerisAPI/getDenomPrecision']({
+      const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: props.denom,
       });
       const balance = walletBalances.value?.find((b) => b.denom === props.denom);

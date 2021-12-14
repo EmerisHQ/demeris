@@ -207,7 +207,6 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -222,6 +221,7 @@ import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore, useEmerisUSERStore } from '@/store';
 import { GasPriceLevel, SendAddressForm } from '@/types/actions';
 import { Balances, Chain } from '@/types/api';
 import { getTicker } from '@/utils/actionHandler';
@@ -263,7 +263,8 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useEmerisAPIStore();
+    const userstore = useEmerisUSERStore();
     const router = useRouter();
     const form = inject<SendAddressForm>('transferForm');
     const { nativeBalances } = useAccount();
@@ -302,7 +303,7 @@ export default defineComponent({
 
     const denomDecimals = computed(() => {
       if (state.currentAsset) {
-        const precision = store.getters['demerisAPI/getDenomPrecision']({
+        const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: state.currentAsset.base_denom,
         });
 
@@ -331,7 +332,7 @@ export default defineComponent({
         return false;
       }
 
-      const price = store.getters['demerisAPI/getPrice']({ denom: state.currentAsset.base_denom });
+      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
 
       return !!price;
     });
@@ -345,7 +346,8 @@ export default defineComponent({
         return false;
       }
 
-      const precision = store.getters['demerisAPI/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+      const precision =
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
       const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
       const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
 
@@ -384,7 +386,7 @@ export default defineComponent({
       if (asset) {
         form.balance.denom = parseCoins(asset.amount as string)[0].denom;
         form.chain_name = asset.on_chain as string;
-        state.assetTicker = await getTicker(asset.base_denom, store.getters['demerisAPI/getDexChain']);
+        state.assetTicker = await getTicker(asset.base_denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
       }
     };
 
@@ -400,7 +402,7 @@ export default defineComponent({
         +parseCoins(b.amount)[0].amount > +parseCoins(a.amount)[0].amount ? 1 : -1,
       );
 
-      const chains: Chain[] = Object.values(store.getters['demerisAPI/getChains']);
+      const chains: Chain[] = Object.values(store.getters[GlobalDemerisGetterTypes.API.getChains]);
 
       try {
         const prefix = bech32.decode(form.recipient).prefix;
@@ -438,7 +440,8 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      state.gasPrice = store.getters['demerisUSER/getPreferredGasPriceLevel'] || GasPriceLevel.AVERAGE;
+      state.gasPrice =
+        userstore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
     });
 
     // TODO: Select chain based in user option
@@ -446,7 +449,8 @@ export default defineComponent({
       () => [state.isMaximumAmountChecked, state.currentAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked) {
-          const precision = store.getters['demerisAPI/getDenomPrecision']({ name: state.currentAsset.base_denom }) || 6;
+          const precision =
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
           const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
           const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
           form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();

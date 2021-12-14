@@ -88,7 +88,7 @@ export const mutations: MutationTree<State> & Mutations = {
     let txPromise = state.transactions.get(JSON.stringify(payload.params));
     if (txPromise == null) {
       let responseResolve, responseReject;
-      const responsePromise: Promise<string> = new Promise((res, rej) => {
+      const responsePromise: Promise<API.Ticket> = new Promise((res, rej) => {
         responseResolve = res;
         responseReject = rej;
       });
@@ -118,7 +118,7 @@ export const mutations: MutationTree<State> & Mutations = {
         );
       } else {
         let responseResolve, responseReject;
-        const responsePromise: Promise<string> = new Promise((res, rej) => {
+        const responsePromise: Promise<API.Ticket> = new Promise((res, rej) => {
           responseResolve = res;
           responseReject = rej;
         });

@@ -26,9 +26,9 @@ import useTheme from '@/composables/useTheme';
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
-  useAllStores,
   useEmerisAPIStore,
   useEmerisUSERStore,
+  useStore,
 } from '@/store';
 
 import { autoLogin, autoLoginDemo } from './utils/basic';
@@ -46,7 +46,7 @@ export default defineComponent({
     useTheme({ updateOnChange: true });
     const apistore = useEmerisAPIStore();
     const userstore = useEmerisUSERStore();
-    const libStore = useAllStores();
+    const libStore = useStore();
     const initialized = ref(false);
     const router = useRouter();
 
@@ -63,7 +63,7 @@ export default defineComponent({
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
       });
-      await apistore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+      await userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
         gasLimit: gasLimit,
       });
       status.value = t('appInit.status.assetLoading');

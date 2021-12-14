@@ -274,7 +274,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
@@ -284,7 +283,7 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
 
 export default defineComponent({
   name: 'SettingsModal',
@@ -302,7 +301,7 @@ export default defineComponent({
     const gitVersion = process.env.VUE_APP_GIT_VERSION;
     const appVersion = process.env.VUE_APP_VERSION;
 
-    const store = useStore();
+    const store = useEmerisUSERStore();
     const theme = useTheme();
 
     const isAdvancedSettingsOpen = ref(false);
@@ -310,7 +309,7 @@ export default defineComponent({
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
     const isDemoAccount = computed(() => {
-      return store.getters['demerisUSER/isDemoAccount'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
     });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
@@ -325,7 +324,7 @@ export default defineComponent({
     const settings = reactive({
       theme,
       gasLimit: computed({
-        get: () => store.getters['demerisAPI/getGasLimit'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
         set: (value: number) => {
           store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
         },

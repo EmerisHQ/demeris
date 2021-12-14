@@ -68,11 +68,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
 import Switch from '@/components/ui/Switch.vue';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -80,7 +79,7 @@ export default defineComponent({
     Switch,
   },
   setup() {
-    const store = useStore();
+    const store = useEmerisUSERStore();
     const menuRef = ref(null);
 
     const isOpen = ref(false);
@@ -93,15 +92,15 @@ export default defineComponent({
     const settings = reactive({
       theme: 'system',
       allowCustomSlippage: computed({
-        get: () => store.getters['demerisUSER/allowCustomSlippage'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters['demerisUSER/viewUnverified'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewUnverified],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters['demerisUSER/viewLPAssetPools'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });

@@ -6,10 +6,8 @@ import { bech32 } from 'bech32';
 import { Chain } from '@/types/api';
 
 import { demoAddresses } from '../store/demeris-user/demo-account';
-import { GlobalDemerisGetterTypes, useEmerisAPIStore, useEmerisUSERStore } from '../store/index';
+import { apistore, GlobalDemerisGetterTypes, userstore } from '../store/index';
 
-const apistore = useEmerisAPIStore();
-const userstore = useEmerisUSERStore();
 export function toHexString(byteArray) {
   return Array.prototype.map
     .call(byteArray, function (byte) {

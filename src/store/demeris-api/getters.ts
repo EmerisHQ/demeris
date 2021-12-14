@@ -55,7 +55,10 @@ export type Getters = {
   [GetterTypes.getSupply](state: State, getters): { (params): number };
   [GetterTypes.getAllVerifiedTraces](state: State): Record<string, API.VerifyTrace>;
   [GetterTypes.getDexChain](state: State): string;
-  [GetterTypes.getTxStatus](state: State): { (params: API.APIRequests): Promise<string> | null };
+  [GetterTypes.getTxStatus](state: State): { (params: API.APIRequests): Promise<API.Ticket> | null };
+  [GetterTypes.isVerified](state: State): {
+    (params: { denom: string; chain_name: string }): boolean;
+  };
   [GetterTypes.getOwnAddress](
     state: State,
     getters,
@@ -127,6 +130,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
       feeAddresses.push({ chain_name: chain.chain_name, demeris_address: chain.demeris_addresses[0] });
     }
     return feeAddresses.length != 0 ? feeAddresses : null;
+  },
+  [GetterTypes.isVerified]: (state) => (params) => {
+    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
   },
   [GetterTypes.getVerifiedDenoms]: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;

@@ -1,13 +1,12 @@
 import { computed, watch } from 'vue';
-import { useStore } from 'vuex';
 
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, useEmerisUSERStore } from '@/store';
 
 type Props = {
   updateOnChange?: boolean;
 };
 export default function useTheme(props: Props = {}) {
-  const store = useStore();
+  const store = useEmerisUSERStore();
 
   const theme = computed({
     get() {

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
-import { RootState } from '@/store';
+import { GlobalDemerisGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
@@ -101,7 +101,7 @@ export interface Actions {
   [DemerisActionTypes.GET_TX_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionsByTicketParams,
-  ): Promise<string>;
+  ): Promise<API.Ticket>;
   [DemerisActionTypes.GET_FEE_ADDRESSES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe }: DemerisActionParams,
@@ -249,9 +249,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getBalances'](params);
     }
   },
-  async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }) {
+  async [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters, rootGetters }) {
     try {
-      const keyHashes = getters['getKeyhashes'];
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
+
       for (const keyHash of keyHashes) {
         await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
@@ -260,9 +261,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllBalances'];
   },
-  async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters }) {
+  async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters, rootGetters }) {
     try {
-      const keyHashes = getters['getKeyhashes'];
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
         await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
@@ -350,9 +351,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getNumbersChain'](params);
   },
-  async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters }) {
+  async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters, rootGetters }) {
     try {
-      const keyHashes = getters['getKeyhashes'];
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
         await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
       }
@@ -460,7 +461,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       console.error(e);
       throw new SpVuexError('Demeris:GetTXStatus', 'Could not perform API query.');
     }
-    return 'pending';
+    return getters['getTxStatus'](params);
   },
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
     try {

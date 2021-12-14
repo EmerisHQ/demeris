@@ -15,7 +15,7 @@ import { messages } from '@/locales/en';
 
 import App from './App.vue';
 import router from './router';
-import { store } from './store';
+import { key, store } from './store';
 
 const i18n = createI18n({
   globalInjection: true,
@@ -40,7 +40,7 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app
   .use(i18n)
-  .use(store)
+  .use(store, key)
   .use(router)
   .use(vueLib)
   .use(VueTippy)

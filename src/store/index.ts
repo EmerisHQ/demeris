@@ -1,4 +1,5 @@
-import { createStore, Store as VuexStore } from 'vuex';
+import { InjectionKey } from 'vue';
+import { createStore, Store as VuexStore, useStore as baseUseStore } from 'vuex';
 
 import {
   DemerisStore as DemerisStoreAPI,
@@ -38,10 +39,11 @@ export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStore
 
 export type RootStoreType = RootStore<Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>>;
 
-export type TypedAPIStore = RootStore<Pick<RootState, typeof namespaceAPI>>;
-export type TypedUSERStore = RootStore<Pick<RootState, typeof namespaceUSER>>;
-export type TypedTXStore = RootStore<Pick<RootState, typeof namespaceTX>>;
+export type TypedAPIStore = DemerisStoreAPI<Pick<RootState, typeof namespaceAPI>>;
+export type TypedUSERStore = DemerisStoreUSER<Pick<RootState, typeof namespaceUSER>>;
+export type TypedTXStore = DemerisStoreTX<Pick<RootState, typeof namespaceTX>>;
 
+export const key: InjectionKey<VuexStore<RootState>> = Symbol();
 // add all modules to vuex
 const initstore = createStore<RootState>({
   modules: {
@@ -54,29 +56,18 @@ const initstore = createStore<RootState>({
 
 // add library modules
 init(initstore as RootStoreType);
-export const store = initstore as RootStoreType;
 
-store.subscribe((mutation) => {
+initstore.subscribe((mutation) => {
   if (mutation.type == 'tendermint.liquidity.v1beta1/QUERY' && mutation.payload.query == 'LiquidityPools') {
-    store.dispatch(GlobalDemerisActionTypes.API.VALIDATE_POOLS, mutation.payload.value.pools);
+    initstore.dispatch(GlobalDemerisActionTypes.API.VALIDATE_POOLS, mutation.payload.value.pools);
   }
 });
 
-export function useStore(): RootStoreType {
-  return store as RootStoreType;
-}
-export function useAllStores(): VuexStore<any> {
-  return store as VuexStore<any>;
-}
-export function useEmerisAPIStore(): TypedAPIStore {
-  return store as TypedAPIStore;
-}
-export function useEmerisUSERStore(): TypedUSERStore {
-  return store as TypedUSERStore;
-}
-export function useEmerisTXStore(): TypedTXStore {
-  return store as TypedTXStore;
-}
+//Module typed exports
+export const store = initstore as VuexStore<any>;
+export const apistore: TypedAPIStore = initstore as TypedAPIStore;
+export const userstore: TypedUSERStore = initstore as TypedUSERStore;
+export const txstore: TypedTXStore = initstore as TypedTXStore;
 
 export const GlobalDemerisActionTypes = {
   TX: GlobalDemerisActionTypesTX,
@@ -88,3 +79,17 @@ export const GlobalDemerisGetterTypes = {
   USER: GlobalGetterTypesUSER,
   API: GlobalGetterTypesAPI,
 };
+
+//Composition API exports
+export function useStore(): VuexStore<any> {
+  return baseUseStore(key) as VuexStore<any>;
+}
+export function useEmerisAPIStore(): TypedAPIStore {
+  return baseUseStore(key) as TypedAPIStore;
+}
+export function useEmerisUSERStore(): TypedUSERStore {
+  return baseUseStore(key) as TypedUSERStore;
+}
+export function useEmerisTXStore(): TypedTXStore {
+  return baseUseStore(key) as TypedTXStore;
+}

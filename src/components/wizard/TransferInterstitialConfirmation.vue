@@ -42,10 +42,10 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
@@ -67,7 +67,7 @@ export default defineComponent({
   emits: ['continue'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useEmerisAPIStore();
     const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
@@ -110,12 +110,12 @@ export default defineComponent({
 
       if (currentAction.value === 'transfer') {
         const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
-        let fromChain = store.getters['demerisAPI/getDisplayChain']({ name: backwardData.from_chain });
-        let toChain = store.getters['demerisAPI/getDisplayChain']({ name: backwardData.to_chain });
+        let fromChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: backwardData.from_chain });
+        let toChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: backwardData.to_chain });
 
         if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
           const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
-          toChain = store.getters['demerisAPI/getDisplayChain']({ name: forwardData.to_chain });
+          toChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain });
         }
 
         return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
@@ -150,10 +150,12 @@ export default defineComponent({
             const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
             const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
 
-            const fromChain = store.getters['demerisAPI/getDisplayChain']({ name: backwardData.from_chain });
-            const toChain = store.getters['demerisAPI/getDisplayChain']({ name: forwardData.to_chain });
+            const fromChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+              name: backwardData.from_chain,
+            });
+            const toChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain });
             const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
-            const nativeChain = store.getters['demerisAPI/getDisplayChain']({ name: asset.on_chain });
+            const nativeChain = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: asset.on_chain });
 
             const translateKeyPath =
               props.steps[0].transactions.length > 2
@@ -183,7 +185,7 @@ export default defineComponent({
       props.steps,
       async () => {
         let stepDenoms = [];
-        const dexChain = store.getters['demerisAPI/getDexChain'];
+        const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
         stepDenoms = props.steps
           .map((step) => {

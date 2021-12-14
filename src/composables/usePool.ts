@@ -1,7 +1,6 @@
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
-import { useAllStores } from '@/store';
-import { Amount } from '@/types/base';
+import { apistore, GlobalDemerisGetterTypes, store } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
@@ -10,7 +9,6 @@ import usePools from './usePools';
 const usePoolInstances = {};
 
 function usePool(id: string) {
-  const store = useAllStores();
   let initialized;
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
@@ -33,14 +31,14 @@ function usePool(id: string) {
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
 
     watch(
-      () => store.getters['demerisAPI/getPrice']({ denom: reserveBaseDenoms.value[0] }),
+      () => apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] }),
       updateTotalLiquidityPrice,
       {
         immediate: true,
       },
     );
     watch(
-      () => store.getters['demerisAPI/getPrice']({ denom: reserveBaseDenoms.value[1] }),
+      () => apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] }),
       updateTotalLiquidityPrice,
       {
         immediate: true,
@@ -58,8 +56,9 @@ function usePool(id: string) {
       return [];
     }
     return (
-      store.getters['demerisAPI/getBalances']({ address: keyHashfromAddress(pool.value?.reserve_account_address) }) ||
-      []
+      apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
+        address: keyHashfromAddress(pool.value?.reserve_account_address),
+      }) || []
     ).map((item) => {
       return { ...parseCoins(item.amount)[0], base_denom: item.base_denom };
     });
@@ -91,8 +90,8 @@ function usePool(id: string) {
     const prices = [];
 
     baseDenoms.map((denom) => {
-      const price = store.getters['demerisAPI/getPrice']({ denom });
-      const precision = store.getters['demerisAPI/getDenomPrecision']({ name: denom }) || 6;
+      const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+      const precision = apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) || 6;
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
       });

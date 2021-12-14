@@ -13,7 +13,7 @@ export type TransactionItem = {
   status: API.Ticket;
   resolve: (value?: unknown | PromiseLike<unknown>) => void;
   reject: (reason?: Error) => void;
-  promise: Promise<string>;
+  promise: Promise<API.Ticket>;
 };
 export type State = {
   endpoint: string;

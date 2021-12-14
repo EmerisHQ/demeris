@@ -96,11 +96,10 @@ import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-import { useStore } from 'vuex';
-
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { Chains, VerifiedDenoms } from '@/types/api';
 import { getBaseDenom } from '@/utils/actionHandler';
 import { hexToRGB } from '@/utils/basic';
@@ -156,7 +155,7 @@ export default defineComponent({
   setup(props) {
     const { pools, getReserveBaseDenoms } = usePools();
 
-    const store = useStore();
+    const store = useEmerisAPIStore();
     const denoms = ref<string[]>([]);
     const isLoaded = ref(false);
 
@@ -169,8 +168,8 @@ export default defineComponent({
     });
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'] || [];
-      const chains: Chains = store.getters['demerisAPI/getChains'] || [];
+      const verifiedDenoms: VerifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+      const chains: Chains = store.getters[GlobalDemerisGetterTypes.API.getChains] || [];
 
       const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
 

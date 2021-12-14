@@ -76,7 +76,6 @@
 <script lang="ts">
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 
 import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -85,6 +84,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
 import { Balance } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
@@ -107,7 +107,7 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props) {
-    const store = useStore();
+    const store = useEmerisAPIStore();
     const modifiedData = computed(() => getUniqueCoinList(props.data));
 
     function setWordColorByKeyword(keyword, word) {
@@ -178,7 +178,7 @@ export default defineComponent({
       }
 
       for (const chain of uniqueChainsList) {
-        const status = store.getters['demerisAPI/getChainStatus']({ chain_name: chain });
+        const status = store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
         if (!status) {
           result.push({
             chain,

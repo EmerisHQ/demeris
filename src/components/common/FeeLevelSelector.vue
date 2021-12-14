@@ -127,12 +127,17 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import Alert from '@/components/ui/Alert.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisActionTypes } from '@/store';
+import {
+  GlobalDemerisActionTypes,
+  GlobalDemerisGetterTypes,
+  useEmerisAPIStore,
+  useEmerisUSERStore,
+  useStore,
+} from '@/store';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
 import { feeForSteps, getTicker } from '@/utils/actionHandler';
 
@@ -151,6 +156,9 @@ export default defineComponent({
   },
   emits: ['update:fees'],
   setup(props, { emit }) {
+    const store = useEmerisAPIStore();
+    const userstore = useEmerisUSERStore();
+    const libStore = useStore();
     const lowFee = ref({});
     const avgFee = ref({});
     const highFee = ref({});
@@ -167,7 +175,6 @@ export default defineComponent({
         highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
       },
     );
-    const store = useStore();
     const txCount = computed(() => {
       let count = 0;
       for (let step of props.steps as Step[]) {
@@ -180,10 +187,10 @@ export default defineComponent({
       for (const chain_name in lowFee.value) {
         for (const denom in lowFee.value[chain_name]) {
           const precision =
-            store.getters['demerisAPI/getDenomPrecision']({
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters['demerisAPI/getPrice']({ denom });
+          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(lowFee.value[chain_name][denom])
@@ -201,10 +208,10 @@ export default defineComponent({
       for (const chain_name in avgFee.value) {
         for (const denom in avgFee.value[chain_name]) {
           const precision =
-            store.getters['demerisAPI/getDenomPrecision']({
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters['demerisAPI/getPrice']({ denom });
+          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(avgFee.value[chain_name][denom])
@@ -221,10 +228,10 @@ export default defineComponent({
       for (const chain_name in highFee.value) {
         for (const denom in highFee.value[chain_name]) {
           const precision =
-            store.getters['demerisAPI/getDenomPrecision']({
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters['demerisAPI/getPrice']({ denom });
+          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(highFee.value[chain_name][denom])
@@ -281,10 +288,10 @@ export default defineComponent({
       if (hasPoolCoinToSwap.value) {
         const swapFees = [];
         const swapFeeRate =
-          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
+          parseFloat(libStore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
         const tx = swapTx.value;
         const precision =
-          store.getters['demerisAPI/getDenomPrecision']({
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: tx.from.denom, //pool coin precision is same
           }) ?? 6;
         if (tx.from.denom.startsWith('pool')) {
@@ -347,7 +354,7 @@ export default defineComponent({
     const gasPriceLevel = computed({
       get: () => store.getters['demerisAPI/getPreferredGasPriceLevel'],
       set: (level: GasPriceLevel) => {
-        store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
+        userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },
     });
 

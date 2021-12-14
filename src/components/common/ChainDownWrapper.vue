@@ -24,10 +24,10 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/runtime-core';
-import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { useEmerisAPIStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -36,7 +36,7 @@ export default defineComponent({
   },
 
   setup() {
-    const store = useStore();
+    const store = useEmerisAPIStore();
 
     const dexChain = store.getters['demerisAPI/getDexChain'];
 
