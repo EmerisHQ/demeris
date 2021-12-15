@@ -240,7 +240,8 @@
                       size="sm"
                       class="mr-3"
                     />
-                    <span class="font-medium">{{ state.receiveAmount }}
+                    <span class="font-medium">
+                      {{ state.receiveAmount }}
                       <span class="font-bold">
                         <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
                       </span>
@@ -349,7 +350,7 @@ import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 import { useStore } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
+import { actionHandler, getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
@@ -568,8 +569,17 @@ export default {
         return;
       }
 
-      const result = usePoolInstance.value.calculateSupplyTokenAmount(+form.coinA.amount, +form.coinB.amount);
-      state.receiveAmount = new BigNumber(result).decimalPlaces(6).toString();
+      const result = usePoolInstance.value.calculateSupplyTokenAmount([
+        {
+          amount: new BigNumber(form.coinA.amount).shiftedBy(precisions.value.coinA).toNumber(),
+          denom: form.coinA.asset.base_denom,
+        },
+        {
+          amount: new BigNumber(form.coinB.amount).shiftedBy(precisions.value.coinB).toNumber(),
+          denom: form.coinB.asset.base_denom,
+        },
+      ]);
+      state.receiveAmount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString();
     };
 
     const precisions = computed(() => {
@@ -599,6 +609,7 @@ export default {
             .toNumber(),
         };
       }
+
       if (reserveBalances.value.length) {
         const baseDenomIndex = {};
         baseDenomIndex[state.poolBaseDenoms[0]] = pool.value.reserve_coin_denoms[0];
@@ -791,13 +802,13 @@ export default {
 
         for (const poolIterator of pools.value) {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
-          // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
-          state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
 
           if (
             reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
+            // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+            state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
             if (poolIterator.id != route.params.id) {
               router.push('/pools/add/' + poolIterator.id);
             }
@@ -939,27 +950,41 @@ export default {
         return;
       }
 
-      const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
-      const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+      const precisions = {
+        [form.coinA.asset.base_denom]:
+          store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) ?? 6,
+        [form.coinB.asset.base_denom]:
+          store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) ?? 6,
+      };
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
-
-      const isReverse = reserveBalances.value[0].base_denom !== form.coinA.asset.base_denom;
+      const prices = {
+        [form.coinA.asset.base_denom]: store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom }),
+        [form.coinB.asset.base_denom]: store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom }),
+      };
 
       const totalA = new BigNumber(reserveBalances.value[0].amount)
-        .shiftedBy(isReverse ? -precisionB : -precisionA)
-        .multipliedBy(isReverse ? priceB : priceA);
+        .shiftedBy(-precisions[reserveBalances.value[0].base_denom])
+        .multipliedBy(prices[reserveBalances.value[0].base_denom]);
       const totalB = new BigNumber(reserveBalances.value[1].amount)
-        .shiftedBy(isReverse ? -precisionA : -precisionB)
-        .multipliedBy(isReverse ? priceA : priceB);
+        .shiftedBy(-precisions[reserveBalances.value[1].base_denom])
+        .multipliedBy(prices[reserveBalances.value[1].base_denom]);
       const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
       const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
 
-      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.toNumber());
+      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.shiftedBy(6).toNumber());
 
-      form.coinA.amount = new BigNumber(result[isReverse ? 1 : 0].amount).decimalPlaces(6).toString();
-      form.coinB.amount = new BigNumber(result[isReverse ? 0 : 1].amount).decimalPlaces(6).toString();
+      const resultA = result.find((item) => getBaseDenomSync(item.denom) === form.coinA.asset.base_denom);
+      const resultB = result.find((item) => getBaseDenomSync(item.denom) === form.coinB.asset.base_denom);
+
+      form.coinA.amount = new BigNumber(resultA.amount)
+        .shiftedBy(-precisions[form.coinA.asset.base_denom])
+        .decimalPlaces(6)
+        .toString();
+      form.coinB.amount = new BigNumber(resultB.amount)
+        .shiftedBy(-precisions[form.coinB.asset.base_denom])
+        .decimalPlaces(6)
+        .toString();
+
       updateReceiveAmount();
     };
 
@@ -1063,20 +1088,10 @@ export default {
                 .shiftedBy(-precisionA + precisionDiff)
                 .decimalPlaces(precisionA)
                 .toString();
-
-              form.coinB.amount = bigAmountA
-                .multipliedBy(bigExchangeAmount)
-                .shiftedBy(-precisionB)
-                .decimalPlaces(precisionB)
-                .toString();
+              coinAChangeHandler();
             } else if (minAmount.isEqualTo(bigAmountBToA) && amountsPositive) {
               form.coinB.amount = bigAmountB.shiftedBy(-precisionB).decimalPlaces(precisionB).toString();
-
-              form.coinA.amount = bigAmountB
-                .dividedBy(bigExchangeAmount)
-                .shiftedBy(-precisionA + precisionDiff)
-                .decimalPlaces(precisionA)
-                .toString();
+              coinBChangeHandler();
             } else {
               form.coinA.amount = '0';
               form.coinB.amount = '0';

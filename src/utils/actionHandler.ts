@@ -1335,7 +1335,7 @@ export async function msgFromStepTransaction(
         swapTypeId: data.pool.type_id,
         offerCoin: { amount: data.from.amount, denom: data.from.denom },
         demandCoinDenom: data.to.denom,
-        offerCoinFee: { amount: String(Math.trunc(+data.from.amount * (swapFeeRate / 2))), denom: data.from.denom },
+        offerCoinFee: { amount: String(Math.ceil(+data.from.amount * (swapFeeRate / 2))), denom: data.from.denom },
         orderPrice: (
           (parseInt(price[0].amount) / parseInt(price[1].amount)) *
           (isReverse ? 1 - slippage : 1 + slippage)
