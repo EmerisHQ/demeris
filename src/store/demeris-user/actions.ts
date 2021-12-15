@@ -2,7 +2,7 @@ import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import { ActionContext, ActionTree } from 'vuex';
 
-import { GlobalDemerisActionTypes, RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { event } from '@/utils/analytics';
@@ -131,11 +131,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch, rootGetters }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
 
-      const chains = getters['getChains'];
+      const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
         await addChain(chain);
@@ -151,7 +151,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         paths.add(chain.derivation_path);
         toQuery.push(chain);
       }
-      const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
+      const dexchain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
+        chain_name: rootGetters[GlobalDemerisGetterTypes.API.getDexChain],
+      });
       await window.keplr.enable(dexchain.node_info.chain_id);
       const key = await window.keplr.getKey(dexchain.node_info.chain_id);
       commit(DemerisMutationTypes.SET_KEPLR, key);

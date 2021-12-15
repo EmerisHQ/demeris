@@ -3,7 +3,7 @@ import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
-import { RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { DemerisMutationTypes } from '@/store/demeris-tx/mutation-types';
 import { Amount } from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
@@ -69,18 +69,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
+  async [DemerisActionTypes.SIGN_WITH_KEPLR]({ dispatch, rootGetters }, { msgs, chain_name, fee, registry, memo }) {
     try {
-      let chain = getters['demerisAPI/getChain']({
+      let chain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
         chain_name,
       }) as ChainData;
       if (!chain || !chain.node_info) {
-        chain = await dispatch('demerisAPI/GET_CHAINS', {
-          subscribe: true,
-          params: {
-            chain_name,
+        chain = await dispatch(
+          GlobalDemerisActionTypes.API.GET_CHAIN,
+          {
+            subscribe: true,
+            params: {
+              chain_name,
+            },
           },
-        });
+          { root: true },
+        );
       }
       // await addChain(chain_name);
 
@@ -90,13 +94,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
 
-      const numbers = await dispatch('demerisAPI/GET_NUMBERS_CHAIN', {
-        subscribe: false,
-        params: {
-          address: keyHashfromAddress(account.address),
-          chain_name: chain_name,
+      const numbers = await dispatch(
+        GlobalDemerisActionTypes.API.GET_NUMBERS_CHAIN,
+        {
+          subscribe: false,
+          params: {
+            address: keyHashfromAddress(account.address),
+            chain_name: chain_name,
+          },
         },
-      });
+        { root: true },
+      );
 
       const signerData = numbers;
       const cosmjsSignerData = {
