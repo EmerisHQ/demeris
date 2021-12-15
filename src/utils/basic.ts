@@ -1,5 +1,5 @@
-import { Coin } from '@cosmjs/amino';
-import { sha256 } from '@cosmjs/crypto';
+import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
+import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 
@@ -8,6 +8,9 @@ import { Chain } from '@/types/api';
 import { demoAddresses } from '../store/demeris/demo-account';
 import { store } from '../store/index';
 
+export function fromHexString(hexString) {
+  return new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+}
 export function toHexString(byteArray) {
   return Array.prototype.map
     .call(byteArray, function (byte) {
@@ -37,12 +40,30 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
+  const isCypress = !!window['Cypress'];
   if (store.getters['demeris/isDemoAccount']) {
     return demoAddresses[chain_name];
   } else {
     const chain = store.getters['demeris/getChain']({ chain_name });
-    const key = await window.keplr.getKey(chain.node_info.chain_id);
-    return key.bech32Address;
+    if (isCypress) {
+      const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+        prefix: chain.node_info.bech32_config.main_prefix,
+        hdPaths: [stringToPath(chain.derivation_path)],
+      });
+      const [account] = await signer.getAccounts();
+      const key = {
+        name: 'Cypress Test',
+        algo: account.algo,
+        pubKey: account.pubkey,
+        bech32Address: account.address,
+        isNanoLedger: false,
+        address: fromHexString(keyHashfromAddress(account.address)),
+      };
+      return key.bech32Address;
+    } else {
+      const key = await window.keplr.getKey(chain.node_info.chain_id);
+      return key.bech32Address;
+    }
   }
 }
 export function isNative(denom: string) {
