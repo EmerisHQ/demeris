@@ -526,8 +526,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         return false;
       },
 
-      hasMissingFees: (context) => context.fees.validation?.missingFees.length > 0,
-      hasIBCFeeWarning: (context) => context.fees.validation?.ibcWarning === true,
+      hasMissingFees: (context) => context.fees?.validation?.missingFees.length > 0,
+      hasIBCFeeWarning: (context) => context.fees?.validation?.ibcWarning === true,
     },
   },
 );

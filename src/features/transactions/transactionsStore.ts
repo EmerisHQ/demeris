@@ -77,12 +77,24 @@ export const useTransactionsStore = defineStore('transactions', {
       delete this.transactions[stepId];
     },
 
-    createTransactionMachine(action: string, steps: Step[], balances: Balance[]): [string, TransactionProcessService] {
+    createTransaction({
+      action,
+      steps,
+      balances,
+      machine,
+    }: {
+      action: string;
+      steps: Step[];
+      balances: Balance[];
+      machine?: typeof transactionProcessMachine;
+    }): [string, TransactionProcessService] {
       const stepId = `${hashObject(steps)}-${Date.now()}`;
       const pendingTransactions = this.pending;
 
-      const service = interpret(
-        transactionProcessMachine.withConfig({
+      let processMachine = machine;
+
+      if (!processMachine) {
+        processMachine = transactionProcessMachine.withConfig({
           services: {
             async validatePreviousTransaction(context: TransactionProcessContext) {
               const currentTransaction = getCurrentTransaction(context);
@@ -115,9 +127,10 @@ export const useTransactionsStore = defineStore('transactions', {
               return Promise.resolve(true);
             },
           },
-        }),
-        { devTools: true },
-      );
+        });
+      }
+
+      const service = interpret(processMachine);
 
       service.start();
       service.send({

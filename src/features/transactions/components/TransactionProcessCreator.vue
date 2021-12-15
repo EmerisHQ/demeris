@@ -42,7 +42,11 @@ const emits = defineEmits(['pending', 'close']);
 const transactionsStore = useTransactionsStore();
 
 const { balances } = useAccount();
-const [stepId, service] = transactionsStore.createTransactionMachine(props.action, props.steps, balances.value);
+const [stepId, service] = transactionsStore.createTransaction({
+  action: props.action,
+  steps: props.steps,
+  balances: balances.value,
+});
 const isPending = computed(() => transactionsStore.isPending(stepId));
 
 const { state } = useActor(service);
