@@ -134,3 +134,7 @@ export function parseCoins(input: string): Coin[] {
       };
     });
 }
+
+export const checkUserCountry = (country) => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone.includes(country);
+};

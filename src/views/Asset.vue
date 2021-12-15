@@ -24,7 +24,8 @@
 
         <!-- Balance -->
 
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
+        <MoonpayBanner v-if="!assets.length && denom === 'uatom' && !isSimplexCountry()" class="mt-16" size="large" />
+        <SimplexBanner v-if="!assets.length && denom === 'uatom' && isSimplexCountry()" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
@@ -146,7 +147,8 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
+        <MoonpayBanner v-if="assets.length && denom == 'uatom' && !isSimplexCountry()" size="small" class="mt-4" />
+        <SimplexBanner v-if="assets.length && denom == 'uatom' && isSimplexCountry()" size="small" class="mt-4" />
       </aside>
     </div>
   </AppLayout>
@@ -166,6 +168,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
+import SimplexBanner from '@/components/common/SimplexBanner.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -177,7 +180,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
-import { generateDenomHash, parseCoins } from '@/utils/basic';
+import { checkUserCountry, generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Asset',
@@ -196,6 +199,7 @@ export default defineComponent({
     TooltipPools,
     PoolBanner,
     MoonpayBanner,
+    SimplexBanner,
     ChainDownWarning,
   },
 
@@ -356,6 +360,10 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
+    const isSimplexCountry = () => {
+      return checkUserCountry('America');
+    };
+
     return {
       nativeAsset,
       assetConfig,
@@ -369,6 +377,7 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      isSimplexCountry,
     };
   },
 });

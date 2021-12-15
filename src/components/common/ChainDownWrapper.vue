@@ -41,7 +41,8 @@ export default defineComponent({
     const dexChain = store.getters['demeris/getDexChain'];
 
     const isHubDown = computed(() => {
-      const status = store.getters['demeris/getChainStatus']({ chain_name: dexChain });
+      const status =
+        store.getters['demeris/getChainStatus']({ chain_name: dexChain }) || window.location.pathname === '/simplex';
       return status === false;
     });
 

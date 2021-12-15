@@ -252,7 +252,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw,toRefs, watch } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -298,7 +298,7 @@ import {
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
+import { checkUserCountry, parseCoins } from '@/utils/basic';
 import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
@@ -384,7 +384,11 @@ export default defineComponent({
 
     const goMoon = () => {
       if (isSignedIn.value) {
-        window.open(mpUrl.value, '', 'height=480,width=320');
+        if (checkUserCountry('America')) {
+          window.open(`${window.location.origin}/simplex?crypto=ATOM&fiat=USD&amount=1000`, '', 'height=500,width=500');
+        } else {
+          window.open(mpUrl.value, '', 'height=480,width=320');
+        }
       } else {
         emitter.emit('toggle-settings-modal');
       }

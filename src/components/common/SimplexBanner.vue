@@ -1,7 +1,7 @@
 <template>
   <button
     class="
-      moonpay-banner
+      simplex-banner
       text-left
       w-full
       flex flex-col
@@ -17,24 +17,24 @@
       active:transform-none active:opacity-70
     "
     :class="[
-      `moonpay-banner--${size}`,
+      `simplex-banner--${size}`,
       size === 'small' ? 'theme-inverse dark:theme-inverse bg-app' : 'bg-surface dark:bg-fg',
     ]"
-    @click="goMoon"
+    @click="goSimplex"
   >
-    <p class="text-text text-1 font-bold">{{ $t('components.moonpayBanner.title', { asset: asset }) }}</p>
-    <p class="text-muted -text-1 mt-14">{{ $t('components.moonpayBanner.poweredBy') }}</p>
+    <p class="text-text text-1 font-bold">{{ $t('components.simplexBanner.title', { asset: asset }) }}</p>
+    <p class="text-muted -text-1 mt-14">{{ $t('components.simplexBanner.poweredBy') }}</p>
   </button>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import useEmitter from '@/composables/useEmitter';
 import { useStore } from '@/store';
 
 export default defineComponent({
-  name: 'MoonpayBanner',
+  name: 'SimplexBanner',
 
   props: {
     asset: {
@@ -58,38 +58,20 @@ export default defineComponent({
       return store.getters['demeris/isDemoAccount'];
     });
 
-    const mpDomain = ref(`${window.location.href.split('?')[0]}simplex?crypto=ATOM&fiat=USD&amount=100`);
-    const mpParams = computed(() => {
-      return {
-        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
-        currencyCode: 'atom',
-        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
-        baseCurrencyCode: 'usd',
-        // baseCurrencyAmount: '50',
-      };
-    });
-    const mpQuery = computed(() => {
-      return new URLSearchParams(mpParams.value).toString();
-    });
-    const mpUrl = computed(() => {
-      return mpDomain.value + '/?' + mpQuery.value;
-    });
-
-    const goMoon = () => {
+    const goSimplex = () => {
       if (isSignedIn.value && !isDemoAccount.value) {
-        window.open(mpUrl.value, '', 'height=480,width=320');
+        window.open(`${window.location.origin}/simplex?crypto=ATOM&fiat=USD&amount=1000`, '', 'height=500,width=500');
       } else {
-        window.open(mpUrl.value, '', 'height=480,width=320');
-        // emitter.emit('toggle-settings-modal');
+        emitter.emit('toggle-settings-modal');
       }
     };
-    return { isSignedIn, goMoon, isDemoAccount };
+    return { isSignedIn, goSimplex, isDemoAccount };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.moonpay-banner {
+.simplex-banner {
   min-height: 5rem;
   background-image: url('~@/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;

@@ -16,17 +16,17 @@
             </router-link>
           </header>
 
-          <!-- <AssetsTable
+          <AssetsTable
             :balances="balances"
             :hide-zero-assets="true"
             variant="balance"
             :show-headers="false"
             :limit-rows="4"
             @row-click="openAssetPage"
-          /> -->
+          />
 
-          <!-- <MoonpayBanner v-if="balances.length" :title="$t('context.moonpay.cta')" size="large" /> -->
-          <SimplexBanner v-if="balances.length" :title="$t('context.moonpay.cta')" size="large" />
+          <MoonpayBanner v-if="isMoonpay" :title="$t('context.moonpay.cta')" size="large" />
+          <SimplexBanner v-if="isSimplex" :title="$t('context.simplex.cta')" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
@@ -70,17 +70,18 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
+import { checkUserCountry } from '@/utils/basic';
 
 export default {
   name: 'Portfolio',
   components: {
     AppLayout,
     Button,
-    // MoonpayBanner,
+    MoonpayBanner,
     SimplexBanner,
     LiquiditySwap,
     TotalPrice,
-    // AssetsTable,
+    AssetsTable,
     Pools,
     Intro,
   },
@@ -97,6 +98,13 @@ export default {
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
+    const isSimplex = computed(() => {
+      return !balances.value.length && checkUserCountry('America');
+    });
+
+    const isMoonpay = computed(() => {
+      return !balances.value.length && !checkUserCountry('America');
+    });
 
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
@@ -111,7 +119,7 @@ export default {
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage };
+    return { balances, poolsInvested, openAssetPage, openPoolsPage, isSimplex, isMoonpay };
   },
 };
 </script>

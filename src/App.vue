@@ -2,8 +2,8 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div v-if="initialized">
-    <CookieConsent />
+  <div v-if="initialized || initializationNotRequired">
+    <CookieConsent v-if="!initializationNotRequired" />
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
@@ -42,9 +42,11 @@ export default defineComponent({
     const store = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
+    const initializationNotRequired = ref(window.location.pathname === '/simplex');
 
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
+
     onMounted(async () => {
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
@@ -136,7 +138,7 @@ export default defineComponent({
         router.push('/welcome');
       }
     });
-    return { initialized, status };
+    return { initialized, status, initializationNotRequired };
   },
   errorCaptured(err) {
     console.error(err);
