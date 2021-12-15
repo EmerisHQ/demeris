@@ -24,4 +24,12 @@ describe('Initial Test - check if page (local) is reachable and Cypress env fork
 
     //cy.launchDemo()
   });
+  describe('Login', () => {
+    it('should be publicly accessible', () => {
+      cy.visit(Env.LOCAL);
+      let welcomePage = new WelcomePage();
+      welcomePage.tryTheDemoButton().click();
+      cy.matchImageSnapshot('mainpage');
+    });
+  });
 });

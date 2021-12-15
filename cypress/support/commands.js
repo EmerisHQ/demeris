@@ -27,6 +27,8 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 // cypress/support/command.js
 // import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
+import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
+
 import { Env } from './Env';
 // addExtensionCommands(Cypress);
 
@@ -38,4 +40,11 @@ Cypress.Commands.add('launchDemo', () => {
   cy.wait(12000);
   cy.xpath('//*[contains(text(),"Try the demo")]').should('be.visible');
   cy.xpath('//*[contains(text(),"Try the demo")]').click();
+});
+
+addMatchImageSnapshotCommand({
+  failureThreshold: 4.2,
+  failureThresholdType: 'percent',
+  customDiffConfig: { threshold: 0.1 },
+  capture: 'viewport',
 });

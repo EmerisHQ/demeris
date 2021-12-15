@@ -14,12 +14,19 @@ require('fs-extra');
 // the project's config changing)
 module.exports = (on, config) => {
   on('before:browser:launch', (browser, launchOptions) => {
-    // supply the absolute path to an unpacked extension's folder
     // NOTE: extensions cannot be loaded in headless Chrome
     launchOptions.extensions.push('Keplr');
 
     return launchOptions;
   });
+};
+const {
+  addMatchImageSnapshotPlugin,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require('cypress-image-snapshot/plugin');
+
+module.exports = (on, config) => {
+  addMatchImageSnapshotPlugin(on, config);
 };
 /**
  * @type {Cypress.PluginConfig}
