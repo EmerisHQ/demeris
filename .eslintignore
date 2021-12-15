@@ -2,5 +2,4 @@ node_modules
 build
 dist
 vue.config.js
-cypress/plugins/extensions/Keplr
 Keplr
