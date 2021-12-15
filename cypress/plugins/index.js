@@ -1,4 +1,6 @@
 import extensionLoader from 'cypress-browser-extension-plugin';
+import * as path from 'path';
+import puppeteer from 'puppeteer';
 
 // <reference types="cypress" />
 // ***********************************************************
@@ -16,8 +18,7 @@ import extensionLoader from 'cypress-browser-extension-plugin';
 module.exports = (on, config) => {
   on('before:browser:launch', (browser, launchOptions) => {
     // supply the absolute path to an unpacked extension's folder
-    // NOTE: extensions cannot be loaded in headless Chrome
-    launchOptions.extensions.push('Keplr');
+    launchOptions.extensions.push(path.join(config.fixturesFolder, 'Keplr'));
 
     return launchOptions;
   });
@@ -27,8 +28,8 @@ module.exports = (on, config) => {
  */
 // eslint-disable-next-line no-unused-vars
 
-export default (on) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-  // on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr/'));
-};
+// export default (on) => {
+//   // `on` is used to hook into various events Cypress emits
+//   // `config` is the resolved Cypress config
+//   // on('before:browser:launch', extensionLoader.load('cypress/plugins/extensions/Keplr/'));
+// };
