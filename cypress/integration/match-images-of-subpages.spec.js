@@ -23,15 +23,6 @@ describe('compare each subpage with screenshot', () => {
     cy.matchImageSnapshot('assetsSubpage');
   });
 
-  it('Portfolio subpage', () => {
-    let navbar = new Navbar();
-
-    navbar.portfolioTab().click();
-    cy.url().should('eq', Env.LOCAL);
-
-    cy.matchImageSnapshot('portfolioSubpage');
-  });
-
   it('Pools subpage', () => {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
