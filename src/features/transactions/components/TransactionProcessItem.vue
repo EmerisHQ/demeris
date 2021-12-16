@@ -50,6 +50,9 @@
 
       <p class="item-description -text-1 opacity-75">
         <i18n-t v-if="state.matches('validating')" keypath="context.transactions.widget.description.validating" />
+        <template v-else-if="state.matches('transacting') && transactionOffset">
+          {{ $t('context.transactions.widget.description.transactingPartial', transactionOffset) }}
+        </template>
         <i18n-t
           v-else-if="state.matches('transacting')"
           keypath="context.transactions.widget.description.transacting"
@@ -73,7 +76,7 @@
           class="text-negative"
         />
         <template v-else-if="state.matches('review') && transactionOffset">
-          {{ $t('context.transactions.widget.description.review', transactionOffset) }}
+          {{ $t('context.transactions.widget.description.reviewPartial', transactionOffset) }}
         </template>
         <i18n-t v-else-if="state.matches('review')" keypath="context.transactions.widget.description.review" />
         <template v-else-if="state.matches('receipt')">

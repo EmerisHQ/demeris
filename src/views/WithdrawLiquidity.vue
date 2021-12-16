@@ -226,6 +226,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { useStore } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -261,6 +262,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
+    const transactionsStore = useTransactionsStore();
 
     const actionSteps = ref([]);
     pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
@@ -558,10 +560,12 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/pools');
     };
 
     const goBack = () => {
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       const currentStepIndex = steps.findIndex((item) => item === state.step);
 
       if (currentStepIndex > 0) {

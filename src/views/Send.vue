@@ -140,6 +140,7 @@ import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { pageview } from '@/utils/analytics';
 
 type TransferType = 'address' | 'move';
@@ -151,8 +152,10 @@ export default {
   setup() {
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
+    const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
+
     const step = ref(undefined);
     pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const { balances } = useAccount();
@@ -181,6 +184,7 @@ export default {
     useMeta(metaSource);
 
     const goBack = () => {
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       if (currentStepIndex.value > 0) {
         step.value = allSteps[transferType.value][currentStepIndex.value - 1];
         return;
@@ -191,6 +195,7 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/');
     };
 

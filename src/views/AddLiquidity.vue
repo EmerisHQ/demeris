@@ -820,6 +820,7 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/pools');
     };
 

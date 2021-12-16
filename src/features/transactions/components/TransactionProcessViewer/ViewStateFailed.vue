@@ -150,7 +150,7 @@
     </template>
 
     <div class="pt-5 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-6' : 'px-16'">
-      <Button v-if="state.matches('failed.unknown')" @click="removeTransactionAndClose">
+      <Button v-if="state.matches('failed.unknown')" @click="onDone">
         {{ t('generic_cta.done') }}
       </Button>
 
@@ -232,5 +232,9 @@ const subtitle = computed(() => {
   return undefined;
 });
 
+const onDone = () => {
+  send('ABORT');
+  removeTransactionAndClose();
+};
 const onCancel = () => transactionsStore.toggleCancelModal();
 </script>

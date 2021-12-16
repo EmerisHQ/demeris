@@ -459,6 +459,7 @@ export const messages = {
           description: {
             validating: 'Preparing transaction...',
             transacting: 'Transaction in progress...',
+            transactingPartial: 'Transaction in progress ({offset}/{total})...',
             signing: 'Signing...',
             waitingPreviousTransaction: 'Pending',
             success: 'Transaction completed',
