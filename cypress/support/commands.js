@@ -27,19 +27,6 @@
 // import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
 import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 
-import { Env } from './Env';
-// addExtensionCommands(Cypress);
-
-const tryTheDemoButtonXpath = '//*[contains(text(),"Try the demo")]';
-
-Cypress.Commands.add('launchDemo', () => {
-  cy.visit(Env.LOCAL);
-  // cy.wait(cy.xpath('//*[contains(text(),"Try the demo")]', {timeout: 20000}).should('be.visible'))
-  cy.wait(12000);
-  cy.xpath('//*[contains(text(),"Try the demo")]').should('be.visible');
-  cy.xpath('//*[contains(text(),"Try the demo")]').click();
-});
-
 addMatchImageSnapshotCommand({
   failureThreshold: 4.2,
   failureThresholdType: 'percent',

@@ -1,5 +1,5 @@
 import { Env } from '../Env';
-import { Navbar } from './Navbar';
+import { Navbar } from './navbar';
 
 export class Pools {
   goTo() {
