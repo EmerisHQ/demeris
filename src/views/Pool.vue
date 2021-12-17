@@ -298,6 +298,7 @@ export default defineComponent({
         base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
       };
+
       const withdrawBalances = isReverse.value
         ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
         : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
