@@ -1,6 +1,4 @@
-import extensionLoader from 'cypress-browser-extension-plugin';
 import * as path from 'path';
-import puppeteer from 'puppeteer';
 
 // <reference types="cypress" />
 // ***********************************************************
