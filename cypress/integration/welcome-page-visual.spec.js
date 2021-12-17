@@ -6,16 +6,15 @@ describe('Welcome page elements location and availibility', function () {
     cy.visit(Env.LOCAL + '/welcome');
   });
 
-  it('Connect Keplr button ', function () {
-    let welcomePage = new WelcomePage();
+  //   it('Connect Keplr button ', function () {
+  //     let welcomePage = new WelcomePage();
 
-    welcomePage.connectKeplrButton().should('be.visible');
-  });
+  //     welcomePage.connectKeplrButton().should('be.visible');
+  //   });
 
   it('Try the Demo button ', function () {
     let welcomePage = new WelcomePage();
 
-    welcomePage.connectKeplrButton().should('be.visible');
-    expect(welcomePage.tryTheDemoButtonIsVisible()).to.be.true;
+    welcomePage.tryTheDemoButtonVisibleInstance().should('be.visible');
   });
 });

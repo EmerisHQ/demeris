@@ -9,12 +9,14 @@ export class WelcomePage {
     return cy.contains('Connect Keplr');
   }
 
-  tryTheDemoButtonIsVisible() {
-    const buttons = cy.get('a[class*="mt-4 font-medium hover:text-text p-1.5 transition-colors active:opacity-70"]');
-    if (buttons[0].should('be.visible') || buttons[1].should('be.visible')) {
-      return true;
+  // TODO - add logic to count cought elements (in case it will be more/less in the future)
+  tryTheDemoButtonVisibleInstance() {
+    if (cy.get('[data-cy=tryTheDemoButton]').should('be.visible')) {
+      return cy.get('[data-cy=tryTheDemoButton]');
+    } else if (cy.get('[data-cy=tryTheDemoButton2]').should('be.visible')) {
+      return cy.get('[data-cy=tryTheDemoButton2]');
     } else {
-      return false;
+      cy.log('none of tryTheDemoButton is visible');
     }
   }
 
