@@ -127,6 +127,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import Alert from '@/components/ui/Alert.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
@@ -134,9 +135,9 @@ import Icon from '@/components/ui/Icon.vue';
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
-  useEmerisAPIStore,
-  useEmerisUSERStore,
-  useStore,
+  RootStoreType,
+  TypedAPIStore,
+  TypedUSERStore,
 } from '@/store';
 import { GasPriceLevel, Step, SwapData } from '@/types/actions';
 import { feeForSteps, getTicker } from '@/utils/actionHandler';
@@ -156,9 +157,9 @@ export default defineComponent({
   },
   emits: ['update:fees'],
   setup(props, { emit }) {
-    const store = useEmerisAPIStore();
-    const userstore = useEmerisUSERStore();
-    const libStore = useStore();
+    const apistore = useStore() as TypedAPIStore;
+    const userstore = useStore() as TypedUSERStore;
+    const libStore = useStore() as RootStoreType;
     const lowFee = ref({});
     const avgFee = ref({});
     const highFee = ref({});
@@ -187,10 +188,10 @@ export default defineComponent({
       for (const chain_name in lowFee.value) {
         for (const denom in lowFee.value[chain_name]) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(lowFee.value[chain_name][denom])
@@ -208,10 +209,10 @@ export default defineComponent({
       for (const chain_name in avgFee.value) {
         for (const denom in avgFee.value[chain_name]) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(avgFee.value[chain_name][denom])
@@ -228,10 +229,10 @@ export default defineComponent({
       for (const chain_name in highFee.value) {
         for (const denom in highFee.value[chain_name]) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
             }) ?? '6';
-          const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
           value =
             value +
             new BigNumber(highFee.value[chain_name][denom])
@@ -273,11 +274,11 @@ export default defineComponent({
         if (hasPoolCoinToSwap.value) {
           poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
-            store.getters['demerisAPI/getDexChain'],
+            apistore.getters['demerisAPI/getDexChain'],
           );
           poolCoinDisplayDenoms.value[1] = await getTicker(
             swapTx.value.to.denom,
-            store.getters['demerisAPI/getDexChain'],
+            apistore.getters['demerisAPI/getDexChain'],
           );
         }
       },
@@ -291,7 +292,7 @@ export default defineComponent({
           parseFloat(libStore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
         const tx = swapTx.value;
         const precision =
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: tx.from.denom, //pool coin precision is same
           }) ?? 6;
         if (tx.from.denom.startsWith('pool')) {
@@ -312,12 +313,12 @@ export default defineComponent({
         let value = 0;
         const tx = swapTx.value;
         const swapFeeRate =
-          parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015;
+          parseFloat(apistore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015;
 
-        const fromPrecision = store.getters['demerisAPI/getDenomPrecision']({ name: tx.from.denom }) ?? '6';
-        const toPrecision = store.getters['demerisAPI/getDenomPrecision']({ name: tx.to.denom }) ?? '6';
-        const fromPrice = store.getters['demerisAPI/getPrice']({ denom: tx.from.denom });
-        const toPrice = store.getters['demerisAPI/getPrice']({ denom: tx.to.denom });
+        const fromPrecision = apistore.getters['demerisAPI/getDenomPrecision']({ name: tx.from.denom }) ?? '6';
+        const toPrecision = apistore.getters['demerisAPI/getDenomPrecision']({ name: tx.to.denom }) ?? '6';
+        const fromPrice = apistore.getters['demerisAPI/getPrice']({ denom: tx.from.denom });
+        const toPrice = apistore.getters['demerisAPI/getPrice']({ denom: tx.to.denom });
 
         value =
           ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) ?? 0) +
@@ -352,7 +353,7 @@ export default defineComponent({
     });
 
     const gasPriceLevel = computed({
-      get: () => store.getters['demerisAPI/getPreferredGasPriceLevel'],
+      get: () => apistore.getters['demerisAPI/getPreferredGasPriceLevel'],
       set: (level: GasPriceLevel) => {
         userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },

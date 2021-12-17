@@ -31,14 +31,14 @@
 <script lang="ts">
 import { bech32 } from 'bech32';
 import { computed, defineComponent, inject } from 'vue';
+import { useStore } from 'vuex';
 
 import Address from '@/components/ui/Address.vue';
 import Button from '@/components/ui/Button.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 import Input from '@/components/ui/Input.vue';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store/index';
 import { SendAddressForm } from '@/types/actions';
-
-import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '../../../store/index';
 
 export default defineComponent({
   name: 'SendFormRecipient',
@@ -54,7 +54,7 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const form = inject<SendAddressForm>('transferForm');
-    const apistore = useEmerisAPIStore();
+    const apistore = useStore() as TypedAPIStore;
     const isValid = computed(() => {
       return form.isTermChecked && isValidAddress.value;
     });

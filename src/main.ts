@@ -15,7 +15,7 @@ import { messages } from '@/locales/en';
 
 import App from './App.vue';
 import router from './router';
-import { key, store } from './store';
+import { key, store } from './store/setup';
 
 const i18n = createI18n({
   globalInjection: true,

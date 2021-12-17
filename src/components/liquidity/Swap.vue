@@ -134,6 +134,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -148,7 +149,6 @@ import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
-import { useStore } from '@/store';
 import { GlobalDemerisActionTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';

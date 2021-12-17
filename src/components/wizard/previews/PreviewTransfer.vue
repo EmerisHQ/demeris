@@ -100,13 +100,13 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Address from '@/components/ui/Address.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';

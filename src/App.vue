@@ -18,18 +18,15 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
-import {
-  GlobalDemerisActionTypes,
-  GlobalDemerisGetterTypes,
-  useEmerisAPIStore,
-  useEmerisUSERStore,
-  useStore,
-} from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
+import { setStore } from '@/utils/useStore';
+import { TypedAPIStore } from '@@/store';
 
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
@@ -44,11 +41,13 @@ export default defineComponent({
 
   setup() {
     useTheme({ updateOnChange: true });
-    const apistore = useEmerisAPIStore();
-    const userstore = useEmerisUSERStore();
-    const libStore = useStore();
+    const store = useStore();
+    const apistore = store as TypedAPIStore;
+    const userstore = store as TypedUSERStore;
     const initialized = ref(false);
     const router = useRouter();
+
+    setStore(store); // make store availabe in some composition functions used in the store itself
 
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
@@ -95,7 +94,7 @@ export default defineComponent({
         });
       }
       status.value = t('appInit.status.liquidityConfigure');
-      await libStore.dispatch('common/env/config', {
+      await store.dispatch('common/env/config', {
         apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
         rpcNode: null,
         wsNode: null,
@@ -108,11 +107,11 @@ export default defineComponent({
       });
       status.value = t('appInit.status.poolFetching');
       try {
-        await libStore.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+        await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
         });
-        await libStore.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-        await libStore.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
+        await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
+        await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
       } catch (e) {
         console.error(e);
       }

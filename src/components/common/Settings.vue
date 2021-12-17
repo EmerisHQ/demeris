@@ -20,6 +20,7 @@
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -27,7 +28,6 @@ import SettingsModal from '@/components/common/SettingsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
-import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'Settings',

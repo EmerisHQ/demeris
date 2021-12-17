@@ -2,13 +2,14 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Balances, StakingBalances } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 export default function useAccount() {
-  const store = useEmerisAPIStore();
+  const store = useStore() as TypedAPIStore;
   const isDemoAccount = computed(() => {
     return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
   });

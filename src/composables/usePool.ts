@@ -1,14 +1,17 @@
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
-import { apistore, GlobalDemerisGetterTypes, store } from '@/store';
+import { GlobalDemerisGetterTypes, RootStore, RootStoreType, TypedAPIStore } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 import usePools from './usePools';
 
 const usePoolInstances = {};
 
 function usePool(id: string) {
+  const apistore = useStore() as TypedAPIStore;
+  const store = useStore() as RootStoreType;
   let initialized;
   const initPromise = new Promise((resolve) => {
     initialized = resolve;

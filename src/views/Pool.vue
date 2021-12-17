@@ -182,6 +182,7 @@ import BigNumber from 'bignumber.js';
 import { computed, defineComponent, Ref, ref, unref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -195,7 +196,7 @@ import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
@@ -217,7 +218,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useEmerisAPIStore();
+    const apistore = useStore() as TypedAPIStore;
     const denoms = ref([]);
     pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
 
@@ -231,8 +232,8 @@ export default defineComponent({
       if (!baseDenoms.length) {
         baseDenoms = pool.value.reserve_coin_denoms;
       }
-      const coinA = !!store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const coinB = !!store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
+      const coinA = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
+      const coinB = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
       const all = coinA && coinB;
 
       return {
@@ -316,9 +317,9 @@ export default defineComponent({
       }
 
       const fromPrecision =
-        store.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+        apistore.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
       const toPrecision =
-        store.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
+        apistore.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {

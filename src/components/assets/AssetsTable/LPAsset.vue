@@ -8,12 +8,13 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
@@ -30,7 +31,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useEmerisAPIStore();
+    const apistore = useStore() as TypedAPIStore;
 
     const { balancesByDenom } = useAccount();
     const { pools } = usePools();

@@ -5,10 +5,10 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 
 export default defineComponent({

@@ -152,6 +152,7 @@
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
@@ -166,7 +167,6 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -269,7 +269,7 @@ export default defineComponent({
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
       const verifiedDenoms = store.getters['demerisAPI/getVerifiedDenoms'];
-      const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
+      const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);

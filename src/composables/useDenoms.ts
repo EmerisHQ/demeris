@@ -1,28 +1,29 @@
 import { computed, ref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, useEmerisAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { getTicker } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 
 let useDenomsInstance = null;
 
 function useDenoms() {
-  const store = useEmerisAPIStore();
+  const apistore = useStore() as TypedAPIStore;
 
   const verifiedDenoms = computed(() => {
-    return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+    return apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
   });
   const useDenomInstances = {};
 
   const useDenomFactory = (base_denom) => {
     const price = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: base_denom });
+      return apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: base_denom });
     });
     const displayName = ref('-');
     const tickerName = ref('-');
     const updateDenom = async () => {
-      tickerName.value = await getTicker(base_denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
-      displayName.value = await getDisplayName(base_denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
+      tickerName.value = await getTicker(base_denom, apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]);
+      displayName.value = await getDisplayName(base_denom, apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]);
     };
 
     watch(verifiedDenoms, updateDenom, { immediate: true });

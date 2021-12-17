@@ -3,8 +3,8 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
-import { useStore } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 export default defineComponent({

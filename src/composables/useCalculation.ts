@@ -1,4 +1,4 @@
-import { useStore } from '@/store';
+import { useStore } from 'vuex';
 
 export default function useCalculation() {
   // precision setting (0.000000 level precision below than this decimal digits will be truncated)

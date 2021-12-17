@@ -24,10 +24,11 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/runtime-core';
+import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { useEmerisAPIStore } from '@/store';
+import { TypedAPIStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -36,12 +37,12 @@ export default defineComponent({
   },
 
   setup() {
-    const store = useEmerisAPIStore();
+    const apistore = useStore() as TypedAPIStore;
 
-    const dexChain = store.getters['demerisAPI/getDexChain'];
+    const dexChain = apistore.getters['demerisAPI/getDexChain'];
 
     const isHubDown = computed(() => {
-      const status = store.getters['demerisAPI/getChainStatus']({ chain_name: dexChain });
+      const status = apistore.getters['demerisAPI/getChainStatus']({ chain_name: dexChain });
       return status === false;
     });
 

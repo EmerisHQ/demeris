@@ -2,12 +2,19 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
-import { apistore, GlobalDemerisActionTypes, GlobalDemerisGetterTypes, store, userstore } from '@/store';
+import {
+  GlobalDemerisActionTypes,
+  GlobalDemerisGetterTypes,
+  RootStoreType,
+  TypedAPIStore,
+  TypedUSERStore,
+} from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import * as Actions from '@/types/actions';
 import * as API from '@/types/api';
 import { Balance, Balances, Denom, IbcInfo } from '@/types/api';
 import { Amount, ChainAmount } from '@/types/base';
+import { useStore } from '@/utils/useStore';
 
 import {
   generateDenomHash,
@@ -21,6 +28,7 @@ import {
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
+  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     output: {
@@ -98,6 +106,7 @@ export async function memoTransfer({
   destination_chain_name: string;
   to_address: string;
 }) {
+  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     mustAddFee: false,
@@ -341,6 +350,7 @@ export async function transfer({
   destination_chain_name: string;
   to_address: string;
 }) {
+  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     mustAddFee: false,
@@ -548,6 +558,7 @@ export async function move({
   chain_name: string;
   destination_chain_name: string;
 }) {
+  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     output: {
@@ -799,6 +810,7 @@ export async function move({
   }
 }
 export async function swap({ from, to }: { from: Amount; to: Amount }) {
+  const store = useStore() as RootStoreType;
   // Get the list of available pools
   const result = {
     steps: [],
@@ -849,6 +861,7 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
   }
 }
 export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
+  const store = useStore() as RootStoreType;
   const result = {
     steps: [],
     output: {
@@ -885,6 +898,7 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
   }
 }
 export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint; poolCoin: Amount }) {
+  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     output: {
@@ -942,6 +956,7 @@ export async function createPool({ coinA, coinB }: { coinA: Amount; coinB: Amoun
 }
 // Action-handler / action composing using the blocks above
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
+  const apistore = useStore() as TypedAPIStore;
   const steps = [];
   try {
     let params;
@@ -1198,6 +1213,9 @@ export async function msgFromStepTransaction(
   stepTx: Actions.StepTransaction,
   gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.MsgMeta> {
+  const store = useStore() as RootStoreType;
+  const apistore = useStore() as TypedAPIStore;
+  const userstore = useStore() as TypedUSERStore;
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
     const msg = await store.dispatch('cosmos.bank.v1beta1/MsgSend', {
@@ -1350,6 +1368,7 @@ export async function msgFromStepTransaction(
   }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+  const apistore = useStore() as TypedAPIStore;
   const denoms = apistore.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
     chain_name,
   }) as Array<Denom>;
@@ -1360,10 +1379,12 @@ export async function getFeeForChain(chain_name: string): Promise<Array<Actions.
   return fees;
 }
 export function getBaseDenomSync(denom: string) {
+  const apistore = useStore() as TypedAPIStore;
   const traces = apistore.getters[GlobalDemerisGetterTypes.API.getAllVerifiedTraces];
   return traces[denom.split('/')[1]]?.base_denom ?? denom;
 }
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
+  const apistore = useStore() as TypedAPIStore;
   const chain_name = chainName || apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
@@ -1395,6 +1416,7 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 }
 
 export function getStepTransactionDetailFromResponse(response: API.TransactionDetailResponse) {
+  const apistore = useStore() as TypedAPIStore;
   const getChainFromAddress = (address: string): API.Chain => {
     const chains = Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]);
     const prefix = bech32.decode(address).prefix;
@@ -1458,6 +1480,7 @@ export function getStepTransactionDetailFromResponse(response: API.TransactionDe
 }
 
 export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
+  const apistore = useStore() as TypedAPIStore;
   const timeout = 1000;
   const limit = 3;
 
@@ -1525,6 +1548,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 }
 
 export async function getDisplayName(name, chain_name = null) {
+  const apistore = useStore() as TypedAPIStore;
   if (isNative(name)) {
     const displayName =
       apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.display_name ??
@@ -1553,6 +1577,7 @@ export async function getDisplayName(name, chain_name = null) {
   }
 }
 export async function getTicker(name, chain_name = null) {
+  const apistore = useStore() as TypedAPIStore;
   if (isNative(name)) {
     const ticker =
       apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.ticker ?? null;
@@ -1579,6 +1604,7 @@ export async function getTicker(name, chain_name = null) {
 }
 
 export async function isLive(chain_name) {
+  const apistore = useStore() as TypedAPIStore;
   const status =
     apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
       chain_name,
@@ -1597,6 +1623,7 @@ export async function isLive(chain_name) {
 }
 
 export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Promise<Array<Actions.FeeWDenom>> {
+  const apistore = useStore() as TypedAPIStore;
   if (stepTx.name == 'transfer') {
     const chain_name = (stepTx.data as Actions.TransferData).chain_name;
     const fee = await getFeeForChain(chain_name);
@@ -1680,6 +1707,7 @@ export async function feeForSteps(
 }
 
 export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Actions.GasPriceLevel): ChainAmount {
+  const userstore = useStore() as TypedUSERStore;
   const feeOption = fees[0];
   const used = {
     amount: {
@@ -1694,6 +1722,7 @@ export function getUsedFee(fees: Array<Actions.FeeWDenom>, gasPriceLevel: Action
 }
 
 export async function toRedeem(balances: Balances): Promise<Balances> {
+  const apistore = useStore() as TypedAPIStore;
   const allValidRedeemableBalances = balances.filter((x) => x.verified && Object.keys(x.ibc).length !== 0);
   const redeemableBalances = [];
   for (const balance of allValidRedeemableBalances) {
@@ -1738,6 +1767,7 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 }
 
 export async function validBalances(balances: Balances): Promise<Balances> {
+  const apistore = useStore() as TypedAPIStore;
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
@@ -1799,6 +1829,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 }
 
 export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
+  const apistore = useStore() as TypedAPIStore;
   const validPools = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
   const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
@@ -1855,6 +1886,7 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   return validPools;
 }
 export async function chainStatusForSteps(steps: Actions.Step[]) {
+  const apistore = useStore() as TypedAPIStore;
   let allClear = true;
   let relayerStatus = true;
   const failedChains = [];
@@ -1986,6 +2018,8 @@ export async function validateStepFeeBalances(
   fees: Actions.FeeTotals,
   gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.FeeWarning> {
+  const apistore = useStore() as TypedAPIStore;
+  const userstore = useStore() as TypedUSERStore;
   const feeWarning: Actions.FeeWarning = {
     missingFees: [],
     ibcWarning: false,
@@ -2389,6 +2423,8 @@ export async function validateStepsFeeBalances(
   allFees: Actions.FeeTotals[],
   gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.FeeWarning> {
+  const apistore = useStore() as TypedAPIStore;
+  const userstore = useStore() as TypedUSERStore;
   const feeWarning: Actions.FeeWarning = {
     missingFees: [],
     ibcWarning: false,
@@ -2796,6 +2832,7 @@ export async function isValidIBCReserveDenom(
   dexChain: string,
   verifiedDenoms: API.VerifiedDenoms,
 ): Promise<boolean> {
+  const apistore = useStore() as TypedAPIStore;
   let verifyTrace;
 
   try {

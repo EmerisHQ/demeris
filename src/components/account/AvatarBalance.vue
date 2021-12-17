@@ -36,10 +36,10 @@
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
 import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'AvatarBalance',

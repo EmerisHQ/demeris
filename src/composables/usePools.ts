@@ -1,14 +1,16 @@
 import BigNumber from 'bignumber.js';
 import { computed, ref, watch } from 'vue';
 
-import { apistore, GlobalDemerisActionTypes, GlobalDemerisGetterTypes, store } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Pool } from '@/types/actions';
 import { getBaseDenom, getTicker } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 let usePoolsInstance = null;
 function usePools() {
   let init = false;
+  const apistore = useStore() as TypedAPIStore;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
     return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools] ?? [];

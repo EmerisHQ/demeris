@@ -255,6 +255,7 @@ import BigNumber from 'bignumber.js';
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -276,9 +277,9 @@ import useEmitter from '@/composables/useEmitter';
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
-  useEmerisAPIStore,
-  useEmerisTXStore,
-  useEmerisUSERStore,
+  TypedAPIStore,
+  TypedTXStore,
+  TypedUSERStore,
 } from '@/store';
 import {
   CreatePoolData,
@@ -347,9 +348,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const emitter = useEmitter();
 
-    const store = useEmerisAPIStore();
-    const userstore = useEmerisUSERStore();
-    const txstore = useEmerisTXStore();
+    const apistore = useStore() as TypedAPIStore;
+    const userstore = useStore() as TypedUSERStore;
+    const txstore = useStore() as TypedTXStore;
 
     const { t } = useI18n({ useScope: 'global' });
 
@@ -364,7 +365,7 @@ export default defineComponent({
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
+        walletAddress: apistore.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // baseCurrencyAmount: '50',
       };
@@ -379,7 +380,7 @@ export default defineComponent({
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
-          store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+          apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
             name: x,
           }),
         )
@@ -736,7 +737,7 @@ export default defineComponent({
                   continue;
                 }
                 try {
-                  let txResultData = await store.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+                  let txResultData = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
@@ -757,7 +758,7 @@ export default defineComponent({
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
                   ) {
-                    txResultData = await store.getters[GlobalDemerisGetterTypes.API.getTxStatus]({
+                    txResultData = await apistore.getters[GlobalDemerisGetterTypes.API.getTxStatus]({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
@@ -814,7 +815,7 @@ export default defineComponent({
                       let retries = 0;
                       while (retries < 10) {
                         try {
-                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
+                          endBlockEvent = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentDataRaw.data.name,
                           });
