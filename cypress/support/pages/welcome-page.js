@@ -9,6 +9,10 @@ export class WelcomePage {
     return cy.contains('Connect Keplr');
   }
 
+  betaAgreeButton() {
+    return cy.contains('Agree');
+  }
+
   // TODO - add logic to count cought elements (in case it will be more/less in the future)
   tryTheDemoButtonVisibleInstance() {
     if (cy.get('[data-cy=tryTheDemoButton]').should('be.visible')) {
