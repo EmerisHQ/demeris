@@ -12,7 +12,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  xit('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
+  it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
