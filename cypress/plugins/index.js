@@ -18,8 +18,8 @@ const {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
 } = require('cypress-image-snapshot/plugin');
 module.exports = (on, config) => {
+  addMatchImageSnapshotPlugin(on, config);
   on('before:browser:launch', (browser, launchOptions) => {
-    addMatchImageSnapshotPlugin(on, config);
     // supply the absolute path to an unpacked extension's folder
     launchOptions.extensions.push(path.join(config.fixturesFolder, 'Keplr'));
 
