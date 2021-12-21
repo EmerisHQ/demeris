@@ -27,6 +27,10 @@ export class Navbar {
   }
 
   // TABS
+  navbarLogo() {
+    return this.navbar().get('[data-cy=navbar-logo]');
+  }
+
   portfolioTab() {
     return this.navbar().contains('Portfolio');
   }
@@ -39,8 +43,12 @@ export class Navbar {
     return this.navbar().contains('Pools');
   }
 
-  navbarLogo() {
-    return this.navbar().get('[data-cy=navbar-logo]');
+  receive() {
+    return cy.get('a[href="/receive"]');
+  }
+
+  send() {
+    return cy.get('a[href="/send"]');
   }
 
   navbar() {
