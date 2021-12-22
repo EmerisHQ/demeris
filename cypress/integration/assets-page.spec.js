@@ -6,13 +6,12 @@ import { WelcomePage } from '../support/pages/welcome-page';
 describe('Check availability of Assets page elements', function () {
   beforeEach(() => {
     cy.visit(Env.LOCAL);
-  });
-  it('go to Assets page', function () {
-    // go to demo from /welcome page
     let welcomePage = new WelcomePage();
 
-    welcomePage.tryTheDemoButton().click({ force: true });
-
+    welcomePage.connectKeplrButton().click();
+    welcomePage.betaAgreeButton().click();
+  });
+  it('go to Assets page', function () {
     // go to Assets page
     let assets = new Assets();
     assets.goToAssertTab();

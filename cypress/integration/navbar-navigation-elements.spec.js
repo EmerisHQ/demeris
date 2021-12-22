@@ -51,4 +51,16 @@ describe('Navbar elements location and availibility', function () {
 
     cy.matchImageSnapshot('receiveSubPage');
   });
+
+  it('"Send" navbar element', function () {
+    let navbar = new Navbar();
+    let subPagePath = new SubPagesPaths();
+
+    cy.url().should('eq', Env.LOCAL);
+
+    navbar.send().click();
+    cy.url().should('contain', subPagePath.send_path);
+
+    cy.matchImageSnapshot('sendSubPage');
+  });
 });
