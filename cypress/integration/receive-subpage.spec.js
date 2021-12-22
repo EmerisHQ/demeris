@@ -1,5 +1,4 @@
 import { Env } from '../support/Env';
-import { Navbar } from '../support/pages/navbar';
 import { Receive } from '../support/pages/receive';
 import { WelcomePage } from '../support/pages/welcome-page';
 
