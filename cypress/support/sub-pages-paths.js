@@ -3,6 +3,6 @@ export class SubPagesPaths {
   pools_path = '/pools';
   receive_path = '/receive';
   send_path = '/send';
-  send_to_adress_path = '/send/adress';
+  send_to_adress_path = '/send/address';
   send_move_assets_path = '/send/move';
 }

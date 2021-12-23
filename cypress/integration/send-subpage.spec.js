@@ -12,9 +12,11 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
+  it('Send - Navbar element', function () {
     let sendPage = new Send();
     let subPagePath = new SubPagesPaths();
+
+    cy.url().should('eq', Env.LOCAL);
 
     sendPage.goTo();
     cy.url().should('contain', subPagePath.send_path);

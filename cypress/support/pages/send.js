@@ -7,15 +7,15 @@ export class Send {
   }
 
   moveAssets() {
-    return blockContainingBothOptions().find('contains', 'Move assets');
+    return this.blockContainingBothOptions().contains('Move assets');
   }
   sendToAdress() {
-    return blockContainingBothOptions().find('contains', 'Send to address');
+    return this.blockContainingBothOptions().contains('Send to address');
   }
 
   blockContainingBothOptions() {
     //contains both "Send to adress" and "Move assets" blocks
-    return cy.get('mt-8 pb-8 flex space-x-8');
+    return cy.get('div[class="mt-8 pb-8 flex space-x-8"]');
   }
 
   goBackWithArrowButton() {
