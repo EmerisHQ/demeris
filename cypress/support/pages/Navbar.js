@@ -51,6 +51,10 @@ export class Navbar {
     return cy.get('a[href="/send"]');
   }
 
+  userSettings() {
+    return this.navbar().get("[class *= 'settings-wrapper']");
+  }
+
   navbar() {
     return cy.get("[role = 'navigation']");
   }
