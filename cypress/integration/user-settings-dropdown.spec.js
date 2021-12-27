@@ -1,11 +1,10 @@
-import { Env } from '../support/Env';
 import { Navbar } from '../support/pages/navbar';
 import { UserDropdown } from '../support/pages/user-dropdown';
 import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Navbar elements location and availibility', function () {
   beforeEach(() => {
-    cy.visit(Env.LOCAL);
+    cy.visit(Cypress.config().baseUrl);
     let welcomePage = new WelcomePage();
 
     welcomePage.connectKeplrButton().click();

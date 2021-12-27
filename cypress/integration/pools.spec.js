@@ -1,9 +1,8 @@
-import { Env } from '../support/Env';
 import { Pools } from '../support/pages/pools';
 
 describe('Pools location and availibility', function () {
   beforeEach(() => {
-    cy.visit(Env.LOCAL);
+    cy.visit(Cypress.config().baseUrl);
   });
 
   it('Pool search field', function () {

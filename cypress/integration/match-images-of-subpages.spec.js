@@ -1,11 +1,10 @@
-import { Env } from '../support/Env';
 import { Navbar } from '../support/pages/navbar';
 import { WelcomePage } from '../support/pages/welcome-page';
 import { SubPagesPaths } from '../support/sub-pages-paths';
 
 describe('compare each subpage with screenshot', () => {
   beforeEach(() => {
-    cy.visit(Env.LOCAL);
+    cy.visit(Cypress.config().baseUrl);
 
     if (cy.url().should('contain', '/welcome')) {
       let welcomePage = new WelcomePage();
@@ -37,7 +36,7 @@ describe('compare each subpage with screenshot', () => {
     let navbar = new Navbar();
 
     navbar.navbarLogo().click();
-    cy.url().should('eq', Env.LOCAL);
+    cy.url().should('eq', Cypress.config().baseUrl);
 
     cy.matchImageSnapshot('mainpage');
   });

@@ -1,9 +1,8 @@
-import { Env } from '../support/Env';
 import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Welcome page elements location and availibility', function () {
   beforeEach(() => {
-    cy.visit(Env.LOCAL + '/welcome');
+    cy.visit(Cypress.config().baseUrl + '/welcome');
   });
 
   //   it('Connect Keplr button ', function () {

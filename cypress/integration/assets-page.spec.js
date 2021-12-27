@@ -1,11 +1,11 @@
-import { Env } from '../support/Env';
 import { Assets } from '../support/pages/assets';
 import { WelcomePage } from '../support/pages/welcome-page';
 // import {actions} from '../../src/store/demeris/actions'
 
 describe('Check availability of Assets page elements', function () {
   beforeEach(() => {
-    cy.visit(Env.LOCAL);
+    cy.visit(Cypress.config().baseUrl);
+
     let welcomePage = new WelcomePage();
 
     welcomePage.connectKeplrButton().click();
