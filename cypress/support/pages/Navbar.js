@@ -1,18 +1,11 @@
-import { Env } from '../Env';
-
 export class Navbar {
-  //NOTE: {TODO}
-  // all pages classes can have method navigating to itself like:
-  // goToTHISPage(){
-  //navbar.thisTab().click}
-
   goToDashboard() {
     // wait for navbar logo to be visible
     cy.get(this.navbarLogo(), { timeout: 20000 }).should('be.visible');
 
     this.navbarLogo().click();
 
-    cy.url().should('eq', Env.LOCAL);
+    cy.url().should('eq', Cypress.config().baseUrl);
   }
 
   openDemoFromWelcomeSite() {
