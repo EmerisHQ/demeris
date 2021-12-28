@@ -1,21 +1,20 @@
 import { SubPagesPaths } from '../../sub-pages-paths';
 import { Send } from '../send';
 
-export class SendToAddressSubpage {
+export class MoveAssetsSubpage {
   goTo() {
     let send = new Send();
     let subpagesPaths = new SubPagesPaths();
 
     if (send.moveAssets().should('be.visible')) {
-      send.sendToAdress().click();
+      send.moveAssets().click();
     } else {
       cy.visit(Cypress.config().baseUrl + subpagesPaths.send_move_assets_path);
       send.moveAssets().click();
     }
   }
-
   header() {
-    return cy.get('h2').contains('Enter an address');
+    return cy.get('h2').contains('Move assets');
   }
 
   inputAmountOfAssets() {

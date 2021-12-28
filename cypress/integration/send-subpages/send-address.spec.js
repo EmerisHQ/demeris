@@ -2,7 +2,7 @@ import { Navbar } from '../../support/pages/navbar';
 import { SendToAddressSubpage } from '../../support/pages/send-subpages/send-address';
 import { WelcomePage } from '../../support/pages/welcome-page';
 
-describe('Check availability of send/move subpage elements', function () {
+describe('Check availability of send/address subpage elements', function () {
   const recipientAddress = 'cosmos1ws4ae7ysl496j4e4pkg0yazpkf6nyrak3ptwpt';
 
   beforeEach(() => {
