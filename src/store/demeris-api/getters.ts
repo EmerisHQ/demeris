@@ -228,6 +228,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getPrice]: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
+    if (state.prices.Tokens.length == 0) {
+      return;
+    }
     const marketPrice = state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
 
     if (marketPrice) {
