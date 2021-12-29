@@ -283,7 +283,8 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
 export default defineComponent({
   name: 'SettingsModal',
@@ -301,7 +302,7 @@ export default defineComponent({
     const gitVersion = process.env.VUE_APP_GIT_VERSION;
     const appVersion = process.env.VUE_APP_VERSION;
 
-    const store = useEmerisUSERStore();
+    const store = useStore();
     const theme = useTheme();
 
     const isAdvancedSettingsOpen = ref(false);

@@ -57,7 +57,8 @@
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
 import Spinner from '../ui/Spinner.vue';
 
@@ -79,7 +80,7 @@ export default defineComponent({
   emits: ['cancel', 'connect', 'warning', 'try-demo'],
 
   setup(_, { emit }) {
-    const store = useEmerisUSERStore();
+    const store = useStore();
     const isConnecting = ref(false);
     const isWarningAgreed = ref(null);
     const isWarningNeeded = ref(null);

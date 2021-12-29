@@ -63,6 +63,7 @@ export default defineComponent({
     });
 
     const updateOwnLiquidityPrice = async () => {
+      const store = useStore();
       if (!pool.value) {
         return;
       }

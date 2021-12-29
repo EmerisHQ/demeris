@@ -10,7 +10,8 @@ import { useStore } from '@/utils/useStore';
 let usePoolsInstance = null;
 function usePools() {
   let init = false;
-  const apistore = useStore() as TypedAPIStore;
+  const libStore = useStore();
+  const apistore = libStore as TypedAPIStore;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
     return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools] ?? [];
@@ -133,7 +134,7 @@ function usePools() {
       return;
     }
 
-    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
     return new BigNumber(poolCoinAmount).dividedBy(totalSupply).multipliedBy(100).toNumber();
@@ -144,7 +145,7 @@ function usePools() {
       return;
     }
 
-    const supplies = store.getters['cosmos.bank.v1beta1/getTotalSupply']();
+    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
     const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
 
     const reserveBalances = (
@@ -189,7 +190,7 @@ function usePools() {
     return withdrawCoins;
   };
   const getNextPoolId = () => {
-    return store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
+    return libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
   };
   const getReserveBalances = async (pool: Pool) => {
     const balances = apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({

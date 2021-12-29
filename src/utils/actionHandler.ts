@@ -810,7 +810,8 @@ export async function move({
   }
 }
 export async function swap({ from, to }: { from: Amount; to: Amount }) {
-  const store = useStore() as RootStoreType;
+  const libStore = useStore();
+  const store = libStore as RootStoreType;
   // Get the list of available pools
   const result = {
     steps: [],
@@ -824,7 +825,7 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
   };
   const liquidityPools =
     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -852,7 +853,7 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
         amount: 0,
         denom: to.denom,
       },
-      chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+      chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
     };
     return result;
   } else {
@@ -861,7 +862,8 @@ export async function swap({ from, to }: { from: Amount; to: Amount }) {
   }
 }
 export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint; coinA: Amount; coinB: Amount }) {
-  const store = useStore() as RootStoreType;
+  const libStore = useStore();
+  const store = libStore as RootStoreType;
   const result = {
     steps: [],
     output: {
@@ -874,7 +876,7 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
   };
   const liquidityPools =
     store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -898,7 +900,7 @@ export async function addLiquidity({ pool_id, coinA, coinB }: { pool_id: bigint;
   }
 }
 export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint; poolCoin: Amount }) {
-  const apistore = useStore() as TypedAPIStore;
+  const libStore = useStore();
   const result = {
     steps: [],
     output: {
@@ -910,8 +912,8 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
     },
   };
   const liquidityPools =
-    store.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
-    (await store.dispatch(
+    libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']() ??
+    (await libStore.dispatch(
       'tendermint.liquidity.v1beta1/QueryLiquidityPools',
       { options: { subscribe: false, all: true }, params: {} },
       { root: true },
@@ -956,7 +958,9 @@ export async function createPool({ coinA, coinB }: { coinA: Amount; coinB: Amoun
 }
 // Action-handler / action composing using the blocks above
 export async function actionHandler(action: Actions.Any): Promise<Array<Actions.Step>> {
-  const apistore = useStore() as TypedAPIStore;
+  const libStore = useStore();
+  const store = libStore as RootStoreType;
+
   const steps = [];
   try {
     let params;
@@ -1047,7 +1051,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.from.amount.denom,
           },
           chain_name: params.from.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
         if (transferToHubStep.steps.length > 0) {
           steps.push({
@@ -1082,7 +1086,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHubCreate.steps.length) {
@@ -1100,7 +1104,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHubCreate.steps.length) {
@@ -1131,7 +1135,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinA.amount.denom,
           },
           chain_name: params.coinA.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
 
         if (transferCoinAtoHub.steps.length) {
@@ -1149,7 +1153,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.coinB.amount.denom,
           },
           chain_name: params.coinB.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
 
         if (transferCoinBtoHub.steps.length) {
@@ -1181,7 +1185,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             denom: params.poolCoin.amount.denom,
           },
           chain_name: params.poolCoin.chain_name,
-          destination_chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          destination_chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
         });
         if (transferPoolCointoHub.steps.length) {
           steps.push({
@@ -1213,19 +1217,19 @@ export async function msgFromStepTransaction(
   stepTx: Actions.StepTransaction,
   gasPriceLevel: Actions.GasPriceLevel,
 ): Promise<Actions.MsgMeta> {
-  const store = useStore() as RootStoreType;
+  const libStore = useStore();
   const apistore = useStore() as TypedAPIStore;
   const userstore = useStore() as TypedUSERStore;
   if (stepTx.name == 'transfer') {
     const data = stepTx.data as Actions.TransferData;
-    const msg = await store.dispatch('cosmos.bank.v1beta1/MsgSend', {
+    const msg = await libStore.dispatch('cosmos.bank.v1beta1/MsgSend', {
       value: {
         amount: [data.amount],
         toAddress: data.to_address,
         fromAddress: await getOwnAddress({ chain_name: data.chain_name }),
       },
     });
-    const registry = store.getters['cosmos.bank.v1beta1/getRegistry'];
+    const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
     return { msg, chain_name: data.chain_name, registry };
   }
 
@@ -1237,7 +1241,7 @@ export async function msgFromStepTransaction(
     } else {
       receiver = await getOwnAddress({ chain_name: data.to_chain });
     }
-    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -1248,7 +1252,7 @@ export async function msgFromStepTransaction(
         token: { ...data.amount },
       },
     });
-    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
 
@@ -1268,7 +1272,7 @@ export async function msgFromStepTransaction(
           userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
       ).toString();
     }
-    const msg = await store.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
+    const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
       value: {
         sourcePort: 'transfer',
         sourceChannel: data.through,
@@ -1278,7 +1282,7 @@ export async function msgFromStepTransaction(
         token: { amount: fromAmount, denom: data.amount.denom },
       },
     });
-    const registry = store.getters['ibc.applications.transfer.v1/getRegistry'];
+    const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
     return { msg, chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
@@ -1290,27 +1294,27 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgDepositWithinBatch', {
       value: {
         depositorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         depositCoins,
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
     const chain_name = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
     const data = stepTx.data as Actions.WithdrawLiquidityData;
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgWithdrawWithinBatch', {
       value: {
         withdrawerAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: data.pool.id,
         poolCoin: { ...data.poolCoin },
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
@@ -1322,21 +1326,21 @@ export async function msgFromStepTransaction(
     } else {
       depositCoins = [data.coinA, data.coinB];
     }
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgCreatePool', {
       value: {
         poolCreatorAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolTypeId: 1,
         depositCoins: depositCoins,
       },
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
   if (stepTx.name == 'swap') {
     const data = stepTx.data as Actions.SwapData;
     const chain_name = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
     const slippage = (userstore.getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5) / 100;
-    const swapFeeRate = store.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
+    const swapFeeRate = libStore.getters['tendermint.liquidity.v1beta1/getParams']().params.swap_fee_rate;
     let isReverse = false;
     if (data.from.denom !== data.pool.reserve_coin_denoms[0]) {
       isReverse = true;
@@ -1346,7 +1350,7 @@ export async function msgFromStepTransaction(
       if (a.denom > b.denom) return 1;
       return 0;
     });
-    const msg = await store.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
+    const msg = await libStore.dispatch('tendermint.liquidity.v1beta1/MsgSwapWithinBatch', {
       value: MsgSwapWithinBatch.fromPartial({
         swapRequesterAddress: await getOwnAddress({ chain_name }), // TODO: change to liq module chain
         poolId: parseInt(data.pool.id),
@@ -1363,7 +1367,7 @@ export async function msgFromStepTransaction(
           .replace(/(^0+)/, ''),
       }),
     });
-    const registry = store.getters['tendermint.liquidity.v1beta1/getRegistry'];
+    const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
     return { msg, chain_name, registry };
   }
 }

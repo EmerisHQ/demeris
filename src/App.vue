@@ -25,8 +25,8 @@ import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
+import { TypedAPIStore } from '@/store';
 import { setStore } from '@/utils/useStore';
-import { TypedAPIStore } from '@@/store';
 
 import { autoLogin, autoLoginDemo } from './utils/basic';
 

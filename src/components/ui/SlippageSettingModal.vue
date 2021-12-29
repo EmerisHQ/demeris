@@ -119,9 +119,9 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
-import { store } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 
 type SwapData = {
   pay: { denom: string; amount: number };
@@ -154,7 +154,7 @@ export default defineComponent({
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
     const trueSlippage = computed(() => {
-      return store.getters['demerisUSER/getSlippagePerc'] || 0.5;
+      return useStore().getters['demerisUSER/getSlippagePerc'] || 0.5;
     });
     const customSlippage = computed(() => {
       if (trueSlippage.value) {
@@ -234,7 +234,9 @@ export default defineComponent({
       validSlippageUpdater(value) {
         const slippage = Number(value);
         if (slippage > 0 && slippage <= 100) {
-          store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { slippagePerc: slippage } });
+          (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
+            data: { slippagePerc: slippage },
+          });
         }
       },
     });
@@ -243,7 +245,7 @@ export default defineComponent({
     const minReceivedText = ref(null);
 
     const allowCustomSlippage = computed(() => {
-      return store.getters['demerisUSER/allowCustomSlippage'];
+      return useStore().getters['demerisUSER/allowCustomSlippage'];
     });
 
     watch(
@@ -259,10 +261,13 @@ export default defineComponent({
     watch(
       () => [props.swapData.pay.amount, props.swapData.pay.denom, props.swapData.receive.denom, state.slippage],
       async () => {
-        const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demerisAPI/getDexChain']);
+        const payDisplayName = await getDisplayName(
+          props.swapData.pay.denom,
+          useStore().getters['demerisAPI/getDexChain'],
+        );
         const receiveDisplayName = await getDisplayName(
           props.swapData.receive.denom,
-          store.getters['demerisAPI/getDexChain'],
+          useStore().getters['demerisAPI/getDexChain'],
         );
         const payAmount = props.swapData.pay.amount;
         const receiveAmount = props.swapData.receive.amount;

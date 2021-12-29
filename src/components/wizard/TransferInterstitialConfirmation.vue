@@ -47,9 +47,9 @@ import { useStore } from 'vuex';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { TypedAPIStore } from '@/store';
 import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
-import { TypedAPIStore } from '@@/store';
 
 export default defineComponent({
   components: {
