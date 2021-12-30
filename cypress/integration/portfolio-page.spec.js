@@ -1,9 +1,8 @@
-import { Env } from '../support/Env';
 import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Portfolio visual check', function () {
   beforeEach(() => {
-    cy.visit(Env.LOCAL);
+    cy.visit(Cypress.config().baseUrl);
     let welcomePage = new WelcomePage();
     welcomePage.tryTheDemoButton().click();
   });
