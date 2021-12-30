@@ -1,6 +1,4 @@
 export class WelcomePage {
-  // return cy.get('*[class^="flex flex-col px-8 text-center py-8"]', { timeout: 20000 }).should('be.visible');
-
   goToWelcomePage() {
     cy.visit('/welcome');
   }
