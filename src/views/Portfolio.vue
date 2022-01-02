@@ -8,7 +8,8 @@
             <TotalPrice :balances="balances" small-decimals />
           </div>
         </header>
-        <section class="mt-16">
+        <AreaChart />
+        <section class="mt-12">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
             <router-link v-if="!balances.length" class="font-medium" to="/assets">
@@ -58,6 +59,7 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import AreaChart from '@/components/common/charts/AreaChart.vue';
 import Intro from '@/components/common/Intro.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
@@ -77,6 +79,7 @@ export default {
     MoonpayBanner,
     LiquiditySwap,
     TotalPrice,
+    AreaChart,
     AssetsTable,
     Pools,
     Intro,
