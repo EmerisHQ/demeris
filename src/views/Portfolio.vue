@@ -8,7 +8,7 @@
             <TotalPrice :balances="balances" small-decimals />
           </div>
         </header>
-        <AreaChart :data-stream="dataStream" />
+        <AreaChart v-if="false" :data-stream="dataStream" />
         <section class="mt-12">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
