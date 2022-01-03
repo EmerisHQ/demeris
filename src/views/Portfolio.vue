@@ -8,7 +8,7 @@
             <TotalPrice :balances="balances" small-decimals />
           </div>
         </header>
-        <AreaChart />
+        <AreaChart :data-stream="dataStream" />
         <section class="mt-12">
           <header class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">{{ $t('context.assets.title') }}</h2>
@@ -111,7 +111,31 @@ export default {
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage };
+    const dataStream = [
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 172 },
+      { x: '07/28/2014', y: 12 },
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 12 },
+      { x: '07/28/2014', y: 56 },
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 122 },
+      { x: '07/28/2014', y: 12 },
+    ];
+
+    return { balances, poolsInvested, openAssetPage, openPoolsPage, dataStream };
   },
 };
 </script>
