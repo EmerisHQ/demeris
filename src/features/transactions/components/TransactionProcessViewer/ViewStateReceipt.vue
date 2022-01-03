@@ -135,7 +135,7 @@
         </template>
 
         <template v-if="transaction.name === 'swap'">
-          <Button variant="secondary">
+          <Button variant="secondary" @click="goToSend">
             <i18n-t keypath="context.transactions.controls.sendAmount">
               <template #amount>
                 <AmountDisplay
@@ -160,6 +160,7 @@
 import BigNumber from 'bignumber.js';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -182,7 +183,7 @@ const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideView
 
 const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
-
+const router = useRouter();
 const lastResult = computed(() => state.value.context.results.slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
 
@@ -208,6 +209,12 @@ const previewComponentMap = {
 
 const onNext = () => {
   send('CONTINUE');
+};
+
+const goToSend = () => {
+  const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
+  const denom = lastResult.value.endBlock?.demand_coin_denom;
+  router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
 };
 
 const getWithdrawTotal = () => {
