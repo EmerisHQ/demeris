@@ -30,7 +30,7 @@
     "@cosmjs/tendermint-rpc": "0.25.6",
     "@cosmjs/utils": "0.25.6",
     "@starport/client-js": "^0.1.52",
-    "@starport/tendermint-liquidity-js": "^0.1.2",
+    "@starport/tendermint-liquidity-js": "^1.4.7",
     "@starport/vue": "^0.1.52",
     "@starport/vuex": "^0.1.52",
     "@types/long": "^4.0.1",

@@ -106,7 +106,7 @@ export default defineComponent({
           options: { subscribe: true },
         });
         await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-        await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true } });
+        await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } });
       } catch (e) {
         console.error(e);
       }

@@ -804,7 +804,7 @@ export default {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
           if (
-            reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+            [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
             // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
