@@ -1,6 +1,6 @@
 <template>
   <div>
-    <apexchart class="w-full" height="320" :options="chartData.options" :series="chartData.series"></apexchart>
+    <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
     <div v-if="variant === 'full'" class="text-right">
       <a
         v-for="(item, index) in filterItems"
@@ -23,6 +23,11 @@ export default defineComponent({
     variant: {
       type: String,
       default: 'full',
+      required: false,
+    },
+    height: {
+      type: String,
+      default: '320',
       required: false,
     },
     dataStream: {
