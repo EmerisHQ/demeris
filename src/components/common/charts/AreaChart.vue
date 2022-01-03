@@ -15,13 +15,20 @@
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent, PropType } from 'vue';
+
+export default defineComponent({
   name: 'AreaChart',
   props: {
     variant: {
       type: String,
       default: 'full',
       required: false,
+    },
+    dataStream: {
+      type: Array as PropType<any[]>,
+      required: true,
+      default: () => [],
     },
   },
   setup() {
@@ -94,39 +101,20 @@ export default {
         series: [
           {
             name: 'Price',
-            data: [
-              { x: '05/06/2014', y: 54 },
-              { x: '05/08/2014', y: 17 },
-              { x: '05/28/2014', y: 26 },
-              { x: '05/29/2014', y: 17 },
-              { x: '05/31/2014', y: 29 },
-              { x: '06/08/2014', y: 172 },
-              { x: '07/28/2014', y: 12 },
-              { x: '05/06/2014', y: 54 },
-              { x: '05/08/2014', y: 17 },
-              { x: '05/28/2014', y: 26 },
-              { x: '05/29/2014', y: 17 },
-              { x: '05/31/2014', y: 29 },
-              { x: '06/08/2014', y: 12 },
-              { x: '07/28/2014', y: 56 },
-              { x: '05/06/2014', y: 54 },
-              { x: '05/08/2014', y: 17 },
-              { x: '05/28/2014', y: 26 },
-              { x: '05/29/2014', y: 17 },
-              { x: '05/31/2014', y: 29 },
-              { x: '06/08/2014', y: 122 },
-              { x: '07/28/2014', y: 12 },
-            ],
+            data: [],
           },
         ],
       },
       activeFilterItemValue: null,
     };
   },
+  mounted() {
+    this.chartData.series[0].data = this.dataStream;
+  },
   methods: {
     setActiveFilter(filterObject): void {
       this.activeFilterItemValue = filterObject.value;
     },
   },
-};
+});
 </script>
