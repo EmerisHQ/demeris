@@ -40,8 +40,8 @@
       <tbody>
         <template v-if="variant === 'balance'">
           <tr
-            v-for="asset in orderUserBalances(balancesWithName)"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedUserBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -79,8 +79,8 @@
         </template>
         <template v-else-if="variant === 'full'">
           <tr
-            v-for="asset in orderAllBalances(balancesWithMarketCap)"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedAllBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -358,19 +358,22 @@ export default defineComponent({
       if (isFullUnavailable) {
         result[Object.keys(result)[0]].unavailable = 'full';
       }
-
       return result;
     };
 
-    const orderUserBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+    const orderedUserBalances = computed(() => {
+      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
       return tokens.slice(0, currentLimit.value);
-    };
+    });
 
-    const orderAllBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
+    const orderedAllBalances = computed(() => {
+      let tokens = orderBy(
+        balancesWithMarketCap.value,
+        [(x) => x.marketCap || '', (x) => x.value.value, 'name'],
+        ['desc', 'desc', 'asc'],
+      );
       return tokens.slice(0, currentLimit.value);
-    };
+    });
 
     const getMarketCap = (denom: string) => {
       const price = store.getters['demeris/getPrice']({ denom });
@@ -396,9 +399,9 @@ export default defineComponent({
       getMarketCap,
       handleClick,
       viewAllHandler,
-      orderUserBalances,
-      orderAllBalances,
       getUnavailableChains,
+      orderedUserBalances,
+      orderedAllBalances,
     };
   },
 });
