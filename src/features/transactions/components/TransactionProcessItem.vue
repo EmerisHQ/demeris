@@ -35,15 +35,15 @@
           <Ticker :name="getBaseDenomSync(transactionAction.data.to.denom)" />
         </template>
         <template v-if="action === 'addliquidity'">
-          Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
+          Add <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
         <template v-if="action === 'withdrawliquidity'">
-          Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
-          <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
+          Withdraw <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[0])" /> ·
+          <Ticker :name="getBaseDenomSync(transactionAction.data.pool.reserve_coin_denoms[1])" />
         </template>
         <template v-if="action === 'createpool'">
-          Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> &rarr;
+          Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
       </p>
