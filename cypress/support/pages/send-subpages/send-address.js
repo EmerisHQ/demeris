@@ -14,15 +14,37 @@ export class SendToAddressSubpage {
     }
   }
 
-  header() {
+  // RECIPIENT step
+  recipientHeader() {
     return cy.get('h2').contains('Enter an address');
+  }
+
+  toARecipientAddressTextField() {
+    return cy.get('input[placeholder="Recipient address"]');
+  }
+  referenceMemoInput() {
+    return cy.get('input[placeholder="Add reference (memo)"]');
+  }
+
+  checkbox() {
+    return cy.get('input[type="checkbox"]');
+  }
+
+  continueButton() {
+    return cy.get('span').contains('Continue').parent().get('button');
+  }
+
+  // AMOUNT step
+
+  amountHeader() {
+    return cy.get('h2').contains('Enter an amount');
   }
 
   inputAmountOfAssets() {
     return cy.get('input[placeholder="0"]');
   }
 
-  moveSelectAsset() {
+  fees() {
     return cy.get('button').contains('Select asset');
   }
 
@@ -30,7 +52,7 @@ export class SendToAddressSubpage {
     return cy.get('button').contains('Select chain');
   }
 
-  continueButton() {
-    return cy.get('span').contains('Continue').parent().get('button');
+  selectTransactionFee() {
+    //
   }
 }
