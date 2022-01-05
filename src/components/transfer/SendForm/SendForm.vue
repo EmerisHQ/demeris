@@ -91,7 +91,7 @@ export default defineComponent({
       async () => {
         if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '' && step.value != 'review') {
           const precision =
-            store.getters['demerisAPI/getDenomPrecision']({
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
             }) || 6;
           const action: TransferAction = {

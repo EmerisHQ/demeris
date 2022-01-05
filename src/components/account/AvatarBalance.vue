@@ -40,6 +40,7 @@ import { useStore } from 'vuex';
 
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -57,13 +58,13 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const keplrAccountName = computed(() => {
-      return store.getters['demerisUSER/getKeplrAccountName'];
+      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAccountName];
     });
     const keplrAddress = computed(() => {
-      return store.getters['demerisUSER/getKeplrAddress'];
+      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAddress];
     });
     const isPriceApiAvailable = computed(() => {
-      return store.getters['demerisAPI/getPrices'].Fiats.length > 0 ? true : false;
+      return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
     });
 
     return {

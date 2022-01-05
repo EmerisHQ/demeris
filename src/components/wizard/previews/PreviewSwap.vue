@@ -122,7 +122,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useCalculation from '@/composables/useCalculation';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -169,7 +169,7 @@ export default defineComponent({
 
     //for receive coin chain_name(always cosmos hub)
     const dexChainName = computed(() => {
-      return store.getters['demerisAPI/getDexChain'];
+      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
     });
 
     // minReceivedAmount & limit price
@@ -191,10 +191,10 @@ export default defineComponent({
 
         let swapPrice = null;
 
-        const fromPrecision = store.getters['demerisAPI/getDenomPrecision']({
+        const fromPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: fromCoinBaseDenom.value,
         });
-        const toPrecision = store.getters['demerisAPI/getDenomPrecision']({
+        const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: toCoinBaseDenom.value,
         });
 
@@ -219,7 +219,7 @@ export default defineComponent({
             ((1 / Number(swapPrice)) *
               Number(
                 10 **
-                  store.getters['demerisAPI/getDenomPrecision']({
+                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
                     name: fromCoinBaseDenom.value,
                   }),
               ) *
@@ -233,7 +233,7 @@ export default defineComponent({
 
     //user slippage tolerance
     const slippageTolerance = computed(() => {
-      return store.getters['demerisAPI/getSlippagePerc'] || 0.5;
+      return store.getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
 
     const payCoinChainName = ref('');
@@ -241,11 +241,11 @@ export default defineComponent({
       () => data.value.from.denom,
       async () => {
         if (isNative(data.value.from.denom)) {
-          payCoinChainName.value = store.getters['demerisAPI/getDexChain'];
+          payCoinChainName.value = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
         } else {
           const verifyTrace =
-            store.getters['demerisAPI/getVerifyTrace']({
-              chain_name: store.getters['demerisAPI/getDexChain'],
+            store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+              chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
               hash: data.value.from.denom.split('/')[1],
             }) ??
             (await store.dispatch(
@@ -253,7 +253,7 @@ export default defineComponent({
               {
                 subscribe: false,
                 params: {
-                  chain_name: store.getters['demerisAPI/getDexChain'],
+                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
                   hash: data.value.from.denom.split('/')[1],
                 },
               },
@@ -267,7 +267,7 @@ export default defineComponent({
 
     // tx fee
     const fee = computed(() => {
-      return props.fees[store.getters['demerisAPI/getDexChain']]['uatom'];
+      return props.fees[store.getters[GlobalDemerisGetterTypes.API.getDexChain]]['uatom'];
     });
 
     const size = props.context === 'default' ? 'md' : 'sm';

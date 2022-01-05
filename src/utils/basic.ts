@@ -43,7 +43,7 @@ export async function getOwnAddress({ chain_name }) {
   if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    const chain = apistore.getters['demerisAPI/getChain']({ chain_name });
+    const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
     const key = await window.keplr.getKey(chain.node_info.chain_id);
     return key.bech32Address;
   }

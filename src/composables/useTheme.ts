@@ -1,6 +1,6 @@
 import { computed, watch } from 'vue';
 
-import { GlobalDemerisActionTypes } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { useStore } from '@/utils/useStore';
 
 type Props = {
@@ -11,7 +11,7 @@ export default function useTheme(props: Props = {}) {
 
   const theme = computed({
     get() {
-      return store.getters['demerisUSER/theme'] || 'system';
+      return store.getters[GlobalDemerisGetterTypes.USER.theme] || 'system';
     },
     set(value: string) {
       store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { theme: value } });

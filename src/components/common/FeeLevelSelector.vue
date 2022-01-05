@@ -274,11 +274,11 @@ export default defineComponent({
         if (hasPoolCoinToSwap.value) {
           poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
-            apistore.getters['demerisAPI/getDexChain'],
+            apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
           );
           poolCoinDisplayDenoms.value[1] = await getTicker(
             swapTx.value.to.denom,
-            apistore.getters['demerisAPI/getDexChain'],
+            apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
           );
         }
       },
@@ -315,10 +315,12 @@ export default defineComponent({
         const swapFeeRate =
           parseFloat(apistore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015;
 
-        const fromPrecision = apistore.getters['demerisAPI/getDenomPrecision']({ name: tx.from.denom }) ?? '6';
-        const toPrecision = apistore.getters['demerisAPI/getDenomPrecision']({ name: tx.to.denom }) ?? '6';
-        const fromPrice = apistore.getters['demerisAPI/getPrice']({ denom: tx.from.denom });
-        const toPrice = apistore.getters['demerisAPI/getPrice']({ denom: tx.to.denom });
+        const fromPrecision =
+          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? '6';
+        const toPrecision =
+          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? '6';
+        const fromPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.from.denom });
+        const toPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.to.denom });
 
         value =
           ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) ?? 0) +
@@ -353,7 +355,7 @@ export default defineComponent({
     });
 
     const gasPriceLevel = computed({
-      get: () => apistore.getters['demerisAPI/getPreferredGasPriceLevel'],
+      get: () => apistore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
       set: (level: GasPriceLevel) => {
         userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
       },

@@ -331,15 +331,15 @@ export default defineComponent({
         },
       }),
       allowCustomSlippage: computed({
-        get: () => store.getters['demerisUSER/allowCustomSlippage'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters['demerisUSER/viewUnverified'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewUnverified],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters['demerisUSER/viewLPAssetPools'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });

@@ -218,7 +218,7 @@ export default defineComponent({
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters['demerisAPI/getVerifiedDenoms'] || [];
+      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
 

@@ -119,7 +119,7 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
-import { GlobalDemerisActionTypes, RootStoreType } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
 
@@ -154,7 +154,7 @@ export default defineComponent({
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
     const trueSlippage = computed(() => {
-      return useStore().getters['demerisUSER/getSlippagePerc'] || 0.5;
+      return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
     const customSlippage = computed(() => {
       if (trueSlippage.value) {
@@ -245,7 +245,7 @@ export default defineComponent({
     const minReceivedText = ref(null);
 
     const allowCustomSlippage = computed(() => {
-      return useStore().getters['demerisUSER/allowCustomSlippage'];
+      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
     });
 
     watch(
@@ -263,11 +263,11 @@ export default defineComponent({
       async () => {
         const payDisplayName = await getDisplayName(
           props.swapData.pay.denom,
-          useStore().getters['demerisAPI/getDexChain'],
+          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
         );
         const receiveDisplayName = await getDisplayName(
           props.swapData.receive.denom,
-          useStore().getters['demerisAPI/getDexChain'],
+          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
         );
         const payAmount = props.swapData.pay.amount;
         const receiveAmount = props.swapData.receive.amount;

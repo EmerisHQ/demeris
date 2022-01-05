@@ -28,7 +28,7 @@ import { useStore } from 'vuex';
 
 import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { TypedAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 
 export default defineComponent({
   components: {
@@ -39,10 +39,10 @@ export default defineComponent({
   setup() {
     const apistore = useStore() as TypedAPIStore;
 
-    const dexChain = apistore.getters['demerisAPI/getDexChain'];
+    const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
     const isHubDown = computed(() => {
-      const status = apistore.getters['demerisAPI/getChainStatus']({ chain_name: dexChain });
+      const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: dexChain });
       return status === false;
     });
 

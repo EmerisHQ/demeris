@@ -1,5 +1,7 @@
 import { useStore } from 'vuex';
 
+import { GlobalDemerisGetterTypes } from '@/store';
+
 export default function useCalculation() {
   // precision setting (0.000000 level precision below than this decimal digits will be truncated)
   const precisionDigits = 10 ** 9;
@@ -17,8 +19,9 @@ export default function useCalculation() {
     if (payCoinData.amount) {
       const feeRate =
         1 - (parseFloat(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) ?? 0.003) / 2;
+
       const payCoinBaseDenomDecimalDigits =
-        store.getters['demerisAPI/getDenomPrecision']({ name: payCoinData.base_denom }) ?? 6;
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: payCoinData.base_denom }) ?? 6;
       const payCoinBaseDenomAmount = Math.trunc(payCoinData.amount * 10 ** payCoinBaseDenomDecimalDigits);
       const swapPrice = getSwapPrice(payCoinBaseDenomAmount, receiveCoinPoolAmount, payCoinPoolAmount);
       const receiveCoinAmount = Number(payCoinBaseDenomAmount / swapPrice) * feeRate;
@@ -37,7 +40,7 @@ export default function useCalculation() {
   ) {
     const swapFeeRate = 1;
     const receiveCoinBaseDenomDecimalDigits =
-      store.getters['demerisAPI/getDenomPrecision']({ name: receiveCoinData.base_denom }) ?? 6; //?? alert('Error: getDenomPrecision');
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: receiveCoinData.base_denom }) ?? 6; //?? alert('Error: getDenomPrecision');
     const receiveCoinBaseDenomAmount = Math.trunc(
       receiveCoinData.amount * 10 ** receiveCoinBaseDenomDecimalDigits * 1.00150225,
     );
@@ -58,7 +61,7 @@ export default function useCalculation() {
   }
 
   function getPrecision(denom) {
-    const chains = store.getters['demerisAPI/getChains'];
+    const chains = store.getters[GlobalDemerisGetterTypes.API.getChains];
     const denomPrecisionIndexer = {};
 
     for (const chain in chains) {

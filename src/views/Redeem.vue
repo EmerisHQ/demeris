@@ -147,7 +147,7 @@ export default defineComponent({
                 hash: balance.ibc.hash,
               }) ??
               (await apistore.dispatch(
-                'demerisAPI/GET_VERIFY_TRACE',
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {

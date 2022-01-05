@@ -27,6 +27,7 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useStore } from 'vuex';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
@@ -61,7 +62,7 @@ export default defineComponent({
     const steps = ref([]);
     const store = useStore();
     const gasPrice = computed(() => {
-      return store.getters['demerisUSER/getPreferredGasPriceLevel'];
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -87,7 +88,7 @@ export default defineComponent({
         step.value != 'review'
       ) {
         const precision =
-          store.getters['demerisAPI/getDenomPrecision']({
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: await getBaseDenom(form.balance.denom, form.on_chain),
           }) || 6;
 

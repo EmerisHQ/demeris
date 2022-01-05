@@ -317,9 +317,13 @@ export default defineComponent({
       }
 
       const fromPrecision =
-        apistore.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[0].base_denom }) ?? '6';
+        apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          name: reserveBalances.value[0].base_denom,
+        }) ?? '6';
       const toPrecision =
-        apistore.getters['demerisAPI/getDenomPrecision']({ name: reserveBalances.value[1].base_denom }) ?? '6';
+        apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          name: reserveBalances.value[1].base_denom,
+        }) ?? '6';
       let balanceA = reserveBalances.value[0].amount;
       let balanceB = reserveBalances.value[1].amount;
       if (balanceA && balanceB) {

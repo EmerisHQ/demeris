@@ -125,7 +125,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.BROADCAST_TX]({ getters }, { tx, chain_name, address }: DemerisTxParams) {
     try {
-      const response = await axios.post(getters['demerisAPI/getEndpoint'] + '/tx/' + chain_name, {
+      const response = await axios.post(getters[GlobalDemerisGetterTypes.API.getEndpoint] + '/tx/' + chain_name, {
         tx_bytes: tx,
         address,
       });

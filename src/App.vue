@@ -75,7 +75,7 @@ export default defineComponent({
       });
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
-          displayChain: apistore.getters['demerisAPI/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
         });
         await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
           subscribe: true,
@@ -84,7 +84,7 @@ export default defineComponent({
           },
         });
         status.value = t('appInit.status.chainStatus', {
-          displayChain: apistore.getters['demerisAPI/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
         });
         await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
           subscribe: true,
