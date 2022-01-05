@@ -102,6 +102,13 @@
         </template>
       </template>
 
+      <template v-if="transaction.name === 'addliquidity'">
+        <div class="text-center">
+          <p class="font-medium text-1"><CurrencyDisplay :value="getDepositTotal()" /></p>
+          <span class="text-muted">supplied</span>
+        </div>
+      </template>
+
       <template v-if="transaction.name === 'withdrawliquidity'">
         <div class="text-center">
           <p class="font-medium text-1"><CurrencyDisplay :value="getWithdrawTotal()" /></p>
@@ -205,7 +212,7 @@ import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { store as globalStore } from '@/store';
-import { SwapEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
+import { AddLiquidityEndBlockResponse, SwapEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -262,6 +269,20 @@ const goToSend = () => {
   const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
   const denom = lastResult.value.endBlock?.demand_coin_denom;
   router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
+};
+
+const getDepositTotal = () => {
+  const endBlock = lastResult.value.endBlock as AddLiquidityEndBlockResponse;
+  const amounts = parseCoins(endBlock.accepted_coins);
+
+  let total = new BigNumber(0);
+  for (const item of amounts) {
+    const baseDenom = getBaseDenomSync(item.denom);
+    const price = globalStore.getters['demeris/getPrice']({ denom: baseDenom });
+    const precision = globalStore.getters['demeris/getDenomPrecision']({ name: baseDenom }) ?? 6;
+    total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
+  }
+  return total.toNumber();
 };
 
 const getWithdrawTotal = () => {

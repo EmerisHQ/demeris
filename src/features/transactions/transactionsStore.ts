@@ -145,7 +145,7 @@ export const useTransactionsStore = defineStore('transactions', {
       service.subscribe((state) => {
         // Notify all waiting services when this completes
         if (state.done || state.matches('receipt')) {
-          Object.values(this.pending).forEach((itemService: TransactionProcessService) => {
+          Object.values(this.transactions).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
               itemService.send('VERIFY');
             }
