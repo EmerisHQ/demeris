@@ -230,7 +230,7 @@ export const messages = {
         genericActionComplete: 'Transaction complete',
         transferActionComplete: 'Assets transferred',
         swapActionComplete: 'Assets swapped',
-        swapActionPartiallyComplete: 'Assets partially swapped ({swappedPercent}%)',
+        swapActionPartiallyComplete: 'Assets partially swapped',
         createPoolActionComplete: 'Pool created',
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',

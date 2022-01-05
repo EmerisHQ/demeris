@@ -36,14 +36,17 @@ export interface TransactionProcessContext {
   currentStepIndex: number;
   currentTransactionIndex: number;
   cursor: number;
-  results: {
-    txhash: string;
-    chain_name: string;
-    status: any;
-    endBlock: any;
-    transaction: StepTransaction;
-    stepIndex: number;
-  }[];
+  results: Record<
+    string,
+    {
+      txhash: string;
+      chain_name: string;
+      status: any;
+      endBlock: any;
+      transaction: StepTransaction;
+      stepIndex: number;
+    }
+  >;
   fees: {
     totals: FeeTotals[];
     validation: FeeWarning | undefined;
@@ -75,7 +78,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       cursor: 0,
       currentStepIndex: 0,
       currentTransactionIndex: 0,
-      results: [],
+      results: {},
       formattedSteps: [],
       fees: {
         totals: [],
@@ -222,20 +225,24 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
           confirming: {
             initial: 'active',
+            entry: ['xs'],
             after: {
               5000: { target: '.pending' },
               60000: { target: '.delayed' },
-              600000: { target: '#failed.unknown' },
+              60100: { target: '#failed.unknown' },
             },
             on: {
+              SET_DATA: {
+                actions: ['setTransactionResponse'],
+              },
               // @ts-ignore
               GOT_RESPONSE: {
                 target: '#next',
-                actions: ['addTransactionResponse'],
+                actions: ['setTransactionResponse'],
               },
               GOT_UNKNOWN: {
                 target: '#failed.unknown',
-                actions: ['addTransactionResponse'],
+                actions: ['setTransactionResponse'],
               },
             },
             invoke: {
@@ -383,6 +390,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           endBlock: undefined,
         };
 
+        // @ts-ignore
+        callback({ type: 'SET_DATA', data: responseData });
+
         globalStore.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
           subscribe: true,
           params: { chain_name: sourceChain, ticket: event.data.ticket },
@@ -494,11 +504,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           currentTransactionIndex: hasCompletedStep ? 0 : context.currentTransactionIndex + 1,
         };
       }),
-      addTransactionResponse: assign({
-        results: (context, event: DoneEventData<any>) => [
+      setTransactionResponse: assign({
+        results: (context, event: DoneEventData<any>) => ({
           ...context.results,
-          { ...event.data, transaction: getCurrentTransaction(context), stepIndex: context.currentStepIndex },
-        ],
+          [event.data.txhash]: {
+            ...event.data,
+            transaction: getCurrentTransaction(context),
+            stepIndex: context.currentStepIndex,
+          },
+        }),
       }),
       logEvent: (_, __, meta) => console.log(meta.action),
     },

@@ -126,14 +126,6 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
   });
 };
 
-export const matchesObject = <T>(obj: Record<string, T>, callback: (key: string) => boolean) => {
-  return Object.entries(obj).find(([key, value]) => {
-    if (callback(key)) {
-      return value;
-    }
-  })?.[1];
-};
-
 export const getExplorerLink = (chainName: string) => {
   const chainMintScanMap = {
     'cosmos-hub': 'cosmos',

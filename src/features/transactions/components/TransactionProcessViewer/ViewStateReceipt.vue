@@ -16,7 +16,7 @@
     />
 
     <h1 class="font-bold" :class="isSwapComponent ? 'text-2 px-6' : 'text-3'">
-      {{ titleMap[transaction.name] }}
+      {{ title }}
     </h1>
 
     <div class="flex flex-col items-center justify-center">
@@ -40,7 +40,28 @@
 
       <template v-if="transaction.name === 'swap'">
         <template v-if="isSwapComponent">
-          <i18n-t keypath="components.txHandlingModal.received">
+          <i18n-t
+            v-if="getSwappedPercent() < 100"
+            tag="p"
+            class="text-center px-4"
+            keypath="components.txHandlingModal.notSwapped"
+          >
+            <template #amount>
+              <span class="font-bold">
+                <AmountDisplay
+                  :amount="{
+                    denom: lastResult.endBlock?.offer_coin_denom,
+                    amount: String(lastResult.endBlock?.remaining_offer_coin_amount),
+                  }"
+                />
+              </span>
+            </template>
+            <template #chainName>
+              <ChainName :name="'cosmos-hub'" />
+            </template>
+          </i18n-t>
+
+          <i18n-t v-else tag="p" class="text-center px-4" keypath="components.txHandlingModal.received">
             <template #amount>
               <span class="font-bold">
                 <AmountDisplay
@@ -124,6 +145,17 @@
       </Collapse>
     </template>
 
+    <template v-if="isSwapComponent && getExplorerTx(lastResult)">
+      <a
+        :href="getExplorerTx(lastResult)"
+        rel="noopener noreferrer"
+        target="_blank"
+        class="self-center mt-8 mb-4 p-2 font-medium"
+      >
+        {{ $t('context.transaction.viewOnExplorer') }} ↗️
+      </a>
+    </template>
+
     <div class="pt-4 flex flex-col space-y-5 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
       <Button v-if="state.matches('receipt')" @click="onNext">{{ $t('context.transactions.controls.next') }}</Button>
 
@@ -158,7 +190,7 @@
 
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, inject } from 'vue';
+import { computed, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -173,7 +205,7 @@ import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { store as globalStore } from '@/store';
-import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
+import { SwapEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
@@ -184,8 +216,12 @@ const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideView
 const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
-const lastResult = computed(() => state.value.context.results.slice(-1)[0]);
+const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
+
+onMounted(() => {
+  console.log(state.value.toJSON());
+});
 
 const titleMap = {
   ibc_backward: t('components.txHandlingModal.transferred'),
@@ -206,6 +242,17 @@ const previewComponentMap = {
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
 };
+
+const title = computed(() => {
+  if (transaction.value.name === 'swap') {
+    const swappedPercent = getSwappedPercent();
+    if (swappedPercent < 100) {
+      return t('components.txHandlingModal.swapActionPartiallyComplete');
+    }
+  }
+
+  return titleMap[transaction.value.name];
+});
 
 const onNext = () => {
   send('CONTINUE');
@@ -229,6 +276,15 @@ const getWithdrawTotal = () => {
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();
+};
+
+const getSwappedPercent = () => {
+  const endBlock = lastResult.value.endBlock as SwapEndBlockResponse;
+  return (
+    (Number(endBlock.exchanged_offer_coin_amount) /
+      (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
+    100
+  );
 };
 </script>
 

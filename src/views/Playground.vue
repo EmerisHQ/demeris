@@ -1,76 +1,48 @@
 <template>
+  <div class="max-w-5xl p-10 shadow-dropdown mt-20 mx-auto">
+    <TransactionProcessViewer v-if="state.key" :step-id="state.key" />
+  </div>
   <div class="flex items-center justify-center p-20 w-full space-x-6">
-    <div class="p-10 shadow-dropdown w-1/3">
-      <TransactionProcessViewer v-if="state.steps.length" :step-id="state.steps[0]" />
-      <Button>Swap</Button>
-    </div>
-
+    <Button class="flex-1" @click="state.key = 'swap-success'">Swap Success</Button>
     <Button class="flex-1">Transfer</Button>
     <Button class="flex-1">Add Liquidity</Button>
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
-
-  <TransactionsCenter />
-
-  <Modal v-if="state.isOpen" variant="full" fullscreen show-close-button @close="state.isOpen = false">
-    <div class="p-20 w-full flex items-center justify-center">Hello</div>
-  </Modal>
 </template>
 
-<script type="ts" setup>
-import { onMounted,reactive } from "vue";
+<script lang="ts" setup>
+import { onMounted, reactive } from 'vue';
+import { interpret, State } from 'xstate';
 
-import Button from "@/components/ui/Button.vue";
-import Modal from '@/components/ui/Modal.vue';
+import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-cosmos-cosmos.json';
+import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
-import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
-import {transactionProcessMachine} from '@/features/transactions/transactionProcessMachine';
-import {useTransactionsStore} from '@/features/transactions/transactionsStore';
+import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 
 const state = reactive({
-  isOpen: false,
-  steps: []
-})
+  key: undefined,
+});
 
-const transactionsStore = useTransactionsStore()
+const transactionsStore = useTransactionsStore();
 const customMachine = transactionProcessMachine.withConfig({
   services: {
     validateFees: () => Promise.resolve({ totals: [] }),
     validateChainStatus: () => Promise.resolve(),
     validatePreviousTransaction: () => Promise.resolve(),
-    signTransaction: () => Promise.reject()
-  }
-})
+    signTransaction: () => Promise.reject(),
+  },
+});
 
 onMounted(() => {
-  state.steps.push(transactionsStore.createTransaction({
-    action: 'swap',
-    steps: [{
-      name: 'swap',
-      description: '',
-      transactions: [{
-        name: 'swap',
-        data: {
-          from: {
-            denom: 'uatom',
-            amount: 10
-          },
-          to: {
-            denom: 'uosmo',
-            amount: 1
-          },
-          pool: { id: 1 }
-        }
-      }]
-    }],
-    balances: [
-      {
-        amount: '1000uatom',
-        base_denom: 'uatom',
-        verified: true
-      }
-    ],
-    machine: customMachine
-  })[0])
-})
+  addService('swap-success', SwapSuccessFixture);
+});
+
+const addService = (key: string, stateDefinition: any) => {
+  const prevState = State.create(stateDefinition);
+  // @ts-ignore
+  const service = interpret(customMachine).start(prevState);
+  // @ts-ignore
+  transactionsStore.transactions[key] = service;
+};
 </script>

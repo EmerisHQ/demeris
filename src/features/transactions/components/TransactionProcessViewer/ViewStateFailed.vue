@@ -105,6 +105,24 @@
       {{ subtitle }}
     </p>
 
+    <p v-else-if="!subtitle && transaction.name === 'swap'">
+      <i18n-t keypath="components.txHandlingModal.notSwapped">
+        <template #amount>
+          <span class="font-bold">
+            <AmountDisplay
+              :amount="{
+                denom: lastResult?.endBlock.offer_coin_denom,
+                amount: String(lastResult?.endBlock.remaining_offer_coin_amount),
+              }"
+            />
+          </span>
+        </template>
+        <template #chainName>
+          <ChainName :name="'cosmos-hub'" />
+        </template>
+      </i18n-t>
+    </p>
+
     <a
       v-if="state.matches('failed.sign')"
       href="https://faq.keplr.app"
@@ -118,7 +136,8 @@
       v-if="lastResult || state.context.error"
       :label-open="$t('generic_cta.showDetails')"
       :label-hide="$t('generic_cta.hideDetails')"
-      class="mt-8 items-center text-left w-full px-16"
+      class="mt-8 items-center text-left w-full"
+      :class="isSwapComponent ? 'px-6' : 'px-16'"
     >
       <Alert status="info" :show-icon="false">
         <ul class="space-y-3">
@@ -138,7 +157,7 @@
       </Alert>
     </Collapse>
 
-    <template v-if="lastResult?.txhash && getExplorerTx(lastResult)">
+    <template v-if="lastResult?.txhash && getExplorerTx(lastResult) && !state.matches('failed.sign')">
       <a
         :href="getExplorerTx(lastResult)"
         rel="noopener noreferrer"
@@ -187,7 +206,7 @@ const transactionsStore = useTransactionsStore();
 const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey);
 const { state, send } = actor;
 
-const lastResult = computed(() => state.value.context.results.slice(-1)[0]);
+const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 
 const titleMap = {
@@ -236,5 +255,6 @@ const onDone = () => {
   send('ABORT');
   removeTransactionAndClose();
 };
+
 const onCancel = () => transactionsStore.toggleCancelModal();
 </script>
