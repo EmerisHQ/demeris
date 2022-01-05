@@ -30,6 +30,7 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useStore } from 'vuex';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
