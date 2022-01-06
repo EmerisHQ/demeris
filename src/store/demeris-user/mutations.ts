@@ -1,17 +1,7 @@
 import { MutationTree } from 'vuex';
 
-import { Pool } from '@/types/actions';
-import * as API from '@/types/api';
-
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
-import { DemerisConfig } from './actions';
-import {
-  APIPromise,
-  DemerisMutations,
-  DemerisMutationTypes as MutationTypes,
-  KeplrKeyData,
-  UserData,
-} from './mutation-types';
+import { DemerisMutations, DemerisMutationTypes as MutationTypes, KeplrKeyData, UserData } from './mutation-types';
 import { getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {

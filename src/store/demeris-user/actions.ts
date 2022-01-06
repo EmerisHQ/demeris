@@ -131,7 +131,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch, rootGetters }) {
+  async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
 

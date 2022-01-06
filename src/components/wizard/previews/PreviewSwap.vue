@@ -191,13 +191,6 @@ export default defineComponent({
 
         let swapPrice = null;
 
-        const fromPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: fromCoinBaseDenom.value,
-        });
-        const toPrecision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: toCoinBaseDenom.value,
-        });
-
         if (reserveDenoms[1] === toCoinBaseDenom.value) {
           swapPrice = getSwapPrice(inputAmount, reserveBalances.balanceA, reserveBalances.balanceB);
         } else {

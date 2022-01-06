@@ -1,4 +1,3 @@
-import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { KeplrKeyData, UserData } from './mutation-types';

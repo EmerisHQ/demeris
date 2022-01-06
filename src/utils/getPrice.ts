@@ -1,9 +1,9 @@
 import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import { GlobalDemerisGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 
 export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolean): ComputedRef<number> {
   const store = useStore();

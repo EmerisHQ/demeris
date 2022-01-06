@@ -1,6 +1,6 @@
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, RootStore, RootStoreType, TypedAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, RootStoreType, TypedAPIStore } from '@/store';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
