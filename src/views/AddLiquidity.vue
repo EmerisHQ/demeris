@@ -300,7 +300,7 @@
         <template v-else>
           <TransactionProcessCreator
             :steps="actionSteps"
-            action="addliquidity"
+            :action="hasPool ? 'addliquidity' : 'createpool'"
             @pending="
               () => {
                 closeModal();
@@ -313,6 +313,7 @@
                 resetHandler();
               }
             "
+            @previous="goBack"
           />
         </template>
       </main>

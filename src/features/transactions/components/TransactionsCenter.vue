@@ -57,7 +57,7 @@
       show-close-button
       @close="closeModal"
     >
-      <TransactionProcessViewer :step-id="transactionsStore.currentId" @close="closeModal" />
+      <TransactionProcessViewer :step-id="transactionsStore.currentId" @close="closeModal" @previous="closeModal" />
     </Modal>
   </teleport>
 </template>

@@ -73,6 +73,18 @@
         </p>
       </template>
 
+      <template v-if="transaction.name === 'addliquidity'">
+        <div>
+          <p class="font-medium">
+            <AmountDisplay :amount="transaction.data.coinA" /> ·
+            <AmountDisplay :amount="transaction.data.coinB" />
+          </p>
+          <p class="text-muted mt-1">
+            <Ticker :name="getDepositDenoms()[0]" /> · <Ticker :name="getDepositDenoms()[1]" /> Pool
+          </p>
+        </div>
+      </template>
+
       <Button v-if="isSwapComponent" variant="secondary" class="w-full mt-8" @click="minimizeModal">
         <span>
           {{ $t('context.transactions.controls.swapAnotherAsset') }}
@@ -97,6 +109,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
+import { AddLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
 import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
@@ -115,6 +128,10 @@ const titleMap = {
   addliquidity: t('components.txHandlingModal.addLiqAction'),
   withdrawliquidity: t('components.txHandlingModal.withdrawing'),
   createpool: t('components.txHandlingModal.createPoolAction'),
+};
+
+const getDepositDenoms = () => {
+  return (transaction.value.data as AddLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync).sort();
 };
 
 const subtitle = computed(() => {

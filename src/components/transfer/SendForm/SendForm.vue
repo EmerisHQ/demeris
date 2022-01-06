@@ -26,6 +26,7 @@
             resetHandler();
           }
         "
+        @previous="emits('previous')"
       />
     </template>
   </div>
@@ -69,7 +70,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step'],
+  emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);

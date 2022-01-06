@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from '@vue/runtime-core';
+import { inject } from 'vue';
 
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';

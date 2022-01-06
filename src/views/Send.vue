@@ -121,8 +121,8 @@
         </template>
 
         <div v-else class="w-full max-w-lg">
-          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
-          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
+          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" @previous="goBack" />
+          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" @previous="goBack" />
         </div>
       </main>
     </div>

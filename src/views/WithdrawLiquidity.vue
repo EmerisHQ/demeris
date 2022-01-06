@@ -198,6 +198,7 @@
                 resetHandler();
               }
             "
+            @previous="goBack"
           />
         </template>
       </main>

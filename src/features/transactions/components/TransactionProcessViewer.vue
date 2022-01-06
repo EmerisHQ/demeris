@@ -18,6 +18,11 @@
       <ViewStateReview />
     </template>
 
+    <template v-else-if="state.matches('feeWarning')">
+      <ModalFeeWarning @close="goBack" />
+      <ViewStateReview />
+    </template>
+
     <ViewStateFailed v-else-if="state.matches('failed')" />
     <div v-else-if="state.matches('aborted')">Aborted</div>
 
@@ -41,6 +46,7 @@ import { TransactionProcessService } from '../transactionProcessMachine';
 import { useTransactionsStore } from '../transactionsStore';
 import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
 import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
+import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
@@ -55,7 +61,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close', 'minimize']);
+const emits = defineEmits(['close', 'minimize', 'previous']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -72,6 +78,7 @@ const minimizeModal = () => {
 };
 
 const closeModal = () => emits('close');
+const goBack = () => emits('previous');
 
 const removeTransactionAndClose = () => {
   transactionsStore.removeTransaction(props.stepId);

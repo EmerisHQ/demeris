@@ -3,10 +3,15 @@
     <GobackWithClose
       v-if="action === 'swap'"
       :class="{ invisible: !['review', 'waitingPreviousTransaction'].some(state.matches) }"
-      @goback="onBack"
+      @goback="
+        () => {
+          transactionsStore.removeTransaction(stepId);
+          emits('close');
+        }
+      "
       @close="handleCloseHeader"
     />
-    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" />
+    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" @previous="onPrevious" />
     <ConnectWalletModal
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
@@ -37,7 +42,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['pending', 'close']);
+const emits = defineEmits(['pending', 'close', 'previous']);
 
 const transactionsStore = useTransactionsStore();
 
@@ -53,10 +58,7 @@ const { state } = useActor(service);
 
 const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
 const onClose = () => emits('close');
-const onBack = () => {
-  transactionsStore.removeTransaction(stepId);
-  emits('close');
-};
+const onPrevious = () => emits('previous');
 
 watch(isPending, (value) => {
   if (value) {

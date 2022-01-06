@@ -197,7 +197,7 @@
 
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, inject, onMounted } from 'vue';
+import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -225,10 +225,6 @@ const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
-
-onMounted(() => {
-  console.log(state.value.toJSON());
-});
 
 const titleMap = {
   ibc_backward: t('components.txHandlingModal.transferred'),
