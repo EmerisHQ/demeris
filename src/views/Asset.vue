@@ -23,10 +23,7 @@
         </header>
 
         <!-- Balance -->
-
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom' && !isSimplexCountry()" class="mt-16" size="large" />
-        <SimplexBanner v-if="!assets.length && denom === 'uatom' && isSimplexCountry()" class="mt-16" size="large" />
-
+        <BuyCryptoBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
         <section v-else class="mt-16">
           <header class="space-y-0.5">
             <h2 class="text-muted">{{ $t('pages.asset.balance') }}</h2>
@@ -147,8 +144,7 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom' && !isSimplexCountry()" size="small" class="mt-4" />
-        <SimplexBanner v-if="assets.length && denom == 'uatom' && isSimplexCountry()" size="small" class="mt-4" />
+        <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
   </AppLayout>
@@ -162,25 +158,25 @@ import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
-import SimplexBanner from '@/components/common/SimplexBanner.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
+import useCountry from '@/composables/useCountry';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
-import { checkUserCountry, generateDenomHash, parseCoins } from '@/utils/basic';
+import { generateDenomHash, parseCoins } from '@/utils/basic';
 
 export default defineComponent({
   name: 'Asset',
@@ -198,8 +194,7 @@ export default defineComponent({
     Pools,
     TooltipPools,
     PoolBanner,
-    MoonpayBanner,
-    SimplexBanner,
+    BuyCryptoBanner,
     ChainDownWarning,
   },
 
@@ -360,10 +355,6 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
-    const isSimplexCountry = () => {
-      return checkUserCountry('America');
-    };
-
     return {
       nativeAsset,
       assetConfig,
@@ -377,7 +368,6 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
-      isSimplexCountry,
     };
   },
 });

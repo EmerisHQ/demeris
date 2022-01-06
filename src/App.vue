@@ -2,8 +2,8 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div v-if="initialized || initializationNotRequired">
-    <CookieConsent v-if="!initializationNotRequired" />
+  <div v-if="initialized">
+    <CookieConsent />
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
@@ -42,8 +42,6 @@ export default defineComponent({
     const store = useAllStores();
     const initialized = ref(false);
     const router = useRouter();
-    const initializationNotRequired = ref(window.location.pathname === '/simplex');
-
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
 
@@ -138,7 +136,7 @@ export default defineComponent({
         router.push('/welcome');
       }
     });
-    return { initialized, status, initializationNotRequired };
+    return { initialized, status };
   },
   errorCaptured(err) {
     console.error(err);

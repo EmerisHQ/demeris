@@ -273,6 +273,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
+import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
@@ -298,7 +299,7 @@ import {
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-import { checkUserCountry, parseCoins } from '@/utils/basic';
+import { parseCoins } from '@/utils/basic';
 import getPrice from '@/utils/getPrice';
 
 export default defineComponent({
@@ -384,7 +385,7 @@ export default defineComponent({
 
     const goMoon = () => {
       if (isSignedIn.value) {
-        if (checkUserCountry('America')) {
+        if (useCountry().includes('America')) {
           window.open(`${window.location.origin}/simplex?crypto=ATOM&fiat=USD&amount=1000`, '', 'height=500,width=500');
         } else {
           window.open(mpUrl.value, '', 'height=480,width=320');

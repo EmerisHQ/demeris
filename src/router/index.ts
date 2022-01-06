@@ -66,10 +66,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Styles.vue'),
   },
   {
-    path: '/simplex',
-    component: () => import('@/views/Simplex.vue'),
-  },
-  {
     path: '/:pathMatch(.*)*',
     redirect: { name: 'Portfolio' },
   },

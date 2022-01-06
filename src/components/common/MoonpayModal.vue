@@ -1,0 +1,69 @@
+<template>
+  <Modal
+    v-show="isModalOpen"
+    variant="center"
+    fullscreen
+    :close-on-overlay-click="true"
+    max-width-class="max-w-sm"
+    @close="toggleMoonpayModal"
+  >
+    <iframe
+      allow="accelerometer; autoplay; camera; gyroscope; payment"
+      width="100%"
+      class="moonpay-iframe"
+      frameborder="0"
+      :src="mpUrl"
+    >
+    </iframe>
+  </Modal>
+</template>
+
+<script lang="ts">
+import { computed, ref } from '@vue/runtime-core';
+import { useStore } from 'vuex';
+
+import Modal from '@/components/ui/Modal.vue';
+import useEmitter from '@/composables/useEmitter';
+
+export default {
+  name: 'MoonpayModal',
+  components: { Modal },
+  setup() {
+    const emitter = useEmitter();
+    const isModalOpen = ref(false);
+    const store = useStore();
+    const mpDomain = ref('https://buy.moonpay.io');
+    const mpParams = computed(() => {
+      return {
+        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
+        currencyCode: 'atom',
+        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+        baseCurrencyCode: 'usd',
+        // colorCode: '#FFFFFF'
+        // baseCurrencyAmount: '50',
+      };
+    });
+    const mpQuery = computed(() => {
+      return new URLSearchParams(mpParams.value).toString();
+    });
+    const mpUrl = computed(() => {
+      return mpDomain.value + '/?' + mpQuery.value;
+    });
+
+    const toggleMoonpayModal = () => {
+      isModalOpen.value = !isModalOpen.value;
+    };
+
+    emitter.on('moonpay', () => {
+      toggleMoonpayModal();
+    });
+    return { isModalOpen, toggleMoonpayModal, mpUrl };
+  },
+};
+</script>
+
+<style lang="scss">
+.moonpay-iframe {
+  min-height: 450px;
+}
+</style>

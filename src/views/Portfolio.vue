@@ -25,8 +25,7 @@
             @row-click="openAssetPage"
           />
 
-          <MoonpayBanner v-if="isMoonpay" :title="$t('context.moonpay.cta')" size="large" />
-          <SimplexBanner v-if="isSimplex" :title="$t('context.simplex.cta')" size="large" />
+          <BuyCryptoBanner size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
@@ -59,9 +58,8 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import Intro from '@/components/common/Intro.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
-import SimplexBanner from '@/components/common/SimplexBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -70,15 +68,13 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
-import { checkUserCountry } from '@/utils/basic';
 
 export default {
   name: 'Portfolio',
   components: {
     AppLayout,
     Button,
-    MoonpayBanner,
-    SimplexBanner,
+    BuyCryptoBanner,
     LiquiditySwap,
     TotalPrice,
     AssetsTable,
@@ -98,13 +94,6 @@ export default {
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
-    const isSimplex = computed(() => {
-      return !balances.value.length && checkUserCountry('America');
-    });
-
-    const isMoonpay = computed(() => {
-      return !balances.value.length && !checkUserCountry('America');
-    });
 
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
@@ -119,7 +108,7 @@ export default {
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage, isSimplex, isMoonpay };
+    return { balances, poolsInvested, openAssetPage, openPoolsPage };
   },
 };
 </script>
