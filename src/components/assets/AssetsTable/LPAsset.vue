@@ -31,7 +31,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const apistore = useStore() as TypedAPIStore;
+    const store = useStore();
 
     const { balancesByDenom } = useAccount();
     const { pools } = usePools();
@@ -63,7 +63,6 @@ export default defineComponent({
     });
 
     const updateOwnLiquidityPrice = async () => {
-      const store = useStore();
       if (!pool.value) {
         return;
       }

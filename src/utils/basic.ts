@@ -49,7 +49,11 @@ export async function getOwnAddress({ chain_name }) {
   }
 }
 export function isNative(denom: string) {
-  return denom.indexOf('ibc/') != 0 ? true : false;
+  if (denom) {
+    return denom.indexOf('ibc/') != 0 ? true : false;
+  } else {
+    return false;
+  }
 }
 
 export function getChannel(path, index) {

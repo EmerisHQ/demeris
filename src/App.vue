@@ -40,18 +40,17 @@ export default defineComponent({
   },
 
   setup() {
-    useTheme({ updateOnChange: true });
     const store = useStore();
+    setStore(store); // make store availabe in some composition functions used in the store itself
     const apistore = store as TypedAPIStore;
     const userstore = store as TypedUSERStore;
     const initialized = ref(false);
     const router = useRouter();
 
-    setStore(store); // make store availabe in some composition functions used in the store itself
-
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
     onMounted(async () => {
+      useTheme({ updateOnChange: true });
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
         gasLimit = 500000;
