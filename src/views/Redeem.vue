@@ -83,12 +83,12 @@
 
       <template v-else>
         <div class="redeem__content">
-          <TxStepsModal
+          <!-- <TxStepsModal
             :data="state.selectedAsset.steps"
             @transacting="goToStep('transfer')"
             @failed="goToStep('review')"
             @reset="resetHandler"
-          />
+          /> -->
         </div>
       </template>
     </main>
@@ -103,7 +103,6 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -115,7 +114,7 @@ import { parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'Redeem',
 
-  components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector, TxStepsModal },
+  components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector },
 
   setup() {
     const router = useRouter();
