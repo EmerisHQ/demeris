@@ -13,8 +13,7 @@ export class SendToAddressSubpage {
       send.moveAssets().click();
     }
   }
-
-  // RECIPIENT step
+  //#region RECIPIENT step
   recipientHeader() {
     return cy.get('h2').contains('Enter an address');
   }
@@ -33,9 +32,9 @@ export class SendToAddressSubpage {
   continueButton() {
     return cy.get('span').contains('Continue').parent().get('button');
   }
+  //#endregion RECIPIENT step
 
-  // AMOUNT step
-
+  //#region AMOUNT step
   amountHeader() {
     return cy.get('h2').contains('Enter an amount');
   }
@@ -52,7 +51,28 @@ export class SendToAddressSubpage {
     return cy.get('button').contains('Select chain');
   }
 
-  selectTransactionFee() {
-    //
+  selectSlowTransactionFee() {
+    selectTransactionFee('Slow');
   }
+
+  selectFastTransactionFee() {
+    selectTransactionFee('Fast');
+  }
+
+  selectTransactionFee(fee) {
+    cy.get('div').contains('Fees (included)');
+    cy.get('button').contains(fee).click();
+  }
+  //#endregion AMOUNT step
+
+  //#region REVIEW step
+  reviewHeader() {
+    return cy.get('h2').contains('Review your transfer details');
+  }
+
+  confirnAndContinueButton() {
+    return cy.get('span').contains('Confirm and continue').parent().get('button');
+  }
+
+  //#endregion REVIEW step
 }
