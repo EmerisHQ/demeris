@@ -18,12 +18,14 @@ describe('Check availability of send/address subpage elements', function () {
     let navbar = new Navbar();
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
+    cy.url().should('eq', Cypress.config().baseUrl);
+
     navbar.send().click();
     sendToAddresseSubpage.goTo();
 
     sendToAddresseSubpage.recipientHeader().should('be.visible');
-    sendToAddresseSubpage.recipientAddressTextArea().type(recipientAddress);
-    sendToAddresseSubpage.referenceMemoTextArea('test memo');
+    sendToAddresseSubpage.toARecipientAddressTextField().type(recipientAddress);
+    sendToAddresseSubpage.referenceMemoInput().type('test memo');
 
     sendToAddresseSubpage.checkbox().should('not.be.checked');
     sendToAddresseSubpage.continueButton().should('be.disabled');
@@ -33,7 +35,7 @@ describe('Check availability of send/address subpage elements', function () {
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
   });
 
-  it('fill in form Amount form', function () {
+  it('fill in form Amount form with Slow fee', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
     recipientFormGoThrough();
@@ -43,7 +45,7 @@ describe('Check availability of send/address subpage elements', function () {
     sendToAddresseSubpage.inputAmountOfAssets().type('1');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
-    sendToAddresseSubpage.confirnAndContinueButton().click();
+    sendToAddresseSubpage.continueButton().click();
   });
 
   it('check Review form', function () {
@@ -53,6 +55,7 @@ describe('Check availability of send/address subpage elements', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
     sendToAddresseSubpage.reviewHeader().should('be.visible');
+    sendToAddresseSubpage.confirnAndContinueButton().should('not.be.disabled');
   });
 
   function recipientFormGoThrough() {
@@ -62,8 +65,8 @@ describe('Check availability of send/address subpage elements', function () {
     navbar.send().click();
     sendToAddresseSubpage.goTo();
 
-    sendToAddresseSubpage.recipientAddressTextArea().type(recipientAddress);
-    sendToAddresseSubpage.referenceMemoTextArea('test memo');
+    sendToAddresseSubpage.toARecipientAddressTextField().type(recipientAddress);
+    sendToAddresseSubpage.referenceMemoInput('test memo');
     sendToAddresseSubpage.checkbox().check();
     sendToAddresseSubpage.continueButton().click();
   }
@@ -75,6 +78,6 @@ describe('Check availability of send/address subpage elements', function () {
     sendToAddresseSubpage.inputAmountOfAssets().type('1');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
-    sendToAddresseSubpage.confirnAndContinueButton().click();
+    sendToAddresseSubpage.continueButton().click();
   }
 });

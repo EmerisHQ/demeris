@@ -19,7 +19,7 @@ export class SendToAddressSubpage {
   }
 
   toARecipientAddressTextField() {
-    return cy.get('input[placeholder="Recipient address"]');
+    return cy.get('textarea[placeholder="Recipient address"]');
   }
   referenceMemoInput() {
     return cy.get('input[placeholder="Add reference (memo)"]');
@@ -30,7 +30,7 @@ export class SendToAddressSubpage {
   }
 
   continueButton() {
-    return cy.get('span').contains('Continue').parent().get('button');
+    return cy.get('span').contains('Continue').parent().parent();
   }
   //#endregion RECIPIENT step
 
@@ -40,7 +40,11 @@ export class SendToAddressSubpage {
   }
 
   inputAmountOfAssets() {
-    return cy.get('input[placeholder="0"]');
+    return cy
+      .get(
+        'label[class="flexible-input relative flex items-center justify-center mx-auto w-full cursor-text text-inactive hover:text-muted uppercase"]',
+      )
+      .find('input[placeholder="0"]');
   }
 
   fees() {
@@ -52,22 +56,22 @@ export class SendToAddressSubpage {
   }
 
   selectSlowTransactionFee() {
-    selectTransactionFee('Slow');
+    this.selectTransactionFee('Slow');
   }
 
   selectFastTransactionFee() {
-    selectTransactionFee('Fast');
+    this.selectTransactionFee('Fast');
   }
 
   selectTransactionFee(fee) {
-    cy.get('div').contains('Fees (included)');
+    cy.get('div').contains('Fees (included)').click();
     cy.get('button').contains(fee).click();
   }
   //#endregion AMOUNT step
 
   //#region REVIEW step
   reviewHeader() {
-    return cy.get('h2').contains('Review your transfer details');
+    return cy.get('h1').contains('Review your transfer details');
   }
 
   confirnAndContinueButton() {
