@@ -13,6 +13,7 @@ describe('Check availability of send/address subpage elements', function () {
     welcomePage.connectKeplrButton().click();
     welcomePage.betaAgreeButton().click();
   });
+
   it('fill in form Recipient form', function () {
     let navbar = new Navbar();
     let sendToAddresseSubpage = new SendToAddressSubpage();
@@ -20,7 +21,7 @@ describe('Check availability of send/address subpage elements', function () {
     navbar.send().click();
     sendToAddresseSubpage.goTo();
 
-    sendToAddresseSubpage.header().should('be.visible');
+    sendToAddresseSubpage.recipientHeader().should('be.visible');
     sendToAddresseSubpage.recipientAddressTextArea().type(recipientAddress);
     sendToAddresseSubpage.referenceMemoTextArea('test memo');
 
@@ -31,4 +32,49 @@ describe('Check availability of send/address subpage elements', function () {
 
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
   });
+
+  it('fill in form Amount form', function () {
+    let sendToAddresseSubpage = new SendToAddressSubpage();
+
+    recipientFormGoThrough();
+
+    sendToAddresseSubpage.amountHeader().should('be.visible');
+    sendToAddresseSubpage.continueButton().should('be.disabled');
+    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.continueButton().should('not.be.disabled');
+    sendToAddresseSubpage.selectSlowTransactionFee();
+    sendToAddresseSubpage.confirnAndContinueButton().click();
+  });
+
+  it('check Review form', function () {
+    recipientFormGoThrough();
+    amountFormGoThrough();
+
+    let sendToAddresseSubpage = new SendToAddressSubpage();
+
+    sendToAddresseSubpage.reviewHeader().should('be.visible');
+  });
+
+  function recipientFormGoThrough() {
+    let navbar = new Navbar();
+    let sendToAddresseSubpage = new SendToAddressSubpage();
+
+    navbar.send().click();
+    sendToAddresseSubpage.goTo();
+
+    sendToAddresseSubpage.recipientAddressTextArea().type(recipientAddress);
+    sendToAddresseSubpage.referenceMemoTextArea('test memo');
+    sendToAddresseSubpage.checkbox().check();
+    sendToAddresseSubpage.continueButton().click();
+  }
+
+  function amountFormGoThrough() {
+    let sendToAddresseSubpage = new SendToAddressSubpage();
+    sendToAddresseSubpage.amountHeader().should('be.visible');
+    sendToAddresseSubpage.continueButton().should('be.disabled');
+    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.continueButton().should('not.be.disabled');
+    sendToAddresseSubpage.selectSlowTransactionFee();
+    sendToAddresseSubpage.confirnAndContinueButton().click();
+  }
 });
