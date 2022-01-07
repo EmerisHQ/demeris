@@ -10,7 +10,7 @@
       <slot />
     </g>
   </svg>
-</template> 
+</template>
 
 <script>
 export default {
@@ -23,4 +23,3 @@ export default {
   },
 };
 </script>
-
