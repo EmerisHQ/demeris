@@ -41,7 +41,7 @@
       <template v-if="transaction.name === 'swap'">
         <template v-if="isSwapComponent">
           <i18n-t
-            v-if="getSwappedPercent() < 100"
+            v-if="getSwapPercent() < 100"
             tag="p"
             class="text-center px-4"
             keypath="components.txHandlingModal.notSwapped"
@@ -248,7 +248,7 @@ const previewComponentMap = {
 
 const title = computed(() => {
   if (transaction.value.name === 'swap') {
-    const swappedPercent = getSwappedPercent(lastResult.value.endBlock);
+    const swappedPercent = getSwapPercent();
     if (swappedPercent < 100) {
       return t('components.txHandlingModal.swapActionPartiallyComplete');
     }
@@ -294,6 +294,8 @@ const getWithdrawTotal = () => {
   }
   return total.toNumber();
 };
+
+const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock);
 </script>
 
 <style scoped>
