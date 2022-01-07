@@ -43,7 +43,7 @@ export enum GlobalGetterTypes {
   getNumbersChain = 'demerisAPI/getNumbersChain',
   getRelayerStatus = 'demerisAPI/getRelayerStatus',
   getRelayerBalance = 'demerisAPI/getRelayerBalance',
-  getRelayerChainStatus = 'getRelayerChainStatus',
+  getRelayerChainStatus = 'demerisAPI/getRelayerChainStatus',
   getAllBalances = 'demerisAPI/getAllBalances',
   getAllStakingBalances = 'demerisAPI/getAllStakingBalances',
   getAllNumbers = 'demerisAPI/getAllNumbers',
