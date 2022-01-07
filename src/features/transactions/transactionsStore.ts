@@ -20,6 +20,7 @@ type State = {
   isViewerModalOpen: boolean;
   isConnectWalletModalOpen: boolean;
   isCancelModalOpen: boolean;
+  hasShownNotification: boolean;
   currentId: string;
 };
 
@@ -32,6 +33,7 @@ export const useTransactionsStore = defineStore('transactions', {
       isViewerModalOpen: false,
       isConnectWalletModalOpen: false,
       isCancelModalOpen: false,
+      hasShownNotification: false,
       currentId: undefined,
     } as State),
 
@@ -110,7 +112,7 @@ export const useTransactionsStore = defineStore('transactions', {
                     return false;
                   }
 
-                  if (snapshot.matches('receipt')) {
+                  if (['receipt', 'failed'].some(snapshot.matches)) {
                     return false;
                   }
 
@@ -144,7 +146,7 @@ export const useTransactionsStore = defineStore('transactions', {
 
       service.subscribe((state) => {
         // Notify all waiting services when this completes
-        if (state.done || state.matches('receipt')) {
+        if (state.done || state.matches('receipt') || state.matches('failed')) {
           Object.values(this.transactions).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
               itemService.send('VERIFY');

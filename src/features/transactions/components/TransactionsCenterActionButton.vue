@@ -119,9 +119,12 @@ watch(pendingsCount, (value, oldValue) => {
 });
 
 onMounted(() => {
-  for (const hash of Object.keys(transactionsStore.pending).reverse()) {
-    subscribe(hash);
+  if (!transactionsStore.hasShownNotification) {
+    for (const hash of Object.keys(transactionsStore.pending).reverse()) {
+      subscribe(hash);
+    }
   }
+  transactionsStore.hasShownNotification = true;
 });
 
 onUnmounted(() => {
