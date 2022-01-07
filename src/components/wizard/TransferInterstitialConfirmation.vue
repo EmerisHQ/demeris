@@ -1,40 +1,40 @@
 <template>
-  <div class="flex flex-col items-center text-center">
+  <div class="flex flex-col items-center text-center space-y-8">
     <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': currentAction === 'swap' }">
       <h1
         class="font-bold pt-8 whitespace-pre-line"
         :class="{
-          'mb-8': !subtitle,
           'text-3': action !== 'swap',
-          'text-2 px-3': action === 'swap',
+          'text-2 px-3 pt-28': action === 'swap',
         }"
       >
         {{ title }}
       </h1>
-      <p v-if="subtitle" class="text-1 text-muted mt-3 mb-8">{{ subtitle }}</p>
+      <p v-if="subtitle" class="text-1 text-muted mt-3">{{ subtitle }}</p>
 
       <img
-        src="@/assets/images/transfer-interstitial.png"
+        :src="action === 'swap' ? TransferSwapImage : TransferImage"
         name="Transfer"
         class=""
-        :class="{ '-mt-8 -mb-10 max-w-sm': action !== 'swap' }"
+        :class="{ '-mb-10 max-w-sm': action !== 'swap', 'absolute z-0 rounded-t-2xl top-0': action === 'swap' }"
       />
     </div>
 
     <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
       {{ description }}
-      <a
-        v-if="action !== 'addliquidity'"
-        href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
-        target="_blank"
-        class="text-link hover:text-link-hover"
-      >
-        {{ $t('generic_cta.learnMore') }} &#x2197;
-      </a>
     </p>
 
+    <a
+      v-if="action !== 'addliquidity'"
+      href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
+      target="_blank"
+      class="font-medium hover:underline"
+    >
+      {{ $t('generic_cta.learnMore') }} &#x2197;
+    </a>
+
     <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': action === 'swap' }">
-      <Button :name="$t('generic_cta.continue')" class="mt-12 mb-8" :click-function="emitContinue" />
+      <Button :name="$t('generic_cta.continue')" class="mb-8" :click-function="emitContinue" />
     </div>
   </div>
 </template>
@@ -44,6 +44,8 @@ import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import TransferImage from '@/assets/images/transfer-interstitial.png';
+import TransferSwapImage from '@/assets/images/transfer-interstitial-swap.png';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
@@ -209,6 +211,8 @@ export default defineComponent({
     );
 
     return {
+      TransferImage,
+      TransferSwapImage,
       currentAction,
       title,
       subtitle,

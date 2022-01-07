@@ -212,11 +212,11 @@ import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { store as globalStore } from '@/store';
-import { AddLiquidityEndBlockResponse, SwapEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
+import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
-import { getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
 
@@ -248,7 +248,7 @@ const previewComponentMap = {
 
 const title = computed(() => {
   if (transaction.value.name === 'swap') {
-    const swappedPercent = getSwappedPercent();
+    const swappedPercent = getSwappedPercent(lastResult.value.endBlock);
     if (swappedPercent < 100) {
       return t('components.txHandlingModal.swapActionPartiallyComplete');
     }
@@ -293,15 +293,6 @@ const getWithdrawTotal = () => {
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();
-};
-
-const getSwappedPercent = () => {
-  const endBlock = lastResult.value.endBlock as SwapEndBlockResponse;
-  return (
-    (Number(endBlock.exchanged_offer_coin_amount) /
-      (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
-    100
-  );
 };
 </script>
 

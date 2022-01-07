@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits, inject } from 'vue';
+import { computed, inject } from 'vue';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';

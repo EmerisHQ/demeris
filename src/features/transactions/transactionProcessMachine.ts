@@ -13,6 +13,7 @@ import {
   msgFromStepTransaction,
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 
 import {
   DoneEventData,
@@ -20,6 +21,7 @@ import {
   getCurrentStep,
   getCurrentTransaction,
   getSourceChainFromTransaction,
+  logAmountVolume,
 } from './transactionProcessHelpers';
 
 interface ContextInputSchema {
@@ -123,7 +125,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               done: {
                 always: [
                   { target: '#feeWarning.missingFees', cond: 'hasMissingFees' },
-                  { target: '#feeWarning.notRequired', cond: 'hasIBCFeeWarning' },
+                  { target: '#feeWarning.ibcWarning', cond: 'hasIBCFeeWarning' },
                   { target: '#chainDown' },
                 ],
               },
@@ -134,7 +136,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             invoke: {
               src: 'validateChainStatus',
               onDone: 'traceChannel',
-              onError: '#failed.chainStatus',
+              onError: {
+                target: '#failed.chainStatus',
+                actions: { type: 'logEvent', key: 'chain_status_warning' },
+              },
             },
           },
           traceChannel: {
@@ -156,13 +161,15 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       feeWarning: {
         id: 'feeWarning',
         states: {
-          notRequired: {
+          ibcWarning: {
+            entry: { type: 'logEvent', key: 'ibc_fee_warning' },
             on: {
               ABORT: '#aborted',
               PROCEED_FEE: '#validating.chainDown',
             },
           },
           missingFees: {
+            entry: { type: 'logEvent', key: 'fee_warning' },
             on: {
               ABORT: '#aborted',
             },
@@ -259,6 +266,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       },
       next: {
         id: 'next',
+        entry: { type: 'logEvent', key: 'completed_tx' },
         always: [
           { target: 'receipt', cond: 'hasMoreTransactions' },
           { target: 'receipt', cond: 'hasMoreSteps' },
@@ -323,7 +331,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         },
       },
       success: {
-        entry: { type: 'logEvent', key: 'completed_tx' },
         type: 'final',
       },
     },
@@ -514,7 +521,46 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
         }),
       }),
-      logEvent: (_, __, meta) => console.log(meta.action),
+      logEvent: (context, __, meta) => {
+        const key = meta.action.key;
+        let data = {};
+
+        switch (key) {
+          case 'chain_status_warning':
+            data = {
+              event_label: 'User got chain down warning',
+              event_category: 'transactions',
+            };
+            break;
+          case 'ibc_fee_warning':
+            data = { event_label: 'User got IBC fee warning', event_category: 'transactions' };
+            break;
+          case 'fee_warning':
+            data = { event_label: 'User got fee warning', event_category: 'transactions' };
+            break;
+          case 'confirm_tx':
+            data = {
+              event_label: 'Confirmed ' + getCurrentTransaction(context).name + ' tx',
+              event_category: 'transactions',
+            };
+            break;
+          case 'signed_tx':
+            data = {
+              event_label: 'Signed ' + getCurrentTransaction(context).name + ' tx',
+              event_category: 'transactions',
+            };
+            break;
+          case 'completed_tx':
+            data = {
+              event_label: 'Completed ' + getCurrentTransaction(context).name + ' tx',
+              event_category: 'transactions',
+            };
+            logAmountVolume(context);
+            break;
+        }
+
+        event(key, data);
+      },
     },
 
     guards: {

@@ -1,9 +1,21 @@
+import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
 import { store as globalStore } from '@/store';
-import { IBCBackwardsData, IBCForwardsData, Step, StepTransaction, TransferData } from '@/types/actions';
-import { Balance } from '@/types/api';
+import {
+  CreatePoolData,
+  IBCBackwardsData,
+  IBCForwardsData,
+  Step,
+  StepTransaction,
+  SwapData,
+  TransferData,
+  WithdrawLiquidityData,
+} from '@/types/actions';
+import { Balance, SwapEndBlockResponse } from '@/types/api';
+import { getBaseDenomSync } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 
 import {
@@ -124,6 +136,184 @@ export const formatStepsWithFee = (context: TransactionProcessContext, balances:
       }),
     };
   });
+};
+
+export const getSwappedPercent = (endBlock: SwapEndBlockResponse) => {
+  return (
+    (Number(endBlock.exchanged_offer_coin_amount) /
+      (Number(endBlock.remaining_offer_coin_amount) + Number(endBlock.exchanged_offer_coin_amount))) *
+    100
+  );
+};
+
+export const logAmountVolume = (context: TransactionProcessContext) => {
+  let baseDenom: string;
+  let denomAmount: string;
+  let usdAmount: number;
+
+  const lastResult = Object.values(context.results).slice(-1)[0];
+  const stepTx = getCurrentTransaction(context);
+
+  const getDisplayPrice = (denom: string, amount: string) => {
+    const price = globalStore.getters['demeris/getPrice']({ denom: denom });
+    const precision = globalStore.getters['demeris/getDenomPrecision']({ name: denom }) ?? '6';
+
+    return (price * parseInt(amount)) / Math.pow(10, precision);
+  };
+
+  switch (stepTx.name) {
+    case 'ibc_forward':
+      baseDenom = getBaseDenomSync((stepTx.data as IBCForwardsData).amount.denom);
+      denomAmount = (stepTx.data as IBCForwardsData).amount.amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      event('usd_volume', {
+        event_label: 'IBC transfer USD volume',
+        event_category: 'volume',
+        value: usdAmount,
+      });
+      event('denom_volume', {
+        event_label: 'IBC transfer ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: denomAmount,
+      });
+      break;
+    case 'ibc_backward':
+      baseDenom = getBaseDenomSync((stepTx.data as IBCBackwardsData).amount.denom);
+      denomAmount = (stepTx.data as IBCBackwardsData).amount.amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      event('usd_volume', {
+        event_label: 'IBC transfer USD volume',
+        event_category: 'volume',
+        value: usdAmount,
+      });
+      event('denom_volume', {
+        event_label: 'IBC transfer ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: denomAmount,
+      });
+      break;
+    case 'swap':
+      baseDenom = getBaseDenomSync((stepTx.data as SwapData).from.denom);
+      denomAmount = (stepTx.data as SwapData).from.amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      const toDenom = getBaseDenomSync((stepTx.data as SwapData).to.denom);
+
+      event('usd_volume', {
+        event_label: 'Swap USD volume',
+        event_category: 'volume',
+        value: usdAmount,
+      });
+      event('denom_volume', {
+        event_label: 'Swap ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: Math.floor(
+          (parseInt((stepTx.data as SwapData).from.amount) * getSwappedPercent(lastResult.endBlock)) / 100,
+        ),
+      });
+      event('denom_volume', {
+        event_label: 'Swap ' + baseDenom + ' -> ' + toDenom + ' volume',
+        event_category: 'volume',
+        value: Math.floor(
+          (parseInt((stepTx.data as SwapData).from.amount) * getSwappedPercent(lastResult.endBlock)) / 100,
+        ),
+      });
+      break;
+    case 'createpool':
+      baseDenom = getBaseDenomSync((stepTx.data as CreatePoolData).coinA.denom);
+      denomAmount = (stepTx.data as CreatePoolData).coinA.amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      const baseDenomB = getBaseDenomSync((stepTx.data as CreatePoolData).coinB.denom);
+      const denomAmountB = (stepTx.data as CreatePoolData).coinB.amount;
+      const usdAmountB = getDisplayPrice(baseDenomB, denomAmountB);
+
+      event('usd_volume', {
+        event_label: 'Create Pool USD volume',
+        event_category: 'volume',
+        value: usdAmount + usdAmountB,
+      });
+      event('denom_volume', {
+        event_label: 'Create Pool ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: denomAmount,
+      });
+      event('denom_volume', {
+        event_label: 'Create Pool ' + baseDenomB + ' volume',
+        event_category: 'volume',
+        value: denomAmountB,
+      });
+      break;
+    case 'addliquidity':
+      const coins = parseCoins(lastResult.endBlock.accepted_coins);
+
+      baseDenom = getBaseDenomSync(coins[0].denom);
+      denomAmount = coins[0].amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      const baseDenom2 = getBaseDenomSync(coins[1].denom);
+      const denomAmount2 = coins[1].amount;
+      const usdAmount2 = getDisplayPrice(baseDenom2, denomAmount2);
+
+      event('usd_volume', {
+        event_label: 'Add Liquidity USD volume',
+        event_category: 'volume',
+        value: usdAmount + usdAmount2,
+      });
+      event('denom_volume', {
+        event_label: 'Add Liquidity ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: denomAmount,
+      });
+      event('denom_volume', {
+        event_label: 'Add Liquidity ' + baseDenom2 + ' volume',
+        event_category: 'volume',
+        value: denomAmount2,
+      });
+      break;
+    case 'withdrawliquidity':
+      const amounts = parseCoins(lastResult.endBlock.withdraw_coins);
+
+      baseDenom = getBaseDenomSync(amounts[0].denom);
+      denomAmount = amounts[0].amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      const usdAmountWithdraw = getDisplayPrice(getBaseDenomSync(amounts[1].denom), amounts[1].amount);
+
+      const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
+      const displayName =
+        globalStore.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == poolCoin)?.display_name ?? null;
+
+      event('usd_volume', {
+        event_label: 'Withdraw Liquidity USD volume',
+        event_category: 'volume',
+        value: usdAmount + usdAmountWithdraw,
+      });
+      event('denom_volume', {
+        event_label: 'Withdraw Liquidity ' + displayName + ' volume',
+        event_category: 'volume',
+        value: new BigNumber((stepTx.data as WithdrawLiquidityData).poolCoin.amount).shiftedBy(-6),
+      });
+      break;
+    case 'transfer':
+      baseDenom = getBaseDenomSync((stepTx.data as TransferData).amount.denom);
+      denomAmount = (stepTx.data as TransferData).amount.amount;
+      usdAmount = getDisplayPrice(baseDenom, denomAmount);
+
+      event('usd_volume', {
+        event_label: 'Transfer USD volume',
+        event_category: 'volume',
+        value: usdAmount,
+      });
+      event('denom_volume', {
+        event_label: 'Transfer ' + baseDenom + ' volume',
+        event_category: 'volume',
+        value: denomAmount,
+      });
+      break;
+  }
 };
 
 export const getExplorerLink = (chainName: string) => {

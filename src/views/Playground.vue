@@ -4,6 +4,7 @@
   </div>
   <div class="flex items-center justify-center p-20 w-full space-x-6">
     <Button class="flex-1" @click="state.key = 'swap-success'">Swap Success</Button>
+    <Button class="flex-1" @click="state.key = 'swap-partial'">Swap Partial</Button>
     <Button class="flex-1">Transfer</Button>
     <Button class="flex-1">Add Liquidity</Button>
     <Button class="flex-1">Withdraw Liquidity</Button>
@@ -14,7 +15,8 @@
 import { onMounted, reactive } from 'vue';
 import { interpret, State } from 'xstate';
 
-import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-cosmos-cosmos.json';
+import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
+import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
 import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
 import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
@@ -36,6 +38,7 @@ const customMachine = transactionProcessMachine.withConfig({
 
 onMounted(() => {
   addService('swap-success', SwapSuccessFixture);
+  addService('swap-partial', SwapPartialFixture);
 });
 
 const addService = (key: string, stateDefinition: any) => {

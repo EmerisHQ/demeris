@@ -36,7 +36,7 @@
 
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
-import { computed, defineProps, provide } from 'vue';
+import { computed, provide } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
