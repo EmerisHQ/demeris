@@ -25,7 +25,7 @@
             @row-click="openAssetPage"
           />
 
-          <BuyCryptoBanner size="large" />
+          <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">

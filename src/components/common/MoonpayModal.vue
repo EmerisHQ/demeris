@@ -1,12 +1,17 @@
 <template>
   <Modal
     v-show="isModalOpen"
+    :open="isModalOpen"
     variant="center"
     fullscreen
-    :close-on-overlay-click="true"
+    :show-close-button="true"
+    :close-on-overlay-click="false"
     max-width-class="max-w-sm"
     @close="toggleMoonpayModal"
   >
+    <template #header>
+      <h1 class="text-2 font-bold">{{ $t('components.moonpayBanner.title', { asset: 'ATOM' }) }}</h1>
+    </template>
     <iframe
       allow="accelerometer; autoplay; camera; gyroscope; payment"
       width="100%"

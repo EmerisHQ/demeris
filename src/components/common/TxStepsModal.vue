@@ -163,14 +163,14 @@
                   }
                 "
               />
-              <ModalButton
+              <!-- <ModalButton
                 :name="$t('generic_cta.getAtom')"
                 :click-function="
                   () => {
-                    goMoon();
+                    buyCrypto();
                   }
                 "
-              />
+              /> -->
             </template>
             <template
               v-if="
@@ -351,23 +351,7 @@ export default defineComponent({
       return store.getters['demeris/isSignedIn'];
     });
     const interstitialProceed = ref(false);
-    const mpDomain = ref('https://buy.moonpay.io');
-    const mpParams = computed(() => {
-      return {
-        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
-        currencyCode: 'atom',
-        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
-        baseCurrencyCode: 'usd',
-        // baseCurrencyAmount: '50',
-      };
-    });
     const chainsStatus = ref({ status: true, failed: [], relayer: true });
-    const mpQuery = computed(() => {
-      return new URLSearchParams(mpParams.value).toString();
-    });
-    const mpUrl = computed(() => {
-      return mpDomain.value + '/?' + mpQuery.value;
-    });
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
@@ -383,12 +367,12 @@ export default defineComponent({
       }
     });
 
-    const goMoon = () => {
+    const buyCrypto = () => {
       if (isSignedIn.value) {
         if (useCountry().includes('America')) {
-          window.open(`${window.location.origin}/simplex?crypto=ATOM&fiat=USD&amount=1000`, '', 'height=500,width=500');
+          emitter.emit('simplex');
         } else {
-          window.open(mpUrl.value, '', 'height=480,width=320');
+          emitter.emit('moonpay');
         }
       } else {
         emitter.emit('toggle-settings-modal');
@@ -1125,7 +1109,7 @@ export default defineComponent({
       feeWarning,
       errorDetails,
       acceptedWarning,
-      goMoon,
+      buyCrypto,
       chainsStatus,
       failedChainsText,
       showChainError,
