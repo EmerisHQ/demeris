@@ -25,8 +25,8 @@
     <p class="text-text text-1 font-bold">{{ bannerTitle }}</p>
     <p class="text-muted -text-1 mt-14">{{ bannerSubtitle }}</p>
   </button>
-  <SimplexModal />
-  <MoonpayModal />
+  <SimplexModal v-if="bannerType === 'simplex'" />
+  <MoonpayModal v-if="bannerType === 'moonpay'" />
 </template>
 
 <script lang="ts">
@@ -100,8 +100,10 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      //simplex requires data in query param
-      bannerType.value === 'simplex' ? router.replace({ query: { crypto: 'ATOM', fiat: 'USD', amount: 500 } }) : '';
+      // simplex requires data in query param. TODO: add previous query params so that they're not removed and remove buytype
+      bannerType.value === 'simplex'
+        ? router.replace({ query: { crypto: 'ATOM', fiat: 'USD', amount: 500, buyType: 'simplex' } })
+        : '';
     });
     return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType };
   },

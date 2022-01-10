@@ -1,6 +1,6 @@
+// v-show="isModalOpen"
 <template>
   <Modal
-    v-show="isModalOpen"
     :open="isModalOpen"
     variant="center"
     fullscreen
@@ -85,6 +85,7 @@ export default {
           styleTag?.appendChild(cssStyles);
           document.head?.appendChild(styleTag);
         }
+        // console.log('gosimplex hit.. modaliopen: ', isModalOpen.value)
       } catch (e) {
         console.log('simplex: ', e);
       }
@@ -94,7 +95,7 @@ export default {
       for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'script']) {
         let element = document.getElementById(id);
         if (element) {
-          //  console.log(element)
+          //  console.log('script remove hit: ', element)
           element.remove();
         }
       }
