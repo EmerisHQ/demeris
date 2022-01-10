@@ -1,9 +1,6 @@
 <template>
   <tippy ref="tippyRef" trigger="manual" placement="left">
-    <button
-      class="w-12 h-12 rounded-full shadow-button bg-surface flex items-center justify-center"
-      @click="handleClick"
-    >
+    <Button rounded variant="secondary" class="w-12 h-12 flex items-center justify-center" @click="handleClick">
       <div
         v-if="notificationsCount"
         class="
@@ -27,7 +24,7 @@
         <span v-else>{{ notificationsCount }}</span>
       </div>
       <Icon name="MenuIcon" :icon-size="7" />
-    </button>
+    </Button>
 
     <template #content>
       <TransactionProcessItem
@@ -43,6 +40,7 @@
 <script lang="tsx" setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 import { TransactionProcessState } from '../transactionProcessMachine';

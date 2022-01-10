@@ -168,7 +168,7 @@
 
       <template v-if="state.matches('success')">
         <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
-          <Button variant="link" @click="onNext">
+          <Button variant="secondary" @click="onNext">
             {{ $t('context.transactions.controls.sendAnotherAsset') }} &rarr;
           </Button>
         </template>
