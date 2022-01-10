@@ -33,6 +33,7 @@ module.exports = {
       inverse: 'var(--inverse)',
       bg: 'var(--bg)',
       fg: 'var(--fg)',
+      'fg-solid': 'var(--fg-solid)',
       border: 'var(--border)',
       link: {
         DEFAULT: 'var(--link)',

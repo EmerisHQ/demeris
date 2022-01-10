@@ -17,7 +17,7 @@
       v-if="isOpen && !isSlippageSettingModalOpen"
       :steps="actionHandlerResult"
       action="swap"
-      class="overflow-hidden bg-surface dark:bg-fg shadow-panel rounded-2xl"
+      class="overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl"
       @pending="
         () => {
           reviewModalToggle();
@@ -154,6 +154,7 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -204,6 +205,8 @@ export default defineComponent({
     const slippage = ref(0);
     const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
+    const transactionsStore = useTransactionsStore();
+
     const isSignedIn = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
@@ -223,6 +226,13 @@ export default defineComponent({
     onUnmounted(() => {
       if (setIntervalId.value) {
         clearInterval(setIntervalId.value);
+      }
+
+      if (transactionsStore.currentId) {
+        const snapshot = transactionsStore.getCurrentService().getSnapshot();
+        if (snapshot.matches('transacting')) {
+          transactionsStore.setTransactionAsPending();
+        }
       }
     });
 

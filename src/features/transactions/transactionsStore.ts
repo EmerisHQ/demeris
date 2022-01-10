@@ -59,6 +59,10 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isViewerModalOpen = !this.isViewerModalOpen;
     },
 
+    getCurrentService(): TransactionProcessService {
+      return this.transactions[this.currentId];
+    },
+
     setCurrentId(id: string | undefined) {
       this.currentId = id;
     },

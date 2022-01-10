@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-col items-center text-center space-y-8">
-    <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': currentAction === 'swap' }">
+    <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': isSwapComponent }">
       <h1
         class="font-bold pt-8 whitespace-pre-line"
         :class="{
-          'text-3': action !== 'swap',
-          'text-2 px-3 pt-28': action === 'swap',
+          'text-3': !isSwapComponent,
+          'text-2 px-3 pt-28': isSwapComponent,
         }"
       >
         {{ title }}
@@ -13,14 +13,14 @@
       <p v-if="subtitle" class="text-1 text-muted mt-3">{{ subtitle }}</p>
 
       <img
-        :src="action === 'swap' ? TransferSwapImage : TransferImage"
+        :src="isSwapComponent ? TransferSwapImage : TransferImage"
         name="Transfer"
         class=""
-        :class="{ '-mb-10 max-w-sm': action !== 'swap', 'absolute z-0 rounded-t-2xl top-0': action === 'swap' }"
+        :class="{ '-mb-10 max-w-sm': !isSwapComponent, 'absolute z-0 rounded-t-2xl top-0': isSwapComponent }"
       />
     </div>
 
-    <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
+    <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': isSwapComponent }">
       {{ description }}
     </p>
 
@@ -33,7 +33,7 @@
       {{ $t('generic_cta.learnMore') }} &#x2197;
     </a>
 
-    <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': action === 'swap' }">
+    <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': isSwapComponent }">
       <Button :name="$t('generic_cta.continue')" class="mb-8" :click-function="emitContinue" />
     </div>
   </div>
@@ -58,6 +58,10 @@ export default defineComponent({
     Button,
   },
   props: {
+    isSwapComponent: {
+      type: Boolean,
+      default: false,
+    },
     action: {
       type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer' | string>,
       default: 'swap',

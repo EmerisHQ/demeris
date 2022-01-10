@@ -4,6 +4,7 @@
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"
       :steps="state.context.formattedSteps"
+      :is-swap-component="isSwapComponent"
       class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
