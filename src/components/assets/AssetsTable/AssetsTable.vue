@@ -40,8 +40,8 @@
       <tbody>
         <template v-if="variant === 'balance'">
           <tr
-            v-for="asset in orderUserBalances(balancesWithName)"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedUserBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -69,7 +69,7 @@
               <div class="flex items-center justify-center space-x-3">
                 <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
                 <ChainDownWarning
-                  v-if="Object.values(getUnavailableChains(asset)).length"
+                  v-show="Object.values(getUnavailableChains(asset)).length"
                   v-bind="Object.values(getUnavailableChains(asset))[0]"
                   :chains="Object.keys(getUnavailableChains(asset))"
                 />
@@ -79,8 +79,8 @@
         </template>
         <template v-else-if="variant === 'full'">
           <tr
-            v-for="asset in orderAllBalances(balancesWithMarketCap)"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedAllBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -152,6 +152,7 @@
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
 import LPAsset from '@/components/assets/AssetsTable/LPAsset.vue';
@@ -166,7 +167,7 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -230,7 +231,7 @@ export default defineComponent({
     const currentLimit = ref(props.limitRows);
     const { stakingBalances } = useAccount();
     const verifiedDenoms = computed(() => {
-      return store.getters['demeris/getVerifiedDenoms'] ?? [];
+      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
     });
 
     const allBalances = computed<Balances>(() => {
@@ -268,8 +269,8 @@ export default defineComponent({
 
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-      const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
-      const summary = Object.entries(denomsAggregate).map(([denom, balances]) => {
+      const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+      const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
@@ -319,7 +320,7 @@ export default defineComponent({
     const balancesWithName = computed(() => {
       let balances = balancesWithValue.value;
       balances.map(async (b) => {
-        let name = await getDisplayName(b.denom, store.getters['demeris/getDexChain']);
+        let name = await getDisplayName(b.denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);
         (b as any).name = name;
       });
       return balances;
@@ -339,7 +340,7 @@ export default defineComponent({
     const getUnavailableChains = (asset) => {
       const result = {};
       const statusMap = asset.chainsNames.reduce((acc, chain) => {
-        acc[chain] = store.getters['demeris/getChainStatus']({ chain_name: chain });
+        acc[chain] = store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
         return acc;
       }, {});
 
@@ -358,23 +359,26 @@ export default defineComponent({
       if (isFullUnavailable) {
         result[Object.keys(result)[0]].unavailable = 'full';
       }
-
       return result;
     };
 
-    const orderUserBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.value.value, 'name'], ['desc', 'asc']);
+    const orderedUserBalances = computed(() => {
+      let tokens = orderBy(balancesWithName.value, [(x) => x.value.value, 'name'], ['desc', 'asc']);
       return tokens.slice(0, currentLimit.value);
-    };
+    });
 
-    const orderAllBalances = (balances) => {
-      let tokens = orderBy(balances, [(x) => x.marketCap || '', (x) => x.value.value, 'name'], ['desc', 'desc', 'asc']);
+    const orderedAllBalances = computed(() => {
+      let tokens = orderBy(
+        balancesWithMarketCap.value,
+        [(x) => x.marketCap || '', (x) => x.value.value, 'name'],
+        ['desc', 'desc', 'asc'],
+      );
       return tokens.slice(0, currentLimit.value);
-    };
+    });
 
     const getMarketCap = (denom: string) => {
-      const price = store.getters['demeris/getPrice']({ denom });
-      const supply = store.getters['demeris/getSupply']({ denom });
+      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+      const supply = store.getters[GlobalDemerisGetterTypes.API.getSupply]({ denom });
       let marketCap = price * supply;
       return marketCap;
     };
@@ -396,9 +400,9 @@ export default defineComponent({
       getMarketCap,
       handleClick,
       viewAllHandler,
-      orderUserBalances,
-      orderAllBalances,
       getUnavailableChains,
+      orderedUserBalances,
+      orderedAllBalances,
     };
   },
 });

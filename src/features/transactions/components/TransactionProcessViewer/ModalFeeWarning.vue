@@ -57,13 +57,14 @@
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import useEmitter from '@/composables/useEmitter';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 import { ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
@@ -81,7 +82,7 @@ const mpParams = computed(() => {
   return {
     apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
     currencyCode: 'atom',
-    walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
+    walletAddress: store.getters[GlobalDemerisGetterTypes.USER.getOwnAddress]({ chain_name: 'cosmos-hub' }),
     baseCurrencyCode: 'usd',
     // baseCurrencyAmount: '50',
   };
@@ -89,7 +90,7 @@ const mpParams = computed(() => {
 const mpQuery = computed(() => new URLSearchParams(mpParams.value).toString());
 const mpUrl = computed(() => mpDomain + '/?' + mpQuery.value);
 
-const isSignedIn = computed(() => store.getters['demeris/isSignedIn']);
+const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]);
 const feeWarning = computed(() => state.value.context.fees.validation);
 
 const goMoon = () => {

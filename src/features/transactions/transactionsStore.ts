@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { interpret } from 'xstate';
 
-import { store as globalStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { hashObject } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 import { getCurrentTransaction, getSourceChainFromTransaction } from './transactionProcessHelpers';
 import {
@@ -90,6 +91,7 @@ export const useTransactionsStore = defineStore('transactions', {
       balances: Balance[];
       machine?: typeof transactionProcessMachine;
     }): [string, TransactionProcessService] {
+      const globalStore = useStore();
       const stepId = `${hashObject(steps)}-${Date.now()}`;
       const pendingTransactions = this.pending;
 
@@ -140,8 +142,8 @@ export const useTransactionsStore = defineStore('transactions', {
         balances,
         action,
         steps,
-        gasPriceLevel: globalStore.getters['demeris/getPreferredGasPriceLevel'],
-        gasLimit: globalStore.getters['demeris/getGasLimit'],
+        gasPriceLevel: globalStore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
+        gasLimit: globalStore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
       });
 
       service.subscribe((state) => {

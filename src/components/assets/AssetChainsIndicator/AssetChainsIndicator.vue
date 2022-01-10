@@ -20,9 +20,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
@@ -65,14 +66,14 @@ export default defineComponent({
         parseInt(parseCoins(amount)[0].amount) /
         Math.pow(
           10,
-          store.getters['demeris/getDenomPrecision']({
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: props.denom,
           }),
         )
       );
     };
     const getChainName = (chain_name) => {
-      return store.getters['demeris/getDisplayChain']({
+      return store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
         name: chain_name,
       });
     };

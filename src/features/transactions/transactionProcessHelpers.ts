@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
-import { store as globalStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import {
   CreatePoolData,
   IBCBackwardsData,
@@ -17,6 +17,7 @@ import { Balance, SwapEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 import {
   TransactionProcessContext,
@@ -45,7 +46,7 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {
-  const dexChain = globalStore.getters['demeris/getDexChain'];
+  const dexChain = useStore().getters[GlobalDemerisGetterTypes.API.getDexChain];
 
   switch (transaction.name) {
     case 'transfer':
@@ -155,8 +156,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
   const stepTx = getCurrentTransaction(context);
 
   const getDisplayPrice = (denom: string, amount: string) => {
-    const price = globalStore.getters['demeris/getPrice']({ denom: denom });
-    const precision = globalStore.getters['demeris/getDenomPrecision']({ name: denom }) ?? '6';
+    const price = useStore().getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom });
+    const precision = useStore().getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? '6';
 
     return (price * parseInt(amount)) / Math.pow(10, precision);
   };
@@ -284,7 +285,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
 
       const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
       const displayName =
-        globalStore.getters['demeris/getVerifiedDenoms']?.find((x) => x.name == poolCoin)?.display_name ?? null;
+        useStore().getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)
+          ?.display_name ?? null;
 
       event('usd_volume', {
         event_label: 'Withdraw Liquidity USD volume',

@@ -200,6 +200,7 @@ import BigNumber from 'bignumber.js';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -211,7 +212,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { store as globalStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -221,6 +222,7 @@ import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transa
 const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
 
 const { state, send } = actor;
+const globalStore = useStore();
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
@@ -274,8 +276,8 @@ const getDepositTotal = () => {
   let total = new BigNumber(0);
   for (const item of amounts) {
     const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters['demeris/getPrice']({ denom: baseDenom });
-    const precision = globalStore.getters['demeris/getDenomPrecision']({ name: baseDenom }) ?? 6;
+    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
+    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();
@@ -288,8 +290,8 @@ const getWithdrawTotal = () => {
   let total = new BigNumber(0);
   for (const item of amounts) {
     const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters['demeris/getPrice']({ denom: baseDenom });
-    const precision = globalStore.getters['demeris/getDenomPrecision']({ name: baseDenom }) ?? 6;
+    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
+    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
     total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
   }
   return total.toNumber();

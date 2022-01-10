@@ -29,9 +29,7 @@
 
     <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
       <Button v-if="isDemoAccount" @click="onConnectWallet">
-        {{
-          $t('context.transactions.controls.connectWallet')
-        }}
+        {{ $t('context.transactions.controls.connectWallet') }}
       </Button>
       <Button v-else @click="onContinue">{{ $t('context.transactions.controls.confirmAndContinue') }}</Button>
     </div>
@@ -41,13 +39,14 @@
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
@@ -59,7 +58,7 @@ const { actor, isSwapComponent } = inject(ProvideViewerKey);
 const { state, send } = actor;
 const { t } = useI18n({ useScope: 'global' });
 
-const isDemoAccount = computed(() => store.getters['demeris/isDemoAccount']);
+const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]);
 
 const previewComponentMap = {
   transfer: PreviewTransfer,

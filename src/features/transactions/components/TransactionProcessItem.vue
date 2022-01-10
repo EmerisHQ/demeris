@@ -105,7 +105,7 @@
           size="sm"
           :tooltip-text="
             $t('context.transactions.controls.waitingTransactionTooltip', {
-              chain: globalStore.getters['demeris/getDisplayChain']({ name: chainName }),
+              chain: globalStore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chainName }),
             })
           "
           disabled
@@ -125,13 +125,14 @@
 <script lang="tsx" setup>
 import { useActor } from '@xstate/vue';
 import { computed, PropType, toRefs } from 'vue';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Spinner from '@/components/ui/Spinner.vue';
-import { store as globalStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 
@@ -154,6 +155,7 @@ const props = defineProps({
   },
 });
 
+const globalStore = useStore();
 const { service } = toRefs(props);
 const { state, send } = useActor(service);
 

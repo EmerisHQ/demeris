@@ -1,8 +1,7 @@
 import { assign, createMachine, Interpreter, State } from 'xstate';
 
-import { store as globalStore } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
-import { DemerisTxParams, TicketResponse } from '@/store/demeris/actions';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions';
 import { FeeTotals, FeeWarning, GasPriceLevel, Step, StepTransaction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import {
@@ -14,6 +13,7 @@ import {
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
+import { useStore } from '@/utils/useStore';
 
 import {
   DoneEventData,
@@ -232,7 +232,6 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
           confirming: {
             initial: 'active',
-            entry: ['xs'],
             after: {
               5000: { target: '.pending' },
               60000: { target: '.delayed' },
@@ -373,7 +372,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           gas: '' + context.input.gasLimit,
         };
 
-        return globalStore.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
+        return useStore().dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
           msgs: [msgResult.msg],
           chain_name: msgResult.chain_name,
           fee,
@@ -382,7 +381,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         });
       },
       broadcastTransaction: async (_, event: DoneEventData<DemerisTxParams>) => {
-        return globalStore.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, event.data);
+        return useStore().dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, event.data);
       },
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
         const currentStep = getCurrentStep(context);
@@ -400,7 +399,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         // @ts-ignore
         callback({ type: 'SET_DATA', data: responseData });
 
-        globalStore.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
+        useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
           subscribe: true,
           params: { chain_name: sourceChain, ticket: event.data.ticket },
         });
@@ -414,7 +413,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentStep.name)) {
             while (retries < 10 && shouldRetry) {
               try {
-                endBlockEvent = await globalStore.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
+                endBlockEvent = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
                   height: height,
                   stepType: currentStep.name,
                 });
@@ -447,7 +446,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ];
 
           while (!breakStatuses.includes(resultData?.status) && shouldRetry) {
-            resultData = await globalStore.getters['demeris/getTxStatus']({
+            resultData = await useStore().getters[GlobalDemerisGetterTypes.API.getTxStatus]({
               chain_name: sourceChain,
               ticket: event.data.ticket,
             });
