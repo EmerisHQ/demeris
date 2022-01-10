@@ -9,7 +9,7 @@ export class SendToAddressSubpage {
     if (send.moveAssets().should('be.visible')) {
       send.sendToAdress().click();
     } else {
-      cy.visit(Cypress.config().baseUrl + subpagesPaths.send_move_assets_path);
+      cy.visit(Cypress.config().baseUrl + subpagesPaths.send_to_adress_path);
       send.moveAssets().click();
     }
   }
