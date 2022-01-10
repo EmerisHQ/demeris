@@ -17,7 +17,7 @@
       v-if="isOpen && !isSlippageSettingModalOpen"
       :steps="actionHandlerResult"
       action="swap"
-      class="overflow-hidden bg-surface shadow-panel rounded-2xl"
+      class="overflow-hidden bg-surface dark:bg-fg shadow-panel rounded-2xl"
       @pending="
         () => {
           reviewModalToggle();

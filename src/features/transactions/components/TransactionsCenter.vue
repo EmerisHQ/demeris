@@ -7,7 +7,7 @@
 
     <section
       v-else
-      class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface shadow-dropdown rounded-t-lg"
+      class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg shadow-dropdown rounded-t-lg"
     >
       <header class="flex items-center space-between py-4 px-6">
         <p class="font-bold flex-1 text-1">Transactions</p>

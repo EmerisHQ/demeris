@@ -12,7 +12,7 @@
     <div
       v-else
       class="transferred-image block bg-no-repeat bg-center bg-contain"
-      :class="isSwapComponent ? 'w-32 h-32' : 'w-44 h-44'"
+      :class="isSwapComponent ? 'w-28 h-28' : 'w-36 h-36'"
     />
 
     <h1 class="font-bold" :class="isSwapComponent ? 'text-2 px-6' : 'text-3'">

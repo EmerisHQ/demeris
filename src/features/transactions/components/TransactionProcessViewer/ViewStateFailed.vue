@@ -133,7 +133,7 @@
     </a>
 
     <Collapse
-      v-if="lastResult || state.context.error"
+      v-if="(lastResult || state.context.error) && !state.matches('failed.unknown')"
       :label-open="$t('generic_cta.showDetails')"
       :label-hide="$t('generic_cta.hideDetails')"
       class="mt-8 items-center text-left w-full"
