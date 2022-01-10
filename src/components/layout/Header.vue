@@ -104,11 +104,12 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import Settings from '@/components/common/Settings.vue';
 import Navbar from '@/components/layout/Navbar.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
 import SendIcon from '../common/Icons/SendIcon.vue';
@@ -133,10 +134,10 @@ export default defineComponent({
         : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
     });
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
     });
     const showBadge = computed(() => {
-      return store.getters['demeris/hasSeenReedem'] ? false : true;
+      return store.getters[GlobalDemerisGetterTypes.USER.hasSeenReedem] ? false : true;
     });
     const settingsRef = ref(null);
 

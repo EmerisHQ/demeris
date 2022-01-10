@@ -469,6 +469,7 @@ export const messages = {
         chains: 'Chains',
         pools: 'Pools',
         pooled: 'Pooled',
+        staking: 'Staking',
       },
       assets: {
         assets: 'Assets',
