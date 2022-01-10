@@ -363,6 +363,7 @@
 import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -379,7 +380,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import {
   AddLiquidityData,
   CreatePoolData,
@@ -599,14 +600,14 @@ export default defineComponent({
                   props.txResult.demandCoinSwappedAmount /
                   Math.pow(
                     10,
-                    store.getters['demeris/getDenomPrecision']({
+                    store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
                       name: sendBaseDenom.value,
                     }),
                   );
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
-                    store.getters['demeris/getDexChain'],
+                    store.getters[GlobalDemerisGetterTypes.API.getDexChain],
                   ),
                 });
               } else {

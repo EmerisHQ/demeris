@@ -58,8 +58,9 @@ import CoinList from '@/components/common/CoinList.vue';
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Search from '@/components/common/Search.vue';
 import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
-import { store } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -104,7 +105,10 @@ export default defineComponent({
               props.assets.map(async (asset) => {
                 return {
                   ...asset,
-                  display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                  display_name: await getDisplayName(
+                    asset.base_denom,
+                    useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+                  ),
                 };
               }),
             ),
@@ -116,7 +120,10 @@ export default defineComponent({
                 props.otherAssets.map(async (asset) => {
                   return {
                     ...asset,
-                    display_name: await getDisplayName(asset.base_denom, store.getters['demeris/getDexChain']),
+                    display_name: await getDisplayName(
+                      asset.base_denom,
+                      useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    ),
                   };
                 }),
               ),
@@ -136,7 +143,7 @@ export default defineComponent({
         if (props.counterDenom?.base_denom) {
           displaySelectedPair.value = await getDisplayName(
             props.counterDenom.base_denom,
-            store.getters['demeris/getDexChain'],
+            useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
           );
         }
       },
