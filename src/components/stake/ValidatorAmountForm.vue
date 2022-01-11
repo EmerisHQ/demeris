@@ -85,10 +85,11 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, Ref, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -102,10 +103,9 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Step } from '@/types/actions';
 import { Balance } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 export default {
   name: 'ValidatorAmountForm',
@@ -130,7 +130,7 @@ export default {
     },
   },
 
-  setup(props) {
+  setup() {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
@@ -173,7 +173,7 @@ export default {
       return result;
     });
     const precision = computed(() =>
-      store.getters['demeris/getDenomPrecision']({
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );

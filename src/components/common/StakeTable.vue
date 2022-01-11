@@ -115,7 +115,7 @@
             </tr>
 
             <!-- staked validators -->
-            <tr v-for="validator of stakingBalances" :key="validator.address" class="group cursor-pointer">
+            <tr v-for="validator of stakingBalances" :key="validator.validator_address" class="group cursor-pointer">
               <td class="py-6 flex items-center transition">
                 <div class="inline-flex items-center mr-4">
                   <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
@@ -171,6 +171,7 @@
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
@@ -180,7 +181,7 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -226,11 +227,11 @@ export default defineComponent({
 
     /* computeds */
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
     const assetPrecision = computed(() => {
       return (
-        store.getters['demeris/getDenomPrecision']({
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: props.denom,
         }) ?? '6'
       );

@@ -209,7 +209,7 @@ export type Pool = {
   pool_coin_denom: string;
 };
 export type MsgMeta = {
-  msg: EncodeObject | EncodeObject[];
+  msg: EncodeObject[];
   chain_name: string;
   registry: Registry;
 };

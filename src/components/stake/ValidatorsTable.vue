@@ -94,6 +94,7 @@ import { ref } from '@vue/reactivity';
 import { computed } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
@@ -101,7 +102,6 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { useStore } from '@/store';
 
 //TODO: implement type for validator list
 export default {

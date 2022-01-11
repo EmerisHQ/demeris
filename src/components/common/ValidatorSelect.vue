@@ -45,13 +45,13 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { store } from '@/store';
 
 export default defineComponent({
   name: 'ValidatorSelect',
@@ -69,6 +69,7 @@ export default defineComponent({
   emits: ['update:amount', 'select'],
   setup(props, { emit }) {
     const router = useRouter();
+    const store = useStore();
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = computed(() =>
       store.getters['demeris/getDenomPrecision']({

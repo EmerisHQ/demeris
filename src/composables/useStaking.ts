@@ -4,20 +4,21 @@
 //TODO : add type for validator list
 type ValidatorStatus = 1 | 2 | 3;
 
-import { useAllStores } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { Chains } from '@/types/api';
 import { keyHashfromAddress } from '@/utils/basic';
+import { useStore } from '@/utils/useStore';
 
 export default function useStaking() {
-  const store = useAllStores();
-  const chains: Chains = store.getters['demeris/getChains'];
+  const store = useStore();
+  const chains: Chains = store.getters[GlobalDemerisGetterTypes.API.getChains];
 
   const getValidatorsByBaseDenom = async (base_denom: string, status: ValidatorStatus[] = [3]) => {
     //TODO: have our own curated DB for validator list
     const chain_name = getChainNameByBaseDenom(base_denom);
-    const rawValidators = await store.dispatch(GlobalDemerisActionTypes.GET_VALIDATORS, { chain_name });
-
+    console.log(chain_name);
+    const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
+    console.log(rawValidators);
     const reducer = (accumulator, validator) => {
       if (status.includes(validator.status)) {
         // TEST: Get a validator data(profile pic url) from keybase
@@ -44,13 +45,13 @@ export default function useStaking() {
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
     const chain_name = getChainNameByBaseDenom(base_denom);
-    const inflation = await store.dispatch(GlobalDemerisActionTypes.GET_INFLATION, { chain_name });
+    const inflation = await store.dispatch(GlobalDemerisActionTypes.API.GET_INFLATION, { chain_name });
     return Math.trunc(inflation * 10000) / 100;
   };
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
     const chain_name = getChainNameByBaseDenom(base_denom);
-    return await store.dispatch(GlobalDemerisActionTypes.GET_STAKING_REWARDS, { chain_name });
+    return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
   };
 
   const getValidatorMoniker = (address: string, validator_list: any[]): string => {

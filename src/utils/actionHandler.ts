@@ -1,4 +1,3 @@
-import { EncodeObject } from '@cosmjs/proto-signing';
 import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
 import { bech32 } from 'bech32';
 import Long from 'long';
@@ -1240,7 +1239,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['cosmos.bank.v1beta1/getRegistry'];
-    return { msg, chain_name: data.chain_name, registry };
+    return { msg: [msg], chain_name: data.chain_name, registry };
   }
 
   if (stepTx.name == 'ibc_forward') {
@@ -1263,7 +1262,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg, chain_name: data.from_chain, registry };
+    return { msg: [msg], chain_name: data.from_chain, registry };
   }
 
   if (stepTx.name == 'ibc_backward') {
@@ -1293,7 +1292,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['ibc.applications.transfer.v1/getRegistry'];
-    return { msg, chain_name: data.from_chain, registry };
+    return { msg: [msg], chain_name: data.from_chain, registry };
   }
   if (stepTx.name == 'addliquidity') {
     const chain_name = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
@@ -1312,7 +1311,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg, chain_name, registry };
+    return { msg: [msg], chain_name, registry };
   }
   if (stepTx.name == 'withdrawliquidity') {
     const chain_name = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
@@ -1325,7 +1324,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg, chain_name, registry };
+    return { msg: [msg], chain_name, registry };
   }
   if (stepTx.name == 'createpool') {
     const chain_name = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
@@ -1344,7 +1343,7 @@ export async function msgFromStepTransaction(
       },
     });
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg, chain_name, registry };
+    return { msg: [msg], chain_name, registry };
   }
   if (stepTx.name == 'swap') {
     const data = stepTx.data as Actions.SwapData;
@@ -1378,14 +1377,14 @@ export async function msgFromStepTransaction(
       }),
     });
     const registry = libStore.getters['tendermint.liquidity.v1beta1/getRegistry'];
-    return { msg, chain_name, registry };
+    return { msg: [msg], chain_name, registry };
   }
   if (stepTx.name == 'claim') {
     const data = stepTx.data as Actions.ClaimData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
     const msgs = await Promise.all(
       data.rewards.map(async (rewardData) => {
-        return await store.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
+        return await libStore.dispatch('cosmos.distribution.v1beta1/MsgWithdrawDelegatorReward', {
           value: {
             delegatorAddress,
             validatorAddress: rewardData.validator_address,
@@ -1393,7 +1392,7 @@ export async function msgFromStepTransaction(
         });
       }),
     );
-    const registry = store.getters['cosmos.distribution.v1beta1/getRegistry'];
+    const registry = libStore.getters['cosmos.distribution.v1beta1/getRegistry'];
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
 }
@@ -2045,7 +2044,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
       }
       if (stepTx.name == 'claim') {
         const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
-        if (!store.getters['demeris/getChainStatus']({ chain_name })) {
+        if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
             continue;

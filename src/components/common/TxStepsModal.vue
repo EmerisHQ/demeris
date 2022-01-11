@@ -711,10 +711,10 @@ export default defineComponent({
                 event_category: 'transactions',
               });
               //for supporting multi msgs
-              const msgData = stepTx.name === 'claim' ? res.msg : [res.msg];
+
               try {
                 tx = await txstore.dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
-                  msgs: msgData,
+                  msgs: res.msg,
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
