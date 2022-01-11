@@ -13,6 +13,8 @@ export class MoveAssetsSubpage {
       send.moveAssets().click();
     }
   }
+
+  //#region Amount
   header() {
     return cy.get('h2').contains('Move assets');
   }
@@ -32,4 +34,7 @@ export class MoveAssetsSubpage {
   continueButton() {
     return cy.get('span').contains('Continue').parent().get('button');
   }
+
+  //#endregion Amount
+  //#region Review
 }
