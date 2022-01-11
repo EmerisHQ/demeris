@@ -19,7 +19,9 @@
 
 <script>
 import { defineComponent } from 'vue';
-export default defineComponent();
+export default defineComponent({
+  name: 'TimeThinIcon',
+});
 </script>
 
 <style lang="scss" scoped>

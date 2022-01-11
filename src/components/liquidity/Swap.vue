@@ -154,6 +154,7 @@ import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
@@ -230,7 +231,8 @@ export default defineComponent({
 
       if (transactionsStore.currentId) {
         const snapshot = transactionsStore.getCurrentService().getSnapshot();
-        if (snapshot.matches('transacting')) {
+        const cursor = getTransactionOffset(snapshot.context);
+        if (snapshot.matches('transacting') || cursor.total > cursor.offset) {
           transactionsStore.setTransactionAsPending();
         }
       }

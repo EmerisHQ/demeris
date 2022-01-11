@@ -4,7 +4,7 @@
     :class="isSwapComponent ? 'space-y-3 pb-8' : 'space-y-5'"
   >
     <div
-      class="flex-1 flex flex-col items-center justify-center"
+      class="flex-1 flex flex-col items-center justify-center w-full"
       :class="isSwapComponent ? 'space-y-3 pb-8' : 'space-y-5'"
     >
       <Spinner :size="2.5" />

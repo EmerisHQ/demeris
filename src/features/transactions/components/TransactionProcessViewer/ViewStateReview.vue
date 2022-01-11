@@ -1,31 +1,36 @@
 <template>
   <div
-    class="max-w-lg flex flex-col items-center w-full"
+    class="max-w-lg flex flex-1 flex-col items-center justify-between w-full"
     :class="isSwapComponent ? 'space-y-4 pb-6' : 'space-y-6 pb-16'"
   >
-    <h1 class="font-bold" :class="isSwapComponent ? 'text-2 pb-0 px-6' : 'text-center text-3 pb-4'">
-      {{ titleMap[step.name] }}
-    </h1>
-
     <div
-      class="rounded-lg w-full px-6 flex flex-col"
-      :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
+      class="flex-1 flex flex-col items-center justify-center w-full"
+      :class="isSwapComponent ? 'space-y-4' : 'space-y-6'"
     >
-      <component
-        :is="previewComponentMap[step.name]"
-        :step="step"
-        :bordered="isSwapComponent"
-        :fees="state.context.fees.totals[state.context.currentStepIndex]"
-        :context="isSwapComponent ? 'widget' : 'default'"
-        :class="{ '-text-1': isSwapComponent }"
-      />
-    </div>
+      <h1 class="font-bold" :class="isSwapComponent ? 'text-2 pb-0 px-6' : 'text-center text-3 pb-4'">
+        {{ titleMap[step.name] }}
+      </h1>
 
-    <p class="px-8 text-center text-muted -text-1">
-      {{ $t('components.txHandlingModal.noRevert') }}
-      <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
-        {{ $t('components.settingsMenu.tos') }} </a>.
-    </p>
+      <div
+        class="rounded-lg w-full px-6 flex flex-col"
+        :class="{ 'border border-border py-4': !isSwapComponent, 'py-1': isSwapComponent }"
+      >
+        <component
+          :is="previewComponentMap[step.name]"
+          :step="step"
+          :bordered="isSwapComponent"
+          :fees="state.context.fees.totals[state.context.currentStepIndex]"
+          :context="isSwapComponent ? 'widget' : 'default'"
+          :class="{ '-text-1': isSwapComponent }"
+        />
+      </div>
+
+      <p class="px-8 text-center text-muted -text-1">
+        {{ $t('components.txHandlingModal.noRevert') }}
+        <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
+          {{ $t('components.settingsMenu.tos') }} </a>.
+      </p>
+    </div>
 
     <div class="pt-4 flex flex-col space-y-3 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
       <Button v-if="isDemoAccount" @click="onConnectWallet">

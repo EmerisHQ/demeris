@@ -1,90 +1,97 @@
 <template>
   <div
-    class="max-w-lg flex flex-col items-center justify-center h-full w-full"
+    class="max-w-lg flex-1 flex flex-col items-center justify-center h-full w-full"
     :class="isSwapComponent ? 'space-y-2 pb-8 px-8' : 'space-y-3 pb-16'"
   >
-    <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">{{ titleMap[transaction.name] }}</h1>
+    <div
+      class="flex-1 flex flex-col items-center justify-center w-full"
+      :class="isSwapComponent ? 'space-y-2' : 'space-y-3'"
+    >
+      <h1 class="font-bold" :class="isSwapComponent ? 'text-2' : 'text-3'">{{ titleMap[transaction.name] }}</h1>
 
-    <p class="text-muted">{{ subtitle }}</p>
+      <p class="text-muted">{{ subtitle }}</p>
 
-    <div class="w-full max-w-lg flex items-center justify-center -space-x-8">
-      <template v-if="transaction.name == 'swap'">
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
-        <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.to.denom)" />
-      </template>
+      <div class="w-full max-w-lg flex items-center justify-center -space-x-8">
+        <template v-if="transaction.name == 'swap'">
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.to.denom)" />
+        </template>
 
-      <template v-if="transaction.name == 'addliquidity' || transaction.name == 'createpool'">
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinA.denom)" />
-        <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinB.denom)" />
-      </template>
+        <template v-if="transaction.name == 'addliquidity' || transaction.name == 'createpool'">
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinA.denom)" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.coinB.denom)" />
+        </template>
 
-      <template v-if="transaction.name == 'withdrawliquidity'">
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[0])" />
-        <EphemerisSpinner class="flex-grow max-w-xs" />
-        <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[1])" />
-      </template>
+        <template v-if="transaction.name == 'withdrawliquidity'">
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[0])" />
+          <EphemerisSpinner class="flex-grow max-w-xs" />
+          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[1])" />
+        </template>
 
-      <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
-        <CircleSymbol size="lg" variant="chain" :chain-name="transaction.data.from_chain" />
-        <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-        <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
-          <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.amount.denom)" />
-        </div>
-        <CircleSymbol size="lg" variant="chain" :chain-name="transaction.data.to_chain" />
-      </template>
+        <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
+          <CircleSymbol size="lg" variant="chain" :chain-name="transaction.data.from_chain" />
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.amount.denom)" />
+          </div>
+          <CircleSymbol size="lg" variant="chain" :chain-name="transaction.data.to_chain" />
+        </template>
 
-      <template v-if="transaction.name == 'transfer'">
-        <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
-        <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
-          <CircleSymbol
-            size="lg"
-            :denom="getBaseDenomSync(transaction.data.amount.denom)"
-            :chain-name="transaction.data.chain_name"
-          />
-        </div>
-      </template>
+        <template v-if="transaction.name == 'transfer'">
+          <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
+          <div class="animate-lr absolute left-1/2 -ml-5 transition transform">
+            <CircleSymbol
+              size="lg"
+              :denom="getBaseDenomSync(transaction.data.amount.denom)"
+              :chain-name="transaction.data.chain_name"
+            />
+          </div>
+        </template>
+      </div>
+
+      <div class="text-center">
+        <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: transaction.data.amount.amount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+
+          <template v-if="transaction.name.startsWith('ibc')">
+            <div class="mt-0.5 text-muted">
+              <ChainName :name="transaction.data.from_chain" /> &rarr;
+              <ChainName :name="transaction.data.to_chain" />
+            </div>
+          </template>
+        </template>
+
+        <template v-if="transaction.name === 'swap'">
+          <p class="font-medium">
+            <Ticker :name="transaction.data.from.denom" /> &rarr;
+            <Ticker :name="transaction.data.to.denom" />
+          </p>
+        </template>
+
+        <template v-if="transaction.name === 'addliquidity'">
+          <div>
+            <p class="font-medium">
+              <AmountDisplay :amount="transaction.data.coinA" /> ·
+              <AmountDisplay :amount="transaction.data.coinB" />
+            </p>
+            <p class="text-muted mt-1">
+              <Ticker :name="getDepositDenoms()[0]" /> · <Ticker :name="getDepositDenoms()[1]" /> Pool
+            </p>
+          </div>
+        </template>
+      </div>
     </div>
 
     <div class="text-center">
-      <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
-        <p class="font-medium text-1">
-          <AmountDisplay
-            :amount="{
-              amount: transaction.data.amount.amount,
-              denom: getBaseDenomSync(transaction.data.amount.denom),
-            }"
-          />
-        </p>
-
-        <template v-if="transaction.name.startsWith('ibc')">
-          <div class="mt-0.5 text-muted">
-            <ChainName :name="transaction.data.from_chain" /> &rarr;
-            <ChainName :name="transaction.data.to_chain" />
-          </div>
-        </template>
-      </template>
-
-      <template v-if="transaction.name === 'swap'">
-        <p class="font-medium">
-          <Ticker :name="transaction.data.from.denom" /> &rarr;
-          <Ticker :name="transaction.data.to.denom" />
-        </p>
-      </template>
-
-      <template v-if="transaction.name === 'addliquidity'">
-        <div>
-          <p class="font-medium">
-            <AmountDisplay :amount="transaction.data.coinA" /> ·
-            <AmountDisplay :amount="transaction.data.coinB" />
-          </p>
-          <p class="text-muted mt-1">
-            <Ticker :name="getDepositDenoms()[0]" /> · <Ticker :name="getDepositDenoms()[1]" /> Pool
-          </p>
-        </div>
-      </template>
-
       <Button v-if="isSwapComponent" variant="secondary" class="w-full mt-8" @click="minimizeModal">
         <span>
           {{ $t('context.transactions.controls.swapAnotherAsset') }}

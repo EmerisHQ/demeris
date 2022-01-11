@@ -3,7 +3,10 @@
     class="max-w-lg flex-1 flex flex-col items-center justify-between h-full w-full"
     :class="isSwapComponent ? 'space-y-3 pb-8' : 'space-y-5 pb-16'"
   >
-    <div class="flex-1 flex flex-col items-center justify-center" :class="isSwapComponent ? 'space-y-3' : 'space-y-5'">
+    <div
+      class="flex-1 flex flex-col items-center justify-center w-full"
+      :class="isSwapComponent ? 'space-y-3' : 'space-y-5'"
+    >
       <div>
         <Icon v-if="state.matches('failed.sign')" name="ExclamationIcon" :icon-size="3" class="text-warning" />
         <Icon v-else-if="state.matches('failed.unknown')" name="QuestionIcon" :icon-size="3" class="text-warning" />
