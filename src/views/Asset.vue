@@ -22,8 +22,10 @@
           </div>
         </header>
 
-        <!-- Balance -->
+        <!-- Asset Price Performance Chart -->
+        <AreaChart :data-stream="dataStream" @filterChanged="filterChanged" />
 
+        <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
@@ -162,6 +164,7 @@ import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
@@ -197,6 +200,7 @@ export default defineComponent({
     PoolBanner,
     MoonpayBanner,
     ChainDownWarning,
+    AreaChart,
   },
 
   setup() {
@@ -356,6 +360,30 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
+    const dataStream = [
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 172 },
+      { x: '07/28/2014', y: 12 },
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 12 },
+      { x: '07/28/2014', y: 56 },
+      { x: '05/06/2014', y: 54 },
+      { x: '05/08/2014', y: 17 },
+      { x: '05/28/2014', y: 26 },
+      { x: '05/29/2014', y: 17 },
+      { x: '05/31/2014', y: 29 },
+      { x: '06/08/2014', y: 122 },
+      { x: '07/28/2014', y: 12 },
+    ];
+
     return {
       nativeAsset,
       assetConfig,
@@ -369,9 +397,8 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      dataStream,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped></style>

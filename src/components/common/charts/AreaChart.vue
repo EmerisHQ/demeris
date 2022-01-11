@@ -119,6 +119,7 @@ export default defineComponent({
   methods: {
     setActiveFilter(filterObject): void {
       this.activeFilterItemValue = filterObject.value;
+      this.$emit('filterChanged', this.activeFilterItemValue);
     },
   },
 });
