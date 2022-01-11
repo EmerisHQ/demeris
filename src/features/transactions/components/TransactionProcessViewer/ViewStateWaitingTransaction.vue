@@ -19,7 +19,7 @@
     </div>
 
     <div class="pt-4 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <Button variant="secondary" @click="closeModal">
+      <Button variant="secondary" @click="confirm">
         {{ $t('context.transactions.controls.ok') }}
       </Button>
     </div>
@@ -39,10 +39,12 @@ import {
   getSourceChainFromTransaction,
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
+import { useTransactionsStore } from '../../transactionsStore';
 
 const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey);
 const { state } = actor;
 const { t } = useI18n({ useScope: 'global' });
+const transactionsStore = useTransactionsStore();
 
 const transactionNameMap = {
   transfer: t('context.transactions.type.transfer'),
@@ -56,4 +58,11 @@ const transactionNameMap = {
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 const sourceChain = computed(() => getSourceChainFromTransaction(transaction.value));
+
+const confirm = () => {
+  transactionsStore.setTransactionAsPending();
+  if (!isSwapComponent.value) {
+    closeModal();
+  }
+};
 </script>
