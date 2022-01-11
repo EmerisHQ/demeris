@@ -1,5 +1,5 @@
 <template>
-  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper w-full relative">
+  <div :style="isInit ? '' : 'pointer-events: none'" class="wrapper w-full relative">
     <SlippageSettingModal
       v-if="isSlippageSettingModalOpen"
       :swap-data="{
@@ -17,7 +17,7 @@
       v-if="isOpen && !isSlippageSettingModalOpen"
       :steps="actionHandlerResult"
       action="swap"
-      class="overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl"
+      class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
       @pending="
         () => {
           reviewModalToggle();
@@ -1132,5 +1132,10 @@ export default defineComponent({
 .wrapper {
   min-width: 20rem;
   /* min-height: 17rem; */
+}
+
+.swap-widget,
+.swap-process {
+  min-height: 24rem;
 }
 </style>

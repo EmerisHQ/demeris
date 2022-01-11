@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center w-full">
+  <div class="flex-1 flex flex-col w-full" :class="{ 'items-center': !isSwapComponent }">
     <TransferInterstitialConfirmation
       v-if="state.matches('ibcConfirmation')"
       :action="state.context.input.action"

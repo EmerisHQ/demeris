@@ -3,7 +3,7 @@
     class="max-w-lg flex flex-col space-y-5 items-center justify-centerw-full"
     :class="isSwapComponent ? 'pb-6' : 'pb-16'"
   >
-    <Icon name="TimeIcon" class="opacity-60" :icon-size="3.5" />
+    <Icon name="TimeThinIcon" class="opacity-60" :icon-size="3.5" />
 
     <h1 class="font-bold pb-4 text-center" :class="isSwapComponent ? 'text-2' : 'text-3'">
       {{ $t('context.transactions.waitingPrevious.title', { type: transactionNameMap[transaction.name] }) }}
@@ -17,8 +17,8 @@
     </p>
 
     <div class="pt-4 w-full" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <Button variant="secondary" @click="transactionsStore.toggleCancelModal">
-        {{ $t('context.transactions.controls.cancel') }}
+      <Button variant="secondary" @click="closeModal">
+        {{ $t('context.transactions.controls.ok') }}
       </Button>
     </div>
   </div>
@@ -37,10 +37,8 @@ import {
   getSourceChainFromTransaction,
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
 
-const transactionsStore = useTransactionsStore();
-const { actor, isSwapComponent } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey);
 const { state } = actor;
 const { t } = useI18n({ useScope: 'global' });
 

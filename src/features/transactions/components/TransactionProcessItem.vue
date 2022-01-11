@@ -2,7 +2,7 @@
   <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
       <Icon v-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
-      <Icon v-else-if="state.matches('success')" name="SuccessIcon" class="text-positive" />
+      <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
       <div v-else-if="state.matches('review') || state.matches('receipt')" class="-space-x-3 inline-flex items-center">
         <CircleSymbol

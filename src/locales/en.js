@@ -473,6 +473,7 @@ export const messages = {
           },
         },
         controls: {
+          ok: 'Ok',
           cancel: 'Cancel',
           tryAgain: 'Try again',
           sign: 'Sign',
