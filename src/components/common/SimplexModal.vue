@@ -51,7 +51,7 @@ export default {
           simplexScript.id = 'simplex-script';
           let simplexFunction = document.createTextNode(`window.simplexAsyncFunction = function () {
             Simplex.init({public_key: 'pk_test_37a1ad27-8916-47a3-971a-b399b869b257'})
-        };`);
+          };`);
           simplexScript?.appendChild(simplexFunction);
           document.head?.appendChild(simplexScript);
 
@@ -77,15 +77,16 @@ export default {
           let styleTag = document.createElement('style');
           styleTag.id = 'simplex-css';
           let cssStyles = document.createTextNode(`
-          .simplex-form{} .simplex-continue-button {background: #000000 !important;
-      border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { width: 80px !important; color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
-      .form-control { border-radius: 10px !important;} .simplex-input {border: 1px solid #ced4da !important;} .error-box {padding: 15px 30px !important;}
-      `);
+						.simplex-form{} .simplex-continue-button {background: #000000 !important;
+						border-radius: 10px !important; color: #fff !important;} .simplex-continue-button:hover {transform: translateY(-1px)} .simplex-dd { width: 80px !important; color: #fff !important; background: #000 !important; border-radius: 10px !important; border: 0px !important; margin-left: 7px !important;}
+						.form-control { border-radius: 10px !important;} .simplex-input {border: 1px solid #ced4da !important;} .error-box {padding: 15px 30px !important;}
+					`);
 
           styleTag?.appendChild(cssStyles);
           document.head?.appendChild(styleTag);
+
+          console.log('gosimplex hit.. modalisopen: ', isModalOpen.value);
         }
-        // console.log('gosimplex hit.. modaliopen: ', isModalOpen.value)
       } catch (e) {
         console.log('simplex: ', e);
       }
@@ -95,11 +96,21 @@ export default {
       for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'script']) {
         let element = document.getElementById(id);
         if (element) {
-          //  console.log('script remove hit: ', element)
+          console.log('script remove hit: ', element);
           element.remove();
         }
       }
     };
+
+    // const removeFirstChildElement = (id) => {
+    // 	let el = document.getElementById(id);
+    //   el.removeChild(el.childNodes[0]);
+    // }
+
+    // const returnChildrenLength = (id) => {
+    // 	console.log(document.getElementById(id)?.children?.length)
+    //  return document.getElementById(id)?.children?.length
+    // }
 
     watch(isModalOpen, (currentIsModalOpen) => {
       if (currentIsModalOpen) {
@@ -111,7 +122,7 @@ export default {
 
     onMounted(() => {
       if (isModalOpen.value) {
-        goSimplex();
+        // goSimplex();
       }
     });
 
@@ -125,6 +136,13 @@ export default {
 
 <style lang="scss">
 .form-container {
-  margin: 15px;
+  padding: 15px;
+  background: white;
+}
+
+.error-box {
+  font-family: inherit !important;
+  width: 100% !important;
+  // background: rgb(0,0,0,0.67) !important;
 }
 </style>

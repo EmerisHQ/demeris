@@ -101,9 +101,9 @@ export default defineComponent({
 
     onMounted(() => {
       // simplex requires data in query param. TODO: add previous query params so that they're not removed and remove buytype
-      bannerType.value === 'simplex'
-        ? router.replace({ query: { crypto: 'ATOM', fiat: 'USD', amount: 500, buyType: 'simplex' } })
-        : '';
+      //   bannerType.value === 'simplex'
+      //     ? router.replace({ query: { crypto: 'ATOM', fiat: 'USD', amount: 500, buyType: 'simplex' } })
+      //     : '';
     });
     return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType };
   },
