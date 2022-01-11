@@ -24,9 +24,10 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
@@ -61,7 +62,7 @@ export default defineComponent({
     const steps = ref([]);
     const store = useStore();
     const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -87,8 +88,9 @@ export default defineComponent({
         step.value != 'review'
       ) {
         const precision =
-          store.getters['demeris/getDenomPrecision']({ name: await getBaseDenom(form.balance.denom, form.on_chain) }) ||
-          6;
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            name: await getBaseDenom(form.balance.denom, form.on_chain),
+          }) || 6;
 
         const action: MoveAction = {
           name: 'move',

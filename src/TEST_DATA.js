@@ -322,7 +322,7 @@ export const SWAP_TEST_DATA = {
           denom: 'uatom',
           amount: 20000000,
         },
-        from: {
+        to: {
           denom: 'uluna',
           amount: 30000000,
         },
