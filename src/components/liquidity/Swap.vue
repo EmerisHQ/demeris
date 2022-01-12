@@ -740,14 +740,10 @@ export default defineComponent({
     watch(
       () => data.payCoinData?.denom,
       async () => {
-        if (data.payCoinData?.denom.startsWith('ibc') || data.payCoinData?.denom === 'uatom') {
-          const fees = await getFeeForChain(data.payCoinData.on_chain);
-          txFee.value =
-            fees[0].amount[gasPriceLevel.value] *
-            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom });
-        } else {
-          return (txFee.value = 0);
-        }
+        const fees = await getFeeForChain(data.payCoinData.on_chain);
+        txFee.value =
+          fees[0].amount[gasPriceLevel.value] *
+          10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom });
       },
     );
 
