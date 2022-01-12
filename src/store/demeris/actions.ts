@@ -1,3 +1,5 @@
+import { Secp256k1HdWallet } from '@cosmjs/amino';
+import { stringToPath } from '@cosmjs/crypto';
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
@@ -10,7 +12,7 @@ import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-import { hashObject, keyHashfromAddress } from '@/utils/basic';
+import { fromHexString, hashObject, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import {
@@ -583,6 +585,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.SIGN_WITH_KEPLR]({ getters, dispatch }, { msgs, chain_name, fee, registry, memo }) {
     try {
+      const isCypress = !!window['Cypress'];
       let chain = getters['getChain']({
         chain_name,
       }) as ChainData;
@@ -596,8 +599,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       // await addChain(chain_name);
 
-      await window.keplr.enable(chain.node_info.chain_id);
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      if (!isCypress) {
+        await window.keplr.enable(chain.node_info.chain_id);
+      }
+      const offlineSigner = isCypress
+        ? await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+            prefix: chain.node_info.bech32_config.main_prefix,
+            hdPaths: [stringToPath(chain.derivation_path)],
+          })
+        : await window.getOfflineSigner(chain.node_info.chain_id);
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });
@@ -630,13 +640,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, getters, dispatch }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
-
+      const isCypress = !!window['Cypress'];
       const chains = getters['getChains'];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
         await addChain(chain);
       }
-      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
+      if (!isCypress) {
+        await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
+      }
       const paths = new Set();
       const toQuery = [];
       for (const chain_name in chains) {
@@ -648,17 +660,55 @@ export const actions: ActionTree<State, RootState> & Actions = {
         toQuery.push(chain);
       }
       const dexchain = getters['getChain']({ chain_name: getters['getDexChain'] });
-      await window.keplr.enable(dexchain.node_info.chain_id);
-      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
-      commit(DemerisMutationTypes.SET_KEPLR, key);
-      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
-      for (const chain of toQuery) {
-        await window.keplr.enable(chain.node_info.chain_id);
-        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+      let keyData;
+      let signer;
+      if (!isCypress) {
+        await window.keplr.enable(dexchain.node_info.chain_id);
+        keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
+      } else {
+        signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+          prefix: dexchain.node_info.bech32_config.main_prefix,
+          hdPaths: [stringToPath(dexchain.derivation_path)],
+        });
+        const [account] = await signer.getAccounts();
+        keyData = {
+          name: 'Cypress Test',
+          algo: account.algo,
+          pubKey: account.pubkey,
+          bech32Address: account.address,
+          isNanoLedger: false,
+          address: fromHexString(keyHashfromAddress(account.address)),
+        };
       }
-      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
+
+      commit(DemerisMutationTypes.SET_KEPLR, keyData);
+      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
+      for (const chain of toQuery) {
+        if (!isCypress) {
+          await window.keplr.enable(chain.node_info.chain_id);
+          const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        } else {
+          const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+            prefix: chain.node_info.bech32_config.main_prefix,
+            hdPaths: [stringToPath(chain.derivation_path)],
+          });
+          const [account] = await signer.getAccounts();
+          const otherKey = {
+            name: 'Cypress Test',
+            algo: account.algo,
+            pubKey: account.pubkey,
+            bech32Address: account.address,
+            isNanoLedger: false,
+            address: fromHexString(keyHashfromAddress(account.address)),
+          };
+          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        }
+      }
+      isCypress
+        ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
+        : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
 
       dispatch(DemerisActionTypes.GET_ALL_BALANCES, { subscribe: true });
       dispatch(DemerisActionTypes.GET_ALL_STAKING_BALANCES, {

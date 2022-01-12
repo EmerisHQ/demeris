@@ -1,6 +1,4 @@
-import extensionLoader from 'cypress-browser-extension-plugin';
 import * as path from 'path';
-import puppeteer from 'puppeteer';
 
 // <reference types="cypress" />
 // ***********************************************************
@@ -15,7 +13,12 @@ import puppeteer from 'puppeteer';
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
+const {
+  addMatchImageSnapshotPlugin,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require('cypress-image-snapshot/plugin');
 module.exports = (on, config) => {
+  addMatchImageSnapshotPlugin(on, config);
   on('before:browser:launch', (browser, launchOptions) => {
     // supply the absolute path to an unpacked extension's folder
     launchOptions.extensions.push(path.join(config.fixturesFolder, 'Keplr'));
@@ -23,14 +26,7 @@ module.exports = (on, config) => {
     return launchOptions;
   });
 };
-const {
-  addMatchImageSnapshotPlugin,
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-} = require('cypress-image-snapshot/plugin');
 
-module.exports = (on, config) => {
-  addMatchImageSnapshotPlugin(on, config);
-};
 /**
  * @type {Cypress.PluginConfig}
  */

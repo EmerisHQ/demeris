@@ -25,3 +25,4 @@ pnpm-debug.log*
 # Cypress screenshots and videos
 cypress/screenshots/*
 cypress/videos/*
+cypress/snapshots/*
