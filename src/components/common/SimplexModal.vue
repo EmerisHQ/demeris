@@ -1,4 +1,3 @@
-// v-show="isModalOpen"
 <template>
   <Modal
     :open="isModalOpen"
@@ -121,9 +120,9 @@ export default {
     });
 
     onMounted(() => {
-      if (isModalOpen.value) {
-        // goSimplex();
-      }
+      // if (isModalOpen.value) {
+      // goSimplex();
+      // }
     });
 
     onUnmounted(() => {

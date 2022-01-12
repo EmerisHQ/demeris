@@ -7,6 +7,8 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
+    <SimplexModal />
+    <MoonpayModal />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -21,6 +23,8 @@ import { useRouter } from 'vue-router';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
+import MoonpayModal from '@/components/common/MoonpayModal.vue';
+import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import { useAllStores } from '@/store';
@@ -35,6 +39,8 @@ export default defineComponent({
     EphemerisSpinner,
     ChainDownWrapper,
     CookieConsent,
+    SimplexModal,
+    MoonpayModal,
   },
 
   setup() {

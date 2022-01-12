@@ -25,8 +25,6 @@
     <p class="text-text text-1 font-bold">{{ bannerTitle }}</p>
     <p class="text-muted -text-1 mt-14">{{ bannerSubtitle }}</p>
   </button>
-  <SimplexModal v-if="bannerType === 'simplex'" />
-  <MoonpayModal v-if="bannerType === 'moonpay'" />
 </template>
 
 <script lang="ts">
@@ -34,19 +32,12 @@ import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import MoonpayModal from '@/components/common/MoonpayModal.vue';
-import SimplexModal from '@/components/common/SimplexModal.vue';
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'BuyCryptoBanner',
-
-  components: {
-    SimplexModal,
-    MoonpayModal,
-  },
 
   props: {
     asset: {
