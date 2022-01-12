@@ -86,7 +86,8 @@ export default defineComponent({
       if (isSignedIn.value && !isDemoAccount.value) {
         emitter.emit(bannerType.value);
       } else {
-        emitter.emit('toggle-settings-modal');
+        emitter.emit(bannerType.value);
+        // emitter.emit('toggle-settings-modal');
       }
     };
 

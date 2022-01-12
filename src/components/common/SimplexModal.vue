@@ -62,6 +62,7 @@ export default {
 
           let simplexIframeScript = document.createElement('script');
           simplexIframeScript.setAttribute('src', 'https://iframe.sandbox.test-simplexcc.com/form-sdk.js');
+          simplexIframeScript.type = 'text/javascript';
           simplexIframeScript.id = 'simplex-iframe-script';
           document.body?.appendChild(simplexIframeScript);
 
