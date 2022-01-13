@@ -149,6 +149,7 @@
 </template>
 
 <script lang="ts">
+import { Balance } from 'EmerisAPI';
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
@@ -270,7 +271,7 @@ export default defineComponent({
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
       const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
-      const summary = Object.entries(denomsAggregate).map(([denom, balances = []]: [string, any[]]) => {
+      const summary = Object.entries(denomsAggregate).map(([denom, balances = []]: [string, Balance[]]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
         const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
