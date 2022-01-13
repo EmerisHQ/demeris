@@ -8,6 +8,8 @@ Before contributing, please familiarize yourself with the [Frontend Engineering 
 
 ### To start Emeris in development mode
 
+⚠️ Since currently dev is unstable at best, please refer below to "To start Emeris in staging/production mode" section.
+
 ```
 npm ci
 npm run serve
