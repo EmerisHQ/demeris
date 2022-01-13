@@ -809,6 +809,15 @@ export default defineComponent({
                   await new Promise((r) => setTimeout(r, 750));
 
                   if (!txResultData.error) {
+                    if (process.env.VUE_APP_FEATURE_WEBSOCKET_RESPONSE) {
+                      // @ts-ignore
+                      await apistore.dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+                        txhash,
+                        chain_name,
+                        stepType: currentDataRaw.data.name,
+                      });
+                    }
+
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentDataRaw.data.name)) {
                       //Get end block events
                       let endBlockEvent = null;

@@ -686,6 +686,37 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name, stepType }) {
+    return new Promise((resolve) => {
+      const ws = new WebSocket('ws://url');
+      const handleOpen = () => {
+        console.log('open');
+      };
+      const handleClose = () => {
+        console.log('close');
+      };
+
+      const handleMessage = () => {
+        // TODO
+        resolve({});
+      };
+
+      ws.onopen = handleOpen;
+      ws.onmessage = handleMessage;
+      ws.onclose = handleClose;
+
+      const subscribe = () => {
+        ws.send(
+          JSON.stringify({
+            // TODO
+          }),
+        );
+      };
+
+      subscribe();
+    });
+  },
+
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
       const wakeUpTime = Date.now() + ms;

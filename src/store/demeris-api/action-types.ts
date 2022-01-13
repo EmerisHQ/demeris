@@ -32,6 +32,7 @@ export enum DemerisActionTypes {
   RESET_STATE = 'RESET_STATE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
   STORE_UPDATE = 'STORE_UPDATE',
+  TRACE_TX_RESPONSE = 'TRACE_TX_RESPONSE',
 }
 export enum GlobalDemerisActionTypes {
   // Cross-chain endpoint actions
@@ -65,6 +66,7 @@ export enum GlobalDemerisActionTypes {
   RESET_STATE = 'demerisAPI/RESET_STATE',
   UNSUBSCRIBE = 'demerisAPI/UNSUBSCRIBE',
   STORE_UPDATE = 'demerisAPI/STORE_UPDATE',
+  TRACE_TX_RESPONSE = 'demerisAPI/TRACE_TX_RESPONSE',
 }
 export type DemerisActionParams = {
   subscribe: boolean;
