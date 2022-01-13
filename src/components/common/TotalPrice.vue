@@ -29,64 +29,68 @@ export default defineComponent({
 
     const { stakingBalances } = useAccount();
     const displayPrice = computed(() => {
-      const liquidValue = (props.balances as Balances).reduce((total, balance) => {
-        if (balance.verified) {
-          if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom })) {
-            let totalValue =
-              parseInt(balance.amount) *
-              store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom });
-            let precision = Math.pow(
-              10,
-              parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-                  name: balance.base_denom,
-                }) || 6,
-              ),
-            );
-            let value = totalValue / precision;
-            if (value) {
-              return total + value;
+      if (props.balances.length > 0) {
+        const liquidValue = (props.balances as Balances).reduce((total, balance) => {
+          if (balance.verified) {
+            if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom })) {
+              let totalValue =
+                parseInt(balance.amount) *
+                store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: balance.base_denom });
+              let precision = Math.pow(
+                10,
+                parseInt(
+                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                    name: balance.base_denom,
+                  }) || 6,
+                ),
+              );
+              let value = totalValue / precision;
+              if (value) {
+                return total + value;
+              } else {
+                return total;
+              }
             } else {
               return total;
             }
           } else {
             return total;
           }
-        } else {
-          return total;
-        }
-      }, 0);
-      const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
-      const stakedValue = stakingBalances.value.reduce((total, stakingBalance) => {
-        const stakedDenom = verifiedDenoms.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
-        if (stakedDenom.length > 0) {
-          if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name })) {
-            let totalValue =
-              parseInt(stakingBalance.amount) *
-                store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0;
-            let precision = Math.pow(
-              10,
-              parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-                  name: stakedDenom[0].name,
-                }) || 6,
-              ),
-            );
-            let value = totalValue / precision;
-            if (value) {
-              return total + value;
+        }, 0);
+        const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+        const stakedValue = stakingBalances.value.reduce((total, stakingBalance) => {
+          const stakedDenom = verifiedDenoms.filter((x) => x.chain_name == stakingBalance.chain_name && x.stakable);
+          if (stakedDenom.length > 0) {
+            if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name })) {
+              let totalValue =
+                parseInt(stakingBalance.amount) *
+                  store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: stakedDenom[0].name }) ?? 0;
+              let precision = Math.pow(
+                10,
+                parseInt(
+                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                    name: stakedDenom[0].name,
+                  }) || 6,
+                ),
+              );
+              let value = totalValue / precision;
+              if (value) {
+                return total + value;
+              } else {
+                return total;
+              }
             } else {
               return total;
             }
           } else {
             return total;
           }
-        } else {
-          return total;
-        }
-      }, 0);
-      const value = liquidValue + stakedValue;
-      return Number.isFinite(value) ? value : 0;
+        }, 0);
+        const value = liquidValue + stakedValue;
+        return Number.isFinite(value) ? value : 0;
+      } else {
+        return 0;
+      }
     });
     return { displayPrice };
   },

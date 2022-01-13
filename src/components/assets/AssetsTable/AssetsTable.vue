@@ -287,14 +287,16 @@ export default defineComponent({
           chainsNames,
         };
       });
-      for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
-        const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
-        if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
-          summary.push({
-            chainsNames: [denom.chain_name],
-            denom: denom.name,
-            totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
-          });
+      if (allBalances.value.length > 0) {
+        for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
+          const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
+          if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
+            summary.push({
+              chainsNames: [denom.chain_name],
+              denom: denom.name,
+              totalAmount: stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0),
+            });
+          }
         }
       }
       const sortedSummary = summary.sort((a, b) => (a.totalAmount > b.totalAmount ? -1 : 1));
