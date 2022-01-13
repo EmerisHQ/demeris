@@ -276,8 +276,8 @@ const goToMove = () => {
 const goToSend = () => {
   const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
   const denom = lastResult.value.endBlock?.demand_coin_denom;
-  removeTransactionAndClose();
   router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
+  removeTransactionAndClose();
 };
 
 const getDepositTotal = () => {

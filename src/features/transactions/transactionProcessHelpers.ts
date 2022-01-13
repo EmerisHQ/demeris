@@ -42,7 +42,7 @@ export const getTransactionOffset = (context: TransactionProcessContext) => {
     return undefined;
   }
 
-  return { offset: context.cursor + 1, total: context.formattedSteps.length };
+  return { offset: context.cursor + 1, total: getTransactionsLength(context) };
 };
 
 export const getSourceChainFromTransaction = (transaction: StepTransaction): string => {

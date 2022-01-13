@@ -50,9 +50,11 @@ import TransactionProcessItem from './TransactionProcessItem.vue';
 const transactionsStore = useTransactionsStore();
 
 const subscriptions = ref({});
+
 const tippyRef = ref(null);
 const state = reactive({
   notifications: {},
+  updates: {},
   lastUpdatedHash: undefined,
   lastUpdatedService: undefined,
 });
@@ -76,7 +78,7 @@ const showNotification = (hash: string) => {
   showTippy();
 };
 
-const subscribe = (pendingHash: string) => {
+const subscribe = (pendingHash: string, skipInitialUpdate = true) => {
   if (subscriptions.value[pendingHash]) {
     return;
   }
@@ -84,6 +86,12 @@ const subscribe = (pendingHash: string) => {
   const pendingService = transactionsStore.pending[pendingHash];
 
   const onUpdate = (emitted: TransactionProcessState) => {
+    state.updates[pendingHash] = (state.updates[pendingHash] ?? 0) + 1;
+
+    if (state.updates[pendingHash] === 1 && skipInitialUpdate) {
+      return;
+    }
+
     state.lastUpdatedService = pendingService;
     state.lastUpdatedHash = pendingHash;
 
@@ -111,18 +119,15 @@ const subscribe = (pendingHash: string) => {
 watch(pendingsCount, (value, oldValue) => {
   if (value > (oldValue ?? 0)) {
     const lastPendingHash = Object.keys(transactionsStore.pending)[0];
-    subscribe(lastPendingHash);
+    subscribe(lastPendingHash, false);
     showNotification(lastPendingHash);
   }
 });
 
 onMounted(() => {
-  if (!transactionsStore.hasShownNotification) {
-    for (const hash of Object.keys(transactionsStore.pending).reverse()) {
-      subscribe(hash);
-    }
+  for (const hash of Object.keys(transactionsStore.pending).reverse()) {
+    subscribe(hash);
   }
-  transactionsStore.hasShownNotification = true;
 });
 
 onUnmounted(() => {
