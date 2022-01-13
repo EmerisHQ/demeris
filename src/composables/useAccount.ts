@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import orderBy from 'lodash.orderby';
+import * as orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';

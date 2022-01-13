@@ -74,7 +74,7 @@
   </div>
 </template>
 <script lang="ts">
-import orderBy from 'lodash.orderby';
+import * as orderBy from 'lodash.orderby';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 

@@ -85,7 +85,7 @@
 <script lang="ts">
 import { reactive, toRefs } from '@vue/reactivity';
 import { computed, watch } from '@vue/runtime-core';
-import orderBy from 'lodash.orderby';
+import * as orderBy from 'lodash.orderby';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 

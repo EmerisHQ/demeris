@@ -204,7 +204,7 @@
 <script lang="ts">
 import { bech32 } from 'bech32';
 import BigNumber from 'bignumber.js';
-import orderBy from 'lodash.orderby';
+import * as orderBy from 'lodash.orderby';
 import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';

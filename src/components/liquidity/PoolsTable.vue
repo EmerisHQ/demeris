@@ -65,7 +65,7 @@
 <script lang="ts">
 import { ref } from '@vue/reactivity';
 import { computed, PropType, watch } from '@vue/runtime-core';
-import orderBy from 'lodash.orderby';
+import * as orderBy from 'lodash.orderby';
 import { useRouter } from 'vue-router';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';

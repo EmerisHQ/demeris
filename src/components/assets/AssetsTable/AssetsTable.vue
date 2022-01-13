@@ -149,8 +149,8 @@
 </template>
 
 <script lang="ts">
-import groupBy from 'lodash.groupby';
-import orderBy from 'lodash.orderby';
+import * as groupBy from 'lodash.groupby';
+import * as orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 
