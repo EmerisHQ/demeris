@@ -73,8 +73,11 @@ const showTippy = async () => {
   setTimeout(() => tippyRef.value?.hide(), 5000);
 };
 
-const showNotification = (hash: string) => {
+const showNotification = (hash: string, skipTippy = false) => {
   state.notifications[hash] = null;
+  if (skipTippy) {
+    return;
+  }
   showTippy();
 };
 
@@ -89,6 +92,7 @@ const subscribe = (pendingHash: string, skipInitialUpdate = true) => {
     state.updates[pendingHash] = (state.updates[pendingHash] ?? 0) + 1;
 
     if (state.updates[pendingHash] === 1 && skipInitialUpdate) {
+      showNotification(pendingHash, true);
       return;
     }
 

@@ -447,8 +447,8 @@ export const messages = {
           createpool: 'liquidity pool provision',
         },
         waitingPrevious: {
-          title: 'Pending {type}',
-          description: 'Your {type} is pending, waiting for other transactions to complete on the {chain} chain.',
+          title: 'Pending transaction',
+          description: 'Your transaction is pending, waiting for other transactions to complete on the {chain} chain.',
         },
         receipt: {
           swappedOnHub: 'Swapped on the Cosmos Hub',
@@ -471,8 +471,9 @@ export const messages = {
           },
         },
         controls: {
-          ok: 'Ok',
+          ok: 'OK',
           cancel: 'Cancel',
+          cancelTransaction: 'Cancel transaction',
           tryAgain: 'Try again',
           keepIt: 'Keep It',
           sign: 'Sign',

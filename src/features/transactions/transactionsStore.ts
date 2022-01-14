@@ -21,6 +21,7 @@ type State = {
   isViewerModalOpen: boolean;
   isConnectWalletModalOpen: boolean;
   isCancelModalOpen: boolean;
+  isPendingModalOpen: boolean;
   hasShownNotification: boolean;
   currentId: string;
 };
@@ -34,6 +35,7 @@ export const useTransactionsStore = defineStore('transactions', {
       isViewerModalOpen: false,
       isConnectWalletModalOpen: false,
       isCancelModalOpen: false,
+      isPendingModalOpen: false,
       hasShownNotification: false,
       currentId: undefined,
     } as State),
@@ -45,6 +47,10 @@ export const useTransactionsStore = defineStore('transactions', {
   actions: {
     toggleCancelModal() {
       this.isCancelModalOpen = !this.isCancelModalOpen;
+    },
+
+    togglePendingModal() {
+      this.isPendingModalOpen = !this.isPendingModalOpen;
     },
 
     toggleBottomSheet() {
@@ -77,6 +83,10 @@ export const useTransactionsStore = defineStore('transactions', {
         [stepId]: this.transactions[stepId],
         ...this.pending,
       };
+    },
+
+    removeTransactionFromPending(stepId: string) {
+      delete this.pending[stepId];
     },
 
     removeTransaction(stepId: string) {

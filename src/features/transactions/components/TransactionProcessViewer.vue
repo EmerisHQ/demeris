@@ -12,7 +12,11 @@
     <ViewStateSigning v-else-if="state.matches('signing')" />
     <ViewStateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
-    <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
+
+    <template v-else-if="state.matches('waitingPreviousTransaction')">
+      <ModalPendingTransaction />
+      <ViewStateReview />
+    </template>
 
     <template v-else-if="state.matches('failed.chainStatus')">
       <ModalChainDown />
@@ -48,12 +52,12 @@ import { useTransactionsStore } from '../transactionsStore';
 import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
 import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
 import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue';
+import ModalPendingTransaction from './TransactionProcessViewer/ModalPendingTransaction.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
 import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
 import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransacting.vue';
-import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
 
 const props = defineProps({
   stepId: {

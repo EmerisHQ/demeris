@@ -30,6 +30,7 @@ const { send } = actor;
 
 const onKeep = () => {
   transactionsStore.toggleCancelModal();
+  transactionsStore.setTransactionAsPending();
   minimizeModal();
 };
 

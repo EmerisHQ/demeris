@@ -57,6 +57,7 @@
       <footer
         v-if="$slots.buttons"
         class="modal__footer relative mt-6 border-t border-border divide-x divide-border flex justify-center"
+        :class="footerClass"
       >
         <slot name="buttons"></slot>
       </footer>
@@ -107,6 +108,10 @@ export default defineComponent({
       default: undefined,
     },
     contentClass: {
+      type: [String, Array, Object],
+      default: undefined,
+    },
+    footerClass: {
       type: [String, Array, Object],
       default: undefined,
     },
