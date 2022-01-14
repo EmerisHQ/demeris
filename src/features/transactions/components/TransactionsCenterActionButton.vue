@@ -37,7 +37,7 @@
   </tippy>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 import Button from '@/components/ui/Button.vue';

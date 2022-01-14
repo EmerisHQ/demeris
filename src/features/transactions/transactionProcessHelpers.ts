@@ -321,14 +321,8 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
 export const getExplorerLink = (chainName: string) => {
   const chainMintScanMap = {
     'cosmos-hub': 'cosmos',
-    akash: 'akash',
-    'crypto-org': 'crypto-org',
-    iris: 'iris',
-    osmosis: 'osmosis',
-    persistence: 'persistence',
-    sentinel: 'sentinel',
   };
-  const chain = chainMintScanMap[chainName];
+  const chain = chainMintScanMap[chainName] || chainName;
 
   if (!chain) {
     return;

@@ -35,7 +35,7 @@
   <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { useActor } from '@xstate/vue';
 import { computed, provide } from 'vue';
 

@@ -122,7 +122,7 @@
   </button>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { useActor } from '@xstate/vue';
 import { computed, PropType, toRefs } from 'vue';
 import { useStore } from 'vuex';

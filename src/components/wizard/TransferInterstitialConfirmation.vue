@@ -13,7 +13,7 @@
       <p v-if="subtitle" class="text-1 text-muted mt-3">{{ subtitle }}</p>
 
       <img
-        :src="isSwapComponent ? TransferSwapImage : TransferImage"
+        :src="imageBanner"
         name="Transfer"
         class=""
         :class="{ '-mb-10 max-w-sm': !isSwapComponent, 'absolute z-0 rounded-t-2xl top-0': isSwapComponent }"
@@ -63,7 +63,7 @@ export default defineComponent({
       default: false,
     },
     action: {
-      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer' | string>,
+      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
       default: 'swap',
     },
     steps: {
@@ -79,6 +79,8 @@ export default defineComponent({
     const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
+
+    const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
 
     const currentAction = computed(() => {
       if (props.action === 'move') {
@@ -225,8 +227,7 @@ export default defineComponent({
     );
 
     return {
-      TransferImage,
-      TransferSwapImage,
+      imageBanner,
       currentAction,
       title,
       subtitle,
