@@ -22,7 +22,7 @@ The reason for this is that on development we need to have at least 3 chains (to
 A potential way of solving this in the future would be if we provide 2 ways of running Emeris in development:
 
 1. with simulated chains where we ourselves manage the data locally which you could locally change (so least dependencies)
-2. with running multiple chains testnets
+2. by running multiple chains testnets
 
 For the time being, if you want a fully functioning version of Emeris:
 
