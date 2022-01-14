@@ -1,54 +1,39 @@
 <template>
   <Modal class="text-center" :variant="'dialog'" fullscreen @close="onCancel">
+    <Icon name="ExclamationThinIcon" class="text-warning mb-4" :icon-size="2" />
     <h2 class="text-1 font-bold mb-4">
-      {{ $t('context.transactions.cancel.title', { type: transactionNameMap[transaction.name] }) }}
+      {{ $t('context.transactions.cancel.title') }}
     </h2>
     <p class="text-muted leading-copy mb-8">
-      <i18n-t :keypath="`context.transactions.cancel.description`">
-        <template #type>
-          <span>{{ transactionNameMap[transaction.name] }}</span>
-        </template>
-      </i18n-t>
+      <i18n-t :keypath="`context.transactions.cancel.description`" />
     </p>
     <template #buttons>
-      <ModalButton :name="$t('generic_cta.cancel')" :click-function="onCancel" />
-      <ModalButton :name="$t('generic_cta.proceed')" :click-function="onProceed" />
+      <ModalButton :name="$t('context.transactions.controls.keepIt')" :click-function="onKeep" />
+      <ModalButton :name="$t('generic_cta.cancel')" class="text-negative-text" :click-function="onCancel" />
     </template>
   </Modal>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { inject } from 'vue';
 
+import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 
-import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
 
 const transactionsStore = useTransactionsStore();
-const { actor, removeTransactionAndClose } = inject(ProvideViewerKey);
-const { state, send } = actor;
-const { t } = useI18n({ useScope: 'global' });
+const { actor, removeTransactionAndClose, minimizeModal } = inject(ProvideViewerKey);
+const { send } = actor;
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
-
-const transactionNameMap = {
-  transfer: t('context.transactions.type.transfer'),
-  ibc_forward: t('context.transactions.type.transfer'),
-  ibc_backward: t('context.transactions.type.transfer'),
-  swap: t('context.transactions.type.swap'),
-  addliquidity: t('context.transactions.type.addliquidity'),
-  withdrawliquidity: t('context.transactions.type.withdrawliquidity'),
-  createpool: t('context.transactions.type.createpool'),
+const onKeep = () => {
+  transactionsStore.toggleCancelModal();
+  minimizeModal();
 };
 
 const onCancel = () => {
-  transactionsStore.toggleCancelModal();
-};
-
-const onProceed = () => {
   transactionsStore.toggleCancelModal();
   removeTransactionAndClose();
   send('ABORT');

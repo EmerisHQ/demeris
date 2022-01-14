@@ -434,10 +434,8 @@ export const messages = {
           createpool: 'Review your liquidity pool provision',
         },
         cancel: {
-          title: 'Cancel {type}?',
-          descriptionDenom:
-            'Your {type} is not complete. Would you like to cancel this transaction? Your {denom} will remain on {chain} chain.',
-          description: 'Your {type} is not complete. Would you like to cancel this transaction?',
+          title: 'Are you sure you want to cancel this transaction?',
+          description: 'This action cannot be reverted.',
         },
         type: {
           transfer: 'transfer',
@@ -476,6 +474,7 @@ export const messages = {
           ok: 'Ok',
           cancel: 'Cancel',
           tryAgain: 'Try again',
+          keepIt: 'Keep It',
           sign: 'Sign',
           waitingTransactionTooltip: 'Waiting for other transactions to complete on the {chain}.',
           next: 'Next',
