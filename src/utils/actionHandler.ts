@@ -1601,7 +1601,6 @@ export async function getTicker(name, chain_name = null) {
         ));
       return await getTicker(verifyTrace.base_denom);
     } catch (e) {
-      console.error(e);
       return name + '(unverified)';
     }
   }
