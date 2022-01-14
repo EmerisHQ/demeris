@@ -1,6 +1,6 @@
 # emeris-web
 
-Web version of the Emeris, the Interface of the Internet of Blockchains.
+Web version of Emeris, the Interface to the Internet of Blockchains.
 
 ## Develop
 
