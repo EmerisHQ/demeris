@@ -1788,7 +1788,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         validBalances.push(balance);
       }
     } else {
-      if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+      if (balance.ibc.path.split('/').length > 2) {
         continue;
       }
       let verifyTrace;
