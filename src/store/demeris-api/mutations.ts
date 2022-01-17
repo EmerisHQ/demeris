@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal';
 import { MutationTree } from 'vuex';
 
 import { Pool } from '@/types/actions';
@@ -45,43 +46,71 @@ export type Mutations<S = State> = {
 
 export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_BALANCES](state: State, payload: DemerisMutations) {
-    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+    if (!isEqual(state.balances[(payload.params as API.AddrReq).address], payload.value as API.Balances)) {
+      state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+    }
   },
   [MutationTypes.SET_POOL_BALANCES](state: State, payload: DemerisMutations) {
-    state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+    if (!isEqual(state.balances[(payload.params as API.AddrReq).address], payload.value as API.Balances)) {
+      state.balances[(payload.params as API.AddrReq).address] = payload.value as API.Balances;
+    }
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
-    state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
+    if (!isEqual(state.stakingBalances[JSON.stringify(payload.params)], payload.value as API.StakingBalances)) {
+      state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
+    }
   },
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
-    state.numbers[(payload.params as API.AddrReq).address] = payload.value as API.Numbers;
+    if (!isEqual(state.numbers[(payload.params as API.AddrReq).address], payload.value as API.Numbers)) {
+      state.numbers[(payload.params as API.AddrReq).address] = payload.value as API.Numbers;
+    }
   },
   [MutationTypes.SET_NUMBERS_CHAIN](state: State, payload: DemerisMutations) {
     if (!state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name]) {
       state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name] = {};
     }
-    state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name][(payload.params as API.ChainAddrReq).address] =
-      payload.value as API.SeqNumber;
+    if (
+      !isEqual(
+        state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name][
+          (payload.params as API.ChainAddrReq).address
+        ],
+        payload.value as API.SeqNumber,
+      )
+    ) {
+      state.chainnumbers[(payload.params as API.ChainAddrReq).chain_name][
+        (payload.params as API.ChainAddrReq).address
+      ] = payload.value as API.SeqNumber;
+    }
   },
   [MutationTypes.SET_FEE_ADDRESSES](state: State, payload: DemerisMutations) {
     for (const feeAddress of payload.value as API.FeeAddresses) {
-      state.chains[feeAddress.chain_name].demeris_addresses = [feeAddress.fee_address];
+      if (!isEqual(state.chains[feeAddress.chain_name].demeris_addresses, [feeAddress.fee_address])) {
+        state.chains[feeAddress.chain_name].demeris_addresses = [feeAddress.fee_address];
+      }
     }
   },
   [MutationTypes.SET_VERIFIED_DENOMS](state: State, payload: DemerisMutations) {
-    state.verifiedDenoms = payload.value as API.VerifiedDenoms;
+    if (!isEqual(state.verifiedDenoms, payload.value as API.VerifiedDenoms)) {
+      state.verifiedDenoms = payload.value as API.VerifiedDenoms;
+    }
   },
   [MutationTypes.SET_VALID_POOLS](state: State, pools: Pool[]) {
-    state.validPools = pools;
+    if (!isEqual(state.validPools, pools)) {
+      state.validPools = pools;
+    }
   },
   [MutationTypes.SET_CHAINS](state: State, payload: DemerisMutations) {
     state.chains = {};
     for (const chain of payload.value as API.Chains) {
-      state.chains[chain.chain_name] = chain;
+      if (!isEqual(state.chains[chain.chain_name], chain)) {
+        state.chains[chain.chain_name] = chain;
+      }
     }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
-    state.prices = payload.value as API.Prices;
+    if (!isEqual(state.prices, payload.value as API.Prices)) {
+      state.prices = payload.value as API.Prices;
+    }
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
@@ -137,9 +166,18 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
     if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-        (payload.params as API.VerifyTraceReq).hash
-      ] = payload.value as API.VerifyTrace;
+      if (
+        !isEqual(
+          state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+            (payload.params as API.VerifyTraceReq).hash
+          ],
+          payload.value as API.VerifyTrace,
+        )
+      ) {
+        state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
+          (payload.params as API.VerifyTraceReq).hash
+        ] = payload.value as API.VerifyTrace;
+      }
     } else {
       state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
       state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
@@ -148,18 +186,39 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name].demeris_addresses = [payload.value as API.FeeAddress];
+    if (
+      !isEqual(state.chains[(payload.params as API.ChainReq).chain_name].demeris_addresses, [
+        payload.value as API.FeeAddress,
+      ])
+    ) {
+      state.chains[(payload.params as API.ChainReq).chain_name].demeris_addresses = [payload.value as API.FeeAddress];
+    }
   },
   [MutationTypes.SET_BECH32_CONFIG](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name].node_info.bech32_config =
-      payload.value as API.Bech32Config;
+    if (
+      !isEqual(
+        state.chains[(payload.params as API.ChainReq).chain_name].node_info.bech32_config,
+        payload.value as API.Bech32Config,
+      )
+    ) {
+      state.chains[(payload.params as API.ChainReq).chain_name].node_info.bech32_config =
+        payload.value as API.Bech32Config;
+    }
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name] = {
-      ...state.chains[(payload.params as API.ChainReq).chain_name],
-      ...(payload.value as API.Chain),
-      relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
-    };
+    if (
+      !isEqual(state.chains[(payload.params as API.ChainReq).chain_name], {
+        ...state.chains[(payload.params as API.ChainReq).chain_name],
+        ...(payload.value as API.Chain),
+        relayerBalance: { address: ``, chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
+      })
+    ) {
+      state.chains[(payload.params as API.ChainReq).chain_name] = {
+        ...state.chains[(payload.params as API.ChainReq).chain_name],
+        ...(payload.value as API.Chain),
+        relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
+      };
+    }
   },
   [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
     state._InProgess.set(payload.hash, payload.promise);
@@ -168,20 +227,40 @@ export const mutations: MutationTree<State> & Mutations = {
     state._InProgess.delete(payload);
   },
   [MutationTypes.SET_PRIMARY_CHANNEL](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[
-      (payload.params as API.ChainReq).destination_chain_name
-    ] = payload.value as API.PrimaryChannel;
+    if (
+      !isEqual(
+        state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[
+          (payload.params as API.ChainReq).destination_chain_name
+        ],
+        payload.value as API.PrimaryChannel,
+      )
+    ) {
+      state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[
+        (payload.params as API.ChainReq).destination_chain_name
+      ] = payload.value as API.PrimaryChannel;
+    }
   },
   [MutationTypes.SET_PRIMARY_CHANNELS](state: State, payload: DemerisMutations) {
     for (const channel of payload.value as API.PrimaryChannels) {
-      state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[channel.counterparty] = channel;
+      if (
+        !isEqual(
+          state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[channel.counterparty],
+          channel,
+        )
+      ) {
+        state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[channel.counterparty] = channel;
+      }
     }
   },
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
-    state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
+    if (!isEqual(state.chains[(payload.params as API.ChainReq).chain_name].status, payload.value as boolean)) {
+      state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
+    }
   },
   [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
-    state.relayer = payload.value as boolean;
+    if (!isEqual(state.chains[(payload.params as API.ChainReq).chain_name].status, payload.value as boolean)) {
+      state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
+    }
   },
   [MutationTypes.SET_TOKEN_PRICES](state: State, payload: DemerisMutations) {
     const newPayload: any = payload.value as API.TokenPrices;
@@ -200,7 +279,9 @@ export const mutations: MutationTree<State> & Mutations = {
     const chains = Object.values(state.chains);
     for (const relayerBalance of payload.value as API.RelayerBalances) {
       const chain_name = chains.find((x) => x.node_info.chain_id == relayerBalance.chain_name).chain_name;
-      state.chains[chain_name].relayerBalance = relayerBalance;
+      if (!isEqual(state.chains[chain_name].relayerBalance, relayerBalance)) {
+        state.chains[chain_name].relayerBalance = relayerBalance;
+      }
     }
   },
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
