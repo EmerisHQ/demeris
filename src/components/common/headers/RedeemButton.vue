@@ -9,9 +9,10 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 
 import RedeemIcon from '@/components/common/Icons/RedeemIcon.vue';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'RedeemButton',
@@ -19,7 +20,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const balances = store.getters['demeris/getAllBalances'];
+    const balances = store.getters[GlobalDemerisGetterTypes.API.getAllBalances];
     const redeemable = [];
     for (let balance of balances) {
       // TODO: check for redeemable
