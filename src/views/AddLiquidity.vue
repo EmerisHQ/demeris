@@ -678,6 +678,10 @@ export default {
         return false;
       }
 
+      if (+state.receiveAmount <= 0) {
+        return false;
+      }
+
       return true;
     });
 
