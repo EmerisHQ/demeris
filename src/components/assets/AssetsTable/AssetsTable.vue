@@ -263,7 +263,6 @@ export default defineComponent({
           }
         });
       }
-
       return balances as Balances;
     });
 
