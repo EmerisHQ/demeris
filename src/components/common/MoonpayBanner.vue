@@ -29,10 +29,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
-import { useStore } from 'vuex';
 
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'MoonpayBanner',
@@ -52,11 +51,11 @@ export default defineComponent({
     const emitter = useEmitter();
 
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters['demeris/isSignedIn'];
     });
 
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters['demeris/isDemoAccount'];
     });
 
     const mpDomain = ref('https://buy.moonpay.io');
@@ -64,7 +63,7 @@ export default defineComponent({
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
+        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // baseCurrencyAmount: '50',
       };

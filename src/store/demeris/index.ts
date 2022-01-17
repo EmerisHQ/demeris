@@ -28,16 +28,10 @@ export type DemerisStore<S = State> = Omit<VuexStore<S>, 'getters' | 'commit' | 
   };
 };
 
-export const namespace = 'demerisUSER';
-
-export const module: Module<State, RootState> = {
+export const store: Module<State, RootState> = {
   state: getDefaultState(),
   mutations,
   getters,
   actions,
   namespaced: true,
 };
-
-import { GlobalDemerisActionTypes } from './action-types';
-import { GlobalGetterTypes } from './getter-types';
-export { GlobalDemerisActionTypes, GlobalGetterTypes };

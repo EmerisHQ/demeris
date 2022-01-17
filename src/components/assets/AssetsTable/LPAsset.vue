@@ -14,7 +14,6 @@ import Ticker from '@/components/common/Ticker.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { VerifyTrace } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { isNative } from '@/utils/basic';
@@ -75,16 +74,16 @@ export default defineComponent({
         denom = walletBalances.value.coinA.denom;
       } else {
         const verifyTrace =
-          store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-            chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          store.getters['demeris/getVerifyTrace']({
+            chain_name: store.getters['demeris/getDexChain'],
             hash: walletBalances.value.coinA.denom.split('/')[1],
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+            'demeris/GET_VERIFY_TRACE',
             {
               subscribe: false,
               params: {
-                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                chain_name: store.getters['demeris/getDexChain'],
                 hash: walletBalances.value.coinA.denom.split('/')[1],
               },
             },
@@ -92,15 +91,14 @@ export default defineComponent({
           ));
         denom = (verifyTrace as VerifyTrace).base_denom;
       }
-      if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom })) {
+      if (store.getters['demeris/getPrice']({ denom: denom })) {
         total =
           total +
-          (parseInt('' + walletBalances.value.coinA.amount) *
-            store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom })) /
+          (parseInt('' + walletBalances.value.coinA.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
             Math.pow(
               10,
               parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                store.getters['demeris/getDenomPrecision']({
                   name: denom,
                 }),
               ),
@@ -111,16 +109,16 @@ export default defineComponent({
         denom = walletBalances.value.coinB.denom;
       } else {
         const verifyTrace =
-          store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-            chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+          store.getters['demeris/getVerifyTrace']({
+            chain_name: store.getters['demeris/getDexChain'],
             hash: walletBalances.value.coinB.denom.split('/')[1],
           }) ??
           (await store.dispatch(
-            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+            'demeris/GET_VERIFY_TRACE',
             {
               subscribe: false,
               params: {
-                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                chain_name: store.getters['demeris/getDexChain'],
                 hash: walletBalances.value.coinB.denom.split('/')[1],
               },
             },
@@ -128,15 +126,14 @@ export default defineComponent({
           ));
         denom = (verifyTrace as VerifyTrace).base_denom;
       }
-      if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom })) {
+      if (store.getters['demeris/getPrice']({ denom: denom })) {
         total =
           total +
-          (parseInt('' + walletBalances.value.coinB.amount) *
-            store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom })) /
+          (parseInt('' + walletBalances.value.coinB.amount) * store.getters['demeris/getPrice']({ denom: denom })) /
             Math.pow(
               10,
               parseInt(
-                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                store.getters['demeris/getDenomPrecision']({
                   name: denom,
                 }),
               ),

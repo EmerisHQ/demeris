@@ -27,10 +27,9 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
@@ -92,7 +91,7 @@ export default defineComponent({
       async () => {
         if (form.balance.amount != '0' && form.balance.denom != '' && form.chain_name != '' && step.value != 'review') {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            store.getters['demeris/getDenomPrecision']({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
             }) || 6;
           const action: TransferAction = {

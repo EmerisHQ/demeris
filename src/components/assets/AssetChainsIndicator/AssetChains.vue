@@ -1,11 +1,6 @@
 <template>
   <tippy v-show="chainsCount > 1" class="block w-8 h-8 relative">
-    <CircleSymbol
-      v-if="filteredBalances.length > 0"
-      variant="chain"
-      :chain-name="filteredBalances[0].on_chain"
-      :glow="false"
-    />
+    <CircleSymbol variant="chain" :chain-name="filteredBalances[0].on_chain" :glow="false" />
     <div class="absolute inset-0.5 -text-1 font-normal z-10 flex items-center justify-center">
       <span>{{ chainsCount }}<template v-if="hasMoreChains">+</template></span>
     </div>
@@ -25,10 +20,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 import { Balances } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
@@ -66,14 +60,14 @@ export default defineComponent({
         parseInt(parseCoins(amount)[0].amount) /
         Math.pow(
           10,
-          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          store.getters['demeris/getDenomPrecision']({
             name: props.denom,
           }),
         )
       );
     };
     const getChainName = (chain_name) => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+      return store.getters['demeris/getDisplayChain']({
         name: chain_name,
       });
     };

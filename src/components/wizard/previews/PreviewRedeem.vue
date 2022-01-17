@@ -39,12 +39,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import { List, ListItem } from '@/components/ui/List';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
 
@@ -126,10 +125,10 @@ export default defineComponent({
         denom: (lastTransaction.data.amount as Base.Amount).denom,
       };
 
-      from.address = store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: from.chain });
+      from.address = store.getters['demeris/getOwnAddress']({ chain_name: from.chain });
 
       if (to.chain) {
-        to.address = store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: to.chain });
+        to.address = store.getters['demeris/getOwnAddress']({ chain_name: to.chain });
       }
 
       if (stepType.value === 'transfer') {
@@ -143,12 +142,12 @@ export default defineComponent({
     });
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      const getName = (name: string) => store.getters['demeris/getDisplayChain']({ name });
       // @ts-ignore
       return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
     };
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      return 'Fees on ' + store.getters['demeris/getDisplayChain']({ name });
     };
     return {
       stepType,
