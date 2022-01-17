@@ -6,10 +6,10 @@ describe('compare each subpage with screenshot', () => {
   beforeEach(() => {
     cy.visit(Cypress.config().baseUrl);
 
-    if (cy.url().should('contain', '/welcome')) {
-      let welcomePage = new WelcomePage();
-      welcomePage.tryTheDemoButtonForceClick();
-    }
+    let welcomePage = new WelcomePage();
+
+    welcomePage.connectKeplrButton().click();
+    welcomePage.betaAgreeButton().click();
   });
 
   it('Assets subpage', () => {
@@ -19,6 +19,7 @@ describe('compare each subpage with screenshot', () => {
     navbar.assetsTab().click();
     cy.url().should('contain', subPagePath.assets_path);
 
+    cy.viewport(1000, 660);
     cy.matchImageSnapshot('assetsSubpage');
   });
 
@@ -29,6 +30,7 @@ describe('compare each subpage with screenshot', () => {
     navbar.poolsTab().click();
     cy.url().should('contain', subPagePath.pools_path);
 
+    cy.viewport(1000, 660);
     cy.matchImageSnapshot('poolsSubpage');
   });
 
@@ -38,6 +40,7 @@ describe('compare each subpage with screenshot', () => {
     navbar.navbarLogo().click();
     cy.url().should('eq', Cypress.config().baseUrl);
 
+    cy.viewport(1000, 660);
     cy.matchImageSnapshot('mainpage');
   });
 });

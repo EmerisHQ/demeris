@@ -19,10 +19,8 @@ describe('Check availability of send/move subpage elements', function () {
     moveAssetsSubpage.goTo();
 
     moveAssetsSubpage.header().should('be.visible');
+    moveAssetsSubpage.continueButton().should('be.disabled');
     moveAssetsSubpage.inputAmountOfAssets().type('123');
-
-    sendToAddresseSubpage.continueButton().should('be.disabled');
-
-    sendToAddresseSubpage.continueButton().should('not.be.disabled');
+    moveAssetsSubpage.continueButton().should('not.be.disabled');
   });
 });

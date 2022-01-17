@@ -5,8 +5,8 @@ import { SubPagesPaths } from '../support/sub-pages-paths';
 describe('Navbar elements location and availibility', function () {
   beforeEach(() => {
     cy.visit(Cypress.config().baseUrl);
-    let welcomePage = new WelcomePage();
 
+    let welcomePage = new WelcomePage();
     welcomePage.connectKeplrButton().click();
     welcomePage.betaAgreeButton().click();
   });
@@ -18,7 +18,7 @@ describe('Navbar elements location and availibility', function () {
     // go to Assets
     // check url /path
     navbar.assetsTab().click();
-    cy.url().should('contain', subPagePath.assets_path);
+    cy.url().should('eq', Cypress.config().baseUrl + subPagePath.assets_path);
 
     // go to Portwolio via Tab
     // check url /path
@@ -28,10 +28,10 @@ describe('Navbar elements location and availibility', function () {
     // go to Pools
     // check url /path
     navbar.poolsTab().click();
-    cy.url().should('contain', subPagePath.pools_path);
+    cy.url().should('eq', Cypress.config().baseUrl + subPagePath.pools_path);
 
     // go to Portfolio via logo
-    // check url /path    navbar.navbarLogo.click()
+    // check url /path
     navbar.navbarLogo().click();
     cy.url().should('eq', Cypress.config().baseUrl);
   });
@@ -40,11 +40,10 @@ describe('Navbar elements location and availibility', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
-    cy.url().should('eq', Cypress.config().baseUrl);
-
     navbar.receive().click();
-    cy.url().should('contain', subPagePath.receive_path);
+    cy.url().should('eq', Cypress.config().baseUrl + subPagePath.receive_path);
 
+    cy.viewport(1000, 660);
     cy.matchImageSnapshot('receiveSubPage');
   });
 
@@ -52,11 +51,10 @@ describe('Navbar elements location and availibility', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
-    cy.url().should('eq', Cypress.config().baseUrl);
-
     navbar.send().click();
-    cy.url().should('contain', subPagePath.send_path);
+    cy.url().should('eq', Cypress.config().baseUrl + subPagePath.send_path);
 
+    cy.viewport(1000, 660);
     cy.matchImageSnapshot('sendSubPage');
   });
 });

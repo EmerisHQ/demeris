@@ -11,10 +11,6 @@ export class Assets {
     cy.url().should('include', '/assets');
   }
 
-  checkVisabilityOfAllTableRows() {
-    return this.tableOfAssets().get('>tr').each().should('be.visible'); // Iterate through each 'tr'
-  }
-
   aktRow() {
     return this.tableAssetsRow('AKT');
   }
