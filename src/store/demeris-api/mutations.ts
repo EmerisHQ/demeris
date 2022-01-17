@@ -221,9 +221,7 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_IN_PROGRESS](state: State, payload: APIPromise) {
-    if (!isEqual(state._InProgess.get(payload.hash), payload.promise)) {
-      state._InProgess.set(payload.hash, payload.promise);
-    }
+    state._InProgess.set(payload.hash, payload.promise);
   },
   [MutationTypes.DELETE_IN_PROGRESS](state: State, payload: string) {
     state._InProgess.delete(payload);
