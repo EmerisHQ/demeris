@@ -31,7 +31,7 @@ describe('Navbar elements location and availibility', function () {
     cy.url().should('eq', Cypress.config().baseUrl + subPagePath.pools_path);
 
     // go to Portfolio via logo
-    // check url /path    navbar.navbarLogo.click()
+    // check url /path
     navbar.navbarLogo().click();
     cy.url().should('eq', Cypress.config().baseUrl);
   });
