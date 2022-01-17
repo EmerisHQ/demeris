@@ -30,6 +30,7 @@ export enum DemerisActionTypes {
   // Internal module actions
   INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
+  SIGN_OUT = 'SIGN_OUT',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
   STORE_UPDATE = 'STORE_UPDATE',
 }
@@ -63,6 +64,7 @@ export enum GlobalDemerisActionTypes {
   // Internal module actions
   INIT = 'demerisAPI/INIT',
   RESET_STATE = 'demerisAPI/RESET_STATE',
+  SIGN_OUT = 'demerisAPI/SIGN_OUT',
   UNSUBSCRIBE = 'demerisAPI/UNSUBSCRIBE',
   STORE_UPDATE = 'demerisAPI/STORE_UPDATE',
 }
