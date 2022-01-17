@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal';
 import { MutationTree } from 'vuex';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -19,7 +20,9 @@ export const mutations: MutationTree<State> & Mutations = {
     if (state.keplr) state.keplr.keyHashes.push(payload);
   },
   [MutationTypes.SET_SESSION_DATA](state: State, payload: UserData) {
-    state._Session = { ...state._Session, ...(payload as UserData) };
+    if (!isEqual(state._Session, { ...state._Session, ...(payload as UserData) })) {
+      state._Session = { ...state._Session, ...(payload as UserData) };
+    }
     if (!state._Session.isDemoAccount) {
       window.localStorage.setItem('lastEmerisSession', '' + payload.updateDT);
     }
@@ -30,7 +33,9 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
     window.localStorage.setItem('gasLimit', (payload.value as number).toString());
-    state.gas_limit = payload.value as number;
+    if (!isEqual(state.gas_limit, payload.value as number)) {
+      state.gas_limit = payload.value as number;
+    }
   },
   [MutationTypes.SIGN_OUT](state: State) {
     for (const sub of state._Subscriptions.values()) {
