@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
     <GobackWithClose
       v-if="action === 'swap'"
       :class="{ invisible: !['review', 'waitingPreviousTransaction', 'ibcConfirmation'].some(state.matches) }"

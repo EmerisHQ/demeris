@@ -250,6 +250,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 target: '#failed.unknown',
                 actions: ['setTransactionResponse'],
               },
+              GOT_FAILURE: {
+                target: '#failed.confirmations',
+                actions: ['setTransactionResponse'],
+              },
             },
             invoke: {
               src: 'fetchTransactionResponse',
@@ -320,7 +324,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           confirmations: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
-              RETRY: { target: '#transacting.confirming' },
+              RETRY: { target: '#transacting' },
               ABORT: '#aborted',
             },
           },
@@ -424,9 +428,14 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               }
             }
 
-            if (!endBlockEvent || endBlockEvent.success === 'failure') {
+            if (!endBlockEvent) {
               // @ts-ignore
               return callback({ type: 'GOT_UNKNOWN', data: { ...responseData, endBlock: endBlockEvent } });
+            }
+
+            if (endBlockEvent.success === 'failure') {
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } });
             }
           }
 
