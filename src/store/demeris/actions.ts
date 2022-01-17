@@ -742,6 +742,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state }, { subscribe = false }) {
+    const isCypress = !!window['Cypress'];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
 
     if (state._InProgess.get(reqHash)) {
@@ -781,7 +782,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
           }
         }
         if (response.data?.data?.Tokens) {
-          commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          if (isCypress) {
+            commit(DemerisMutationTypes.SET_PRICES, {
+              value: {
+                Fiats: response.data.data.Fiats,
+                Tokens: response.data.data.Tokens.map((x) => {
+                  return { ...x, Price: 1.1 };
+                }),
+              },
+            });
+          } else {
+            commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          }
         }
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_PRICES, payload: {} });
