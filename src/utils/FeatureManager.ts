@@ -4,7 +4,7 @@ class FeatureManager {
 
   private constructor() {
     for (const [key, value] of Object.entries(process.env).filter((i) => i[0].indexOf('VUE_APP_FEATURE_') > -1)) {
-      this.features[key] = value === 'true' ? true : false;
+      this.features[key] = value === 'true';
     }
 
     location.search
