@@ -258,9 +258,7 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
-    if (!isEqual(state.chains[(payload.params as API.ChainReq).chain_name].status, payload.value as boolean)) {
-      state.chains[(payload.params as API.ChainReq).chain_name].status = payload.value as boolean;
-    }
+    state.relayer = payload.value as boolean;
   },
 
   [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
