@@ -1,4 +1,3 @@
-import isEqual from 'lodash.isequal';
 import { MutationTree } from 'vuex';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
