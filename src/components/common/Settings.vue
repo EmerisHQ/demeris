@@ -20,7 +20,6 @@
 import MD5 from 'crypto-js/md5';
 import avatar from 'gradient-avatar';
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
-import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
@@ -28,7 +27,7 @@ import SettingsModal from '@/components/common/SettingsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'Settings',
@@ -50,11 +49,11 @@ export default defineComponent({
     const { balances } = useAccount();
 
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters['demeris/isSignedIn'];
     });
 
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters['demeris/isDemoAccount'];
     });
     const toggleWalletModal = () => {
       isWalletModalOpen.value = !isWalletModalOpen.value;

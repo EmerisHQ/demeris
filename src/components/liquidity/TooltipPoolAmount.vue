@@ -11,7 +11,6 @@ import { useStore } from 'vuex';
 
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Pool } from '@/types/actions';
 import { parseCoins } from '@/utils/basic';
 
@@ -30,7 +29,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const apistore = useStore() as TypedAPIStore;
+    const store = useStore();
     const { pool, reserveBalances, getPoolWithdrawBalances } = usePool((props.pool as Pool).id);
 
     const { balancesByDenom } = useAccount();
@@ -50,7 +49,7 @@ export default defineComponent({
     });
 
     const amount = computed(() => {
-      const precision = apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+      const precision = store.getters['demeris/getDenomPrecision']({
         name: props.denom,
       });
       const balance = walletBalances.value?.find((b) => b.denom === props.denom);

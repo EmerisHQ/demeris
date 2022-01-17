@@ -68,10 +68,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { useStore } from 'vuex';
 
 import Icon from '@/components/ui/Icon.vue';
 import Switch from '@/components/ui/Switch.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, useEmerisUSERStore } from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 
 export default defineComponent({
   components: {
@@ -79,28 +80,28 @@ export default defineComponent({
     Switch,
   },
   setup() {
-    const store = useEmerisUSERStore();
+    const store = useStore();
     const menuRef = ref(null);
 
     const isOpen = ref(false);
     const toggleOpen = () => (isOpen.value = !isOpen.value);
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
+      store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { [key]: value } });
     };
 
     const settings = reactive({
       theme: 'system',
       allowCustomSlippage: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage],
+        get: () => store.getters['demeris/allowCustomSlippage'],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewUnverified],
+        get: () => store.getters['demeris/viewUnverified'],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
+        get: () => store.getters['demeris/viewLPAssetPools'],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });

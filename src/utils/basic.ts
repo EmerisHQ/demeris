@@ -3,10 +3,10 @@ import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
-import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { Chain } from '@/types/api';
-import { useStore } from '@/utils/useStore';
+
+import { demoAddresses } from '../store/demeris/demo-account';
+import { store } from '../store/index';
 
 export function toHexString(byteArray) {
   return Array.prototype.map
@@ -16,10 +16,9 @@ export function toHexString(byteArray) {
     .join('');
 }
 export function getChainFromRecipient(recipient: string) {
-  const apistore = useStore() as TypedAPIStore;
   const prefix = bech32.decode(recipient).prefix;
   return (
-    (Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]) as Chain[]).find(
+    (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
       (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
     )?.chain_name ?? null
   );
@@ -38,22 +37,16 @@ export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
 export async function getOwnAddress({ chain_name }) {
-  const userstore = useStore() as TypedUSERStore;
-  const apistore = useStore() as TypedAPIStore;
-  if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
+  if (store.getters['demeris/isDemoAccount']) {
     return demoAddresses[chain_name];
   } else {
-    const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
+    const chain = store.getters['demeris/getChain']({ chain_name });
     const key = await window.keplr.getKey(chain.node_info.chain_id);
     return key.bech32Address;
   }
 }
 export function isNative(denom: string) {
-  if (denom) {
-    return denom.indexOf('ibc/') != 0 ? true : false;
-  } else {
-    return false;
-  }
+  return denom.indexOf('ibc/') != 0 ? true : false;
 }
 
 export function getChannel(path, index) {
