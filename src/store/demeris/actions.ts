@@ -201,8 +201,8 @@ export interface Actions {
     { commit, dispatch }: ActionContext<State, RootState>,
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
-  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>, keyHashes: string[]): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
     subscription: DemerisSubscriptions,
