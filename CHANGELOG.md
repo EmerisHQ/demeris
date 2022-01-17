@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.7 - 2022-01-17
+
+### Updates
+
+- Added Vega SDK update support
+- Liquidity module update
+- IBC module update
+- Vuex store refactoring (performance enhancement)
+- Limit reactivity when nothing to update (performance enhancement)
+
+### Fixes
+
+- Amount precision in add/withdraw liquidity forms
+- Pool price variation fix
+- Allow oepration when prices API is unavailable
+- Asset flickering bug
+- Ensure data is loaded before rendering
+- Max amount calculation improvements
+- Handle corrupt asset data from DB
+
 ## 0.1.6 - 2021-11-24
 
 ### Updates
