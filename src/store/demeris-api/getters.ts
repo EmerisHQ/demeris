@@ -28,6 +28,7 @@ export type Getters = {
   [GetterTypes.getVerifiedDenoms](state: State): API.VerifiedDenoms | null;
   [GetterTypes.getChains](state: State): Record<string, ChainData>;
   [GetterTypes.getPrices](state: State): API.Prices;
+  [GetterTypes.getTokenPrices](state: State): API.TokenPrices;
   [GetterTypes.getExchangeAmountFromATOMPool](state: State, getters): { (base_denom: string): number };
   [GetterTypes.getPrice](
     state: State,
@@ -172,6 +173,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getPrices]: (state) => {
     return state.prices;
+  },
+  [GetterTypes.getTokenPrices]: (state) => {
+    return state.tokenPrices;
   },
   [GetterTypes.getExchangeAmountFromATOMPool]: (state, getters) => (base_denom: string) => {
     const traces = getters['getAllVerifiedTraces'];

@@ -24,6 +24,7 @@ export type State = {
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
   verifiedDenoms: API.VerifiedDenoms;
   prices: API.Prices;
+  tokenPrices: API.TokenPrices;
   relayer: boolean;
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
@@ -44,6 +45,14 @@ export function getDefaultState(): State {
     prices: {
       Fiats: [],
       Tokens: [],
+    },
+    tokenPrices: {
+      id: '',
+      prices: [],
+      name: '',
+      market_caps: [],
+      symbol: '',
+      total_volumes: [],
     },
     relayer: false,
     chains: {},

@@ -183,6 +183,18 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_RELAYER_STATUS](state: State, payload: DemerisMutations) {
     state.relayer = payload.value as boolean;
   },
+  [MutationTypes.SET_TOKEN_PRICES](state: State, payload: DemerisMutations) {
+    const newPayload: any = payload.value as API.TokenPrices;
+    const historicalPrices: any = newPayload.data.prices.map((item) => {
+      const date = new Date(item[0]);
+      const newdate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+      return {
+        x: newdate,
+        y: item[1],
+      };
+    });
+    state.tokenPrices = historicalPrices;
+  },
 
   [MutationTypes.SET_RELAYER_BALANCES](state: State, payload: DemerisMutations) {
     const chains = Object.values(state.chains);

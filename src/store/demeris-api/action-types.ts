@@ -23,6 +23,7 @@ export enum DemerisActionTypes {
   GET_CHAIN = 'GET_CHAIN',
   GET_PRIMARY_CHANNEL = 'GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'GET_PRIMARY_CHANNELS',
+  GET_TOKEN_PRICES = 'GET_TOKEN_PRICES',
   GET_CHAIN_STATUS = 'GET_CHAIN_STATUS',
   GET_RELAYER_STATUS = 'GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'GET_RELAYER_BALANCES',
@@ -56,6 +57,7 @@ export enum GlobalDemerisActionTypes {
   GET_CHAIN = 'demerisAPI/GET_CHAIN',
   GET_PRIMARY_CHANNEL = 'demerisAPI/GET_PRIMARY_CHANNEL',
   GET_PRIMARY_CHANNELS = 'demerisAPI/GET_PRIMARY_CHANNELS',
+  GET_TOKEN_PRICES = 'demerisAPI/GET_TOKEN_PRICES',
   GET_CHAIN_STATUS = 'demerisAPI/GET_CHAIN_STATUS',
   GET_RELAYER_STATUS = 'demerisAPI/GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'demerisAPI/GET_RELAYER_BALANCES',
@@ -69,6 +71,10 @@ export enum GlobalDemerisActionTypes {
 export type DemerisActionParams = {
   subscribe: boolean;
   params?: API.APIRequests;
+};
+export type DemerisActionByTokenPriceParams = {
+  subscribe: boolean;
+  params?: API.TokenPriceReq;
 };
 export type DemerisActionsByAddressParams = {
   subscribe: boolean;

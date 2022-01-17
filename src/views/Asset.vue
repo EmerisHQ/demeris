@@ -23,7 +23,7 @@
         </header>
 
         <!-- Asset Price Performance Chart -->
-        <AreaChart :data-stream="dataStream" @filterChanged="filterChanged" />
+        <AreaChart :data-stream="dataStream" @filterChanged="getTokenPrices" />
 
         <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
@@ -155,7 +155,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRaw,watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -361,29 +361,24 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
-    const dataStream = [
-      { x: '05/06/2014', y: 54 },
-      { x: '05/08/2014', y: 17 },
-      { x: '05/28/2014', y: 26 },
-      { x: '05/29/2014', y: 17 },
-      { x: '05/31/2014', y: 29 },
-      { x: '06/08/2014', y: 172 },
-      { x: '07/28/2014', y: 12 },
-      { x: '05/06/2014', y: 54 },
-      { x: '05/08/2014', y: 17 },
-      { x: '05/28/2014', y: 26 },
-      { x: '05/29/2014', y: 17 },
-      { x: '05/31/2014', y: 29 },
-      { x: '06/08/2014', y: 12 },
-      { x: '07/28/2014', y: 56 },
-      { x: '05/06/2014', y: 54 },
-      { x: '05/08/2014', y: 17 },
-      { x: '05/28/2014', y: 26 },
-      { x: '05/29/2014', y: 17 },
-      { x: '05/31/2014', y: 29 },
-      { x: '06/08/2014', y: 122 },
-      { x: '07/28/2014', y: 12 },
-    ];
+    onMounted(() => {
+      getTokenPrices('1');
+    });
+
+    const getTokenPrices = async (days: string) => {
+      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+        subscribe: false,
+        params: {
+          token_id: 'akash-network',
+          days,
+          currency: 'usd',
+        },
+      });
+    };
+
+    const dataStream = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+    });
 
     return {
       nativeAsset,
@@ -399,6 +394,7 @@ export default defineComponent({
       totalAmount,
       isPoolCoin,
       dataStream,
+      getTokenPrices,
     };
   },
 });

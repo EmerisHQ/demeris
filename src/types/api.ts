@@ -4,6 +4,19 @@ import * as Base from './base';
 export type AddrReq = {
   address: string;
 };
+export type TokenPriceReq = {
+  token_id: string;
+  days: string;
+  currency: string;
+};
+export type TokenPrices = {
+  id: string;
+  prices: number[];
+  name: string;
+  market_caps: number[];
+  symbol: string;
+  total_volumes: number[];
+};
 export type ChainAddrReq = {
   chain_name: string;
   address: string;

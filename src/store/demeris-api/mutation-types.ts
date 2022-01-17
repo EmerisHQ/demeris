@@ -15,6 +15,7 @@ export enum DemerisMutationTypes {
   SET_NUMBERS = 'SET_NUMBERS',
   SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
   SET_PRICES = 'SET_PRICES',
+  SET_TOKEN_PRICES = 'SET_TOKEN_PRICES',
   SET_TX_STATUS = 'SET_TX_STATUS',
   SET_CHAINS = 'SET_CHAINS',
   SET_CHAIN = 'SET_CHAIN',
@@ -55,6 +56,7 @@ export type DemerisMutationArgs =
   | boolean
   | number
   | API.Prices
+  | API.TokenPrices
   | API.FeeAddress
   | API.FeeAddresses
   | API.Bech32Config
