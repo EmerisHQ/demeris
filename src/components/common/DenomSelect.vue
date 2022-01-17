@@ -112,8 +112,9 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
-import { store } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 export default defineComponent({
   name: 'DenomSelect',
   components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
@@ -156,7 +157,7 @@ export default defineComponent({
         if (props.selectedDenom?.base_denom) {
           displayName.value = await getDisplayName(
             props.selectedDenom.base_denom,
-            store.getters['demeris/getDexChain'],
+            useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
           );
         }
       },

@@ -5,9 +5,10 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
 
@@ -38,12 +39,12 @@ export default defineComponent({
     const price = ref();
 
     const priceObserver = computed(() => {
-      return store.getters['demeris/getPrice']({ denom: denom.value });
+      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value });
     });
 
     const displayPrice = computed(() => {
       const precision =
-        store.getters['demeris/getDenomPrecision']({
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: denom.value,
         }) ?? '6';
       let value;

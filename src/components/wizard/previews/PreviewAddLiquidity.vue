@@ -83,6 +83,7 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, reactive, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -90,7 +91,7 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { AddLiquidityEndBlockResponse } from '@/types/api';
 import * as Base from '@/types/base';
@@ -158,13 +159,13 @@ export default defineComponent({
 
     const precisions = computed(() => {
       return {
-        coinA: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[0] }) ?? 6,
-        coinB: store.getters['demeris/getDenomPrecision']({ name: poolInfo.denoms[1] }) ?? 6,
+        coinA: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[0] }) ?? 6,
+        coinB: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: poolInfo.denoms[1] }) ?? 6,
       };
     });
 
     const chainName = computed(() => {
-      return store.getters['demeris/getDexChain'];
+      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
     });
 
     const hasPool = computed(() => {
