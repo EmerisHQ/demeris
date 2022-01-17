@@ -20,7 +20,7 @@ export class MoveAssetsSubpage {
   }
 
   inputAmountOfAssets() {
-    return cy.get('input[placeholder="0"]');
+    return cy.get('.uppercase > .flex-1 > .flex > .flexible-input__input');
   }
 
   moveSelectAsset() {
