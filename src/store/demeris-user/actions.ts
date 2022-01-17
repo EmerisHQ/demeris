@@ -75,7 +75,7 @@ export interface Actions {
     { commit }: ActionContext<State, RootState>,
     { gasLimit }: { gasLimit: number },
   ): Promise<void>;
-  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.SIGN_OUT]({ state, commit, dispatch }: ActionContext<State, RootState>): Promise<void>;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
@@ -131,9 +131,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_IN]({ state, commit, dispatch, rootGetters }) {
+  async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
-      await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
@@ -180,9 +179,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return false;
     }
   },
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ state, commit, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
-      await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
@@ -215,7 +213,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
   },
-  [DemerisActionTypes.SIGN_OUT]({ commit }) {
+  async [DemerisActionTypes.SIGN_OUT]({ state, commit, dispatch }) {
+    await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
     event('sign_out', { event_label: 'Signed out', event_category: 'authentication' });
     commit(DemerisMutationTypes.SIGN_OUT);
   },
