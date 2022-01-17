@@ -1,6 +1,7 @@
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
+import { KeplrKeyData, UserData } from './mutation-types';
 export type ChainMeta = {
   verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
@@ -13,51 +14,50 @@ export type TransactionItem = {
   status: API.Ticket;
   resolve: (value?: unknown | PromiseLike<unknown>) => void;
   reject: (reason?: Error) => void;
-  promise: Promise<API.Ticket>;
+  promise: Promise<string>;
 };
 export type State = {
   endpoint: string;
   hub_chain: string;
+  gas_limit: number;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
   numbers: Record<string, API.Numbers>;
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
   verifiedDenoms: API.VerifiedDenoms;
+  keplr: KeplrKeyData;
   prices: API.Prices;
-  tokenPrices: API.TokenPrices;
+  tokenPrices: API.TokenPrices[];
   relayer: boolean;
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   validPools: Pool[];
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
+  _Session: UserData | Record<string, never>;
 };
 export function getDefaultState(): State {
   return {
     endpoint: '',
     hub_chain: 'cosmoshub-4',
+    gas_limit: 500000,
     balances: {},
     stakingBalances: {},
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
     validPools: [],
+    keplr: null,
     prices: {
       Fiats: [],
       Tokens: [],
     },
-    tokenPrices: {
-      id: '',
-      prices: [],
-      name: '',
-      market_caps: [],
-      symbol: '',
-      total_volumes: [],
-    },
+    tokenPrices: [],
     relayer: false,
     chains: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),
+    _Session: {},
   };
 }

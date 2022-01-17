@@ -16,7 +16,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, PropType, ref, watch } from 'vue';
+
+import { TokenPrices } from '@/types/api';
 
 export default defineComponent({
   name: 'AreaChart',
@@ -39,7 +41,7 @@ export default defineComponent({
   },
   emits: ['filterChanged'],
   setup(props, { emit }) {
-    const filterItems = [
+    const filterItems = ref([
       {
         text: '1D',
         value: '1',
@@ -68,9 +70,9 @@ export default defineComponent({
         text: 'All',
         value: 'max',
       },
-    ];
+    ]);
 
-    const chartData = {
+    const chartData = ref({
       options: {
         chart: {
           type: 'area',
@@ -119,7 +121,7 @@ export default defineComponent({
           data: [],
         },
       ],
-    };
+    });
 
     const activeFilterItem = ref('1');
 
@@ -128,9 +130,14 @@ export default defineComponent({
       emit('filterChanged', activeFilterItem.value);
     };
 
-    onMounted(() => {
-      chartData.series[0].data = props.dataStream;
-    });
+    watch(
+      () => props.dataStream as TokenPrices[],
+      async (value) => {
+        chartData.value.series[0].data = value;
+        // window.dispatchEvent(new Event('resize'))
+      },
+      { immediate: true },
+    );
 
     return {
       filterItems,

@@ -22,6 +22,8 @@
           </div>
         </header>
 
+        <!-- {{ dataStream }} -->
+
         <!-- Asset Price Performance Chart -->
         <AreaChart :data-stream="dataStream" @filterChanged="getTokenPrices" />
 
@@ -155,7 +157,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRaw,watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRaw, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -177,7 +179,6 @@ import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
@@ -213,7 +214,7 @@ export default defineComponent({
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
-    const apistore = useStore() as TypedAPIStore;
+    const store = useStore();
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
@@ -222,7 +223,7 @@ export default defineComponent({
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
 
@@ -234,7 +235,7 @@ export default defineComponent({
     const unavailableChains = computed(() => {
       const result = {};
       for (const asset of assets.value) {
-        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
+        const status = store.getters['demeris/getChainStatus']({ chain_name: asset.on_chain });
         if (!status) {
           result[asset.on_chain] = {
             chain: asset.on_chain,
@@ -251,16 +252,16 @@ export default defineComponent({
     watch(
       denom,
       async () => {
-        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        const dexChain = store.getters['demeris/getDexChain'];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
-            apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+            store.getters['demeris/getPrimaryChannel']({
               chain_name: dexChain,
               destination_chain_name: assetConfig.value.chain_name,
             }) ??
-            (await apistore.dispatch(
-              GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+            (await store.dispatch(
+              'demeris/GET_PRIMARY_CHANNEL',
               {
                 subscribe: true,
                 params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },
@@ -366,7 +367,7 @@ export default defineComponent({
     });
 
     const getTokenPrices = async (days: string) => {
-      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+      await store.dispatch('demeris/GET_TOKEN_PRICES', {
         subscribe: false,
         params: {
           token_id: 'akash-network',
@@ -377,7 +378,7 @@ export default defineComponent({
     };
 
     const dataStream = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+      return toRaw(store.getters['demeris/getTokenPrices']);
     });
 
     return {

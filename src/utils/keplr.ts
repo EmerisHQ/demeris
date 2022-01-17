@@ -1,13 +1,11 @@
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import { ChainData } from '@/store/demeris/state';
 import { Denom } from '@/types/api';
 import { AmountWithMeta } from '@/types/base';
 
-import { useStore } from './useStore';
+import { store } from '../store/index';
 
 export async function addChain(chain_name: string): Promise<void> {
-  const apistore = useStore() as TypedAPIStore;
-  const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({
+  const chain = store.getters['demeris/getChain']({
     chain_name,
   }) as ChainData;
   let rpc;

@@ -1,17 +1,16 @@
 import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
+import { useStore } from 'vuex';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Balances, StakingBalances } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
-import { useStore } from '@/utils/useStore';
 
 export default function useAccount() {
-  const store = useStore() as TypedAPIStore;
+  const store = useStore();
   const isDemoAccount = computed(() => {
-    return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+    return store.getters['demeris/isDemoAccount'];
   });
   const allbalances = computed<Balances>(() => {
     // TODO: Remove after cloud is fully deployed
@@ -20,7 +19,7 @@ export default function useAccount() {
       return TEST_DATA.balances;
     }
     */
-    return store.getters[GlobalDemerisGetterTypes.API.getAllBalances] || [];
+    return store.getters['demeris/getAllBalances'] || [];
   });
 
   const redeemableBalances = ref([]);
@@ -74,7 +73,7 @@ export default function useAccount() {
   const getNativeBalances = (
     { balances, aggregate }: { balances?: Balances | Ref<Balances>; aggregate?: boolean } = { balances: [] },
   ) => {
-    const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+    const verifiedDenoms = store.getters['demeris/getVerifiedDenoms'];
     const result = [];
 
     for (const verifiedDenom of verifiedDenoms) {
@@ -102,7 +101,7 @@ export default function useAccount() {
         ...asset,
         amount: '' + totalAmount + asset.base_denom,
         displayName: verifiedDenom.display_name,
-        precision: store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: asset.base_denom }) ?? 6,
+        precision: store.getters['demeris/getDenomPrecision']({ name: asset.base_denom }) ?? 6,
       });
     }
 
@@ -124,7 +123,7 @@ export default function useAccount() {
   };
 
   const stakingBalances = computed<StakingBalances>(() => {
-    return store.getters[GlobalDemerisGetterTypes.API.getAllStakingBalances] || [];
+    return store.getters['demeris/getAllStakingBalances'] || [];
   });
 
   const stakingBalancesByChain = (chain_name: string) => {
@@ -140,8 +139,8 @@ export default function useAccount() {
       .map((item) => {
         const amount = parseCoins(item.amount)[0].amount;
         const denom = item.base_denom;
-        const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) ?? 6;
-        const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+        const precision = store.getters['demeris/getDenomPrecision']({ name: denom }) ?? 6;
+        const price = store.getters['demeris/getPrice']({ denom });
         const result = new BigNumber(amount).multipliedBy(price).shiftedBy(-precision).toNumber();
         return { ...item, price: result };
       })

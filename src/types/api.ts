@@ -10,12 +10,8 @@ export type TokenPriceReq = {
   currency: string;
 };
 export type TokenPrices = {
-  id: string;
-  prices: number[];
-  name: string;
-  market_caps: number[];
-  symbol: string;
-  total_volumes: number[];
+  x: string;
+  y: number;
 };
 export type ChainAddrReq = {
   chain_name: string;
@@ -266,7 +262,6 @@ export type Ticket = {
   height?: number;
   newTicket?: string;
   error?: string;
-  tx_hashes?: any[];
 };
 export type SeqNumber = {
   chain_name: string;

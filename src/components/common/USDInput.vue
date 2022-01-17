@@ -4,10 +4,9 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import AmountInput from '@/components/ui/AmountInput.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 
 export default defineComponent({
   name: 'USDInput',
@@ -22,7 +21,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     // Should not observe price changes
-    const price = ref(store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom }));
+    const price = ref(store.getters['demeris/getPrice']({ denom: props.denom }));
     const usdValue = ref('');
     const previousInput = ref('');
 
@@ -65,7 +64,7 @@ export default defineComponent({
     const { denom } = toRefs(props);
     watch(denom, (newDenom, oldDenom) => {
       if (newDenom !== oldDenom) {
-        price.value = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom });
+        price.value = store.getters['demeris/getPrice']({ denom: props.denom });
       }
     });
 

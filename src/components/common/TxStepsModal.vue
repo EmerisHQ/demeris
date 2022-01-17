@@ -274,13 +274,7 @@ import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdr
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
 import useEmitter from '@/composables/useEmitter';
-import {
-  GlobalDemerisActionTypes,
-  GlobalDemerisGetterTypes,
-  TypedAPIStore,
-  TypedTXStore,
-  TypedUSERStore,
-} from '@/store';
+import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
 import {
   CreatePoolData,
   FeeTotals,
@@ -348,16 +342,12 @@ export default defineComponent({
   setup(props, { emit }) {
     const emitter = useEmitter();
 
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
-    const txstore = useStore() as TypedTXStore;
-
     const { t } = useI18n({ useScope: 'global' });
 
-    const gasPriceLevel = computed(() => userstore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => store.getters['demeris/getPreferredGasPriceLevel']);
 
     const isSignedIn = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+      return store.getters['demeris/isSignedIn'];
     });
     const interstitialProceed = ref(false);
     const mpDomain = ref('https://buy.moonpay.io');
@@ -365,7 +355,7 @@ export default defineComponent({
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: apistore.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
+        walletAddress: store.getters['demeris/getOwnAddress']({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // baseCurrencyAmount: '50',
       };
@@ -380,7 +370,7 @@ export default defineComponent({
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
-          apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+          store.getters['demeris/getDisplayChain']({
             name: x,
           }),
         )
@@ -418,6 +408,7 @@ export default defineComponent({
     const fees = ref([]);
     const connectModalOpen = ref(false);
     const retry = ref(false);
+    const store = useStore();
     const hasMore = ref(false);
     const isFinal = ref(false);
     const isTransferConfirmationOpen = ref(false);
@@ -498,7 +489,7 @@ export default defineComponent({
             });
             const fee =
               parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[gasPriceLevel.value]) *
-              userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit];
+              store.getters['demeris/getGasLimit'];
             const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
             if (baseDenomBalance) {
               const amount = parseCoins(baseDenomBalance.amount)[0];
@@ -620,7 +611,7 @@ export default defineComponent({
       },
     );
     const isDemoAccount = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
+      return store.getters['demeris/isDemoAccount'];
     });
     const confirm = async () => {
       if (isDemoAccount.value) {
@@ -683,11 +674,11 @@ export default defineComponent({
                     amount:
                       '' +
                       parseFloat(feeOptions[0].amount[gasPriceLevel.value as GasPriceLevel]) *
-                        userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+                        store.getters['demeris/getGasLimit'],
                     denom: feeOptions[0].denom,
                   },
                 ],
-                gas: '' + userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
+                gas: '' + store.getters['demeris/getGasLimit'],
               };
               let tx;
               event('confirm_tx', {
@@ -695,7 +686,7 @@ export default defineComponent({
                 event_category: 'transactions',
               });
               try {
-                tx = await txstore.dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
+                tx = await store.dispatch(GlobalDemerisActionTypes.SIGN_WITH_KEPLR, {
                   msgs: [res.msg],
                   chain_name: res.chain_name,
                   fee,
@@ -722,7 +713,7 @@ export default defineComponent({
                 let result;
                 try {
                   await ensureTraceChannel(stepTx);
-                  result = await txstore.dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, tx);
+                  result = await store.dispatch(GlobalDemerisActionTypes.BROADCAST_TX, tx);
                 } catch (e) {
                   console.error(e);
                   errorDetails.value = {
@@ -737,7 +728,7 @@ export default defineComponent({
                   continue;
                 }
                 try {
-                  let txResultData: any = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+                  let txResultData = await store.dispatch(GlobalDemerisActionTypes.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });
@@ -758,7 +749,7 @@ export default defineComponent({
                     txResultData.status != 'Tokens_unlocked_timeout' &&
                     txResultData.status != 'Tokens_unlocked_ack'
                   ) {
-                    txResultData = await apistore.getters[GlobalDemerisGetterTypes.API.getTxStatus]({
+                    txResultData = await store.getters['demeris/getTxStatus']({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
                     });
@@ -815,7 +806,7 @@ export default defineComponent({
                       let retries = 0;
                       while (retries < 10) {
                         try {
-                          endBlockEvent = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
+                          endBlockEvent = await store.dispatch(GlobalDemerisActionTypes.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentDataRaw.data.name,
                           });

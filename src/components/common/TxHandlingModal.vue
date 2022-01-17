@@ -363,7 +363,6 @@
 import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -380,7 +379,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/store';
 import {
   AddLiquidityData,
   CreatePoolData,
@@ -501,8 +500,14 @@ export default defineComponent({
     const getExplorerLink = (chainName: string) => {
       const chainMintScanMap = {
         'cosmos-hub': 'cosmos',
+        akash: 'akash',
+        'crypto-org': 'crypto-org',
+        iris: 'iris',
+        osmosis: 'osmosis',
+        persistence: 'persistence',
+        sentinel: 'sentinel',
       };
-      const chain = chainMintScanMap[chainName] || chainName;
+      const chain = chainMintScanMap[chainName];
 
       if (!chain) {
         return;
@@ -594,14 +599,14 @@ export default defineComponent({
                   props.txResult.demandCoinSwappedAmount /
                   Math.pow(
                     10,
-                    store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                    store.getters['demeris/getDenomPrecision']({
                       name: sendBaseDenom.value,
                     }),
                   );
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
-                    store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    store.getters['demeris/getDexChain'],
                   ),
                 });
               } else {
