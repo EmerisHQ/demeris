@@ -259,7 +259,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+        dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -270,7 +270,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+        dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
