@@ -131,10 +131,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_SESSION_DATA', { updateDT: Date.now() });
     }
   },
-  async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
+  async [DemerisActionTypes.SIGN_IN]({ state, commit, dispatch, rootGetters }) {
     try {
+      await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
       await dispatch(DemerisActionTypes.SIGN_OUT);
-
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
       window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
       for (const chain in chains) {
@@ -180,8 +180,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return false;
     }
   },
-  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
+  async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ state, commit, dispatch }) {
     try {
+      await dispatch(GlobalDemerisActionTypes.API.SIGN_OUT, state.keplr?.keyHashes ?? [], { root: true });
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });

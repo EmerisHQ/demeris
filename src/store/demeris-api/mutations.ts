@@ -40,6 +40,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
   [MutationTypes.RESET_STATE](state: S): void;
+  [MutationTypes.SIGN_OUT](state: S, payload: string[]): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
 };
@@ -276,6 +277,25 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
+  },
+  [MutationTypes.SIGN_OUT](state: State, payload: string[]) {
+    for (const sub of state._Subscriptions.values()) {
+      const subObj = JSON.parse(sub);
+      if (
+        subObj.action == DemerisActionTypes.GET_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
+        subObj.action == DemerisActionTypes.GET_NUMBERS
+      ) {
+        state._Subscriptions.delete(sub);
+      }
+    }
+    for (const keyhash of payload ?? []) {
+      delete state.balances[keyhash];
+    }
+    state.stakingBalances = {};
+    state.numbers = {};
+    state.transactions = new Map();
+    state._InProgess = new Map();
   },
   [MutationTypes.SUBSCRIBE](state: State, subscription) {
     state._Subscriptions.add(JSON.stringify(subscription));
