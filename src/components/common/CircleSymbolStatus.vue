@@ -20,6 +20,8 @@ type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+
 export default defineComponent({
   name: 'CircleSymbolStatus',
   props: {
@@ -37,15 +39,17 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
 
     const displayChain = computed(() => {
-      const displayName = store.getters['demeris/getDisplayChain']({ name: props.chainName });
+      const displayName = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: props.chainName });
       return displayName || props.chainName;
     });
 
     const chainDown = computed(() => {
-      const chainStatus = store.getters['demeris/getChainStatus']({ chain_name: props.chainName });
+      const chainStatus = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
+        chain_name: props.chainName,
+      });
       return chainStatus.failed?.length > 0;
     });
 

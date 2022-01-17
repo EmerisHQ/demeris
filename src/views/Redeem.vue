@@ -107,7 +107,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
 import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
@@ -121,9 +121,11 @@ export default defineComponent({
     const router = useRouter();
     const { redeemableBalances } = useAccount();
     const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
+    const userstore = useStore() as TypedUSERStore;
+
     pageview({ page_title: 'Redeem', page_path: '/redeem' });
-    store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+    userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
@@ -140,12 +142,12 @@ export default defineComponent({
             let balance = { ...newBalance };
             balance.hops = [];
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
                 chain_name: balance.on_chain,
                 hash: balance.ibc.hash,
               }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
@@ -180,7 +182,7 @@ export default defineComponent({
     };
 
     const getRoute = (hash, chain_name) => {
-      const verifyTrace = store.getters['demeris/getVerifyTrace']({
+      const verifyTrace = apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
         chain_name,
         hash,
       });
