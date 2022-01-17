@@ -274,7 +274,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
 
 import AvatarBalance from '@/components/account/AvatarBalance.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
@@ -284,7 +283,8 @@ import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import Switch from '@/components/ui/Switch.vue';
 import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
 export default defineComponent({
   name: 'SettingsModal',
@@ -310,7 +310,7 @@ export default defineComponent({
     const isWarningViewUnverifiedOpen = ref(false);
     const isWarningViewLPAssetPoolsOpen = ref(false);
     const isDemoAccount = computed(() => {
-      return store.getters['demeris/isDemoAccount'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
     });
     const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
     const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
@@ -319,27 +319,27 @@ export default defineComponent({
       (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { [key]: value } });
+      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
     };
 
     const settings = reactive({
       theme,
       gasLimit: computed({
-        get: () => store.getters['demeris/getGasLimit'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
         set: (value: number) => {
-          store.dispatch(GlobalDemerisActionTypes.SET_GAS_LIMIT, { gasLimit: value });
+          store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
         },
       }),
       allowCustomSlippage: computed({
-        get: () => store.getters['demeris/allowCustomSlippage'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage],
         set: (value: boolean) => updateSession('customSlippage', value),
       }),
       viewUnverified: computed({
-        get: () => store.getters['demeris/viewUnverified'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewUnverified],
         set: (value: boolean) => updateSession('viewUnverified', value),
       }),
       viewLPAssetPools: computed({
-        get: () => store.getters['demeris/viewLPAssetPools'],
+        get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
     });
@@ -379,7 +379,7 @@ export default defineComponent({
       } else {
         emit('disconnect');
         window.localStorage.setItem('lastEmerisSession', '');
-        store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+        store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
       }
     };
 

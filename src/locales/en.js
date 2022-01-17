@@ -8,8 +8,8 @@ export const messages = {
         chainLoading: 'Loading chains...',
         priceFetching: 'Fetching prices...',
         relayerChecking: 'Checking relayers...',
-        chainDetails: "Fetching '{displayChain}` details...",
-        chainStatus: "Checking '{displayChain}` status...",
+        chainDetails: "Fetching '{displayChain}' details...",
+        chainStatus: "Checking '{displayChain}' status...",
         relayerBalanceFetching: 'Fetching relayer balances...',
         liquidityConfigure: 'Configuring liquidity module...',
         poolFetching: 'Fetching liquidity pools...',
@@ -442,7 +442,6 @@ export const messages = {
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
-        pooled: 'Pooled',
         staking: 'Staking',
       },
       assets: {

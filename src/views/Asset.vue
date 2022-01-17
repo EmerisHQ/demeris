@@ -174,6 +174,7 @@ import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
@@ -208,7 +209,7 @@ export default defineComponent({
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
 
@@ -217,7 +218,7 @@ export default defineComponent({
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = store.getters['demeris/getVerifiedDenoms'] || [];
+      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
 
@@ -229,7 +230,7 @@ export default defineComponent({
     const unavailableChains = computed(() => {
       const result = {};
       for (const asset of assets.value) {
-        const status = store.getters['demeris/getChainStatus']({ chain_name: asset.on_chain });
+        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
         if (!status) {
           result[asset.on_chain] = {
             chain: asset.on_chain,
@@ -246,16 +247,16 @@ export default defineComponent({
     watch(
       denom,
       async () => {
-        const dexChain = store.getters['demeris/getDexChain'];
+        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           const invPrimaryChannel =
-            store.getters['demeris/getPrimaryChannel']({
+            apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
               chain_name: dexChain,
               destination_chain_name: assetConfig.value.chain_name,
             }) ??
-            (await store.dispatch(
-              'demeris/GET_PRIMARY_CHANNEL',
+            (await apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
               {
                 subscribe: true,
                 params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },

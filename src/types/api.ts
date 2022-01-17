@@ -253,6 +253,7 @@ export type Ticket = {
   height?: number;
   newTicket?: string;
   error?: string;
+  tx_hashes?: any[];
 };
 export type SeqNumber = {
   chain_name: string;

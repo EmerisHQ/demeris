@@ -154,7 +154,7 @@
               <ListItem inset size="md" label="Pool price">
                 <AmountDisplay
                   :amount="{
-                    amount: 10 ** store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms[0] }),
+                    amount: 10 ** store.getters['demerisAPI/getDenomPrecision']({ name: reserveBaseDenoms[0] }),
                     denom: reserveBaseDenoms[0],
                   }"
                 />
@@ -202,6 +202,7 @@ import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -217,7 +218,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
@@ -325,16 +326,22 @@ export default {
     const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);
     const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
     const precisionA = computed(
-      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 1 : 0] }) || 6,
+      () =>
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          name: reserveBaseDenoms.value[isReverse.value ? 1 : 0],
+        }) || 6,
     );
     const precisionB = computed(
-      () => store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[isReverse.value ? 0 : 1] }) || 6,
+      () =>
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          name: reserveBaseDenoms.value[isReverse.value ? 0 : 1],
+        }) || 6,
     );
 
     const precisionDiff = computed(() => {
       return (
-        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[0] }) -
-        store.getters['demeris/getDenomPrecision']({ name: reserveBaseDenoms.value[1] })
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[0] }) -
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[1] })
       );
     });
 
@@ -347,7 +354,7 @@ export default {
     });
 
     const dexChain = computed(() => {
-      return store.getters['demeris/getDexChain'];
+      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
     });
 
     // TODO: Fetch from API the wallet available amount
@@ -368,7 +375,8 @@ export default {
         return false;
       }
 
-      const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
+      const precision =
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6;
       const amount = new BigNumber(state.amount || 0).shiftedBy(precision);
       const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 
@@ -380,8 +388,8 @@ export default {
         return false;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
 
       if (!priceA || !priceB) {
         return false;
@@ -435,10 +443,10 @@ export default {
         return;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
       total = total.plus(new BigNumber(priceA).multipliedBy(state.receiveAmounts.coinA.amount));
 
-      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
       total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
 
       state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
@@ -456,8 +464,8 @@ export default {
 
       const isReverse = reserveBalances.value[0].base_denom !== reserveBaseDenoms.value[0];
 
-      const priceA = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
 
       const totalA = new BigNumber(reserveBalances.value[isReverse ? 1 : 0].amount)
         .multipliedBy(priceA)
@@ -620,7 +628,9 @@ export default {
       () => [state.isMaximumAmountChecked, state.selectedAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked && state.selectedAsset) {
-          const precision = store.getters['demeris/getDenomPrecision']({ name: state.selectedAsset.base_denom }) || 6;
+          const precision =
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) ||
+            6;
           const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount);
           const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
 

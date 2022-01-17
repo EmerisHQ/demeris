@@ -11,6 +11,7 @@ import { useStore } from 'vuex';
 import Ticker from '@/components/common/Ticker.vue';
 import TooltipPoolAmount from '@/components/liquidity/TooltipPoolAmount.vue';
 import usePool from '@/composables/usePool';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Pool } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
@@ -32,7 +33,7 @@ export default defineComponent({
 
   setup(props) {
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
 
     const { pairName } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
@@ -46,16 +47,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                 hash: newDenoms[0].split('/')[1],
               }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                     hash: newDenoms[0].split('/')[1],
                   },
                 },
@@ -71,16 +72,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                 hash: newDenoms[1].split('/')[1],
               }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                     hash: newDenoms[1].split('/')[1],
                   },
                 },

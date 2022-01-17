@@ -85,6 +85,7 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Balance } from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 
@@ -107,7 +108,7 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props) {
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
     const modifiedData = computed(() => getUniqueCoinList(props.data));
 
     function setWordColorByKeyword(keyword, word) {
@@ -178,7 +179,7 @@ export default defineComponent({
       }
 
       for (const chain of uniqueChainsList) {
-        const status = store.getters['demeris/getChainStatus']({ chain_name: chain });
+        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
         if (!status) {
           result.push({
             chain,

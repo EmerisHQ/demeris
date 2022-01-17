@@ -18,14 +18,16 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
-import { useAllStores } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
+import { TypedAPIStore } from '@/store';
+import { setStore } from '@/utils/useStore';
 
-import { GlobalDemerisActionTypes } from './store/demeris/action-types';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -38,47 +40,52 @@ export default defineComponent({
   },
 
   setup() {
-    useTheme({ updateOnChange: true });
-    const store = useAllStores();
+    const store = useStore();
+    setStore(store); // make store availabe in some composition functions used in the store itself
+    const apistore = store as TypedAPIStore;
+    const userstore = store as TypedUSERStore;
     const initialized = ref(false);
     const router = useRouter();
 
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
     onMounted(async () => {
+      useTheme({ updateOnChange: true });
       let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
       if (!gasLimit) {
         gasLimit = 500000;
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
-      await store.dispatch(GlobalDemerisActionTypes.INIT, {
+      await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
         endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
-        gas_limit: gasLimit,
+      });
+      await userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+        gasLimit: gasLimit,
       });
       status.value = t('appInit.status.assetLoading');
-      await store.dispatch(GlobalDemerisActionTypes.GET_VERIFIED_DENOMS, {
+      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
       status.value = t('appInit.status.chainLoading');
-      let chains = await store.dispatch(GlobalDemerisActionTypes.GET_CHAINS, {
+      let chains = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
         subscribe: false,
       });
       for (let chain in chains) {
         status.value = t('appInit.status.chainDetails', {
-          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
           subscribe: true,
           params: {
             chain_name: chain,
           },
         });
         status.value = t('appInit.status.chainStatus', {
-          displayChain: store.getters['demeris/getDisplayChain']({ name: chain }),
+          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
         });
-        await store.dispatch(GlobalDemerisActionTypes.GET_CHAIN_STATUS, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
           subscribe: true,
           params: {
             chain_name: chain,
@@ -109,7 +116,7 @@ export default defineComponent({
       }
       status.value = t('appInit.status.priceFetching');
       try {
-        await store.dispatch(GlobalDemerisActionTypes.GET_PRICES, {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
           subscribe: true,
         });
       } catch (e) {
@@ -117,16 +124,19 @@ export default defineComponent({
       }
       status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
-        await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+        await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
       } else {
         if (autoLoginDemo()) {
-          await store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
         }
       }
       window.addEventListener('keplr_keystorechange', async () => {
         window.localStorage.setItem('lastEmerisSession', '');
-        if (store.getters['demeris/isSignedIn'] && !store.getters['demeris/isDemoAccount']) {
-          await store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+        if (
+          userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] &&
+          !userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+        ) {
+          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
         }
       });
       initialized.value = true;
