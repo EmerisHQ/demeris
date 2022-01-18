@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
+import { featureRunning } from '@/utils/FeatureManager';
 import Portfolio from '@/views/Portfolio.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -69,13 +70,14 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:pathMatch(.*)*',
     redirect: { name: 'Portfolio' },
   },
-  {
+];
+if (featureRunning('STAKING')) {
+  routes.push({
     path: '/stake/:denom',
     name: 'Stake',
     component: () => import('@/views/Stake.vue'),
-  },
-];
-
+  });
+}
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
