@@ -97,8 +97,8 @@
           {{ $t('context.transactions.controls.swapAnotherAsset') }}
         </span>
       </Button>
-      <Button v-else variant="primary" class="w-full mt-8" @click="navigateToPortfolio">
-        <span>{{ $t('context.transactions.controls.backToPortfolio') }}</span>
+      <Button v-else variant="primary" class="w-full mt-8" @click="minimizeModal">
+        <span>{{ $t('context.transactions.controls.backToEmeris') }}</span>
       </Button>
       <p class="text-muted -text-1 px-4 mt-3">{{ $t('context.transactions.transacting.notifiedWhenCompletes') }}</p>
     </div>
@@ -108,7 +108,6 @@
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -124,7 +123,6 @@ import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProces
 const { t } = useI18n({ useScope: 'global' });
 const { actor, isSwapComponent, minimizeModal } = inject(ProvideViewerKey);
 const { state } = actor;
-const router = useRouter();
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
 const titleMap = {
@@ -147,11 +145,6 @@ const subtitle = computed(() => {
   }
   return t('components.txHandlingModal.txProgress');
 });
-
-const navigateToPortfolio = () => {
-  router.push('/');
-  minimizeModal();
-};
 </script>
 
 <style scoped>

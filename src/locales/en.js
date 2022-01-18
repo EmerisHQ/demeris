@@ -485,7 +485,7 @@ export const messages = {
           sendAmount: 'Send {amount}',
           sendAnotherAsset: 'Send another asset',
           swapAnotherAsset: 'Swap another asset',
-          backToPortfolio: 'Back to portfolio',
+          backToEmeris: 'Back to Emeris',
         },
       },
     },
