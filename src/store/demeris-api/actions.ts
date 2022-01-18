@@ -180,6 +180,7 @@ export interface Actions {
     { endpoint, refreshTime, hub_chain, gas_limit }: DemerisConfig,
   ): void;
   [DemerisActionTypes.RESET_STATE]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.SIGN_OUT]({ commit }: ActionContext<State, RootState>, keyHashes: string[]): void;
   [DemerisActionTypes.UNSUBSCRIBE](
     { commit }: ActionContext<State, RootState>,
     subscription: DemerisSubscriptions,
@@ -274,7 +275,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+        dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -285,7 +286,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+        dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
@@ -806,6 +807,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
+  },
+  [DemerisActionTypes.SIGN_OUT]({ commit }, keyHashes) {
+    commit(DemerisMutationTypes.SIGN_OUT, keyHashes);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach(async (subscription_json) => {
