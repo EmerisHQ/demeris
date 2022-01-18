@@ -10,8 +10,8 @@ class FeatureManager {
     };
 
     for (const [key, value] of Object.entries(appParams)) {
-      if (key.indexOf('VUE_APP_FEATURE') > -1) {
-        this.features[key] = value === 'true' || parseInt(value) === 1 ? true : false;
+      if (key.indexOf('VUE_APP_FEATURE') === 0) {
+        this.features[key.substring(16)] = value === 'true' || parseInt(value) === 1 ? true : false;
       }
     }
   }
