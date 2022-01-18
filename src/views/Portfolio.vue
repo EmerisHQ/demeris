@@ -92,8 +92,8 @@ export default {
       })),
     );
 
-    if (featureRunning('VUE_APP_FEATURE_TEST_SHOW_CONSOLE_LOG')) {
-      console.log('VUE_APP_FEATURE_TEST_SHOW_CONSOLE_LOG is running');
+    if (featureRunning('TEST_SHOW_CONSOLE_LOG')) {
+      console.log('Feature: TEST_SHOW_CONSOLE_LOG is running');
     }
 
     const router = useRouter();
