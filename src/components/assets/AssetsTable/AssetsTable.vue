@@ -40,8 +40,8 @@
       <tbody>
         <template v-if="variant === 'balance'">
           <tr
-            v-for="(asset, index) in orderedUserBalances"
-            :key="index"
+            v-for="asset in orderedUserBalances"
+            :key="asset.denom"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -79,8 +79,8 @@
         </template>
         <template v-else-if="variant === 'full'">
           <tr
-            v-for="(asset, index) in orderedAllBalances"
-            :key="index"
+            v-for="asset in orderedAllBalances"
+            :key="asset.denom"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
