@@ -377,6 +377,10 @@ export const messages = {
         title: 'Purchase {asset}',
         poweredBy: 'Powered by Moonpay',
       },
+      simplexBanner: {
+        title: 'Purchase {asset}',
+        poweredBy: 'Powered by Simplex',
+      },
       avatar: {
         priceApiDown: 'Asset prices are currently unavailable.',
       },
@@ -391,6 +395,9 @@ export const messages = {
         title: 'Chains',
       },
       moonpay: {
+        cta: 'Add crypto to your account',
+      },
+      simplex: {
         cta: 'Add crypto to your account',
       },
       transaction: {
