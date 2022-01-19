@@ -12,15 +12,17 @@
 
     <template v-else-if="['review', 'send'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <TxStepsModal
-          :data="steps"
-          :back-route="{ name: 'Portfolio' }"
-          action-name="transfer"
-          @transacting="goToStep('send')"
-          @failed="goToStep('review')"
-          @reset="resetHandler"
-          @finish="resetHandler"
-        />
+        <template #deactivated>
+          <TxStepsModal
+            :data="steps"
+            :back-route="{ name: 'Portfolio' }"
+            action-name="transfer"
+            @transacting="goToStep('send')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+            @finish="resetHandler"
+          />
+        </template>
 
         <TransactionProcessCreator
           :steps="steps"
