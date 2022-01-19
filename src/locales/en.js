@@ -41,6 +41,7 @@ export const messages = {
     navbar: {
       portfolio: 'Portfolio',
       assets: 'Assets',
+      // airdrops: 'Airdrops',
       pools: 'Pools',
       send: 'Send',
       receive: 'Receive',

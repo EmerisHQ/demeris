@@ -737,7 +737,7 @@ export default defineComponent({
                   continue;
                 }
                 try {
-                  let txResultData: any = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+                  let txResultData = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
                   });

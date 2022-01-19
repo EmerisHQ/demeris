@@ -74,11 +74,15 @@ export default defineComponent({
 
     const chartData = ref({
       options: {
+        theme: {
+          mode: 'dark',
+        },
         chart: {
           type: 'area',
           toolbar: {
             show: false,
           },
+          background: 'transparent',
         },
         stroke: {
           curve: 'straight',
