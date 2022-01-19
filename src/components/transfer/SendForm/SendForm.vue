@@ -11,23 +11,35 @@
     </template>
 
     <template v-else-if="['review', 'send'].includes(step)">
-      <TransactionProcessCreator
-        :steps="steps"
-        action="transfer"
-        @pending="
-          () => {
-            closeModal();
-            resetHandler();
-          }
-        "
-        @close="
-          () => {
-            closeModal();
-            resetHandler();
-          }
-        "
-        @previous="$emit('previous')"
-      />
+      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+        <TxStepsModal
+          :data="steps"
+          :back-route="{ name: 'Portfolio' }"
+          action-name="transfer"
+          @transacting="goToStep('send')"
+          @failed="goToStep('review')"
+          @reset="resetHandler"
+          @finish="resetHandler"
+        />
+
+        <TransactionProcessCreator
+          :steps="steps"
+          action="transfer"
+          @pending="
+            () => {
+              closeModal();
+              resetHandler();
+            }
+          "
+          @close="
+            () => {
+              closeModal();
+              resetHandler();
+            }
+          "
+          @previous="$emit('previous')"
+        />
+      </FeatureRunningConditional>
     </template>
   </div>
 </template>
@@ -38,6 +50,8 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
@@ -55,9 +69,11 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
+    TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
     TransactionProcessCreator,
+    FeatureRunningConditional,
   },
 
   props: {
