@@ -275,19 +275,19 @@ export default defineComponent({
 
     watch(
       [() => props.chainName, () => props.denom, () => props.poolDenoms],
-      async ([], [newChainName, newDenom, newPoolDenoms]) => {
+      async ([, oldDenom], [newChainName, newDenom, newPoolDenoms]) => {
         if (isPoolCoin.value) {
           let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (newDenom as string));
 
           if (existingPool) {
             denoms.value = await getReserveBaseDenoms(existingPool);
-          } else if (newPoolDenoms.filter(Boolean).length) {
-            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, newChainName)));
+          } else if (newPoolDenoms?.filter(Boolean).length) {
+            denoms.value = await Promise.all(newPoolDenoms.map((item) => getBaseDenom(item, newChainName)));
           }
         } else {
           let baseDenom = newDenom;
           try {
-            baseDenom = await getBaseDenom(props.denom as string, newChainName);
+            baseDenom = await getBaseDenom(oldDenom as string, newChainName);
           } catch (e) {
             //
           }
