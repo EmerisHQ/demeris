@@ -363,17 +363,15 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      getTokenPrices('1');
+      getTokenPrices('max');
     });
 
     const getTokenPrices = async (days: string) => {
-      // console.log('checking here', assets.value);
-      // const currentAsset = assets.value.find((item) => item.base_denom === route.params.denom);
-      // console.log('checking here', currentAsset);
+      const chainName = toRaw(assetConfig.value).chain_name;
       await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
         subscribe: false,
         params: {
-          token_id: 'akash-network',
+          token_id: chainName === 'cosmos-hub' ? 'cosmos' : chainName === 'akash' ? 'akash-network' : chainName,
           days,
           currency: 'usd',
         },

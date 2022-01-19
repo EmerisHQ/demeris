@@ -127,7 +127,7 @@ export default defineComponent({
       ],
     });
 
-    const activeFilterItem = ref('1');
+    const activeFilterItem = ref('max');
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
