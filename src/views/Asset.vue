@@ -23,7 +23,7 @@
         </header>
 
         <!-- Asset Price Performance Chart -->
-        <AreaChart :data-stream="dataStream" @filterChanged="getTokenPrices" />
+        <AreaChart v-if="isAreaChartFeatureRunning" :data-stream="dataStream" @filterChanged="getTokenPrices" />
 
         <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
@@ -182,6 +182,7 @@ import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'Asset',
@@ -383,6 +384,8 @@ export default defineComponent({
       return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
     });
 
+    const isAreaChartFeatureRunning = featureRunning('VUE_APP_FEATURE_PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+
     return {
       nativeAsset,
       assetConfig,
@@ -398,6 +401,7 @@ export default defineComponent({
       isPoolCoin,
       dataStream,
       getTokenPrices,
+      isAreaChartFeatureRunning,
     };
   },
 });
