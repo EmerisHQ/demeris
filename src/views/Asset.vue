@@ -117,10 +117,11 @@
         </section>
 
         <!-- Staking -->
-
-        <section v-if="assetConfig?.stakable" class="mt-16">
-          <StakeTable class="mt-8" :denom="denom" />
-        </section>
+        <template v-if="stakingEnabled">
+          <section v-if="assetConfig?.stakable" class="mt-16">
+            <StakeTable class="mt-8" :denom="denom" />
+          </section>
+        </template>
 
         <!-- Pools -->
 
@@ -177,7 +178,7 @@ import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
-
+import { featureRunning } from '@/utils/FeatureManager';
 export default defineComponent({
   name: 'Asset',
 
@@ -207,6 +208,7 @@ export default defineComponent({
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
+    const stakingEnabled = featureRunning('STAKING');
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
     const denom = computed(() => route.params.denom as string);
@@ -368,6 +370,7 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      stakingEnabled,
     };
   },
 });
