@@ -1,18 +1,11 @@
-import { Env } from '../Env';
-
 export class Navbar {
-  //NOTE: {TODO}
-  // all pages classes can have method navigating to itself like:
-  // goToTHISPage(){
-  //navbar.thisTab().click}
-
   goToDashboard() {
     // wait for navbar logo to be visible
     cy.get(this.navbarLogo(), { timeout: 20000 }).should('be.visible');
 
     this.navbarLogo().click();
 
-    cy.url().should('eq', Env.LOCAL);
+    cy.url().should('eq', Cypress.config().baseUrl);
   }
 
   openDemoFromWelcomeSite() {
@@ -27,6 +20,10 @@ export class Navbar {
   }
 
   // TABS
+  navbarLogo() {
+    return this.navbar().get('[data-cy=navbar-logo]');
+  }
+
   portfolioTab() {
     return this.navbar().contains('Portfolio');
   }
@@ -39,8 +36,16 @@ export class Navbar {
     return this.navbar().contains('Pools');
   }
 
-  navbarLogo() {
-    return this.navbar().get('[data-cy=navbar-logo]');
+  receive() {
+    return cy.get('a[href="/receive"]');
+  }
+
+  send() {
+    return cy.get('a[href="/send"]');
+  }
+
+  userSettings() {
+    return this.navbar().get("[class *= 'settings-wrapper']");
   }
 
   navbar() {

@@ -1,6 +1,8 @@
 import { computed, ComputedRef, ref, unref, watch } from 'vue';
 
 import { useAllStores } from '@/store';
+import { Amount } from '@/types/base';
+import { getBaseDenomSync } from '@/utils/actionHandler';
 import { keyHashfromAddress, parseCoins } from '@/utils/basic';
 
 import usePools from './usePools';
@@ -54,12 +56,14 @@ function usePool(id: string) {
     });
   });
 
-  const calculateSupplyTokenAmount = (amountA: number, amountB: number) => {
+  const calculateSupplyTokenAmount = (amounts: { denom: string; amount: number }[]) => {
     if (!totalSupply.value || !reserveBalances.value) {
       return 1;
     }
 
     const sortedBalances = [...reserveBalances.value].sort((a, b) => (b.base_denom > a.base_denom ? -1 : 1));
+    const amountA = amounts.find((item) => getBaseDenomSync(item.denom) === sortedBalances[0].base_denom).amount;
+    const amountB = amounts.find((item) => getBaseDenomSync(item.denom) === sortedBalances[1].base_denom).amount;
 
     const poolCoinAmount = Math.min(
       (totalSupply.value * amountA) / sortedBalances[0].amount,
