@@ -1,3 +1,4 @@
+import { SubPagesPaths } from '../sub-pages-paths';
 export class Portfolio {
   totalBalanceVisibility() {
     cy.contains('Total balance').should('be.visible');
@@ -12,8 +13,10 @@ export class Portfolio {
   }
 
   emptyPoolsBehaviour() {
+    let subPagePath = new SubPagesPaths();
     cy.contains('Pools you add liquidity to will appear here.').should('be.visible');
-    cy.get('button:contains("Explore pools")').should('be.visible').click();
-    cy.url().should('eq', 'http://localhost:8080/pools');
+    cy.get('button:contains("Explore pools")').should('be.visible');
+    cy.get('button:contains("Explore pools")').click();
+    cy.url().should('include', subPagePath.pools_path);
   }
 }
