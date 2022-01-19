@@ -384,7 +384,7 @@ export default defineComponent({
       return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
     });
 
-    const isAreaChartFeatureRunning = featureRunning('VUE_APP_FEATURE_PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
 
     return {
       nativeAsset,
