@@ -12,6 +12,7 @@ import { validPools } from '@/utils/actionHandler';
 import { hashObject } from '@/utils/basic';
 
 import {
+  DemerisActionByTokenPriceParams,
   DemerisActionParams,
   DemerisActionsByAddressParams,
   DemerisActionsByChainAddressParams,
@@ -146,6 +147,10 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
   ): Promise<API.PrimaryChannels>;
+  [DemerisActionTypes.GET_TOKEN_PRICES](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionByTokenPriceParams,
+  ): Promise<any>;
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByChainParams,
@@ -640,6 +645,19 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetPrimaryChannels', 'Could not perform API query.');
     }
     return getters['getPrimaryChannels'](JSON.stringify(params));
+  },
+  async [DemerisActionTypes.GET_TOKEN_PRICES]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(
+        getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
+      );
+      commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: response.data });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TOKEN_PRICES, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
+    }
   },
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
