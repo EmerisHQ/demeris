@@ -1,12 +1,12 @@
 <template>
   <div class="flex items-center justify-between py-7 px-4">
-    <div class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('goback')">
+    <button class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('goback')">
       <Icon :name="'ArrowLeftIcon'" :icon-size="1.5" />
-    </div>
+    </button>
     <div class="w-6"></div>
-    <div class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('close')">
+    <button v-if="showClose" class="w-10 flex items-center justify-evenly cursor-pointer" @click="clickIcon('close')">
       <Icon :name="'CloseIcon'" :icon-size="1.5" />
-    </div>
+    </button>
   </div>
 </template>
 <script lang="ts">
@@ -16,6 +16,12 @@ import Icon from '@/components/ui/Icon.vue';
 export default defineComponent({
   name: 'GobackWithClose',
   components: { Icon },
+  props: {
+    showClose: {
+      type: Boolean,
+      default: true,
+    },
+  },
   emits: ['goback', 'close'],
   setup(props, { emit }) {
     function clickIcon(event) {
