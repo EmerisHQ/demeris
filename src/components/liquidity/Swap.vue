@@ -1,5 +1,5 @@
 <template>
-  <div :style="isInit ? '' : 'pointer-events: none;'" class="wrapper w-full relative">
+  <div :style="isInit ? '' : 'pointer-events: none'" class="wrapper w-full relative">
     <SlippageSettingModal
       v-if="isSlippageSettingModalOpen"
       :swap-data="{
@@ -13,19 +13,24 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <ReviewModal
+    <TransactionProcessCreator
       v-if="isOpen && !isSlippageSettingModalOpen"
-      :data="actionHandlerResult"
-      action-name="swap"
-      variant="widget"
-      @close="reviewModalToggle"
-      @reset="
+      :steps="actionHandlerResult"
+      action="swap"
+      class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
+      @pending="
         () => {
           reviewModalToggle();
           reset();
         }
       "
-      @goback="() => reviewModalToggle()"
+      @close="
+        () => {
+          reviewModalToggle();
+          reset();
+        }
+      "
+      @previous="reviewModalToggle"
     />
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
@@ -138,7 +143,6 @@ import { useStore } from 'vuex';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -149,6 +153,9 @@ import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -164,10 +171,10 @@ export default defineComponent({
     DenomSelect,
     Icon,
     IconButton,
-    ReviewModal,
     Alert,
     SlippageSettingModal,
     FeeLevelSelector,
+    TransactionProcessCreator,
   },
 
   props: {
@@ -199,6 +206,8 @@ export default defineComponent({
     const slippage = ref(0);
     const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
+    const transactionsStore = useTransactionsStore();
+
     const isSignedIn = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
@@ -218,6 +227,14 @@ export default defineComponent({
     onUnmounted(() => {
       if (setIntervalId.value) {
         clearInterval(setIntervalId.value);
+      }
+
+      if (transactionsStore.currentId) {
+        const snapshot = transactionsStore.getCurrentService().getSnapshot();
+        const cursor = getTransactionOffset(snapshot.context);
+        if (snapshot.matches('transacting') || cursor.total > cursor.offset) {
+          transactionsStore.setTransactionAsPending();
+        }
       }
     });
 
@@ -740,6 +757,10 @@ export default defineComponent({
     watch(
       () => data.payCoinData?.denom,
       async () => {
+        if (!data.payCoinData) {
+          return;
+        }
+
         if (
           data.payCoinData?.denom.startsWith('pool') ||
           (data.payCoinData?.denom.startsWith('ibc') &&
@@ -747,10 +768,10 @@ export default defineComponent({
         ) {
           txFee.value = 0;
         } else {
-          const fees = await getFeeForChain(data.payCoinData.on_chain);
+          const fees = await getFeeForChain(data.payCoinData?.on_chain);
           txFee.value =
             fees[0].amount[gasPriceLevel.value] *
-            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData.base_denom });
+            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
         }
       },
     );
@@ -1121,5 +1142,10 @@ export default defineComponent({
 .wrapper {
   min-width: 20rem;
   /* min-height: 17rem; */
+}
+
+.swap-widget,
+.swap-process {
+  min-height: 24rem;
 }
 </style>

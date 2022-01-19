@@ -1,5 +1,5 @@
 <template>
-  <List>
+  <List :bordered="bordered">
     <ListItem :label="$t(`components.previews.transfer.${response ? 'sentLbl' : 'sendLbl'}`)">
       <div class="flex justify-end items-center">
         <div class="text-right">
@@ -141,6 +141,10 @@ export default defineComponent({
     context: {
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
+    },
+    bordered: {
+      type: Boolean,
+      default: true,
     },
   },
 
