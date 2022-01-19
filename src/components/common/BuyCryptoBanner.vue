@@ -36,6 +36,7 @@ import { useStore } from 'vuex';
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 export default defineComponent({
   name: 'BuyCryptoBanner',
   props: {
@@ -55,7 +56,11 @@ export default defineComponent({
     const route = useRoute();
     //remove query check. just for testing
     const bannerType = ref(
-      route.query?.buyType ? route.query?.buyType : userCountry.includes('America') ? 'simplex' : 'moonpay',
+      route.query?.buyType
+        ? route.query?.buyType
+        : userCountry.includes('America') && featureRunning('SIMPLEX')
+        ? 'simplex'
+        : 'moonpay',
     );
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
