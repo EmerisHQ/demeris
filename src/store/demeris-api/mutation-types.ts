@@ -21,6 +21,7 @@ export enum DemerisMutationTypes {
   SET_VERIFIED_DENOMS = 'SET_VERIFIED_DENOMS',
   SET_PRIMARY_CHANNEL = 'SET_PRIMARY_CHANNEL',
   SET_PRIMARY_CHANNELS = 'SET_PRIMARY_CHANNELS',
+  SET_TOKEN_PRICES = 'SET_TOKEN_PRICES',
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
   SET_RELAYER_STATUS = 'SET_RELAYER_STATUS',
   SET_RELAYER_BALANCES = 'SET_RELAYER_BALANCES',
@@ -61,6 +62,7 @@ export type DemerisMutationArgs =
   | API.Bech32Config
   | API.PrimaryChannels
   | API.PrimaryChannel
+  | API.TokenPrices
   | API.StakingBalances
   | API.Numbers
   | API.SeqNumber

@@ -22,8 +22,10 @@
           </div>
         </header>
 
-        <!-- Balance -->
+        <!-- Asset Price Performance Chart -->
+        <AreaChart v-if="isAreaChartFeatureRunning" :data-stream="dataStream" @filterChanged="getTokenPrices" />
 
+        <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
@@ -153,7 +155,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRaw, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -162,6 +164,7 @@ import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
@@ -179,6 +182,7 @@ import { VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'Asset',
@@ -198,6 +202,7 @@ export default defineComponent({
     PoolBanner,
     MoonpayBanner,
     ChainDownWarning,
+    AreaChart,
   },
 
   setup() {
@@ -357,6 +362,30 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
+    onMounted(() => {
+      getTokenPrices('1');
+    });
+
+    const getTokenPrices = async (days: string) => {
+      // console.log('checking here', assets.value);
+      // const currentAsset = assets.value.find((item) => item.base_denom === route.params.denom);
+      // console.log('checking here', currentAsset);
+      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+        subscribe: false,
+        params: {
+          token_id: 'akash-network',
+          days,
+          currency: 'usd',
+        },
+      });
+    };
+
+    const dataStream = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+    });
+
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+
     return {
       nativeAsset,
       assetConfig,
@@ -370,6 +399,9 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      dataStream,
+      getTokenPrices,
+      isAreaChartFeatureRunning,
     };
   },
 });
