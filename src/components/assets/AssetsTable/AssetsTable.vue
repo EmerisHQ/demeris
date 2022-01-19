@@ -40,8 +40,8 @@
       <tbody>
         <template v-if="variant === 'balance'">
           <tr
-            v-for="asset in orderedUserBalances"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedUserBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -79,8 +79,8 @@
         </template>
         <template v-else-if="variant === 'full'">
           <tr
-            v-for="asset in orderedAllBalances"
-            :key="asset.denom"
+            v-for="(asset, index) in orderedAllBalances"
+            :key="index"
             class="assets-table__row group cursor-pointer"
             @click="handleClick(asset)"
           >
@@ -111,7 +111,7 @@
           </tr>
         </template>
         <template v-else>
-          <tr :key="asset.denom" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
+          <tr :key="index" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
                 <CircleSymbol :denom="asset.denom" />

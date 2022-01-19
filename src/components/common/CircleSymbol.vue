@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 type CircleSymbolVariant = 'asset' | 'chain';
@@ -180,7 +180,6 @@ export default defineComponent({
 
       const chainConfig = chains[denomConfig.chain_name];
       denomConfig.logo = denomConfig.logo || chainConfig?.logo;
-
       return { ...denomConfig };
     });
 
@@ -275,21 +274,21 @@ export default defineComponent({
     });
 
     watch(
-      () => toRefs(props),
-      async () => {
+      [() => props.chainName, () => props.denom, () => props.poolDenoms],
+      async ([], [newChainName, newDenom, newPoolDenoms]) => {
         if (isPoolCoin.value) {
-          let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
+          let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (newDenom as string));
 
           if (existingPool) {
             denoms.value = await getReserveBaseDenoms(existingPool);
-          } else if (props.poolDenoms.filter(Boolean).length) {
-            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
+          } else if (newPoolDenoms.filter(Boolean).length) {
+            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, newChainName)));
           }
         } else {
-          let baseDenom = props.denom;
+          let baseDenom = newDenom;
           try {
-            baseDenom = await getBaseDenom(props.denom as string, props.chainName);
-          } catch {
+            baseDenom = await getBaseDenom(props.denom as string, newChainName);
+          } catch (e) {
             //
           }
           denoms.value = [baseDenom];
