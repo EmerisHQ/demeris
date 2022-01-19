@@ -21,13 +21,6 @@
     >
       {{ $t('navbar.pools') }}
     </router-link>
-    <!-- <router-link
-      class="h-12 py-3.5 px-2 md:px-3 leading-5 hover:text-text active:opacity-70"
-      exact-active-class="text-text font-medium"
-      to="/airdrops"
-    >
-      {{ $t('navbar.airdrops') }}
-    </router-link> -->
   </nav>
 </template>
 <script lang="ts">
