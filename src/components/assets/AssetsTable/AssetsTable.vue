@@ -69,7 +69,7 @@
               <div class="flex items-center justify-center space-x-3">
                 <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
                 <ChainDownWarning
-                  v-show="Object.values(getUnavailableChains(asset)).length"
+                  v-if="Object.values(getUnavailableChains(asset)).length"
                   v-bind="Object.values(getUnavailableChains(asset))[0]"
                   :chains="Object.keys(getUnavailableChains(asset))"
                 />

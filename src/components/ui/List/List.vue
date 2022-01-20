@@ -1,5 +1,8 @@
 <template>
-  <div class="list" :class="{ 'border-t border-b border-border divide-y divide-border': variant === 'divided' }">
+  <div
+    class="list"
+    :class="{ 'border-border divide-y divide-border': variant === 'divided', 'border-t border-b': bordered }"
+  >
     <slot />
   </div>
 </template>
@@ -13,6 +16,10 @@ export default defineComponent({
     variant: {
       type: String as PropType<'divided' | 'none'>,
       default: 'divided',
+    },
+    bordered: {
+      type: Boolean,
+      default: true,
     },
   },
 });

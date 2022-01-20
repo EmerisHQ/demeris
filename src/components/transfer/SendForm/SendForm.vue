@@ -7,18 +7,26 @@
 
     <template v-else-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
-      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="goToStep('review')" />
+      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="generateSteps" />
     </template>
 
-    <template v-else>
-      <TxStepsModal
-        :data="steps"
-        :back-route="{ name: 'Portfolio' }"
-        action-name="transfer"
-        @transacting="goToStep('send')"
-        @failed="goToStep('review')"
-        @reset="resetHandler"
-        @finish="resetHandler"
+    <template v-else-if="['review', 'send'].includes(step)">
+      <TransactionProcessCreator
+        :steps="steps"
+        action="transfer"
+        @pending="
+          () => {
+            closeModal();
+            resetHandler();
+          }
+        "
+        @close="
+          () => {
+            closeModal();
+            resetHandler();
+          }
+        "
+        @previous="$emit('previous')"
       />
     </template>
   </div>
@@ -27,9 +35,10 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { SendAddressForm, TransferAction } from '@/types/actions';
 import { Balances } from '@/types/api';
@@ -46,9 +55,9 @@ export default defineComponent({
   name: 'SendForm',
 
   components: {
-    TxStepsModal,
     SendFormAmount,
     SendFormRecipient,
+    TransactionProcessCreator,
   },
 
   props: {
@@ -62,11 +71,13 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step'],
+  emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
+    const router = useRouter();
+
     const form: SendAddressForm = reactive({
       recipient: '',
       chain_name: '',
@@ -86,6 +97,10 @@ export default defineComponent({
       get: () => props.step,
       set: (value) => emit('update:step', value),
     });
+
+    const closeModal = () => {
+      router.push('/');
+    };
 
     watch(
       () => [form.balance.amount, form.balance.denom, form.chain_name],
@@ -144,7 +159,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { steps, form, goToStep, generateSteps, resetHandler, state };
+    return { steps, form, goToStep, generateSteps, resetHandler, state, closeModal };
   },
 });
 </script>
