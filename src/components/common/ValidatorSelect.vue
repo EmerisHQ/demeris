@@ -52,6 +52,7 @@ import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'ValidatorSelect',
@@ -72,7 +73,7 @@ export default defineComponent({
     const store = useStore();
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = computed(() =>
-      store.getters['demeris/getDenomPrecision']({
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );

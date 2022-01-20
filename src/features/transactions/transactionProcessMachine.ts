@@ -377,7 +377,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         return useStore().dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
-          msgs: [msgResult.msg],
+          msgs: msgResult.msg,
           chain_name: msgResult.chain_name,
           fee,
           registry: msgResult.registry,

@@ -42,7 +42,7 @@
       <!-- table body -->
       <tbody>
         <tr
-          v-for="validator of filteredValidatorList"
+          v-for="validator of sortedValidatorList"
           :key="validator.operator_address"
           class="group cursor-pointer"
           @click="selectValidator(validator)"
@@ -102,6 +102,7 @@ import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 
 //TODO: implement type for validator list
 export default {
@@ -127,7 +128,7 @@ export default {
 
     /* preset variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
-    const precision = store.getters['demeris/getDenomPrecision']({ name: baseDenom });
+    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
 
     /* variables */
     const keyword = ref<string>('');
@@ -136,6 +137,13 @@ export default {
     const filteredValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
       return props.validatorList.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+    });
+    const sortedValidatorList = computed(() => {
+      return filteredValidatorList.value.sort((a, b) => {
+        if (Number(a.tokens) < Number(b.tokens)) return -1;
+        if (Number(a.tokens) > Number(b.tokens)) return 1;
+        return 0;
+      });
     });
     const getCommissionDisplayValue = (value) => {
       return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
@@ -161,6 +169,7 @@ export default {
     return {
       baseDenom,
       filteredValidatorList,
+      sortedValidatorList,
       keyword,
       getCommissionDisplayValue,
       getAmountDisplayValue,

@@ -84,11 +84,19 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_UNBONDING_DELEGATIONS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByAddressParams,
+  ): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Balances>;
   [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({
     dispatch,
     getters,
   }: ActionContext<State, RootState>): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({
+    dispatch,
+    getters,
+  }: ActionContext<State, RootState>): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_NUMBERS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
@@ -338,6 +346,43 @@ export const actions: ActionTree<State, RootState> & Actions = {
       resolver();
 
       return getters['getStakingBalances'](params);
+    }
+  },
+  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getUnbondingDelegations'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/unbondingdelegations',
+        );
+        commit(DemerisMutationTypes.SET_UNBONDING_DELEGATIONS, { params, value: response.data.unbonding_delegations });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+      } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetUnbondingDelegations', 'Could not perform API query.');
+      }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getUnbondingDelegations'](params);
     }
   },
   async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
