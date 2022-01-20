@@ -1,4 +1,3 @@
-import { Env } from '../support/Env';
 import { Assets } from '../support/pages/assets';
 import { Portfolio } from '../support/pages/portfolio';
 import { WelcomePage } from '../support/pages/welcome-page';
@@ -7,7 +6,8 @@ describe('Portfolio visual check', function () {
   beforeEach(() => {
     cy.visit(Cypress.config().baseUrl);
     let welcomePage = new WelcomePage();
-    welcomePage.tryTheDemoButton().click({ force: true });
+    welcomePage.connectKeplrButton().click();
+    welcomePage.betaAgreeButton().click();
   });
 
   it('visibility of elements', function () {
@@ -24,8 +24,4 @@ describe('Portfolio visual check', function () {
 
     portfolio.emptyPoolsBehaviour();
   });
-  // it('add new pools', function (){
-  //   let portfolio = new Portfolio();
-  //   portfolio.addNewPools()
-  // })
 });
