@@ -12,6 +12,7 @@ import { validPools } from '@/utils/actionHandler';
 import { hashObject } from '@/utils/basic';
 
 import {
+  DemerisActionByTokenIdParams,
   DemerisActionByTokenPriceParams,
   DemerisActionParams,
   DemerisActionsByAddressParams,
@@ -150,6 +151,10 @@ export interface Actions {
   [DemerisActionTypes.GET_TOKEN_PRICES](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionByTokenPriceParams,
+  ): Promise<any>;
+  [DemerisActionTypes.GET_TOKEN_ID](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionByTokenIdParams,
   ): Promise<any>;
   [DemerisActionTypes.GET_CHAIN_STATUS](
     { commit, getters }: ActionContext<State, RootState>,
@@ -657,6 +662,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
     } catch (e) {
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
+    }
+  },
+  async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`);
+      commit(DemerisMutationTypes.SET_TOKEN_ID, { value: { ...response.data, token: params.token } });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TOKEN_ID, payload: { params } });
+      }
+      return getters['getTokenId'];
+    } catch (e) {
+      throw new SpVuexError('Demeris:getTokenId', 'Could not perform API query.');
     }
   },
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state }, { subscribe = false, params }) {

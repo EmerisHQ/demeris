@@ -73,6 +73,7 @@ export type Getters = {
   [GetterTypes.getPrimaryChannel](state: State): { (params: API.APIRequests): string | null };
   [GetterTypes.getPrimaryChannels](state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
   [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
+  [GetterTypes.getTokenId](state: State): string | null;
   [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
 };
 
@@ -323,6 +324,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getTokenPrices]: (state) => {
     return state.tokenPrices;
+  },
+  [GetterTypes.getTokenId]: (state) => {
+    return state.tokenId;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;

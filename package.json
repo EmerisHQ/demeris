@@ -45,6 +45,8 @@
     "lodash.groupby": "^4.6.0",
     "lodash.isequal": "^4.5.0",
     "lodash.orderby": "^4.6.0",
+    "lodash.maxby": "^4.6.0",
+    "lodash.minby": "^4.6.0",
     "long": "^4.0.0",
     "mitt": "^3.0.0",
     "pinia": "^2.0.6",

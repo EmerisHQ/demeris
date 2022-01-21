@@ -175,6 +175,7 @@ import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
+import useDenoms from '@/composables/useDenoms';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
@@ -216,6 +217,7 @@ export default defineComponent({
     });
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
+    const { useDenom } = useDenoms();
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
@@ -367,11 +369,17 @@ export default defineComponent({
     });
 
     const getTokenPrices = async (days: string) => {
-      const chainName = toRaw(assetConfig.value).chain_name;
+      const { displayName } = useDenom(denom.value);
+      const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
+        subscribe: false,
+        params: {
+          token: displayName.value.toLowerCase(),
+        },
+      });
       await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
         subscribe: false,
         params: {
-          token_id: chainName === 'cosmos-hub' ? 'cosmos' : chainName === 'akash' ? 'akash-network' : chainName,
+          token_id: chainName,
           days,
           currency: 'usd',
         },

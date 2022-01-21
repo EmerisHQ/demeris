@@ -9,6 +9,10 @@ export type TokenPriceReq = {
   days: string;
   currency: string;
 };
+export type TokenIdReq = {
+  token: string;
+};
+export type TokenId = string;
 export type TokenPrices = {
   x: string;
   y: number;
