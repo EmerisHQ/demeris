@@ -1,14 +1,27 @@
+import { Assets } from '../support/pages/assets';
+import { Portfolio } from '../support/pages/portfolio';
 import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Portfolio visual check', function () {
   beforeEach(() => {
     cy.visit(Cypress.config().baseUrl);
     let welcomePage = new WelcomePage();
-    welcomePage.tryTheDemoButton().click();
+    welcomePage.connectKeplrButton().click();
+    welcomePage.betaAgreeButton().click();
   });
 
-  it('total balance check', function () {
-    cy.contains('Total balance').should('be.visible');
-    cy.get('*[class="total-price"]').should('contain', '$');
+  it('visibility of elements', function () {
+    let portfolio = new Portfolio();
+
+    portfolio.totalBalanceVisibility();
+    portfolio.assetsVisibility();
+    portfolio.poolsVisibility();
+
+    let portfolioAssets = new Assets();
+    portfolioAssets.aktRow().should('be.visible');
+    portfolioAssets.atomRow().should('be.visible');
+    portfolioAssets.gravityRow().should('be.visible');
+
+    portfolio.emptyPoolsBehaviour();
   });
 });

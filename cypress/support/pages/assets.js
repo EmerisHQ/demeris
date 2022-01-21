@@ -23,6 +23,10 @@ export class Assets {
     return this.tableAssetsRow('LUNA');
   }
 
+  gravityRow() {
+    return this.tableAssetsRow('Gravity 1');
+  }
+
   tableAssetsRow(assetCode) {
     return this.tableOfAssets().contains('tr', assetCode);
   }
