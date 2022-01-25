@@ -152,6 +152,7 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionByTokenPriceParams,
   ): Promise<any>;
+  [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }: ActionContext<State, RootState>): void;
   [DemerisActionTypes.GET_TOKEN_ID](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionByTokenIdParams,
@@ -663,6 +664,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
+  },
+  [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
+    commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });
   },
   async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters }, { subscribe = false, params }) {
     try {

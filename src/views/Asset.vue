@@ -155,7 +155,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted,ref, toRaw, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -365,7 +365,7 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      getTokenPrices('max');
+      getTokenPrices('1');
     });
 
     const getTokenPrices = async (days: string) => {
@@ -376,14 +376,17 @@ export default defineComponent({
           token: displayName.value.toLowerCase(),
         },
       });
-      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
-        subscribe: false,
-        params: {
-          token_id: chainName,
-          days,
-          currency: 'usd',
-        },
-      });
+
+      if (chainName) {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+          subscribe: false,
+          params: {
+            token_id: chainName,
+            days,
+            currency: 'usd',
+          },
+        });
+      }
     };
 
     const dataStream = computed(() => {
@@ -391,6 +394,10 @@ export default defineComponent({
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+
+    onUnmounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
+    });
 
     return {
       nativeAsset,

@@ -257,13 +257,17 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_TOKEN_PRICES](state: State, payload: DemerisMutations) {
     const newPayload: any = payload.value;
-    const historicalPrices: API.TokenPrices[] = newPayload.data.prices.map((item) => {
-      return {
-        x: new Date(item[0]).toLocaleString(),
-        y: item[1],
-      };
-    });
-    state.tokenPrices = historicalPrices;
+    if (newPayload.data) {
+      const historicalPrices: API.TokenPrices[] = newPayload.data.prices.map((item) => {
+        return {
+          x: new Date(item[0]).toLocaleString(),
+          y: item[1],
+        };
+      });
+      state.tokenPrices = historicalPrices;
+    } else {
+      state.tokenPrices = [];
+    }
   },
   [MutationTypes.SET_TOKEN_ID](state: State, payload: DemerisMutations) {
     const newPayload: any = payload.value;
