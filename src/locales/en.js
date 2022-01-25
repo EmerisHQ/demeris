@@ -44,6 +44,7 @@ export const messages = {
       portfolio: 'Portfolio',
       assets: 'Assets',
       pools: 'Pools',
+      airdrops: 'Airdrops',
       send: 'Send',
       receive: 'Receive',
       settings: 'Settings',

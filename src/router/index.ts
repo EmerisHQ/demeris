@@ -37,6 +37,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/Pools.vue'),
   },
   {
+    path: '/airdrops',
+    name: 'Airdrops',
+    component: () => import('@/views/Airdrops.vue'),
+  },
+  {
     path: '/asset/:denom',
     name: 'Asset',
     component: () => import('@/views/Asset.vue'),
