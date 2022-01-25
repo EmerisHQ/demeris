@@ -253,6 +253,7 @@ export type Ticket = {
   height?: number;
   newTicket?: string;
   error?: string;
+  tx_hashes?: any[];
 };
 export type SeqNumber = {
   chain_name: string;
@@ -265,6 +266,14 @@ export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
 export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq;
+
+export type SwapEndBlockResponse = {
+  exchanged_offer_coin_amount: string;
+  remaining_offer_coin_amount: string;
+  exchanged_demand_coin_amount: string;
+  demand_coin_denom: string;
+  offer_coin_denom: string;
+};
 
 export type AddLiquidityEndBlockResponse = {
   accepted_coins: string;

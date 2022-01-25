@@ -1,40 +1,40 @@
 <template>
-  <div class="flex flex-col items-center text-center">
-    <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': currentAction === 'swap' }">
+  <div class="flex flex-col items-center text-center space-y-8">
+    <div class="flex flex-col items-center" :class="{ 'flex-col-reverse': isSwapComponent }">
       <h1
         class="font-bold pt-8 whitespace-pre-line"
         :class="{
-          'mb-8': !subtitle,
-          'text-3': action !== 'swap',
-          'text-2 px-3': action === 'swap',
+          'text-3': !isSwapComponent,
+          'text-2 px-3 pt-28': isSwapComponent,
         }"
       >
         {{ title }}
       </h1>
-      <p v-if="subtitle" class="text-1 text-muted mt-3 mb-8">{{ subtitle }}</p>
+      <p v-if="subtitle" class="text-1 text-muted mt-3">{{ subtitle }}</p>
 
       <img
-        src="@/assets/images/transfer-interstitial.png"
+        :src="imageBanner"
         name="Transfer"
         class=""
-        :class="{ '-mt-8 -mb-10 max-w-sm': action !== 'swap' }"
+        :class="{ '-mb-10 max-w-sm': !isSwapComponent, 'absolute z-0 rounded-t-2xl top-0': isSwapComponent }"
       />
     </div>
 
-    <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': action === 'swap' }">
+    <p class="text-muted leading-copy max-w-md mx-auto" :class="{ 'px-6': isSwapComponent }">
       {{ description }}
-      <a
-        v-if="action !== 'addliquidity'"
-        href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
-        target="_blank"
-        class="text-link hover:text-link-hover"
-      >
-        {{ $t('generic_cta.learnMore') }} &#x2197;
-      </a>
     </p>
 
-    <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': action === 'swap' }">
-      <Button :name="$t('generic_cta.continue')" class="mt-12 mb-8" :click-function="emitContinue" />
+    <a
+      v-if="action !== 'addliquidity'"
+      href="https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"
+      target="_blank"
+      class="font-medium hover:underline"
+    >
+      {{ $t('generic_cta.learnMore') }} &#x2197;
+    </a>
+
+    <div class="w-full max-w-sm mx-auto" :class="{ 'px-6': isSwapComponent }">
+      <Button :name="$t('generic_cta.continue')" class="mb-8" :click-function="emitContinue" />
     </div>
   </div>
 </template>
@@ -44,8 +44,12 @@ import { computed, defineComponent, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import TransferImage from '@/assets/images/transfer-interstitial.png';
+import TransferSwapImage from '@/assets/images/transfer-interstitial-swap.png';
 import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
+import { GlobalDemerisGetterTypes } from '@/store';
+import { TypedAPIStore } from '@/store';
 import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
@@ -54,6 +58,10 @@ export default defineComponent({
     Button,
   },
   props: {
+    isSwapComponent: {
+      type: Boolean,
+      default: false,
+    },
     action: {
       type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
       default: 'swap',
@@ -67,10 +75,12 @@ export default defineComponent({
   emits: ['continue'],
 
   setup(props, { emit }) {
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
     const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
+
+    const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
 
     const currentAction = computed(() => {
       if (props.action === 'move') {
@@ -110,12 +120,14 @@ export default defineComponent({
 
       if (currentAction.value === 'transfer') {
         const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
-        let fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
-        let toChain = store.getters['demeris/getDisplayChain']({ name: backwardData.to_chain });
+        let fromChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+          name: backwardData.from_chain,
+        });
+        let toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: backwardData.to_chain });
 
         if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
           const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
-          toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+          toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain });
         }
 
         return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
@@ -150,10 +162,16 @@ export default defineComponent({
             const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
             const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
 
-            const fromChain = store.getters['demeris/getDisplayChain']({ name: backwardData.from_chain });
-            const toChain = store.getters['demeris/getDisplayChain']({ name: forwardData.to_chain });
+            const fromChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+              name: backwardData.from_chain,
+            });
+            const toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+              name: forwardData.to_chain,
+            });
             const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
-            const nativeChain = store.getters['demeris/getDisplayChain']({ name: asset.on_chain });
+            const nativeChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+              name: asset.on_chain,
+            });
 
             const translateKeyPath =
               props.steps[0].transactions.length > 2
@@ -183,7 +201,7 @@ export default defineComponent({
       props.steps,
       async () => {
         let stepDenoms = [];
-        const dexChain = store.getters['demeris/getDexChain'];
+        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
         stepDenoms = props.steps
           .map((step) => {
@@ -209,6 +227,7 @@ export default defineComponent({
     );
 
     return {
+      imageBanner,
       currentAction,
       title,
       subtitle,

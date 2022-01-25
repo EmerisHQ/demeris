@@ -2,156 +2,142 @@ import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
-import { GasPriceLevel, Pool } from '@/types/actions';
+import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
 
+import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
+import { GetterTypes } from './getter-types';
 import { ChainData, State } from './state';
-
+type Namespaced<T, N extends string> = {
+  [P in keyof T & string as `${N}/${P}`]: T[P];
+};
 export type Getters = {
-  getBalances(state: State): { (params: API.APIRequests): API.Balances | null };
-  getStakingBalances(state: State): { (params: API.APIRequests): API.StakingBalances | null };
-  getNumbers(state: State): { (params: API.APIRequests): API.Numbers | null };
-  getAllBalances(state: State): API.Balances | null;
-  getAllStakingBalances(state: State): API.StakingBalances | null;
-  getAllNumbers(state: State): API.Numbers | null;
-  getFeeAddresses(state: State): API.FeeAddresses | null;
-  getVerifiedDenoms(state: State): API.VerifiedDenoms | null;
-  getChains(state: State): Record<string, ChainData>;
-  getGasLimit(state: State): number;
-  getPrices(state: State): API.Prices;
-  getPrice(
+  [GetterTypes.getBalances](state: State): { (params: API.APIRequests): API.Balances | null };
+  [GetterTypes.getStakingBalances](state: State): { (params: API.APIRequests): API.StakingBalances | null };
+  [GetterTypes.getNumbers](state: State): { (params: API.APIRequests): API.Numbers | null };
+  [GetterTypes.getNumbersChain](state: State): { (params: API.APIRequests): API.SeqNumber | null };
+  [GetterTypes.getRelayerStatus](state: State): boolean;
+  [GetterTypes.getRelayerBalance](state: State): { (params: API.APIRequests): API.RelayerBalance };
+  [GetterTypes.getRelayerChainStatus](state: State): { (params: API.APIRequests): boolean };
+  [GetterTypes.getAllBalances](state: State, getters, rootState, rootGetters): API.Balances | null;
+  [GetterTypes.getAllStakingBalances](state: State): API.StakingBalances | null;
+  [GetterTypes.getAllNumbers](state: State): API.Numbers | null;
+  [GetterTypes.getFeeAddresses](state: State): API.FeeAddresses | null;
+  [GetterTypes.getVerifiedDenoms](state: State): API.VerifiedDenoms | null;
+  [GetterTypes.getChains](state: State): Record<string, ChainData>;
+  [GetterTypes.getPrices](state: State): API.Prices;
+  [GetterTypes.getExchangeAmountFromATOMPool](state: State, getters): { (base_denom: string): number };
+  [GetterTypes.getPrice](
     state: State,
     getters,
   ): {
     (params: { denom: string }): number;
   };
-  getTicker(
+  [GetterTypes.getTicker](
+    state: State,
+    getters,
+  ): {
+    (params: { name: string }): string;
+  };
+  [GetterTypes.getChainFromChainId](state: State): {
+    (chain_id: string): string;
+  };
+  [GetterTypes.getDisplayChain](state: State): {
+    (params: { name: string }): string;
+  };
+  [GetterTypes.getDenomPrecision](state: State): {
+    (params: { name: string }): string;
+  };
+  [GetterTypes.getEndpoint](state: State): string;
+  [GetterTypes.getAllValidPools](state: State): Pool[];
+  [GetterTypes.getSupply](state: State, getters): { (params): number };
+  [GetterTypes.getAllVerifiedTraces](state: State): Record<string, API.VerifyTrace>;
+  [GetterTypes.getDexChain](state: State): string;
+  [GetterTypes.getTxStatus](state: State): { (params: API.APIRequests): Promise<API.Ticket> | null };
+  [GetterTypes.isVerified](state: State): {
+    (params: { denom: string; chain_name: string }): boolean;
+  };
+  [GetterTypes.getOwnAddress](
     state: State,
     getters,
     rootState,
     rootGetters,
-  ): {
-    (params: { name: string }): string;
-  };
-  getDisplayChain(state: State): {
-    (params: { name: string }): string;
-  };
-  getDenomPrecision(state: State): {
-    (params: { name: string }): string;
-  };
-  isVerified(state: State): {
-    (params: { denom: string; chain_name: string }): boolean;
-  };
-  getEndpoint(state: State): string;
-  getAllValidPools(state: State): Pool[];
-  isSignedIn(state: State): boolean;
-  getDexChain(state: State): string;
-  getKeyhashes(state: State): string[];
-  getTxStatus(state: State): { (params: API.APIRequests): Promise<string> | null };
-  getKeplrAccountName(state: State): string | null;
-  isDemoAccount(state: State): boolean;
-  hasSeenReedem(state: State): boolean;
-  viewUnverified(state: State): boolean;
-  viewLPAssetPools(state: State): boolean;
-  allowCustomSlippage(state: State): boolean;
-  getSlippagePerc(state: State): number;
-  theme(state: State): string;
-  getPreferredGasPriceLevel(state: State): GasPriceLevel;
-  getOwnAddress(state: State): { (params: API.APIRequests): string | null };
-  getVerifyTrace(state: State): { (params: API.APIRequests): API.VerifyTrace | null };
-  getFeeAddress(state: State): { (params: API.APIRequests): API.FeeAddress | null };
-  getBech32Config(state: State): { (params: API.APIRequests): API.Bech32Config | null };
-  getFeeTokens(state: State): { (params: API.APIRequests): API.FeeTokens | null };
-  getChain(state: State): { (params: API.APIRequests): ChainData | null };
-  getPrimaryChannel(state: State): { (params: API.APIRequests): string | null };
-  getPrimaryChannels(state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
-  getChainStatus(state: State): { (params: API.APIRequests): boolean };
+  ): { (params: API.APIRequests): string | null };
+  [GetterTypes.getVerifyTrace](state: State): { (params: API.APIRequests): API.VerifyTrace | null };
+  [GetterTypes.getFeeAddress](state: State): { (params: API.APIRequests): API.FeeAddress | null };
+  [GetterTypes.getBech32Config](state: State): { (params: API.APIRequests): API.Bech32Config | null };
+  [GetterTypes.getFeeTokens](state: State): { (params: API.APIRequests): API.FeeTokens | null };
+  [GetterTypes.getChain](state: State): { (params: API.APIRequests): ChainData | null };
+  [GetterTypes.getPrimaryChannel](state: State): { (params: API.APIRequests): string | null };
+  [GetterTypes.getPrimaryChannels](state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
+  [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
 };
 
+export type GlobalGetters = Namespaced<Getters, 'demerisAPI'>;
+
 export const getters: GetterTree<State, RootState> & Getters = {
-  getBalances: (state) => (params) => {
+  [GetterTypes.getBalances]: (state) => (params) => {
     return state.balances[(params as API.AddrReq).address] ?? null;
   },
-  getStakingBalances: (state) => (params) => {
+  [GetterTypes.getStakingBalances]: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
-  getAllBalances: (state) => {
-    if (!state.keplr) {
+  [GetterTypes.getAllBalances]: (state: State, _getters, _rootState, rootGetters) => {
+    if (!rootGetters[GlobalUserGetterTypes.getKeplr]) {
       return null;
     }
 
     const balances = Object.values(state.balances)
       .filter((balance) => balance !== null)
       .flat()
-      .filter((balance) => state.keplr.keyHashes.indexOf(balance.address) > -1)
+      .filter((balance) => rootGetters[GlobalUserGetterTypes.getKeplr].keyHashes.indexOf(balance.address) > -1)
       .filter((balance) => parseCoins(balance.amount)[0].amount != '0');
     return balances.length > 0 ? balances : null;
   },
-  getAllValidPools: (state) => {
+  [GetterTypes.getAllValidPools]: (state) => {
     return state.validPools ?? [];
   },
-  getAllStakingBalances: (state) => {
+  [GetterTypes.getAllStakingBalances]: (state) => {
     const stakingBalances = Object.values(state.stakingBalances)
       .filter((balance) => balance !== null)
       .flat();
     return stakingBalances.length > 0 ? stakingBalances : null;
   },
-  getNumbers: (state) => (params) => {
+  [GetterTypes.getNumbers]: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;
   },
-  getNumbersChain: (state) => (params) => {
+  [GetterTypes.getNumbersChain]: (state) => (params) => {
     return state.chainnumbers[(params as API.ChainAddrReq).chain_name][(params as API.ChainAddrReq).address] ?? null;
   },
-  getSlippagePerc: (state) => {
-    return state._Session.slippagePerc;
-  },
-  getRelayerStatus: (state) => {
+  [GetterTypes.getRelayerStatus]: (state) => {
     return state.relayer;
   },
-  getRelayerBalance: (state) => (params) => {
+  [GetterTypes.getRelayerBalance]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name].relayerBalance;
   },
-  getRelayerChainStatus: (state) => (params) => {
+  [GetterTypes.getRelayerChainStatus]: (state) => (params) => {
     return true || (state.chains[(params as API.ChainReq).chain_name].relayerBalance.enough_balance && state.relayer);
   },
-  isDemoAccount: (state) => {
-    return state._Session.isDemoAccount;
-  },
-  hasSeenReedem: (state) => {
-    return state._Session.hasSeenRedeem;
-  },
-  theme: (state) => {
-    return state._Session.theme;
-  },
-  getPreferredGasPriceLevel: (state) => {
-    return state._Session.gasPriceLevel;
-  },
-  allowCustomSlippage: (state) => {
-    return state._Session.customSlippage;
-  },
-  viewUnverified: (state) => {
-    return state._Session.viewUnverified;
-  },
-  viewLPAssetPools: (state) => {
-    return state._Session.viewLPAssetPools;
-  },
-  getAllNumbers: (state) => {
+  [GetterTypes.getAllNumbers]: (state) => {
     const numbers = Object.values(state.numbers).flat();
     return numbers.length > 0 ? numbers : null;
   },
-  getFeeAddresses: (state) => {
+  [GetterTypes.getFeeAddresses]: (state) => {
     const feeAddresses = [];
     for (const chain of Object.values(state.chains)) {
       feeAddresses.push({ chain_name: chain.chain_name, demeris_address: chain.demeris_addresses[0] });
     }
     return feeAddresses.length != 0 ? feeAddresses : null;
   },
-  getVerifiedDenoms: (state) => {
+  [GetterTypes.isVerified]: (state) => (params) => {
+    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
+  },
+  [GetterTypes.getVerifiedDenoms]: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
-  getTicker:
+  [GetterTypes.getTicker]:
     (state, getters) =>
     ({ name }) => {
       const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
@@ -168,29 +154,26 @@ export const getters: GetterTree<State, RootState> & Getters = {
         }
       }
     },
-  getChainFromChainId: (state) => (chain_id) => {
+  [GetterTypes.getChainFromChainId]: (state) => (chain_id) => {
     return Object.values(state.chains).find((x) => x.node_info.chain_id == chain_id).chain_name;
   },
-  getDisplayChain:
+  [GetterTypes.getDisplayChain]:
     (state) =>
     ({ name }) => {
       return state.chains[name]?.display_name ?? null;
     },
-  getDenomPrecision:
+  [GetterTypes.getDenomPrecision]:
     (state) =>
     ({ name }) => {
       return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
     },
-  getChains: (state) => {
+  [GetterTypes.getChains]: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
   },
-  getPrices: (state) => {
+  [GetterTypes.getPrices]: (state) => {
     return state.prices;
   },
-  isVerified: (state) => (params) => {
-    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
-  },
-  getExchangeAmountFromATOMPool: (state, getters) => (base_denom: string) => {
+  [GetterTypes.getExchangeAmountFromATOMPool]: (state, getters) => (base_denom: string) => {
     const traces = getters['getAllVerifiedTraces'];
     const pools = getters['getAllValidPools'];
 
@@ -243,8 +226,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
 
     return exchangeAmount;
   },
-  getPrice: (state, getters) => (params) => {
+  [GetterTypes.getPrice]: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
+    if (state.prices.Tokens.length == 0) {
+      return;
+    }
     const marketPrice = state.prices.Tokens.find((x) => x.Symbol == ticker)?.Price ?? null;
 
     if (marketPrice) {
@@ -264,48 +250,28 @@ export const getters: GetterTree<State, RootState> & Getters = {
 
     return null;
   },
-  getSupply: (state, getters) => (params) => {
+  [GetterTypes.getSupply]: (state, getters) => (params) => {
     const ticker = (getters['getTicker']({ name: params.denom }) + 'USDT').toUpperCase();
     return state.prices.Tokens.find((x) => x.Symbol == ticker)?.Supply ?? null;
   },
-  getEndpoint: (state) => {
+  [GetterTypes.getEndpoint]: (state) => {
     return state.endpoint;
   },
-  isSignedIn: (state) => {
-    return state.keplr ? true : false;
-  },
-  getKeplrAccountName: (state) => {
-    return state.keplr?.name ?? null;
-  },
-  getDexChain: (state) => {
+  [GetterTypes.getDexChain]: (state) => {
     return state.hub_chain;
   },
-  getTxStatus: (state) => (params) => {
+  [GetterTypes.getTxStatus]: (state) => (params) => {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
   },
-  getOwnAddress: (state) => (params) => {
+  [GetterTypes.getOwnAddress]: (state: State, _getters, _rootState, rootGetters) => (params) => {
     return (
       chainAddressfromAddress(
         state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-        state.keplr.bech32Address,
+        rootGetters[GlobalUserGetterTypes.getKeplr].bech32Address,
       ) ?? null
     );
   },
-  getKeplrAddress: (state) => {
-    if (state.keplr) {
-      return keyHashfromAddress(state.keplr.bech32Address);
-    } else {
-      return null;
-    }
-  },
-  getKeyhashes: (state) => {
-    if (state.keplr && state.keplr.keyHashes) {
-      return state.keplr.keyHashes;
-    } else {
-      return null;
-    }
-  },
-  getVerifyTrace: (state) => (params) => {
+  [GetterTypes.getVerifyTrace]: (state) => (params) => {
     if (
       state.chains[(params as API.VerifyTraceReq).chain_name] &&
       state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces
@@ -318,7 +284,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
       return null;
     }
   },
-  getAllVerifiedTraces: (state) => {
+  [GetterTypes.getAllVerifiedTraces]: (state) => {
     let result = {};
     for (const chain of Object.values(state.chains)) {
       result = {
@@ -328,36 +294,33 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
     return result;
   },
-  getFeeAddress: (state) => (params) => {
+  [GetterTypes.getFeeAddress]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.demeris_addresses[0] ?? null;
   },
-  getBech32Config: (state) => (params) => {
+  [GetterTypes.getBech32Config]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
-  getFeeTokens: (state) => (params) => {
+  [GetterTypes.getFeeTokens]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.denoms.filter((x) => x.fee_token) ?? null;
   },
-  getChain: (state) => (params) => {
+  [GetterTypes.getChain]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;
   },
-  getGasLimit: (state) => {
-    return state.gas_limit;
-  },
-  getPrimaryChannel: (state) => (params) => {
+  [GetterTypes.getPrimaryChannel]: (state) => (params) => {
     return (
       state.chains[(params as API.ChainReq).chain_name]?.primary_channel[
         (params as API.ChainReq).destination_chain_name
       ] ?? null
     );
   },
-  getPrimaryChannels: (state) => (params) => {
+  [GetterTypes.getPrimaryChannels]: (state) => (params) => {
     const channels = [];
     for (const channel of Object.values(state.chains[(params as API.ChainReq).chain_name].primary_channel)) {
       channels.push(channel);
     }
     return channels.length != 0 ? channels : null;
   },
-  getChainStatus: (state) => (params) => {
+  [GetterTypes.getChainStatus]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
   },
 };

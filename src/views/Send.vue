@@ -35,38 +35,12 @@
             <div class="mt-8 pb-8 flex space-x-8">
               <router-link
                 :to="{ name: 'Send', params: { type: 'address' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
+                class="send__type flex-1 flex flex-col items-center justify-center p-8 bg-surface group dark:hover:text-inverse shadow-card hover:shadow-panel focus:shadow-panel active:opacity-70 transition rounded-2xl text-center overflow-hidden"
               >
                 <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.sendToAddress') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
+                    class="send__type__circle absolute z-0 inset-0 bg-brand rounded-full transition-transform duration-300"
                   ></span>
                   <Icon class="relative" name="SendIcon" :icon-size="1.5" />
                 </div>
@@ -77,38 +51,12 @@
 
               <router-link
                 :to="{ name: 'Send', params: { type: 'move' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
+                class="send__type flex-1 flex flex-col items-center justify-center p-8 bg-surface group dark:hover:text-inverse shadow-card hover:shadow-panel focus:shadow-panel active:opacity-70 transition rounded-2xl text-center overflow-hidden"
               >
                 <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.moveAssets') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
+                    class="send__type__circle absolute z-0 inset-0 bg-brand rounded-full transition-transform duration-300"
                   ></span>
                   <Icon class="relative" name="SwapLRIcon" :icon-size="1.5" />
                 </div>
@@ -121,8 +69,8 @@
         </template>
 
         <div v-else class="w-full max-w-lg">
-          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" />
-          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" />
+          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" @previous="goBack" />
+          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" @previous="goBack" />
         </div>
       </main>
     </div>
@@ -140,6 +88,7 @@ import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { pageview } from '@/utils/analytics';
 
 type TransferType = 'address' | 'move';
@@ -151,8 +100,10 @@ export default {
   setup() {
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
+    const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const transferType = computed(() => route.params.type as TransferType);
+
     const step = ref(undefined);
     pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const { balances } = useAccount();
@@ -181,6 +132,7 @@ export default {
     useMeta(metaSource);
 
     const goBack = () => {
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       if (currentStepIndex.value > 0) {
         step.value = allSteps[transferType.value][currentStepIndex.value - 1];
         return;
@@ -191,6 +143,7 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/');
     };
 

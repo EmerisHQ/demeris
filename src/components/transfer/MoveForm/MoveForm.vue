@@ -5,17 +5,14 @@
       <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
     </template>
 
-    <template v-else>
-      <TxStepsModal
-        v-if="steps.length > 0"
-        :data="steps"
-        :gas-price-level="gasPrice"
-        :back-route="{ name: 'Portfolio' }"
-        action-name="move"
-        @transacting="goToStep('move')"
-        @failed="goToStep('review')"
-        @reset="resetHandler"
-        @finish="resetHandler"
+    <template v-else-if="['review', 'move'].includes(step)">
+      <TransactionProcessCreator
+        v-if="steps.length"
+        :steps="steps"
+        action="move"
+        @pending="closeModal"
+        @close="closeModal"
+        @previous="$emit('previous')"
       />
     </template>
   </div>
@@ -24,9 +21,11 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import { useStore } from '@/store';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
 import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
@@ -41,7 +40,7 @@ export default defineComponent({
 
   components: {
     MoveFormAmount,
-    TxStepsModal,
+    TransactionProcessCreator,
   },
 
   props: {
@@ -55,13 +54,15 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step'],
+  emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
+    const router = useRouter();
+
     const gasPrice = computed(() => {
-      return store.getters['demeris/getPreferredGasPriceLevel'];
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
     const form: MoveAssetsForm = reactive({
@@ -78,6 +79,10 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
+    const closeModal = () => {
+      router.push('/');
+    };
+
     watch(form, async () => {
       if (
         form.balance.amount != '0' &&
@@ -87,8 +92,9 @@ export default defineComponent({
         step.value != 'review'
       ) {
         const precision =
-          store.getters['demeris/getDenomPrecision']({ name: await getBaseDenom(form.balance.denom, form.on_chain) }) ||
-          6;
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+            name: await getBaseDenom(form.balance.denom, form.on_chain),
+          }) || 6;
 
         const action: MoveAction = {
           name: 'move',
@@ -138,7 +144,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler };
+    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler, closeModal };
   },
 });
 </script>

@@ -250,12 +250,22 @@
         </template>
 
         <template v-else>
-          <TxStepsModal
-            :data="actionSteps"
-            action-name="addliquidity"
-            @transacting="goToStep('send')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
+          <TransactionProcessCreator
+            :steps="actionSteps"
+            :action="hasPool ? 'addliquidity' : 'createpool'"
+            @pending="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @close="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @previous="goBack"
           />
         </template>
       </main>
@@ -269,6 +279,7 @@ import { computed, reactive, Ref, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
@@ -278,7 +289,6 @@ import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
@@ -289,7 +299,9 @@ import useAccount from '@/composables/useAccount';
 import useDenoms from '@/composables/useDenoms';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
-import { useStore } from '@/store';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityAction, CreatePoolAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler, getBaseDenomSync } from '@/utils/actionHandler';
@@ -312,7 +324,7 @@ export default {
     FlexibleAmountInput,
     Icon,
     ListItem,
-    TxStepsModal,
+    TransactionProcessCreator,
   },
 
   setup() {
@@ -322,6 +334,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { useDenom } = useDenoms();
+    const transactionsStore = useTransactionsStore();
     const poolId = computed(() => route.params.id as string);
 
     const actionSteps = ref<Step[]>([]);
@@ -354,8 +367,8 @@ export default {
         return false;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
-      const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: form.coinA.asset.base_denom });
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: form.coinB.asset.base_denom });
 
       if (!priceA || !priceB) {
         return false;
@@ -392,6 +405,10 @@ export default {
     const previewPoolCoinDenom = computed(() => {
       return `G` + getNextPoolId();
     });
+
+    const closeModal = () => {
+      router.push('/');
+    };
 
     const hasPair = computed(() => {
       return !!form.coinA.asset && !!form.coinB.asset;
@@ -521,8 +538,10 @@ export default {
 
     const precisions = computed(() => {
       return {
-        coinA: store.getters['demeris/getDenomPrecision']({ name: form.coinA?.asset?.base_denom }) ?? 6,
-        coinB: store.getters['demeris/getDenomPrecision']({ name: form.coinB?.asset?.base_denom }) ?? 6,
+        coinA:
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinA?.asset?.base_denom }) ?? 6,
+        coinB:
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinB?.asset?.base_denom }) ?? 6,
       };
     });
 
@@ -592,14 +611,16 @@ export default {
       let coinB = true;
 
       if (form.coinA.asset && form.coinA.amount) {
-        const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+        const precisionA =
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinA.asset.base_denom }) || 6;
         const amountA = new BigNumber(form.coinA.amount).shiftedBy(precisionA);
         const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
         coinA = amountA.plus(feeA).isLessThanOrEqualTo(parseCoins(form.coinA.asset.amount)[0].amount);
       }
 
       if (form.coinB.asset && form.coinB.amount) {
-        const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+        const precisionB =
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinB.asset.base_denom }) || 6;
         const amountB = new BigNumber(form.coinB.amount).shiftedBy(precisionB);
         const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
         coinB = amountB.plus(feeB).isLessThanOrEqualTo(parseCoins(form.coinB.asset.amount)[0].amount);
@@ -629,7 +650,7 @@ export default {
     });
 
     const needsTransferToHub = computed(() => {
-      const hubName = store.getters['demeris/getDexChain'];
+      const hubName = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
       if (form.coinA.asset?.on_chain !== hubName || form.coinB.asset?.on_chain !== hubName) {
         return true;
@@ -650,12 +671,12 @@ export default {
       let total = new BigNumber(0);
 
       if (form.coinA.asset) {
-        const priceA = store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom });
+        const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: form.coinA.asset.base_denom });
         total = total.plus(new BigNumber(priceA).multipliedBy(form.coinA.amount));
       }
 
       if (form.coinB.asset) {
-        const priceB = store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom });
+        const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: form.coinB.asset.base_denom });
         total = total.plus(new BigNumber(priceB).multipliedBy(form.coinB.amount));
       }
 
@@ -681,8 +702,8 @@ export default {
     const generateActionSteps = async () => {
       let action: AddLiquidityAction | CreatePoolAction;
       const precisions = [
-        store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6,
-        store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6,
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinA.asset.base_denom }) || 6,
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinB.asset.base_denom }) || 6,
       ];
       let coinAdenom = form.coinA.asset.base_denom;
       if (form.coinA.asset.ibc?.hash) {
@@ -741,7 +762,7 @@ export default {
           const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
           if (
-            reserveDenoms.sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+            [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
             poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
           ) {
             // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
@@ -757,6 +778,7 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/pools');
     };
 
@@ -766,6 +788,7 @@ export default {
     };
 
     const goBack = () => {
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       const currentStepIndex = steps.findIndex((item) => item === state.step);
 
       if (currentStepIndex > 0) {
@@ -888,14 +911,18 @@ export default {
 
       const precisions = {
         [form.coinA.asset.base_denom]:
-          store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) ?? 6,
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinA.asset.base_denom }) ?? 6,
         [form.coinB.asset.base_denom]:
-          store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) ?? 6,
+          store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinB.asset.base_denom }) ?? 6,
       };
 
       const prices = {
-        [form.coinA.asset.base_denom]: store.getters['demeris/getPrice']({ denom: form.coinA.asset.base_denom }),
-        [form.coinB.asset.base_denom]: store.getters['demeris/getPrice']({ denom: form.coinB.asset.base_denom }),
+        [form.coinA.asset.base_denom]: store.getters[GlobalDemerisGetterTypes.API.getPrice]({
+          denom: form.coinA.asset.base_denom,
+        }),
+        [form.coinB.asset.base_denom]: store.getters[GlobalDemerisGetterTypes.API.getPrice]({
+          denom: form.coinB.asset.base_denom,
+        }),
       };
 
       const totalA = new BigNumber(reserveBalances.value[0].amount)
@@ -1001,11 +1028,13 @@ export default {
       () => {
         if (state.isMaximumAmountChecked) {
           if (form.coinA.asset && form.coinB.asset) {
-            const precisionA = store.getters['demeris/getDenomPrecision']({ name: form.coinA.asset.base_denom }) || 6;
+            const precisionA =
+              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinA.asset.base_denom }) || 6;
             const amountA = parseCoins(form.coinA.asset.amount)[0].amount || 0;
             const feeA = feesAmount.value[form.coinA.asset.base_denom] || 0;
 
-            const precisionB = store.getters['demeris/getDenomPrecision']({ name: form.coinB.asset.base_denom }) || 6;
+            const precisionB =
+              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.coinB.asset.base_denom }) || 6;
             const amountB = parseCoins(form.coinB.asset.amount)[0].amount || 0;
             const feeB = feesAmount.value[form.coinB.asset.base_denom] || 0;
 
@@ -1042,6 +1071,7 @@ export default {
     );
 
     return {
+      closeModal,
       pageTitle,
       creationFee,
       actionSteps,

@@ -3,6 +3,7 @@ import 'tippy.js/dist/tippy.css';
 
 import vueLib from '@starport/vue';
 import mitt from 'mitt';
+import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import { VueCookieNext } from 'vue-cookie-next';
 import VueGtag from 'vue-gtag';
@@ -15,7 +16,7 @@ import { messages } from '@/locales/en';
 
 import App from './App.vue';
 import router from './router';
-import { store } from './store';
+import { store } from './store/setup';
 
 const i18n = createI18n({
   globalInjection: true,
@@ -46,6 +47,7 @@ app
   .use(VueTippy)
   .use(VueCookieNext)
   .use(createMetaManager())
+  .use(createPinia())
   .use(VueGtag, {
     config: {
       id: 'UA-201374903-1',

@@ -35,20 +35,7 @@
         </button>
         <label
           v-if="allowCustomSlippage"
-          class="
-            custom-slippage
-            h-12
-            pr-3
-            flex-shrink flex
-            items-baseline
-            justify-center
-            text-center
-            focus-within:text-right
-            bg-fg
-            rounded-xl
-            outline-none
-            text-text
-          "
+          class="custom-slippage h-12 pr-3 flex-shrink flex items-baseline justify-center text-center focus-within:text-right bg-fg rounded-xl outline-none text-text"
           :class="[
             isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
             Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
@@ -60,20 +47,7 @@
             :value="customSlippage"
             type="number"
             placeholder="Custom"
-            class="
-              custom-slippage__input
-              h-12
-              appearance-none
-              overflow-hidden
-              py-0
-              pr-0
-              pl-3
-              m-0
-              flex-grow
-              border-none
-              outline-none
-              bg-transparent
-            "
+            class="custom-slippage__input h-12 appearance-none overflow-hidden py-0 pr-0 pl-3 m-0 flex-grow border-none outline-none bg-transparent"
             :class="[isCustomSelected ? 'w-12' : 'w-20']"
             required
             @input="setCustomSlippage"
@@ -119,9 +93,9 @@ import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, 
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
-import { store } from '@/store';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 
 type SwapData = {
   pay: { denom: string; amount: number };
@@ -154,7 +128,7 @@ export default defineComponent({
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
     const trueSlippage = computed(() => {
-      return store.getters['demeris/getSlippagePerc'] || 0.5;
+      return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
     const customSlippage = computed(() => {
       if (trueSlippage.value) {
@@ -234,7 +208,9 @@ export default defineComponent({
       validSlippageUpdater(value) {
         const slippage = Number(value);
         if (slippage > 0 && slippage <= 100) {
-          store.dispatch(GlobalDemerisActionTypes.SET_SESSION_DATA, { data: { slippagePerc: slippage } });
+          (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
+            data: { slippagePerc: slippage },
+          });
         }
       },
     });
@@ -243,7 +219,7 @@ export default defineComponent({
     const minReceivedText = ref(null);
 
     const allowCustomSlippage = computed(() => {
-      return store.getters['demeris/allowCustomSlippage'];
+      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
     });
 
     watch(
@@ -259,10 +235,13 @@ export default defineComponent({
     watch(
       () => [props.swapData.pay.amount, props.swapData.pay.denom, props.swapData.receive.denom, state.slippage],
       async () => {
-        const payDisplayName = await getDisplayName(props.swapData.pay.denom, store.getters['demeris/getDexChain']);
+        const payDisplayName = await getDisplayName(
+          props.swapData.pay.denom,
+          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
+        );
         const receiveDisplayName = await getDisplayName(
           props.swapData.receive.denom,
-          store.getters['demeris/getDexChain'],
+          useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
         );
         const payAmount = props.swapData.pay.amount;
         const receiveAmount = props.swapData.receive.amount;

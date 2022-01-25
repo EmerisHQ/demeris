@@ -1,8 +1,9 @@
 import { computed, ComputedRef, nextTick, ref, watch } from 'vue';
 
-import { useStore } from '@/store';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
+import { useStore } from '@/utils/useStore';
 
 export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolean): ComputedRef<number> {
   const store = useStore();
@@ -12,12 +13,12 @@ export default function (amount: Amount, showZero?: boolean, autoUpdate?: boolea
   const price = ref();
 
   const priceObserver = computed(() => {
-    return store.getters['demeris/getPrice']({ denom: denom.value });
+    return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value });
   });
 
   const displayPrice = computed(() => {
     const precision =
-      store.getters['demeris/getDenomPrecision']({
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: denom.value,
       }) ?? '6';
     let value;

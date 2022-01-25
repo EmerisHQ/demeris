@@ -57,10 +57,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes } from '@/store/demeris/action-types';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { useStore } from '@/utils/useStore';
 
 import Spinner from '../ui/Spinner.vue';
 
@@ -97,7 +97,7 @@ export default defineComponent({
     };
 
     const isSignedIn = computed(() => {
-      return store.getters['demeris/isSignedIn'];
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
 
     const trySignIn = () => {
@@ -109,7 +109,7 @@ export default defineComponent({
     };
 
     const signIn = () => {
-      store.dispatch(GlobalDemerisActionTypes.SIGN_IN);
+      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
       isConnecting.value = true;
     };
 
@@ -119,7 +119,7 @@ export default defineComponent({
     });
 
     const signInDemo = () => {
-      store.dispatch(GlobalDemerisActionTypes.SIGN_IN_WITH_WATCHER);
+      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
       isConnecting.value = true;
     };
     watch(isSignedIn, () => {

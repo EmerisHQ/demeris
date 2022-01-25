@@ -3,10 +3,10 @@ import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
 
+import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
+import { demoAddresses } from '@/store/demeris-user/demo-account';
 import { Chain } from '@/types/api';
-
-import { demoAddresses } from '../store/demeris/demo-account';
-import { store } from '../store/index';
+import { useStore } from '@/utils/useStore';
 
 export function fromHexString(hexString) {
   return new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
@@ -19,9 +19,10 @@ export function toHexString(byteArray) {
     .join('');
 }
 export function getChainFromRecipient(recipient: string) {
+  const apistore = useStore() as TypedAPIStore;
   const prefix = bech32.decode(recipient).prefix;
   return (
-    (Object.values(store.getters['demeris/getChains']) as Chain[]).find(
+    (Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]) as Chain[]).find(
       (x) => (x as Chain).node_info.bech32_config.prefix_account == prefix,
     )?.chain_name ?? null
   );
@@ -41,10 +42,12 @@ export function chainAddressfromAddress(prefix: string, address: string) {
 }
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
-  if (store.getters['demeris/isDemoAccount']) {
+  const userstore = useStore() as TypedUSERStore;
+  const apistore = useStore() as TypedAPIStore;
+  if (userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]) {
     return demoAddresses[chain_name];
   } else {
-    const chain = store.getters['demeris/getChain']({ chain_name });
+    const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
       const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
         prefix: chain.node_info.bech32_config.main_prefix,
@@ -67,7 +70,11 @@ export async function getOwnAddress({ chain_name }) {
   }
 }
 export function isNative(denom: string) {
-  return denom.indexOf('ibc/') != 0 ? true : false;
+  if (denom) {
+    return denom.indexOf('ibc/') != 0 ? true : false;
+  } else {
+    return false;
+  }
 }
 
 export function getChannel(path, index) {

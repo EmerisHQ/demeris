@@ -1,22 +1,7 @@
 <template>
   <router-link
     :to="{ name: 'Pool', params: { id: pool.id } }"
-    class="
-      pool-card
-      relative
-      flex
-      transition
-      transform
-      hover:-translate-y-px
-      focus:-translate-y-px
-      shadow-card
-      hover:shadow-panel
-      rounded-2xl
-      active:transform-none active:opacity-70
-      focus-visible:ring-2
-      focus:ring-tertiary focus:ring-opacity-50
-      cursor-pointer
-    "
+    class="pool-card relative flex transition transform hover:-translate-y-px focus:-translate-y-px shadow-card hover:shadow-panel rounded-2xl active:transform-none active:opacity-70 focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 cursor-pointer"
   >
     <div
       class="flex-1 relative z-10 flex flex-col items-between justify-stretch rounded-2xl p-6 text-0 bg-surface h-40"
@@ -43,6 +28,7 @@ import { useStore } from 'vuex';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
 import usePool from '@/composables/usePool';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Pool } from '@/types/actions';
 import { isNative } from '@/utils/basic';
 
@@ -62,7 +48,7 @@ export default defineComponent({
 
   setup(props) {
     const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
-    const store = useStore();
+    const apistore = useStore() as TypedAPIStore;
 
     const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
     const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
@@ -74,8 +60,8 @@ export default defineComponent({
         baseDenoms = props.pool.reserve_coin_denoms;
       }
 
-      const priceA = store.getters['demeris/getPrice']({ denom: baseDenoms[0] });
-      const priceB = store.getters['demeris/getPrice']({ denom: baseDenoms[1] });
+      const priceA = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
+      const priceB = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
 
       if (!priceA || !priceB) {
         return false;
@@ -92,16 +78,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                 hash: newDenoms[0].split('/')[1],
               }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                     hash: newDenoms[0].split('/')[1],
                   },
                 },
@@ -117,16 +103,16 @@ export default defineComponent({
         } else {
           try {
             const verifyTrace =
-              store.getters['demeris/getVerifyTrace']({
-                chain_name: store.getters['demeris/getDexChain'],
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                 hash: newDenoms[1].split('/')[1],
               }) ??
-              (await store.dispatch(
-                'demeris/GET_VERIFY_TRACE',
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
                 {
                   subscribe: false,
                   params: {
-                    chain_name: store.getters['demeris/getDexChain'],
+                    chain_name: apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
                     hash: newDenoms[1].split('/')[1],
                   },
                 },
