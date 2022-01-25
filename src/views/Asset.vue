@@ -60,7 +60,13 @@
               </dd>
             </div>
 
-            <div>
+            <div v-if="assetConfig?.stakable && stakingEnabled">
+              <dt class="text-muted">{{ $t('pages.asset.unbonding') }}</dt>
+              <dd class="font-medium mt-0.5">
+                <AmountDisplay :amount="{ amount: unstakedAmount, denom }" />
+              </dd>
+            </div>
+            <div v-else>
               <dt class="text-muted">{{ $t('pages.asset.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
                 <tippy>
@@ -214,7 +220,8 @@ export default defineComponent({
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
-    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
+    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
+      useAccount();
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
@@ -285,6 +292,13 @@ export default defineComponent({
       }
       return 0;
     });
+    const unbondingDelegation = computed(() => {
+      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
+        return unbondingDelegationsByChain(assetConfig.value.chain_name);
+      }
+      return 0;
+    });
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
@@ -300,6 +314,19 @@ export default defineComponent({
       return totalStakedAmount;
     });
 
+    const unstakedAmount = computed(() => {
+      let unstaked = unbondingDelegation.value;
+      let totalUnstakedAmount = 0;
+      if (Array.isArray(unstaked)) {
+        for (let i = 0; i < unstaked.length; i++) {
+          let amount = parseFloat(unstaked[i].amount);
+          if (amount) {
+            totalUnstakedAmount += amount;
+          }
+        }
+      }
+      return totalUnstakedAmount;
+    });
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
@@ -354,7 +381,7 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value;
+      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
     });
 
     return {
@@ -367,6 +394,7 @@ export default defineComponent({
       poolsInvestedWithAsset,
       availableAmount,
       stakedAmount,
+      unstakedAmount,
       pooledAmount,
       totalAmount,
       isPoolCoin,

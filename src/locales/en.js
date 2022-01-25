@@ -542,6 +542,7 @@ export const messages = {
         pools: 'Pools',
         pooled: 'Pooled',
         staking: 'Staking',
+        unbonding: 'Unstaking',
       },
       assets: {
         assets: 'Assets',

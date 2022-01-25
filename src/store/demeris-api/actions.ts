@@ -301,6 +301,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllStakingBalances'];
   },
+  async [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({ dispatch, getters, rootGetters }) {
+    try {
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
+      for (const keyHash of keyHashes) {
+        dispatch(DemerisActionTypes.GET_UNBONDING_DELEGATIONS, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
+    }
+    return getters['getAllUnbondingDelegations'];
+  },
   async [DemerisActionTypes.VALIDATE_POOLS]({ commit, getters }, pools) {
     try {
       const vp = await validPools(pools);

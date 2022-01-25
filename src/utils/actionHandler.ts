@@ -1395,6 +1395,21 @@ export async function msgFromStepTransaction(
     const registry = libStore.getters['cosmos.distribution.v1beta1/getRegistry'];
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
+  if (stepTx.name == 'stake') {
+    const data = stepTx.data as Actions.StakeData;
+    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
+    const msgs = [
+      await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
+        value: {
+          delegatorAddress,
+          validatorAddress: rewardData.validator_address,
+          amount,
+        },
+      }),
+    ];
+    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
+    return { msg: msgs, chain_name: data.chain_name, registry };
+  }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
   const apistore = useStore() as TypedAPIStore;

@@ -27,7 +27,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { stakingBalances } = useAccount();
+    const { stakingBalances, unbondingDelegations } = useAccount();
     const displayPrice = computed(() => {
       if (props.balances.length > 0) {
         const liquidValue = (props.balances as Balances).reduce((total, balance) => {
@@ -86,7 +86,35 @@ export default defineComponent({
             return total;
           }
         }, 0);
-        const value = liquidValue + stakedValue;
+        const unstakedValue = unbondingDelegations.value.reduce((total, unstakingBalance) => {
+          const unstakedDenom = verifiedDenoms.filter((x) => x.chain_name == unstakingBalance.chain_name && x.stakable);
+          if (unstakedDenom.length > 0) {
+            if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name })) {
+              let totalValue =
+                parseInt(unstakingBalance.amount) *
+                  store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0;
+              let precision = Math.pow(
+                10,
+                parseInt(
+                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+                    name: unstakedDenom[0].name,
+                  }) || 6,
+                ),
+              );
+              let value = totalValue / precision;
+              if (value) {
+                return total + value;
+              } else {
+                return total;
+              }
+            } else {
+              return total;
+            }
+          } else {
+            return total;
+          }
+        }, 0);
+        const value = liquidValue + stakedValue + unstakedValue;
         return Number.isFinite(value) ? value : 0;
       } else {
         return 0;

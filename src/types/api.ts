@@ -100,6 +100,14 @@ export type StakingBalancesResponse = {
   staking_balances: StakingBalances;
 };
 
+// /unbonding_delegations/:address response data types
+
+export type UnbondingDelegation = StakingBalance;
+export type UnbondingDelegations = Array<UnbondingDelegation>;
+export type UnbondingDelegationsResponse = {
+  unbonding_delegations: UnbondingDelegations;
+};
+
 // /verified_denoms endpoint data types
 
 export type VerifiedDenom = Denom & { chain_name: string };
