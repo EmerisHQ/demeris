@@ -23,7 +23,11 @@
         </header>
 
         <!-- Asset Price Performance Chart -->
-        <AreaChart v-if="isAreaChartFeatureRunning" :data-stream="dataStream" @filterChanged="getTokenPrices" />
+        <AreaChart
+          v-if="isAreaChartFeatureRunning && !denom.includes('pool')"
+          :data-stream="dataStream"
+          @filterChanged="getTokenPrices"
+        />
 
         <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
@@ -155,7 +159,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted,ref, toRaw, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
