@@ -31,5 +31,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          command: npx cypress run
       # - name: Test
       #   run: npm run test:unit -- --runInBand

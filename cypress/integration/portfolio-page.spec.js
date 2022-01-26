@@ -18,9 +18,7 @@ describe('Portfolio visual check', function () {
     portfolio.poolsVisibility();
 
     let portfolioAssets = new Assets();
-    portfolioAssets.aktRow().should('be.visible');
     portfolioAssets.atomRow().should('be.visible');
-    portfolioAssets.gravityRow().should('be.visible');
 
     portfolio.emptyPoolsBehaviour();
   });
