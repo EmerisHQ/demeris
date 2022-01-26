@@ -7,7 +7,7 @@
       :show-close-button="false"
       footer-class="flex-col divide-y divide-x-0"
     >
-      <Icon name="TimeThinIcon" class="opacity-60 mb-4" :icon-size="2" />
+      <Icon name="TimeThinIcon" class="opacity-60 mb-8" :icon-size="2" />
 
       <h2 class="text-1 font-bold mb-4">
         {{ $t('context.transactions.waitingPrevious.title') }}
@@ -34,6 +34,7 @@
 <script lang="ts" setup>
 import { computed, inject } from 'vue';
 
+import ChainName from '@/components/common/ChainName.vue';
 import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pendingTransactions.length && !isModalOpen" class="relative">
+  <div v-if="pendingTransactions.length && !isModalOpen && !transactionsStore.isPendingModalOpen" class="relative">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
       class="fixed bottom-8 right-8 z-50"
@@ -58,7 +58,15 @@
   </div>
 
   <teleport to="body">
+    <TransactionProcessViewer
+      v-if="transactionsStore.isPendingModalOpen"
+      :step-id="transactionsStore.currentId"
+      @close="closeModal"
+      @previous="closeModal"
+    />
+
     <Modal
+      v-else
       :open="isModalOpen"
       variant="takeover"
       class="bg-surface"
@@ -95,6 +103,19 @@ const rowsLimit = computed(() => state.viewAll ? undefined : 3);
 
 const selectItem = (stepId) => {
   transactionsStore.setCurrentId(stepId);
+  const service = transactionsStore.getCurrentService();
+
+  if (!service) {
+    return;
+  }
+
+  const snapshot = service.getSnapshot();
+
+  if (snapshot.matches('waitingPreviousTransaction')) {
+    transactionsStore.togglePendingModal();
+    return;
+  }
+
   transactionsStore.toggleViewerModal();
 }
 

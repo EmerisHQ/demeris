@@ -53,6 +53,10 @@ export const useTransactionsStore = defineStore('transactions', {
       this.isPendingModalOpen = !this.isPendingModalOpen;
     },
 
+    closePendingModal() {
+      this.isPendingModalOpen = false;
+    },
+
     toggleBottomSheet() {
       this.isBottomSheetMinimized = !this.isBottomSheetMinimized;
     },
