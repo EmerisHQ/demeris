@@ -119,7 +119,13 @@ const selectItem = (stepId) => {
   transactionsStore.toggleViewerModal();
 }
 
-const closeModal = () => selectItem(undefined);
+const closeModal = () => {
+  transactionsStore.setCurrentId(undefined);
+  if (transactionsStore.isPendingModalOpen) {
+    transactionsStore.closePendingModal();
+  }
+  transactionsStore.toggleViewerModal();
+};
 
 const toggleViewAll = () => state.viewAll = !state.viewAll;
 
