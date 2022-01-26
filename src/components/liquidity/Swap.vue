@@ -13,25 +13,43 @@
       }"
       @goback="slippageSettingModalToggle"
     />
-    <TransactionProcessCreator
-      v-if="isOpen && !isSlippageSettingModalOpen"
-      :steps="actionHandlerResult"
-      action="swap"
-      class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
-      @pending="
-        () => {
-          reviewModalToggle();
-          reset();
-        }
-      "
-      @close="
-        () => {
-          reviewModalToggle();
-          reset();
-        }
-      "
-      @previous="reviewModalToggle"
-    />
+    <FeatureRunningConditional v-if="isOpen && !isSlippageSettingModalOpen" name="TRANSACTIONS_CENTER">
+      <template #deactivated>
+        <ReviewModal
+          :data="actionHandlerResult"
+          action-name="swap"
+          variant="widget"
+          @close="reviewModalToggle"
+          @reset="
+            () => {
+              reviewModalToggle();
+              reset();
+            }
+          "
+          @goback="() => reviewModalToggle()"
+        />
+      </template>
+
+      <TransactionProcessCreator
+        :steps="actionHandlerResult"
+        action="swap"
+        class="swap-process overflow-hidden bg-surface dark:bg-fg-solid shadow-panel rounded-2xl flex flex-col"
+        @pending="
+          () => {
+            reviewModalToggle();
+            reset();
+          }
+        "
+        @close="
+          () => {
+            reviewModalToggle();
+            reset();
+          }
+        "
+        @previous="reviewModalToggle"
+      />
+    </FeatureRunningConditional>
+
     <div
       class="swap-widget bg-surface dark:bg-fg rounded-2xl"
       :class="[
@@ -143,6 +161,7 @@ import { useStore } from 'vuex';
 
 import DenomSelect from '@/components/common/DenomSelect.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
+import ReviewModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -164,6 +183,8 @@ import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
 
+import FeatureRunningConditional from '../common/FeatureRunningConditional.vue';
+
 export default defineComponent({
   name: 'Swap',
   components: {
@@ -175,6 +196,8 @@ export default defineComponent({
     SlippageSettingModal,
     FeeLevelSelector,
     TransactionProcessCreator,
+    FeatureRunningConditional,
+    ReviewModal,
   },
 
   props: {
