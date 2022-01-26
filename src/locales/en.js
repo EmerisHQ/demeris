@@ -409,6 +409,14 @@ export const messages = {
         onchain: '{amount} on {chain}',
         viewAll: 'View all',
       },
+      airdrops: {
+        title: 'Airdrops',
+        asset: 'Asset',
+        date: 'Date',
+        action: 'Action',
+        amount: 'Amount',
+        viewAll: 'View all',
+      },
       pools: {
         title: 'Pools',
         mine: 'My pools',
