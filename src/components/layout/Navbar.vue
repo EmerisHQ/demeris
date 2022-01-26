@@ -22,6 +22,7 @@
       {{ $t('navbar.pools') }}
     </router-link>
     <router-link
+      v-if="isAirdropsFeatureRunning"
       class="h-12 py-3.5 px-2 md:px-3 leading-5 hover:text-text active:opacity-70"
       exact-active-class="text-text font-medium"
       to="/airdrops"
@@ -35,8 +36,19 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import { featureRunning } from '@/utils/FeatureManager';
+
 export default defineComponent({
   name: 'Navbar',
+
+  setup() {
+    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE') ? true : false;
+
+    return {
+      isAirdropsFeatureRunning,
+    };
+  },
 });
 </script>
 

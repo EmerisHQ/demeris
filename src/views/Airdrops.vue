@@ -30,7 +30,6 @@ import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import airdropsData from '@/data/sampleAirdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Airdrops',
@@ -49,10 +48,6 @@ export default {
         title: t('navbar.airdrops'),
       })),
     );
-
-    if (featureRunning('TEST_SHOW_CONSOLE_LOG')) {
-      console.log('Feature: TEST_SHOW_CONSOLE_LOG is running');
-    }
 
     const router = useRouter();
     const airdrops = airdropsData.sampleAirdrops;
