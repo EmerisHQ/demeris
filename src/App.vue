@@ -7,6 +7,9 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
+    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+      <TransactionsCenter />
+    </FeatureRunningConditional>
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -24,10 +27,12 @@ import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
+import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
 import { TypedAPIStore } from '@/store';
 import { setStore } from '@/utils/useStore';
 
+import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -37,6 +42,8 @@ export default defineComponent({
     EphemerisSpinner,
     ChainDownWrapper,
     CookieConsent,
+    TransactionsCenter,
+    FeatureRunningConditional,
   },
 
   setup() {

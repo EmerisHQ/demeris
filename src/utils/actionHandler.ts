@@ -1601,7 +1601,6 @@ export async function getTicker(name, chain_name = null) {
         ));
       return await getTicker(verifyTrace.base_denom);
     } catch (e) {
-      console.error(e);
       return name + '(unverified)';
     }
   }
@@ -1788,7 +1787,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         validBalances.push(balance);
       }
     } else {
-      if (balance.ibc.path.split('/').length > 2) {
+      if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
         continue;
       }
       let verifyTrace;

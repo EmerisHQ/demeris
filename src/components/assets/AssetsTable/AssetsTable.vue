@@ -47,7 +47,7 @@
           >
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
-                <CircleSymbol :denom="asset.denom" />
+                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
                 <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
@@ -69,7 +69,7 @@
               <div class="flex items-center justify-center space-x-3">
                 <AssetChains :denom="asset.denom" :balances="balances" :show-description="true" class="ml-auto" />
                 <ChainDownWarning
-                  v-show="Object.values(getUnavailableChains(asset)).length"
+                  v-if="Object.values(getUnavailableChains(asset)).length"
                   v-bind="Object.values(getUnavailableChains(asset))[0]"
                   :chains="Object.keys(getUnavailableChains(asset))"
                 />
@@ -86,7 +86,7 @@
           >
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
-                <CircleSymbol :denom="asset.denom" />
+                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
                 <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
@@ -111,10 +111,10 @@
           </tr>
         </template>
         <template v-else>
-          <tr :key="asset.denom" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
+          <tr :key="index" class="assets-table__row group cursor-pointer" @click="handleClick(asset)">
             <td class="py-5 align-middle group-hover:bg-fg transition">
               <div class="flex items-center">
-                <CircleSymbol :denom="asset.denom" />
+                <CircleSymbol :key="'' + asset.denom + index" :denom="asset.denom" />
                 <div class="ml-4 whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0">
                   <span class="font-medium"><Denom :name="asset.denom" /></span>
                   <LPAsset :name="asset.denom" />
@@ -263,7 +263,6 @@ export default defineComponent({
           }
         });
       }
-
       return balances as Balances;
     });
 
