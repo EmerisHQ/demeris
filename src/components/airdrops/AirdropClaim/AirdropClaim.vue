@@ -2,6 +2,16 @@
   <div class="wrapper w-full relative">
     <div class="claim-widget bg-surface dark:bg-fg rounded-2xl py-8 shadow-panel">
       <!-- Claim Header -->
+      <!-- Has Airdrop amount -->
+      <div class="text-center">
+        <div class="w-1/4 mx-auto mb-6">
+          <img src="~@/assets/images/airdrop-logo.png" alt="Airdrop Logo" />
+        </div>
+        <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
+        <p class="text-2 font-medium">126.54 LIKE</p>
+      </div>
+
+      <!-- Auto dropped amount -->
       <div class="text-center">
         <div class="w-1/4 mx-auto mb-6">
           <img src="~@/assets/images/airdrop-logo.png" alt="Airdrop Logo" />
@@ -37,6 +47,40 @@
       <!-- Claim button -->
       <div class="px-6">
         <Button name="Claim" />
+      </div>
+
+      <!-- Ended -->
+      <div class="px-6 mt-4">
+        <div class="bg-fg p-4 rounded-xl -text-1 font-medium">Ended</div>
+      </div>
+
+      <!-- Not Eligible -->
+      <div class="px-6 mt-4">
+        <div class="bg-fg p-4 rounded-xl -text-1 font-medium">Not eligible</div>
+      </div>
+
+      <!-- Become Eligible -->
+      <div class="px-6 mt-4">
+        <div class="bg-fg p-4 rounded-xl">
+          <p class="-text-1 text-muted mb-1">Become eligible</p>
+          <p class="-text-1 font-medium">Look condition in how to be eligible section</p>
+        </div>
+      </div>
+
+      <!-- Eligibility to be announced -->
+      <div class="px-6 mt-4">
+        <div class="bg-fg p-4 rounded-xl">
+          <p class="-text-1 text-muted mb-1">Eligibility</p>
+          <p class="-text-1 font-medium">To be announced</p>
+        </div>
+      </div>
+
+      <!-- Eligibility  - Stake ATOM -->
+      <div class="px-6 mt-4">
+        <div class="bg-fg p-4 rounded-xl">
+          <p class="-text-1 text-muted mb-1">Eligibility</p>
+          <p class="-text-1 font-medium">Stake ATOM</p>
+        </div>
       </div>
     </div>
   </div>
