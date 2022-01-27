@@ -23,11 +23,7 @@
         </header>
 
         <!-- Asset Price Performance Chart -->
-        <AreaChart
-          v-if="isAreaChartFeatureRunning && !denom.includes('pool')"
-          :data-stream="dataStream"
-          @filterChanged="getTokenPrices"
-        />
+        <AreaChart v-if="true && !denom.includes('pool')" :data-stream="dataStream" @filterChanged="getTokenPrices" />
 
         <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
