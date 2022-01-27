@@ -7,7 +7,9 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
-    <TransactionsCenter />
+    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+      <TransactionsCenter />
+    </FeatureRunningConditional>
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -30,6 +32,7 @@ import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } fr
 import { TypedAPIStore } from '@/store';
 import { setStore } from '@/utils/useStore';
 
+import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 
 export default defineComponent({
@@ -40,6 +43,7 @@ export default defineComponent({
     ChainDownWrapper,
     CookieConsent,
     TransactionsCenter,
+    FeatureRunningConditional,
   },
 
   setup() {
