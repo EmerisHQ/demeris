@@ -13,6 +13,7 @@ import {
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 import {
@@ -478,6 +479,16 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
 
           responseData.status = resultData;
+
+          if (featureRunning('WEBSOCKET_RESPONSE')) {
+            // @ts-ignore
+            responseData.websocket = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+              chain_name: responseData.chain_name,
+              txhash: responseData.txhash,
+              stepType: currentStep.name,
+            });
+          }
+
           const endBlockResult = await fetchEndBlock(resultData.height);
           responseData.endBlock = endBlockResult;
 

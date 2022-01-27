@@ -163,6 +163,7 @@ export type Chain = {
   genesis_hash?: string;
   node_info?: NodeInfo;
   derivation_path?: string;
+  public_node_endpoints?: Record<string, string | null>;
 };
 export type ChainResponse = {
   chain: Chain;

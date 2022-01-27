@@ -22,6 +22,7 @@ import {
   DemerisActionTypes,
   DemerisSubscriptions,
 } from './action-types';
+import { GetterTypes } from './getter-types';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
@@ -688,33 +689,74 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
 
   async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name, stepType }) {
-    return new Promise((resolve) => {
-      const ws = new WebSocket('ws://url');
-      const handleOpen = () => {
-        console.log('open');
-      };
-      const handleClose = () => {
-        console.log('close');
+    return new Promise((resolve, reject) => {
+      const chain = getters[GetterTypes.getChain]({ chain_name });
+      let wsUrl = chain?.public_node_endpoints?.tendermint_rpc;
+
+      if (!wsUrl) {
+        wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
+      }
+
+      const ws = new WebSocket(wsUrl);
+      const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
+      const subscribeQuery = `tm.event = 'Tx' AND tx.hash = '${txhash}'`;
+
+      const txRPC = () => {
+        ws.send(
+          JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tx',
+            id: 'tx',
+            params: [txHash64, false],
+          }),
+        );
       };
 
-      const handleMessage = () => {
-        // TODO
-        resolve({});
+      const subscribeRPC = () => {
+        ws.send(
+          JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'subscribe',
+            id: 'subscribe',
+            params: {
+              query: subscribeQuery,
+            },
+          }),
+        );
+      };
+
+      const handleOpen = () => {
+        txRPC();
+        subscribeRPC();
+      };
+
+      const handleMessage = (evt: MessageEvent) => {
+        const data = JSON.parse(evt.data);
+
+        if (data.error) {
+          // Not found
+          if (data.error.code === -32603) {
+            return;
+          }
+
+          reject(new Error(data.error));
+        }
+
+        if (!data?.result?.tx_result) {
+          return;
+        }
+
+        const txResult = data.result.tx_result;
+        resolve(txResult);
+      };
+
+      const handleClose = () => {
+        console.log('close');
       };
 
       ws.onopen = handleOpen;
       ws.onmessage = handleMessage;
       ws.onclose = handleClose;
-
-      const subscribe = () => {
-        ws.send(
-          JSON.stringify({
-            // TODO
-          }),
-        );
-      };
-
-      subscribe();
     });
   },
 
