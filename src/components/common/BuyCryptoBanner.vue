@@ -28,9 +28,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import useCountry from '@/composables/useCountry';
@@ -62,7 +62,6 @@ export default defineComponent({
         ? 'simplex'
         : 'moonpay',
     );
-    const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const bannerTitle = computed(() => {
       return bannerType.value === 'simplex'
@@ -87,11 +86,6 @@ export default defineComponent({
         emitter.emit('toggle-settings-modal');
       }
     };
-    onMounted(() => {
-      // bannerType.value === 'simplex'
-      //   ? router.replace({ query: { ...route.query, crypto: 'ATOM', fiat: 'USD', amount: 500, buyType: 'simplex' } })
-      //   : '';
-    });
     return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType };
   },
 });

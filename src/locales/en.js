@@ -384,6 +384,10 @@ export const messages = {
       avatar: {
         priceApiDown: 'Asset prices are currently unavailable.',
       },
+      simplex: {
+        transactionSuccessful: 'Transaction successful. Please refresh this page.',
+        transactionFailed: 'Transaction failed. Please refresh this page.',
+      },
     },
     context: {
       feeLevels: {

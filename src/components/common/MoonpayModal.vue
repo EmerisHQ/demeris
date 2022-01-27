@@ -25,24 +25,20 @@
 
 <script lang="ts">
 import { computed, ref } from '@vue/runtime-core';
-import { useStore } from 'vuex';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
 export default {
   name: 'MoonpayModal',
   components: { Modal },
   setup() {
     const emitter = useEmitter();
     const isModalOpen = ref(false);
-    const store = useStore();
     const mpDomain = ref('https://buy.moonpay.io');
     const mpParams = computed(() => {
       return {
         apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
         currencyCode: 'atom',
-        walletAddress: store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
         baseCurrencyCode: 'usd',
         // colorCode: '#FFFFFF'
         // baseCurrencyAmount: '50',

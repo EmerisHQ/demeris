@@ -1,4 +1,3 @@
-// :open="isModalOpen" // v-show="isModalOpen"
 <template>
   <Modal
     v-show="isModalOpen"
@@ -14,8 +13,10 @@
       <h1 class="text-2 font-bold">{{ $t('components.simplexBanner.title', { asset: 'ATOM' }) }}</h1>
     </template>
     <div class="form-container">
-      <!-- <div v-if="isReturn">Transaction completed.</div> -->
-      <form id="simplex-form">
+      <div v-if="transactionStatus === 'success' || transactionStatus === 'failure'">
+        {{ transactionCompletedText }}
+      </div>
+      <form v-else id="simplex-form">
         <div id="checkout-element"></div>
       </form>
     </div>
@@ -23,7 +24,8 @@
 </template>
 
 <script lang="ts">
-import { onUnmounted, ref, watch } from '@vue/runtime-core';
+import { computed, ref, watch } from '@vue/runtime-core';
+import { useI18n } from 'vue-i18n';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';
@@ -32,23 +34,32 @@ export default {
   components: { Modal },
   setup() {
     const emitter = useEmitter();
+    const { t } = useI18n({ useScope: 'global' });
     const isModalOpen = ref(false);
+    const transactionStatus = ref('ongoing');
     const toggleSimplexModal = () => {
       isModalOpen.value = !isModalOpen.value;
+    };
+    const setTransactionStatus = (status) => {
+      transactionStatus.value = status;
     };
     emitter.on('simplex', () => {
       toggleSimplexModal();
     });
+
+    const transactionCompletedText = computed(() => {
+      if (transactionStatus.value === 'success') {
+        return t('components.simplex.transactionSuccessful');
+      } else {
+        return t('components.simplex.transactionFailed');
+      }
+    });
     const goSimplex = () => {
       try {
-        if (!document.getElementById('simplex-script')) {
-          let simplexScript = document.createElement('script');
-          simplexScript.id = 'simplex-script';
-          let simplexFunction = document.createTextNode(`window.simplexAsyncFunction = function () {
-            Simplex.init({public_key: 'pk_test_37a1ad27-8916-47a3-971a-b399b869b257'})
-          };`);
-          simplexScript?.appendChild(simplexFunction);
-          document.head?.appendChild(simplexScript);
+        if (!document.getElementById('simplex-iframe-script')) {
+          (window as any).simplexAsyncFunction = function () {
+            (window as any)?.Simplex?.init({ public_key: 'pk_test_37a1ad27-8916-47a3-971a-b399b869b257' });
+          };
           let simplexCDNScript = document.createElement('script');
           simplexCDNScript.setAttribute('src', 'https://cdn.test-simplexcc.com/sdk/v1/js/sdk.js');
           simplexCDNScript.id = 'simplex-cdn-script';
@@ -60,11 +71,10 @@ export default {
           simplexIframeScript.id = 'simplex-iframe-script';
           document.body?.appendChild(simplexIframeScript);
           simplexIframeScript.onload = () => {
-            let scriptTag = document.createElement('script');
-            let createForm = document.createTextNode(`window.simplex.createForm();`);
-            scriptTag.id = 'script';
-            scriptTag?.appendChild(createForm);
-            document.body?.appendChild(scriptTag);
+            (window as any)?.simplex?.createForm();
+            (window as any)?.Simplex?.subscribe('onlineFlowFinished', function (event) {
+              setTransactionStatus(event.payload.result);
+            });
           };
           let styleTag = document.createElement('style');
           styleTag.id = 'simplex-css';
@@ -82,7 +92,7 @@ export default {
     };
 
     // const deleteScripts = () => {
-    //   for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'script', 'simplex-css']) {
+    //   for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'simplex-css']) {
     //     let element = document.getElementById(id);
     //     if (element) {
     //       element.remove();
@@ -90,32 +100,17 @@ export default {
     //   }
     // };
 
-    // (window as any).Simplex.unload((event) => console.log(event))
-
     // const unloadCheckout = () => {
-    // let unloadScriptTag = document.createElement('script');
-    // let unload = document.createTextNode(`Simplex.unload((event) => console.log(event))`);
-    // unloadScriptTag?.appendChild(unload);
-    // document.body?.appendChild(unloadScriptTag);
+    //   (window as any)?.Simplex?.unload((event) => console.log(event))
     // }
-
-    // Next line is a part of the magical hidden documentation that simplex releases only when you ask them :P the above unloadcheckout too :P
-    // Simplex.subscribe('onlineFlowFinished', function(event){console.log(event.payload.result)})
 
     watch(isModalOpen, (currentIsModalOpen) => {
       if (currentIsModalOpen) {
         goSimplex();
-      } else {
-        // unloadCheckout();
-        // deleteScripts();
       }
     });
 
-    onUnmounted(() => {
-      // unloadCheckout();
-      // deleteScripts();
-    });
-    return { isModalOpen, toggleSimplexModal };
+    return { isModalOpen, toggleSimplexModal, transactionStatus, transactionCompletedText };
   },
 };
 </script>
@@ -125,10 +120,11 @@ export default {
   padding: 15px;
   background: white;
   border-top: outset;
+  color: black;
+  min-height: 350px;
 }
 .error-box {
   font-family: inherit !important;
   width: 100% !important;
-  // background: rgb(0,0,0,0.67) !important;
 }
 </style>
