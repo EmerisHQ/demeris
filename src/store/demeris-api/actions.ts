@@ -19,6 +19,7 @@ import {
   DemerisActionsByChainAddressParams,
   DemerisActionsByChainParams,
   DemerisActionsByTicketParams,
+  DemerisActionSetAirdropParams,
   DemerisActionsGetTxsParams,
   DemerisActionsTraceParams,
   DemerisActionTypes,
@@ -153,6 +154,10 @@ export interface Actions {
     { subscribe, params }: DemerisActionByTokenPriceParams,
   ): Promise<any>;
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.GET_SELECTED_AIRDROP](
+    { commit }: ActionContext<State, RootState>,
+    { params }: DemerisActionSetAirdropParams,
+  ): void;
   [DemerisActionTypes.GET_TOKEN_ID](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionByTokenIdParams,
@@ -664,6 +669,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     } catch (e) {
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
+  },
+  [DemerisActionTypes.GET_SELECTED_AIRDROP]({ commit }, { params }) {
+    commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params });
   },
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });

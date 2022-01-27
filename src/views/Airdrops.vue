@@ -6,7 +6,7 @@
           <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">Airdrops</div>
         </header>
         <section class="mt-12">
-          <AirdropsTable :airdrops="airdrops" :show-headers="false" :limit-rows="10" @row-click="openAssetPage" />
+          <AirdropsTable :airdrops="airdrops" :show-headers="false" :limit-rows="10" @row-click="openAirdropPage" />
         </section>
       </div>
 
@@ -23,12 +23,15 @@ import { computed } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import airdropsData from '@/data/sampleAirdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
+import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
 export default {
@@ -41,6 +44,7 @@ export default {
   },
 
   setup() {
+    const apistore = useStore() as TypedAPIStore;
     const { t } = useI18n({ useScope: 'global' });
     pageview({ page_title: 'Airdrops', page_path: '/' });
     useMeta(
@@ -52,11 +56,16 @@ export default {
     const router = useRouter();
     const airdrops = airdropsData.sampleAirdrops;
 
-    const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
+    const openAirdropPage = (airdrop: Airdrop) => {
+      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
+      apistore.dispatch(GlobalDemerisActionTypes.API.GET_SELECTED_AIRDROP, {
+        params: {
+          airdrop,
+        },
+      });
     };
 
-    return { airdrops, openAssetPage };
+    return { airdrops, openAirdropPage };
   },
 };
 </script>

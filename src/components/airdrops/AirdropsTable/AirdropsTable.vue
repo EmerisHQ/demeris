@@ -176,8 +176,8 @@ export default defineComponent({
     const activeFilterItem = ref('all');
     const showMoreFilters = ref(false);
 
-    const handleClick = (asset: Record<string, string>) => {
-      emit('row-click', asset);
+    const handleClick = (airdrop: Airdrop) => {
+      emit('row-click', airdrop);
     };
 
     const setActiveFilter = (item: any) => {

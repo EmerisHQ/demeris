@@ -7,7 +7,7 @@
         <p>What is an airdrop? ↗️</p>
       </div>
     </div>
-    <div class="divider"></div>
+    <Divider extra-classes="ml-14 my-6" />
     <div class="flex">
       <InfoStarIcon class="mr-4" />
       <div>
@@ -21,6 +21,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import Divider from '@/components/ui/Divider.vue';
+
 import InfoStarIcon from '../../common/Icons/InfoStarIcon.vue';
 
 export default defineComponent({
@@ -28,14 +30,7 @@ export default defineComponent({
 
   components: {
     InfoStarIcon,
+    Divider,
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.divider {
-  margin: 1.5rem 0 1.5rem 3.5rem;
-  height: 1px;
-  background: rgba($color: #000000, $alpha: 0.1);
-}
-</style>

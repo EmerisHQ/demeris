@@ -30,6 +30,7 @@ export enum DemerisActionTypes {
   GET_RELAYER_STATUS = 'GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'GET_RELAYER_BALANCES',
   GET_TXS = 'GET_TXS',
+  GET_SELECTED_AIRDROP = 'GET_SELECTED_AIRDROP',
   // Internal module actions
   INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
@@ -67,6 +68,7 @@ export enum GlobalDemerisActionTypes {
   GET_RELAYER_STATUS = 'demerisAPI/GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'demerisAPI/GET_RELAYER_BALANCES',
   GET_TXS = 'demerisAPI/GET_TXS',
+  GET_SELECTED_AIRDROP = 'demerisAPI/GET_SELECTED_AIRDROP',
   // Internal module actions
   INIT = 'demerisAPI/INIT',
   RESET_STATE = 'demerisAPI/RESET_STATE',
@@ -85,6 +87,9 @@ export type DemerisActionsByAddressParams = {
 export type DemerisActionByTokenPriceParams = {
   subscribe: boolean;
   params?: API.TokenPriceReq;
+};
+export type DemerisActionSetAirdropParams = {
+  params?: API.selectedAirdropReq;
 };
 export type DemerisActionByTokenIdParams = {
   subscribe: boolean;

@@ -26,6 +26,7 @@ export enum DemerisMutationTypes {
   SET_CHAIN_STATUS = 'SET_CHAIN_STATUS',
   SET_RELAYER_STATUS = 'SET_RELAYER_STATUS',
   SET_RELAYER_BALANCES = 'SET_RELAYER_BALANCES',
+  SET_SELECTED_AIRDROP = 'SET_SELECTED_AIRDROP',
   INIT = 'INIT',
   SET_IN_PROGRESS = 'SET_IN_PROGRESS',
   DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
@@ -65,6 +66,7 @@ export type DemerisMutationArgs =
   | API.PrimaryChannel
   | API.TokenPrices
   | API.TokenId
+  | API.Airdrop
   | API.StakingBalances
   | API.Numbers
   | API.SeqNumber

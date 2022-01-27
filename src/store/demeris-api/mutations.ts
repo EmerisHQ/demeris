@@ -37,6 +37,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_TOKEN_PRICES](state: S, payload: { params: API.APIRequests; value: any[] }): void;
   [MutationTypes.SET_TOKEN_ID](state: S, payload: { value: API.TokenId }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
+  [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: API.Airdrop }): void;
 
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
@@ -272,6 +273,10 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_TOKEN_ID](state: State, payload: DemerisMutations) {
     const newPayload: any = payload.value;
     state.tokenId = newPayload.data[newPayload.token];
+  },
+  [MutationTypes.SET_SELECTED_AIRDROP](state: State, payload: DemerisMutations) {
+    const newPayload: any = payload.value;
+    state.selectedAirdrop = newPayload.airdrop;
   },
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
     if (!isEqual(state.chains[(payload.params as API.ChainReq).chain_name].status, payload.value as boolean)) {

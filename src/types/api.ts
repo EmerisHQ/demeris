@@ -347,6 +347,10 @@ export type Airdrop = {
   claimActions: AirdropClaimAction[];
 };
 
+export type selectedAirdropReq = {
+  airdrop: Airdrop;
+};
+
 export type TransactionDetailResponse = {
   tx: {
     body: {

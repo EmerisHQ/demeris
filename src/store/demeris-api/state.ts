@@ -30,6 +30,7 @@ export type State = {
   tokenPrices: API.TokenPrices[];
   tokenId: string;
   validPools: Pool[];
+  selectedAirdrop: API.Airdrop;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
 };
@@ -51,6 +52,28 @@ export function getDefaultState(): State {
     tokenId: '',
     relayer: false,
     chains: {},
+    selectedAirdrop: {
+      project: '',
+      projectWebsiteUrl: '',
+      eligibilityType: '',
+      projectDescription: '',
+      chainName: '',
+      chainID: '',
+      tokenTicker: '',
+      tokenIcon: '',
+      twitterUrl: '',
+      discordUrl: '',
+      mediumUrl: '',
+      airdropBlogUrl: '',
+      startDate: '',
+      endDate: '',
+      snapshotDate: '',
+      snapshotBlockHeight: '',
+      eligibilityCriteria: [],
+      eligibilityCheckEndpoint: '',
+      unanimousClaim: false,
+      claimActions: [],
+    },
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),

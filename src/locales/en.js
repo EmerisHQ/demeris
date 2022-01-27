@@ -416,6 +416,7 @@ export const messages = {
         action: 'Action',
         amount: 'Amount',
         viewAll: 'View all',
+        allAirdrops: 'All airdrops',
       },
       pools: {
         title: 'Pools',
