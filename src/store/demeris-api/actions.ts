@@ -742,12 +742,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
           reject(new Error(data.error));
         }
 
-        if (!data?.result?.tx_result) {
-          return;
+        if (data.result?.data?.value?.TxResult) {
+          resolve(data.result.data.value.TxResult);
         }
 
-        const txResult = data.result.tx_result;
-        resolve(txResult);
+        if (data?.result?.tx_result) {
+          resolve(data.result.tx_result);
+        }
       };
 
       const handleClose = () => {

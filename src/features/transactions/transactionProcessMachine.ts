@@ -399,15 +399,11 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           chain_name: sourceChain,
           status: undefined,
           endBlock: undefined,
+          websocket: undefined,
         };
 
         // @ts-ignore
         callback({ type: 'SET_DATA', data: responseData });
-
-        useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
-          subscribe: true,
-          params: { chain_name: sourceChain, ticket: event.data.ticket },
-        });
 
         let shouldRetry = true;
 
@@ -440,6 +436,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
           }
 
+          responseData.endBlock = endBlockEvent;
           return endBlockEvent;
         };
 
@@ -480,23 +477,38 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
           responseData.status = resultData;
 
-          if (featureRunning('WEBSOCKET_RESPONSE')) {
-            // @ts-ignore
-            responseData.websocket = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
-              chain_name: responseData.chain_name,
-              txhash: responseData.txhash,
-              stepType: currentStep.name,
-            });
-          }
-
-          const endBlockResult = await fetchEndBlock(resultData.height);
-          responseData.endBlock = endBlockResult;
+          await fetchEndBlock(resultData.height);
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });
         };
 
-        setTimeout(fetchStatus, 0);
+        const traceResponse = async () => {
+          // @ts-ignore
+          const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+            chain_name: responseData.chain_name,
+            txhash: responseData.txhash,
+            stepType: currentStep.name,
+          });
+
+          responseData.websocket = wsResult;
+
+          await fetchEndBlock(wsResult.height);
+
+          // @ts-ignore
+          callback({ type: 'GOT_RESPONSE', data: responseData });
+        };
+
+        if (featureRunning('WEBSOCKET_RESPONSE')) {
+          setTimeout(traceResponse, 0);
+        } else {
+          useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+            subscribe: true,
+            params: { chain_name: sourceChain, ticket: event.data.ticket },
+          });
+
+          setTimeout(fetchStatus, 0);
+        }
 
         return () => (shouldRetry = false);
       },
