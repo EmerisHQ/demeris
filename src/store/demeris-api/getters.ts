@@ -301,7 +301,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
   [GetterTypes.getFeeTokens]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.denoms.filter((x) => x.fee_token) ?? null;
+    return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? null;
   },
   [GetterTypes.getChain]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;

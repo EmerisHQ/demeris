@@ -1523,21 +1523,22 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      for (const denom of ibcDenoms) {
-        await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-          {
-            subscribe: false,
-            cache: false,
-            params: {
-              chain_name: chain,
-              hash: denom.split('/')[1],
+      await Promise.all(
+        ibcDenoms.map((denom) =>
+          apistore.dispatch(
+            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              cache: false,
+              params: {
+                chain_name: chain,
+                hash: denom.split('/')[1],
+              },
             },
-          },
-          { root: true },
-        );
-      }
-      break;
+            { root: true },
+          ),
+        ),
+      );
     } catch (e) {
       error = e;
       retries++;
@@ -1774,60 +1775,62 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
-  for (const balance of balances) {
-    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-    const hashAddress = keyHashfromAddress(ownAddress);
+  await Promise.all(
+    balances.map(async (balance) => {
+      const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+      const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress) {
-      continue;
-    }
+      if (balance.address !== hashAddress) {
+        return;
+      }
 
-    if (Object.keys(balance.ibc).length == 0) {
-      if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
-        validBalances.push(balance);
-      }
-    } else {
-      if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
-        continue;
-      }
-      let verifyTrace;
-      try {
-        verifyTrace =
-          apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+      if (Object.keys(balance.ibc).length == 0) {
+        if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+          validBalances.push(balance);
+        }
+      } else {
+        if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+          return;
+        }
+        let verifyTrace;
+        try {
+          verifyTrace =
+            apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+              chain_name: balance.on_chain,
+              hash: balance.ibc.hash,
+            }) ??
+            (await apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+              { root: true },
+            ));
+        } catch (e) {
+          return;
+        }
+
+        if (!verifyTrace || !verifyTrace.verified) {
+          return;
+        }
+
+        const primaryChannel =
+          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
             chain_name: balance.on_chain,
-            hash: balance.ibc.hash,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-            { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+            {
+              subscribe: false,
+              params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+            },
             { root: true },
           ));
-      } catch (e) {
-        continue;
+        if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+          validBalances.push(balance);
+        }
       }
-
-      if (!verifyTrace || !verifyTrace.verified) {
-        continue;
-      }
-
-      const primaryChannel =
-        apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-          chain_name: balance.on_chain,
-          destination_chain_name: verifyTrace.trace[0].counterparty_name,
-        }) ??
-        (await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-          {
-            subscribe: false,
-            params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
-          },
-          { root: true },
-        ));
-      if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-        validBalances.push(balance);
-      }
-    }
-  }
+    }),
+  );
   return validBalances;
 }
 

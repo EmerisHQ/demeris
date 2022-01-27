@@ -356,7 +356,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+        dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');
