@@ -11,7 +11,7 @@
       </div>
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <LiquiditySwap />
+        <SkeletonLoader width="100%" height="320px" />
         <AirdropsInfo class="mt-8" />
       </aside>
     </div>
@@ -27,7 +27,7 @@ import { useStore } from 'vuex';
 
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import airdropsData from '@/data/sampleAirdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
@@ -38,7 +38,7 @@ export default {
   name: 'Airdrops',
   components: {
     AppLayout,
-    LiquiditySwap,
+    SkeletonLoader,
     AirdropsTable,
     AirdropsInfo,
   },

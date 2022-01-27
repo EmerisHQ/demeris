@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center py-8">
-    <Button v-if="showBackButton" variant="link">
+    <Button v-if="showBackButton" variant="link" @click="handleGoBackClick">
       <Icon :name="'ArrowLeftIcon'" icon-size="1" />
     </Button>
     <div class="ml-4">{{ title }}</div>
@@ -26,6 +26,16 @@ export default defineComponent({
       required: false,
       default: true,
     },
+  },
+  emits: ['go-back'],
+  setup(props, { emit }) {
+    const handleGoBackClick = () => {
+      emit('go-back');
+    };
+
+    return {
+      handleGoBackClick,
+    };
   },
 });
 </script>

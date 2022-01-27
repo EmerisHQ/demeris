@@ -3,7 +3,7 @@
     <div class="md:flex justify-between">
       <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header class="w-full max-w-7xl mx-auto">
-          <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" />
+          <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
         </header>
 
         <section>
@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
+import { computed, defineComponent, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -103,11 +103,11 @@ import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
 import airdropsData from '@/data/sampleAirdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
-export default {
+export default defineComponent({
   name: 'Airdrop',
   components: {
     AppLayout,
@@ -141,9 +141,17 @@ export default {
       });
     };
 
-    return { airdrops, openAirdropPage };
+    const selectedAirdrop = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+    });
+
+    const goBackToAirdropspage = () => {
+      router.push('/airdrops');
+    };
+
+    return { airdrops, openAirdropPage, selectedAirdrop, goBackToAirdropspage };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
