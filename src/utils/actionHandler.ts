@@ -1371,6 +1371,7 @@ export async function msgFromStepTransaction(
     return { msg, chain_name, registry };
   }
 }
+// TODO make getter so it out updates on getFeeTokens getter
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
   const apistore = useStore() as TypedAPIStore;
   const denoms = apistore.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
