@@ -466,6 +466,7 @@ export const messages = {
             receipt: 'Partially completed ({offset}/{total})',
             failed: {
               sign: 'Transaction not signed',
+              unknown: "Coudln't fetch result",
               default: 'Transaction failed',
             },
           },
