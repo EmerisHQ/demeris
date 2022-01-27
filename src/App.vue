@@ -54,6 +54,8 @@ export default defineComponent({
     const initialized = ref(false);
     const router = useRouter();
 
+    console.time();
+
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
     onMounted(async () => {
@@ -68,38 +70,41 @@ export default defineComponent({
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
       });
-      await userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
+      userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
         gasLimit: gasLimit,
       });
-      status.value = t('appInit.status.assetLoading');
-      await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+      // status.value = t('appInit.status.assetLoading');
+      apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
         subscribe: true,
       });
-      status.value = t('appInit.status.chainLoading');
-      let chains = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
-        subscribe: false,
-      });
-      for (let chain in chains) {
-        status.value = t('appInit.status.chainDetails', {
-          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
+      // status.value = t('appInit.status.chainLoading');
+      apistore
+        .dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
+          subscribe: false,
+        })
+        .then((chains) => {
+          for (let chain in chains) {
+            // status.value = t('appInit.status.chainDetails', {
+            //   displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
+            // });
+            apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            });
+            // status.value = t('appInit.status.chainStatus', {
+            //   displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
+            // });
+            apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            });
+          }
         });
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
-          subscribe: true,
-          params: {
-            chain_name: chain,
-          },
-        });
-        status.value = t('appInit.status.chainStatus', {
-          displayChain: apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: chain }),
-        });
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
-          subscribe: true,
-          params: {
-            chain_name: chain,
-          },
-        });
-      }
-      status.value = t('appInit.status.liquidityConfigure');
+      // status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
         apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
         rpcNode: null,
@@ -111,30 +116,28 @@ export default defineComponent({
         offline: true,
         refresh: 10000,
       });
-      status.value = t('appInit.status.poolFetching');
+      // status.value = t('appInit.status.poolFetching');
       try {
-        await store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+        store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
           options: { subscribe: true },
         });
-        await store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-        await store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } });
+        store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
+        store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } });
       } catch (e) {
         console.error(e);
       }
-      status.value = t('appInit.status.priceFetching');
-      try {
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
+      // status.value = t('appInit.status.priceFetching');
+      apistore
+        .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
           subscribe: true,
-        });
-      } catch (e) {
-        //
-      }
-      status.value = t('appInit.status.signingIn');
+        })
+        .catch();
+      // status.value = t('appInit.status.signingIn');
       if (autoLogin()) {
-        await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+        userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
       } else {
         if (autoLoginDemo()) {
-          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+          userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
         }
       }
       window.addEventListener('keplr_keystorechange', async () => {
@@ -143,9 +146,11 @@ export default defineComponent({
           userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] &&
           !userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
         ) {
-          await userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
+          userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
         }
       });
+
+      console.timeEnd();
       initialized.value = true;
       const isReturnUser = ref(null);
       isReturnUser.value = window.localStorage.getItem('isReturnUser');
