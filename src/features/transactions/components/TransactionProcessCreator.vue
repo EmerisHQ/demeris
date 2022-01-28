@@ -4,7 +4,7 @@
       v-if="action === 'swap'"
       :class="{ invisible: !['review', 'waitingPreviousTransaction', 'ibcConfirmation'].some(state.matches) }"
       :show-close="!state.matches('ibcConfirmation')"
-      class="relative z-10"
+      class="relative z-10 text-inverse"
       @goback="
         () => {
           transactionsStore.removeTransaction(stepId);
