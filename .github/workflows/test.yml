@@ -34,7 +34,7 @@ jobs:
           VUE_APP_EMERIS_MNEMONIC: ${{secrets.VUE_APP_EMERIS_MNEMONIC}}
 
       - name: Cypress run
-         uses: GabrielBB/xvfb-action@v1
+        uses: GabrielBB/xvfb-action@v1
         with:
           run: npx cypress run
 
