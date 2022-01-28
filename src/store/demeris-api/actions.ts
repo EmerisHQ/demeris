@@ -10,6 +10,7 @@ import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { hashObject } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import {
   DemerisActionParams,
@@ -356,7 +357,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
-        dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+        if (featureRunning('requestparallelization')) {
+          dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+        } else {
+          await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');

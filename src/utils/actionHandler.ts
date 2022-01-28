@@ -25,6 +25,7 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
+import { featureRunning } from './FeatureManager';
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
@@ -1524,9 +1525,26 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      await Promise.all(
-        ibcDenoms.map((denom) =>
-          apistore.dispatch(
+      if (featureRunning('requestparallelization')) {
+        await Promise.all(
+          ibcDenoms.map((denom) =>
+            apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                cache: false,
+                params: {
+                  chain_name: chain,
+                  hash: denom.split('/')[1],
+                },
+              },
+              { root: true },
+            ),
+          ),
+        );
+      } else {
+        for (const denom of ibcDenoms) {
+          await apistore.dispatch(
             GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
             {
               subscribe: false,
@@ -1537,9 +1555,10 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
               },
             },
             { root: true },
-          ),
-        ),
-      );
+          );
+        }
+        break;
+      }
     } catch (e) {
       error = e;
       retries++;
@@ -1776,13 +1795,73 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
-  await Promise.all(
-    balances.map(async (balance) => {
+  if (featureRunning('requestparallelization')) {
+    await Promise.all(
+      balances.map(async (balance) => {
+        const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+        const hashAddress = keyHashfromAddress(ownAddress);
+
+        if (balance.address !== hashAddress) {
+          return;
+        }
+
+        if (Object.keys(balance.ibc).length == 0) {
+          if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+            validBalances.push(balance);
+          }
+        } else {
+          if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+            return;
+          }
+          let verifyTrace;
+          try {
+            verifyTrace =
+              apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              }) ??
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+                { root: true },
+              ));
+          } catch (e) {
+            return;
+          }
+
+          if (!verifyTrace || !verifyTrace.verified) {
+            return;
+          }
+
+          const primaryChannel =
+            apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+              chain_name: balance.on_chain,
+              destination_chain_name: verifyTrace.trace[0].counterparty_name,
+            }) ??
+            (await apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+              {
+                subscribe: false,
+                params: {
+                  chain_name: balance.on_chain,
+                  destination_chain_name: verifyTrace.trace[0].counterparty_name,
+                },
+              },
+              { root: true },
+            ));
+          if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+            validBalances.push(balance);
+          }
+        }
+      }),
+    );
+  } else {
+    for (const balance of balances) {
       const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
       const hashAddress = keyHashfromAddress(ownAddress);
 
       if (balance.address !== hashAddress) {
-        return;
+        continue;
       }
 
       if (Object.keys(balance.ibc).length == 0) {
@@ -1791,7 +1870,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         }
       } else {
         if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
-          return;
+          continue;
         }
         let verifyTrace;
         try {
@@ -1806,11 +1885,11 @@ export async function validBalances(balances: Balances): Promise<Balances> {
               { root: true },
             ));
         } catch (e) {
-          return;
+          continue;
         }
 
         if (!verifyTrace || !verifyTrace.verified) {
-          return;
+          continue;
         }
 
         const primaryChannel =
@@ -1830,8 +1909,8 @@ export async function validBalances(balances: Balances): Promise<Balances> {
           validBalances.push(balance);
         }
       }
-    }),
-  );
+    }
+  }
   return validBalances;
 }
 
