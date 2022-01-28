@@ -30,11 +30,11 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VUE_APP_EMERIS_MNEMONIC: ${{secrets.VUE_APP_EMERIS_MNEMONIC}}
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
-        with:
-          command: npx cypress run
 
       - name: Test
         run: npm run test:unit -- --runInBand
