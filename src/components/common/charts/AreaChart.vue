@@ -5,7 +5,7 @@
       <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
       <div v-if="variant === 'full'" class="flex justify-between items-center">
         <p class="-text-1 text-muted">
-          High ${{ highestPrice ? highestPrice.toFixed(2) : 0 }} / Low ${{ lowestprice ? lowestprice.toFixed(2) : 0 }}
+          {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}
         </p>
         <div>
           <a
@@ -142,8 +142,8 @@ export default defineComponent({
     });
 
     const activeFilterItem = ref('1');
-    let highestPrice = ref(0);
-    let lowestprice = ref(0);
+    let highestPrice = ref('');
+    let lowestPrice = ref('');
     let openingPrice = ref(0);
     let closingPrice = ref(0);
 
@@ -156,8 +156,13 @@ export default defineComponent({
       () => props.dataStream as TokenPrices[],
       async (value) => {
         chartData.value.series[0].data = value;
-        highestPrice.value = maxBy(value, 'y') ? maxBy(value, 'y').y : 0;
-        lowestprice.value = minBy(value, 'y') ? minBy(value, 'y').y : 0;
+
+        const high = (maxBy(value, 'y') ? maxBy(value, 'y').y : 0).toFixed(2);
+        highestPrice.value = '$' + high.toString();
+
+        const low = (minBy(value, 'y') ? minBy(value, 'y').y : 0).toFixed(2);
+        lowestPrice.value = '$' + low.toString();
+
         openingPrice.value = value[0] ? value[0].y : 0;
         closingPrice.value = value[value.length - 1] ? value[value.length - 1].y : 0;
 
@@ -177,7 +182,7 @@ export default defineComponent({
       chartData,
       activeFilterItem,
       highestPrice,
-      lowestprice,
+      lowestPrice,
       setActiveFilter,
     };
   },
