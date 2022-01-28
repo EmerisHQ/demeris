@@ -34,7 +34,9 @@ jobs:
           VUE_APP_EMERIS_MNEMONIC: ${{secrets.VUE_APP_EMERIS_MNEMONIC}}
 
       - name: Cypress run
-        uses: cypress-io/github-action@v2
+         uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npx cypress run
 
       - name: Test
         run: npm run test:unit -- --runInBand
