@@ -47,7 +47,7 @@ import {
 import { useTransactionsStore } from '../../transactionsStore';
 
 const transactionsStore = useTransactionsStore();
-const { actor, minimizeModal } = inject(ProvideViewerKey);
+const { actor, minimizeModal, stepId } = inject(ProvideViewerKey);
 const { state } = actor;
 
 const transaction = computed(() => getCurrentTransaction(state.value.context));
@@ -59,6 +59,6 @@ const onKeep = () => {
 
 const onCancel = () => {
   transactionsStore.toggleCancelModal();
-  transactionsStore.removeTransactionFromPending(transactionsStore.currentId);
+  transactionsStore.removeTransactionFromPending(stepId);
 };
 </script>
