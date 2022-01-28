@@ -670,7 +670,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
         }
-        throw new SpVuexError('Demeris:GetChainStatus', 'Could not perform API query.');
+        console.error('Demeris:GetChainStatus Could not perform API query.');
       }
       resolver();
       commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
