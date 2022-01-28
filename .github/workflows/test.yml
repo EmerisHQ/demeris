@@ -31,9 +31,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: install xvfb
-        run: sudo apt-get install xvfb
-
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
