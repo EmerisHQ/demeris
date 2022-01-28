@@ -26,7 +26,7 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, PropType, ref, watch } from 'vue';
+import { defineComponent, ref, toRefs } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import { TokenPrices } from '@/types/api';
@@ -48,9 +48,8 @@ export default defineComponent({
       required: false,
     },
     dataStream: {
-      type: Array as PropType<any[]>,
       required: true,
-      default: () => [],
+      default: [],
     },
     showLoading: {
       type: Boolean,
@@ -136,7 +135,7 @@ export default defineComponent({
       series: [
         {
           name: 'Price',
-          data: [],
+          data: ref(null),
         },
       ],
     });
@@ -152,30 +151,28 @@ export default defineComponent({
       emit('filterChanged', activeFilterItem.value);
     };
 
-    watch(
-      () => props.dataStream as TokenPrices[],
-      async (value) => {
-        chartData.value.series[0].data = value;
+    let { dataStream } = toRefs(props);
 
-        const high = (maxBy(value, 'y') ? maxBy(value, 'y').y : 0).toFixed(2);
-        highestPrice.value = '$' + high.toString();
+    chartData.value.series[0].data = dataStream;
 
-        const low = (minBy(value, 'y') ? minBy(value, 'y').y : 0).toFixed(2);
-        lowestPrice.value = '$' + low.toString();
+    const high = (maxBy(dataStream.value, 'y') ? maxBy(dataStream.value, 'y').y : 0).toFixed(2);
+    highestPrice.value = '$' + high.toString();
 
-        openingPrice.value = value[0] ? value[0].y : 0;
-        closingPrice.value = value[value.length - 1] ? value[value.length - 1].y : 0;
+    const low = (minBy(dataStream.value, 'y') ? minBy(dataStream.value, 'y').y : 0).toFixed(2);
+    lowestPrice.value = '$' + low.toString();
 
-        if (openingPrice.value < closingPrice.value) {
-          chartData.value.options.colors[0] = '#00CF30';
-          chartData.value.options.fill.colors[0] = '#90EE90';
-        } else {
-          chartData.value.options.colors[0] = '#FF3D56';
-          chartData.value.options.fill.colors[0] = '#FF3D56';
-        }
-      },
-      { immediate: true },
-    );
+    openingPrice.value = dataStream.value[0] ? dataStream.value[0].y : 0;
+    closingPrice.value = dataStream.value[dataStream.value.length - 1]
+      ? dataStream.value[dataStream.value.length - 1].y
+      : 0;
+
+    if (openingPrice.value < closingPrice.value) {
+      chartData.value.options.colors[0] = '#00CF30';
+      chartData.value.options.fill.colors[0] = '#90EE90';
+    } else {
+      chartData.value.options.colors[0] = '#FF3D56';
+      chartData.value.options.fill.colors[0] = '#FF3D56';
+    }
 
     return {
       filterItems,

@@ -369,7 +369,7 @@ export default defineComponent({
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
     const dataStream = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
     });
     const getTokenPrices = ref(null);
 
