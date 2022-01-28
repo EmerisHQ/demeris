@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SkeletonLoader v-if="chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
+    <SkeletonLoader v-if="showLoading && chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
     <div v-if="chartData.series[0].data.length > 0">
       <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
       <div v-if="variant === 'full'" class="flex justify-between items-center">
@@ -51,6 +51,9 @@ export default defineComponent({
       type: Array as PropType<any[]>,
       required: true,
       default: () => [],
+    },
+    showLoading: {
+      type: Boolean,
     },
   },
   emits: ['filterChanged'],

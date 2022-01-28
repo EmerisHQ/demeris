@@ -328,6 +328,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getTokenId]: (state) => {
     return state.tokenId;
   },
+  [GetterTypes.getTokenPricesLoadingStatus]: (state) => {
+    return state.tokenPricesLoadingStatus;
+  },
+  [GetterTypes.getTokenIdLoadingStatus]: (state) => {
+    return state.tokenIdLoadingStatus;
+  },
   [GetterTypes.getChainStatus]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
   },

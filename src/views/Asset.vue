@@ -24,8 +24,9 @@
 
         <!-- Asset Price Performance Chart -->
         <AreaChart
-          v-if="isAreaChartFeatureRunning && !denom.includes('pool')"
+          v-if="showPriceChart"
           :data-stream="dataStream"
+          :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
         />
 
@@ -159,7 +160,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
+import { computed, defineComponent, onUnmounted, ref, toRaw, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -179,11 +180,10 @@ import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
-import useDenoms from '@/composables/useDenoms';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { VerifiedDenoms } from '@/types/api';
+import { LoadingState,VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
@@ -221,7 +221,6 @@ export default defineComponent({
     });
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
-    const { useDenom } = useDenoms();
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
@@ -368,36 +367,54 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
-    onMounted(() => {
-      getTokenPrices('1');
-    });
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const dataStream = ref(null);
+    const getTokenPrices = ref(null);
 
-    const getTokenPrices = async (days: string) => {
-      const { displayName } = useDenom(denom.value);
-      const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
-        subscribe: false,
-        params: {
-          token: displayName.value.toLowerCase(),
-        },
+    if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
+      watch(displayName, async () => {
+        if (displayName.value) {
+          getTokenPrices.value('1');
+        }
       });
 
-      if (chainName) {
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+      getTokenPrices.value = async (days: string) => {
+        const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
           subscribe: false,
           params: {
-            token_id: chainName,
-            days,
-            currency: 'usd',
+            token: displayName.value.toLowerCase(),
           },
         });
-      }
-    };
 
-    const dataStream = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+        if (chainName) {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+            subscribe: false,
+            params: {
+              token_id: chainName,
+              days,
+              currency: 'usd',
+            },
+          });
+        }
+      };
+
+      dataStream.value = toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+    }
+
+    const isDenomAPool = computed(() => {
+      return denom.value.includes('pool');
     });
 
-    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const showPriceChart = computed(() => {
+      return isAreaChartFeatureRunning && !isDenomAPool.value;
+    });
+
+    const showPriceChartLoadingSkeleton = computed(() => {
+      return (
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+      );
+    });
 
     onUnmounted(() => {
       apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
@@ -418,7 +435,8 @@ export default defineComponent({
       isPoolCoin,
       dataStream,
       getTokenPrices,
-      isAreaChartFeatureRunning,
+      showPriceChart,
+      showPriceChartLoadingSkeleton,
     };
   },
 });

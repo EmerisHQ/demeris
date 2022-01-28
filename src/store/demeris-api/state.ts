@@ -28,7 +28,9 @@ export type State = {
   chains: Record<string, ChainData>;
   transactions: Map<string, TransactionItem>;
   tokenPrices: API.TokenPrices[];
+  tokenPricesLoadingStatus: API.LoadingState;
   tokenId: string;
+  tokenIdLoadingStatus: API.LoadingState;
   validPools: Pool[];
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
@@ -48,7 +50,9 @@ export function getDefaultState(): State {
       Tokens: [],
     },
     tokenPrices: [],
+    tokenPricesLoadingStatus: API.LoadingState.INIT,
     tokenId: '',
+    tokenIdLoadingStatus: API.LoadingState.INIT,
     relayer: false,
     chains: {},
     transactions: new Map(),
