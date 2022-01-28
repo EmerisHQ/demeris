@@ -182,6 +182,7 @@ import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import FeatureRunningConditional from '../common/FeatureRunningConditional.vue';
 
@@ -777,27 +778,53 @@ export default defineComponent({
     });
 
     //tx fee setting
-    watch(
-      () => data.payCoinData?.denom,
-      async () => {
-        if (!data.payCoinData) {
-          return;
-        }
+    if (featureRunning('requestparallelization')) {
+      watch(
+        () => [data.payCoinData?.denom, store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]],
+        async (denom, feeTokens) => {
+          if (!data.payCoinData || !feeTokens) {
+            return;
+          }
 
-        if (
-          data.payCoinData?.denom.startsWith('pool') ||
-          (data.payCoinData?.denom.startsWith('ibc') &&
-            data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
-        ) {
-          txFee.value = 0;
-        } else {
-          const fees = await getFeeForChain(data.payCoinData?.on_chain);
-          txFee.value =
-            fees[0].amount[gasPriceLevel.value] *
-            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
-        }
-      },
-    );
+          if (
+            data.payCoinData?.denom.startsWith('pool') ||
+            (data.payCoinData?.denom.startsWith('ibc') &&
+              data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
+          ) {
+            txFee.value = 0;
+          } else {
+            const fees = await getFeeForChain(data.payCoinData?.on_chain);
+            txFee.value =
+              fees[0].amount[gasPriceLevel.value] *
+              10 **
+                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+          }
+        },
+      );
+    } else {
+      watch(
+        () => data.payCoinData?.denom,
+        async (denom) => {
+          if (!data.payCoinData) {
+            return;
+          }
+
+          if (
+            data.payCoinData?.denom.startsWith('pool') ||
+            (data.payCoinData?.denom.startsWith('ibc') &&
+              data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
+          ) {
+            txFee.value = 0;
+          } else {
+            const fees = await getFeeForChain(data.payCoinData?.on_chain);
+            txFee.value =
+              fees[0].amount[gasPriceLevel.value] *
+              10 **
+                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+          }
+        },
+      );
+    }
 
     //max button text set
     watch(
