@@ -183,7 +183,7 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { LoadingState,VerifiedDenoms } from '@/types/api';
+import { LoadingState, VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
@@ -368,7 +368,9 @@ export default defineComponent({
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
-    const dataStream = ref(null);
+    const dataStream = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
+    });
     const getTokenPrices = ref(null);
 
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
@@ -397,8 +399,6 @@ export default defineComponent({
           });
         }
       };
-
-      dataStream.value = toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]);
     }
 
     const isDenomAPool = computed(() => {
