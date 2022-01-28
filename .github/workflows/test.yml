@@ -36,10 +36,11 @@ jobs:
       - name: apt update
         run: sudo apt update
 
+      - name: install dependencies
+        run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
       - name: Cypress run
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: npx cypress run
+        uses: cypress-io/github-action@v2
 
       - name: Test
         run: npm run test:unit -- --runInBand
