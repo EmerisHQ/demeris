@@ -39,8 +39,13 @@ jobs:
       - name: install dependencies
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
+      - name: install image-snapshot plugin
+        run: npm -f install --save-dev cypress-image-snapshot
+        
       - name: Cypress run
         uses: cypress-io/github-action@v2
+          with:
+            command: npx cypress run
 
       - name: Test
         run: npm run test:unit -- --runInBand
