@@ -41,11 +41,9 @@ jobs:
 
       - name: install image-snapshot plugin
         run: npm -f install --save-dev cypress-image-snapshot
-        
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
-          with:
-            command: npx cypress run
 
       - name: Test
         run: npm run test:unit -- --runInBand
