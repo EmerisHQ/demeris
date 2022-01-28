@@ -14,6 +14,7 @@ export enum DemerisActionTypes {
   GET_CHAINS = 'GET_CHAINS',
   GET_PRICES = 'GET_PRICES',
   GET_TX_STATUS = 'GET_TX_STATUS',
+  GET_TX_DEST_HASH = 'GET_TX_DEST_HASH',
   GET_END_BLOCK_EVENTS = 'GET_END_BLOCK_EVENTS',
   VALIDATE_POOLS = 'VALIDATE_POOLS',
   // Chain-specific endpoint actions
@@ -50,6 +51,7 @@ export enum GlobalDemerisActionTypes {
   GET_CHAINS = 'demerisAPI/GET_CHAINS',
   GET_PRICES = 'demerisAPI/GET_PRICES',
   GET_TX_STATUS = 'demerisAPI/GET_TX_STATUS',
+  GET_TX_DEST_HASH = 'demerisAPI/GET_TX_DEST_HASH',
   GET_END_BLOCK_EVENTS = 'demerisAPI/GET_END_BLOCK_EVENTS',
   VALIDATE_POOLS = 'demerisAPI/VALIDATE_POOLS',
   GET_VERIFY_TRACE = 'demerisAPI/GET_VERIFY_TRACE',

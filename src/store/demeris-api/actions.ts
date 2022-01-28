@@ -465,6 +465,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getTxStatus'](params);
   },
+  async [DemerisActionTypes.GET_TX_DEST_HASH]({ getters }, { from_chain, to_chain, txhash }) {
+    try {
+      const response = await axios.get(`${getters['getEndpoint']}/tx/${from_chain}/${to_chain}/${txhash}`);
+      return response.data;
+    } catch (e) {
+      console.error(e);
+      throw new SpVuexError('Demeris:GetTXDestHash', 'Could not perform API query.');
+    }
+  },
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chains');

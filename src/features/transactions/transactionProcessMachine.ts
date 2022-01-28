@@ -2,7 +2,7 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions';
-import { FeeTotals, FeeWarning, GasPriceLevel, Step, StepTransaction } from '@/types/actions';
+import { FeeTotals, FeeWarning, GasPriceLevel, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import {
   chainStatusForSteps,
@@ -484,7 +484,28 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         const traceResponse = async () => {
-          // @ts-ignore
+          if (currentTransaction.name.includes('ibc')) {
+            let retriesDestCount = 0;
+            const { from_chain, to_chain } = currentTransaction.data as IBCBackwardsData;
+
+            while (retriesDestCount < 10 && shouldRetry) {
+              try {
+                const destHash = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
+                  from_chain,
+                  to_chain,
+                  txhash: responseData.txhash,
+                });
+
+                responseData.chain_name = to_chain;
+                responseData.txhash = destHash;
+                break;
+              } catch {
+                retriesDestCount++;
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            }
+          }
+
           const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
             chain_name: responseData.chain_name,
             txhash: responseData.txhash,
