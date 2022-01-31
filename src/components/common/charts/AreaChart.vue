@@ -26,10 +26,10 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, ref, toRefs } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import { TokenPrices } from '@/types/api';
+// import { TokenPrices } from '@/types/api';
 
 export default defineComponent({
   name: 'AreaChart',
@@ -151,28 +151,30 @@ export default defineComponent({
       emit('filterChanged', activeFilterItem.value);
     };
 
-    let { dataStream } = toRefs(props);
+    watch(
+      () => props.dataStream,
+      async (newVal) => {
+        chartData.value.series[0].data = newVal;
 
-    chartData.value.series[0].data = dataStream;
+        const high = (maxBy(newVal, 'y') ? maxBy(newVal, 'y').y : 0).toFixed(2);
+        highestPrice.value = '$' + high.toString();
 
-    const high = (maxBy(dataStream.value, 'y') ? maxBy(dataStream.value, 'y').y : 0).toFixed(2);
-    highestPrice.value = '$' + high.toString();
+        const low = (minBy(newVal, 'y') ? minBy(newVal, 'y').y : 0).toFixed(2);
+        lowestPrice.value = '$' + low.toString();
 
-    const low = (minBy(dataStream.value, 'y') ? minBy(dataStream.value, 'y').y : 0).toFixed(2);
-    lowestPrice.value = '$' + low.toString();
+        openingPrice.value = newVal[0] ? newVal[0].y : 0;
+        closingPrice.value = newVal[newVal.length - 1] ? newVal[newVal.length - 1].y : 0;
 
-    openingPrice.value = dataStream.value[0] ? dataStream.value[0].y : 0;
-    closingPrice.value = dataStream.value[dataStream.value.length - 1]
-      ? dataStream.value[dataStream.value.length - 1].y
-      : 0;
-
-    if (openingPrice.value < closingPrice.value) {
-      chartData.value.options.colors[0] = '#00CF30';
-      chartData.value.options.fill.colors[0] = '#90EE90';
-    } else {
-      chartData.value.options.colors[0] = '#FF3D56';
-      chartData.value.options.fill.colors[0] = '#FF3D56';
-    }
+        if (openingPrice.value < closingPrice.value) {
+          chartData.value.options.colors[0] = '#00CF30';
+          chartData.value.options.fill.colors[0] = '#90EE90';
+        } else {
+          chartData.value.options.colors[0] = '#FF3D56';
+          chartData.value.options.fill.colors[0] = '#FF3D56';
+        }
+      },
+      { immediate: true },
+    );
 
     return {
       filterItems,
