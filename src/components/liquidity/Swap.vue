@@ -782,7 +782,7 @@ export default defineComponent({
       watch(
         () => [data.payCoinData?.denom, store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]],
         async (denom, feeTokens) => {
-          if (!data.payCoinData || !feeTokens) {
+          if (!data.payCoinData || feeTokens.length === 0) {
             return;
           }
 

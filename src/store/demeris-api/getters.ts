@@ -6,6 +6,7 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
@@ -301,7 +302,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
   [GetterTypes.getFeeTokens]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? null;
+    if (featureRunning('REQUEST_PARALLELIZATION')) {
+      return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
+    } else {
+      return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? null;
+    }
   },
   [GetterTypes.getChain]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;
