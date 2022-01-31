@@ -1525,7 +1525,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      if (featureRunning('REQUEST_PARALLELIZTION')) {
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
         await Promise.all(
           ibcDenoms.map((denom) =>
             apistore.dispatch(
@@ -1795,7 +1795,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
-  if (featureRunning('REQUEST_PARALLELIZTION')) {
+  if (featureRunning('REQUEST_PARALLELIZATION')) {
     await Promise.all(
       balances.map(async (balance) => {
         const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
