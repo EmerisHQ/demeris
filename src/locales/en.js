@@ -516,6 +516,7 @@ export const messages = {
         chains: 'Chains',
         pools: 'Pools',
         staking: 'Staking',
+        highLow: 'High {high} / Low {low}',
       },
       assets: {
         assets: 'Assets',

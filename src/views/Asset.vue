@@ -22,8 +22,15 @@
           </div>
         </header>
 
-        <!-- Balance -->
+        <!-- Asset Price Performance Chart -->
+        <AreaChart
+          v-if="showPriceChart"
+          :data-stream="dataStream"
+          :show-loading="showPriceChartLoadingSkeleton"
+          @filterChanged="getTokenPrices"
+        />
 
+        <!-- Balance -->
         <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
@@ -153,7 +160,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -162,6 +169,7 @@ import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
@@ -175,10 +183,11 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { VerifiedDenoms } from '@/types/api';
+import { LoadingState, VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'Asset',
@@ -198,6 +207,7 @@ export default defineComponent({
     PoolBanner,
     MoonpayBanner,
     ChainDownWarning,
+    AreaChart,
   },
 
   setup() {
@@ -357,6 +367,59 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const dataStream = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
+    });
+    const getTokenPrices = ref(null);
+
+    if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
+      watch(displayName, async () => {
+        if (displayName.value) {
+          getTokenPrices.value('1');
+        }
+      });
+
+      getTokenPrices.value = async (days: string) => {
+        const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
+          subscribe: false,
+          params: {
+            token: displayName.value.toLowerCase(),
+          },
+        });
+
+        if (chainName) {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+            subscribe: false,
+            params: {
+              token_id: chainName,
+              days,
+              currency: 'usd',
+            },
+          });
+        }
+      };
+    }
+
+    const isDenomAPool = computed(() => {
+      return denom.value.includes('pool');
+    });
+
+    const showPriceChart = computed(() => {
+      return isAreaChartFeatureRunning && !isDenomAPool.value;
+    });
+
+    const showPriceChartLoadingSkeleton = computed(() => {
+      return (
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+      );
+    });
+
+    onUnmounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
+    });
+
     return {
       nativeAsset,
       assetConfig,
@@ -370,6 +433,10 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      dataStream,
+      getTokenPrices,
+      showPriceChart,
+      showPriceChartLoadingSkeleton,
     };
   },
 });
