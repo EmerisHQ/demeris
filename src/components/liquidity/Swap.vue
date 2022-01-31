@@ -780,22 +780,28 @@ export default defineComponent({
     //tx fee setting
     if (featureRunning('REQUEST_PARALLELIZATION')) {
       watch(
-        () => [data.payCoinData?.denom, store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]],
-        async (denom, feeTokens) => {
-          if (!data.payCoinData || feeTokens.length === 0) {
+        () => [
+          data.payCoinData?.denom,
+          store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
+            chain_name: data.payCoinData?.on_chain,
+          }),
+          store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
+        ],
+        async ([denom, feeTokens, gasPriceLevel]) => {
+          if (!denom || feeTokens.length === 0 || !gasPriceLevel) {
             return;
           }
 
           if (
-            data.payCoinData?.denom.startsWith('pool') ||
-            (data.payCoinData?.denom.startsWith('ibc') &&
+            denom.startsWith('pool') ||
+            (denom.startsWith('ibc') &&
               data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
           ) {
             txFee.value = 0;
           } else {
             const fees = await getFeeForChain(data.payCoinData?.on_chain);
             txFee.value =
-              fees[0].amount[gasPriceLevel.value] *
+              fees[0].amount[gasPriceLevel] *
               10 **
                 store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
           }
@@ -804,7 +810,7 @@ export default defineComponent({
     } else {
       watch(
         () => data.payCoinData?.denom,
-        async (denom) => {
+        async () => {
           if (!data.payCoinData) {
             return;
           }
