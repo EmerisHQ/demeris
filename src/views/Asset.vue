@@ -160,7 +160,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted, ref, toRaw, watch } from 'vue';
+import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';

@@ -26,10 +26,10 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, PropType,ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-// import { TokenPrices } from '@/types/api';
+import { TokenPrices } from '@/types/api';
 
 export default defineComponent({
   name: 'AreaChart',
@@ -48,8 +48,8 @@ export default defineComponent({
       required: false,
     },
     dataStream: {
+      type: Array as PropType<TokenPrices[]>,
       required: true,
-      default: [],
     },
     showLoading: {
       type: Boolean,
