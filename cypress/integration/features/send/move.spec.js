@@ -12,13 +12,15 @@ describe('Check availability of send/move subpage elements', function () {
     welcomePage.betaAgreeButton().click();
   });
   it('fill in form amount form', function () {
+    const testInputValue = '1';
+
     let navbar = new Navbar();
     let moveAssetsSubpage = new MoveAssetsSubpage();
 
     navbar.send().click();
     moveAssetsSubpage.goTo();
     //Amount step
-    moveAssetsSubpage.inputAmountOfAssets().type('1');
+    moveAssetsSubpage.inputAmountOfAssets().type(testInputValue);
     moveAssetsSubpage.continueButton().click();
 
     //Review step
@@ -27,7 +29,7 @@ describe('Check availability of send/move subpage elements', function () {
       .should(
         'have.attr',
         'href',
-        '"https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0"',
+        'https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0',
       );
     moveAssetsSubpage.continueButton().click();
 

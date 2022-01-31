@@ -1,5 +1,3 @@
-import { get } from 'core-js/core/dict';
-
 import { SubPagesPaths } from '../../sub-pages-paths';
 import { Send } from '../send';
 
@@ -34,7 +32,7 @@ export class MoveAssetsSubpage {
   }
 
   continueButton() {
-    return cy.get('span').contains('Continue').parent().get('button');
+    return cy.get('span').contains('Continue').parent().parent();
   }
 
   setSlowFee() {
@@ -64,7 +62,14 @@ export class MoveAssetsSubpage {
   }
 
   learnMoreButton() {
-    return cy.get('a').contains('Learn more');
+    return cy.get('a').contains('Learn more ↗ ');
   }
   //#region Review
+  // sendRowValue() {
+  //   return this.sendRow().
+  // }
+
+  sendRow() {
+    return cy.get('w-full').contains('send');
+  }
 }
