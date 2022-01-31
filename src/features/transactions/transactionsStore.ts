@@ -111,7 +111,7 @@ export const useTransactionsStore = defineStore('transactions', {
     }): [string, TransactionProcessService] {
       const globalStore = useStore();
       const stepId = `${hashObject(steps)}-${Date.now()}`;
-      const pendingTransactions = this.pending;
+      const allTransactions = () => this.transactions;
 
       let processMachine = machine;
 
@@ -122,21 +122,17 @@ export const useTransactionsStore = defineStore('transactions', {
               const currentTransaction = getCurrentTransaction(context);
               const currentSourceChain = getSourceChainFromTransaction(currentTransaction);
 
-              const hasPendingInChain = Object.values(pendingTransactions).some((item: TransactionProcessService) => {
+              const hasPendingInChain = Object.values(allTransactions()).some((item: TransactionProcessService) => {
                 const snapshot = item.getSnapshot();
                 const itemTransaction = getCurrentTransaction(snapshot.context);
                 const itemSourceChain = getSourceChainFromTransaction(itemTransaction);
 
                 if (itemSourceChain === currentSourceChain) {
-                  if (snapshot.done) {
-                    return false;
+                  if (['transacting', 'signing'].some(snapshot.matches)) {
+                    return true;
                   }
 
-                  if (['receipt', 'failed'].some(snapshot.matches)) {
-                    return false;
-                  }
-
-                  return true;
+                  return false;
                 }
 
                 return false;
@@ -164,12 +160,20 @@ export const useTransactionsStore = defineStore('transactions', {
         gasLimit: globalStore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
       });
 
-      service.subscribe((state) => {
+      service.subscribe(function (state) {
+        if (state.matches('signing.active')) {
+          Object.values(allTransactions()).forEach((itemService: TransactionProcessService) => {
+            if (['receipt', 'review'].some(itemService.state.matches)) {
+              itemService.send('VERIFY_QUEUE');
+            }
+          });
+        }
+
         // Notify all waiting services when this completes
         if (state.done || state.matches('receipt') || state.matches('failed')) {
-          Object.values(this.transactions).forEach((itemService: TransactionProcessService) => {
+          Object.values(allTransactions()).forEach((itemService: TransactionProcessService) => {
             if (itemService.state.matches('waitingPreviousTransaction')) {
-              itemService.send('VERIFY');
+              itemService.send('VERIFY_QUEUE');
             }
           });
         }
