@@ -357,7 +357,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
       for (const keyHash of keyHashes) {
-        if (featureRunning('requestparallelization')) {
+        if (featureRunning('REQUEST_PARALLELIZTION')) {
           dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
         } else {
           await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });

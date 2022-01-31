@@ -57,7 +57,7 @@ export default defineComponent({
 
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
-    if (featureRunning('requestparallelization')) {
+    if (featureRunning('REQUEST_PARALLELIZTION')) {
       onMounted(async () => {
         useTheme({ updateOnChange: true });
         let gasLimit = parseInt(window.localStorage.getItem('gasLimit'));
