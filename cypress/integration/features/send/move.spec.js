@@ -32,6 +32,7 @@ describe('Check availability of send/move subpage elements', function () {
         'https://blog.cosmos.network/deep-dive-how-will-ibc-create-value-for-the-cosmos-hub-eedefb83c7a0',
       );
     moveAssetsSubpage.continueButton().click();
+    moveAssetsSubpage.sendRowValue().should('contain', testInputValue);
 
     //Move step
     //at this point we get the popup

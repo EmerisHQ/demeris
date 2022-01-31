@@ -64,10 +64,10 @@ export class MoveAssetsSubpage {
   learnMoreButton() {
     return cy.get('a').contains('Learn more ↗ ');
   }
-  //#region Review
-  // sendRowValue() {
-  //   return this.sendRow().
-  // }
+  // #region Review
+  sendRowValue() {
+    return this.sendRow().find('w-full text-right');
+  }
 
   sendRow() {
     return cy.get('w-full').contains('send');
