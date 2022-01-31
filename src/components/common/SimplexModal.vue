@@ -1,6 +1,6 @@
 <template>
   <Modal
-    v-show="isModalOpen"
+    :open="isModalOpen"
     variant="center"
     fullscreen
     :close-on-overlay-click="false"
@@ -95,22 +95,26 @@ export default {
       }
     };
 
-    // const deleteScripts = () => {
-    //   for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'simplex-css']) {
-    //     let element = document.getElementById(id);
-    //     if (element) {
-    //       element.remove();
-    //     }
-    //   }
-    // };
+    const deleteScripts = () => {
+      for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'simplex-css']) {
+        let element = document.getElementById(id);
+        if (element) {
+          element.remove();
+        }
+      }
+    };
 
-    // const unloadCheckout = () => {
-    //   (window as any)?.Simplex?.unload((event) => console.log(event))
-    // }
+    const unloadCheckout = () => {
+      (window as any)?.Simplex?.unload((event) => console.log(event));
+    };
 
     watch(isModalOpen, (currentIsModalOpen) => {
       if (currentIsModalOpen) {
         goSimplex();
+      } else {
+        // unloadCheckout();
+        // setTimeout(() => unloadCheckout(), 1000)
+        deleteScripts();
       }
     });
 
