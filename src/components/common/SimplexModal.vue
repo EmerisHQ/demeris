@@ -72,9 +72,13 @@ export default {
           document.body?.appendChild(simplexIframeScript);
           simplexIframeScript.onload = () => {
             (window as any)?.simplex?.createForm();
-            (window as any)?.Simplex?.subscribe('onlineFlowFinished', function (event) {
-              setTransactionStatus(event.payload.result);
-            });
+            setTimeout(
+              () =>
+                (window as any).Simplex.subscribe('onlineFlowFinished', function (event) {
+                  setTransactionStatus(event.payload.result);
+                }),
+              1500,
+            );
           };
           let styleTag = document.createElement('style');
           styleTag.id = 'simplex-css';
