@@ -1,25 +1,30 @@
 <template>
-  <input
-    ref="inputRef"
-    v-model="model"
-    :placeholder="placeholder"
-    type="text"
-    inputmode="decimal"
-    pattern="^[0-9]*[.,]?[0-9]*$"
-    autocomplete="off"
-    minlength="1"
-    spellcheck="false"
-    class="search-input bg-transparent pt-3 pr-5 pb-3 pl-5"
-  />
+  <span class="flex search-input-container">
+    <Icon name="MagnifyingGlassIcon" :icon-size="1" class="text-inactive pl-3" />
+    <input
+      v-model="model"
+      :placeholder="placeholder"
+      type="text"
+      autocomplete="off"
+      minlength="1"
+      spellcheck="false"
+      class="bg-transparent pt-3 pr-5 pb-3 pl-2 w-full"
+    />
+  </span>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
+
+import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
   name: 'SearchBox',
+  components: {
+    Icon,
+  },
   props: {
-    searchValue: {
-      type: [String],
+    modelValue: {
+      type: String,
       default: '',
     },
     placeholder: {
@@ -27,38 +32,20 @@ export default defineComponent({
       default: 'Search',
     },
   },
-  emits: ['searchValue'],
+  emits: ['update:modelValue'],
 
   setup(props, { emit }) {
-    const inputRef = ref(null);
-
     const model = computed({
-      get: () => (props.searchValue || '').toString(),
-      set: (value) => {
-        if (!inputRef.value) {
-          return;
-        }
-
-        let currentValue = value;
-
-        while (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
-          currentValue = currentValue.slice(0, -1);
-        }
-
-        emit('searchValue', currentValue);
-        inputRef.value.value = currentValue;
-      },
+      get: () => (props.modelValue || '').toString(),
+      set: (value) => emit('update:modelValue', value),
     });
-    return { inputRef, model };
+    return { model };
   },
 });
 </script>
 <style lang="scss" scoped>
-.search-input {
+.search-input-container {
   width: 100%;
-  background: url('~@/assets/svg/icon-search.svg') no-repeat 14px;
-  background-size: 20px;
-  padding-left: 35px;
   background-color: rgba(0, 0, 0, 0.03);
   border-radius: 10px;
   height: 40px;

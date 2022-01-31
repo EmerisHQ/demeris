@@ -3,18 +3,6 @@
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
   <div v-if="initialized">
-    <Modal
-      v-show="true"
-      :open="true"
-      variant="center"
-      fullscreen
-      show-close-button
-      class="connect-wallet-modal"
-      max-width-class="max-w-sm"
-      @close="closeConnectKeplr"
-    >
-      <SearchBox :search-value="some" @search-value="come" />
-    </Modal>
     <CookieConsent />
     <ChainDownWrapper>
       <router-view />
@@ -36,8 +24,6 @@ import { useStore } from 'vuex';
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
-import Modal from '@/components/ui/Modal.vue';
-import SearchBox from '@/components/ui/SearchBox.vue';
 import useTheme from '@/composables/useTheme';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
@@ -54,8 +40,6 @@ export default defineComponent({
     ChainDownWrapper,
     CookieConsent,
     TransactionsCenter,
-    SearchBox,
-    Modal,
   },
 
   setup() {
