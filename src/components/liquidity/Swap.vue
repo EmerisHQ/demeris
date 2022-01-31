@@ -778,7 +778,7 @@ export default defineComponent({
     });
 
     //tx fee setting
-    if (featureRunning('REQUEST_PARALLELIZTION')) {
+    if (featureRunning('REQUEST_PARALLELIZATION')) {
       watch(
         () => [data.payCoinData?.denom, store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]],
         async (denom, feeTokens) => {
