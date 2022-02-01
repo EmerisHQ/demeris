@@ -5,48 +5,47 @@
       <!-- Has Airdrop amount -->
       <div class="text-center">
         <div class="w-1/4 mx-auto mb-6">
-          <img src="~@/assets/images/airdrop-logo.png" alt="Airdrop Logo" />
-        </div>
-        <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
-        <p class="text-2 font-medium">126.54 LIKE</p>
-      </div>
-
-      <!-- Auto dropped amount -->
-      <div class="text-center">
-        <div class="w-1/4 mx-auto mb-6">
-          <img src="~@/assets/images/airdrop-logo.png" alt="Airdrop Logo" />
+          <img :src="selectedAirdrop.tokenIcon" alt="Airdrop Logo" />
         </div>
         <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
         <p class="text-2 font-medium">126.54 LIKE</p>
       </div>
 
       <div class="px-6">
-        <Divider extra-classes="my-8" />
+        <Divider extra-classes="mt-8 mb-4" />
+      </div>
+
+      <!-- Balance -->
+      <div class="px-6">
+        <div class="flex justify-between font-medium">
+          <p>Balance</p>
+          <p class="color-blue">126.54 LIKE</p>
+        </div>
+      </div>
+
+      <div class="px-6">
+        <Divider extra-classes="my-4" />
       </div>
 
       <!-- Claim Details -->
       <div class="px-6 pb-6">
-        <div class="flex justify-between font-medium mb-4">
-          <p>Your balance</p>
-          <p>126.54 LIKE</p>
-        </div>
-        <div class="flex justify-between -text-1 text-muted mb-4">
+        <div v-if="selectedAirdrop.snapshotDate" class="flex justify-between -text-1 text-muted mb-4">
           <p>Snapshot Date</p>
-          <p>Dec 8, 2021</p>
+          <p>{{ selectedAirdrop.snapshotDate }}</p>
         </div>
-        <div class="flex justify-between -text-1 text-muted mb-4">
+        <div v-if="selectedAirdrop.startDate" class="flex justify-between -text-1 text-muted mb-4">
           <p>Starts</p>
-          <p>Jan 31, 2022</p>
+          <p>{{ selectedAirdrop.startDate }}</p>
         </div>
-        <div class="flex justify-between -text-1 text-muted mb-4">
+        <div v-if="selectedAirdrop.endDate" class="flex justify-between -text-1 text-muted mb-4">
           <p>Ends</p>
-          <p>Jan 31, 2022</p>
+          <p>{{ selectedAirdrop.endDate }}</p>
         </div>
       </div>
 
       <!-- Claim button -->
       <div class="px-6">
-        <Button name="Claim" />
+        <Button name="Claim" @click="toggleClaimModal" />
       </div>
 
       <!-- Ended -->
@@ -83,19 +82,45 @@
         </div>
       </div>
     </div>
+
+    <AirdropClaimModal :open="isClaimModalOpen" @close="toggleClaimModal" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed,defineComponent, ref, toRaw } from 'vue';
+import { useStore } from 'vuex';
 
+import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimModal.vue';
 import Button from '@/components/ui/Button.vue';
 import Divider from '@/components/ui/Divider.vue';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 
 export default defineComponent({
   name: 'Swap',
   components: {
     Button,
     Divider,
+    AirdropClaimModal,
+  },
+
+  setup() {
+    const apistore = useStore() as TypedAPIStore;
+
+    const isClaimModalOpen = ref(false);
+
+    const toggleClaimModal = () => {
+      isClaimModalOpen.value = !isClaimModalOpen.value;
+    };
+
+    const selectedAirdrop = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+    });
+
+    return {
+      isClaimModalOpen,
+      toggleClaimModal,
+      selectedAirdrop,
+    };
   },
 });
 </script>
@@ -105,7 +130,9 @@ export default defineComponent({
   min-width: 20rem;
   /* min-height: 17rem; */
 }
-
+.color-blue {
+  color: #094efd;
+}
 .claim-widget {
   min-height: 24rem;
 }

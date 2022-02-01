@@ -133,14 +133,13 @@ import { defineComponent, PropType, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
+import CaretDownIcon from '@/components/common/Icons/CaretDownIcon.vue';
+import CaretUpIcon from '@/components/common/Icons/CaretUpIcon.vue';
+import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import { Airdrop } from '@/types/api';
-
-import ArrowRightIcon from '../../common/Icons/ArrowRightIcon.vue';
-import CaretDownIcon from '../../common/Icons/CaretDownIcon.vue';
-import CaretUpIcon from '../../common/Icons/CaretUpIcon.vue';
-import ClaimedIcon from '../../common/Icons/ClaimedIcon.vue';
 
 export default defineComponent({
   name: 'AirdropsTable',

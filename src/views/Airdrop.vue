@@ -14,9 +14,9 @@
 
           <!-- Airdrop Title -->
           <div class="mt-8">
-            <div class="text-2 font-bold mt-1 mb-2">Likecoin Airdrop</div>
+            <div class="text-2 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
             <div class="items-center">
-              <span class="text-muted">LIKE</span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
+              <span class="text-muted">{{ selectedAirdrop.tokenTicker }}</span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
             </div>
           </div>
 
@@ -29,29 +29,16 @@
             <!-- Description -->
             <div>
               <p class="mb-4 description-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer vitae lacus quis ex congue accumsan.
-                Pellentesque mattis ligula viverra, fermentum sem non, mollis quam. Mauris vel tincidunt dui. Donec at
-                elit scelerisque, sagittis ex in, varius nibh.
-              </p>
-
-              <p class="mb-4 description-text">
-                Cras tellus ligula, maximus eu nulla sed, tempus molestie lorem. Mauris euismod nunc a felis efficitur,
-                at egestas risus vestibulum. Suspendisse nisl lectus, faucibus vel consequat congue, faucibus vel felis.
-                Cras finibus consectetur lorem, vel tempor massa lobortis in.
-              </p>
-
-              <p class="mb-4 description-text">
-                Morbipharetra ut dui ut vulputate. Pellentesque at ante non dolor efficitur condimentum. Duis diam erat,
-                placerat sed ipsum at, sollicitudin pellentesque massa vulputate noahin.
+                {{ selectedAirdrop.projectDescription }}
               </p>
             </div>
 
             <!-- Links -->
-            <div class="w-3/4 flex justify-between items-center mt-12">
-              <a class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Condex.com↗️</span></a>
-              <a class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Discord↗️</span></a>
-              <a class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Medium↗️</span></a>
-              <a class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Twitter↗️</span></a>
+            <div class="w-full flex justify-between items-center mt-12">
+              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
+              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Discord↗️</span></a>
+              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Medium↗️</span></a>
+              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Twitter↗️</span></a>
             </div>
           </div>
 
@@ -61,13 +48,8 @@
           <div class="w-3/4 mb-12">
             <div class="text-1 font-medium mt-1 mb-6">How to be eligible</div>
             <ul class="eligibility-criteria">
-              <li>
-                Snapshot taken at 8th October for: ATOM & XPRT. Luna is 1st block of columbus 5, still troubleshooting,
-                will announce soon. ask to send to blockheight, stake.like.co↗️
-              </li>
-              <li>
-                Balances that were vesting or unbonding at the time of the snapshot are not eligible. LPs of tokens were
-                excluded from the airdrop.
+              <li v-for="criteriaItem in selectedAirdrop.eligibilityCriteria" :key="criteriaItem.Criteria">
+                {{ criteriaItem.desc }}
               </li>
             </ul>
           </div>
