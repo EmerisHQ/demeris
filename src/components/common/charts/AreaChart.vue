@@ -26,7 +26,7 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, PropType,ref, watch } from 'vue';
+import { defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import { TokenPrices } from '@/types/api';
@@ -40,12 +40,10 @@ export default defineComponent({
     variant: {
       type: String,
       default: 'full',
-      required: false,
     },
     height: {
       type: String,
       default: '320',
-      required: false,
     },
     dataStream: {
       type: Array as PropType<TokenPrices[]>,
@@ -86,6 +84,7 @@ export default defineComponent({
           mode: 'dark',
         },
         tooltip: {
+          enabled: true,
           x: {
             show: false,
           },
@@ -94,6 +93,9 @@ export default defineComponent({
           type: 'area',
           toolbar: {
             show: false,
+          },
+          zoom: {
+            enabled: false,
           },
           background: 'transparent',
         },
@@ -152,18 +154,20 @@ export default defineComponent({
     };
 
     watch(
-      () => props.dataStream,
-      async (newVal) => {
-        chartData.value.series[0].data = newVal;
+      () => [props.dataStream, props.variant],
+      async () => {
+        chartData.value.series[0].data = props.dataStream;
 
-        const high = (maxBy(newVal, 'y') ? maxBy(newVal, 'y').y : 0).toFixed(2);
+        const high = (maxBy(props.dataStream, 'y') ? maxBy(props.dataStream, 'y').y : 0).toFixed(2);
         highestPrice.value = '$' + high.toString();
 
-        const low = (minBy(newVal, 'y') ? minBy(newVal, 'y').y : 0).toFixed(2);
+        const low = (minBy(props.dataStream, 'y') ? minBy(props.dataStream, 'y').y : 0).toFixed(2);
         lowestPrice.value = '$' + low.toString();
 
-        openingPrice.value = newVal[0] ? newVal[0].y : 0;
-        closingPrice.value = newVal[newVal.length - 1] ? newVal[newVal.length - 1].y : 0;
+        openingPrice.value = props.dataStream[0] ? props.dataStream[0].y : 0;
+        closingPrice.value = props.dataStream[props.dataStream.length - 1]
+          ? props.dataStream[props.dataStream.length - 1].y
+          : 0;
 
         if (openingPrice.value < closingPrice.value) {
           chartData.value.options.colors[0] = '#00CF30';
@@ -171,6 +175,10 @@ export default defineComponent({
         } else {
           chartData.value.options.colors[0] = '#FF3D56';
           chartData.value.options.fill.colors[0] = '#FF3D56';
+        }
+
+        if (props.variant === 'mini') {
+          chartData.value.options.tooltip.enabled = false;
         }
       },
       { immediate: true },
