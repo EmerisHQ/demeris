@@ -69,6 +69,7 @@
     "@keplr-wallet/types": "^0.8.11",
     "@pinia/testing": "^0.0.8",
     "@samuraiexx/cypress-browser-extension-plugin": "^0.1.0",
+    "@testing-library/vue": "^6.4.2",
     "@types/jest": "^27.0.3",
     "@types/lodash": "4.14.171",
     "@types/lodash.groupby": "^4.6.6",
