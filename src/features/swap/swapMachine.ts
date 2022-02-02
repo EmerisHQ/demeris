@@ -10,7 +10,7 @@ interface SwapContext {
   receiveCoin: any;
   depositAmount: number;
   receiveAmount: number;
-  routeIndex: any;
+  selectedRoute: any;
   balances: any[];
   autoRefreshEnabled?: boolean;
   data: SwapContextData;
@@ -21,7 +21,7 @@ const defaultContext = () => ({
   receiveCoin: {},
   depositAmount: undefined,
   receiveAmount: undefined,
-  routeIndex: undefined,
+  selectedRoute: undefined,
   balances: [],
   autoRefreshEnabled: true,
   data: {
@@ -56,22 +56,53 @@ export const swapMachine = createMachine<SwapContext>(
       booting: {
         invoke: {
           src: 'fetchData',
-          onDone: 'idle',
+          onDone: 'active.idle',
         },
       },
-      idle: {
-        id: 'idle',
+      active: {
+        id: 'active',
+        initial: 'pending',
         on: {
           REFRESH: {
             target: 'updating.all',
             actions: [],
           },
-          SET_ROUTE_INDEX: {
-            actions: 'setRouteIndex',
+          SELECT_ROUTE: {
+            actions: 'setSelectedRoute',
           },
           SWITCH_COINS: {
             target: 'updating.routes',
             actions: 'switchCoins',
+          },
+        },
+        states: {
+          idle: {},
+          pending: {
+            on: {
+              INVALID_INSUFFICIENT_DEPOSIT_AMOUNT: 'invalid.insufficientDepositAmount',
+              INVALID_INSUFFICIENT_BALANCE: 'invalid.insufficientBalance',
+              INVALID: 'invalid',
+            },
+            invoke: {
+              src: 'performValidation',
+              onDone: 'valid',
+            },
+          },
+          valid: {
+            on: {
+              SUBMIT: {
+                actions: 'handleSubmit',
+              },
+            },
+          },
+          invalid: {
+            initial: 'unknown',
+            states: {
+              insufficientDepositAmount: {},
+              insufficientFeeAmount: {},
+              insufficientBalance: {},
+              unknown: {},
+            },
           },
         },
       },
@@ -81,7 +112,7 @@ export const swapMachine = createMachine<SwapContext>(
             invoke: {
               src: 'refreshData',
               onDone: {
-                target: '#idle',
+                target: '#active',
                 actions: 'assignData',
               },
             },
@@ -93,7 +124,7 @@ export const swapMachine = createMachine<SwapContext>(
                 invoke: {
                   src: 'getRoutes',
                   onDone: {
-                    target: '#idle',
+                    target: '#active',
                     actions: 'assignRoutes',
                   },
                 },
@@ -109,7 +140,7 @@ export const swapMachine = createMachine<SwapContext>(
             invoke: {
               src: 'getPools',
               onDone: {
-                target: '#idle',
+                target: '#active',
                 actions: 'assignPools',
               },
             },
@@ -130,6 +161,13 @@ export const swapMachine = createMachine<SwapContext>(
         return () => {
           clearInterval(refreshId);
         };
+      },
+      performValidation: (context) => (send) => {
+        if (!context.depositAmount) {
+          return send('INVALID');
+        }
+
+        return Promise.resolve(true);
       },
       fetchData: () => {
         return Promise.resolve(true);
@@ -175,8 +213,8 @@ export const swapMachine = createMachine<SwapContext>(
       setReceiveCoin: assign((context, event) => ({
         receiveCoin: event.value,
       })),
-      setRouteIndex: assign((context, event) => ({
-        routeIndex: event.value,
+      setSelectedRoute: assign((context, event) => ({
+        selectedRoute: event.value,
       })),
     },
   },

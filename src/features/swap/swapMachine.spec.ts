@@ -55,6 +55,17 @@ it('should debounce deposit amount changes', async () => {
   expect(mockGetRoutes).toHaveBeenCalledTimes(1);
 });
 
+it('should get invalid state when amount is empty', async () => {
+  const service = interpret(swapMachine, { clock: new SimulatedClock() }).start();
+
+  await waitFor(() => expect(service.state.matches('active.idle')).toBe(true));
+
+  service.send({ type: 'UPDATE_DEPOSIT_AMOUNT', value: undefined });
+  service.clock.increment(2000);
+
+  await waitFor(() => expect(service.state.matches('active.invalid')).toBe(true));
+});
+
 it('should switch coins', async () => {
   const service = interpret(swapMachine);
   service.start();
