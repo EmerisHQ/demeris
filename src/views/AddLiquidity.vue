@@ -375,6 +375,7 @@ import { Balance } from '@/types/api';
 import { actionHandler, getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'AddLiquidity',
@@ -716,7 +717,7 @@ export default {
         return false;
       }
 
-      if (+state.receiveAmount <= 0) {
+      if (featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0) {
         return false;
       }
 
@@ -758,18 +759,21 @@ export default {
     };
 
     const submitButtonHint = computed(() => {
-      let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
-      let insufficientAmount = +state.receiveAmount <= 0;
-      if (insufficientAmount && !emptyFields) {
-        return t('pages.addLiquidity.insufficientAmountHint');
+      if (featureRunning('POOL_MIN_AMOUNT')) {
+        let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+        let insufficientAmount = +state.receiveAmount <= 0;
+        if (insufficientAmount && !emptyFields) {
+          return t('pages.addLiquidity.insufficientAmountHint');
+        }
       }
+
       return undefined;
     });
 
     const submitButtonName = computed(() => {
       let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
       let insufficientFunds = !hasSufficientFunds.value.total;
-      let insufficientAmount = +state.receiveAmount <= 0;
+      let insufficientAmount = featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0;
       let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
 
       if (emptyFields) {
