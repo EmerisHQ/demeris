@@ -935,6 +935,35 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
   }
 }
 
+export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: Amount }) {
+  const apistore = useStore() as TypedAPIStore;
+  const result = {
+    steps: [],
+    output: {
+      amount: {
+        denom: '',
+        amount: 0,
+      },
+      chain_name: '',
+    },
+  };
+  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+  const verified = verifiedDenoms.find((x) => x.name == amount.denom && x.stakable == true);
+  if (!verified) {
+    throw new Error('Token is not stakable');
+  }
+  const chain_name = verified.chain_name;
+  result.steps.push({
+    name: 'stake',
+    status: 'pending',
+    data: {
+      validatorAddress,
+      amount,
+      chain_name,
+    },
+  });
+  return result;
+}
 export async function createPool({ coinA, coinB }: { coinA: Amount; coinB: Amount }) {
   const result = {
     steps: [],
@@ -1215,6 +1244,74 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           transactions: [{ name: 'claim', status: 'pending', data: params }],
         });
         break;
+      case 'unstake':
+        params = (action as Actions.UndelegateAction).params;
+        steps.push({
+          name: 'unstake',
+          description: 'Unstake',
+          memo: '',
+          transactions: [
+            {
+              name: 'unstake',
+              status: 'pending',
+              data: {
+                validatorAddress: params.validatorAddress,
+                amount: { amount: params.amount.amount, denom: params.amount.denom },
+                chain_name: params.amount.chain_name,
+              },
+            },
+          ],
+        });
+        break;
+      case 'switch':
+        params = (action as Actions.RedelegateAction).params;
+        steps.push({
+          name: 'switch',
+          description: 'Redelegate',
+          memo: '',
+          transactions: [
+            {
+              name: 'switch',
+              status: 'pending',
+              data: {
+                validatorSrcAddress: params.validatorSrcAddress,
+                validatorDstAddress: params.validatorDstAddress,
+                amount: { amount: params.amount.amount, denom: params.amount.denom },
+                chain_name: params.amount.chain_name,
+              },
+            },
+          ],
+        });
+        break;
+      case 'stake':
+        params = (action as Actions.DelegateAction).params;
+        const transferStakingCoinToNative = await move({
+          amount: {
+            amount: params.amount.amount,
+            denom: params.amount.denom,
+          },
+          chain_name: params.amount.chain_name,
+          destination_chain_name: await getNativeChain(params.amount.denom, params.amount.chain_name),
+        });
+        if (transferStakingCoinToNative.steps.length) {
+          steps.push({
+            name: 'transfer',
+            description: 'Staking token must be transferred to native chain', //TODO
+            memo: '',
+            transactions: [...transferStakingCoinToNative.steps],
+          });
+        }
+        const stakingStep = await stake({
+          validatorAddress: params.validatorAddress,
+          amount: transferStakingCoinToNative.output.amount,
+        });
+        steps.push({
+          name: 'stake',
+          description: 'Staking', //TODO
+          memo: '',
+          transactions: [...stakingStep.steps],
+        });
+        break;
     }
   } catch (e) {
     throw new Error('Unable to create action steps: ' + e);
@@ -1396,19 +1493,44 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'stake') {
-    const data = stepTx.data as Actions.StakeData;
+    const data = stepTx.data as Actions.DelegateData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
-    const msgs = [
-      await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
-        value: {
-          delegatorAddress,
-          validatorAddress: rewardData.validator_address,
-          amount,
-        },
-      }),
-    ];
+    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
+      value: {
+        delegatorAddress,
+        validatorAddress: data.validatorAddress,
+        amount: data.amount,
+      },
+    });
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: msgs, chain_name: data.chain_name, registry };
+    return { msg: [msg], chain_name: data.chain_name, registry };
+  }
+  if (stepTx.name == 'unstake') {
+    const data = stepTx.data as Actions.UndelegateData;
+    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
+    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgUndelegate', {
+      value: {
+        delegatorAddress,
+        validatorAddress: data.validatorAddress,
+        amount: data.amount,
+      },
+    });
+    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
+    return { msg: [msg], chain_name: data.chain_name, registry };
+  }
+  if (stepTx.name == 'switch') {
+    const data = stepTx.data as Actions.RedelegateData;
+    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
+    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgBeginRedelegate', {
+      value: {
+        delegatorAddress,
+        validatorSrcAddress: data.validatorSrcAddress,
+        validatorDstAddress: data.validatorDstAddress,
+        amount: data.amount,
+      },
+    });
+    const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
+    return { msg: [msg], chain_name: data.chain_name, registry };
   }
 }
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
@@ -1459,6 +1581,37 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
   return denom;
 }
 
+export async function getNativeChain(denom: string, chainName = null): Promise<string> {
+  const apistore = useStore() as TypedAPIStore;
+  const chain_name = chainName || apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+
+  const verified = verifiedDenoms.find((item) => item.name === denom);
+  if (verified) {
+    return verified.chain_name;
+  }
+
+  const hash = denom.split('/')[1];
+
+  if (!hash) {
+    throw new Error('Denom not verified');
+  }
+
+  let trace = apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({ chain_name, hash });
+
+  if (!trace) {
+    trace = await apistore.dispatch(
+      GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+      { subscribe: false, params: { chain_name, hash } },
+      { root: true },
+    );
+  }
+
+  if (trace) {
+    return await getNativeChain(trace.base_denom);
+  }
+  throw new Error('Denom not verified');
+}
 export function getStepTransactionDetailFromResponse(response: API.TransactionDetailResponse) {
   const apistore = useStore() as TypedAPIStore;
   const getChainFromAddress = (address: string): API.Chain => {
@@ -1704,6 +1857,21 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
   }
   if (stepTx.name == 'claim') {
     const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'stake') {
+    const chain_name = (stepTx.data as Actions.DelegateData).chain_name;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'unstake') {
+    const chain_name = (stepTx.data as Actions.UndelegateData).chain_name;
+    const fee = await getFeeForChain(chain_name);
+    return fee;
+  }
+  if (stepTx.name == 'switch') {
+    const chain_name = (stepTx.data as Actions.RedelegateData).chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
@@ -2056,7 +2224,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'claim') {
+      if (stepTx.name == 'claim' || stepTx.name == 'stake' || stepTx.name == 'unstake' || stepTx.name == 'switch') {
         const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
         if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
@@ -2436,6 +2604,26 @@ export async function validateStepFeeBalances(
           balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
         } else {
           throw new Error('Insufficient balance: ' + data.poolCoin.denom);
+        }
+      }
+    }
+    if (stepTx.name == 'stake') {
+      const data = stepTx.data as Actions.DelegateData;
+
+      const balance = balances.find((x) => {
+        const amount = parseCoins(x.amount)[0];
+        if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      if (balance) {
+        const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.amount.amount);
+        if (newAmount >= 0) {
+          balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
+        } else {
+          throw new Error('Insufficient balance: ' + data.amount.denom);
         }
       }
     }
@@ -2845,6 +3033,26 @@ export async function validateStepsFeeBalances(
             balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
           } else {
             throw new Error('Insufficient balance: ' + data.poolCoin.denom);
+          }
+        }
+      }
+      if (stepTx.name == 'stake') {
+        const data = stepTx.data as Actions.DelegateData;
+
+        const balance = balances.find((x) => {
+          const amount = parseCoins(x.amount)[0];
+          if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+        if (balance) {
+          const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.amount.amount);
+          if (newAmount >= 0) {
+            balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
+          } else {
+            throw new Error('Insufficient balance: ' + data.amount.denom);
           }
         }
       }

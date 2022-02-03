@@ -55,6 +55,19 @@ export type ClaimRewardsParams = {
   total: string;
   chain_name: string;
 };
+export type DelegateParams = {
+  validatorAddress: string;
+  amount: Base.ChainAmount;
+};
+export type UndelegateParams = {
+  validatorAddress: string;
+  amount: Base.ChainAmount;
+};
+export type RedelegateParams = {
+  validatorSrcAddress: string;
+  validatorDstAddress: string;
+  amount: Base.ChainAmount;
+};
 export type RedeemParams = Array<Base.ChainAmount>;
 export type SwapAction = BaseAction & { params: SwapParams };
 export type MoveAction = BaseAction & { params: MoveParams };
@@ -65,6 +78,9 @@ export type TransferAction = BaseAction & { params: TransferParams };
 export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
 export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
+export type DelegateAction = BaseAction & { params: DelegateParams };
+export type UndelegateAction = BaseAction & { params: UndelegateParams };
+export type RedelegateAction = BaseAction & { params: RedelegateParams };
 export type Any =
   | SwapAction
   | RedeemAction
@@ -73,7 +89,10 @@ export type Any =
   | WithdrawLiquidityAction
   | CreatePoolAction
   | MoveAction
-  | ClaimRewardsAction;
+  | ClaimRewardsAction
+  | DelegateAction
+  | UndelegateAction
+  | RedelegateAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -124,6 +143,23 @@ export type ClaimData = {
   rewards: { reward: string; validator_address: string }[];
   chain_name: string;
 };
+export type DelegateData = {
+  validatorAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+export type UndelegateData = {
+  validatorAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+export type RedelegateData = {
+  validatorSrcAddress: string;
+  validatorDstAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+
 export type StepTransaction = {
   name:
     | 'ibc_forward'
@@ -148,7 +184,10 @@ export type StepTransaction = {
     | AddLiquidityData
     | WithdrawLiquidityData
     | CreatePoolData
-    | ClaimData;
+    | ClaimData
+    | DelegateData
+    | UndelegateData
+    | RedelegateData;
 };
 export type Step = {
   name:
