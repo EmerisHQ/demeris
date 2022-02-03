@@ -15,11 +15,17 @@
         'flex-1 flex flex-col items-stretch': variant !== 'widget',
       }"
     >
-      <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
+      <GobackWithClose
+        v-if="variant === 'widget'"
+        class="relative z-10 text-inverse"
+        @goback="emitHandler('close')"
+        @close="emitHandler('close')"
+      />
       <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
         <TransferInterstitialConfirmation
           :action="actionName"
           :steps="data"
+          :is-swap-component="variant === 'widget'"
           @continue="
             isTransferConfirmationOpen = false;
             interstitialProceed = true;

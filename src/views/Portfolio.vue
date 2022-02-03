@@ -68,6 +68,7 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Portfolio',
@@ -91,6 +92,10 @@ export default {
       })),
     );
 
+    if (featureRunning('TEST_SHOW_CONSOLE_LOG')) {
+      console.log('Feature: TEST_SHOW_CONSOLE_LOG is running');
+    }
+
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
@@ -112,5 +117,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped></style>

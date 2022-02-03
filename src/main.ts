@@ -3,12 +3,14 @@ import 'tippy.js/dist/tippy.css';
 
 import vueLib from '@starport/vue';
 import mitt from 'mitt';
+import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import { VueCookieNext } from 'vue-cookie-next';
 import VueGtag from 'vue-gtag';
 import { createI18n } from 'vue-i18n';
 import { createMetaManager } from 'vue-meta';
 import VueTippy from 'vue-tippy';
+import VueApexCharts from 'vue3-apexcharts';
 
 import stringFilters from '@/filters/string';
 import { messages } from '@/locales/en';
@@ -38,6 +40,7 @@ const emitter = mitt();
 const app = createApp(App);
 app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
+app.use(VueApexCharts);
 app
   .use(i18n)
   .use(store)
@@ -46,6 +49,7 @@ app
   .use(VueTippy)
   .use(VueCookieNext)
   .use(createMetaManager())
+  .use(createPinia())
   .use(VueGtag, {
     config: {
       id: 'UA-201374903-1',
