@@ -41,13 +41,9 @@
         </template>
         <template v-if="step == 'amount'">
           <div class="max-w-3xl">
-            <ValidatorAmountForm :validators="selectedValidators" @previous="goBack" />
+            <ValidatorAmountForm :validators="Array.from(selectedValidators)" @previous="goBack" />
           </div>
         </template>
-        <div v-else class="w-full max-w-lg">
-          <SendForm v-if="transferType === 'address'" v-model:step="step" :balances="balances" @previous="goBack" />
-          <MoveForm v-if="transferType === 'move'" v-model:step="step" :balances="balances" @previous="goBack" />
-        </div>
       </main>
     </div>
   </div>
@@ -61,8 +57,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
-import MoveForm from '@/components/transfer/MoveForm';
-import SendForm from '@/components/transfer/SendForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -75,7 +69,7 @@ type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
 export default {
   name: 'Send',
-  components: { Button, SendForm, MoveForm, Icon, ValidatorsTable, ValidatorAmountForm },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm },
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
@@ -90,7 +84,7 @@ export default {
     const baseDenom = route.params.denom as string;
     const validatorList = ref<Array<unknown>>([]);
     const totalStakedAmount = ref<number>(0);
-    const selectedValidators = ref([]);
+    const selectedValidators = ref(new Set());
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
       if (stakingBalances.value.length) {
@@ -130,7 +124,7 @@ export default {
 
     const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
     const addValidator = (val) => {
-      selectedValidators.value.push(val);
+      selectedValidators.value.add(val);
       step.value = allSteps[actionType][currentStepIndex.value + 1];
     };
     const metaSource = computed(() => {
