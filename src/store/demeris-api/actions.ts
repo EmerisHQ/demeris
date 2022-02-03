@@ -339,10 +339,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-          '/chain/' +
-          (params as API.ChainAddrReq).chain_name +
-          '/numbers/' +
-          (params as API.ChainAddrReq).address,
+        '/chain/' +
+        (params as API.ChainAddrReq).chain_name +
+        '/numbers/' +
+        (params as API.ChainAddrReq).address,
       );
       commit(DemerisMutationTypes.SET_NUMBERS_CHAIN, { params, value: response.data.numbers });
       if (subscribe) {
@@ -426,7 +426,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
                     };
                     response.data.data.Tokens.push(priceData);
                   }
-                } catch (e) {}
+                } catch (e) { }
               }
             }
           }
@@ -454,10 +454,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-          '/tx/ticket/' +
-          (params as API.TicketReq).chain_name +
-          '/' +
-          (params as API.TicketReq).ticket,
+        '/tx/ticket/' +
+        (params as API.TicketReq).chain_name +
+        '/' +
+        (params as API.TicketReq).ticket,
       );
       commit(DemerisMutationTypes.SET_TX_STATUS, { params, value: response.data });
       if (subscribe) {
@@ -527,10 +527,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       try {
         const response = await axios.get(
           getters['getEndpoint'] +
-            '/chain/' +
-            (params as API.VerifyTraceReq).chain_name +
-            '/denom/verify_trace/' +
-            (params as API.VerifyTraceReq).hash,
+          '/chain/' +
+          (params as API.VerifyTraceReq).chain_name +
+          '/denom/verify_trace/' +
+          (params as API.VerifyTraceReq).hash,
         );
         if (response && response.data && response.data.verify_trace) {
           commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
@@ -618,10 +618,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-          '/chain/' +
-          (params as API.ChainReq).chain_name +
-          '/primary_channel/' +
-          (params as API.ChainReq).destination_chain_name,
+        '/chain/' +
+        (params as API.ChainReq).chain_name +
+        '/primary_channel/' +
+        (params as API.ChainReq).destination_chain_name,
       );
       commit(DemerisMutationTypes.SET_PRIMARY_CHANNEL, { params, value: response.data.primary_channel });
       if (subscribe) {
@@ -671,6 +671,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       } catch (e) {
         commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+
+        if (featureRunning('REQUEST_PARALLELIZATION')) {
+          commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: false });
+        }
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
@@ -695,7 +699,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
       const wakeUpTime = Date.now() + ms;
-      while (Date.now() < wakeUpTime) {}
+      while (Date.now() < wakeUpTime) { }
     }
 
     try {
@@ -756,9 +760,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   ) {
     console.log('Vuex nodule: demeris initialized!');
     commit('INIT', { endpoint, hub_chain, gas_limit });
-    setInterval(() => {
-      dispatch(DemerisActionTypes.STORE_UPDATE);
-    }, refreshTime);
+    // setInterval(() => {
+    //   dispatch(DemerisActionTypes.STORE_UPDATE);
+    // }, refreshTime);
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
