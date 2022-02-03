@@ -760,9 +760,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   ) {
     console.log('Vuex nodule: demeris initialized!');
     commit('INIT', { endpoint, hub_chain, gas_limit });
-    // setInterval(() => {
-    //   dispatch(DemerisActionTypes.STORE_UPDATE);
-    // }, refreshTime);
+    setInterval(() => {
+      dispatch(DemerisActionTypes.STORE_UPDATE);
+    }, refreshTime);
   },
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
