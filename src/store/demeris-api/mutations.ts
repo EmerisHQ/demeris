@@ -38,6 +38,12 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.PrimaryChannels },
   ): void;
+  [MutationTypes.SET_TOKEN_PRICES](state: S, payload: { params: API.APIRequests; value: any[] }): void;
+  [MutationTypes.SET_TOKEN_PRICES_STATUS](
+    state: S,
+    payload: { params: API.APIRequests; value: API.LoadingState },
+  ): void;
+  [MutationTypes.SET_TOKEN_ID](state: S, payload: { value: API.TokenId }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
 
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
@@ -268,6 +274,30 @@ export const mutations: MutationTree<State> & Mutations = {
         state.chains[(payload.params as API.ChainReq).chain_name].primaryChannels[channel.counterparty] = channel;
       }
     }
+  },
+  [MutationTypes.SET_TOKEN_PRICES](state: State, payload: DemerisMutations) {
+    const newPayload: any = payload.value;
+    if (newPayload.data) {
+      const historicalPrices: API.TokenPrices[] = newPayload.data.prices.map((item) => {
+        return {
+          x: new Date(item[0]).toLocaleString(),
+          y: item[1],
+        };
+      });
+      state.tokenPrices = historicalPrices;
+    } else {
+      state.tokenPrices = [];
+    }
+  },
+  [MutationTypes.SET_TOKEN_PRICES_STATUS](state: State, payload: DemerisMutations) {
+    state.tokenPricesLoadingStatus = payload.value as API.LoadingState;
+  },
+  [MutationTypes.SET_TOKEN_ID](state: State, payload: DemerisMutations) {
+    const newPayload: any = payload.value;
+    state.tokenId = newPayload.data[newPayload.token];
+  },
+  [MutationTypes.SET_TOKEN_ID_STATUS](state: State, payload: DemerisMutations) {
+    state.tokenIdLoadingStatus = payload.value as API.LoadingState;
   },
   [MutationTypes.SET_CHAIN_STATUS](state: State, payload: DemerisMutations) {
     if (!isEqual(state.chains[(payload.params as API.ChainReq).chain_name].status, payload.value as boolean)) {

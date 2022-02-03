@@ -492,6 +492,7 @@ export const messages = {
             receipt: 'Partially completed ({offset}/{total})',
             failed: {
               sign: 'Transaction not signed',
+              unknown: "Couldn't fetch result",
               default: 'Transaction failed',
             },
           },
@@ -543,6 +544,7 @@ export const messages = {
         pooled: 'Pooled',
         staking: 'Staking',
         unbonding: 'Unstaking',
+        highLow: 'High {high} / Low {low}',
       },
       assets: {
         assets: 'Assets',

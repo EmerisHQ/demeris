@@ -1,7 +1,8 @@
 <template>
   <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
-      <Icon v-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
+      <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
+      <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
       <Icon v-else-if="state.matches('success')" name="SuccessOutlineIcon" class="text-positive" />
       <Icon v-else-if="state.matches('waitingPreviousTransaction')" name="TimeIcon" class="opacity-60" />
       <div v-else-if="state.matches('review') || state.matches('receipt')" class="-space-x-3 inline-flex items-center">
@@ -68,6 +69,11 @@
           keypath="context.transactions.widget.description.failed.sign"
           tag="span"
           class="text-negative"
+        />
+        <i18n-t
+          v-else-if="state.matches('failed.unknown')"
+          keypath="context.transactions.widget.description.failed.unknown"
+          tag="span"
         />
         <i18n-t
           v-else-if="state.matches('failed')"
