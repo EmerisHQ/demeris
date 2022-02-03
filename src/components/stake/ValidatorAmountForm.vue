@@ -41,11 +41,11 @@
                 border-t border-border
                 rounded-b-2xl
               "
-              @click="toggleChainsModal(null, 'coinB')"
+              @click="toggleChainsModal(null, vali.operator_address)"
             >
               <div>
                 {{ $t('pages.addLiquidity.fromLbl') }}
-                <span class="font-medium text-text"><ChainName :name="'cosmos-hub'" /></span>
+                <span class="font-medium text-text"><ChainName :name="toStake[vali.operator_address]?.on_chain" /></span>
               </div>
               <div class="flex">
                 test
@@ -137,7 +137,7 @@ export default {
     const router = useRouter();
     const store = useStore();
     const { balances: userBalances, getNativeBalances } = useAccount();
-
+    const toStake = ref({});
     /* meta & GA */
     useMeta({ title: t('context.stake.title') });
 
@@ -181,13 +181,17 @@ export default {
 
     /* functions */
     const validatorSelectHandler = (e) => {
+      console.log('back');
       emit('previous');
     };
     const goToReview = () => {
       console.log('GO TO REVIEW');
     };
-    const toggleChainsModal = (asset?: Balance, source: 'coinA' | 'coinB' = 'coinA') => {
-      console.log('selectedAsset', asset);
+    const toggleChainsModal = (asset: Balance, source: string) => {
+      if (asset) {
+        toStake.value[source] = asset;
+      }
+      console.log(toStake.value);
       state.chainsModalSource = source;
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
@@ -201,7 +205,7 @@ export default {
       baseDenom,
       validatorSelectHandler,
       toggleChainsModal,
-
+      toStake,
       goToReview,
     };
   },

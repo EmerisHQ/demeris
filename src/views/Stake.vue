@@ -183,9 +183,6 @@ export default {
         } as ClaimRewardsAction;
         stepsData.value = await actionHandler(action);
       }
-
-      console.log('validaorList', validatorList.value);
-      console.log('stakingBalance', stakingBalances.value);
     })();
 
     /* computeds */
