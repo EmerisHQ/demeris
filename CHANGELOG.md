@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.8 - 2022-02-03
+
+### Features
+
+- Asset page Price Chart
+- Transactions center widget
+- Feature flags
+
+### Fixes
+
+- Hide unverified assets
+- Fixed some copy in the transaction widget
+- Fixes Ts error
+- Fixes flickering in circlesymbol
+
 ## 0.1.7 - 2022-01-17
 
 ### Updates
