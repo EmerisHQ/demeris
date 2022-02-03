@@ -547,7 +547,9 @@ export default defineComponent({
           if (location.search) {
             const params = new URL(location.href).searchParams;
             form.balance.denom = params.get('base_denom');
-            form.balance.amount = params.get('amount');
+            const precision =
+              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.balance.denom }) ?? 6;
+            form.balance.amount = new BigNumber(params.get('amount') ?? 0).shiftedBy(-precision).toString();
           }
 
           if (form.balance.denom) {

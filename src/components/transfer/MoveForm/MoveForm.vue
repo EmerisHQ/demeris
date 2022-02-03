@@ -5,18 +5,31 @@
       <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
     </template>
 
-    <template v-else>
-      <TxStepsModal
-        v-if="steps.length > 0"
-        :data="steps"
-        :gas-price-level="gasPrice"
-        :back-route="{ name: 'Portfolio' }"
-        action-name="move"
-        @transacting="goToStep('move')"
-        @failed="goToStep('review')"
-        @reset="resetHandler"
-        @finish="resetHandler"
-      />
+    <template v-else-if="['review', 'move'].includes(step)">
+      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+        <template #deactivated>
+          <TxStepsModal
+            v-if="steps.length"
+            :data="steps"
+            :gas-price-level="gasPrice"
+            :back-route="{ name: 'Portfolio' }"
+            action-name="move"
+            @transacting="goToStep('move')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+            @finish="resetHandler"
+          />
+        </template>
+
+        <TransactionProcessCreator
+          v-if="steps.length"
+          :steps="steps"
+          action="move"
+          @pending="closeModal"
+          @close="closeModal"
+          @previous="$emit('previous')"
+        />
+      </FeatureRunningConditional>
     </template>
   </div>
 </template>
@@ -24,9 +37,12 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
 import { Balances } from '@/types/api';
@@ -42,7 +58,9 @@ export default defineComponent({
 
   components: {
     MoveFormAmount,
+    TransactionProcessCreator,
     TxStepsModal,
+    FeatureRunningConditional,
   },
 
   props: {
@@ -56,11 +74,13 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step'],
+  emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);
     const store = useStore();
+    const router = useRouter();
+
     const gasPrice = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
@@ -78,6 +98,10 @@ export default defineComponent({
       get: () => props.step,
       set: (value) => emit('update:step', value),
     });
+
+    const closeModal = () => {
+      router.push('/');
+    };
 
     watch(form, async () => {
       if (
@@ -140,7 +164,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler };
+    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler, closeModal };
   },
 });
 </script>
