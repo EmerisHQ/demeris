@@ -3,6 +3,18 @@ class FeatureManager {
   features: { [key: string]: boolean } = {};
 
   private constructor() {
+    this.load();
+  }
+
+  public static getInstance(): FeatureManager {
+    return this._instance || (this._instance = new this());
+  }
+
+  public featureRunning(feature: string): boolean {
+    return this.features[feature];
+  }
+
+  public load() {
     const urlParams = Object.fromEntries(new URLSearchParams(location.search));
     const appParams = {
       ...process.env,
@@ -15,15 +27,9 @@ class FeatureManager {
       }
     }
   }
-
-  public static getInstance(): FeatureManager {
-    return this._instance || (this._instance = new this());
-  }
-
-  public featureRunning(feature: string): boolean {
-    return this.features[feature];
-  }
 }
 
 const instance = FeatureManager.getInstance();
 export const featureRunning = (name: string) => instance.featureRunning(name);
+// testing helper
+export const loadFeaturesRunning = () => instance.load();

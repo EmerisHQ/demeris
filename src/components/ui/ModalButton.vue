@@ -1,6 +1,6 @@
 <template>
   <Button
-    :class="[status, 'btn flex-grow']"
+    :class="[status, 'btn flex-grow', { squared: squared }]"
     :name="name"
     :status="status"
     variant="secondary"
@@ -26,6 +26,7 @@ export default defineComponent({
     clickFunction: { type: Function, required: false, default: null },
     tooltipText: { type: String, required: false, default: '' },
     disabled: { type: Boolean, default: false },
+    squared: { type: Boolean, default: false },
   },
 });
 </script>
@@ -41,11 +42,11 @@ export default defineComponent({
     background-color: var(--fg);
   }
 
-  .btn:first-child & {
+  .btn:not(.squared):first-child & {
     @apply rounded-bl-2xl;
   }
 
-  .btn:last-child & {
+  .btn:not(.squared):last-child & {
     @apply rounded-br-2xl;
   }
 }

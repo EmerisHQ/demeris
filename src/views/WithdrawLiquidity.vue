@@ -183,13 +183,35 @@
         </template>
 
         <template v-else>
-          <TxStepsModal
-            :data="actionSteps"
-            action-name="withdrawliquidity"
-            @transacting="goToStep('send')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-          />
+          <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+            <template #deactivated>
+              <TxStepsModal
+                :data="actionSteps"
+                action-name="withdrawliquidity"
+                @transacting="goToStep('send')"
+                @failed="goToStep('review')"
+                @reset="resetHandler"
+              />
+            </template>
+
+            <TransactionProcessCreator
+              :steps="actionSteps"
+              action="withdrawliquidity"
+              @pending="
+                () => {
+                  closeModal();
+                  resetHandler();
+                }
+              "
+              @close="
+                () => {
+                  closeModal();
+                  resetHandler();
+                }
+              "
+              @previous="goBack"
+            />
+          </FeatureRunningConditional>
         </template>
       </main>
     </div>
@@ -208,6 +230,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
@@ -218,6 +241,8 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { useTransactionsStore } from '@/features/transactions/transactionsStore';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { WithdrawLiquidityAction } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -237,8 +262,10 @@ export default {
     DenomSelect,
     ChainSelectModal,
     FeeLevelSelector,
-    TxStepsModal,
     FlexibleAmountInput,
+    TransactionProcessCreator,
+    FeatureRunningConditional,
+    TxStepsModal,
   },
 
   setup() {
@@ -253,6 +280,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
+    const transactionsStore = useTransactionsStore();
 
     const actionSteps = ref([]);
     pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
@@ -436,6 +464,10 @@ export default {
       state.amount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString();
     };
 
+    const closeModal = () => {
+      router.push('/');
+    };
+
     const updateTotalCurrencyPrice = () => {
       let total = new BigNumber(0);
 
@@ -553,10 +585,12 @@ export default {
     };
 
     const onClose = () => {
+      transactionsStore.setTransactionAsPending();
       router.push('/pools');
     };
 
     const goBack = () => {
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       const currentStepIndex = steps.findIndex((item) => item === state.step);
 
       if (currentStepIndex > 0) {
@@ -653,6 +687,7 @@ export default {
     );
 
     return {
+      closeModal,
       dexChain,
       pool,
       pairName,

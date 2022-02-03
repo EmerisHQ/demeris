@@ -5,5 +5,16 @@ process.env.VUE_APP_GIT_VERSION = gitVersion();
 process.env.VUE_APP_VERSION = pkg.version;
 
 module.exports = {
+  configureWebpack: {
+    module: {
+      rules: [
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
+      ],
+    },
+  },
   transpileDependencies: ['@starport/tendermint-liquidity-js', 'vue-meta'],
 };
