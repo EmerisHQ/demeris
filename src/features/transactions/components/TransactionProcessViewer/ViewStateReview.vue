@@ -48,6 +48,7 @@ import { useStore } from 'vuex';
 
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
@@ -72,6 +73,7 @@ const previewComponentMap = {
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
+  claim: PreviewClaim,
 };
 
 const titleMap = {
@@ -81,6 +83,7 @@ const titleMap = {
   addliquidity: t('context.transactions.review.addliquidity'),
   withdrawliquidity: t('context.transactions.review.withdrawliquidity'),
   createpool: t('context.transactions.review.createpool'),
+  claim: t('context.transactions.review.claim'),
 };
 
 const step = computed(() => getCurrentStep(state.value.context));

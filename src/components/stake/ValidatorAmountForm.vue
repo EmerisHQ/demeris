@@ -130,7 +130,8 @@ export default {
     },
   },
 
-  setup() {
+  emits: ['previous'],
+  setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
@@ -180,7 +181,7 @@ export default {
 
     /* functions */
     const validatorSelectHandler = (e) => {
-      console.log('validatorSelectHandler', e);
+      emit('previous');
     };
     const goToReview = () => {
       console.log('GO TO REVIEW');

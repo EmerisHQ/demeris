@@ -81,6 +81,11 @@ if (featureRunning('STAKING')) {
     name: 'Stake',
     component: () => import('@/views/Stake.vue'),
   });
+  routes.push({
+    path: '/staking/:denom/:action?/:validator?',
+    name: 'Staking',
+    component: () => import('@/views/Staking.vue'),
+  });
 }
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

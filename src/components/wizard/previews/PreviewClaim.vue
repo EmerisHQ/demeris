@@ -42,7 +42,11 @@
     <ListItem :label="$t(`components.previews.claim.transactionFee`)">
       <div class="flex justify-end items-center">
         <div class="text-right">
-          <AmountDisplay class="text-0" :amount="{ amount: fee, denom: rewardsDenom }" />
+          <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
+            <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+              <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+            </template>
+          </template>
         </div>
         <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" />
       </div>

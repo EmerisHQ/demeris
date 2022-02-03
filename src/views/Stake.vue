@@ -24,11 +24,11 @@
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center">
         <!-- Claim -->
-        <template v-if="currentStep === StakingActionSteps.CLAIM">
+        <template v-if="currentStep === StakingActionSteps.CLAIM && stepsData.length > 0">
           <div class="max-w-3xl">
-            <TxStepsModal
-              :action-name="'claim'"
-              :data="stepsData"
+            <TransactionProcessCreator
+              :action="'claim'"
+              :steps="stepsData"
               @transacting="() => {}"
               @failed="() => {}"
               @reset="() => {}"
@@ -68,15 +68,6 @@
             <div class="mt-8 pb-8 flex space-x-8"></div>
           </div>
         </template>
-        <button
-          @click="
-            () => {
-              currentStep = actionSteps[currentStepIndex + 1];
-            }
-          "
-        >
-          TEST BUTTON(GO NEXT)
-        </button>
       </main>
     </div>
   </div>
@@ -88,13 +79,13 @@ import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { StakingActions, StakingActionSteps } from '@/types/actions';
 import { ClaimRewardsAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
@@ -102,7 +93,7 @@ import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 export default {
   name: 'Stake',
-  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TxStepsModal },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TransactionProcessCreator },
 
   setup() {
     /* hooks */

@@ -13,29 +13,92 @@
     <!-- validator table -->
     <table class="pools-table table-fixed -ml-6">
       <colgroup>
-        <col width="25%" />
-        <col width="25%" />
-        <col width="10%" />
-        <col width="25%" />
-        <col width="15%" />
+        <template v-if="hasActions">
+          <col width="25%" />
+          <col width="25%" />
+          <col width="10%" />
+          <col width="25%" />
+          <col width="15%" />
+        </template>
+        <template v-else>
+          <col width="30%" />
+          <col width="30%" />
+          <col width="15%" />
+          <col width="25%" />
+        </template>
       </colgroup>
 
       <!-- table header -->
       <thead class="hidden md:table-header-group text-muted">
         <tr>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-left transition">
-            {{ $t('components.validatorTable.validator') }}
+          <th
+            class="align-middle font-normal -text-1 py-4 px-0 sticky top-0 z-20 bg-app text-left transition"
+            :class="{ 'font-bold': sortBy == 'name' }"
+          >
+            <span
+              @click="
+                () => {
+                  sort('name');
+                }
+              "
+            >{{ $t('components.validatorTable.validator') }}</span>
+            <template v-if="sortBy == 'name'">
+              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+              <ReceiveIcon v-else class="inline" />
+            </template>
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
-            {{ $t('components.validatorTable.votingPower') }}
+          <th
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+            :class="{ 'font-bold': sortBy == 'power' }"
+          >
+            <span
+              @click="
+                () => {
+                  sort('power');
+                }
+              "
+            >{{ $t('components.validatorTable.votingPower') }}</span>
+            <template v-if="sortBy == 'power'">
+              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+              <ReceiveIcon v-else class="inline" />
+            </template>
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
-            {{ $t('components.validatorTable.commission') }}
+          <th
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+            :class="{ 'font-bold': sortBy == 'commission' }"
+          >
+            <span
+              @click="
+                () => {
+                  sort('commission');
+                }
+              "
+            >{{ $t('components.validatorTable.commission') }}</span>
+            <template v-if="sortBy == 'commission'">
+              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+              <ReceiveIcon v-else class="inline" />
+            </template>
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition">
-            {{ $t('components.validatorTable.staked') }}
+          <th
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+            :class="{ 'font-bold': sortBy == 'staked' }"
+          >
+            <span
+              @click="
+                () => {
+                  sort('staked');
+                }
+              "
+            >{{ $t('components.validatorTable.staked') }}</span>
+            <template v-if="sortBy == 'staked'">
+              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+              <ReceiveIcon v-else class="inline" />
+            </template>
           </th>
-          <th class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"></th>
+          <th
+            v-if="hasActions"
+            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+          ></th>
         </tr>
       </thead>
 
@@ -71,7 +134,7 @@
               {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
             </div>
           </td>
-          <td class="text-right group-hover:bg-fg transition">
+          <td v-if="hasActions" class="text-right group-hover:bg-fg transition">
             <div class="flex justify-center">
               <Button
                 variant="secondary"
@@ -90,13 +153,15 @@
 </template>
 
 <script lang="ts">
-import { ref } from '@vue/reactivity';
 import { computed } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
+import { PropType, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
+import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -104,15 +169,24 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 
+enum ValStyle {
+  LIST = 'list',
+  ACTIONLIST = 'actionlist',
+}
+
 //TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
-  components: { Search, CircleSymbol, Ticker, Button, Icon, Price },
+  components: { Search, CircleSymbol, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon },
   props: {
     validatorList: {
       type: Array,
       required: true,
       default: () => [],
+    },
+    tableStyle: {
+      type: String as PropType<ValStyle>,
+      default: 'actionlist',
     },
     totalStakedAmount: {
       type: Number,
@@ -132,17 +206,43 @@ export default {
 
     /* variables */
     const keyword = ref<string>('');
+    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST);
+    const sortBy = ref('power');
+    const sortOrder = ref('desc');
 
     /* functions */
     const filteredValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
       return props.validatorList.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
     });
+    const sort = (by) => {
+      if (sortBy.value == by && sortOrder.value == 'asc') {
+        sortOrder.value = 'desc';
+      } else {
+        sortOrder.value = 'asc';
+      }
+      sortBy.value = by;
+    };
     const sortedValidatorList = computed(() => {
       return filteredValidatorList.value.sort((a, b) => {
-        if (Number(a.tokens) < Number(b.tokens)) return -1;
-        if (Number(a.tokens) > Number(b.tokens)) return 1;
-        return 0;
+        switch (sortBy.value) {
+          case 'power':
+            if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
+            if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
+            return 0;
+          case 'name':
+            if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
+            if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
+            return 0;
+          case 'commission':
+            if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
+            if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
+            return 0;
+          case 'staked':
+            if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
+            if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
+            return 0;
+        }
       });
     });
     const getCommissionDisplayValue = (value) => {
@@ -176,6 +276,10 @@ export default {
       getVotingPowerPercDisplayValue,
       selectValidator,
       orderPools,
+      hasActions,
+      sort,
+      sortBy,
+      sortOrder,
     };
   },
 };

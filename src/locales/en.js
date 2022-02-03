@@ -458,6 +458,10 @@ export const messages = {
           addliquidity: 'Review your pool liquidity provision',
           withdrawliquidity: 'Review your liquidity withdrawal',
           createpool: 'Review your liquidity pool provision',
+          claim: 'Review your rewards claim details',
+          stake: 'Review your delegation details',
+          unstake: 'Review your undelegation details',
+          switch: 'Review your redelegation details',
         },
         cancel: {
           title: 'Are you sure you want to cancel this transaction?',

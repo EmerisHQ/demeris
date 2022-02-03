@@ -49,6 +49,7 @@ const emits = defineEmits(['pending', 'close', 'previous']);
 const transactionsStore = useTransactionsStore();
 
 const { balances } = useAccount();
+
 const [stepId, service] = transactionsStore.createTransaction({
   action: props.action,
   steps: props.steps,
