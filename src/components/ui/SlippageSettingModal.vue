@@ -33,9 +33,23 @@
         >
           1%
         </button>
-        <label
+        <Search
           v-if="allowCustomSlippage"
-          class="
+          v-model:keyword="customSlippage"
+          :input-type="'number'"
+          :is-close-icon-visible="false"
+          :is-search-icon-visible="false"
+          placeholder="Custom"
+          class="custom-slippage grow-0"
+          @update:keyword="(e) => setCustomSlippage(e)"
+        />
+        <!-- <div :class="[
+          isCustomSlippageEditing ? 'custom-selected border-2 bg-gold-to-br rounded-lg dark:theme-inverse font-medium' : '',
+        ]"
+        >
+          <label
+            v-if="allowCustomSlippage"
+            class="
             custom-slippage
             h-12
             pr-3
@@ -49,18 +63,18 @@
             outline-none
             text-text
           "
-          :class="[
-            isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
-            Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
-          ]"
-          for=""
-        >
-          <input
-            ref="customSlippageInput"
-            :value="customSlippage"
-            type="number"
-            placeholder="Custom"
-            class="
+            :class="[
+              isCustomSelected && !isCustomSlippageEditing? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
+              Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
+            ]"
+            for=""
+          >
+            <input
+              ref="customSlippageInput"
+              :value="customSlippage"
+              type="number"
+              placeholder="Custom"
+              class="
               custom-slippage__input
               h-12
               appearance-none
@@ -74,12 +88,15 @@
               outline-none
               bg-transparent
             "
-            :class="[isCustomSelected ? 'w-12' : 'w-20']"
-            required
-            @input="setCustomSlippage"
-          />
-          <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
-        </label>
+              :class="[isCustomSelected ? 'w-12' : 'w-20']"
+              required
+              @input="setCustomSlippage"
+              @focus="onCustomSlippageFocussed"
+              @blur="onCustomSlippageFocusOut"
+            />
+            <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
+          </label>
+        </div> -->
       </div>
     </div>
     <div v-if="alertStatus" class="px-6">
@@ -116,8 +133,10 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
+import Search from '@/components/common/Search.vue';
 import Alert from '@/components/ui/Alert.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
@@ -135,6 +154,7 @@ export default defineComponent({
   components: {
     TitleWithGoback,
     Alert,
+    Search,
   },
 
   props: {
@@ -153,54 +173,39 @@ export default defineComponent({
   },
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
+    const { t } = useI18n({ useScope: 'global' });
     const trueSlippage = computed(() => {
       return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
-    const customSlippage = computed(() => {
-      if (trueSlippage.value) {
-        if (trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1) {
-          return trueSlippage.value;
-        } else {
-          return null;
-        }
-      } else {
-        return null;
-      }
-    });
+    const isCustomSelected = ref(false);
+    const isCustomSlippageEditing = ref(false);
+
+    const customSlippage = ref(null);
+
+    // const customSlippage = computed(() => {
+    //     return !!isCustomSelected.value ? trueSlippage.value : null;
+    // });
 
     const state = reactive({
       slippage: computed(() => {
         if (trueSlippage.value) {
-          if (trueSlippage.value == 0.1 || trueSlippage.value == 0.5 || trueSlippage.value == 1) {
-            return trueSlippage.value;
-          } else {
-            return null;
-          }
+          return trueSlippage.value;
         } else {
           return 0.5;
         }
       }),
 
-      isCustomSelected: computed(() => {
-        if (customSlippage?.value) {
-          return true;
-        } else {
-          return false;
-        }
-      }),
       alertStatus: computed(() => {
-        const slippage = state.slippage ?? customSlippage.value;
+        const slippage = state.slippage;
         if (slippage) {
-          if (slippage == 0.1) {
-            return 'warning';
-          } else if (slippage <= 0.1) {
-            if (slippage < 0) {
-              return 'error';
-            } else {
-              return 'warning';
-            }
-          } else if (slippage >= 3) {
+          if (
+            slippage <= 0 ||
+            slippage > 100 ||
+            (customSlippage.value && isCustomSelected.value && customSlippage.value != trueSlippage.value)
+          ) {
             return 'error';
+          } else if (slippage >= 20) {
+            return 'warning';
           } else {
             return null;
           }
@@ -210,13 +215,9 @@ export default defineComponent({
       }),
       alertText: computed(() => {
         if (state.alertStatus === 'warning') {
-          return 'With a low slippage, only a very small part of your swap may be fulfilled';
+          return t('components.slippageSettingsModal.highSlippageMessage');
         } else if (state.alertStatus === 'error') {
-          if (state.slippage < 0) {
-            return 'Please enter a valid slippage rate.';
-          } else {
-            return 'Your swap price may be significantly above the market price. ';
-          }
+          return t('components.slippageSettingsModal.slippageValueError');
         } else {
           return '';
         }
@@ -229,10 +230,11 @@ export default defineComponent({
         state.validSlippageUpdater(slippage);
       },
       setCustomSlippage: (e) => {
-        state.validSlippageUpdater(e.target.value);
+        state.validSlippageUpdater(e, true);
       },
-      validSlippageUpdater(value) {
+      validSlippageUpdater(value, isCustom = false) {
         const slippage = Number(value);
+        isCustomSelected.value = isCustom;
         if (slippage > 0 && slippage <= 100) {
           (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
             data: { slippagePerc: slippage },
@@ -240,6 +242,15 @@ export default defineComponent({
         }
       },
     });
+
+    const onCustomSlippageFocussed = () => {
+      isCustomSlippageEditing.value = true;
+      isCustomSelected.value = true;
+    };
+
+    const onCustomSlippageFocusOut = () => {
+      isCustomSlippageEditing.value = false;
+    };
     const customSlippageInput = ref(null);
     const limitPriceText = ref('');
     const minReceivedText = ref(null);
@@ -251,7 +262,7 @@ export default defineComponent({
     watch(
       () => allowCustomSlippage.value,
       () => {
-        if (!allowCustomSlippage.value && state.isCustomSelected) {
+        if (!allowCustomSlippage.value && isCustomSelected.value) {
           state.setSlippage(0.5);
         }
       },
@@ -277,8 +288,8 @@ export default defineComponent({
           payAmount
             ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
             : props.swapData.isReverse
-            ? props.swapData.poolPrice.toFixed(4)
-            : (1 / props.swapData.poolPrice).toFixed(4)
+            ? props.swapData.poolPrice?.toFixed(4)
+            : (1 / props.swapData.poolPrice)?.toFixed(4)
         } ${receiveDisplayName}`;
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
           minReceivedText.value = `${
@@ -292,9 +303,9 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
-        customSlippageInput.value.focus();
-      }
+      // if (state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
+      //   customSlippageInput.value.focus();
+      // }
     });
 
     return {
@@ -304,43 +315,56 @@ export default defineComponent({
       customSlippage,
       limitPriceText,
       minReceivedText,
+      onCustomSlippageFocussed,
+      isCustomSelected,
+      onCustomSlippageFocusOut,
+      isCustomSlippageEditing,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.custom-slippage {
-  &:hover &__input::placeholder {
-    color: var(--muted);
-  }
-
-  &__input {
-    min-width: 0.66em;
-    font: inherit;
-    letter-spacing: inherit;
-    outline: none;
-    -moz-appearance: textfield;
-
-    &:empty {
-      text-align: center;
-    }
-
-    &:focus,
-    &:valid {
-      text-align: right;
-    }
-
-    &::placeholder,
-    &:focus::placeholder {
-      color: var(--inactive);
-    }
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      appearance: none;
-      margin: 0;
-    }
-  }
+// ::v-deep(input){
+//   background:black;
+// }
+::v-deep(input::-webkit-inner-spin-button, input::-webkit-outer-spin-button) {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
 }
+// .custom-slippage {
+
+//   &:hover &__input::placeholder {
+//     color: var(--muted);
+//   }
+
+//   ::v-deep(input) {
+//     min-width: 0.66em;
+//     font: inherit;
+//     letter-spacing: inherit;
+//     outline: none;
+//     -moz-appearance: textfield;
+
+//     &:empty {
+//       text-align: center;
+//     }
+
+//     &:focus,
+//     &:valid {
+//       text-align: right;
+//     }
+
+//     &::placeholder,
+//     &:focus::placeholder {
+//       color: var(--inactive);
+//     }
+//     &::-webkit-inner-spin-button,
+//     &::-webkit-outer-spin-button {
+//       -webkit-appearance: none;
+//       appearance: none;
+//       margin: 0;
+//     }
+//   }
+// }
 </style>
