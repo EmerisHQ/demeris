@@ -33,6 +33,7 @@
           <div class="max-w-7xl">
             <ValidatorsTable
               :validator-list="validatorList"
+              :disabled-list="disabledValidators"
               :total-staked-amount="totalStakedAmount"
               table-style="list"
               @selectValidator="addValidator"
@@ -41,7 +42,14 @@
         </template>
         <template v-if="step == 'amount'">
           <div class="max-w-3xl">
-            <ValidatorAmountForm :validators="Array.from(selectedValidators)" @previous="goBack" />
+            <ValidatorAmountForm
+              :validators="selectedValidators"
+              @previous="
+                (e) => {
+                  selectAnother(e);
+                }
+              "
+            />
           </div>
         </template>
       </main>
@@ -68,7 +76,7 @@ import { keyHashfromAddress } from '@/utils/basic';
 type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
 export default {
-  name: 'Send',
+  name: 'Staking',
   components: { Button, Icon, ValidatorsTable, ValidatorAmountForm },
 
   setup() {
@@ -76,6 +84,7 @@ export default {
     const router = useRouter();
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
+    const editing = ref(null);
     const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom, getValidatorMoniker } =
       useStaking();
     const { balances, stakingBalances } = useAccount();
@@ -84,7 +93,7 @@ export default {
     const baseDenom = route.params.denom as string;
     const validatorList = ref<Array<unknown>>([]);
     const totalStakedAmount = ref<number>(0);
-    const selectedValidators = ref(new Set());
+    const selectedValidators = ref([]);
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
       if (stakingBalances.value.length) {
@@ -108,7 +117,17 @@ export default {
     });
     const step = validator || actionType === 'claim' ? ref('amount') : ref('validator');
     pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
-
+    const selectAnother = (e) => {
+      step.value = allSteps[actionType][currentStepIndex.value - 1];
+      editing.value = e;
+    };
+    const disabledValidators = computed(() => {
+      if (editing.value !== null) {
+        return selectedValidators.value.slice().splice(editing.value, 1);
+      } else {
+        return selectedValidators.value;
+      }
+    });
     const showBackButton = computed(() => {
       return !!actionType;
     });
@@ -124,7 +143,12 @@ export default {
 
     const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
     const addValidator = (val) => {
-      selectedValidators.value.add(val);
+      if (editing.value !== null) {
+        selectedValidators.value[editing.value] = val;
+      } else {
+        selectedValidators.value.push(val);
+      }
+      editing.value = null;
       step.value = allSteps[actionType][currentStepIndex.value + 1];
     };
     const metaSource = computed(() => {
@@ -169,7 +193,9 @@ export default {
       validatorList,
       addValidator,
       selectedValidators,
+      selectAnother,
       totalStakedAmount,
+      disabledValidators,
     };
   },
 };

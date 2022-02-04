@@ -107,10 +107,18 @@
         <tr
           v-for="validator of sortedValidatorList"
           :key="validator.operator_address"
-          class="group cursor-pointer"
-          @click="selectValidator(validator)"
+          :set="(isDisabled = disabledListAddresses.includes(validator.operator_address))"
+          class="group"
+          :class="{ 'opacity-50': isDisabled, 'cursor-pointer': !isDisabled }"
+          @click="
+            () => {
+              if (!isDisabled) {
+                selectValidator(validator);
+              }
+            }
+          "
         >
-          <td class="py-5 flex items-center group-hover:bg-fg transition">
+          <td class="py-5 flex items-center" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             <div class="inline-flex items-center mr-4">
               <!-- TODO: get logo url -->
               <CircleSymbol :denom="baseDenom" class="w-8 h-8 rounded-full bg-fg z-1" />
@@ -119,22 +127,22 @@
               {{ validator.moniker }}
             </span>
           </td>
-          <td class="text-right group-hover:bg-fg transition">
+          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
             <div class="-text-1 text-muted">
               {{ getVotingPowerPercDisplayValue(validator.tokens) }}
             </div>
           </td>
-          <td class="text-right group-hover:bg-fg transition">
+          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             {{ getCommissionDisplayValue(validator.commission_rate) }}
           </td>
-          <td class="text-right group-hover:bg-fg transition">
+          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
             <div class="-text-1 text-muted">
               {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
             </div>
           </td>
-          <td v-if="hasActions" class="text-right group-hover:bg-fg transition">
+          <td v-if="hasActions" class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             <div class="flex justify-center">
               <Button
                 variant="secondary"
@@ -184,6 +192,11 @@ export default {
       required: true,
       default: () => [],
     },
+    disabledList: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
     tableStyle: {
       type: String as PropType<ValStyle>,
       default: 'actionlist',
@@ -214,6 +227,9 @@ export default {
     const filteredValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
       return props.validatorList.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+    });
+    const disabledListAddresses = computed(() => {
+      return props.disabledList?.map((x) => x.operator_address) ?? [];
     });
     const sort = (by) => {
       if (sortBy.value == by && sortOrder.value == 'asc') {
@@ -280,6 +296,7 @@ export default {
       sort,
       sortBy,
       sortOrder,
+      disabledListAddresses,
     };
   },
 };

@@ -16,11 +16,15 @@
 
           <!-- Validator stake amount input -->
           <fieldset
-            v-for="vali in validators"
+            v-for="(vali, index) in validators"
             :key="vali.operator_address"
             class="bg-surface shadow-card rounded-2xl mt-4 pt-2"
           >
-            <ValidatorSelect v-model:amount="vali.inputAmount" :validator="vali" @select="validatorSelectHandler" />
+            <ValidatorSelect
+              v-model:amount="vali.inputAmount"
+              :validator="vali"
+              @select="() => validatorSelectHandler(index)"
+            />
 
             <button
               class="
@@ -48,20 +52,40 @@
                 <span class="font-medium text-text"><ChainName :name="toStake[vali.operator_address]?.on_chain" /></span>
               </div>
               <div class="flex">
-                test
+                <AmountDisplay
+                  :amount="{
+                    amount: toStake[vali.operator_address]?.amount,
+                    denom: toStake[vali.operator_address]?.base_denom,
+                  }"
+                  :class="{
+                    'text-negative-text': compareInputToBalance(
+                      vali.inputAmount,
+                      toStake[vali.operator_address]?.amount,
+                    ),
+                  }"
+                />
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
               </div>
             </button>
           </fieldset>
 
+          <Button
+            class="mt-2"
+            name="Add a validator"
+            variant="link"
+            :full-width="false"
+            @click="() => validatorAddHandler()"
+          >
+            <Icon name="PlusIcon" :icon-size="2" />
+          </Button>
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
             <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
 
             <ListItem inset size="md" label="Total stake">
-              <AmountDisplay :amount="{ amount: 100, denom: 'uatom' }" />
+              <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
-                <Price :amount="{ denom: baseDenom, amount: 100 }" :show-zero="true" />
+                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" />
               </div>
             </ListItem>
 
@@ -136,6 +160,7 @@ export default {
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
+
     const { balances: userBalances, getNativeBalances } = useAccount();
     const toStake = ref({});
     /* meta & GA */
@@ -173,16 +198,32 @@ export default {
 
       return result;
     });
+    const totalToStake = computed(
+      () => props.validators.reduce((total, val) => total + Number(val.inputAmount ?? 0), 0) * 10 ** precision.value,
+    );
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
 
+    const compareInputToBalance = (input, balancestring) => {
+      if (input && balancestring) {
+        const balance = parseCoins(balancestring)[0].amount;
+        const inputAmt = parseFloat(input);
+        const balanceAmt = Number(balance) / 10 ** precision.value;
+        return inputAmt > balanceAmt;
+      } else {
+        return false;
+      }
+    };
+
     /* functions */
-    const validatorSelectHandler = (e) => {
-      console.log('back');
-      emit('previous');
+    const validatorSelectHandler = (index) => {
+      emit('previous', index);
+    };
+    const validatorAddHandler = () => {
+      emit('previous', null);
     };
     const goToReview = () => {
       console.log('GO TO REVIEW');
@@ -204,9 +245,12 @@ export default {
       precision,
       baseDenom,
       validatorSelectHandler,
+      validatorAddHandler,
       toggleChainsModal,
       toStake,
       goToReview,
+      compareInputToBalance,
+      totalToStake,
     };
   },
 };
