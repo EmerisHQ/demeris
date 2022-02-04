@@ -34,7 +34,7 @@
     "@starport/vuex": "^0.1.52",
     "@types/long": "^4.0.1",
     "@xstate/vue": "^0.8.1",
-    "apexcharts": "^3.33.0",
+    "apexcharts": "^3.22.2",
     "axios": "^0.21.1",
     "bech32": "^2.0.0",
     "bignumber.js": "^9.0.1",
