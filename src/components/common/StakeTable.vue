@@ -296,25 +296,17 @@ export default defineComponent({
     };
     const goStakeActionPage = (action: string, validatorAddress = '') => {
       if (action === StakingActions.STAKE) {
-        router.push(
-          `/stake/${props.denom}?action=${StakingActions.STAKE}${
-            validatorAddress ? `&validator_address=${validatorAddress}` : ''
-          }`,
-        );
+        router.push(`/staking/${props.denom}/${StakingActions.STAKE}${validatorAddress ? `/${validatorAddress}` : ''}`);
       } else if (action === StakingActions.UNSTAKE) {
         router.push(
-          `/stake/${props.denom}?action=${StakingActions.UNSTAKE}${
-            validatorAddress ? `&validator_address=${validatorAddress}` : ''
-          }`,
+          `/staking/${props.denom}?action=${StakingActions.UNSTAKE}${validatorAddress ? `/${validatorAddress}` : ''}`,
         );
       } else if (action === StakingActions.SWITCH) {
         router.push(
-          `/stake/${props.denom}?action=${StakingActions.SWITCH}${
-            validatorAddress ? `&validator_address=${validatorAddress}` : ''
-          }`,
+          `/staking/${props.denom}?action=${StakingActions.SWITCH}${validatorAddress ? `/${validatorAddress}` : ''}`,
         );
       } else {
-        router.push(`/stake/${props.denom}?action=${StakingActions.CLAIM}`);
+        router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
       }
     };
     /* watch */
