@@ -1,5 +1,6 @@
 export enum GetterTypes {
   getKeplr = 'getKeplr',
+  getFirstLoad = 'getFirstLoad',
   getGasLimit = 'getGasLimit',
   isSignedIn = 'isSignedIn',
   getKeyhashes = 'getKeyhashes',
@@ -17,6 +18,7 @@ export enum GetterTypes {
 }
 export enum GlobalGetterTypes {
   getKeplr = 'demerisUSER/getKeplr',
+  getFirstLoad = 'demerisUSER/getFirstLoad',
   getGasLimit = 'demerisUSER/getGasLimit',
   isSignedIn = 'demerisUSER/isSignedIn',
   getKeyhashes = 'demerisUSER/getKeyhashes',

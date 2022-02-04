@@ -73,49 +73,60 @@ export default defineComponent({
         userstore.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, {
           gasLimit: gasLimit,
         });
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
-          subscribe: true,
-        });
+        try {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+            subscribe: true,
+          });
+        } catch (_e) {
+          //TODO: Show maintenance screen
+        }
         apistore
           .dispatch(GlobalDemerisActionTypes.API.GET_CHAINS, {
             subscribe: false,
           })
           .then((chains) => {
             for (let chain in chains) {
-              apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
-                subscribe: true,
-                params: {
-                  chain_name: chain,
-                },
-              });
-              apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
-                subscribe: true,
-                params: {
-                  chain_name: chain,
-                },
-              });
+              apistore
+                .dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+                  subscribe: true,
+                  params: {
+                    chain_name: chain,
+                  },
+                })
+                .then((chain) => {
+                  apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN_STATUS, {
+                    subscribe: true,
+                    params: {
+                      chain_name: chain.chain_name,
+                    },
+                  });
+                });
             }
+          })
+          .catch((_e) => {
+            // TODO: Show maintenance screen
           });
-        await store.dispatch('common/env/config', {
-          apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
-          rpcNode: null,
-          wsNode: null,
-          chainId: 'cosmos-hub',
-          addrPrefix: 'cosmos',
-          sdkVersion: 'Stargate',
-          getTXApi: null,
-          offline: true,
-          refresh: 10000,
-        });
-        try {
-          store.dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
-            options: { subscribe: true },
+        store
+          .dispatch('common/env/config', {
+            apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
+            rpcNode: null,
+            wsNode: null,
+            chainId: 'cosmos-hub',
+            addrPrefix: 'cosmos',
+            sdkVersion: 'Stargate',
+            getTXApi: null,
+            offline: true,
+            refresh: 10000,
+          })
+          .then(() => {
+            store
+              .dispatch('tendermint.liquidity.v1beta1/QueryLiquidityPools', {
+                options: { subscribe: true },
+              })
+              .catch();
+            store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } }).catch();
+            store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } }).catch();
           });
-          store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } });
-          store.dispatch('cosmos.bank.v1beta1/QueryTotalSupply', { options: { subscribe: true, all: true } });
-        } catch (e) {
-          console.error(e);
-        }
         apistore
           .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
             subscribe: true,

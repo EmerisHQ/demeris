@@ -90,6 +90,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
       return null;
     }
   },
+  [GetterTypes.getFirstLoad]: (state) => {
+    return state.balancesFirstLoad && state.stakingBalancesFirstLoad;
+  },
   [GetterTypes.getGasLimit]: (state) => {
     return state.gas_limit;
   },

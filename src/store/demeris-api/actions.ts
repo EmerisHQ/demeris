@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
-import { GlobalDemerisGetterTypes, RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
@@ -266,8 +266,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      for (const keyHash of keyHashes) {
-        dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const balanceLoads = [];
+        for (const keyHash of keyHashes) {
+          balanceLoads.push(
+            dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }),
+          );
+        }
+        await Promise.all(balanceLoads);
+      } else {
+        for (const keyHash of keyHashes) {
+          await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -277,8 +287,20 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters, rootGetters }) {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
-      for (const keyHash of keyHashes) {
-        dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const stakingBalanceLoads = [];
+        for (const keyHash of keyHashes) {
+          stakingBalanceLoads.push(
+            dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
+          );
+        }
+        await Promise.all(stakingBalanceLoads);
+        dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
+      } else {
+        for (const keyHash of keyHashes) {
+          await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
@@ -350,10 +372,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-        '/chain/' +
-        (params as API.ChainAddrReq).chain_name +
-        '/numbers/' +
-        (params as API.ChainAddrReq).address,
+          '/chain/' +
+          (params as API.ChainAddrReq).chain_name +
+          '/numbers/' +
+          (params as API.ChainAddrReq).address,
       );
       commit(DemerisMutationTypes.SET_NUMBERS_CHAIN, { params, value: response.data.numbers });
       if (subscribe) {
@@ -367,10 +389,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters, rootGetters }) {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
-      for (const keyHash of keyHashes) {
-        if (featureRunning('REQUEST_PARALLELIZATION')) {
-          dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
-        } else {
+
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const numberLoads = [];
+        for (const keyHash of keyHashes) {
+          numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
+        }
+        await Promise.all(numberLoads);
+      } else {
+        for (const keyHash of keyHashes) {
           await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
         }
       }
@@ -437,7 +464,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
                     };
                     response.data.data.Tokens.push(priceData);
                   }
-                } catch (e) { }
+                } catch (e) {}
               }
             }
           }
@@ -465,10 +492,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-        '/tx/ticket/' +
-        (params as API.TicketReq).chain_name +
-        '/' +
-        (params as API.TicketReq).ticket,
+          '/tx/ticket/' +
+          (params as API.TicketReq).chain_name +
+          '/' +
+          (params as API.TicketReq).ticket,
       );
       commit(DemerisMutationTypes.SET_TX_STATUS, { params, value: response.data });
       if (subscribe) {
@@ -538,10 +565,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       try {
         const response = await axios.get(
           getters['getEndpoint'] +
-          '/chain/' +
-          (params as API.VerifyTraceReq).chain_name +
-          '/denom/verify_trace/' +
-          (params as API.VerifyTraceReq).hash,
+            '/chain/' +
+            (params as API.VerifyTraceReq).chain_name +
+            '/denom/verify_trace/' +
+            (params as API.VerifyTraceReq).hash,
         );
         if (response && response.data && response.data.verify_trace) {
           commit(DemerisMutationTypes.SET_VERIFY_TRACE, { params, value: response.data.verify_trace });
@@ -608,7 +635,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
-        commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
+        commit(DemerisMutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
         }
@@ -629,10 +656,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
-        '/chain/' +
-        (params as API.ChainReq).chain_name +
-        '/primary_channel/' +
-        (params as API.ChainReq).destination_chain_name,
+          '/chain/' +
+          (params as API.ChainReq).chain_name +
+          '/primary_channel/' +
+          (params as API.ChainReq).destination_chain_name,
       );
       commit(DemerisMutationTypes.SET_PRIMARY_CHANNEL, { params, value: response.data.primary_channel });
       if (subscribe) {
@@ -716,10 +743,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       } catch (e) {
         commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
-
-        if (featureRunning('REQUEST_PARALLELIZATION')) {
-          commit(DemerisMutationTypes.SET_CHAIN_STATUS, { params, value: false });
-        }
         rejecter(e);
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
@@ -743,8 +766,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
-      const wakeUpTime = Date.now() + ms;
-      while (Date.now() < wakeUpTime) { }
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     try {

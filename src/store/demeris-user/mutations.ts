@@ -8,6 +8,8 @@ export type Mutations<S = State> = {
   [MutationTypes.ADD_KEPLR_KEYHASH](state: S, payload: string): void;
   [MutationTypes.SET_SESSION_DATA](state: S, payload: UserData): void;
   [MutationTypes.SET_KEPLR](state: S, payload: KeplrKeyData): void;
+  [MutationTypes.SET_BALANCES_FIRST_LOAD](state: S, payload: boolean): void;
+  [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: S, payload: boolean): void;
   [MutationTypes.SIGN_OUT](state: S): void;
   [MutationTypes.RESET_STATE](state: S): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
@@ -27,6 +29,12 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_KEPLR](state: State, payload: KeplrKeyData) {
     state.keplr = payload;
     state.keplr.keyHashes = [];
+  },
+  [MutationTypes.SET_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
+    state.balancesFirstLoad = payload;
+  },
+  [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
+    state.stakingBalancesFirstLoad = payload;
   },
   [MutationTypes.SET_GAS_LIMIT](state: State, payload: DemerisMutations) {
     window.localStorage.setItem('gasLimit', (payload.value as number).toString());

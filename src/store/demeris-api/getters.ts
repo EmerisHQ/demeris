@@ -142,34 +142,34 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getTicker]:
     (state, getters) =>
-      ({ name }) => {
-        const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
-        if (ticker) {
-          return ticker;
+    ({ name }) => {
+      const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
+      if (ticker) {
+        return ticker;
+      }
+      const pools = getters['tendermint.liquidity.v1beta1/getAllValidPools'];
+      if (pools && pools.pools) {
+        const pool = pools.pools.find((x) => x.pool_coin_denom == name);
+        if (pool) {
+          return 'G' + (pools.length + 1);
+        } else {
+          return null;
         }
-        const pools = getters['tendermint.liquidity.v1beta1/getAllValidPools'];
-        if (pools && pools.pools) {
-          const pool = pools.pools.find((x) => x.pool_coin_denom == name);
-          if (pool) {
-            return 'G' + (pools.length + 1);
-          } else {
-            return null;
-          }
-        }
-      },
+      }
+    },
   [GetterTypes.getChainFromChainId]: (state) => (chain_id) => {
     return Object.values(state.chains).find((x) => x.node_info.chain_id == chain_id).chain_name;
   },
   [GetterTypes.getDisplayChain]:
     (state) =>
-      ({ name }) => {
-        return state.chains[name]?.display_name ?? null;
-      },
+    ({ name }) => {
+      return state.chains[name]?.display_name ?? null;
+    },
   [GetterTypes.getDenomPrecision]:
     (state) =>
-      ({ name }) => {
-        return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
-      },
+    ({ name }) => {
+      return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
+    },
   [GetterTypes.getChains]: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
   },
@@ -316,7 +316,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getPrimaryChannel]: (state) => (params) => {
     return (
       state.chains[(params as API.ChainReq).chain_name]?.primary_channel[
-      (params as API.ChainReq).destination_chain_name
+        (params as API.ChainReq).destination_chain_name
       ] ?? null
     );
   },

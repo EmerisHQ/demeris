@@ -56,6 +56,8 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     seen: boolean,
   ): Promise<void>;
+  [DemerisActionTypes.BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
+  [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
   [DemerisActionTypes.SET_SESSION_DATA](
     { commit, getters, state }: ActionContext<State, RootState>,
     { data: UserData }: DemerisSessionParams,
@@ -93,6 +95,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
     seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
+  },
+  async [DemerisActionTypes.BALANCES_LOADED]({ commit }) {
+    commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, false);
+  },
+  async [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }) {
+    commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, false);
   },
   async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
@@ -164,7 +172,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
         commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
       }
       dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
-
+      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
@@ -190,6 +199,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
+      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,

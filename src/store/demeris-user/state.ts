@@ -17,6 +17,8 @@ export type TransactionItem = {
 };
 export type State = {
   gas_limit: number;
+  balancesFirstLoad: boolean;
+  stakingBalancesFirstLoad: boolean;
   keplr: KeplrKeyData;
   _Subscriptions: Set<string>;
   _Session: UserData | Record<string, never>;
@@ -24,6 +26,8 @@ export type State = {
 export function getDefaultState(): State {
   return {
     gas_limit: 500000,
+    balancesFirstLoad: true,
+    stakingBalancesFirstLoad: true,
     keplr: null,
     _Subscriptions: new Set(),
     _Session: {},
