@@ -186,7 +186,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BALANCES]({ commit, dispatch, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -206,6 +206,26 @@ export const actions: ActionTree<State, RootState> & Actions = {
           getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
         );
 
+        if (featureRunning('REQUEST_PARALLELIZATION') && response.data.balances) {
+          const tracesLoaded = [];
+          for (const balance of response.data.balances as API.Balances) {
+            if (
+              Object.keys(balance.ibc).length != 0 &&
+              !getters['getVerifyTrace']({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              })
+            ) {
+              tracesLoaded.push(
+                dispatch(DemerisActionTypes.GET_VERIFY_TRACE, {
+                  subscribe: false,
+                  params: { chain_name: balance.on_chain, hash: balance.ibc.hash },
+                }),
+              );
+            }
+          }
+          await Promise.all(tracesLoaded);
+        }
         commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
@@ -274,6 +294,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
           );
         }
         await Promise.all(balanceLoads);
+        if (rootGetters[GlobalDemerisGetterTypes.USER.getFirstLoad]) {
+          dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
+        }
       } else {
         for (const keyHash of keyHashes) {
           await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });

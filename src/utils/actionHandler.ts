@@ -1857,10 +1857,6 @@ export async function validBalances(balances: Balances): Promise<Balances> {
         }
       }),
     );
-
-    if (apistore.getters[GlobalDemerisGetterTypes.USER.getFirstLoad]) {
-      apistore.dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
-    }
   } else {
     for (const balance of balances) {
       const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
