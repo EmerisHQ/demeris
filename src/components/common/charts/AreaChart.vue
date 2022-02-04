@@ -142,7 +142,7 @@ export default defineComponent({
       ],
     });
 
-    const activeFilterItem = ref('1');
+    const activeFilterItem = ref('max');
     let highestPrice = ref('');
     let lowestPrice = ref('');
     let openingPrice = ref(0);
