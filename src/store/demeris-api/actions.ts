@@ -770,7 +770,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
 
     try {
-      sleep(800);
+      await sleep(800);
       const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
       const successData = {};
 

@@ -7,7 +7,7 @@ import * as API from '@/types/api';
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
 import { APIPromise, DemerisMutations, DemerisMutationTypes as MutationTypes } from './mutation-types';
-import { getDefaultState, State } from './state';
+import { ChainData, getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
   [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
@@ -28,7 +28,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
   [MutationTypes.SET_BECH32_CONFIG](state: S, payload: { params: API.APIRequests; value: API.Bech32Config }): void;
-  [MutationTypes.SET_CHAIN](state: S, payload: { value: API.Chain }): void;
+  [MutationTypes.SET_CHAIN](state: S, payload: { value: ChainData }): void;
   [MutationTypes.SET_PRIMARY_CHANNEL](state: S, payload: { params: API.APIRequests; value: API.PrimaryChannel }): void;
   [MutationTypes.SET_PRIMARY_CHANNELS](
     state: S,
@@ -213,16 +213,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
+    const { status, ...toUpdate } = payload.value as ChainData;
+    if (!state.chains[(payload.params as API.ChainReq).chain_name].status) {
+      (toUpdate as ChainData).status = status;
+    }
     if (
       !isEqual(state.chains[(payload.params as API.ChainReq).chain_name], {
         ...state.chains[(payload.params as API.ChainReq).chain_name],
-        ...(payload.value as API.Chain),
+        ...(payload.value as ChainData),
         relayerBalance: { address: ``, chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
       })
     ) {
       state.chains[(payload.params as API.ChainReq).chain_name] = {
         ...state.chains[(payload.params as API.ChainReq).chain_name],
-        ...(payload.value as API.Chain),
+        ...toUpdate,
         relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
       };
     }

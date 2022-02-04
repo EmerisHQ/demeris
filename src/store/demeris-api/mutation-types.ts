@@ -2,6 +2,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisConfig } from './actions';
+import { ChainData } from './state';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
@@ -74,6 +75,7 @@ export type DemerisMutationArgs =
   | API.VerifyTrace
   | API.Chains
   | API.Chain
+  | ChainData
   | API.Ticket
   | API.RelayerBalances
   | API.VerifiedDenoms
