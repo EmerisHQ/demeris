@@ -406,6 +406,8 @@ export const messages = {
         amount: 'Amount',
         balance: 'Balance',
         onchain: '{amount} on {chain}',
+        lastWeek: 'Last 7 Days',
+        lastDay: '24h',
         viewAll: 'View all',
       },
       pools: {
@@ -466,6 +468,7 @@ export const messages = {
             receipt: 'Partially completed ({offset}/{total})',
             failed: {
               sign: 'Transaction not signed',
+              unknown: "Couldn't fetch result",
               default: 'Transaction failed',
             },
           },
@@ -515,6 +518,7 @@ export const messages = {
         chains: 'Chains',
         pools: 'Pools',
         staking: 'Staking',
+        highLow: 'High {high} / Low {low}',
       },
       assets: {
         assets: 'Assets',

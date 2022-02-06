@@ -6,14 +6,30 @@
     </template>
 
     <template v-else-if="['review', 'move'].includes(step)">
-      <TransactionProcessCreator
-        v-if="steps.length"
-        :steps="steps"
-        action="move"
-        @pending="closeModal"
-        @close="closeModal"
-        @previous="$emit('previous')"
-      />
+      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+        <template #deactivated>
+          <TxStepsModal
+            v-if="steps.length"
+            :data="steps"
+            :gas-price-level="gasPrice"
+            :back-route="{ name: 'Portfolio' }"
+            action-name="move"
+            @transacting="goToStep('move')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+            @finish="resetHandler"
+          />
+        </template>
+
+        <TransactionProcessCreator
+          v-if="steps.length"
+          :steps="steps"
+          action="move"
+          @pending="closeModal"
+          @close="closeModal"
+          @previous="$emit('previous')"
+        />
+      </FeatureRunningConditional>
     </template>
   </div>
 </template>
@@ -24,6 +40,8 @@ import { computed, defineComponent, PropType, provide, reactive, ref, watch } fr
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { MoveAction, MoveAssetsForm } from '@/types/actions';
@@ -41,6 +59,8 @@ export default defineComponent({
   components: {
     MoveFormAmount,
     TransactionProcessCreator,
+    TxStepsModal,
+    FeatureRunningConditional,
   },
 
   props: {

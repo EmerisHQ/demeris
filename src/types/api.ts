@@ -1,8 +1,28 @@
 import * as Base from './base';
 
+export enum LoadingState {
+  INIT = 'INIT',
+  LOADING = 'LOADING',
+  ERROR = 'ERROR',
+  LOADED = 'LOADED',
+}
+
 // Params object for actions requiring a BECH32 decoded address as param
 export type AddrReq = {
   address: string;
+};
+export type TokenPriceReq = {
+  token_id: string;
+  days: string;
+  currency: string;
+};
+export type TokenIdReq = {
+  token: string;
+};
+export type TokenId = string;
+export type TokenPrices = {
+  x: string;
+  y: number;
 };
 export type ChainAddrReq = {
   chain_name: string;
