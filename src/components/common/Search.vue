@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <div class="relative flex cursor-text" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
+    <div class="suffix relative flex cursor-text" :style="isFocused ? '' : 'background-image: none'" @click="setFocus">
       <input
         ref="searchInput"
         :value="keyword"
@@ -27,6 +27,8 @@
         :type="inputType"
         :placeholder="placeholder"
         @input="$emit('update:keyword', $event.target.value)"
+        @focus="$emit('focus:value', $event.target.value)"
+        @blur="$emit('blur:value', $event.target.value)"
       />
       <Icon
         v-if="isSearchIconVisible"
@@ -58,7 +60,11 @@
           }
         "
       />
-      <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
+      <slot></slot>
+      <div
+        class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible"
+        :class="[borderColour ? borderColour : 'bg-gold-circular']"
+      />
     </div>
   </div>
 </template>
@@ -76,8 +82,9 @@ export default defineComponent({
     isSearchIconVisible: { type: Boolean, default: true },
     isCloseIconVisible: { type: Boolean, default: true },
     inputType: { type: String, default: 'text' },
+    borderColour: { type: String, default: null },
   },
-  emits: ['update:keyword'],
+  emits: ['update:keyword', 'blur:value', 'focus:value'],
   setup(props) {
     const searchInput = ref(null);
     const isFocused = ref(false);

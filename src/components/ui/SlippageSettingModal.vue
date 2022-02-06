@@ -14,21 +14,27 @@
       <div class="flex justify-between my-4 space-x-2">
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 0.1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 0.5 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(1)"
         >
           1%
@@ -39,64 +45,20 @@
           :input-type="'number'"
           :is-close-icon-visible="false"
           :is-search-icon-visible="false"
+          :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
           placeholder="Custom"
-          class="custom-slippage grow-0"
+          class="custom-slippage bg-fg rounded-xl outline-none text-text"
+          :class="[
+            isCustomSelected && !isCustomSlippageEditing
+              ? 'bg-surface theme-inverse dark:theme-inverse font-medium rounded-lg'
+              : '',
+          ]"
           @update:keyword="(e) => setCustomSlippage(e)"
-        />
-        <!-- <div :class="[
-          isCustomSlippageEditing ? 'custom-selected border-2 bg-gold-to-br rounded-lg dark:theme-inverse font-medium' : '',
-        ]"
+          @focus:value="(e) => onCustomSlippageFocussed(e)"
+          @blur:value="(e) => onCustomSlippageFocusOut(e)"
         >
-          <label
-            v-if="allowCustomSlippage"
-            class="
-            custom-slippage
-            h-12
-            pr-3
-            flex-shrink flex
-            items-baseline
-            justify-center
-            text-center
-            focus-within:text-right
-            bg-fg
-            rounded-xl
-            outline-none
-            text-text
-          "
-            :class="[
-              isCustomSelected && !isCustomSlippageEditing? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
-              Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
-            ]"
-            for=""
-          >
-            <input
-              ref="customSlippageInput"
-              :value="customSlippage"
-              type="number"
-              placeholder="Custom"
-              class="
-              custom-slippage__input
-              h-12
-              appearance-none
-              overflow-hidden
-              py-0
-              pr-0
-              pl-3
-              m-0
-              flex-grow
-              border-none
-              outline-none
-              bg-transparent
-            "
-              :class="[isCustomSelected ? 'w-12' : 'w-20']"
-              required
-              @input="setCustomSlippage"
-              @focus="onCustomSlippageFocussed"
-              @blur="onCustomSlippageFocusOut"
-            />
-            <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
-          </label>
-        </div> -->
+          <span v-if="!isCustomSlippageEditing" class="text-text">%</span>
+        </Search>
       </div>
     </div>
     <div v-if="alertStatus" class="px-6">
@@ -132,7 +94,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
@@ -177,14 +139,25 @@ export default defineComponent({
     const trueSlippage = computed(() => {
       return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
+    const allowCustomSlippage = computed(() => {
+      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
+    });
+
+    const inputBackgroundColour = computed(() => {
+      if (isCustomSelected.value && !isCustomSlippageEditing.value) {
+        return '';
+      }
+      return isCustomSelected.value || isCustomSlippageEditing.value ? 'var(--surface-image)' : 'var(--transparent)';
+    });
+
+    const inputWidth = computed(() => (customSlippage.value ? '4rem' : ''));
+
     const isCustomSelected = ref(false);
     const isCustomSlippageEditing = ref(false);
-
-    const customSlippage = ref(null);
-
-    // const customSlippage = computed(() => {
-    //     return !!isCustomSelected.value ? trueSlippage.value : null;
-    // });
+    const customSlippage = ref(trueSlippage.value);
+    const customSlippageInput = ref(null);
+    const limitPriceText = ref('');
+    const minReceivedText = ref(null);
 
     const state = reactive({
       slippage: computed(() => {
@@ -246,18 +219,12 @@ export default defineComponent({
     const onCustomSlippageFocussed = () => {
       isCustomSlippageEditing.value = true;
       isCustomSelected.value = true;
+      customSlippage.value = trueSlippage.value;
     };
 
     const onCustomSlippageFocusOut = () => {
       isCustomSlippageEditing.value = false;
     };
-    const customSlippageInput = ref(null);
-    const limitPriceText = ref('');
-    const minReceivedText = ref(null);
-
-    const allowCustomSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
-    });
 
     watch(
       () => allowCustomSlippage.value,
@@ -302,12 +269,6 @@ export default defineComponent({
       { immediate: true },
     );
 
-    onMounted(() => {
-      // if (state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
-      //   customSlippageInput.value.focus();
-      // }
-    });
-
     return {
       ...toRefs(state),
       allowCustomSlippage,
@@ -319,52 +280,47 @@ export default defineComponent({
       isCustomSelected,
       onCustomSlippageFocusOut,
       isCustomSlippageEditing,
+      trueSlippage,
+      inputBackgroundColour,
+      inputWidth,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-// ::v-deep(input){
-//   background:black;
-// }
-::v-deep(input::-webkit-inner-spin-button, input::-webkit-outer-spin-button) {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
+.custom-slippage {
+  max-width: 100px;
+
+  &::v-deep(.suffix) {
+    align-items: center;
+  }
+
+  ::v-deep(input) {
+    min-width: 0.66em;
+    font: inherit;
+    letter-spacing: inherit;
+    outline: none;
+    -moz-appearance: textfield;
+    padding-right: 0;
+    background: v-bind(inputBackgroundColour);
+    width: v-bind(inputWidth);
+
+    &:empty {
+      text-align: right;
+    }
+
+    &:focus,
+    &:valid {
+      text-align: right;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+  }
 }
-// .custom-slippage {
-
-//   &:hover &__input::placeholder {
-//     color: var(--muted);
-//   }
-
-//   ::v-deep(input) {
-//     min-width: 0.66em;
-//     font: inherit;
-//     letter-spacing: inherit;
-//     outline: none;
-//     -moz-appearance: textfield;
-
-//     &:empty {
-//       text-align: center;
-//     }
-
-//     &:focus,
-//     &:valid {
-//       text-align: right;
-//     }
-
-//     &::placeholder,
-//     &:focus::placeholder {
-//       color: var(--inactive);
-//     }
-//     &::-webkit-inner-spin-button,
-//     &::-webkit-outer-spin-button {
-//       -webkit-appearance: none;
-//       appearance: none;
-//       margin: 0;
-//     }
-//   }
-// }
 </style>
