@@ -155,7 +155,6 @@ export default defineComponent({
     const isCustomSelected = ref(false);
     const isCustomSlippageEditing = ref(false);
     const customSlippage = ref(trueSlippage.value);
-    const customSlippageInput = ref(null);
     const limitPriceText = ref('');
     const minReceivedText = ref(null);
 
@@ -272,7 +271,6 @@ export default defineComponent({
     return {
       ...toRefs(state),
       allowCustomSlippage,
-      customSlippageInput,
       customSlippage,
       limitPriceText,
       minReceivedText,
