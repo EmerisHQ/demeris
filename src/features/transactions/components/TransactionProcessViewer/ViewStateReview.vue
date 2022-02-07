@@ -49,6 +49,7 @@ import { useStore } from 'vuex';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
+import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
@@ -70,6 +71,8 @@ const previewComponentMap = {
   transfer: PreviewTransfer,
   move: PreviewTransfer,
   swap: PreviewSwap,
+  stake: PreviewStake,
+  multistake: PreviewStake,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
@@ -78,6 +81,8 @@ const previewComponentMap = {
 
 const titleMap = {
   transfer: t('context.transactions.review.transfer'),
+  stake: t('context.transactions.review.stake'),
+  multistake: t('context.transactions.review.stake'),
   move: t('context.transactions.review.move'),
   swap: t('context.transactions.review.swap'),
   addliquidity: t('context.transactions.review.addliquidity'),

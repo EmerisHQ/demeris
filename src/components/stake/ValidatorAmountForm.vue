@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full justify-center">
+  <div v-if="state.validatorAmounts.length > 0" class="flex w-full justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <main class="pb-28 flex-1 flex flex-col items-center justify-center">
         <div class="w-full max-w-lg mx-auto">
@@ -16,8 +16,8 @@
 
           <!-- Validator stake amount input -->
           <fieldset
-            v-for="(vali, index) in validators"
-            :key="vali.operator_address"
+            v-for="(vali, index) in state.validatorAmounts"
+            :key="vali.validator.operator_address"
             class="bg-surface shadow-card rounded-2xl mt-4 pt-2"
           >
             <ValidatorSelect
@@ -45,23 +45,20 @@
                 border-t border-border
                 rounded-b-2xl
               "
-              @click="toggleChainsModal(null, vali.operator_address)"
+              @click="toggleChainsModal(null, index)"
             >
               <div>
                 {{ $t('pages.addLiquidity.fromLbl') }}
-                <span class="font-medium text-text"><ChainName :name="toStake[vali.operator_address]?.on_chain" /></span>
+                <span class="font-medium text-text"><ChainName :name="vali.from?.on_chain" /></span>
               </div>
               <div class="flex">
                 <AmountDisplay
                   :amount="{
-                    amount: toStake[vali.operator_address]?.amount,
-                    denom: toStake[vali.operator_address]?.base_denom,
+                    amount: vali.from?.amount,
+                    denom: vali.from?.base_denom,
                   }"
                   :class="{
-                    'text-negative-text': compareInputToBalance(
-                      vali.inputAmount,
-                      toStake[vali.operator_address]?.amount,
-                    ),
+                    'text-negative-text': compareInputToBalance(vali.inputAmount, vali.from?.amount),
                   }"
                 />
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -95,7 +92,7 @@
             </div>
 
             <!-- IBC transfer alert -->
-            <Alert v-if="true" status="info" class="mb-6">
+            <Alert v-if="hasIBC" status="info" class="mb-6">
               {{ $t('pages.addLiquidity.hubWarning') }}
             </Alert>
 
@@ -109,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -128,8 +125,9 @@ import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { Step } from '@/types/actions';
+import { MultiDelegateAction, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
+import { actionHandler } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 export default {
   name: 'ValidatorAmountForm',
@@ -147,35 +145,79 @@ export default {
   },
   props: {
     validators: { type: Array, required: true, default: () => [] },
-    totalStakedAmount: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
   },
 
-  emits: ['previous'],
+  emits: ['previous', 'next'],
   setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const store = useStore();
-
     const { balances: userBalances, getNativeBalances } = useAccount();
     const toStake = ref({});
+    const actionSteps = ref<Step[]>([]);
+    const state = reactive({
+      isChainsModalOpen: false,
+      chainsModalSource: 0,
+      fees: {},
+      validatorAmounts: [],
+    });
+    const validators = toRefs(props).validators;
+    watch(
+      () => validators.value,
+      (newList, _oldList) => {
+        for (let i = 0; i < newList.length; i++) {
+          if (state.validatorAmounts[i]) {
+            if (state.validatorAmounts[i].validator.operator_address != newList[i].operator_address) {
+              state.validatorAmounts[i].validator = newList[i];
+            }
+          } else {
+            state.validatorAmounts.push({ validator: newList[i], inputAmount: null, from: null });
+          }
+        }
+        console.log(state.validatorAmounts);
+      },
+      { immediate: true },
+    );
     /* meta & GA */
     useMeta({ title: t('context.stake.title') });
 
     /* variables */
     const baseDenom = router.currentRoute.value.params.denom as string;
-    const actionSteps = ref<Step[]>([]);
-    const validatorStakingAmounts = ref(0);
-    const state = reactive({
-      isChainsModalOpen: false,
-      chainsModalSource: 'coinA',
-      fees: {},
-    });
 
+    const action = computed(() => {
+      return {
+        name: 'multistake',
+        params: state.validatorAmounts.map((x) => {
+          if (x.from) {
+            return {
+              validatorAddress: x.validator.operator_address,
+              amount: {
+                amount: {
+                  amount: (x.inputAmount * 10 ** precision.value).toString(),
+                  denom: parseCoins(x.from.amount)[0].denom,
+                },
+                chain_name: x.from.on_chain,
+              },
+            };
+          }
+        }),
+      } as MultiDelegateAction;
+    });
+    watch(
+      () => action.value,
+      async (action, _) => {
+        actionSteps.value = await actionHandler(action);
+      },
+    );
+    const hasIBC = computed(() => {
+      const steptxnames = actionSteps.value.map((x) => x.transactions.map((tx) => tx.name)).flat();
+      if (steptxnames.includes('ibc_backward') || steptxnames.includes('ibc_forward')) {
+        return true;
+      } else {
+        return false;
+      }
+    });
     /* computeds */
     const balances = computed(() => {
       const nativeBalances = getNativeBalances();
@@ -199,7 +241,8 @@ export default {
       return result;
     });
     const totalToStake = computed(
-      () => props.validators.reduce((total, val) => total + Number(val.inputAmount ?? 0), 0) * 10 ** precision.value,
+      () =>
+        state.validatorAmounts.reduce((total, val) => total + Number(val.inputAmount ?? 0), 0) * 10 ** precision.value,
     );
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -226,21 +269,19 @@ export default {
       emit('previous', null);
     };
     const goToReview = () => {
-      console.log('GO TO REVIEW');
+      emit('next', actionSteps.value);
     };
-    const toggleChainsModal = (asset: Balance, source: string) => {
+    const toggleChainsModal = (asset: Balance, index: number) => {
       if (asset) {
-        toStake.value[source] = asset;
+        state.validatorAmounts[index].from = asset;
       }
-      console.log(toStake.value);
-      state.chainsModalSource = source;
+      state.chainsModalSource = index;
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
 
     return {
-      validatorStakingAmounts,
-      actionSteps,
       state,
+      actionSteps,
       balances,
       precision,
       baseDenom,
@@ -251,6 +292,7 @@ export default {
       goToReview,
       compareInputToBalance,
       totalToStake,
+      hasIBC,
     };
   },
 };

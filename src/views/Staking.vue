@@ -40,17 +40,41 @@
             />
           </div>
         </template>
-        <template v-if="step == 'amount'">
-          <div class="max-w-3xl">
+        <template v-if="actionType == 'stake'">
+          <div v-show="step == 'amount'" class="max-w-3xl">
             <ValidatorAmountForm
-              :validators="selectedValidators"
+              :validators="selectedValidators.slice()"
               @previous="
                 (e) => {
                   selectAnother(e);
                 }
               "
+              @next="
+                (actionSteps) => {
+                  setSteps(actionSteps);
+                }
+              "
             />
           </div>
+        </template>
+        <template v-if="step == 'review'">
+          <TransactionProcessCreator
+            :steps="steps"
+            action="stake"
+            @pending="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @close="
+              () => {
+                closeModal();
+                resetHandler();
+              }
+            "
+            @previous="$emit('previous')"
+          />
         </template>
       </main>
     </div>
@@ -69,7 +93,9 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
+import { Step } from '@/types/actions';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -77,7 +103,7 @@ type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
 export default {
   name: 'Staking',
-  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TransactionProcessCreator },
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
@@ -134,6 +160,7 @@ export default {
     const isBackDisabled = computed(() => {
       return step.value === 'validator' || (actionType === 'claim' && step.value === 'amount');
     });
+    const steps = ref<Step[]>([]);
     const allSteps = {
       stake: ['validator', 'amount', 'review', 'delegate'],
       unstake: ['validator', 'amount', 'review', 'undelegate'],
@@ -175,7 +202,12 @@ export default {
       step.value = undefined;
       router.back();
     };
+    const setSteps = (actionSteps) => {
+      steps.value = actionSteps.slice();
 
+      step.value = allSteps[actionType][currentStepIndex.value + 1];
+      console.log(steps);
+    };
     const onClose = () => {
       transactionsStore.setTransactionAsPending();
       router.push('/');
@@ -196,6 +228,8 @@ export default {
       selectAnother,
       totalStakedAmount,
       disabledValidators,
+      setSteps,
+      steps,
     };
   },
 };

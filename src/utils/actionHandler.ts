@@ -956,11 +956,13 @@ export async function stake({ validatorAddress, amount }: { validatorAddress: st
   result.steps.push({
     name: 'stake',
     status: 'pending',
-    data: {
-      validatorAddress,
-      amount,
-      chain_name,
-    },
+    data: [
+      {
+        validatorAddress,
+        amount,
+        chain_name,
+      },
+    ],
   });
   return result;
 }
@@ -1287,11 +1289,11 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         params = (action as Actions.DelegateAction).params;
         const transferStakingCoinToNative = await move({
           amount: {
-            amount: params.amount.amount,
-            denom: params.amount.denom,
+            amount: params.amount.amount.amount,
+            denom: params.amount.amount.denom,
           },
           chain_name: params.amount.chain_name,
-          destination_chain_name: await getNativeChain(params.amount.denom, params.amount.chain_name),
+          destination_chain_name: await getNativeChain(params.amount.amount.denom, params.amount.chain_name),
         });
         if (transferStakingCoinToNative.steps.length) {
           steps.push({
@@ -1301,6 +1303,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
             transactions: [...transferStakingCoinToNative.steps],
           });
         }
+
         const stakingStep = await stake({
           validatorAddress: params.validatorAddress,
           amount: transferStakingCoinToNative.output.amount,
@@ -1311,6 +1314,43 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
           memo: '',
           transactions: [...stakingStep.steps],
         });
+        break;
+      case 'multistake':
+        const mdparams = (action as Actions.MultiDelegateAction).params;
+        let allsteps: Actions.Step[] = [];
+        for (let i = 0; i < mdparams.length; i++) {
+          const mdsteps = await actionHandler({ name: 'stake', memo: action.memo, params: mdparams[i] });
+
+          allsteps = [...allsteps, ...mdsteps];
+        }
+
+        const stakesteps: Actions.Step[] = [];
+        for (const step of allsteps) {
+          if (step.name == 'transfer') {
+            steps.push(step);
+          } else {
+            stakesteps.push(step);
+          }
+        }
+        steps.push({
+          name: 'stake',
+          description: 'Staking', //TODO
+          memo: '',
+          transactions: [
+            {
+              name: 'stake',
+              status: 'pending',
+              data: [
+                ...stakesteps
+                  .map((x) => x.transactions)
+                  .flat()
+                  .map((x) => x.data)
+                  .flat(),
+              ],
+            },
+          ],
+        });
+
         break;
     }
   } catch (e) {
@@ -1493,17 +1533,22 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'stake') {
-    const data = stepTx.data as Actions.DelegateData;
-    const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
-    const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
-      value: {
-        delegatorAddress,
-        validatorAddress: data.validatorAddress,
-        amount: data.amount,
-      },
-    });
+    const data = stepTx.data as Actions.DelegateData[];
+    const delegatorAddress = await getOwnAddress({ chain_name: data[0].chain_name });
+    const msgs = await Promise.all(
+      data.map(
+        async (x) =>
+          await libStore.dispatch('cosmos.staking.v1beta1/MsgDelegate', {
+            value: {
+              delegatorAddress,
+              validatorAddress: x.validatorAddress,
+              amount: x.amount,
+            },
+          }),
+      ),
+    );
     const registry = libStore.getters['cosmos.staking.v1beta1/getRegistry'];
-    return { msg: [msg], chain_name: data.chain_name, registry };
+    return { msg: msgs, chain_name: data[0].chain_name, registry };
   }
   if (stepTx.name == 'unstake') {
     const data = stepTx.data as Actions.UndelegateData;
@@ -1861,7 +1906,8 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'stake') {
-    const chain_name = (stepTx.data as Actions.DelegateData).chain_name;
+    console.log(stepTx);
+    const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
@@ -2224,8 +2270,19 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
           }
         }
       }
-      if (stepTx.name == 'claim' || stepTx.name == 'stake' || stepTx.name == 'unstake' || stepTx.name == 'switch') {
+      if (stepTx.name == 'claim' || stepTx.name == 'unstake' || stepTx.name == 'switch') {
         const chain_name = (stepTx.data as Actions.ClaimData).chain_name;
+        if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
+          allClear = false;
+          if (failedChains.includes(chain_name)) {
+            continue;
+          } else {
+            failedChains.push(chain_name);
+          }
+        }
+      }
+      if (stepTx.name == 'stake') {
+        const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
         if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -3037,22 +3094,31 @@ export async function validateStepsFeeBalances(
         }
       }
       if (stepTx.name == 'stake') {
-        const data = stepTx.data as Actions.DelegateData;
+        const data = stepTx.data as Actions.DelegateData[];
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
-          if (amount.denom == data.amount.denom && x.on_chain == data.chain_name) {
+          if (amount.denom == data[0].amount.denom && x.on_chain == data[0].chain_name) {
             return true;
           } else {
             return false;
           }
         });
         if (balance) {
-          const newAmount = parseInt(parseCoins(balance.amount)[0].amount) - parseInt(data.amount.amount);
+          const newAmount =
+            parseInt(parseCoins(balance.amount)[0].amount) -
+            data.reduce((acc, txdata) => {
+              return acc + parseInt(txdata.amount.amount);
+            }, 0);
           if (newAmount >= 0) {
             balance.amount = newAmount + parseCoins(balance.amount)[0].denom;
           } else {
-            throw new Error('Insufficient balance: ' + data.amount.denom);
+            throw new Error(
+              'Insufficient balance: ' +
+                data.reduce((acc, txdata) => {
+                  return acc + parseInt(txdata.amount.amount);
+                }, 0),
+            );
           }
         }
       }

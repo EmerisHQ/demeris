@@ -10,11 +10,11 @@
       <CircleSymbol :denom="baseDenom" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
       <div>
         <div class="flex items-center font-medium text-1">
-          {{ validator.moniker }}
+          {{ validator.validator.moniker }}
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
+          {{ validator.validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
         </div>
       </div>
     </div>
@@ -84,7 +84,7 @@ export default defineComponent({
     });
 
     const selectValidator = () => {
-      emit('select', props.validator);
+      emit('select', props.validator.validator);
     };
 
     return {

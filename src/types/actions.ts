@@ -15,6 +15,7 @@ export type BaseAction = {
     | 'memo-transfer'
     | 'claim'
     | 'stake'
+    | 'multistake'
     | 'unstake'
     | 'switch';
   memo?: string;
@@ -59,6 +60,9 @@ export type DelegateParams = {
   validatorAddress: string;
   amount: Base.ChainAmount;
 };
+
+export type MultiDelegateParams = Array<DelegateParams>;
+
 export type UndelegateParams = {
   validatorAddress: string;
   amount: Base.ChainAmount;
@@ -78,6 +82,7 @@ export type TransferAction = BaseAction & { params: TransferParams };
 export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
 export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
+export type MultiDelegateAction = BaseAction & { params: MultiDelegateParams };
 export type DelegateAction = BaseAction & { params: DelegateParams };
 export type UndelegateAction = BaseAction & { params: UndelegateParams };
 export type RedelegateAction = BaseAction & { params: RedelegateParams };
@@ -91,6 +96,7 @@ export type Any =
   | MoveAction
   | ClaimRewardsAction
   | DelegateAction
+  | MultiDelegateAction
   | UndelegateAction
   | RedelegateAction;
 export type StepTransactionDetails = {
@@ -185,7 +191,7 @@ export type StepTransaction = {
     | WithdrawLiquidityData
     | CreatePoolData
     | ClaimData
-    | DelegateData
+    | DelegateData[]
     | UndelegateData
     | RedelegateData;
 };
