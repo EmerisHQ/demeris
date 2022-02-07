@@ -1,6 +1,6 @@
 {
   "name": "emeris-web",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
