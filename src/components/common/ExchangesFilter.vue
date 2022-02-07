@@ -1,10 +1,10 @@
 <template>
   <span class="flex items-center">
-    <SearchBox
-      :model-value="searchValue"
+    <Search
+      :keyword="searchValue"
       placeholder="Search exchanges"
-      class="ml-6 mr-3"
-      @update:model-value="onInput"
+      class="search ml-6 mr-3 flex-grow"
+      @update:keyword="onInput"
     />
     <span class="mr-6">{{ selectedExchangesLength }}/{{ exchanges?.length }}</span>
   </span>
@@ -22,20 +22,20 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
 
+import Search from '@/components/common/Search.vue';
 import ListItemCheckbox from '@/components/ui/List/ListItemCheckbox.vue';
-import SearchBox from '@/components/ui/SearchBox.vue';
 
-type exchange = { name: string; symbolUrl: string; isSelected: boolean };
+type Exchange = { name: string; symbolUrl: string; isSelected: boolean };
 
 export default defineComponent({
   name: 'ExchangesFilter',
   components: {
     ListItemCheckbox,
-    SearchBox,
+    Search,
   },
   props: {
     exchanges: {
-      type: Array as PropType<Array<exchange>>,
+      type: Array as PropType<Array<Exchange>>,
       required: true,
     },
   },
@@ -75,4 +75,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.search ::v-deep(input) {
+  height: 2.5rem;
+}
+</style>
