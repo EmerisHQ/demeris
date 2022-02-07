@@ -20,26 +20,39 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
       - name: apt update
         run: sudo apt update
 
       - name: install dependencies
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install
+        run: npm install
 
       - name: install image-snapshot plugin
         run: npm -f install --save-dev cypress-image-snapshot
-
+      
+      - name: Build
+        run: npm run build
+      
       - name: run serve
         run: npm run serve &
         env:
