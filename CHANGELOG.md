@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed some copy in the transaction widget
 - Fixes Ts error
 - Fixes flickering in circlesymbol
+- Fixes Asset line chart component not displaying when switching between assets
 
 ## 0.1.7 - 2022-01-17
 
