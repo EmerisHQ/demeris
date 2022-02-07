@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.9 - 2022-02-07
+
+### Features
+
+- Adjust netlify builds
+
+### Fixes
+
+- Fixes Asset line chart component not displaying when switching between assets
+
 ## 0.1.8 - 2022-02-03
 
 ### Features
