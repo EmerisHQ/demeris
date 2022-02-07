@@ -5,14 +5,11 @@
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "test:unit": "jest",
     "lint": "vue-cli-service lint",
+    "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
-    "build:staging": "vue-cli-service build --mode staging",
-    "prepare": "simple-git-hooks",
-    "serve:production": "NODE_ENV=development vue-cli-service serve --mode production",
-    "serve:staging": "NODE_ENV=development vue-cli-service serve --mode staging"
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.14.5",
