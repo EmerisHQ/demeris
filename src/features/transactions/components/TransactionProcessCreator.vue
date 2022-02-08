@@ -2,9 +2,12 @@
   <div class="w-full">
     <GobackWithClose
       v-if="action === 'swap'"
-      :class="{ invisible: !['review', 'waitingPreviousTransaction', 'ibcConfirmation'].some(state.matches) }"
+      :class="{
+        invisible: !['review', 'ibcConfirmation'].some(state.matches),
+        'text-inverse': state.matches('ibcConfirmation'),
+      }"
       :show-close="!state.matches('ibcConfirmation')"
-      class="relative z-10 text-inverse"
+      class="relative z-10"
       @goback="
         () => {
           transactionsStore.removeTransaction(stepId);

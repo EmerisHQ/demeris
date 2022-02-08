@@ -69,7 +69,7 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
 
-const { actor } = inject(ProvideViewerKey);
+const { actor, stepId } = inject(ProvideViewerKey);
 const { state, send } = actor;
 
 const emits = defineEmits(['close']);
@@ -102,7 +102,7 @@ const goMoon = () => {
 };
 
 const cancel = () => {
-  transactionsStore.removeTransaction(transactionsStore.currentId);
+  transactionsStore.removeTransaction(stepId);
   emits('close');
 };
 const proceed = () => send('PROCEED_FEE');
