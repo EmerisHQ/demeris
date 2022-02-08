@@ -9,7 +9,7 @@
             title="Select chain"
             :show-subtitle="false"
             :assets="balances"
-            :selected-denom="'uatom'"
+            :selected-denom="baseDenom"
             :func="() => toggleChainsModal()"
             @select="toggleChainsModal($event, state.chainsModalSource)"
           />

@@ -15,6 +15,7 @@
     />
     <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" @previous="onPrevious" />
     <ConnectWalletModal
+      v-if="transactionsStore"
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
     />

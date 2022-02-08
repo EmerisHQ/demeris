@@ -57,10 +57,16 @@
             />
           </div>
         </template>
+        <template v-if="actionType == 'unstake' && step == 'amount'">
+          <div class="max-w-3xl">
+            <StakedValidatorAmount v-model="unstakeAmount" :validator="selectedValidators.slice()[0]" />
+          </div>
+        </template>
         <template v-if="step == 'review'">
           <TransactionProcessCreator
+            v-if="steps.length > 0"
             :steps="steps"
-            action="stake"
+            :action="actionType"
             @pending="
               () => {
                 closeModal();
@@ -87,6 +93,7 @@ import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
+import StakedValidatorAmount from '@/components/stake/StakedValidatorAmount.vue';
 import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
@@ -95,7 +102,9 @@ import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
+import { ClaimRewardsAction } from '@/types/actions';
 import { Step } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -103,7 +112,7 @@ type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
 export default {
   name: 'Staking',
-  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TransactionProcessCreator },
+  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TransactionProcessCreator, StakedValidatorAmount },
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
@@ -111,17 +120,24 @@ export default {
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const editing = ref(null);
-    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getChainNameByBaseDenom, getValidatorMoniker } =
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getValidatorMoniker, getChainNameByBaseDenom } =
       useStaking();
     const { balances, stakingBalances } = useAccount();
     const actionType = route.params.action as ActionType;
     const validator = route.params.validator;
     const baseDenom = route.params.denom as string;
-    const validatorList = ref<Array<unknown>>([]);
+    const validatorList = ref([]);
     const totalStakedAmount = ref<number>(0);
+    const unstakeAmount = ref<string>('');
     const selectedValidators = ref([]);
+    const step = actionType == 'claim' ? ref('review') : validator ? ref('amount') : ref('validator');
+
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
+      const preselectedValidator = validatorList.value.find((x) => x.operator_address == validator);
+      if (preselectedValidator) {
+        selectedValidators.value.push(preselectedValidator);
+      }
       if (stakingBalances.value.length) {
         validatorList.value.forEach((vali: any) => {
           const stakedValidator = stakingBalances.value.find(
@@ -140,8 +156,22 @@ export default {
           vali.stakedAmount = 0;
         });
       }
+      if (actionType == 'claim') {
+        const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
+        const chainName = await getChainNameByBaseDenom(baseDenom);
+        const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
+          reward.moniker = getValidatorMoniker(reward.validator_address, validatorList.value);
+          return reward;
+        });
+        const action = {
+          name: 'claim',
+          params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chain_name: chainName },
+        } as ClaimRewardsAction;
+
+        steps.value = await actionHandler(action);
+        console.log(steps);
+      }
     });
-    const step = validator || actionType === 'claim' ? ref('amount') : ref('validator');
     pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const selectAnother = (e) => {
       step.value = allSteps[actionType][currentStepIndex.value - 1];
@@ -158,16 +188,23 @@ export default {
       return !!actionType;
     });
     const isBackDisabled = computed(() => {
-      return step.value === 'validator' || (actionType === 'claim' && step.value === 'amount');
+      return step.value === 'validator' || (actionType === 'claim' && step.value === 'review');
     });
     const steps = ref<Step[]>([]);
     const allSteps = {
       stake: ['validator', 'amount', 'review', 'delegate'],
       unstake: ['validator', 'amount', 'review', 'undelegate'],
       switch: ['validator', 'amount', 'review', 'redelegate'],
-      claim: ['amount', 'review', 'claim'],
+      claim: ['review', 'claim'],
     };
 
+    const resetHandler = () => {
+      if (actionType == 'claim') {
+        step.value = 'review';
+      } else {
+        step.value = 'validator';
+      }
+    };
     const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
     const addValidator = (val) => {
       if (editing.value !== null) {
@@ -209,7 +246,7 @@ export default {
       console.log(steps);
     };
     const onClose = () => {
-      transactionsStore.setTransactionAsPending();
+      transactionsStore.removeTransaction(transactionsStore.currentId);
       router.push('/');
     };
 
@@ -228,8 +265,10 @@ export default {
       selectAnother,
       totalStakedAmount,
       disabledValidators,
+      resetHandler,
       setSteps,
       steps,
+      unstakeAmount,
     };
   },
 };

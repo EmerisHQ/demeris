@@ -1,5 +1,5 @@
 <template>
-  <List class="border px-8 rounded-lg">
+  <List>
     <!-- Total rewards -->
     <ListItem :label="$t(`components.previews.claim.totalRewards`)">
       <div class="flex justify-end items-center">

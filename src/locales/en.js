@@ -358,6 +358,13 @@ export const messages = {
           transactionFee: 'Transaction fee',
           rewards: 'rewards',
         },
+        stake: {
+          stakeLbl: 'Stake',
+          validatorsLbl: 'Validators',
+          stakedLbl: 'Stake',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'Base fee paid to the network',
+        },
       },
       settingsMenu: {
         theme: 'Theme',
@@ -459,7 +466,7 @@ export const messages = {
           withdrawliquidity: 'Review your liquidity withdrawal',
           createpool: 'Review your liquidity pool provision',
           claim: 'Review your rewards claim details',
-          stake: 'Review your delegation details',
+          stake: 'Review your stake',
           unstake: 'Review your undelegation details',
           switch: 'Review your redelegation details',
         },

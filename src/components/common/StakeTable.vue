@@ -183,7 +183,7 @@ import useDenoms from '@/composables/useDenoms';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
-import { keyHashfromAddress } from '@/utils/basic';
+import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
   components: {
@@ -211,7 +211,6 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const { stakingBalancesByChain } = useAccount();
     const store = useStore();
-
     /* variables */
     const selectedTab = ref<number>(1);
     const assetStakingAPY = ref<number | string>('-');
@@ -238,6 +237,12 @@ export default defineComponent({
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(getChainNameByBaseDenom(props.denom));
+    });
+
+    const operator_prefix = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
+        chain_name: getChainNameByBaseDenom(props.denom),
+      }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
       // console.log(stakingBalances.value)
@@ -294,16 +299,17 @@ export default defineComponent({
       });
       return moniker;
     };
-    const goStakeActionPage = (action: string, validatorAddress = '') => {
+    const goStakeActionPage = (action: string, valAddress = '') => {
+      const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
       if (action === StakingActions.STAKE) {
         router.push(`/staking/${props.denom}/${StakingActions.STAKE}${validatorAddress ? `/${validatorAddress}` : ''}`);
       } else if (action === StakingActions.UNSTAKE) {
         router.push(
-          `/staking/${props.denom}?action=${StakingActions.UNSTAKE}${validatorAddress ? `/${validatorAddress}` : ''}`,
+          `/staking/${props.denom}/${StakingActions.UNSTAKE}${validatorAddress ? `/${validatorAddress}` : ''}`,
         );
       } else if (action === StakingActions.SWITCH) {
         router.push(
-          `/staking/${props.denom}?action=${StakingActions.SWITCH}${validatorAddress ? `/${validatorAddress}` : ''}`,
+          `/staking/${props.denom}/${StakingActions.SWITCH}${validatorAddress ? `/${validatorAddress}` : ''}`,
         );
       } else {
         router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
