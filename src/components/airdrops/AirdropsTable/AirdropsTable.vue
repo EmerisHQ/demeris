@@ -169,7 +169,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['row-click'],
+  emits: ['row-click', 'active-filter'],
   setup(props, { emit }) {
     const keyword = ref<string>('');
     const activeFilterItem = ref('all');
@@ -181,6 +181,7 @@ export default defineComponent({
 
     const setActiveFilter = (item: any) => {
       activeFilterItem.value = item.value;
+      emit('active-filter', activeFilterItem.value);
     };
 
     const toggleMoreFilters = (item: any) => {

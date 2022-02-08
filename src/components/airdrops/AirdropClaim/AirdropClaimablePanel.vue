@@ -4,17 +4,16 @@
       <!-- Claim Header -->
       <div>
         <img
-          v-if="theme === 'light'"
           src="~@/assets/images/airdrop-claimable-header-light.png"
           alt="Airdrop Claimable Header"
           class="rounded-t-2xl"
         />
-        <img
-          v-else
+        <!-- <img
+          v-if="activeFilter === 'all'"
           src="~@/assets/images/airdrop-claimable-header-dark.png"
           alt="Airdrop Claimable Header"
           class="rounded-t-2xl"
-        />
+        /> -->
       </div>
 
       <!-- Has Airdrop amount -->
@@ -25,7 +24,7 @@
 
       <!-- Claim button -->
       <div class="px-6">
-        <Button name="Claim" />
+        <Button name="Show eligible Airdrop" />
       </div>
     </div>
   </div>
@@ -43,6 +42,12 @@ export default defineComponent({
   components: {
     Button,
   },
+  props: {
+    activeFilter: {
+      type: String,
+      default: 'all',
+    },
+  },
 
   setup() {
     const theme = useTheme();
@@ -52,9 +57,19 @@ export default defineComponent({
       return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
     });
 
+    const buttonText = computed(() => {
+      return '';
+    });
+
+    const titleText = computed(() => {
+      return '';
+    });
+
     return {
       theme,
       selectedAirdrop,
+      buttonText,
+      titleText,
     };
   },
 });

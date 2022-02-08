@@ -6,12 +6,18 @@
           <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">Airdrops</div>
         </header>
         <section class="mt-12">
-          <AirdropsTable :airdrops="airdrops" :show-headers="false" :limit-rows="10" @row-click="openAirdropPage" />
+          <AirdropsTable
+            :airdrops="airdrops"
+            :show-headers="false"
+            :limit-rows="10"
+            @row-click="openAirdropPage"
+            @active-filter="setActiveFilter"
+          />
         </section>
       </div>
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <AirdropClaimablePanel class="mb-6" />
+        <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
         <!-- Quick Info -->
         <div class="mb-8 flex items-start text-muted border border-border rounded-xl p-4">
           <WarningCircleIcon class="mr-2" />
@@ -26,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -62,6 +68,12 @@ export default {
       })),
     );
 
+    const activeFilter = ref('');
+
+    const setActiveFilter = (value: string) => {
+      activeFilter.value = value;
+    };
+
     const router = useRouter();
     const airdrops = airdropsData.sampleAirdrops;
 
@@ -81,7 +93,7 @@ export default {
       });
     };
 
-    return { airdrops, openAirdropPage };
+    return { airdrops, openAirdropPage, activeFilter, setActiveFilter };
   },
 };
 </script>

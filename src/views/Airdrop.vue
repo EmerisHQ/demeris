@@ -72,7 +72,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
-import AirdropsCurrentBalance from '@/components/airdrops/AirdropsInfo/AirdropsCurrentBalance.vue';
+import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
 import GoBack from '@/components/common/headers/GoBack.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
