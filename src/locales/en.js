@@ -24,6 +24,7 @@ export const messages = {
       confirm: 'Confirm',
       continue: 'Continue',
       noFunds: 'Insufficient funds',
+      insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try adjusting your search',
       max: 'Max',
@@ -500,6 +501,7 @@ export const messages = {
         available: 'available',
         pool: 'pool',
         firstProvider: 'You are the first liquidity provider',
+        insufficientAmountHint: 'The amount you are trying to supply is too low. Please try a greater amount',
         firstProviderWarning:
           'As the first liquidity provider to the {tickerA} · {tickerB} pool, you will be creating the pool and setting the price. Proceed with caution.',
         supplyLbl: 'Supply',
