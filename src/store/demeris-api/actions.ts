@@ -210,6 +210,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           const tracesLoaded = [];
           for (const balance of response.data.balances as API.Balances) {
             if (
+              // balance.ibc holds resolved ibc denoms so we can show the name of the coin. this functions as a cache. so if it was loaded in the past we don't need to load it again.
               Object.keys(balance.ibc).length != 0 &&
               !getters['getVerifyTrace']({
                 chain_name: balance.on_chain,
