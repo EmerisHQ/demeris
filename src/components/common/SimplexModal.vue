@@ -58,18 +58,20 @@ export default {
       try {
         if (!document.getElementById('simplex-iframe-script')) {
           (window as any).simplexAsyncFunction = function () {
-            (window as any)?.Simplex?.init({ public_key: 'pk_test_37a1ad27-8916-47a3-971a-b399b869b257' });
+            (window as any)?.Simplex?.init({ public_key: 'pk_live_450069ac-11e8-46bc-b1a9-73b7e812d113' });
           };
           let simplexCDNScript = document.createElement('script');
-          simplexCDNScript.setAttribute('src', 'https://cdn.test-simplexcc.com/sdk/v1/js/sdk.js');
+          simplexCDNScript.setAttribute('src', 'https://cdn.simplex.com/sdk/v1/js/sdk.js');
           simplexCDNScript.id = 'simplex-cdn-script';
           simplexCDNScript.async = true;
           document.head?.appendChild(simplexCDNScript);
+
           let simplexIframeScript = document.createElement('script');
-          simplexIframeScript.setAttribute('src', 'https://iframe.sandbox.test-simplexcc.com/form-sdk.js');
+          simplexIframeScript.setAttribute('src', 'https://iframe.simplex-affiliates.com/form-sdk.js');
           simplexIframeScript.type = 'text/javascript';
           simplexIframeScript.id = 'simplex-iframe-script';
           document.body?.appendChild(simplexIframeScript);
+
           simplexIframeScript.onload = () => {
             (window as any)?.simplex?.createForm();
             setTimeout(
@@ -80,6 +82,12 @@ export default {
               1500,
             );
           };
+
+          let simplexTrackingScript = document.createElement('script');
+          simplexTrackingScript.setAttribute('src', 'https://checkout.simplexcc.com/splx.js');
+          simplexTrackingScript.id = 'simplex-tracking-script';
+          document.body?.appendChild(simplexTrackingScript);
+
           let styleTag = document.createElement('style');
           styleTag.id = 'simplex-css';
           let cssStyles = document.createTextNode(`
