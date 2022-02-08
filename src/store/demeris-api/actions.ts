@@ -793,7 +793,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
 
     try {
-      await sleep(800);
+      await sleep(800); // Apparently it takes some time for end block events to be available on the rpc endpoint after the tx is delivered and our tx ticket updates so this is why this was added originally.
       const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
       const successData = {};
 
