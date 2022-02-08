@@ -151,7 +151,7 @@
 <script lang="ts">
 import groupBy from 'lodash.groupby';
 import orderBy from 'lodash.orderby';
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import AssetChains from '@/components/assets/AssetChainsIndicator/AssetChains.vue';
@@ -318,7 +318,17 @@ export default defineComponent({
       return balances;
     });
 
-    const balancesWithName = computed(() => {
+    const balancesWithName: ComputedRef<
+      {
+        denom: string;
+        totalAmount: number;
+        chainsNames: string[];
+        marketCap?: number;
+        value?: {
+          value: string;
+        };
+      }[]
+    > = computed(() => {
       let balances = balancesWithValue.value;
       balances.map(async (b) => {
         let name = await getDisplayName(b.denom, store.getters[GlobalDemerisGetterTypes.API.getDexChain]);

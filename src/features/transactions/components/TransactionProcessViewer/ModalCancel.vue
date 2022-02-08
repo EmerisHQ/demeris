@@ -36,6 +36,7 @@ const onKeep = () => {
 
 const onCancel = () => {
   transactionsStore.toggleCancelModal();
+  transactionsStore.closePendingModal();
   removeTransactionAndClose();
   send('ABORT');
 };

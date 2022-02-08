@@ -63,7 +63,7 @@ export type TransactionProcessEvents =
   | { type: 'ABORT' }
   | { type: 'RETRY' }
   | { type: 'CONTINUE' }
-  | { type: 'VERIFY' };
+  | { type: 'VERIFY_QUEUE' };
 
 export const transactionProcessMachine = createMachine<TransactionProcessContext, TransactionProcessEvents>(
   {
@@ -179,13 +179,14 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       waitingPreviousTransaction: {
         id: 'waitingPreviousTransaction',
         on: {
-          VERIFY: '#validating.previousTransaction',
+          VERIFY_QUEUE: '#validating.previousTransaction',
           ABORT: '#aborted',
         },
       },
       review: {
         id: 'review',
         on: {
+          VERIFY_QUEUE: '#validating.previousTransaction',
           SIGN: { target: 'signing' },
         },
       },
@@ -286,6 +287,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             target: 'signing',
             actions: 'goNextTransaction',
           },
+          VERIFY_QUEUE: '#validating.previousTransaction',
         },
       },
       aborted: {
