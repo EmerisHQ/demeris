@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center py-8">
     <Button v-if="showBackButton" variant="link" @click="handleGoBackClick">
-      <Icon :name="'ArrowLeftIcon'" icon-size="1" />
+      <Icon :name="'ArrowLeftIcon'" :icon-size="1" />
     </Button>
     <div class="ml-4">{{ title }}</div>
   </div>

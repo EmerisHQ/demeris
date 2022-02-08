@@ -1,30 +1,24 @@
 <template>
-  <AppLayout>
-    <div class="md:flex justify-between">
+  <AppLayout :no-margin="true">
+    <header class="-mt-32 w-full bg-fg">
+      <div class="pt-24 pb-12 px-5 md:px-8 max-w-7xl mx-auto">
+        <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
+        <!-- Airdrop Title -->
+        <div class="mt-8">
+          <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
+          <div class="items-center">
+            <span class="text-muted">{{ selectedAirdrop.tokenTicker }} <span>{{ selectedAirdrop.chainName }} Chain</span></span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="md:flex justify-between px-5 md:px-8 max-w-7xl mx-auto">
       <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
-        <header class="w-full max-w-7xl mx-auto">
-          <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
-        </header>
-
-        <section>
-          <!-- Airdrop Banner -->
-          <div>
-            <img src="~@/assets/images/airdrop-banner.png" alt="Airdrop Banner" />
-          </div>
-
-          <!-- Airdrop Title -->
-          <div class="mt-8">
-            <div class="text-2 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
-            <div class="items-center">
-              <span class="text-muted">{{ selectedAirdrop.tokenTicker }}</span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
-            </div>
-          </div>
-
-          <Divider extra-classes="my-12" />
-
+        <section class="mt-8">
           <!-- About the Project -->
           <div class="w-3/4">
-            <div class="text-1 font-medium mt-1 mb-6">About the project</div>
+            <div class="text-1 font-medium mt-1 mb-6">About {{ selectedAirdrop.project }}</div>
 
             <!-- Description -->
             <div>
@@ -62,9 +56,9 @@
         </section>
       </div>
 
-      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
+      <aside class="-mt-32 flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
         <AirdropClaim />
-        <AirdropsInfo class="mt-8" />
+        <AirdropsCurrentBalance class="mt-8" />
       </aside>
     </div>
   </AppLayout>
@@ -78,7 +72,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
-import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
+import AirdropsCurrentBalance from '@/components/airdrops/AirdropsInfo/AirdropsCurrentBalance.vue';
 import GoBack from '@/components/common/headers/GoBack.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
@@ -95,7 +89,7 @@ export default defineComponent({
     AppLayout,
     AirdropClaim,
     GoBack,
-    AirdropsInfo,
+    AirdropsCurrentBalance,
     Divider,
     LinkIcon,
     WarningCircleIcon,

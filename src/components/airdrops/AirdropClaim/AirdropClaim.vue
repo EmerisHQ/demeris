@@ -3,28 +3,12 @@
     <div class="claim-widget bg-surface dark:bg-fg rounded-2xl py-8 shadow-panel">
       <!-- Claim Header -->
       <!-- Has Airdrop amount -->
-      <div class="text-center">
+      <div class="text-center mb-6">
         <div class="w-1/4 mx-auto mb-6">
           <img :src="selectedAirdrop.tokenIcon" alt="Airdrop Logo" />
         </div>
         <p class="-text-1 text-muted mb-2">Your Airdrop amount</p>
-        <p class="text-2 font-medium">126.54 LIKE</p>
-      </div>
-
-      <div class="px-6">
-        <Divider extra-classes="mt-8 mb-4" />
-      </div>
-
-      <!-- Balance -->
-      <div class="px-6">
-        <div class="flex justify-between font-medium">
-          <p>Balance</p>
-          <p class="color-blue">126.54 LIKE</p>
-        </div>
-      </div>
-
-      <div class="px-6">
-        <Divider extra-classes="my-4" />
+        <p class="text-2 font-bold">126.54 LIKE</p>
       </div>
 
       <!-- Claim Details -->
@@ -40,6 +24,10 @@
         <div v-if="selectedAirdrop.endDate" class="flex justify-between -text-1 text-muted mb-4">
           <p>Ends</p>
           <p>{{ selectedAirdrop.endDate }}</p>
+        </div>
+        <div class="flex justify-between -text-1 text-muted mb-4">
+          <p>Distribution</p>
+          <p>Auto-drop</p>
         </div>
       </div>
 
@@ -87,19 +75,17 @@
   </div>
 </template>
 <script lang="ts">
-import { computed,defineComponent, ref, toRaw } from 'vue';
+import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimModal.vue';
 import Button from '@/components/ui/Button.vue';
-import Divider from '@/components/ui/Divider.vue';
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 
 export default defineComponent({
-  name: 'Swap',
+  name: 'AirdropClaim',
   components: {
     Button,
-    Divider,
     AirdropClaimModal,
   },
 

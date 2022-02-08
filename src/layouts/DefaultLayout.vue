@@ -1,6 +1,9 @@
 <template>
   <Header />
-  <div class="layout-frame pt-4 sm:pt-6 md:pt-12 px-5 md:px-8 pb-20 md:pb-32 max-w-7xl mx-auto">
+  <div
+    class="layout-frame pt-4 sm:pt-6 md:pt-12 pb-20 md:pb-32"
+    :class="noMargin ? '' : 'px-5 md:px-8 max-w-7xl mx-auto'"
+  >
     <slot />
   </div>
 </template>
@@ -14,6 +17,12 @@ export default defineComponent({
   name: 'DefaultLayout',
   components: {
     Header,
+  },
+  props: {
+    noMargin: {
+      type: Boolean,
+      default: false,
+    },
   },
 });
 </script>
