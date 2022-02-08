@@ -24,11 +24,12 @@
 </template>
 
 <script lang="ts">
-import { computed, ref, watch } from '@vue/runtime-core';
+import { computed, onMounted, ref, watch } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 
 import Modal from '@/components/ui/Modal.vue';
 import useEmitter from '@/composables/useEmitter';
+import { event } from '@/utils/analytics';
 export default {
   name: 'SimplexModal',
   components: { Modal },
@@ -42,6 +43,17 @@ export default {
     };
     const setTransactionStatus = (status) => {
       transactionStatus.value = status;
+      if (status === 'failure') {
+        event('simplex_transaction', {
+          event_label: 'Transaction with Simplex failure',
+          event_category: 'Fiat Onramp',
+        });
+      } else if (status === 'success') {
+        event('simplex_transaction', {
+          event_label: 'Transaction with Simplex success',
+          event_category: 'Fiat Onramp',
+        });
+      }
     };
     emitter.on('simplex', () => {
       toggleSimplexModal();
@@ -121,6 +133,13 @@ export default {
         goSimplex();
       }
     });
+
+    onMounted(() =>
+      event('simplex_transaction', {
+        event_label: 'Transaction with Simplex initiated',
+        event_category: 'Fiat Onramp',
+      }),
+    );
 
     return { isModalOpen, toggleSimplexModal, transactionStatus, transactionCompletedText };
   },
