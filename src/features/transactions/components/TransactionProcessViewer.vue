@@ -12,11 +12,7 @@
     <ViewStateSigning v-else-if="state.matches('signing')" />
     <ViewStateTransacting v-else-if="state.matches('transacting')" />
     <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
-
-    <template v-else-if="state.matches('waitingPreviousTransaction')">
-      <ModalPendingTransaction />
-      <ViewStateReview />
-    </template>
+    <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
 
     <template v-else-if="state.matches('failed.chainStatus')">
       <ModalChainDown />
@@ -37,6 +33,7 @@
   </div>
 
   <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
+  <ModalPendingTransaction v-if="transactionsStore.isPendingModalOpen" />
 </template>
 
 <script lang="ts" setup>
@@ -58,6 +55,7 @@ import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
 import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
 import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransacting.vue';
+import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
 
 const props = defineProps({
   stepId: {
@@ -70,13 +68,21 @@ const emits = defineEmits(['close', 'minimize', 'previous']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
-const isSwapComponent = computed(() => isSwapAction(state.value.context) && !transactionsStore.isViewerModalOpen);
+const isSwapComponent = computed(
+  () =>
+    isSwapAction(state.value.context) && !transactionsStore.isViewerModalOpen && !transactionsStore.isPendingModalOpen,
+);
 
 const actor = useActor(transactionService);
 const { state, send } = actor;
 
 const minimizeModal = () => {
   transactionsStore.setTransactionAsPending();
+
+  if (transactionsStore.isPendingModalOpen) {
+    transactionsStore.closePendingModal();
+  }
+
   if (transactionsStore.isViewerModalOpen) {
     closeModal();
   }

@@ -743,6 +743,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.ERROR });
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
+    return getters['getTokenPrices'];
   },
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });

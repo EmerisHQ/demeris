@@ -407,7 +407,7 @@ export default defineComponent({
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
         if (displayName.value) {
-          getTokenPrices.value('1');
+          getTokenPrices.value('max');
         }
       });
 
