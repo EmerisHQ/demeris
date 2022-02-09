@@ -1258,7 +1258,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
               status: 'pending',
               data: {
                 validatorAddress: params.validatorAddress,
-                amount: { amount: params.amount.amount, denom: params.amount.denom },
+                amount: { amount: params.amount.amount.amount, denom: params.amount.amount.denom },
                 chain_name: params.amount.chain_name,
               },
             },

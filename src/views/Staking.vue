@@ -59,7 +59,15 @@
         </template>
         <template v-if="actionType == 'unstake' && step == 'amount'">
           <div class="max-w-3xl">
-            <StakedValidatorAmount v-model="unstakeAmount" :validator="selectedValidators.slice()[0]" />
+            <StakedValidatorAmount
+              v-model="unstakeAmount"
+              :validator="selectedValidators.slice()[0]"
+              @next="
+                (actionSteps) => {
+                  setSteps(actionSteps);
+                }
+              "
+            />
           </div>
         </template>
         <template v-if="step == 'review'">

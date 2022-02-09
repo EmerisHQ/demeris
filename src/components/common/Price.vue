@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CurrencyDisplay :value="displayPrice" show-dash />
+    <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
   </div>
 </template>
 <script lang="ts">
@@ -25,6 +25,10 @@ export default defineComponent({
     showZero: {
       type: Boolean,
       default: false,
+    },
+    showDash: {
+      type: Boolean,
+      default: true,
     },
     autoUpdate: {
       type: Boolean,

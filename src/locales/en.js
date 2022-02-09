@@ -366,6 +366,16 @@ export const messages = {
           feeLbl: 'Transaction fee',
           feeLblHint: 'Base fee paid to the network',
         },
+        unstake: {
+          unstakeLbl: 'Unstake',
+          claimLbl: 'Claim rewards',
+          fromLbl: 'From',
+          periodLbl: 'Unstaking period',
+          periodVal: '{days} days',
+          availLbl: 'Staked assets available',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'Base fee paid to the network',
+        },
       },
       settingsMenu: {
         theme: 'Theme',

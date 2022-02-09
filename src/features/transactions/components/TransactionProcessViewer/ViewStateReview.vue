@@ -52,6 +52,7 @@ import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 
@@ -73,6 +74,7 @@ const previewComponentMap = {
   swap: PreviewSwap,
   stake: PreviewStake,
   multistake: PreviewStake,
+  unstake: PreviewUnstake,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
@@ -82,6 +84,7 @@ const previewComponentMap = {
 const titleMap = {
   transfer: t('context.transactions.review.transfer'),
   stake: t('context.transactions.review.stake'),
+  unstake: t('context.transactions.review.unstake'),
   multistake: t('context.transactions.review.stake'),
   move: t('context.transactions.review.move'),
   swap: t('context.transactions.review.swap'),

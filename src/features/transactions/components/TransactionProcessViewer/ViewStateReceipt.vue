@@ -217,6 +217,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
@@ -250,6 +251,8 @@ const previewComponentMap = {
   transfer: PreviewTransfer,
   swap: PreviewSwap,
   stake: PreviewStake,
+  multistake: PreviewStake,
+  unstake: PreviewUnstake,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
