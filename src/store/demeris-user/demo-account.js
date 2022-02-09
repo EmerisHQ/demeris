@@ -66,6 +66,7 @@ export const demoAccount = {
     '863ea62ff1f8c10bec4f377219dedf0e90ac4767',
     'ffa2a069d1531f0301fc685ad3c9b24c4753125c',
     '43ac5d4fcea9f31a42e28b9b976d94404497366a',
+    'cc331484358bed4971537aa42b456ea3b25794ad',
   ],
 };
 export const demoAddresses = {
@@ -87,4 +88,10 @@ export const demoAddresses = {
   juno: 'juno10ms58lgajy69z2x62shj0nxc6r3a0r7ql8mctt',
   bitcanna: 'bcna10ms58lgajy69z2x62shj0nxc6r3a0r7qn9gzy9',
   ki: 'ki10ms58lgajy69z2x62shj0nxc6r3a0r7qccfvgr',
+  rizon: 'rizon10ms58lgajy69z2x62shj0nxc6r3a0r7q2gyjq0',
+  cheqd: 'cheqd10ms58lgajy69z2x62shj0nxc6r3a0r7q8h5r8x',
+  chihuahua: 'chihuahua1ese3fpp430k5ju2n02jzk3tw5we9099dc5rh8e',
+  stargaze: 'stars10ms58lgajy69z2x62shj0nxc6r3a0r7qaf078x',
+  sommelier: 'somm10ms58lgajy69z2x62shj0nxc6r3a0r7q9fh0aa',
+  bitsong: 'bitsong1ese3fpp430k5ju2n02jzk3tw5we9099dhgu3y5',
 };
