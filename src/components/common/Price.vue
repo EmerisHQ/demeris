@@ -1,7 +1,13 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" show-dash />
-    <div class="-text-1 font-normal">{{ priceDiffObject }}</div>
+    <div
+      v-if="priceDiffObject.rawDiff"
+      class="-text-1 font-normal"
+      :class="priceDiffObject.indicator === 'gain' ? 'color-green' : 'color-red'"
+    >
+      {{ $t('pages.asset.priceDiff', priceDiffObject) }}
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -106,3 +112,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.color-green {
+  color: #008223;
+}
+.color-red {
+  color: #d80228;
+}
+</style>

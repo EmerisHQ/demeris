@@ -1,9 +1,15 @@
 <template>
   <div>
-    <SkeletonLoader v-if="showLoading && chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
+    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 50}px`" class="mb-8" />
     <div v-if="chartData.series[0].data.length > 0">
-      <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
-      <div v-if="variant === 'full'" class="flex justify-between items-center">
+      <apexchart
+        v-if="!showLoading"
+        class="w-full"
+        :height="height"
+        :options="chartData.options"
+        :series="chartData.series"
+      ></apexchart>
+      <div v-if="variant === 'full'" class="flex justify-between items-center -mt-4">
         <p class="-text-1 text-muted">
           {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}
         </p>
@@ -11,7 +17,7 @@
           <a
             v-for="(item, index) in filterItems"
             :key="index"
-            class="mx-2 rounded px-4 py-2 -text-1 cursor-pointer hover:bg-fg"
+            class="mx-1 rounded-lg px-4 py-2 -text-1 cursor-pointer"
             :class="item.value === activeFilterItem ? 'bg-fg font-medium' : 'text-muted'"
             @click="setActiveFilter(item)"
           >
@@ -123,8 +129,8 @@ export default defineComponent({
           gradient: {
             type: 'vertical',
             shade: 'light',
-            opacityFrom: 0.7,
-            opacityTo: 0.3,
+            opacityFrom: 0.5,
+            opacityTo: 0.2,
           },
         },
         yaxis: {
@@ -175,22 +181,30 @@ export default defineComponent({
         if (openingPrice.value <= closingPrice.value) {
           chartData.value.options.colors[0] = '#00CF30';
           chartData.value.options.fill.colors[0] = '#90EE90';
-          priceDiff.value = `$${openingPrice.value - closingPrice.value}`;
+
+          const rawPriceDiff = closingPrice.value - openingPrice.value;
+          priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
           priceDiffIndicator.value = 'gain';
-          priceDiffPercent.value = `${((openingPrice.value - closingPrice.value) / openingPrice.value) * 100}%`;
+          priceDiffPercent.value = `${(((closingPrice.value - openingPrice.value) / openingPrice.value) * 100).toFixed(
+            2,
+          )}%`;
           emit('priceDiff', {
             diff: priceDiff.value,
+            rawDiff: rawPriceDiff,
             indicator: priceDiffIndicator.value,
             percent: priceDiffPercent.value,
           });
         } else {
           chartData.value.options.colors[0] = '#FF3D56';
           chartData.value.options.fill.colors[0] = '#FF3D56';
-          priceDiff.value = `$${closingPrice.value - openingPrice.value}`;
+
+          const rawPriceDiff = openingPrice.value - closingPrice.value;
+          priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
           priceDiffIndicator.value = 'loss';
-          priceDiffPercent.value = `${((closingPrice.value - openingPrice.value) / openingPrice.value) * 100}%`;
+          priceDiffPercent.value = `-${((rawPriceDiff / openingPrice.value) * 100).toFixed(2)}%`;
           emit('priceDiff', {
             diff: priceDiff.value,
+            rawDiff: rawPriceDiff,
             indicator: priceDiffIndicator.value,
             percent: priceDiffPercent.value,
           });

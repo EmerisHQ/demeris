@@ -5,7 +5,7 @@
         <!-- Info -->
 
         <header>
-          <div class="sm:flex items-center flex-wrap gap-y-3">
+          <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
               <div class="sm:flex items-baseline flex-wrap">
