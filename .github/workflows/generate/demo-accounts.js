@@ -1,25 +1,20 @@
-// TODO: discuss where this script can be placed
-
-// List of chains: https://staging.demeris.io/v1/chains
-// Chain data using chain_name from above endpoint: https://staging.demeris.io/v1/chain/cosmos-hub
-
 const fs = require('fs');
 const axios = require('axios');
+const { bech32 } = require('bech32');
 const { Secp256k1HdWallet } = require('@cosmjs/amino');
 const { stringToPath } = require('@cosmjs/crypto');
 
-const file = `${__dirname}/../../../src/store/demeris-user/demo-account.js`;
-
-// TODO: read from env
+// TODO: read mnemonic from env -> from secret
 const mnemonic = 'nominee fox avoid drive fringe capital main shaft sample basic flag view';
 
-const getDemoAccount = async () => {
+const getDemoAccountDetails = async () => {
   const {
     data: { chains },
   } = await axios.get('https://staging.demeris.io/v1/chains');
   const chainNames = chains?.map((c) => c.chain_name);
 
   const demoAccountAddresses = {};
+  const keyHashes = new Set();
   await Promise.all(
     chainNames.map(async (chainName) => {
       const {
@@ -34,29 +29,108 @@ const getDemoAccount = async () => {
       });
       const accountFromSigner = (await signer.getAccounts())[0];
       const address = accountFromSigner.address;
-
+      keyHashes.add(keyHashfromAddress(address));
       demoAccountAddresses[chainName] = address;
     }),
   );
 
-  console.log('demoAccountAddresses', demoAccountAddresses);
-
-  return [];
+  createDemoAccountsFile(demoAccountAddresses, [...keyHashes]);
 };
 
-getDemoAccount();
+const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
+  const fileContents = `export const demoAccount = {
+    name: 'Demo Account',
+    algo: 'secp256k1',
+    pubKey: {
+      0: 2,
+      1: 77,
+      2: 180,
+      3: 175,
+      4: 102,
+      5: 96,
+      6: 147,
+      7: 15,
+      8: 125,
+      9: 36,
+      10: 66,
+      11: 27,
+      12: 170,
+      13: 241,
+      14: 145,
+      15: 113,
+      16: 240,
+      17: 79,
+      18: 214,
+      19: 162,
+      20: 196,
+      21: 166,
+      22: 243,
+      23: 33,
+      24: 20,
+      25: 42,
+      26: 134,
+      27: 65,
+      28: 134,
+      29: 97,
+      30: 181,
+      31: 54,
+      32: 124,
+    },
+    address: {
+      0: 126,
+      1: 225,
+      2: 67,
+      3: 253,
+      4: 29,
+      5: 145,
+      6: 52,
+      7: 81,
+      8: 40,
+      9: 218,
+      10: 84,
+      11: 47,
+      12: 39,
+      13: 204,
+      14: 216,
+      15: 208,
+      16: 227,
+      17: 215,
+      18: 143,
+      19: 192,
+    },
+    bech32Address: 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
+    isNanoLedger: false,
+    keyHashes: ${JSON.stringify(keyHashes, null, 2)},
+  };
+  export const demoAddresses = ${JSON.stringify(demoAccountAddresses, null, 2)};
+  `;
 
-// if(data.length){
-//   fs.writeFile(file, `{"data":"Hey there4!"}`, (err) => {
-//     if(err) {
-//         return console.log('error saving file',err);
-//     }
-//     console.log("The file was saved!");
-//     try {
-//         const data = fs.readFileSync(file, 'utf8')
-//         console.log('file contents:', data)
-//       } catch (err) {
-//         console.error('error reading file',err)
-//       }
-// });
-// }
+  const fileName = `${__dirname}/../../../src/store/demeris-user/demo-account-new.js`;
+
+  fs.writeFile(fileName, fileContents, (err) => {
+    if (err) {
+      return console.log('error saving file', err);
+    }
+    console.log('The file was saved!');
+  });
+};
+
+// TODO: pull directly from /src/utils
+// This code runs in node and the original code is in TS with imports
+function toHexString(byteArray) {
+  return Array.prototype.map
+    .call(byteArray, function (byte) {
+      return ('0' + (byte & 0xff).toString(16)).slice(-2);
+    })
+    .join('');
+}
+
+function keyHashfromAddress(address) {
+  try {
+    return toHexString(bech32.fromWords(bech32.decode(address).words));
+  } catch (e) {
+    throw new Error('Could not decode address');
+  }
+}
+
+getDemoAccountDetails();

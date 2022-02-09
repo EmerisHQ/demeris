@@ -2,11 +2,12 @@
 # - which user commits
 # - user credentials?
 # - Can we commit and push directly to develop without PR?
-# - Where is the demo wallet mnemonic
 # - How to pass mnemonic as env
 # - How to read env in script
 # - will this workflow work on our self-hosted runner?
-# - can we implement caching of build to speed up script?
+# - can we implement caching of npm ci to speed up script?
+# - Ki chain is not part of response in https://staging.demeris.io/v1/chains - should it be available?
+# - demo-accounts.js will run in node inside github actions - should it still be converted to TS?
 
 name: Generate Wallet Demo Accounts 
 
