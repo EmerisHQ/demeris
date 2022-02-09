@@ -7,32 +7,56 @@
     }"
   >
     <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow">
-      <CircleSymbol :denom="baseDenom" :chain-name="undefined" :size="size" :class="'mr-4'" />
+      <CircleSymbol :denom="stakingDenom" :chain-name="undefined" :size="size" :class="'mr-4'" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
         </div>
         <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {{ validator.validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
+          <AmountDisplay :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" /> staked
         </div>
       </div>
     </div>
+    <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
+      <AmountInput
+        :model-value="validator.inputAmount"
+        class="
+          denom-select__coin-amount-input
+          text-text
+          w-full
+          p-0
+          text-right
+          font-bold
+          bg-transparent
+          placeholder-inactive
+          appearance-none
+          border-none
+        "
+        :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
+        placeholder="0"
+        min="0"
+        @input="$emit('update:amount', $event.target.value)"
+      />
+      <Price :amount="{ denom: stakingDenom, amount: inputAmount * 10 ** precision }" />
+    </label>
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
 import { computed, defineComponent, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Price from '@/components/common/Price.vue';
+import AmountInput from '@/components/ui/AmountInput.vue';
 import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes, RootStore, RootStoreType } from '@/store';
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 import { keyHashfromAddress } from '@/utils/basic';
 
 export default defineComponent({
   name: 'ValidatorDisplay',
-  components: {},
+  components: { AmountDisplay, CircleSymbol, AmountInput, Price },
   props: {
     validator: {
       type: Object,
@@ -41,11 +65,7 @@ export default defineComponent({
         return {};
       },
     },
-    chainName: {
-      type: String,
-      required: true,
-      default: '',
-    },
+    size: { type: String, required: false, default: 'md' },
   },
   setup(props) {
     const store = useStore() as RootStoreType;
@@ -54,7 +74,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
     const stakingDenom = computed(() => {
-      return chain.value;
+      return (chain.value as ChainData).denoms.find((x) => x.stakable) ?? null;
     });
     const propsRef = toRefs(props);
 
@@ -76,7 +96,7 @@ export default defineComponent({
       });
     });
     return {
-      baseDenom,
+      stakingDenom,
       stakingBalance,
     };
   },

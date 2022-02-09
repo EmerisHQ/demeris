@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <main class="pb-28 flex-1 flex flex-col items-center justify-center">
         <div class="w-full max-w-lg mx-auto">
-          <ValidatorSelect v-if="validator" v-model:amount="model" :validator="{ validator: validator }" />
+          <ValidatorDisplay v-if="validator" v-model:amount="model" :validator="validator" />
 
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
@@ -39,7 +39,8 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
+import Price from '@/components/common/Price.vue';
+import ValidatorDisplay from '@/components/common/ValidatorDisplay.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
@@ -50,10 +51,11 @@ export default defineComponent({
   name: 'StakedValidatorAmount',
   components: {
     AmountInput,
-    ValidatorSelect,
+    ValidatorDisplay,
     ListItem,
     AmountDisplay,
     Button,
+    Price,
   },
   props: {
     modelValue: {
