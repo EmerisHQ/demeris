@@ -53,7 +53,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
-  emits: ['filterChanged'],
+  emits: ['filterChanged', 'priceDiff'],
   setup(props, { emit }) {
     const filterItems = ref([
       {
@@ -147,6 +147,9 @@ export default defineComponent({
     let lowestPrice = ref('');
     let openingPrice = ref(0);
     let closingPrice = ref(0);
+    let priceDiff = ref('');
+    let priceDiffIndicator = ref('');
+    let priceDiffPercent = ref('');
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
@@ -169,12 +172,28 @@ export default defineComponent({
           ? props.dataStream[props.dataStream.length - 1].y
           : 0;
 
-        if (openingPrice.value < closingPrice.value) {
+        if (openingPrice.value <= closingPrice.value) {
           chartData.value.options.colors[0] = '#00CF30';
           chartData.value.options.fill.colors[0] = '#90EE90';
+          priceDiff.value = `$${openingPrice.value - closingPrice.value}`;
+          priceDiffIndicator.value = 'gain';
+          priceDiffPercent.value = `${((openingPrice.value - closingPrice.value) / openingPrice.value) * 100}%`;
+          emit('priceDiff', {
+            diff: priceDiff.value,
+            indicator: priceDiffIndicator.value,
+            percent: priceDiffPercent.value,
+          });
         } else {
           chartData.value.options.colors[0] = '#FF3D56';
           chartData.value.options.fill.colors[0] = '#FF3D56';
+          priceDiff.value = `$${closingPrice.value - openingPrice.value}`;
+          priceDiffIndicator.value = 'loss';
+          priceDiffPercent.value = `${((closingPrice.value - openingPrice.value) / openingPrice.value) * 100}%`;
+          emit('priceDiff', {
+            diff: priceDiff.value,
+            indicator: priceDiffIndicator.value,
+            percent: priceDiffPercent.value,
+          });
         }
 
         if (props.variant === 'mini') {

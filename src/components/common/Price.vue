@@ -1,6 +1,7 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" show-dash />
+    <div class="-text-1 font-normal">{{ priceDiffObject }}</div>
   </div>
 </template>
 <script lang="ts">
@@ -29,6 +30,10 @@ export default defineComponent({
     autoUpdate: {
       type: Boolean,
       default: true,
+    },
+    priceDiffObject: {
+      type: Object,
+      default: null,
     },
   },
   setup(props) {
