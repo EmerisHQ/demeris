@@ -159,7 +159,9 @@ export default defineComponent({
     });
     const isCustomSelected = ref(false);
     const isCustomSlippageEditing = ref(false);
-    const customSlippage = ref(trueSlippage.value);
+    const customSlippage = ref(
+      trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1 ? trueSlippage.value : 'Custom',
+    );
     const limitPriceText = ref('');
     const minReceivedText = ref(null);
 
@@ -180,7 +182,8 @@ export default defineComponent({
             slippage > 100 ||
             (customSlippage.value &&
               isCustomSelected.value &&
-              customSlippage.value.toString()?.replace('%', '') != trueSlippage.value)
+              customSlippage.value.toString()?.replace('%', '') != trueSlippage.value) ||
+            (isCustomSelected.value && !customSlippage.value)
           ) {
             return 'error';
           } else if (slippage >= 20) {
@@ -215,6 +218,9 @@ export default defineComponent({
         const slippage = Number(value);
         isCustomSelected.value = isCustom;
         if (slippage > 0 && slippage <= 100) {
+          if (!isCustom) {
+            customSlippage.value = 'Custom';
+          }
           (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
             data: { slippagePerc: slippage },
           });
@@ -230,7 +236,7 @@ export default defineComponent({
 
     const onCustomSlippageFocusOut = () => {
       isCustomSlippageEditing.value = false;
-      if (!customSlippage.value?.toString()?.includes('%')) {
+      if (!!Number(customSlippage.value)) {
         customSlippage.value += '%';
       }
     };
@@ -294,7 +300,7 @@ export default defineComponent({
       if (state.slippage && state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
         isCustomSelected.value = true;
       }
-      if (!customSlippage.value?.toString()?.includes('%')) {
+      if (!!Number(customSlippage.value)) {
         customSlippage.value += '%';
       }
     });
