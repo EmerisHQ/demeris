@@ -39,7 +39,6 @@
         >
           1%
         </button>
-        <!-- isCustomSelected && customSlippage != trueSlippage  -->
         <Input
           v-if="allowCustomSlippage"
           v-model:modelValue="customSlippage"
