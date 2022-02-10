@@ -68,7 +68,6 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Portfolio',
