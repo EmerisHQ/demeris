@@ -5,12 +5,10 @@
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "NODE_ENV=development vue-cli-service build --mode development",
     "test:unit": "jest",
-    "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint",
+    "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
-    "cypress": "vue-cli-service test:e2e --headless",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
@@ -73,7 +71,6 @@
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
     "@vue/cli-plugin-babel": "~4.5.15",
-    "@vue/cli-plugin-e2e-cypress": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.15",
     "@vue/cli-plugin-router": "~4.5.15",
     "@vue/cli-plugin-typescript": "~4.5.15",

@@ -11,7 +11,10 @@ jobs:
 
   cypress-run:
     runs-on: self-hosted
-    container: cypress/browsers:node14.17.0-chrome91-ff89
+    container:
+      image: cypress/browsers:node14.17.0-chrome91-ff89
+      ports:
+        - 8080
     steps:
       - name: Checkout
         uses: actions/checkout@v2

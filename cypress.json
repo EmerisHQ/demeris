@@ -1,5 +1,8 @@
 {
   "defaultCommandTimeout": 20000,
+  "baseUrl": "http://localhost:8080/",
+  "modifyObstructiveCode": true,
+  "experimentalSourceRewriting": true,
   "pluginsFile": "cypress/plugins/index.js",
   "integrationFolder": "cypress/integration",
   "testFiles": "**/*.*",
