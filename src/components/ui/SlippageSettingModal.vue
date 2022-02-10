@@ -362,5 +362,4 @@ export default defineComponent({
   padding-right: 0.82rem;
   background: v-bind(inputBackground);
 }
-// 50 x 3
 </style>
