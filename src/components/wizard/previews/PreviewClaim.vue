@@ -33,8 +33,7 @@
             {{ $t(`components.previews.claim.rewards`) }}
           </div>
         </div>
-        <!-- TODO -->
-        <!-- <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" /> -->
+        <ValidatorBadge :validator="getValidator(vali.validator_address)" class="ml-3" />
       </div>
     </ListItem>
 
@@ -48,19 +47,21 @@
             </template>
           </template>
         </div>
-        <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" />
       </div>
     </ListItem>
   </List>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
+import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
 
 export default defineComponent({
@@ -72,6 +73,7 @@ export default defineComponent({
     CircleSymbol,
     List,
     ListItem,
+    ValidatorBadge,
   },
 
   props: {
@@ -94,6 +96,11 @@ export default defineComponent({
   },
 
   setup(props: any) {
+    const route = useRoute();
+    const { getValidatorsByBaseDenom } = useStaking();
+
+    const baseDenom = route.params.denom as string;
+    const validatorList = ref([]);
     const rewardsDenom = computed(() => {
       return props.step.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
     });
@@ -107,10 +114,17 @@ export default defineComponent({
       return Object.values(Object.values(props.fees)[0]);
     });
 
+    onMounted(async () => {
+      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
+    });
+    const getValidator = (val_address) => {
+      return validatorList.value.find((x) => x.operator_address == val_address);
+    };
     return {
       rewardsDenom,
       rewardsAmount,
       validators,
+      getValidator,
       fee,
     };
   },

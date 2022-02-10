@@ -121,7 +121,7 @@
           <td class="py-5 flex items-center" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
             <div class="inline-flex items-center mr-4">
               <!-- TODO: get logo url -->
-              <CircleSymbol :denom="baseDenom" class="w-8 h-8 rounded-full bg-fg z-1" />
+              <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
             </div>
             <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
               {{ validator.moniker }}
@@ -167,7 +167,6 @@ import { PropType, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
 import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import Price from '@/components/common/Price.vue';
@@ -177,6 +176,8 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 
+import ValidatorBadge from '../common/ValidatorBadge.vue';
+
 enum ValStyle {
   LIST = 'list',
   ACTIONLIST = 'actionlist',
@@ -185,7 +186,7 @@ enum ValStyle {
 //TODO: implement type for validator list
 export default {
   name: 'ValidatorTable',
-  components: { Search, CircleSymbol, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon },
+  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon },
   props: {
     validatorList: {
       type: Array,

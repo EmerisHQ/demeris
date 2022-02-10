@@ -4,7 +4,6 @@
       <main class="pb-28 flex-1 flex flex-col items-center justify-center">
         <div class="w-full max-w-lg mx-auto">
           <StakedValidatorAmountInput v-if="validator" v-model="model" :validator="validator" />
-
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
             <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
@@ -13,6 +12,12 @@
               <AmountDisplay :amount="{ amount: remainingStake, denom: baseDenom }" />
               <div class="text-muted">
                 <Price :amount="{ denom: baseDenom, amount: remainingStake }" :show-zero="true" :show-dash="false" />
+              </div>
+            </ListItem>
+            <ListItem inset size="md" label="Claiming rewards">
+              <AmountDisplay :amount="{ amount: stakingRewards, denom: baseDenom }" />
+              <div class="text-muted">
+                <Price :amount="{ denom: baseDenom, amount: stakingRewards }" :show-zero="true" :show-dash="false" />
               </div>
             </ListItem>
 
@@ -27,14 +32,10 @@
       </main>
     </div>
   </div>
-  {{ validator.identity }}
-  {{ validator.moniker }}
-  {{ displayStakingBalance }}
-  <AmountInput v-model="model" type="text" />
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -42,9 +43,9 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmountInput.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
+import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { Step, UndelegateAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
@@ -52,7 +53,6 @@ import { actionHandler } from '@/utils/actionHandler';
 export default defineComponent({
   name: 'StakedValidatorAmount',
   components: {
-    AmountInput,
     StakedValidatorAmountInput,
     ListItem,
     AmountDisplay,
@@ -78,15 +78,21 @@ export default defineComponent({
   setup(props, { emit }) {
     const route = useRoute();
     const store = useStore();
-
+    const { getStakingRewardsByBaseDenom } = useStaking();
     const actionSteps = ref<Step[]>([]);
     const propsRef = toRefs(props);
     const fees = ref({});
+    const stakingRewardsData = ref(null);
     const model = computed({
       get: () => propsRef.modelValue.value,
       set: (value) => emit('update:modelValue', value),
     });
-
+    const baseDenom = route.params.denom as string;
+    const precision = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        name: baseDenom,
+      }),
+    );
     const action = computed(() => {
       return {
         name: 'unstake',
@@ -111,12 +117,16 @@ export default defineComponent({
       },
     );
 
-    const baseDenom = route.params.denom as string;
-    const precision = computed(() =>
-      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-        name: baseDenom,
-      }),
-    );
+    const stakingRewards = computed(() => {
+      if (stakingRewardsData.value !== null) {
+        return parseFloat(
+          stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
+            ?.reward ?? '0',
+        ).toString();
+      } else {
+        return '0';
+      }
+    });
     const stakingBalance = computed(() => {
       return propsRef.validator.value.stakedAmount;
     });
@@ -135,6 +145,9 @@ export default defineComponent({
     const goToReview = () => {
       emit('next', actionSteps.value);
     };
+    onMounted(async () => {
+      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
+    });
     return {
       displayStakingBalance,
       model,
@@ -144,6 +157,7 @@ export default defineComponent({
       remainingStake,
       isValid,
       actionSteps,
+      stakingRewards,
     };
   },
 });

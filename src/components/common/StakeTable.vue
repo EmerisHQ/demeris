@@ -118,7 +118,12 @@
             <tr v-for="validator of stakingBalances" :key="validator.validator_address" class="group cursor-pointer">
               <td class="py-6 flex items-center transition">
                 <div class="inline-flex items-center mr-4">
-                  <CircleSymbol :denom="denom" class="w-8 h-8 rounded-full bg-fg z-1" />
+                  <ValidatorBadge
+                    :validator="
+                      validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
+                    "
+                    class="w-8 h-8 rounded-full bg-fg z-1"
+                  />
                 </div>
                 <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
                   {{ getValidatorMoniker(validator.validator_address) }}
@@ -185,6 +190,8 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
+import ValidatorBadge from './ValidatorBadge.vue';
+
 export default defineComponent({
   components: {
     Button,
@@ -192,6 +199,7 @@ export default defineComponent({
     Ticker,
     Price,
     Icon,
+    ValidatorBadge,
   },
   props: {
     denom: {
@@ -219,7 +227,9 @@ export default defineComponent({
 
     /* created */
     (async () => {
-      assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
+      try {
+        assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
+      } catch (e) {}
       validatorList.value = await getValidatorsByBaseDenom(props.denom);
       console.log('validatorList', validatorList.value);
     })();
@@ -299,6 +309,14 @@ export default defineComponent({
       });
       return moniker;
     };
+    const getValidatorData = (address: string): any => {
+      console.log(address);
+      validatorList.value.some((vali) => {
+        if (keyHashfromAddress(vali.operator_address) === address) {
+          return vali;
+        }
+      });
+    };
     const goStakeActionPage = (action: string, valAddress = '') => {
       const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
       if (action === StakingActions.STAKE) {
@@ -336,11 +354,14 @@ export default defineComponent({
       totalStakedAssetDisplayAmount,
       assetStakingAPY,
       getDisplayAmount,
+      getValidatorData,
       stakingBalances,
       goStakeActionPage,
       getValidatorMoniker,
       getTabClass,
       selectTab,
+      keyHashfromAddress,
+      validatorList,
     };
   },
 });

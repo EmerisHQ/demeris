@@ -136,7 +136,7 @@ export default {
     const baseDenom = route.params.denom as string;
     const validatorList = ref([]);
     const totalStakedAmount = ref<number>(0);
-    const unstakeAmount = ref<string>('');
+    const unstakeAmount = ref<string>('0');
     const selectedValidators = ref([]);
     const step = actionType == 'claim' ? ref('review') : validator ? ref('amount') : ref('validator');
 

@@ -7,7 +7,7 @@
     }"
   >
     <div class="self-stretch flex items-center flex-shrink-0 pr-3 flex-grow">
-      <CircleSymbol :denom="stakingDenom.name" :chain-name="undefined" :size="size" :class="'mr-4'" />
+      <ValidatorBadge :validator="validator" :size="size" :class="'mr-4'" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
@@ -16,7 +16,8 @@
           class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap cursor-pointer"
           @click="setMax"
         >
-          <AmountDisplay :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" /> staked
+          <AmountDisplay v-if="stakingDenom" :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" />
+          staked
         </div>
       </div>
     </div>
@@ -39,7 +40,12 @@
         placeholder="0"
         min="0"
       />
-      <Price :amount="{ denom: stakingDenom.name, amount: modelInBase }" :show-zero="true" :show-dash="false" />
+      <Price
+        v-if="stakingDenom"
+        :amount="{ denom: stakingDenom.name, amount: modelInBase }"
+        :show-zero="true"
+        :show-dash="false"
+      />
     </label>
   </div>
 </template>
@@ -49,15 +55,16 @@ import { computed, defineComponent, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 
+import ValidatorBadge from '../common/ValidatorBadge.vue';
+
 export default defineComponent({
   name: 'StakedValidatorAmountInput',
-  components: { AmountDisplay, CircleSymbol, AmountInput, Price },
+  components: { AmountDisplay, ValidatorBadge, AmountInput, Price },
   props: {
     modelValue: {
       type: String,

@@ -3,7 +3,7 @@
     <!-- Pay/Receive -->
 
     <ListItem direction="col">
-      <ListItem v-if="tx" :size="size" :label="$t('components.previews.unstake.unstakeLbl')">
+      <ListItem v-if="tx" size="sm" :label="$t('components.previews.unstake.unstakeLbl')">
         <div class="flex justify-end items-center">
           <div class="text-right">
             <AmountDisplay
@@ -18,26 +18,30 @@
           <CircleSymbol :denom="baseDenom" :chain-name="chainName" size="md" class="ml-3" />
         </div>
       </ListItem>
-      <ListItem v-if="tx" :size="sm" :label="$t('components.previews.unstake.claimLbl')" class="text-muted">
-        <AmountDisplay class="font-medium" :amount="{ amount: unStaked, denom: baseDenom }" />
+      <ListItem v-if="tx" size="sm" :label="$t('components.previews.unstake.claimLbl')" class="text-muted">
+        <AmountDisplay class="font-medium" :amount="{ amount: stakingRewards, denom: baseDenom }" />
       </ListItem>
     </ListItem>
 
     <!-- Price  -->
-    <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.validatorsLbl')">
-      <div class="flex justify-end">
-        <div>
-          {{ getValidatorMoniker(stake.validatorAddress) }}
-          <AmountDisplay :amount="stake.amount" />
-        </div>
+    <ListItem v-if="tx" size="sm" :label="$t('components.previews.unstake.fromLbl')">
+      <div class="flex justify-end items-center">
+        {{ validator.moniker }}
+        <ValidatorBadge :validator="validator" class="ml-3" />
       </div>
     </ListItem>
 
+    <ListItem direction="col">
+      <ListItem size="sm" label="Time to unstake"> 21 days </ListItem>
+      <ListItem size="sm" :label="$t('components.previews.unstake.availLbl')" class="text-normal text-muted">
+        {{ availableAt }}
+      </ListItem>
+    </ListItem>
     <!-- Fee -->
     <ListItem
-      :size="size"
-      :label="$t('components.previews.stake.feeLbl')"
-      :hint="$t('components.previews.stake.feeLblHint')"
+      size="sm"
+      :label="$t('components.previews.unstake.feeLbl')"
+      :hint="$t('components.previews.unstake.feeLblHint')"
     >
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -55,6 +59,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
@@ -67,6 +72,7 @@ export default defineComponent({
     CircleSymbol,
     List,
     ListItem,
+    ValidatorBadge,
   },
 
   props: {
@@ -86,7 +92,7 @@ export default defineComponent({
 
   setup(props) {
     const store = useStore();
-    const { getValidatorsByBaseDenom } = useStaking();
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking();
 
     const route = useRoute();
 
@@ -94,6 +100,7 @@ export default defineComponent({
     const validators = ref([]);
     const baseDenom = route.params.denom as string;
     const tx = computed(() => propsRef.step.value.transactions[0]);
+    const stakingRewardsData = ref(null);
     const chainName = computed(() => {
       return (tx.value.data as Actions.UndelegateData).chain_name;
     });
@@ -101,21 +108,42 @@ export default defineComponent({
       return (tx.value.data as Actions.UndelegateData).amount.amount;
     });
     onMounted(async () => {
+      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
-    const getValidatorMoniker = (address) => {
-      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
-    };
+
+    const stakingRewards = computed(() => {
+      if (stakingRewardsData.value !== null) {
+        return parseFloat(
+          stakingRewardsData.value.rewards.find(
+            (x) => x.validator_address == (tx.value.data as Actions.UndelegateData).validatorAddress,
+          )?.reward ?? '0',
+        ).toString();
+      } else {
+        return '0';
+      }
+    });
+    const validator = computed(() => {
+      return validators.value.find(
+        (x) => x.operator_address == (tx.value.data as Actions.UndelegateData).validatorAddress,
+      );
+    });
     const size = props.context === 'default' ? 'md' : 'sm';
 
+    const availableAtTime = new Date();
+    availableAtTime.setDate(availableAtTime.getDate() + 21);
+    const availableAt = availableAtTime.toLocaleString();
     return {
       store,
       size,
       tx,
-      getValidatorMoniker,
+      availableAt,
+
       baseDenom,
       chainName,
       unStaked,
+      stakingRewards,
+      validator,
     };
   },
 });

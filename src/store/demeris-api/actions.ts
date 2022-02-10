@@ -9,7 +9,7 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
-import { hashObject, keyHashfromAddress } from '@/utils/basic';
+import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 
 import {
   DemerisActionByTokenIdParams,
@@ -825,7 +825,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
         const checks = getEndBlockChecks({
           type: stepType,
-          requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
+          requesterAddress: await getOwnAddress({ chain_name: getters['getDexChain'] }),
         });
 
         response.data.result?.end_block_events?.forEach((item) => {
@@ -885,7 +885,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters }, { chain_name }: DemerisGetRewardsParam) {
     try {
-      const address = keyHashfromAddress(getters['getOwnAddress']({ chain_name }));
+      const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
       const response = await axios.get(
         getters['getEndpoint'] + '/account/' + address + '/delegatorrewards/' + chain_name,
       );
