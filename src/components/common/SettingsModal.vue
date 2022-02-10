@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-30 shadow-panel">
+    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-40 shadow-panel">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
         <div class="py-2">
