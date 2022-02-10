@@ -162,7 +162,7 @@
 <script lang="ts">
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
@@ -221,6 +221,7 @@ export default defineComponent({
     });
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
+    const router = useRouter();
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
@@ -231,6 +232,9 @@ export default defineComponent({
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
+    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+      router.push('/');
+    }
 
     const nativeAsset = computed(() => {
       return nativeBalances.value.find((item) => item.base_denom === denom.value);
@@ -376,7 +380,7 @@ export default defineComponent({
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
         if (displayName.value) {
-          getTokenPrices.value('1');
+          getTokenPrices.value('max');
         }
       });
 
