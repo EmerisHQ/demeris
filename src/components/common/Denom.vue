@@ -2,7 +2,7 @@
   {{ display }}
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, toRefs, watch } from 'vue';
 
 import useDenoms from '@/composables/useDenoms';
 
@@ -15,8 +15,9 @@ export default defineComponent({
     let display = ref('-');
     const loaded = false;
     const { useDenom } = useDenoms();
+    const name = toRefs(props).name;
     watch(
-      () => props.name,
+      () => name.value,
       (denomName, oldDenomName) => {
         if (denomName != oldDenomName || !loaded) {
           const { displayName } = useDenom(denomName);
