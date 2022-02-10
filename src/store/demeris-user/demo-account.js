@@ -67,6 +67,8 @@ export const demoAccount = {
     'e361989ea8accb81b1fc8fc784c8d91562871d01',
     '2a85f087692019a52cf1b55f6a3b0f042a47fe52',
     '111b08007642fa83f70d1d4fddae06a09e9d16c9',
+    'c7eff64c7a3707d39c99906ef38177f2c07667ec',
+    '37bd0b105947e4b12e332463b11d816651be42d9',
   ],
 };
 export const demoAddresses = {
@@ -94,4 +96,6 @@ export const demoAddresses = {
   stargaze: 'stars14y53meat0ehx2k0c38knym9zczzezedrs06qcr',
   sommelier: 'somm14y53meat0ehx2k0c38knym9zczzezedrg0z3zc',
   bitsong: 'bitsong1ungr3gkhuqy2njurlsr7smxw38te5qef4jrmk3',
+  desmos: 'desmos1clhlvnr6xura88yejph08qth7tq8velvjfuvgc',
+  lum: 'lum1x77skyzegljtzt3ny33mz8vpvegmuske5l5w5e',
 };
