@@ -379,10 +379,9 @@ export default defineComponent({
     });
 
     const getTokenPrices = ref(null);
-    const setPriceDifference = ref(null);
     let priceDiffObject = ref(null);
 
-    setPriceDifference.value = (priceDiff: any) => {
+    const setPriceDifference = (priceDiff: any) => {
       priceDiffObject.value = priceDiff;
     };
 
