@@ -58,7 +58,6 @@
           @blur:value="(e) => onCustomSlippageFocusOut(e)"
           @keydown="(e) => onKeyDown(e)"
         >
-          <!-- @keyup.enter="(e) => onCustomSlippageFocusOut(e)"  -->
           <template #end>
             <span v-if="isCustomSlippageEditing">%</span>
           </template>
@@ -152,12 +151,13 @@ export default defineComponent({
     );
     const textAlign = computed(() => (isCustomSlippageEditing.value ? 'left' : 'center'));
     const suffixParent = computed(() => (isCustomSlippageEditing.value ? null : 0));
-    const inputBackground = computed(() =>
-      !isCustomSelected.value || (isCustomSelected.value && customSlippage.value != trueSlippage.value)
-        ? 'rgb(50,50,50)'
-        : `var('--fg-surface')`,
-    );
-    //not selectef or slected and error
+    const inputBackground = computed(() => {
+      return isCustomSelected.value && state.alertStatus == 'error'
+        ? `var(--fg-solid)`
+        : isCustomSelected.value && !isCustomSlippageEditing.value && state.alertStatus !== 'error'
+        ? 'var(--text)'
+        : 'var(--fg)';
+    });
     const isCustomSelected = ref(false);
     const isCustomSlippageEditing = ref(false);
     const customSlippage = ref(trueSlippage.value);
@@ -315,6 +315,7 @@ export default defineComponent({
       textAlign,
       suffixParent,
       onKeyDown,
+      inputBackground,
     };
   },
 });
