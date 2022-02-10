@@ -16,16 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Serve
-        run: npm install -g serve
-
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          build: npm run build
-          start: serve -s dist -p 8080
+          start: npm run serve
   test:
     runs-on: self-hosted
 
