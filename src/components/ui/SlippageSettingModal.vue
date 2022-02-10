@@ -39,26 +39,30 @@
         >
           1%
         </button>
-        <Search
+        <!-- isCustomSelected && customSlippage != trueSlippage  -->
+        <Input
           v-if="allowCustomSlippage"
-          v-model:keyword="customSlippage"
-          :input-type="'number'"
-          :is-close-icon-visible="false"
-          :is-search-icon-visible="false"
-          :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
-          placeholder="Custom"
-          class="custom-slippage bg-fg rounded-xl outline-none text-text"
+          v-model:modelValue="customSlippage"
+          class="bg-fg rounded-xl outline-none text-text"
           :class="[
-            isCustomSelected && !isCustomSlippageEditing
+            isCustomSelected && !isCustomSlippageEditing && alertStatus !== 'error'
               ? 'bg-surface theme-inverse dark:theme-inverse font-medium rounded-lg'
               : '',
           ]"
-          @update:keyword="(e) => setCustomSlippage(e)"
+          :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
+          placeholder="Custom"
+          :force-border-visible="isCustomSelected && alertStatus == 'error'"
+          type="text"
+          @update:modelValue="(e) => setCustomSlippage(e)"
           @focus:value="(e) => onCustomSlippageFocussed(e)"
           @blur:value="(e) => onCustomSlippageFocusOut(e)"
+          @keydown="(e) => onKeyDown(e)"
         >
-          <span v-if="!isCustomSlippageEditing" class="text-text">%</span>
-        </Search>
+          <!-- @keyup.enter="(e) => onCustomSlippageFocusOut(e)"  -->
+          <template #end>
+            <span v-if="isCustomSlippageEditing">%</span>
+          </template>
+        </Input>
       </div>
     </div>
     <div v-if="alertStatus" class="px-6">
@@ -94,12 +98,12 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import Search from '@/components/common/Search.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Input from '@/components/ui/Input.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
@@ -116,7 +120,7 @@ export default defineComponent({
   components: {
     TitleWithGoback,
     Alert,
-    Search,
+    Input,
   },
 
   props: {
@@ -143,15 +147,17 @@ export default defineComponent({
       return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
     });
 
-    const inputBackgroundColour = computed(() => {
-      if (isCustomSelected.value && !isCustomSlippageEditing.value) {
-        return '';
-      }
-      return isCustomSelected.value || isCustomSlippageEditing.value ? 'var(--surface-image)' : 'var(--transparent)';
-    });
-
-    const inputWidth = computed(() => (customSlippage.value ? '4rem' : ''));
-
+    const inputWidth = computed(() =>
+      customSlippage.value && customSlippage.value?.toString()?.length >= 6 ? '7.5rem' : '5rem',
+    );
+    const textAlign = computed(() => (isCustomSlippageEditing.value ? 'left' : 'center'));
+    const suffixParent = computed(() => (isCustomSlippageEditing.value ? null : 0));
+    const inputBackground = computed(() =>
+      !isCustomSelected.value || (isCustomSelected.value && customSlippage.value != trueSlippage.value)
+        ? 'rgb(50,50,50)'
+        : `var('--fg-surface')`,
+    );
+    //not selectef or slected and error
     const isCustomSelected = ref(false);
     const isCustomSlippageEditing = ref(false);
     const customSlippage = ref(trueSlippage.value);
@@ -173,7 +179,9 @@ export default defineComponent({
           if (
             slippage <= 0 ||
             slippage > 100 ||
-            (customSlippage.value && isCustomSelected.value && customSlippage.value != trueSlippage.value)
+            (customSlippage.value &&
+              isCustomSelected.value &&
+              customSlippage.value.toString()?.replace('%', '') != trueSlippage.value)
           ) {
             return 'error';
           } else if (slippage >= 20) {
@@ -223,6 +231,21 @@ export default defineComponent({
 
     const onCustomSlippageFocusOut = () => {
       isCustomSlippageEditing.value = false;
+      if (!customSlippage.value?.toString()?.includes('%')) {
+        customSlippage.value += '%';
+      }
+    };
+
+    const onKeyDown = (e) => {
+      const keyCode = e.keyCode || e.which;
+      if (keyCode == 8 || keyCode == 27 || keyCode == 46 || keyCode == 37 || keyCode == 39) {
+        // backspace || delete || escape || arrows
+        return;
+      } else if (/^[A-Za-z]+$/.test(e.key) || /[-!$%^@&*()_+|~=`\\#{}\[\]:";'<>?,\/]/.test(e.key)) {
+        //disallow alphabets and these characters.
+        e.preventDefault();
+      }
+      return;
     };
 
     watch(
@@ -268,6 +291,15 @@ export default defineComponent({
       { immediate: true },
     );
 
+    onMounted(() => {
+      if (state.slippage && state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
+        isCustomSelected.value = true;
+      }
+      if (!customSlippage.value?.toString()?.includes('%')) {
+        customSlippage.value += '%';
+      }
+    });
+
     return {
       ...toRefs(state),
       allowCustomSlippage,
@@ -279,40 +311,30 @@ export default defineComponent({
       onCustomSlippageFocusOut,
       isCustomSlippageEditing,
       trueSlippage,
-      inputBackgroundColour,
       inputWidth,
+      textAlign,
+      suffixParent,
+      onKeyDown,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.custom-slippage {
-  max-width: 100px;
-
-  &::v-deep(.suffix) {
-    align-items: center;
-  }
-
-  ::v-deep(input) {
-    min-width: 0.66em;
-    font: inherit;
-    letter-spacing: inherit;
-    outline: none;
-    -moz-appearance: textfield;
-    padding-right: 0;
-    background: v-bind(inputBackgroundColour);
-    width: v-bind(inputWidth);
-
+::v-deep(.input) {
+  width: v-bind(inputWidth);
+  input {
     &:empty {
-      text-align: right;
+      text-align: center;
     }
-
     &:focus,
     &:valid {
-      text-align: right;
+      text-align: v-bind(textAlign);
     }
-
+    &::placeholder,
+    &:focus::placeholder {
+      color: var(--inactive);
+    }
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
       -webkit-appearance: none;
@@ -321,4 +343,18 @@ export default defineComponent({
     }
   }
 }
+
+::v-deep(.input__icon) {
+  color: var(--text);
+  padding: v-bind(suffixParent);
+  display: flex;
+  align-items: center;
+  height: inherit;
+}
+
+::v-deep(input) {
+  padding-right: 0.82rem;
+  background: v-bind(inputBackground);
+}
+// 50 x 3
 </style>

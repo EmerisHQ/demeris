@@ -39,12 +39,17 @@
         "
         :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
         v-bind="$attrs"
+        @focus="$emit('focus:value', $event.target.value)"
+        @blur="$emit('blur:value', $event.target.value)"
       />
       <div v-if="hasEndSlot" class="input__icon absolute z-20 top-0 right-0 p-4 pointer-events-none">
         <slot name="end" />
       </div>
 
-      <div class="focus-border absolute z-0 -inset-0.5 rounded-xl invisible bg-gold-circular" />
+      <div
+        class="focus-border absolute z-0 -inset-0.5 rounded-xl"
+        :class="[borderColour ? borderColour : 'bg-gold-circular', forceBorderVisible ? 'visible' : 'invisible']"
+      />
     </div>
 
     <tippy v-if="hint" class="p-3 text-inactive hover:text-muted transition-colors" tabindex="0">
@@ -73,16 +78,18 @@ export default defineComponent({
 
   props: {
     modelValue: {
-      type: String,
+      type: [String, Number],
       default: '',
     },
     hint: {
       type: String,
       default: undefined,
     },
+    borderColour: { type: String, default: null },
+    forceBorderVisible: { type: Boolean, default: false },
   },
 
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'focus:value', 'blur:value'],
 
   setup(props, { emit, slots }) {
     const model = computed({
