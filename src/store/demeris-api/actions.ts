@@ -14,6 +14,7 @@ import { hashObject } from '@/utils/basic';
 import {
   DemerisActionByTokenIdParams,
   DemerisActionByTokenPriceParams,
+  DemerisActionGetAirdropsParams,
   DemerisActionParams,
   DemerisActionsByAddressParams,
   DemerisActionsByChainAddressParams,
@@ -154,6 +155,10 @@ export interface Actions {
     { subscribe, params }: DemerisActionByTokenPriceParams,
   ): Promise<any>;
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.GET_AIRDROPS](
+    { commit }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionGetAirdropsParams,
+  ): Promise<any>;
   [DemerisActionTypes.GET_SELECTED_AIRDROP](
     { commit }: ActionContext<State, RootState>,
     { params }: DemerisActionSetAirdropParams,
@@ -665,6 +670,20 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TOKEN_PRICES, payload: { params } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
+    }
+  },
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+    try {
+      const response = await axios.get(
+        `https://github.com/allinbits/Emeris-Airdrop/tree/main/airdropList/${params.airdropName}.json`,
+      );
+      console.log('response here', response);
+      commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: response.data });
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');

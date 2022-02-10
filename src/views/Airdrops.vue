@@ -6,13 +6,13 @@
           <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">Airdrops</div>
         </header>
         <section class="mt-12">
-          <AirdropsTable
+          <!-- <AirdropsTable
             :airdrops="airdrops"
             :show-headers="false"
             :limit-rows="10"
             @row-click="openAirdropPage"
             @active-filter="setActiveFilter"
-          />
+          /> -->
         </section>
       </div>
 
@@ -40,9 +40,9 @@ import { useStore } from 'vuex';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
-import AirdropsTable from '@/components/airdrops/AirdropsTable';
+// import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
-import airdropsData from '@/data/sampleAirdrops';
+import airdrops from '@/data/airdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
@@ -53,7 +53,7 @@ export default {
   components: {
     AppLayout,
     AirdropClaimablePanel,
-    AirdropsTable,
+    // AirdropsTable,
     AirdropsInfo,
     WarningCircleIcon,
   },
@@ -75,7 +75,17 @@ export default {
     };
 
     const router = useRouter();
-    const airdrops = airdropsData.sampleAirdrops;
+
+    if (airdrops.length > 0) {
+      airdrops.forEach(async (airdrop) => {
+        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+          subscribe: false,
+          params: {
+            airdropName: airdrop,
+          },
+        });
+      });
+    }
 
     // onMounted(() => {
     //   require
@@ -93,7 +103,7 @@ export default {
       });
     };
 
-    return { airdrops, openAirdropPage, activeFilter, setActiveFilter };
+    return { openAirdropPage, activeFilter, setActiveFilter };
   },
 };
 </script>

@@ -30,6 +30,7 @@ export type State = {
   tokenPrices: API.TokenPrices[];
   tokenId: string;
   validPools: Pool[];
+  airdrops: API.Airdrop[];
   selectedAirdrop: API.Airdrop;
   _Subscriptions: Set<string>;
   _InProgess: Map<string, Promise<void>>;
@@ -52,6 +53,7 @@ export function getDefaultState(): State {
     tokenId: '',
     relayer: false,
     chains: {},
+    airdrops: [],
     selectedAirdrop: {
       project: '',
       projectWebsiteUrl: '',

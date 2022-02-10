@@ -12,6 +12,9 @@ export type TokenPriceReq = {
 export type TokenIdReq = {
   token: string;
 };
+export type AirdropsReq = {
+  airdropName: string;
+};
 export type TokenId = string;
 export type TokenPrices = {
   x: string;
