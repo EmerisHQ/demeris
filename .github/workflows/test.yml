@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: npm install
+        run: npm install
+
       - name: Cypress run
         run: npm run cypress
   test:
