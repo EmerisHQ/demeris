@@ -32,7 +32,7 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { computed,defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import { TokenPrices } from '@/types/api';
@@ -172,9 +172,9 @@ export default defineComponent({
         priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
         priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
       } else {
-        rawPriceDiff = openingPrice.value - closingPrice.value;
+        rawPriceDiff = openingPrice - closingPrice;
         priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
-        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice.value) * 100).toFixed(2)}%`;
+        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
       }
 
       emit('priceDiff', {

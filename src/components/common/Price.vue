@@ -2,9 +2,9 @@
   <div>
     <CurrencyDisplay :value="displayPrice" show-dash />
     <div
-      v-if="priceDiffObject && priceDiffObject.rawDiff"
+      v-if="showPriceDiff"
       class="-text-1 font-normal"
-      :class="priceDiffObject.indicator === 'gain' ? 'color-green' : 'color-red'"
+      :class="priceDiffIndicator === 'gain' ? 'color-green' : 'color-red'"
     >
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
@@ -108,7 +108,15 @@ export default defineComponent({
       },
     );
 
-    return { displayPrice };
+    const showPriceDiff = computed(() => {
+      return props.priceDiffObject && props.priceDiffObject.rawDiff;
+    });
+
+    const priceDiffIndicator = computed(() => {
+      return props.priceDiffObject.indicator;
+    });
+
+    return { displayPrice, showPriceDiff, priceDiffIndicator };
   },
 });
 </script>
