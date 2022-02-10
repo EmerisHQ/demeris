@@ -8,38 +8,13 @@ on:
       - develop
 
 jobs:
-  install:
-    runs-on: self-hosted
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
 
-      - name: Save build folder
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          if-no-files-found: error
-          path: dist
-
-      - name: Cypress install
-        uses: cypress-io/github-action@v2
-        with:
-          # Disable running of tests within install job
-          runTests: false
-          build: npm run build
   cypress-run:
     runs-on: self-hosted
     container: cypress/browsers:node14.17.0-chrome91-ff89
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Download the build folders
-        uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: dist
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
