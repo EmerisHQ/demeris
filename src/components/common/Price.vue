@@ -2,7 +2,7 @@
   <div>
     <CurrencyDisplay :value="displayPrice" show-dash />
     <div
-      v-if="priceDiffObject.rawDiff"
+      v-if="priceDiffObject && priceDiffObject.rawDiff"
       class="-text-1 font-normal"
       :class="priceDiffObject.indicator === 'gain' ? 'color-green' : 'color-red'"
     >

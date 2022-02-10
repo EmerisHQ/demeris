@@ -1,7 +1,7 @@
 <template>
   <div>
     <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 50}px`" class="mb-8" />
-    <div v-if="chartData.series[0].data.length > 0">
+    <div v-if="hasData">
       <apexchart
         v-if="!showLoading"
         class="w-full"
@@ -32,7 +32,7 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, PropType, ref, watch } from 'vue';
+import { computed,defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import { TokenPrices } from '@/types/api';
@@ -154,12 +154,35 @@ export default defineComponent({
     let openingPrice = ref(0);
     let closingPrice = ref(0);
     let priceDiff = ref('');
-    let priceDiffIndicator = ref('');
     let priceDiffPercent = ref('');
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
       emit('filterChanged', activeFilterItem.value);
+    };
+
+    const hasData = computed(() => {
+      return chartData.value.series[0].data.length > 0;
+    });
+
+    const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
+      let rawPriceDiff = 0;
+      if (indicator === 'gain') {
+        rawPriceDiff = closingPrice - openingPrice;
+        priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
+        priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+      } else {
+        rawPriceDiff = openingPrice.value - closingPrice.value;
+        priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
+        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice.value) * 100).toFixed(2)}%`;
+      }
+
+      emit('priceDiff', {
+        diff: priceDiff.value,
+        rawDiff: rawPriceDiff,
+        indicator: indicator,
+        percent: priceDiffPercent.value,
+      });
     };
 
     watch(
@@ -182,32 +205,12 @@ export default defineComponent({
           chartData.value.options.colors[0] = '#00CF30';
           chartData.value.options.fill.colors[0] = '#90EE90';
 
-          const rawPriceDiff = closingPrice.value - openingPrice.value;
-          priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
-          priceDiffIndicator.value = 'gain';
-          priceDiffPercent.value = `${(((closingPrice.value - openingPrice.value) / openingPrice.value) * 100).toFixed(
-            2,
-          )}%`;
-          emit('priceDiff', {
-            diff: priceDiff.value,
-            rawDiff: rawPriceDiff,
-            indicator: priceDiffIndicator.value,
-            percent: priceDiffPercent.value,
-          });
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
           chartData.value.options.colors[0] = '#FF3D56';
           chartData.value.options.fill.colors[0] = '#FF3D56';
 
-          const rawPriceDiff = openingPrice.value - closingPrice.value;
-          priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
-          priceDiffIndicator.value = 'loss';
-          priceDiffPercent.value = `-${((rawPriceDiff / openingPrice.value) * 100).toFixed(2)}%`;
-          emit('priceDiff', {
-            diff: priceDiff.value,
-            rawDiff: rawPriceDiff,
-            indicator: priceDiffIndicator.value,
-            percent: priceDiffPercent.value,
-          });
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
         }
 
         if (props.variant === 'mini') {
@@ -220,6 +223,7 @@ export default defineComponent({
     return {
       filterItems,
       chartData,
+      hasData,
       activeFilterItem,
       highestPrice,
       lowestPrice,
