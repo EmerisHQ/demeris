@@ -92,10 +92,6 @@ export default {
       })),
     );
 
-    if (featureRunning('TEST_SHOW_CONSOLE_LOG')) {
-      console.log('Feature: TEST_SHOW_CONSOLE_LOG is running');
-    }
-
     const router = useRouter();
     const { balances } = useAccount();
     const { pools } = usePools();
