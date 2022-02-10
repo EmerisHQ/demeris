@@ -263,7 +263,13 @@
                 <Alert v-if="hasPair && needsTransferToHub" status="info" class="mb-6">
                   {{ $t('pages.addLiquidity.hubWarning') }}
                 </Alert>
-                <Button :name="submitButtonName" :disabled="!isValid" @click="goToReview" />
+                <Button
+                  v-tippy="{ trigger: submitButtonHint ? 'mouseenter focus' : 'manual' }"
+                  :name="submitButtonName"
+                  :disabled="!isValid"
+                  :content="submitButtonHint"
+                  @click="goToReview"
+                />
               </div>
             </template>
 
@@ -298,23 +304,35 @@
         </template>
 
         <template v-else>
-          <TransactionProcessCreator
-            :steps="actionSteps"
-            :action="hasPool ? 'addliquidity' : 'createpool'"
-            @pending="
-              () => {
-                closeModal();
-                resetHandler();
-              }
-            "
-            @close="
-              () => {
-                closeModal();
-                resetHandler();
-              }
-            "
-            @previous="goBack"
-          />
+          <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+            <template #deactivated>
+              <TxStepsModal
+                :data="actionSteps"
+                action-name="addliquidity"
+                @transacting="goToStep('send')"
+                @failed="goToStep('review')"
+                @reset="resetHandler"
+              />
+            </template>
+
+            <TransactionProcessCreator
+              :steps="actionSteps"
+              :action="hasPool ? 'addliquidity' : 'createpool'"
+              @pending="
+                () => {
+                  closeModal();
+                  resetHandler();
+                }
+              "
+              @close="
+                () => {
+                  closeModal();
+                  resetHandler();
+                }
+              "
+              @previous="goBack"
+            />
+          </FeatureRunningConditional>
         </template>
       </main>
     </div>
@@ -335,8 +353,10 @@ import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import DenomSelect from '@/components/common/DenomSelect.vue';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
@@ -355,6 +375,7 @@ import { Balance } from '@/types/api';
 import { actionHandler, getBaseDenomSync } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'AddLiquidity',
@@ -373,6 +394,8 @@ export default {
     Icon,
     ListItem,
     TransactionProcessCreator,
+    FeatureRunningConditional,
+    TxStepsModal,
   },
 
   setup() {
@@ -694,6 +717,10 @@ export default {
         return false;
       }
 
+      if (featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0) {
+        return false;
+      }
+
       return true;
     });
 
@@ -731,13 +758,28 @@ export default {
       state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
     };
 
+    const submitButtonHint = computed(() => {
+      if (featureRunning('POOL_MIN_AMOUNT')) {
+        let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
+        let insufficientAmount = +state.receiveAmount <= 0;
+        if (insufficientAmount && !emptyFields) {
+          return t('pages.addLiquidity.insufficientAmountHint');
+        }
+      }
+
+      return undefined;
+    });
+
     const submitButtonName = computed(() => {
       let emptyFields = +form.coinA.amount <= 0 || +form.coinB.amount <= 0;
       let insufficientFunds = !hasSufficientFunds.value.total;
+      let insufficientAmount = featureRunning('POOL_MIN_AMOUNT') && +state.receiveAmount <= 0;
       let invalidPool = !hasPool.value && (+form.coinA.amount < 1 || +form.coinB.amount < 1);
 
       if (emptyFields) {
         return t('generic_cta.continue');
+      } else if (insufficientAmount) {
+        return t('generic_cta.insufficientAmount');
       } else if (insufficientFunds) {
         return t('generic_cta.noFunds');
       } else if (!insufficientFunds && invalidPool) {
@@ -1119,6 +1161,7 @@ export default {
     );
 
     return {
+      submitButtonHint,
       closeModal,
       pageTitle,
       creationFee,

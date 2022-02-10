@@ -1,11 +1,11 @@
 <template>
   <div>
-    <SkeletonLoader v-if="chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
+    <SkeletonLoader v-if="showLoading && chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
     <div v-if="chartData.series[0].data.length > 0">
       <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
       <div v-if="variant === 'full'" class="flex justify-between items-center">
         <p class="-text-1 text-muted">
-          High ${{ highestPrice ? highestPrice.toFixed(2) : 0 }} / Low ${{ lowestprice ? lowestprice.toFixed(2) : 0 }}
+          {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}
         </p>
         <div>
           <a
@@ -40,17 +40,17 @@ export default defineComponent({
     variant: {
       type: String,
       default: 'full',
-      required: false,
     },
     height: {
       type: String,
       default: '320',
-      required: false,
     },
     dataStream: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<TokenPrices[]>,
       required: true,
-      default: () => [],
+    },
+    showLoading: {
+      type: Boolean,
     },
   },
   emits: ['filterChanged'],
@@ -84,6 +84,7 @@ export default defineComponent({
           mode: 'dark',
         },
         tooltip: {
+          enabled: true,
           x: {
             show: false,
           },
@@ -92,6 +93,9 @@ export default defineComponent({
           type: 'area',
           toolbar: {
             show: false,
+          },
+          zoom: {
+            enabled: false,
           },
           background: 'transparent',
         },
@@ -133,14 +137,14 @@ export default defineComponent({
       series: [
         {
           name: 'Price',
-          data: [],
+          data: ref(null),
         },
       ],
     });
 
-    const activeFilterItem = ref('1');
-    let highestPrice = ref(0);
-    let lowestprice = ref(0);
+    const activeFilterItem = ref('max');
+    let highestPrice = ref('');
+    let lowestPrice = ref('');
     let openingPrice = ref(0);
     let closingPrice = ref(0);
 
@@ -150,13 +154,20 @@ export default defineComponent({
     };
 
     watch(
-      () => props.dataStream as TokenPrices[],
-      async (value) => {
-        chartData.value.series[0].data = value;
-        highestPrice.value = maxBy(value, 'y') ? maxBy(value, 'y').y : 0;
-        lowestprice.value = minBy(value, 'y') ? minBy(value, 'y').y : 0;
-        openingPrice.value = value[0] ? value[0].y : 0;
-        closingPrice.value = value[value.length - 1] ? value[value.length - 1].y : 0;
+      () => [props.dataStream, props.variant],
+      async () => {
+        chartData.value.series[0].data = props.dataStream;
+
+        const high = (maxBy(props.dataStream, 'y') ? maxBy(props.dataStream, 'y').y : 0).toFixed(2);
+        highestPrice.value = '$' + high.toString();
+
+        const low = (minBy(props.dataStream, 'y') ? minBy(props.dataStream, 'y').y : 0).toFixed(2);
+        lowestPrice.value = '$' + low.toString();
+
+        openingPrice.value = props.dataStream[0] ? props.dataStream[0].y : 0;
+        closingPrice.value = props.dataStream[props.dataStream.length - 1]
+          ? props.dataStream[props.dataStream.length - 1].y
+          : 0;
 
         if (openingPrice.value < closingPrice.value) {
           chartData.value.options.colors[0] = '#00CF30';
@@ -164,6 +175,10 @@ export default defineComponent({
         } else {
           chartData.value.options.colors[0] = '#FF3D56';
           chartData.value.options.fill.colors[0] = '#FF3D56';
+        }
+
+        if (props.variant === 'mini') {
+          chartData.value.options.tooltip.enabled = false;
         }
       },
       { immediate: true },
@@ -174,7 +189,7 @@ export default defineComponent({
       chartData,
       activeFilterItem,
       highestPrice,
-      lowestprice,
+      lowestPrice,
       setActiveFilter,
     };
   },

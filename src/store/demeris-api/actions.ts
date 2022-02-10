@@ -663,17 +663,21 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getPrimaryChannels'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_TOKEN_PRICES]({ commit, getters }, { subscribe = false, params }) {
+    commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.LOADING });
     try {
       const response = await axios.get(
         getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
       );
       commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: response.data });
+      commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.LOADED });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TOKEN_PRICES, payload: { params } });
       }
     } catch (e) {
+      commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.ERROR });
       throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
     }
+    return getters['getTokenPrices'];
   },
   async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
@@ -696,15 +700,18 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });
   },
   async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters }, { subscribe = false, params }) {
+    commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, { value: API.LoadingState.LOADING });
     try {
       const response = await axios.get(getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`);
       commit(DemerisMutationTypes.SET_TOKEN_ID, { value: { ...response.data, token: params.token } });
+      commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, { value: API.LoadingState.LOADED });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_TOKEN_ID, payload: { params } });
       }
       return getters['getTokenId'];
     } catch (e) {
-      throw new SpVuexError('Demeris:getTokenId', 'Could not perform API query.');
+      commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, { value: API.LoadingState.ERROR });
+      console.error('Demeris:getTokenId: Could not perform API query.');
     }
   },
   async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state }, { subscribe = false, params }) {

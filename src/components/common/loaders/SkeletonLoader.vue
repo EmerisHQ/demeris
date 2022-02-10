@@ -1,5 +1,5 @@
 <template>
-  <span :style="{ height, width: computedWidth }" class="SkeletonLoader rounded-md" />
+  <span :style="{ height, width: computedWidth }" class="skeleton-loader rounded-md" />
 </template>
 
 <script>
@@ -40,7 +40,7 @@ export default {
 </script>
 
 <style lang="scss">
-.SkeletonLoader {
+.skeleton-loader {
   display: inline-block;
   position: relative;
   overflow: hidden;

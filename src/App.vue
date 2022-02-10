@@ -7,7 +7,11 @@
     <ChainDownWrapper>
       <router-view />
     </ChainDownWrapper>
-    <TransactionsCenter />
+    <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+      <TransactionsCenter />
+    </FeatureRunningConditional>
+    <SimplexModal />
+    <MoonpayModal />
   </div>
   <div v-else class="h-screen flex flex-col items-center justify-center">
     <h1 class="text-3 font-bold">{{ $t('appInit.title') }}</h1>
@@ -23,6 +27,8 @@ import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
+import MoonpayModal from '@/components/common/MoonpayModal.vue';
+import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useTheme from '@/composables/useTheme';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
@@ -30,7 +36,9 @@ import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } fr
 import { TypedAPIStore } from '@/store';
 import { setStore } from '@/utils/useStore';
 
+import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import { autoLogin, autoLoginDemo } from './utils/basic';
+import { featureRunning } from './utils/FeatureManager';
 
 export default defineComponent({
   name: 'App',
@@ -40,10 +48,23 @@ export default defineComponent({
     ChainDownWrapper,
     CookieConsent,
     TransactionsCenter,
+    FeatureRunningConditional,
+    SimplexModal,
+    MoonpayModal,
   },
 
   setup() {
     const store = useStore();
+    let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
+    let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
+    if (featureRunning('USE_STAGING')) {
+      liquidityEndpoint = process.env.VUE_APP_EMERIS_STAGING_LIQUIDITY_ENDPOINT;
+      emerisEndpoint = process.env.VUE_APP_EMERIS_STAGING_ENDPOINT;
+    }
+    if (featureRunning('USE_DEV')) {
+      liquidityEndpoint = process.env.VUE_APP_EMERIS_DEV_LIQUIDITY_ENDPOINT;
+      emerisEndpoint = process.env.VUE_APP_EMERIS_DEV_ENDPOINT;
+    }
     setStore(store); // make store availabe in some composition functions used in the store itself
     const apistore = store as TypedAPIStore;
     const userstore = store as TypedUSERStore;
@@ -60,7 +81,7 @@ export default defineComponent({
         window.localStorage.setItem('gasLimit', gasLimit.toString());
       }
       await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
-        endpoint: process.env.VUE_APP_EMERIS_ENDPOINT,
+        endpoint: emerisEndpoint,
         hub_chain: 'cosmos-hub',
         refreshTime: 5000,
       });
@@ -97,7 +118,7 @@ export default defineComponent({
       }
       status.value = t('appInit.status.liquidityConfigure');
       await store.dispatch('common/env/config', {
-        apiNode: process.env.VUE_APP_EMERIS_LIQUIDITY_ENDPOINT,
+        apiNode: liquidityEndpoint,
         rpcNode: null,
         wsNode: null,
         chainId: 'cosmos-hub',

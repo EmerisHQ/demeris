@@ -1776,6 +1776,7 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 
   for (const balance of balances) {
     const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+    if (!ownAddress) continue;
     const hashAddress = keyHashfromAddress(ownAddress);
 
     if (balance.address !== hashAddress) {

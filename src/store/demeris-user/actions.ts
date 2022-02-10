@@ -135,7 +135,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
-      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
+      window.keplr.defaultOptions = {
+        sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
+      };
       for (const chain in chains) {
         await addChain(chain);
       }

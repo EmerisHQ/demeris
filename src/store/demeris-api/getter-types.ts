@@ -35,8 +35,10 @@ export enum GetterTypes {
   getPrimaryChannel = 'getPrimaryChannel',
   getPrimaryChannels = 'getPrimaryChannels',
   getTokenPrices = 'getTokenPrices',
+  getTokenPricesLoadingStatus = 'getTokenPricesLoadingStatus',
   getTokenId = 'getTokenId',
   getSelectedAirdrop = 'getSelectedAirdrop',
+  getTokenIdLoadingStatus = 'getTokenIdLoadingStatus',
   getChainStatus = 'getChainStatus',
 }
 export enum GlobalGetterTypes {
@@ -76,7 +78,9 @@ export enum GlobalGetterTypes {
   getPrimaryChannel = 'demerisAPI/getPrimaryChannel',
   getPrimaryChannels = 'demerisAPI/getPrimaryChannels',
   getTokenPrices = 'demerisAPI/getTokenPrices',
+  getTokenPricesLoadingStatus = 'demerisAPI/getTokenPricesLoadingStatus',
   getTokenId = 'demerisAPI/getTokenId',
   getSelectedAirdrop = 'demerisAPI/getSelectedAirdrop',
+  getTokenIdLoadingStatus = 'demerisAPI/getTokenIdLoadingStatus',
   getChainStatus = 'demerisAPI/getChainStatus',
 }

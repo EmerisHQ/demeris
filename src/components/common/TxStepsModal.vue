@@ -15,11 +15,17 @@
         'flex-1 flex flex-col items-stretch': variant !== 'widget',
       }"
     >
-      <GobackWithClose v-if="variant === 'widget'" @goback="emitHandler('close')" @close="emitHandler('close')" />
+      <GobackWithClose
+        v-if="variant === 'widget'"
+        class="relative z-10 text-inverse"
+        @goback="emitHandler('close')"
+        @close="emitHandler('close')"
+      />
       <template v-if="!isTxHandlingModalOpen && isTransferConfirmationOpen">
         <TransferInterstitialConfirmation
           :action="actionName"
           :steps="data"
+          :is-swap-component="variant === 'widget'"
           @continue="
             isTransferConfirmationOpen = false;
             interstitialProceed = true;
@@ -163,14 +169,14 @@
                   }
                 "
               />
-              <ModalButton
+              <!-- <ModalButton
                 :name="$t('generic_cta.getAtom')"
                 :click-function="
                   () => {
-                    goMoon();
+                    buyCrypto();
                   }
                 "
-              />
+              /> -->
             </template>
             <template
               v-if="
@@ -273,6 +279,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
 import useAccount from '@/composables/useAccount';
+import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import {
   GlobalDemerisActionTypes,
@@ -360,23 +367,7 @@ export default defineComponent({
       return userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
     const interstitialProceed = ref(false);
-    const mpDomain = ref('https://buy.moonpay.io');
-    const mpParams = computed(() => {
-      return {
-        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
-        currencyCode: 'atom',
-        walletAddress: apistore.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
-        baseCurrencyCode: 'usd',
-        // baseCurrencyAmount: '50',
-      };
-    });
     const chainsStatus = ref({ status: true, failed: [], relayer: true });
-    const mpQuery = computed(() => {
-      return new URLSearchParams(mpParams.value).toString();
-    });
-    const mpUrl = computed(() => {
-      return mpDomain.value + '/?' + mpQuery.value;
-    });
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
@@ -392,9 +383,13 @@ export default defineComponent({
       }
     });
 
-    const goMoon = () => {
+    const buyCrypto = () => {
       if (isSignedIn.value) {
-        window.open(mpUrl.value, '', 'height=480,width=320');
+        if (useCountry().includes('America')) {
+          emitter.emit('simplex');
+        } else {
+          emitter.emit('moonpay');
+        }
       } else {
         emitter.emit('toggle-settings-modal');
       }
@@ -1129,7 +1124,7 @@ export default defineComponent({
       feeWarning,
       errorDetails,
       acceptedWarning,
-      goMoon,
+      buyCrypto,
       chainsStatus,
       failedChainsText,
       showChainError,
