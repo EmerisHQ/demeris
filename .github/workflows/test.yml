@@ -19,8 +19,12 @@ jobs:
       - name: npm install
         run: npm install
 
-      - name: Cypress run
-        run: npm run cypress
+      - name: Cypress Run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm run serve
+          wait-on: http://localhost:8080/
+
   test:
     runs-on: self-hosted
 
