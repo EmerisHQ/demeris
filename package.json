@@ -1,18 +1,15 @@
 {
   "name": "emeris-web",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "test:unit": "jest",
     "lint": "vue-cli-service lint",
+    "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
-    "build:staging": "vue-cli-service build --mode staging",
-    "prepare": "simple-git-hooks",
-    "serve:production": "NODE_ENV=development vue-cli-service serve --mode production",
-    "serve:staging": "NODE_ENV=development vue-cli-service serve --mode staging"
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.14.5",
@@ -34,7 +31,7 @@
     "@starport/vuex": "0.1.53",
     "@types/long": "^4.0.1",
     "@xstate/vue": "^0.8.1",
-    "apexcharts": "^3.33.0",
+    "apexcharts": "^3.22.2",
     "axios": "^0.21.1",
     "bech32": "^2.0.0",
     "bignumber.js": "^9.0.1",

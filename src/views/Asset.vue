@@ -31,7 +31,7 @@
         />
 
         <!-- Balance -->
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
+        <BuyCryptoBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
@@ -153,7 +153,7 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
+        <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
   </AppLayout>
@@ -162,17 +162,17 @@
 <script lang="ts">
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -205,7 +205,7 @@ export default defineComponent({
     Pools,
     TooltipPools,
     PoolBanner,
-    MoonpayBanner,
+    BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
   },
@@ -221,6 +221,7 @@ export default defineComponent({
     });
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
+    const router = useRouter();
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
@@ -231,6 +232,9 @@ export default defineComponent({
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
+    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+      router.push('/');
+    }
 
     const nativeAsset = computed(() => {
       return nativeBalances.value.find((item) => item.base_denom === denom.value);
@@ -376,7 +380,7 @@ export default defineComponent({
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
         if (displayName.value) {
-          getTokenPrices.value('1');
+          getTokenPrices.value('max');
         }
       });
 

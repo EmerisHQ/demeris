@@ -138,7 +138,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const isCypress = !!window['Cypress'];
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
-      window.keplr.defaultOptions = { sign: { preferNoSetFee: true, preferNoSetMemo: true } };
+
+      window.keplr.defaultOptions = {
+        sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
+      };
 
       if (!isCypress) {
         for (const chain in chains) {

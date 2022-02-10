@@ -24,6 +24,7 @@ export const messages = {
       confirm: 'Confirm',
       continue: 'Continue',
       noFunds: 'Insufficient funds',
+      insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",
       filterRetry: 'Try adjusting your search',
       max: 'Max',
@@ -377,8 +378,16 @@ export const messages = {
         title: 'Purchase {asset}',
         poweredBy: 'Powered by Moonpay',
       },
+      simplexBanner: {
+        title: 'Purchase {asset}',
+        poweredBy: 'Powered by Simplex',
+      },
       avatar: {
         priceApiDown: 'Asset prices are currently unavailable.',
+      },
+      simplex: {
+        transactionSuccessful: 'Transaction successful. Please refresh this page.',
+        transactionFailed: 'Transaction failed. Please refresh this page.',
       },
     },
     context: {
@@ -391,6 +400,9 @@ export const messages = {
         title: 'Chains',
       },
       moonpay: {
+        cta: 'Add crypto to your account',
+      },
+      simplex: {
         cta: 'Add crypto to your account',
       },
       transaction: {
@@ -406,6 +418,8 @@ export const messages = {
         amount: 'Amount',
         balance: 'Balance',
         onchain: '{amount} on {chain}',
+        lastWeek: 'Last 7 Days',
+        lastDay: '24h',
         viewAll: 'View all',
       },
       pools: {
@@ -498,6 +512,7 @@ export const messages = {
         available: 'available',
         pool: 'pool',
         firstProvider: 'You are the first liquidity provider',
+        insufficientAmountHint: 'The amount you are trying to supply is too low. Please try a greater amount',
         firstProviderWarning:
           'As the first liquidity provider to the {tickerA} · {tickerB} pool, you will be creating the pool and setting the price. Proceed with caution.',
         supplyLbl: 'Supply',
