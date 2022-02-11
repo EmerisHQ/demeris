@@ -25,11 +25,11 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 // cypress/support/command.js
 // import addExtensionCommands from 'cypress-browser-extension-plugin/commands';
-import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
+// import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 
-addMatchImageSnapshotCommand({
-  failureThreshold: 4.2,
-  failureThresholdType: 'percent',
-  customDiffConfig: { threshold: 0.1 },
-  capture: 'viewport',
-});
+// addMatchImageSnapshotCommand({
+//   failureThreshold: 4.2,
+//   failureThresholdType: 'percent',
+//   customDiffConfig: { threshold: 0.1 },
+//   capture: 'viewport',
+// });
