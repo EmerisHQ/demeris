@@ -12,7 +12,7 @@ describe('compare each subpage with screenshot', () => {
     welcomePage.betaAgreeButton().click();
   });
 
-  it('Assets subpage', () => {
+  it.skip('Assets subpage', () => {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
@@ -23,7 +23,7 @@ describe('compare each subpage with screenshot', () => {
     cy.matchImageSnapshot('assetsSubpage');
   });
 
-  it('Pools subpage', () => {
+  it.skip('Pools subpage', () => {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
@@ -34,7 +34,7 @@ describe('compare each subpage with screenshot', () => {
     cy.matchImageSnapshot('poolsSubpage');
   });
 
-  it('Main page', () => {
+  it.skip('Main page', () => {
     let navbar = new Navbar();
 
     navbar.navbarLogo().click();
