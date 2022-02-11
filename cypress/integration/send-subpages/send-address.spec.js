@@ -14,7 +14,7 @@ describe('Check availability of send/address subpage elements', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it('fill in form Recipient form', function () {
+  it.skip('fill in form Recipient form', function () {
     let navbar = new Navbar();
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
@@ -35,7 +35,7 @@ describe('Check availability of send/address subpage elements', function () {
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
   });
 
-  it('fill in form Amount form with Slow fee', function () {
+  it.skip('fill in form Amount form with Slow fee', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
     recipientFormGoThrough();
@@ -48,7 +48,7 @@ describe('Check availability of send/address subpage elements', function () {
     sendToAddresseSubpage.continueButton().click();
   });
 
-  it('check Review form', function () {
+  it.skip('check Review form', function () {
     recipientFormGoThrough();
     amountFormGoThrough();
 

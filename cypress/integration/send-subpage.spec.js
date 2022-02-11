@@ -11,7 +11,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it('Send - Navbar element', function () {
+  it.skip('Send - Navbar element', function () {
     let sendPage = new Send();
     let subPagePath = new SubPagesPaths();
 

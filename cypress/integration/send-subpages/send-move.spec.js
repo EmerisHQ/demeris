@@ -11,7 +11,7 @@ describe('Check availability of send/move subpage elements', function () {
     welcomePage.connectKeplrButton().click();
     welcomePage.betaAgreeButton().click();
   });
-  it('fill in form amount form', function () {
+  it.skip('fill in form amount form', function () {
     let navbar = new Navbar();
     let moveAssetsSubpage = new MoveAssetsSubpage();
 

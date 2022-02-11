@@ -11,7 +11,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
+  it.skip('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
@@ -36,7 +36,7 @@ describe('Navbar elements location and availibility', function () {
     cy.url().should('eq', Cypress.config().baseUrl);
   });
 
-  it('"Receive" navbar element', function () {
+  it.skip('"Receive" navbar element', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
@@ -47,7 +47,7 @@ describe('Navbar elements location and availibility', function () {
     cy.matchImageSnapshot('receiveSubPage');
   });
 
-  it('"Send" navbar element', function () {
+  it.skip('"Send" navbar element', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
