@@ -25,7 +25,7 @@
             @row-click="openAssetPage"
           />
 
-          <MoonpayBanner v-if="!balances.length" :title="$t('context.moonpay.cta')" size="large" />
+          <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
         <section class="mt-16">
           <header class="flex justify-between items-center mb-6">
@@ -58,8 +58,8 @@ import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 
 import AssetsTable from '@/components/assets/AssetsTable';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import Intro from '@/components/common/Intro.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -68,14 +68,13 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { pageview } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Portfolio',
   components: {
     AppLayout,
     Button,
-    MoonpayBanner,
+    BuyCryptoBanner,
     LiquiditySwap,
     TotalPrice,
     AssetsTable,
@@ -91,10 +90,6 @@ export default {
         title: t('navbar.portfolio'),
       })),
     );
-
-    if (featureRunning('TEST_SHOW_CONSOLE_LOG')) {
-      console.log('Feature: TEST_SHOW_CONSOLE_LOG is running');
-    }
 
     const router = useRouter();
     const { balances } = useAccount();

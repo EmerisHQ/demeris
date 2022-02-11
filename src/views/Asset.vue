@@ -5,7 +5,7 @@
         <!-- Info -->
 
         <header>
-          <div class="sm:flex items-center flex-wrap gap-y-3">
+          <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
               <div class="sm:flex items-baseline flex-wrap">
@@ -15,6 +15,7 @@
               <Price
                 v-tippy
                 :amount="{ amount: 0, denom }"
+                :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold"
                 content="Current asset price"
               />
@@ -28,10 +29,11 @@
           :data-stream="dataStream"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
+          @priceDiff="setPriceDifference"
         />
 
         <!-- Balance -->
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
+        <BuyCryptoBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
@@ -158,7 +160,7 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
+        <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
   </AppLayout>
@@ -172,12 +174,12 @@ import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -210,7 +212,7 @@ export default defineComponent({
     Pools,
     TooltipPools,
     PoolBanner,
-    MoonpayBanner,
+    BuyCryptoBanner,
     ChainDownWarning,
     AreaChart,
   },
@@ -402,7 +404,13 @@ export default defineComponent({
     const dataStream = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
     });
+
     const getTokenPrices = ref(null);
+    let priceDiffObject = ref(null);
+
+    const setPriceDifference = (priceDiff: any) => {
+      priceDiffObject.value = priceDiff;
+    };
 
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
@@ -470,6 +478,8 @@ export default defineComponent({
       getTokenPrices,
       showPriceChart,
       showPriceChartLoadingSkeleton,
+      priceDiffObject,
+      setPriceDifference,
     };
   },
 });
