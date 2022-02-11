@@ -59,6 +59,10 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
+        with:
+          wait-on: 'http://localhost:8080'
+          # wait for 2 minutes for the server to respond
+          wait-on-timeout: 120
 
       - name: Test
         run: npm run test:unit -- --runInBand
