@@ -165,7 +165,6 @@
 <script lang="ts">
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
-import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
@@ -176,6 +175,7 @@ import Ticker from '@/components/common/Ticker.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 
 import ValidatorBadge from '../common/ValidatorBadge.vue';
 
@@ -217,14 +217,17 @@ export default defineComponent({
   emits: ['selectValidator'],
   setup(props, { emit }) {
     /* hooks */
-    const router = useRouter();
     const store = useStore();
 
-    /* preset variables */
-    const baseDenom = router.currentRoute.value.params.denom as string;
-    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
-
     const propsRef = toRefs(props);
+    /* preset variables */
+    const chain = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+        chain_name: propsRef.validatorList.value[0].chain_name,
+      });
+    });
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
 
     /* variables */
     const keyword = ref<string>('');

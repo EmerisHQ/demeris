@@ -95,7 +95,6 @@
 import { computed, defineComponent, inject, PropType, reactive, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
-import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -111,6 +110,7 @@ import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 import { MultiDelegateForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { isNative, parseCoins } from '@/utils/basic';
@@ -140,7 +140,6 @@ export default defineComponent({
   setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
-    const route = useRoute();
     const store = useStore();
 
     const form = inject<MultiDelegateForm>('stakeForm');
@@ -161,8 +160,10 @@ export default defineComponent({
     useMeta({ title: t('context.stake.title') });
 
     /* variables */
-    const baseDenom = route.params.denom as string;
-
+    const chain = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
+    });
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const hasIBC = computed(() => {
       const denomTypes = form.stakes.map((x) => {
         return isNative(x.denom) ? 'native' : 'ibc';

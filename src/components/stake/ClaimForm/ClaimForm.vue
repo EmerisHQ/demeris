@@ -29,7 +29,7 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
@@ -37,6 +37,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import useStaking from '@/composables/useStaking';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 import { ClaimRewardsAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
@@ -75,9 +76,13 @@ export default defineComponent({
 
     const { getStakingRewardsByBaseDenom, getValidatorMoniker, getChainNameByBaseDenom } = useStaking();
 
-    const route = useRoute();
     const propsRef = toRefs(props);
-    const baseDenom = route.params.denom as string;
+    const chain = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({
+        chain_name: propsRef.validators.value[0].chain_name,
+      });
+    });
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });

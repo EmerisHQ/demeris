@@ -36,7 +36,6 @@
 <script lang="ts">
 import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -47,6 +46,7 @@ import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
 import { Step, UndelegateAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 
@@ -76,7 +76,6 @@ export default defineComponent({
   },
   emits: ['previous', 'next', 'update:modelValue'],
   setup(props, { emit }) {
-    const route = useRoute();
     const store = useStore();
     const { getStakingRewardsByBaseDenom } = useStaking();
     const actionSteps = ref<Step[]>([]);
@@ -87,7 +86,11 @@ export default defineComponent({
       get: () => propsRef.modelValue.value,
       set: (value) => emit('update:modelValue', value),
     });
-    const baseDenom = route.params.denom as string;
+
+    const chain = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+    });
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
