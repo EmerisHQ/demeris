@@ -351,6 +351,7 @@ export const messages = {
         disconnectWallet: 'Disconnect wallet',
         connectWallet: 'Connect wallet',
         support: 'Support',
+        telegram: 'Telegram',
         twitter: 'Twitter',
         privacy: 'Privacy',
         tos: 'Terms of Service',
