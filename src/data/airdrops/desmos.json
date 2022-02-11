@@ -1,0 +1,37 @@
+{
+  "project": "Desmos",
+  "projectWebsiteUrl": "https://desmos.network/",
+  "projectDescription": "Desmos is a public blockchain protocol built on Cosmos-SDK created to support and build open, decentralized, and censorship-resistant social networks and applications, specifically targeting those that are user-focused. It aims to solve the issues of centralized social networks and their lack of privacy/security through implementing anonymity features and improving social media users’ overall health when communicating and interacting online. Its main feature is Demos Profiles, where users can create and manage their own cross-chain digital identities for proof and verification purposes from a single entity, leveraging IBC allows them to link their decentralized identity to other interconnected blockchains or applications within the Cosmos ecosystem, establishing ownership between accounts across multiple chains. The protocol is powered by the DSM token, which can be staked to secure the network in return for platform transaction fees and inflation rewards, as well as a governance mechanism for its holders.",
+  "chainName": "Desmos",
+  "chainID": "desmos-mainnet",
+  "tokenTicker": "DSM",
+  "tokenIcon": "https://raw.githubusercontent.com/cosmos/chain-registry/master/desmos/images/dsm.png",
+  "airdropStartDate": "2021-11-25",
+  "twitterUrl": "https://twitter.com/DesmosNetwork",
+  "discordUrl": "https://discord.desmos.network/",
+  "mediumUrl": "https://medium.com/desmosnetwork",
+  "airdropBlogUrl": "https://medium.com/desmosnetwork/desmos-airdrop-faqs-d5107dd34f17",
+  "airdropEndDate": "2022-02-26",
+  "snapshotDate": ["2021-08-31", "2021-09-21", "2021-09-30", "2021-10-31"],
+  "eligibleTokens": ["OSMO", "ATOM", "AKT", "BAND", "CRO", "JUNO", "KAVA", "LIKE", "LUNA", "NGM", "REGEN"],
+  "eligibilityCriteria": [
+    {
+      "description": "ATOM, OSMO, AKT, BAND, CRO, JUNO, KAVA, LIKE, LUNA, NGA, REGEN holders"
+    },
+    {
+      "description": "OSMO liquidity providers"
+    }
+  ],
+  "eligibilityCheckEndpoint": "https://api.airdrop.desmos.network/users/<address>",
+  "unanimousClaim": true,
+  "claimActions": [
+    {
+      "actionType": "plaintext",
+      "description": "Create a Desmos wallet"
+    },
+    {
+      "actionType": "plaintext",
+      "description": "Connect your eligible account(s) to your Desmos profile"
+    }
+  ]
+}

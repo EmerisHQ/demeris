@@ -1,0 +1,28 @@
+{
+  "project": "GAME",
+  "projectWebsiteUrl": "https://gamenet.one/",
+  "projectDescription": "GAME is a fair and secure distributed game platform that supports the development of new games and makes it easier to trade valuable data such as items, weapons, and armor in the game. These in-game items will be distributed to the market as uniquely defined tokens on GAME Hub, enabling transactions without third parties. Unlike the conventional centralized game structure, GAME creates new value for data in a game virtual space because token ownership does not belong to the game operator. Ordinal blockchain games built on Ethereum are not fast enough to achieve a good user experience. GAME's Cosmos-built PoS blockchain platform realizes high throughput to significantly improve usability. It's also highly scalable, flexible, and secure, with IBC enabled to connect to other Cosmos ecosystem chains.",
+  "chainName": "GAME",
+  "chainID": "GAME-1",
+  "tokenTicker": "GAME",
+  "tokenIcon": "An SVG icon",
+  "airdropStartDate": "H1 2022",
+  "twitterUrl": "",
+  "discordUrl": "",
+  "mediumUrl": "https://medium.com/game",
+  "airdropBlogUrl": "https://medium.com/game/game-airdrop-for-atom-holder-563336c5f32e",
+  "airdropEndDate": "2022-06-01",
+  "snapshotDate": ["2021-02-18", "2021-11-01"],
+  "eligibleTokens": ["OSMO", "ATOM", "LUNA", "XPRT"],
+  "eligibilityCriteria": [
+    {
+      "description": "ATOM holders"
+    }
+  ],
+  "eligibilityCheckEndpoint": "https://airdrop-api.gamenet.one/<address>",
+  "claimActions": [
+    {
+      "actionType": "autodrop"
+    }
+  ]
+}

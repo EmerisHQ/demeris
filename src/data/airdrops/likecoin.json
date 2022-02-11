@@ -1,0 +1,25 @@
+{
+  "project": "Likecoin",
+  "projectWebsiteUrl": "https://about.like.co/",
+  "projectDescription": "LikeCoin is a decentralized publishing infrastructure that aims to promote and solidify the ownership and verifiability of online content for creators and consumers, storing immutable and valuable metadata by registering it within its blockchain. Users on the platform can utilize its registry protocol called ISCN (International Standard Content Number) to store and maintain this data, which keeps a record of important information such as the content’s timestamp, author, title, licensing, and other details. LikeCoin provides SDK plugins for publication platforms like news outlets, social media, and blogging websites to integrate to Web3, focusing on integrating with platforms like WordPress, Medium, and Vocus. There is also existing media powered by LikeCoin, including independent media in Hong Kong and Taiwan. LIKE is the utility token to facilitate the registration and protocol fee on-chain. Creators are also tipped in LIKE whenever their content drives engagement through likes or shares on the network.",
+  "chainName": "LikeCoin",
+  "chainID": "likecoin-mainnet-2",
+  "tokenTicker": "LIKE",
+  "tokenIcon": "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/images/like.svg",
+  "airdropStartDate": "2022-02-21",
+  "twitterUrl": "https://twitter.com/likecoin",
+  "discordUrl": "https://discord.com/invite/W4DQ6peZZZ",
+  "mediumUrl": "https://blog.like.co/",
+  "airdropBlogUrl": "https://blog.like.co/proposal-to-fairdrop-likecoin-to-the-cosmos-community-and-civic-likers-d64d841287d8",
+  "airdropEndDate": "",
+  "snapshotDate": "2021-11-25",
+  "eligibleTokens": ["OSMO", "ATOM"],
+  "eligibilityCriteria": [
+    {
+      "description": "ATOM and OSMO holders, delegators and liquidity providers"
+    },
+    {
+      "description": "Civic Liker"
+    }
+  ]
+}

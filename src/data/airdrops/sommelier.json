@@ -1,0 +1,29 @@
+{
+  "project": "Sommelier",
+  "projectWebsiteUrl": "https://sommelier.finance/",
+  "projectDescription": "Sommelier is a DeFi blockchain protocol and bi-directional Ethereum bridge that serves as a co-processor to Ethereum, built on the Cosmos Stargate SDK. The protocol is powered by validators and liquidity providers (LPs) who benefit from a wide array of transaction features, such as portfolio rebalancing and limit orders. Originally created to support multi-chain transactions, Sommelier has predominantly focused and tailored its overall model to tap into Ethereum’s vast DeFi ecosystem, helping support DeFi liquidity and transactions by providing far more efficient throughput. Through automated portfolio rebalancing, LPs can protect themselves against impermanent loss while also having their pool token holdings optimized to ensure they’re always earning the highest yield. The protocol also aggregates and batches transactions, thereby reducing gas fees, providing an attractive alternative to Ethereum’s high transaction costs. As for security, Sommelier uses a decentralized governance mechanism run by validators, ensuring top-notch safety of user funds.",
+  "chainName": "Sommelier",
+  "chainID": "sommelier-3",
+  "tokenTicker": "SOMM",
+  "tokenIcon": "https://github.com/osmosis-labs/assetlists/raw/main/images/somm.png",
+  "airdropStartDate": "2022-02-01",
+  "twitterUrl": "https://twitter.com/sommfinance",
+  "discordUrl": "https://discord.gg/bKwnRPTynU",
+  "mediumUrl": "",
+  "airdropBlogUrl": "https://community.sommelier.finance/t/sips-002-a-proposal-for-a-sommelier-token-airdrop-of-somm-to-select-liquidity-providers/272",
+  "airdropEndDate": "2022-03-31",
+  "snapshotDate": "2021-10-31",
+  "eligibleTokens": ["OSMO"],
+  "eligibilityCriteria": [
+    {
+      "description": "Osmosis liquidity providers"
+    }
+  ],
+  "eligibilityCheckEndpoint": "",
+  "unanimousClaim": false,
+  "claimActions": [
+    {
+      "actionType": "autodrop"
+    }
+  ]
+}

@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted,ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -40,9 +40,7 @@ import { useStore } from 'vuex';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
-// import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
-import airdrops from '@/data/airdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
@@ -76,23 +74,15 @@ export default {
 
     const router = useRouter();
 
-    if (airdrops.length > 0) {
-      airdrops.forEach(async (airdrop) => {
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
-          subscribe: false,
-          params: {
-            airdropName: airdrop,
-          },
+    onMounted(() => {
+      require
+        .context('@/data/airdrops', true, /\.json$/)
+        .keys()
+        .forEach(async (airdrop) => {
+          console.log('checking here', airdrop.slice(2));
+          fetch(`../data/airdrops/${airdrop}`).then((response) => console.log('response', response));
         });
-      });
-    }
-
-    // onMounted(() => {
-    //   require
-    //     .context('../components/', true, /\.vue$/)
-    //     .keys()
-    //     .forEach((r) => console.log('checking here', r));
-    // });
+    });
 
     const openAirdropPage = (airdrop: Airdrop) => {
       router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });

@@ -77,7 +77,6 @@ import GoBack from '@/components/common/headers/GoBack.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
-import airdropsData from '@/data/airdrops';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
@@ -106,7 +105,6 @@ export default defineComponent({
     );
 
     const router = useRouter();
-    const airdrops = airdropsData;
 
     const openAirdropPage = (airdrop: Airdrop) => {
       router.push('/airdrop');
@@ -125,7 +123,7 @@ export default defineComponent({
       router.push('/airdrops');
     };
 
-    return { airdrops, openAirdropPage, selectedAirdrop, goBackToAirdropspage };
+    return { openAirdropPage, selectedAirdrop, goBackToAirdropspage };
   },
 });
 </script>

@@ -1,0 +1,30 @@
+{
+  "project": "Comdex",
+  "projectWebsiteUrl": "https://comdex.one/home",
+  "projectDescription": "Comdex is a decentralized synthetic asset exchange that allows users to hold Cosmos-based digital assets and collateralize them to mint cAssets (such as ATOM and XPRT), which are the respective on-chain derivative tokens that can be traded and exchanged on its cSwap AMM (Automated Market Maker). It was designed to create more equal opportunities in DeFi, allowing for greater access for investors when it comes to exposure to commodity assets and debt. The protocol is also IBC-enabled, allowing for interoperability across the Cosmos ecosystem. There’s also a cross-chain bridge that allows users to transfer their assets to Comdex from other blockchains, and vice versa. CMDX is the protocol’s native token with a range of utilities, from serving as a payment mechanism to securing the overall network. Token holders can also stake it to earn rewards and participate in governance proposals while leveraging it as collateral to mint synthetic assets.",
+  "chainName": "Comdex",
+  "chainID": "comdex-1",
+  "tokenTicker": "CMDX",
+  "tokenIcon": "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/images/cmdx.png",
+  "airdropStartDate": "2021-12-09",
+  "twitterUrl": "https://twitter.com/ComdexOfficial",
+  "mediumUrl": "https://comdexofficial.medium.com/",
+  "airdropBlogUrl": "https://blog.comdex.one/how-to-claim-your-cmdx-airdrop-47873917e10",
+  "airdropEndDate": "2022-06",
+  "snapshotDate": "H1 2023",
+  "eligibleTokens": ["OSMO", "ATOM", "LUNA", "XPRT"],
+  "eligibilityCriteria": [
+    {
+      "description": "ATOM, OSMO, LUNA or XPRT holders"
+    }
+  ],
+  "eligibilityCheckEndpoint": "http://eligibility.comdex.one/check/v2/<address>",
+  "unanimousClaim": true,
+  "claimActions": [
+    {
+      "actionType": "plaintext",
+      "description": "Navigate to the website, submit your address, accept the disclaimer and claim the airdrop. Your airdrop will be unlocked entirely in five phases. The first phase is when you are claiming your airdrop for the first time, and your subsequent four phases will be unlocked automatically in every 3-months.",
+      "unlockPercentage": 20
+    }
+  ]
+}

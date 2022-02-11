@@ -1,0 +1,26 @@
+{
+  "project": "Bitsong",
+  "projectWebsiteUrl": "https://bitsong.io",
+  "projectDescription": "BitSong gives artists, fans, distributors, and music labels a decentralized open marketplace for sharing music. It operates through a Delegated Proof of Stake (DPoS) consensus mechanism and is IBC-enabled, to interact with other Cosmos chains. The platform allows users to stream and download various types of music, monetize their contributions through rewards, buy NFTs, and invest in music. Its earnings model makes the music industry fairer through transparency and speed, helping shift opportunity and power back to artists and fans worldwide. NFTs back the various digital media that can be created on BitSong, including music, art, videos, and more. All content on the platform is completely immutable and comes with provable ownership, making every creation unique to the original artist. BTSG is the platform’s native token for validating transactions and staking to earn high-yield rewards. Users can also sell their NFTs and receive BTSG or Fan Tokens as payment.",
+  "chainName": "Bitsong",
+  "chainID": "bitsong-2b",
+  "tokenTicker": "BTSG",
+  "tokenIcon": "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/images/btsg.svg",
+  "airdropStartDate": "2021-12-30",
+  "twitterUrl": "https://twitter.com/BitSongOfficial",
+  "mediumUrl": "https://bitsongofficial.medium.com/",
+  "airdropBlogUrl": "https://bitsongofficial.medium.com/btsg-airdrop-is-here-f321e32966d6",
+  "airdropEndDate": "2022-06",
+  "snapshotDate": "",
+  "eligibleTokens": ["OSMO", "ATOM", "JUNO"],
+  "eligibilityCriteria": [
+    {
+      "description": "ATOM, JUNO and OSMO stakers"
+    }
+  ],
+  "claimActions": [
+    {
+      "actionType": "autodrop"
+    }
+  ]
+}
