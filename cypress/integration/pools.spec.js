@@ -1,8 +1,13 @@
 import { Pools } from '../support/pages/pools';
+import { WelcomePage } from '../support/pages/welcome-page';
 
 describe('Pools location and availibility', function () {
   beforeEach(() => {
     cy.visit(Cypress.config().baseUrl);
+
+    let welcomePage = new WelcomePage();
+    welcomePage.connectKeplrButton().click();
+    welcomePage.betaAgreeButton().click();
   });
 
   it('Pool search field', function () {

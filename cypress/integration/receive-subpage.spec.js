@@ -16,7 +16,7 @@ describe('Navbar elements location and availibility', function () {
 
     receivePage.fillInSearchField('ATOM');
     receivePage.teble().should('contain', 'ATOM');
-    receivePage.teble().should('contain', 'Cosmos Hub Emeris');
+    receivePage.teble().should('contain', 'Cosmos Hub');
 
     receivePage.searchField().clear();
     receivePage.fillInSearchField('test');
