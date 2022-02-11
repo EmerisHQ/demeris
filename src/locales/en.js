@@ -533,6 +533,7 @@ export const messages = {
         pools: 'Pools',
         staking: 'Staking',
         highLow: 'High {high} / Low {low}',
+        priceDiff: '{diff} ({percent})',
       },
       assets: {
         assets: 'Assets',
