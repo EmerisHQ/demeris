@@ -51,6 +51,7 @@
           :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
           placeholder="Custom"
           :force-border-visible="isCustomSelected && alertStatus == 'error'"
+          :value-formatter="format"
           type="text"
           @update:modelValue="(e) => setCustomSlippage(e)"
           @focus:value="(e) => onCustomSlippageFocussed(e)"
@@ -164,6 +165,23 @@ export default defineComponent({
     );
     const limitPriceText = ref('');
     const minReceivedText = ref(null);
+
+    const format = (value: string) => {
+      let newValue = value;
+      // Only numbers
+      newValue = newValue.replace(/[^0-9.]/g, '');
+
+      if (newValue.startsWith('.')) {
+        newValue = '0' + newValue;
+      }
+
+      if (newValue.split('').filter((char) => char === '.').length > 1) {
+        // Remove subsequent separators
+        newValue = newValue.replace(/(?<=\..*)\./g, '');
+      }
+
+      return newValue;
+    };
 
     const state = reactive({
       slippage: computed(() => {
@@ -321,6 +339,7 @@ export default defineComponent({
       suffixParent,
       onKeyDown,
       inputBackground,
+      format,
     };
   },
 });

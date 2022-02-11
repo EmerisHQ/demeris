@@ -87,6 +87,7 @@ export default defineComponent({
     },
     borderColour: { type: String, default: null },
     forceBorderVisible: { type: Boolean, default: false },
+    valueFormatter: { type: Function, default: null },
   },
 
   emits: ['update:modelValue', 'focus:value', 'blur:value'],
@@ -94,7 +95,13 @@ export default defineComponent({
   setup(props, { emit, slots }) {
     const model = computed({
       get: () => props.modelValue,
-      set: (value) => emit('update:modelValue', value),
+      set: (value) => {
+        let currentValue = value;
+        if (props.valueFormatter) {
+          currentValue = props.valueFormatter(currentValue);
+        }
+        emit('update:modelValue', currentValue);
+      },
     });
 
     const hasStartSlot = computed(() => !!slots.start);
