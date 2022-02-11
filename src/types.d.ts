@@ -11,6 +11,7 @@ declare global {
   export interface KeplrSignOptions {
     readonly preferNoSetFee?: boolean;
     readonly preferNoSetMemo?: boolean;
+    readonly disableBalanceCheck?: boolean;
   }
   interface CustomKeplr extends Keplr {
     enable(chainId: string | string[]): Promise<void>;
