@@ -82,7 +82,7 @@
     "@vue/test-utils": "^2.0.0-0",
     "@vue/vue3-jest": "^27.0.0-alpha.4",
     "autoprefixer": "^9.8.6",
-    "cypress": "8.4.0",
+    "cypress": "9.4.1",
     "cypress-browser-extension-plugin": "^0.1.0",
     "cypress-wait-until": "^1.7.2",
     "cypress-xpath": "^1.6.2",
