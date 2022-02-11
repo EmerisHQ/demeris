@@ -163,6 +163,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
@@ -208,11 +209,6 @@ export default defineComponent({
       required: false,
       default: '',
     },
-    totalStakedAmount: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
   },
   emits: ['selectValidator'],
   setup(props, { emit }) {
@@ -234,7 +230,13 @@ export default defineComponent({
     const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST);
     const sortBy = ref('power');
     const sortOrder = ref('desc');
-
+    const totalStakedAmount = computed(() => {
+      return propsRef.validatorList.value
+        .reduce((acc, validator) => {
+          return acc.plus(new BigNumber(validator.tokens));
+        }, new BigNumber(0))
+        .toString();
+    });
     /* functions */
     const filteredAndSortedValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
@@ -273,21 +275,15 @@ export default defineComponent({
       return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
     };
     const getAmountDisplayValue = (value) => {
-      return Math.trunc(parseInt(value) / Math.pow(10, precision)).toLocaleString('en-US');
+      return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US');
     };
     const getVotingPowerPercDisplayValue = (value) => {
-      return Math.trunc((value / props.totalStakedAmount) * 10000) / 100 + '%';
+      return (
+        new BigNumber(value).dividedBy(totalStakedAmount.value).multipliedBy(100).decimalPlaces(2).toString() + '%'
+      );
     };
     const selectValidator = (vali) => {
       emit('selectValidator', vali);
-    };
-
-    const orderPools = (unorderedPools) => {
-      return orderBy(
-        unorderedPools,
-        ['ownShare', (x) => x.totalLiquidityPrice || 0, 'displayName'],
-        ['desc', 'desc', 'asc'],
-      );
     };
 
     return {
@@ -298,7 +294,7 @@ export default defineComponent({
       getAmountDisplayValue,
       getVotingPowerPercDisplayValue,
       selectValidator,
-      orderPools,
+
       hasActions,
       sort,
       sortBy,
