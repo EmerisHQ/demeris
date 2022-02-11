@@ -10,41 +10,29 @@
       <CircleSymbol :denom="baseDenom" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
       <div>
         <div class="flex items-center font-medium text-1">
-          {{ validator.validator.moniker }}
+          {{ validator.moniker }}
           <Icon name="SmallDownIcon" :icon-size="1" class="ml-1" />
         </div>
         <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
-          {{ validator.validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
+          {{ validator.stakedAmount / 10 ** precision ?? 0 }} <Denom :name="baseDenom" /> staked
         </div>
       </div>
     </div>
     <label class="denom-select__coin-amount w-full text-right text-muted hover:text-text focus-within:text-text">
       <AmountInput
-        :model-value="validator.inputAmount"
-        class="
-          denom-select__coin-amount-input
-          text-text
-          w-full
-          p-0
-          text-right
-          font-bold
-          bg-transparent
-          placeholder-inactive
-          appearance-none
-          border-none
-        "
+        v-model="inputAmount"
+        class="denom-select__coin-amount-input text-text w-full p-0 text-right font-bold bg-transparent placeholder-inactive appearance-none border-none"
         :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
-        @input="$emit('update:amount', $event.target.value)"
       />
-      <Price :amount="{ denom: baseDenom, amount: inputAmount * 10 ** precision }" />
+      <Price :amount="{ denom: baseDenom, amount: (parseFloat(inputAmount) * 10 ** precision).toString() }" />
     </label>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
@@ -58,6 +46,11 @@ export default defineComponent({
   name: 'ValidatorSelect',
   components: { AmountInput, Denom, CircleSymbol, Icon, Price },
   props: {
+    amount: {
+      type: String as PropType<string>,
+      required: true,
+      default: '',
+    },
     size: { type: String, required: false, default: 'md' },
     validator: {
       type: Object,
@@ -69,22 +62,24 @@ export default defineComponent({
   },
   emits: ['update:amount', 'select'],
   setup(props, { emit }) {
-    const router = useRouter();
+    const route = useRoute();
     const store = useStore();
-    const baseDenom = router.currentRoute.value.params.denom as string;
+    const baseDenom = route.params.denom as string;
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
     );
 
+    const propsRef = toRefs(props);
+
     const inputAmount = computed({
-      get: () => props.validator.inputAmount,
+      get: () => propsRef.amount.value,
       set: (value) => emit('update:amount', value),
     });
 
     const selectValidator = () => {
-      emit('select', props.validator.validator);
+      emit('select', propsRef.validator.value);
     };
 
     return {

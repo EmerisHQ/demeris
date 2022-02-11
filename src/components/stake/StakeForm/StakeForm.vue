@@ -12,7 +12,12 @@
     </template>
     <template v-else-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
-      <ValidatorAmountForm :validators="validators" />
+      <ValidatorAmountForm
+        :validators="validators"
+        :steps="steps"
+        @next="generateSteps"
+        @selectanother="selectAnother"
+      />
     </template>
 
     <template v-else-if="['review', 'stake'].includes(step)">
@@ -45,7 +50,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, Prop, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -55,7 +60,7 @@ import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { MultiDelegateAction, MultiDelegateForm } from '@/types/actions';
+import { DelegateForm, MultiDelegateAction, MultiDelegateForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
@@ -141,8 +146,17 @@ export default defineComponent({
         }),
       } as MultiDelegateAction;
     });
+    const isValid = (form: DelegateForm) => {
+      return (
+        form.validatorAddress !== '' &&
+        form.amount !== '' &&
+        form.denom !== '' &&
+        form.chain_name !== '' &&
+        form.from_chain !== ''
+      );
+    };
     watch(form, async () => {
-      if (form.stakes.length > 0 && step.value != 'review') {
+      if (form.stakes.length > 0 && form.stakes.every((x) => isValid(x)) && step.value != 'review') {
         steps.value = await actionHandler(action.value);
       } else {
         steps.value = [];
@@ -153,9 +167,11 @@ export default defineComponent({
       event('review_tx', { event_label: 'Reviewing stake tx', event_category: 'transactions' });
       goToStep('review');
     };
-
+    const selectAnother = (e) => {
+      valToEdit.value = e;
+      goToStep('validator');
+    };
     const goToStep = (value: Step) => {
-      console.log(value);
       step.value = value;
     };
 
@@ -173,7 +189,7 @@ export default defineComponent({
       return propsRef.validators.value.find((x) => x.operator_address == address) ?? undefined;
     };
     const addValidator = (validator) => {
-      if (valToEdit.value) {
+      if (valToEdit.value !== null) {
         form.stakes[valToEdit.value].validatorAddress = validator.operator_address;
         valToEdit.value = null;
       } else {
@@ -183,6 +199,7 @@ export default defineComponent({
           denom: '',
           from_chain: '',
           chain_name: validator.chain_name,
+          from_balance: '',
         });
       }
       goToStep('amount');
@@ -211,6 +228,8 @@ export default defineComponent({
       addValidator,
       validatorsToDisable,
       currentlyEditing,
+      selectAnother,
+      valToEdit,
     };
   },
 });

@@ -21,44 +21,30 @@
             class="bg-surface shadow-card rounded-2xl mt-4 pt-2"
           >
             <ValidatorSelect
-              v-model:amount="vali.amount"
-              :validator="vali.validarot"
+              :amount="vali.amount"
+              :validator="vali.validator"
+              @update:amount="
+                (newAmount) => (form.stakes.find((x) => x.validatorAddress == vali.validatorAddress).amount = newAmount)
+              "
               @select="() => validatorSelectHandler(index)"
             />
 
             <button
-              class="
-                py-4
-                px-5
-                flex
-                items-center
-                justify-between
-                w-full
-                outline-none
-                text-left
-                group
-                active:opacity-70
-                transition-opacity
-                text-muted
-                hover:text-text
-                focus:text-text
-                border-t border-border
-                rounded-b-2xl
-              "
+              class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
               @click="toggleChainsModal(null, index)"
             >
               <div>
                 {{ $t('pages.addLiquidity.fromLbl') }}
-                <span class="font-medium text-text"><ChainName :name="vali.from?.on_chain" /></span>
+                <span class="font-medium text-text"><ChainName :name="vali.from_chain" /></span>
               </div>
               <div class="flex">
                 <AmountDisplay
                   :amount="{
-                    amount: vali.from?.amount,
-                    denom: vali.from?.base_denom,
+                    amount: vali.from_balance,
+                    denom: vali.denom,
                   }"
                   :class="{
-                    'text-negative-text': compareInputToBalance(vali.inputAmount, vali.from?.amount),
+                    'text-negative-text': compareInputToBalance(vali.amount, vali.from_balance),
                   }"
                 />
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -88,7 +74,7 @@
 
             <!-- Fee -->
             <div class="mt-6 mb-2">
-              <FeeLevelSelector :steps="actionSteps" @update:fees="state.fees = $event" />
+              <FeeLevelSelector :steps="steps" @update:fees="fees = $event" />
             </div>
 
             <!-- IBC transfer alert -->
@@ -106,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { computed, inject, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
@@ -129,7 +115,7 @@ import { MultiDelegateAction, MultiDelegateForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
-export default {
+export default defineComponent({
   name: 'ValidatorAmountForm',
   components: {
     Alert,
@@ -145,6 +131,10 @@ export default {
   },
   props: {
     validators: { type: Array as PropType<any[]>, required: true, default: () => [] },
+    steps: {
+      type: Array as PropType<Step[]>,
+      default: () => [],
+    },
   },
 
   emits: ['selectanother', 'next'],
@@ -161,6 +151,7 @@ export default {
       isChainsModalOpen: false,
       chainsModalSource: 0,
     });
+    const fees = ref({});
     const validators = toRefs(props).validators;
     const validatorsToStakeWith = computed(() => {
       return form.stakes.map((x) => {
@@ -205,8 +196,14 @@ export default {
 
       return result;
     });
-    const totalToStake = computed(
-      () => form.stakes.reduce((total, val) => total + Number(val.amount ?? 0), 0) * 10 ** precision.value,
+    const totalToStake = computed(() =>
+      validatorsToStakeWith.value
+        .reduce(
+          (total, val) =>
+            total + Number(val.amount ?? 0) * 10 ** precision.value + Number(val.validator.stakedAmount ?? 0),
+          0,
+        )
+        .toString(),
     );
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -214,9 +211,8 @@ export default {
       }),
     );
 
-    const compareInputToBalance = (input, balancestring) => {
-      if (input && balancestring) {
-        const balance = parseCoins(balancestring)[0].amount;
+    const compareInputToBalance = (input, balance) => {
+      if (input && balance) {
         const inputAmt = parseFloat(input);
         const balanceAmt = Number(balance) / 10 ** precision.value;
         return inputAmt > balanceAmt;
@@ -238,6 +234,7 @@ export default {
     const toggleChainsModal = (asset: Balance, index: number) => {
       if (asset) {
         form.stakes[index].from_chain = asset.on_chain;
+        form.stakes[index].from_balance = parseCoins(asset.amount)[0].amount;
         form.stakes[index].denom = parseCoins(asset.amount)[0].denom;
       }
       state.chainsModalSource = index;
@@ -247,6 +244,7 @@ export default {
     return {
       state,
       form,
+      fees,
       balances,
       precision,
       baseDenom,
@@ -260,7 +258,7 @@ export default {
       hasIBC,
     };
   },
-};
+});
 </script>
 
 <style lang="scss">
