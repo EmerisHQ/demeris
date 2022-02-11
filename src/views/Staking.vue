@@ -57,11 +57,18 @@
             />
           </div>
         </template>
-        <template v-if="actionType == 'unstake' && step == 'amount'">
-          <div class="max-w-3xl">
-            <StakedValidatorAmount
-              v-model="unstakeAmount"
-              :validator="selectedValidators.slice()[0]"
+        <template v-if="actionType == 'unstake'">
+          <div class="w-full max-w-lg">
+            <UnstakeForm v-model:step="step" :validator="selectedValidators.slice()[0]" @previous="goBack" />
+          </div>
+        </template>
+        <template v-if="actionType == 'switch' && step == 'amount'">
+          <div class="max-w-7xl">
+            <RestakeValidatorAmount
+              v-if="fromValidator"
+              :size="'md'"
+              :from-validator="fromValidator"
+              :to-validator="toValidator"
               @next="
                 (actionSteps) => {
                   setSteps(actionSteps);
@@ -96,12 +103,14 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
+import RestakeValidatorAmount from '@/components/stake/RestakeValidatorAmount.vue';
 import StakedValidatorAmount from '@/components/stake/StakedValidatorAmount.vue';
+import UnstakeForm from '@/components/stake/UnstakeForm';
 import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
@@ -118,9 +127,17 @@ import { keyHashfromAddress } from '@/utils/basic';
 
 type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
-export default {
+export default defineComponent({
   name: 'Staking',
-  components: { Button, Icon, ValidatorsTable, ValidatorAmountForm, TransactionProcessCreator, StakedValidatorAmount },
+  components: {
+    Button,
+    Icon,
+    ValidatorsTable,
+    ValidatorAmountForm,
+    TransactionProcessCreator,
+    UnstakeForm,
+    RestakeValidatorAmount,
+  },
 
   setup() {
     const { t } = useI18n({ useScope: 'global' });
@@ -139,12 +156,17 @@ export default {
     const unstakeAmount = ref<string>('0');
     const selectedValidators = ref([]);
     const step = actionType == 'claim' ? ref('review') : validator ? ref('amount') : ref('validator');
-
+    const fromValidator = ref({});
+    const toValidator = ref({});
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
       const preselectedValidator = validatorList.value.find((x) => x.operator_address == validator);
       if (preselectedValidator) {
-        selectedValidators.value.push(preselectedValidator);
+        if (actionType == 'switch') {
+          fromValidator.value = preselectedValidator;
+        } else {
+          selectedValidators.value.push(preselectedValidator);
+        }
       }
       if (stakingBalances.value.length) {
         validatorList.value.forEach((vali: any) => {
@@ -277,9 +299,11 @@ export default {
       setSteps,
       steps,
       unstakeAmount,
+      fromValidator,
+      toValidator,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

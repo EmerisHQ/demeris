@@ -1,0 +1,92 @@
+<template>
+  <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow">
+    <ValidatorBadge :validator="validator" :size="size" :class="'mr-4'" />
+    <div class="flex items-center font-medium">
+      {{ validator.moniker }}
+    </div>
+    <div class="flex flex-col items-end text-right justify-end">
+      <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <Price :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" />
+      </div>
+      <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap -text-1">
+        <AmountDisplay :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" /> staked
+      </div>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import { computed, defineComponent, toRefs } from 'vue';
+import { useStore } from 'vuex';
+
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import Price from '@/components/common/Price.vue';
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
+import { ChainData } from '@/store/demeris-api/state';
+
+import ValidatorBadge from '../common/ValidatorBadge.vue';
+
+export default defineComponent({
+  name: 'ValidatorDisplay',
+  components: { AmountDisplay, ValidatorBadge, Price },
+  props: {
+    validator: {
+      type: Object,
+      required: true,
+      default: () => {
+        return {};
+      },
+    },
+    size: { type: String, required: false, default: 'md' },
+  },
+  setup(props) {
+    const store = useStore() as RootStoreType;
+    const propsRef = toRefs(props);
+    const chain = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
+    });
+    const stakingDenom = computed(() => {
+      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;
+    });
+    const stakingBalance = computed(() => {
+      return propsRef.validator.value?.stakedAmount;
+    });
+    return {
+      stakingDenom,
+      stakingBalance,
+    };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.denom-select {
+  &--empty &__coin,
+  &--empty &__coin-image {
+    cursor: default;
+  }
+
+  .max-display-width {
+    max-width: 9.375rem;
+  }
+
+  &__coin-amount {
+    &-input {
+      outline: none;
+
+      &::placeholder {
+        transition: color 150ms ease-out;
+      }
+
+      /* Chrome, Safari, Edge, Opera */
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+    &:hover &-input:not(:focus)::placeholder {
+      color: var(--muted);
+    }
+  }
+}
+</style>

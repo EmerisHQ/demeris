@@ -29,7 +29,10 @@
             <div class="text-text text-0">
               {{ vali.moniker }}
             </div>
-            <AmountDisplay class="font-medium" :amount="{ amount: parseInt(vali.reward), denom: rewardsDenom }" />
+            <AmountDisplay
+              class="font-medium"
+              :amount="{ amount: parseInt(vali.reward).toString(), denom: rewardsDenom }"
+            />
             {{ $t(`components.previews.claim.rewards`) }}
           </div>
         </div>
@@ -105,7 +108,7 @@ export default defineComponent({
       return props.step.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
     });
     const rewardsAmount = computed(() => {
-      return parseInt(props.step.transactions[0].data.total);
+      return parseInt(props.step.transactions[0].data.total).toString();
     });
     const validators = computed(() => {
       return props.step.transactions[0].data.rewards;

@@ -228,7 +228,12 @@ export type SendAddressForm = {
   isTermChecked?: boolean;
   balance: Base.Amount;
 };
-
+export type UndelegateForm = {
+  validatorAddress: string;
+  amount: string;
+  denom: string;
+  chain_name: string;
+};
 export type MoveAssetsForm = {
   balance: Base.Amount;
   on_chain: string;

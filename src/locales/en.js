@@ -137,6 +137,9 @@ export const messages = {
         swapFee: 'Swap fee',
         estimate: 'Estimated total fees',
       },
+      unstakeForm: {
+        title: 'Enter amount to unstake',
+      },
       moveForm: {
         title: 'Move assets',
         action: 'Move',
