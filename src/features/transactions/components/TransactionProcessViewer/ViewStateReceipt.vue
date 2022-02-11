@@ -214,8 +214,10 @@ import Collapse from '@/components/ui/Collapse.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
@@ -243,6 +245,11 @@ const titleMap = {
   addliquidity: t('components.txHandlingModal.addLiqActionComplete'),
   withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
   createpool: t('components.txHandlingModal.createPoolActionComplete'),
+  claim: t('components.txHandlingModal.claimActionComplete'),
+  switch: t('components.txHandlingModal.switchActionComplete'),
+  stake: t('components.txHandlingModal.stakeActionComplete'),
+  multistake: t('components.txHandlingModal.stakeActionComplete'),
+  unstake: t('components.txHandlingModal.unstakeActionComplete'),
 };
 
 const previewComponentMap = {
@@ -253,6 +260,8 @@ const previewComponentMap = {
   stake: PreviewStake,
   multistake: PreviewStake,
   unstake: PreviewUnstake,
+  claim: PreviewClaim,
+  switch: PreviewSwitch,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,

@@ -51,6 +51,7 @@ import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidit
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
@@ -79,6 +80,7 @@ const previewComponentMap = {
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
   claim: PreviewClaim,
+  switch: PreviewSwitch,
 };
 
 const titleMap = {
@@ -92,6 +94,7 @@ const titleMap = {
   withdrawliquidity: t('context.transactions.review.withdrawliquidity'),
   createpool: t('context.transactions.review.createpool'),
   claim: t('context.transactions.review.claim'),
+  switch: t('context.transactions.review.switch'),
 };
 
 const step = computed(() => getCurrentStep(state.value.context));
