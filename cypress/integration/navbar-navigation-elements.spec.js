@@ -42,9 +42,6 @@ describe('Navbar elements location and availibility', function () {
 
     navbar.receive().click();
     cy.url().should('eq', Cypress.config().baseUrl + subPagePath.receive_path);
-
-    // cy.viewport(1000, 660);
-    // cy.matchImageSnapshot('receiveSubPage');
   });
 
   it('"Send" navbar element', function () {
@@ -53,8 +50,5 @@ describe('Navbar elements location and availibility', function () {
 
     navbar.send().click();
     cy.url().should('eq', Cypress.config().baseUrl + subPagePath.send_path);
-
-    // cy.viewport(1000, 660);
-    // cy.matchImageSnapshot('sendSubPage');
   });
 });

@@ -1,5 +1,3 @@
-import { Secp256k1HdWallet } from '@cosmjs/amino';
-import { stringToPath } from '@cosmjs/crypto';
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
