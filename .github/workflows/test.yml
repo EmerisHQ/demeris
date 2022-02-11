@@ -48,21 +48,12 @@ jobs:
 
       - name: install image-snapshot plugin
         run: npm -f install --save-dev cypress-image-snapshot
-      
-      # - name: Build
-      #   run: npm run build
-      
-      # - name: run serve
-      #   run: npm run serve &
-      #   env:
-      #     VUE_APP_EMERIS_MNEMONIC: ${{secrets.VUE_APP_EMERIS_MNEMONIC}}
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
           start: npm run serve
           wait-on: 'http://localhost:8080'
-          # wait for 2 minutes for the server to respond
           wait-on-timeout: 180
 
       - name: Test
