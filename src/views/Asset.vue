@@ -5,7 +5,7 @@
         <!-- Info -->
 
         <header>
-          <div class="sm:flex items-center flex-wrap gap-y-3">
+          <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
               <div class="sm:flex items-baseline flex-wrap">
@@ -15,6 +15,7 @@
               <Price
                 v-tippy
                 :amount="{ amount: 0, denom }"
+                :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold"
                 content="Current asset price"
               />
@@ -28,6 +29,7 @@
           :data-stream="dataStream"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
+          @priceDiff="setPriceDifference"
         />
 
         <!-- Balance -->
@@ -375,7 +377,13 @@ export default defineComponent({
     const dataStream = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
     });
+
     const getTokenPrices = ref(null);
+    let priceDiffObject = ref(null);
+
+    const setPriceDifference = (priceDiff: any) => {
+      priceDiffObject.value = priceDiff;
+    };
 
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
@@ -441,6 +449,8 @@ export default defineComponent({
       getTokenPrices,
       showPriceChart,
       showPriceChartLoadingSkeleton,
+      priceDiffObject,
+      setPriceDifference,
     };
   },
 });

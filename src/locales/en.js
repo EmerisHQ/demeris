@@ -351,6 +351,7 @@ export const messages = {
         disconnectWallet: 'Disconnect wallet',
         connectWallet: 'Connect wallet',
         support: 'Support',
+        telegram: 'Telegram',
         twitter: 'Twitter',
         privacy: 'Privacy',
         tos: 'Terms of Service',
@@ -532,6 +533,7 @@ export const messages = {
         pools: 'Pools',
         staking: 'Staking',
         highLow: 'High {high} / Low {low}',
+        priceDiff: '{diff} ({percent})',
       },
       assets: {
         assets: 'Assets',
