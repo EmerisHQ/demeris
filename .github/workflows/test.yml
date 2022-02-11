@@ -15,6 +15,10 @@ jobs:
       matrix:
         node-version: [14.x, 16.x]
 
+    env:
+      VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+      VUE_APP_FEATURE_USE_DEV: true
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -52,8 +56,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          env: VUE_APP_EMERIS_MNEMONIC=${{ secrets.VUE_APP_EMERIS_MNEMONIC }},VUE_APP_FEATURE_USE_DEV=true
-          start: npm run serve:cypress
+          start: npm run serve
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
 
