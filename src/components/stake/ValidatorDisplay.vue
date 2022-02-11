@@ -1,10 +1,10 @@
 <template>
-  <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow">
+  <div class="self-stretch flex items-center flex-shrink-0 pr-3 flex-grow py-6">
     <ValidatorBadge :validator="validator" :size="size" :class="'mr-4'" />
     <div class="flex items-center font-medium">
       {{ validator.moniker }}
     </div>
-    <div class="flex flex-col items-end text-right justify-end">
+    <div class="flex flex-col items-end text-right justify-end flex-grow">
       <div class="text-muted text-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
         <Price :amount="{ amount: validator.stakedAmount, denom: stakingDenom.name }" />
       </div>

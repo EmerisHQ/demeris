@@ -1,7 +1,10 @@
 <template>
-  <div>
-    <UnstakeFormAmountInput v-if="validator" v-model="form.amount" :validator="validator" />
-    <List>
+  <main class="pb-28 flex-1 flex flex-col items-center justify-center">
+    <div class="w-full max-w-lg mx-auto">
+      <UnstakeFormAmountInput v-if="validator" v-model="form.amount" :validator="validator" />
+    </div>
+
+    <div class="mt-2 w-full max-w-sm mx-auto">
       <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
 
       <ListItem inset size="md" label="Total stake remaining">
@@ -16,14 +19,13 @@
           <Price :amount="{ denom: form.denom, amount: stakingRewards }" :show-zero="true" :show-dash="false" />
         </div>
       </ListItem>
-    </List>
-    <!-- Fee -->
-    <div class="mt-6 mb-2">
-      <FeeLevelSelector :steps="steps" @update:fees="fees = $event" />
+      <div class="mt-6 mb-2">
+        <FeeLevelSelector :steps="steps" @update:fees="fees = $event" />
+      </div>
+      <!-- Continue button -->
+      <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="goToReview" />
     </div>
-    <!-- Continue button -->
-    <Button :name="$t('generic_cta.continue')" :disabled="!isValid" @click="goToReview" />
-  </div>
+  </main>
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
@@ -35,7 +37,6 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import Button from '@/components/ui/Button.vue';
-import List from '@/components/ui/List/List.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
@@ -52,7 +53,6 @@ export default defineComponent({
     Button,
     Price,
     FeeLevelSelector,
-    List,
   },
   props: {
     validator: {

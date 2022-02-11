@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, inject, PropType, reactive, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute } from 'vue-router';
@@ -111,9 +111,8 @@ import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { MultiDelegateAction, MultiDelegateForm, Step } from '@/types/actions';
+import { MultiDelegateForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
   name: 'ValidatorAmountForm',

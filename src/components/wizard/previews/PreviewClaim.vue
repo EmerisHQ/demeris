@@ -13,7 +13,7 @@
             <Price :amount="{ denom: rewardsDenom, amount: rewardsAmount }" />
           </div>
         </div>
-        <CircleSymbol :denom="'uatom'" :chain-name="'cosmos-hub'" size="md" class="ml-3" />
+        <CircleSymbol :denom="rewardsDenom" size="md" class="ml-3" />
       </div>
     </ListItem>
 
@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -104,19 +104,16 @@ export default defineComponent({
 
     const baseDenom = route.params.denom as string;
     const validatorList = ref([]);
+    const propsRef = toRefs(props);
     const rewardsDenom = computed(() => {
-      return props.step.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
+      return propsRef.step.value.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
     });
     const rewardsAmount = computed(() => {
-      return parseInt(props.step.transactions[0].data.total).toString();
+      return parseInt(propsRef.step.value.transactions[0].data.total).toString();
     });
     const validators = computed(() => {
-      return props.step.transactions[0].data.rewards;
+      return propsRef.step.value.transactions[0].data.rewards;
     });
-    const fee = computed(() => {
-      return Object.values(Object.values(props.fees)[0]);
-    });
-
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
     });
@@ -128,7 +125,6 @@ export default defineComponent({
       rewardsAmount,
       validators,
       getValidator,
-      fee,
     };
   },
 });

@@ -238,6 +238,13 @@ export type DelegateForm = UndelegateForm & { from_chain: string; from_balance: 
 export type MultiDelegateForm = {
   stakes: DelegateForm[];
 };
+export type RedelegateForm = {
+  validatorAddress: string;
+  toValidatorAddress: string;
+  amount: string;
+  denom: string;
+  chain_name: string;
+};
 export type MoveAssetsForm = {
   balance: Base.Amount;
   on_chain: string;

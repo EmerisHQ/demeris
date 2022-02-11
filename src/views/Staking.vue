@@ -29,6 +29,27 @@
       </header>
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
+        <template v-if="actionType == 'claim'">
+          <div class="w-full">
+            <ClaimForm
+              v-if="validatorList.length > 0"
+              v-model:step="step"
+              :validators="validatorList"
+              @previous="goBack"
+            />
+          </div>
+        </template>
+        <template v-if="actionType == 'switch'">
+          <div class="w-full">
+            <SwitchForm
+              v-if="validatorList.length > 0"
+              v-model:step="step"
+              :validators="validatorList"
+              :preselected="validator"
+              @previous="goBack"
+            />
+          </div>
+        </template>
         <template v-if="actionType == 'stake'">
           <div class="w-full">
             <StakeForm
@@ -45,41 +66,6 @@
             <UnstakeForm v-model:step="step" :validator="selectedValidators.slice()[0]" @previous="goBack" />
           </div>
         </template>
-        <template v-if="actionType == 'switch' && step == 'amount'">
-          <div class="max-w-7xl">
-            <RestakeValidatorAmount
-              v-if="fromValidator"
-              :size="'md'"
-              :from-validator="fromValidator"
-              :to-validator="toValidator"
-              @next="
-                (actionSteps) => {
-                  setSteps(actionSteps);
-                }
-              "
-            />
-          </div>
-        </template>
-        <template v-if="step == 'review'">
-          <TransactionProcessCreator
-            v-if="steps.length > 0"
-            :steps="steps"
-            :action="actionType"
-            @pending="
-              () => {
-                closeModal();
-                resetHandler();
-              }
-            "
-            @close="
-              () => {
-                closeModal();
-                resetHandler();
-              }
-            "
-            @previous="$emit('previous')"
-          />
-        </template>
       </main>
     </div>
   </div>
@@ -91,18 +77,16 @@ import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
-import RestakeValidatorAmount from '@/components/stake/RestakeValidatorAmount.vue';
+import ClaimForm from '@/components/stake/ClaimForm/ClaimForm.vue';
 import StakeForm from '@/components/stake/StakeForm';
+import SwitchForm from '@/components/stake/SwitchForm/SwitchForm.vue';
 import UnstakeForm from '@/components/stake/UnstakeForm';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
-import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { ClaimRewardsAction } from '@/types/actions';
 import { Step } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
 
@@ -114,9 +98,9 @@ export default defineComponent({
     Button,
     Icon,
     StakeForm,
-    TransactionProcessCreator,
     UnstakeForm,
-    RestakeValidatorAmount,
+    SwitchForm,
+    ClaimForm,
   },
 
   setup() {
@@ -125,17 +109,16 @@ export default defineComponent({
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const editing = ref(null);
-    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom, getValidatorMoniker, getChainNameByBaseDenom } =
-      useStaking();
+    const { getValidatorsByBaseDenom } = useStaking();
     const { balances, stakingBalances } = useAccount();
     const actionType = route.params.action as ActionType;
-    const validator = route.params.validator;
+    const validator = route.params.validator as string;
     const baseDenom = route.params.denom as string;
     const validatorList = ref([]);
     const totalStakedAmount = ref<number>(0);
     const unstakeAmount = ref<string>('0');
     const selectedValidators = ref([]);
-    const step = actionType == 'claim' ? ref('review') : ref('validator');
+    const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator');
     const fromValidator = ref({});
     const toValidator = ref({});
     onMounted(async () => {
@@ -166,21 +149,6 @@ export default defineComponent({
           vali.stakedAmount = 0;
         });
       }
-      if (actionType == 'claim') {
-        const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-        const chainName = await getChainNameByBaseDenom(baseDenom);
-        const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
-          reward.moniker = getValidatorMoniker(reward.validator_address, validatorList.value);
-          return reward;
-        });
-        const action = {
-          name: 'claim',
-          params: { total: rewardsData.total, rewards: rewardsDataWithMoniker, chain_name: chainName },
-        } as ClaimRewardsAction;
-
-        steps.value = await actionHandler(action);
-        console.log(steps);
-      }
     });
     pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
     const selectAnother = (e) => {
@@ -198,12 +166,16 @@ export default defineComponent({
       return !!actionType;
     });
     const isBackDisabled = computed(() => {
-      return step.value === 'validator' || (actionType === 'claim' && step.value === 'review');
+      return (
+        step.value === 'validator' ||
+        (actionType === 'claim' && step.value === 'review') ||
+        (actionType === 'unstake' && step.value === 'amount')
+      );
     });
     const steps = ref<Step[]>([]);
     const allSteps = {
       stake: ['validator', 'amount', 'review', 'delegate'],
-      unstake: ['validator', 'amount', 'review', 'undelegate'],
+      unstake: ['amount', 'review', 'undelegate'],
       switch: ['validator', 'amount', 'review', 'redelegate'],
       claim: ['review', 'claim'],
     };
@@ -211,6 +183,8 @@ export default defineComponent({
     const resetHandler = () => {
       if (actionType == 'claim') {
         step.value = 'review';
+      } else if (actionType == 'unstake') {
+        step.value = 'amount';
       } else {
         step.value = 'validator';
       }

@@ -6,7 +6,6 @@ import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 export default function useAccount() {
