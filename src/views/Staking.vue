@@ -29,31 +29,13 @@
       </header>
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
-        <template v-if="step == 'validator'">
-          <div class="max-w-7xl">
-            <ValidatorsTable
-              :validator-list="validatorList"
-              :disabled-list="disabledValidators"
-              :total-staked-amount="totalStakedAmount"
-              table-style="list"
-              @selectValidator="addValidator"
-            />
-          </div>
-        </template>
         <template v-if="actionType == 'stake'">
-          <div v-show="step == 'amount'" class="max-w-3xl">
-            <ValidatorAmountForm
-              :validators="selectedValidators.slice()"
-              @previous="
-                (e) => {
-                  selectAnother(e);
-                }
-              "
-              @next="
-                (actionSteps) => {
-                  setSteps(actionSteps);
-                }
-              "
+          <div class="w-full max-w-lg">
+            <StakeForm
+              v-model:step="step"
+              :validators="validatorList"
+              :preselected="selectedValidators.slice()[0]"
+              @previous="goBack"
             />
           </div>
         </template>
@@ -109,10 +91,8 @@ import { useMeta } from 'vue-meta';
 import { useRoute, useRouter } from 'vue-router';
 
 import RestakeValidatorAmount from '@/components/stake/RestakeValidatorAmount.vue';
-import StakedValidatorAmount from '@/components/stake/StakedValidatorAmount.vue';
+import StakeForm from '@/components/stake/StakeForm';
 import UnstakeForm from '@/components/stake/UnstakeForm';
-import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
-import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -132,8 +112,7 @@ export default defineComponent({
   components: {
     Button,
     Icon,
-    ValidatorsTable,
-    ValidatorAmountForm,
+    StakeForm,
     TransactionProcessCreator,
     UnstakeForm,
     RestakeValidatorAmount,

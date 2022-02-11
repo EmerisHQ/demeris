@@ -137,6 +137,10 @@ export const messages = {
         swapFee: 'Swap fee',
         estimate: 'Estimated total fees',
       },
+      stakeForm: {
+        selectTitle: 'Select a validator',
+        title: 'Enter amount to stake',
+      },
       unstakeForm: {
         title: 'Enter amount to unstake',
       },

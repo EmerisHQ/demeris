@@ -105,7 +105,7 @@
       <!-- table body -->
       <tbody>
         <tr
-          v-for="validator of sortedValidatorList"
+          v-for="validator of filteredAndSortedValidatorList"
           :key="validator.operator_address"
           :set="(isDisabled = disabledListAddresses.includes(validator.operator_address))"
           class="group"
@@ -161,9 +161,8 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
 import orderBy from 'lodash.orderby';
-import { PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -182,25 +181,30 @@ enum ValStyle {
   LIST = 'list',
   ACTIONLIST = 'actionlist',
 }
-
+type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
-export default {
+export default defineComponent({
   name: 'ValidatorTable',
   components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon },
   props: {
     validatorList: {
-      type: Array,
+      type: Array as PropType<any[]>,
       required: true,
       default: () => [],
     },
     disabledList: {
-      type: Array,
-      required: true,
+      type: Array as PropType<any[]>,
+      required: false,
       default: () => [],
     },
     tableStyle: {
-      type: String as PropType<ValStyle>,
+      type: String as PropType<ValStyleType>,
       default: 'actionlist',
+    },
+    currentlyEditing: {
+      type: String as PropType<string>,
+      required: false,
+      default: '',
     },
     totalStakedAmount: {
       type: Number,
@@ -218,6 +222,8 @@ export default {
     const baseDenom = router.currentRoute.value.params.denom as string;
     const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
 
+    const propsRef = toRefs(props);
+
     /* variables */
     const keyword = ref<string>('');
     const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST);
@@ -225,12 +231,33 @@ export default {
     const sortOrder = ref('desc');
 
     /* functions */
-    const filteredValidatorList = computed(() => {
+    const filteredAndSortedValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
-      return props.validatorList.filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1);
+      return propsRef.validatorList.value
+        .filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1)
+        .sort((a, b) => {
+          switch (sortBy.value) {
+            case 'power':
+              if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
+              if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
+              return 0;
+            case 'name':
+              if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
+              if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
+              return 0;
+            case 'commission':
+              if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
+              if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
+              return 0;
+            case 'staked':
+              if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
+              if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
+              return 0;
+          }
+        });
     });
     const disabledListAddresses = computed(() => {
-      return props.disabledList?.map((x) => x.operator_address) ?? [];
+      return propsRef.disabledList.value?.map((x) => x.operator_address) ?? [];
     });
     const sort = (by) => {
       if (sortBy.value == by && sortOrder.value == 'asc') {
@@ -240,28 +267,6 @@ export default {
       }
       sortBy.value = by;
     };
-    const sortedValidatorList = computed(() => {
-      return filteredValidatorList.value.sort((a, b) => {
-        switch (sortBy.value) {
-          case 'power':
-            if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
-            if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
-            return 0;
-          case 'name':
-            if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
-            if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
-            return 0;
-          case 'commission':
-            if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
-            if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
-            return 0;
-          case 'staked':
-            if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
-            if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
-            return 0;
-        }
-      });
-    });
     const getCommissionDisplayValue = (value) => {
       return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
     };
@@ -285,8 +290,7 @@ export default {
 
     return {
       baseDenom,
-      filteredValidatorList,
-      sortedValidatorList,
+      filteredAndSortedValidatorList,
       keyword,
       getCommissionDisplayValue,
       getAmountDisplayValue,
@@ -300,7 +304,7 @@ export default {
       disabledListAddresses,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -184,7 +184,7 @@ export interface Actions {
   [DemerisActionTypes.GET_VALIDATORS](
     { getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetValidatorsParam,
-  ): Promise<unknown>;
+  ): Promise<any>;
   [DemerisActionTypes.GET_INFLATION](
     { getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetInflationParam,

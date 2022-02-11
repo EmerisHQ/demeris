@@ -1,0 +1,212 @@
+<template>
+  <div class="w-full max-w-lg mx-auto">
+    <template v-if="step == 'validator'">
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.selectTitle') }}</h2>
+      <ValidatorsTable
+        :validator-list="validators"
+        :disabled-list="validatorsToDisable"
+        :currently-editing="currentlyEditing"
+        :table-style="'list'"
+        @selectValidator="addValidator"
+      />
+    </template>
+    <template v-else-if="step === 'amount'">
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.unstakeForm.title') }}</h2>
+    </template>
+
+    <template v-else-if="['review', 'stake'].includes(step)">
+      <FeatureRunningConditional name="TRANSACTIONS_CENTER">
+        <template #deactivated>
+          <TxStepsModal
+            v-if="steps.length"
+            :data="steps"
+            :gas-price-level="gasPrice"
+            :back-route="{ name: 'Portfolio' }"
+            action-name="unstake"
+            @transacting="goToStep('stake')"
+            @failed="goToStep('review')"
+            @reset="resetHandler"
+            @finish="resetHandler"
+          />
+        </template>
+
+        <TransactionProcessCreator
+          v-if="steps.length"
+          :steps="steps"
+          action="unstake"
+          @pending="closeModal"
+          @close="closeModal"
+          @previous="$emit('previous')"
+        />
+      </FeatureRunningConditional>
+    </template>
+  </div>
+</template>
+
+<script lang="ts">
+import BigNumber from 'bignumber.js';
+import { computed, defineComponent, onMounted, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
+import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
+import { DelegateForm, MultiDelegateAction } from '@/types/actions';
+import { actionHandler } from '@/utils/actionHandler';
+import { event } from '@/utils/analytics';
+
+import ValidatorsTable from '../ValidatorsTable.vue';
+
+type Step = 'validator' | 'amount' | 'review' | 'stake';
+
+export default defineComponent({
+  name: 'StakeForm',
+
+  components: {
+    TransactionProcessCreator,
+    TxStepsModal,
+    FeatureRunningConditional,
+
+    ValidatorsTable,
+  },
+
+  props: {
+    step: {
+      type: String as PropType<Step>,
+      default: undefined,
+    },
+    validators: {
+      type: Array,
+      required: true,
+      default: () => {
+        return [];
+      },
+    },
+    preselected: {
+      type: Object,
+      required: false,
+      default: undefined,
+    },
+  },
+
+  emits: ['update:step', 'previous'],
+
+  setup(props, { emit }) {
+    const steps = ref([]);
+    const store = useStore();
+    const router = useRouter();
+
+    const route = useRoute();
+    const propsRef = toRefs(props);
+    const baseDenom = route.params.denom as string;
+    const precision = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        name: baseDenom,
+      }),
+    );
+    const gasPrice = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
+    });
+
+    const form: DelegateForm = reactive({ stakes: [] });
+
+    const valToEdit = ref(null as number);
+    const step = computed({
+      get: () => props.step,
+      set: (value) => emit('update:step', value),
+    });
+
+    const closeModal = () => {
+      router.push('/');
+    };
+    const action = computed(() => {
+      return {
+        name: 'multistake',
+        params: form.stakes.map((x) => {
+          return {
+            validatorAddress: x.validatorAddress,
+            amount: {
+              amount: {
+                amount: new BigNumber(x.amount != '' ? x.amount ?? 0 : 0)
+                  .multipliedBy(10 ** precision.value)
+                  .toString(),
+                denom: baseDenom,
+              },
+              chain_name: x.chain_name,
+            },
+          };
+        }),
+      } as MultiDelegateAction;
+    });
+    watch(form, async () => {
+      if (form.stakes.length > 0 && step.value != 'review') {
+        steps.value = await actionHandler(action.value);
+      } else {
+        steps.value = [];
+      }
+    });
+
+    const generateSteps = async () => {
+      event('review_tx', { event_label: 'Reviewing stake tx', event_category: 'transactions' });
+      goToStep('review');
+    };
+
+    const goToStep = (value: Step) => {
+      step.value = value;
+    };
+
+    const resetHandler = () => {
+      form.stakes = [];
+      steps.value = [];
+
+      goToStep('validator');
+    };
+
+    if (!props.step) {
+      step.value = 'validator';
+    }
+    const addValidator = (validator) => {
+      if (valToEdit.value) {
+        form.stakes[valToEdit.value].validatorAddress = validator.operator_address;
+        valToEdit.value = null;
+      } else {
+        form.stakes.push({
+          validatorAddress: validator.operator_address,
+          amount: '',
+          denom: baseDenom,
+          chain_name: validator.chain_name,
+        });
+      }
+    };
+    const validatorsToDisable = computed(() => {
+      return form.stakes.map((x) => x.validatorAddress);
+    });
+    const currentlyEditing = computed(() => {
+      return valToEdit.value ? form.stakes[valToEdit.value].validatorAddress : null;
+    });
+    provide('stakeForm', form);
+    onMounted(() => {
+      if (propsRef.preselected.value) {
+        addValidator(propsRef.preselected.value);
+      }
+    });
+    console.log('here');
+    return {
+      gasPrice,
+      steps,
+      generateSteps,
+      form,
+      goToStep,
+      resetHandler,
+      closeModal,
+      addValidator,
+      validatorsToDisable,
+      currentlyEditing,
+    };
+  },
+});
+</script>
+
+<style lang="scss"></style>
