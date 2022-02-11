@@ -27,6 +27,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --negative: #ff1b44;
   --negative-text: #ca0842;
   --warning: #fb7c07;
+  --black: #171717;
 }
 /* Dark mode custom properties */
 @mixin themeDark {
