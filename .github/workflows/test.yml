@@ -52,6 +52,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
+          env: VUE_APP_EMERIS_MNEMONIC=${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
           start: npm run serve
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
