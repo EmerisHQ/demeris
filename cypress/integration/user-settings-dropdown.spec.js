@@ -11,7 +11,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it.skip('user settings dropdown - Navbar element', function () {
+  it('user settings dropdown - Navbar element', function () {
     let userDropdown = new UserDropdown();
 
     userDropdown.expand();
@@ -28,7 +28,7 @@ describe('Navbar elements location and availibility', function () {
     userDropdown.version().should('be.visible');
   });
 
-  it.skip('disconnect Keplr wallet', function () {
+  it('disconnect Keplr wallet', function () {
     let userDropdown = new UserDropdown();
     let navbar = new Navbar();
     userDropdown.expand();

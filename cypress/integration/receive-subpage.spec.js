@@ -10,7 +10,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it.skip('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
+  it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
     let receivePage = new Receive();
     receivePage.goTo();
 

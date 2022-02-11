@@ -10,7 +10,7 @@ describe('Portfolio visual check', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it.skip('visibility of elements', function () {
+  it('visibility of elements', function () {
     let portfolio = new Portfolio();
 
     portfolio.totalBalanceVisibility();

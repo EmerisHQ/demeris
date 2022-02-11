@@ -11,7 +11,7 @@ describe('Navbar elements location and availibility', function () {
     welcomePage.betaAgreeButton().click();
   });
 
-  it.skip('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
+  it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
@@ -36,25 +36,25 @@ describe('Navbar elements location and availibility', function () {
     cy.url().should('eq', Cypress.config().baseUrl);
   });
 
-  it.skip('"Receive" navbar element', function () {
+  it('"Receive" navbar element', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
     navbar.receive().click();
     cy.url().should('eq', Cypress.config().baseUrl + subPagePath.receive_path);
 
-    cy.viewport(1000, 660);
-    cy.matchImageSnapshot('receiveSubPage');
+    // cy.viewport(1000, 660);
+    // cy.matchImageSnapshot('receiveSubPage');
   });
 
-  it.skip('"Send" navbar element', function () {
+  it('"Send" navbar element', function () {
     let navbar = new Navbar();
     let subPagePath = new SubPagesPaths();
 
     navbar.send().click();
     cy.url().should('eq', Cypress.config().baseUrl + subPagePath.send_path);
 
-    cy.viewport(1000, 660);
-    cy.matchImageSnapshot('sendSubPage');
+    // cy.viewport(1000, 660);
+    // cy.matchImageSnapshot('sendSubPage');
   });
 });

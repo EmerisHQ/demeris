@@ -13,7 +13,7 @@ describe('Pools location and availibility', function () {
     poolsPage.searchForPool('test');
   });
 
-  it.skip('Add liquidity button usage', function () {
+  it('Add liquidity button usage', function () {
     const poolsPage = new Pools();
 
     poolsPage.goTo();
