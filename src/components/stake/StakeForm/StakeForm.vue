@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full max-w-lg mx-auto">
+  <div class="w-full mx-auto">
     <template v-if="step == 'validator'">
-      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.selectTitle') }}</h2>
+      <h2 class="text-3 font-bold pt-8 text-left">{{ $t('components.stakeForm.selectTitle') }}</h2>
       <ValidatorsTable
         :validator-list="validators"
         :disabled-list="validatorsToDisable"
@@ -10,8 +10,9 @@
         @selectValidator="addValidator"
       />
     </template>
-    <template v-else-if="step === 'amount'">
-      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.unstakeForm.title') }}</h2>
+    <template v-else-if="step === 'amount' && form.stakes.length > 0">
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
+      <ValidatorAmountForm :validators="validators" />
     </template>
 
     <template v-else-if="['review', 'stake'].includes(step)">
@@ -42,22 +43,21 @@
     </template>
   </div>
 </template>
-
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, Prop, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
+import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
+import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { DelegateForm, MultiDelegateAction } from '@/types/actions';
+import { MultiDelegateAction, MultiDelegateForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
-
-import ValidatorsTable from '../ValidatorsTable.vue';
 
 type Step = 'validator' | 'amount' | 'review' | 'stake';
 
@@ -68,8 +68,8 @@ export default defineComponent({
     TransactionProcessCreator,
     TxStepsModal,
     FeatureRunningConditional,
-
     ValidatorsTable,
+    ValidatorAmountForm,
   },
 
   props: {
@@ -78,14 +78,14 @@ export default defineComponent({
       default: undefined,
     },
     validators: {
-      type: Array,
+      type: Array as PropType<any[]>,
       required: true,
       default: () => {
         return [];
       },
     },
     preselected: {
-      type: Object,
+      type: String as PropType<string>,
       required: false,
       default: undefined,
     },
@@ -110,7 +110,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: DelegateForm = reactive({ stakes: [] });
+    const form: MultiDelegateForm = reactive({ stakes: [] });
 
     const valToEdit = ref(null as number);
     const step = computed({
@@ -132,10 +132,11 @@ export default defineComponent({
                 amount: new BigNumber(x.amount != '' ? x.amount ?? 0 : 0)
                   .multipliedBy(10 ** precision.value)
                   .toString(),
-                denom: baseDenom,
+                denom: x.denom,
               },
-              chain_name: x.chain_name,
+              chain_name: x.from_chain,
             },
+            chain_name: x.chain_name,
           };
         }),
       } as MultiDelegateAction;
@@ -154,6 +155,7 @@ export default defineComponent({
     };
 
     const goToStep = (value: Step) => {
+      console.log(value);
       step.value = value;
     };
 
@@ -167,6 +169,9 @@ export default defineComponent({
     if (!props.step) {
       step.value = 'validator';
     }
+    const lookupValidator = (address) => {
+      return propsRef.validators.value.find((x) => x.operator_address == address) ?? undefined;
+    };
     const addValidator = (validator) => {
       if (valToEdit.value) {
         form.stakes[valToEdit.value].validatorAddress = validator.operator_address;
@@ -175,10 +180,12 @@ export default defineComponent({
         form.stakes.push({
           validatorAddress: validator.operator_address,
           amount: '',
-          denom: baseDenom,
+          denom: '',
+          from_chain: '',
           chain_name: validator.chain_name,
         });
       }
+      goToStep('amount');
     };
     const validatorsToDisable = computed(() => {
       return form.stakes.map((x) => x.validatorAddress);
@@ -188,11 +195,11 @@ export default defineComponent({
     });
     provide('stakeForm', form);
     onMounted(() => {
+      console.log(propsRef);
       if (propsRef.preselected.value) {
-        addValidator(propsRef.preselected.value);
+        addValidator(lookupValidator(propsRef.preselected.value));
       }
     });
-    console.log('here');
     return {
       gasPrice,
       steps,

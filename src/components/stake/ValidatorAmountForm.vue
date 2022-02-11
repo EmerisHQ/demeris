@@ -1,5 +1,5 @@
 <template>
-  <div v-if="state.validatorAmounts.length > 0" class="flex w-full justify-center">
+  <div v-if="form.stakes.length > 0" class="flex w-full justify-center">
     <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <main class="pb-28 flex-1 flex flex-col items-center justify-center">
         <div class="w-full max-w-lg mx-auto">
@@ -16,13 +16,13 @@
 
           <!-- Validator stake amount input -->
           <fieldset
-            v-for="(vali, index) in state.validatorAmounts"
+            v-for="(vali, index) in validatorsToStakeWith"
             :key="vali.validator.operator_address"
             class="bg-surface shadow-card rounded-2xl mt-4 pt-2"
           >
             <ValidatorSelect
-              v-model:amount="vali.inputAmount"
-              :validator="vali"
+              v-model:amount="vali.amount"
+              :validator="vali.validarot"
               @select="() => validatorSelectHandler(index)"
             />
 
@@ -106,10 +106,10 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, ref, toRefs, watch } from 'vue';
+import { computed, inject, PropType, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -125,10 +125,10 @@ import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { MultiDelegateAction, Step } from '@/types/actions';
+import { MultiDelegateAction, MultiDelegateForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { actionHandler } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import { isNative, parseCoins } from '@/utils/basic';
 export default {
   name: 'ValidatorAmountForm',
   components: {
@@ -144,75 +144,40 @@ export default {
     ListItem,
   },
   props: {
-    validators: { type: Array, required: true, default: () => [] },
+    validators: { type: Array as PropType<any[]>, required: true, default: () => [] },
   },
 
-  emits: ['previous', 'next'],
+  emits: ['selectanother', 'next'],
   setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
-    const router = useRouter();
+    const route = useRoute();
     const store = useStore();
+
+    const form = inject<MultiDelegateForm>('stakeForm');
     const { balances: userBalances, getNativeBalances } = useAccount();
-    const toStake = ref({});
-    const actionSteps = ref<Step[]>([]);
+
     const state = reactive({
       isChainsModalOpen: false,
       chainsModalSource: 0,
-      fees: {},
-      validatorAmounts: [],
     });
     const validators = toRefs(props).validators;
-    watch(
-      () => validators.value,
-      (newList, _oldList) => {
-        for (let i = 0; i < newList.length; i++) {
-          if (state.validatorAmounts[i]) {
-            if (state.validatorAmounts[i].validator.operator_address != newList[i].operator_address) {
-              state.validatorAmounts[i].validator = newList[i];
-            }
-          } else {
-            state.validatorAmounts.push({ validator: newList[i], inputAmount: null, from: null });
-          }
-        }
-        console.log(state.validatorAmounts);
-      },
-      { immediate: true },
-    );
+    const validatorsToStakeWith = computed(() => {
+      return form.stakes.map((x) => {
+        return { ...x, validator: validators.value.find((y) => y.operator_address == x.validatorAddress) };
+      });
+    });
     /* meta & GA */
     useMeta({ title: t('context.stake.title') });
 
     /* variables */
-    const baseDenom = router.currentRoute.value.params.denom as string;
+    const baseDenom = route.params.denom as string;
 
-    const action = computed(() => {
-      return {
-        name: 'multistake',
-        params: state.validatorAmounts.map((x) => {
-          if (x.from) {
-            return {
-              validatorAddress: x.validator.operator_address,
-              amount: {
-                amount: {
-                  amount: (x.inputAmount * 10 ** precision.value).toString(),
-                  denom: parseCoins(x.from.amount)[0].denom,
-                },
-                chain_name: x.from.on_chain,
-              },
-            };
-          }
-        }),
-      } as MultiDelegateAction;
-    });
-    watch(
-      () => action.value,
-      async (action, _) => {
-        actionSteps.value = await actionHandler(action);
-      },
-    );
     const hasIBC = computed(() => {
-      const steptxnames = actionSteps.value.map((x) => x.transactions.map((tx) => tx.name)).flat();
-      if (steptxnames.includes('ibc_backward') || steptxnames.includes('ibc_forward')) {
+      const denomTypes = form.stakes.map((x) => {
+        return isNative(x.denom) ? 'native' : 'ibc';
+      });
+      if (denomTypes.includes('ibc')) {
         return true;
       } else {
         return false;
@@ -241,8 +206,7 @@ export default {
       return result;
     });
     const totalToStake = computed(
-      () =>
-        state.validatorAmounts.reduce((total, val) => total + Number(val.inputAmount ?? 0), 0) * 10 ** precision.value,
+      () => form.stakes.reduce((total, val) => total + Number(val.amount ?? 0), 0) * 10 ** precision.value,
     );
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -263,17 +227,18 @@ export default {
 
     /* functions */
     const validatorSelectHandler = (index) => {
-      emit('previous', index);
+      emit('selectanother', index);
     };
     const validatorAddHandler = () => {
-      emit('previous', null);
+      emit('selectanother', null);
     };
     const goToReview = () => {
-      emit('next', actionSteps.value);
+      emit('next');
     };
     const toggleChainsModal = (asset: Balance, index: number) => {
       if (asset) {
-        state.validatorAmounts[index].from = asset;
+        form.stakes[index].from_chain = asset.on_chain;
+        form.stakes[index].denom = parseCoins(asset.amount)[0].denom;
       }
       state.chainsModalSource = index;
       state.isChainsModalOpen = !state.isChainsModalOpen;
@@ -281,17 +246,17 @@ export default {
 
     return {
       state,
-      actionSteps,
+      form,
       balances,
       precision,
       baseDenom,
       validatorSelectHandler,
       validatorAddHandler,
       toggleChainsModal,
-      toStake,
       goToReview,
       compareInputToBalance,
       totalToStake,
+      validatorsToStakeWith,
       hasIBC,
     };
   },

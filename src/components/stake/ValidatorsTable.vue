@@ -2,7 +2,6 @@
   <section class="flex flex-col">
     <!-- search -->
     <div class="w-full">
-      <h1 class="text-3 font-bold text-left">{{ $t('components.stakeTable.selectValidator') }}</h1>
       <Search
         v-model:keyword="keyword"
         :placeholder="$t('components.stakeTable.searchValidator')"
@@ -107,12 +106,15 @@
         <tr
           v-for="validator of filteredAndSortedValidatorList"
           :key="validator.operator_address"
-          :set="(isDisabled = disabledListAddresses.includes(validator.operator_address))"
+          :set="(isDisabled = disabledList.includes(validator.operator_address))"
           class="group"
           :class="{ 'opacity-50': isDisabled, 'cursor-pointer': !isDisabled }"
           @click="
             () => {
-              if (!isDisabled) {
+              if (
+                !disabledList.includes(validator.operator_address) &&
+                currentlyEditing != validator.operator_address
+              ) {
                 selectValidator(validator);
               }
             }
@@ -256,9 +258,6 @@ export default defineComponent({
           }
         });
     });
-    const disabledListAddresses = computed(() => {
-      return propsRef.disabledList.value?.map((x) => x.operator_address) ?? [];
-    });
     const sort = (by) => {
       if (sortBy.value == by && sortOrder.value == 'asc') {
         sortOrder.value = 'desc';
@@ -301,7 +300,6 @@ export default defineComponent({
       sort,
       sortBy,
       sortOrder,
-      disabledListAddresses,
     };
   },
 });

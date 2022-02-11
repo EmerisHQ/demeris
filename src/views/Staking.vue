@@ -30,11 +30,12 @@
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
         <template v-if="actionType == 'stake'">
-          <div class="w-full max-w-lg">
+          <div class="w-full">
             <StakeForm
+              v-if="validatorList.length > 0"
               v-model:step="step"
               :validators="validatorList"
-              :preselected="selectedValidators.slice()[0]"
+              :preselected="validator"
               @previous="goBack"
             />
           </div>
@@ -134,7 +135,7 @@ export default defineComponent({
     const totalStakedAmount = ref<number>(0);
     const unstakeAmount = ref<string>('0');
     const selectedValidators = ref([]);
-    const step = actionType == 'claim' ? ref('review') : validator ? ref('amount') : ref('validator');
+    const step = actionType == 'claim' ? ref('review') : ref('validator');
     const fromValidator = ref({});
     const toValidator = ref({});
     onMounted(async () => {
@@ -277,6 +278,7 @@ export default defineComponent({
       resetHandler,
       setSteps,
       steps,
+      validator,
       unstakeAmount,
       fromValidator,
       toValidator,
