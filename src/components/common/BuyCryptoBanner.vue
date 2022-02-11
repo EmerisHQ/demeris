@@ -1,7 +1,7 @@
 <template>
   <button
     class="
-      moonpay-banner
+      buy-crypto-banner
       text-left
       w-full
       flex flex-col
@@ -17,26 +17,28 @@
       active:transform-none active:opacity-70
     "
     :class="[
-      `moonpay-banner--${size}`,
+      `buy-crypto-banner--${size}`,
       size === 'small' ? 'theme-inverse dark:theme-inverse bg-app' : 'bg-surface dark:bg-fg',
     ]"
-    @click="goMoon"
+    @click="openModal"
   >
-    <p class="text-text text-1 font-bold">{{ $t('components.moonpayBanner.title', { asset: asset }) }}</p>
-    <p class="text-muted -text-1 mt-14">{{ $t('components.moonpayBanner.poweredBy') }}</p>
+    <p class="text-text text-1 font-bold">{{ bannerTitle }}</p>
+    <p class="text-muted -text-1 mt-14">{{ bannerSubtitle }}</p>
   </button>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
+import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisGetterTypes } from '@/store';
-
+import { featureRunning } from '@/utils/FeatureManager';
 export default defineComponent({
-  name: 'MoonpayBanner',
-
+  name: 'BuyCryptoBanner',
   props: {
     asset: {
       type: String,
@@ -47,55 +49,55 @@ export default defineComponent({
       default: 'large',
     },
   },
-  setup() {
+  setup(props) {
     const store = useStore();
     const emitter = useEmitter();
-
+    const userCountry = useCountry();
+    const route = useRoute();
+    //remove query check. just for testing
+    const bannerType = ref(
+      route.query?.buyType
+        ? route.query?.buyType
+        : userCountry.includes('America') && featureRunning('SIMPLEX')
+        ? 'simplex'
+        : 'moonpay',
+    );
+    const { t } = useI18n({ useScope: 'global' });
+    const bannerTitle = computed(() => {
+      return bannerType.value === 'simplex'
+        ? t('components.simplexBanner.title', { asset: props.asset })
+        : t('components.moonpayBanner.title', { asset: props.asset });
+    });
+    const bannerSubtitle = computed(() => {
+      return bannerType.value === 'simplex'
+        ? t('components.simplexBanner.poweredBy')
+        : t('components.moonpayBanner.poweredBy');
+    });
     const isSignedIn = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
-
     const isDemoAccount = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
     });
-
-    const mpDomain = ref('https://buy.moonpay.io');
-    const mpParams = computed(() => {
-      return {
-        apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
-        currencyCode: 'atom',
-        walletAddress: store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: 'cosmos-hub' }),
-        baseCurrencyCode: 'usd',
-        // baseCurrencyAmount: '50',
-      };
-    });
-    const mpQuery = computed(() => {
-      return new URLSearchParams(mpParams.value).toString();
-    });
-    const mpUrl = computed(() => {
-      return mpDomain.value + '/?' + mpQuery.value;
-    });
-
-    const goMoon = () => {
+    const openModal = () => {
       if (isSignedIn.value && !isDemoAccount.value) {
-        window.open(mpUrl.value, '', 'height=480,width=320');
+        emitter.emit(bannerType.value);
       } else {
         emitter.emit('toggle-settings-modal');
       }
     };
-    return { isSignedIn, goMoon, isDemoAccount };
+    return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.moonpay-banner {
+.buy-crypto-banner {
   min-height: 5rem;
   background-image: url('~@/assets/images/buy-atom-card-big.png');
   background-repeat: no-repeat;
   background-position: top 30% left 120%;
   background-size: 70% auto;
-
   &--small {
     background-position: left 6rem top 0%;
     background-size: 95% auto;

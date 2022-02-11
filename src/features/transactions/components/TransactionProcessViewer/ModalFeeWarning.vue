@@ -63,13 +63,15 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
+import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { ProvideViewerKey } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
 
-const { actor } = inject(ProvideViewerKey);
+const { actor, stepId } = inject(ProvideViewerKey);
 const { state, send } = actor;
 
 const emits = defineEmits(['close']);
@@ -77,32 +79,20 @@ const transactionsStore = useTransactionsStore();
 const emitter = useEmitter();
 const store = useStore();
 
-const mpDomain = 'https://buy.moonpay.io';
-const mpParams = computed(() => {
-  return {
-    apiKey: 'pk_live_C5H29zimSfFDzncZqYM4lQjuqZp2NNke',
-    currencyCode: 'atom',
-    walletAddress: store.getters[GlobalDemerisGetterTypes.USER.getOwnAddress]({ chain_name: 'cosmos-hub' }),
-    baseCurrencyCode: 'usd',
-    // baseCurrencyAmount: '50',
-  };
-});
-const mpQuery = computed(() => new URLSearchParams(mpParams.value).toString());
-const mpUrl = computed(() => mpDomain + '/?' + mpQuery.value);
-
 const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]);
 const feeWarning = computed(() => state.value.context.fees.validation);
 
 const goMoon = () => {
   if (isSignedIn.value) {
-    window.open(mpUrl.value, '', 'height=480,width=320');
+    const userCountry = useCountry();
+    userCountry.includes('America') && featureRunning('SIMPLEX') ? emitter.emit('simplex') : emitter.emit('moonpay');
   } else {
     emitter.emit('toggle-settings-modal');
   }
 };
 
 const cancel = () => {
-  transactionsStore.removeTransaction(transactionsStore.currentId);
+  transactionsStore.removeTransaction(stepId);
   emits('close');
 };
 const proceed = () => send('PROCEED_FEE');
