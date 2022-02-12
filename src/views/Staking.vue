@@ -1,6 +1,6 @@
 <template>
-  <div class="send relative flex w-full min-h-screen justify-center">
-    <div class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
+  <div class="stake relative flex w-full min-h-screen justify-center">
+    <div v-if="validatorList.length > 0" class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <header class="flex items-center justify-between py-6 h-24">
         <Button
           v-if="showBackButton"
@@ -68,6 +68,9 @@
         </template>
       </main>
     </div>
+    <div v-else class="flex w-full min-h-screen flex-col items-center justify-center">
+      <EphemerisSpinner class="h-64 w-64" />
+    </div>
   </div>
 </template>
 
@@ -82,6 +85,7 @@ import StakeForm from '@/components/stake/StakeForm';
 import SwitchForm from '@/components/stake/SwitchForm/SwitchForm.vue';
 import UnstakeForm from '@/components/stake/UnstakeForm';
 import Button from '@/components/ui/Button.vue';
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
@@ -101,6 +105,7 @@ export default defineComponent({
     UnstakeForm,
     SwitchForm,
     ClaimForm,
+    EphemerisSpinner,
   },
 
   setup() {
@@ -261,13 +266,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.send__type:hover {
-  transform: translateY(-2px);
-
-  .send__type__circle {
-    transform: scale(8);
-    transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
-  }
-}
-</style>
+<style lang="scss" scoped></style>
