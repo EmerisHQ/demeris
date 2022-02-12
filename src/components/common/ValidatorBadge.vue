@@ -3,6 +3,28 @@
     class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
     :class="[`circle-symbol--validator`, `circle-symbol--${size}`]"
   >
+    <div
+      v-if="validator.jailed"
+      v-tippy
+      :content="'Validator jailed'"
+      class="
+        flex
+        items-center
+        justify-center
+        w-3
+        h-3
+        border-1 border-bg
+        bg-negative
+        rounded-full
+        absolute
+        z-50
+        -right-1
+        -top-1
+        font-medium
+        -text-1
+        text-text
+      "
+    ></div>
     <template v-if="logoUrl != ''">
       <img :src="logoUrl" :alt="validator.moniker" class="w-full h-full rounded-full relative z-10" />
       <img alt="Logo glow" :src="logoUrl" class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter" />

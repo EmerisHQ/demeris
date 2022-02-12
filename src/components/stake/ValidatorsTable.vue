@@ -145,9 +145,12 @@
             <td v-if="hasActions" class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
               <div class="flex justify-center">
                 <Button
+                  v-tippy
                   class="ml-8"
+                  :content="validator.jailed ? 'Validator jailed' : 'Stake'"
                   :name="$t('components.validatorTable.stake')"
                   :full-width="false"
+                  :disabled="validator.jailed"
                   @click.stop="
                     () => {
                       if (
