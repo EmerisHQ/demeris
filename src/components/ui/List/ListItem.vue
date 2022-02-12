@@ -6,8 +6,10 @@
       `flex-${direction}`,
       {
         'items-center': direction === 'col',
+        'py-3': !inset && size === 'xs',
         'py-6': !inset && size === 'sm',
         'py-8': !inset && size === 'md',
+        'pt-3': inset && size === 'xs',
         'pt-4': inset && size === 'sm',
         'pt-6': inset && size === 'md',
       },
@@ -15,7 +17,15 @@
   >
     <template v-if="label || description">
       <div :class="[firstCellClass, { 'flex items-start justify-between gap-x-3': direction === 'col' }]">
-        <div v-if="label" class="font-medium text-left flex items-center">
+        <div
+          v-if="label"
+          class="text-left flex items-center"
+          :class="{
+            'font-light': weight == 'light',
+            'font-normal': weight == 'normal',
+            'font-medium': weight == 'medium',
+          }"
+        >
           <span>{{ label }}</span>
           <span v-if="hint" v-tippy :content="hint" class="text-muted hover:text-current ml-2">
             <Icon name="HintIcon" :icon-size="1" />
@@ -123,8 +133,12 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    weight: {
+      type: String as PropType<'light' | 'normal' | 'medium'>,
+      default: 'medium',
+    },
     size: {
-      type: String as PropType<'sm' | 'md'>,
+      type: String as PropType<'xs' | 'sm' | 'md'>,
       default: 'md',
     },
   },

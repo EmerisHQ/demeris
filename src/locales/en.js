@@ -22,6 +22,7 @@ export const messages = {
       agree: 'Agree',
       cancel: 'Cancel',
       confirm: 'Confirm',
+      close: 'Close',
       continue: 'Continue',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
@@ -136,6 +137,11 @@ export const messages = {
         slowWarning: 'Your transaction may take longer to be processed.',
         swapFee: 'Swap fee',
         estimate: 'Estimated total fees',
+      },
+      validatorCard: {
+        commissionTooltip: 'TODO: commission tooltip',
+        maxCommissionTooltip: 'TODO: Max commission tooltip',
+        maxChangeRateTooltip: 'TODO: maxChangeRate tooltip',
       },
       stakeForm: {
         selectTitle: 'Select a validator',

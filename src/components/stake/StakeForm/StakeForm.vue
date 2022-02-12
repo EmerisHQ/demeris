@@ -1,12 +1,11 @@
 <template>
   <div class="w-full mx-auto">
     <template v-if="step == 'validator'">
-      <h2 class="text-3 font-bold pt-8 text-left">{{ $t('components.stakeForm.selectTitle') }}</h2>
       <ValidatorsTable
         :validator-list="validators"
         :disabled-list="validatorsToDisable"
         :currently-editing="currentlyEditing"
-        :table-style="'list'"
+        :table-style="'actionlist'"
         @selectValidator="addValidator"
       />
     </template>

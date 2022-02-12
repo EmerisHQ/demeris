@@ -1,170 +1,201 @@
 <template>
-  <section class="flex flex-col">
-    <!-- search -->
-    <div class="w-full">
-      <Search
-        v-model:keyword="keyword"
-        :placeholder="$t('components.stakeTable.searchValidator')"
-        class="py-6 max-w-xs w-full"
-      />
-    </div>
+  <section class="flex items-start">
+    <div class="flex flex-col">
+      <h2 class="text-3 font-bold pt-8 text-left">{{ $t('components.stakeForm.selectTitle') }}</h2>
+      <!-- search -->
+      <div class="w-full">
+        <Search
+          v-model:keyword="keyword"
+          :placeholder="$t('components.stakeTable.searchValidator')"
+          class="py-6 max-w-xs w-full"
+        />
+      </div>
 
-    <!-- validator table -->
-    <table class="pools-table table-fixed -ml-6">
-      <colgroup>
-        <template v-if="hasActions">
-          <col width="25%" />
-          <col width="25%" />
-          <col width="10%" />
-          <col width="25%" />
-          <col width="15%" />
-        </template>
-        <template v-else>
-          <col width="30%" />
-          <col width="30%" />
-          <col width="15%" />
-          <col width="25%" />
-        </template>
-      </colgroup>
+      <!-- validator table -->
 
-      <!-- table header -->
-      <thead class="hidden md:table-header-group text-muted">
-        <tr>
-          <th
-            class="align-middle font-normal -text-1 py-4 px-0 sticky top-0 z-20 bg-app text-left transition"
-            :class="{ 'font-bold': sortBy == 'name' }"
-          >
-            <span
-              @click="
-                () => {
-                  sort('name');
-                }
-              "
-            >{{ $t('components.validatorTable.validator') }}</span>
-            <template v-if="sortBy == 'name'">
-              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-              <ReceiveIcon v-else class="inline" />
-            </template>
-          </th>
-          <th
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-            :class="{ 'font-bold': sortBy == 'power' }"
-          >
-            <span
-              @click="
-                () => {
-                  sort('power');
-                }
-              "
-            >{{ $t('components.validatorTable.votingPower') }}</span>
-            <template v-if="sortBy == 'power'">
-              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-              <ReceiveIcon v-else class="inline" />
-            </template>
-          </th>
-          <th
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-            :class="{ 'font-bold': sortBy == 'commission' }"
-          >
-            <span
-              @click="
-                () => {
-                  sort('commission');
-                }
-              "
-            >{{ $t('components.validatorTable.commission') }}</span>
-            <template v-if="sortBy == 'commission'">
-              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-              <ReceiveIcon v-else class="inline" />
-            </template>
-          </th>
-          <th
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-            :class="{ 'font-bold': sortBy == 'staked' }"
-          >
-            <span
-              @click="
-                () => {
-                  sort('staked');
-                }
-              "
-            >{{ $t('components.validatorTable.staked') }}</span>
-            <template v-if="sortBy == 'staked'">
-              <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-              <ReceiveIcon v-else class="inline" />
-            </template>
-          </th>
-          <th
-            v-if="hasActions"
-            class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-          ></th>
-        </tr>
-      </thead>
+      <table class="pools-table table-fixed -ml-6">
+        <colgroup>
+          <template v-if="hasActions">
+            <col width="25%" />
+            <col width="25%" />
+            <col width="10%" />
+            <col width="25%" />
+            <col width="15%" />
+          </template>
+          <template v-else>
+            <col width="30%" />
+            <col width="30%" />
+            <col width="15%" />
+            <col width="25%" />
+          </template>
+        </colgroup>
 
-      <!-- table body -->
-      <tbody>
-        <tr
-          v-for="validator of filteredAndSortedValidatorList"
-          :key="validator.operator_address"
-          :set="(isDisabled = disabledList.includes(validator.operator_address))"
-          class="group"
-          :class="{ 'opacity-50': isDisabled, 'cursor-pointer': !isDisabled }"
-          @click="
-            () => {
-              if (
-                !disabledList.includes(validator.operator_address) &&
-                currentlyEditing != validator.operator_address
-              ) {
-                selectValidator(validator);
+        <!-- table header -->
+        <thead class="hidden md:table-header-group text-muted">
+          <tr>
+            <th
+              class="align-middle font-normal -text-1 py-4 px-0 sticky top-0 z-20 bg-app text-left transition"
+              :class="{ 'font-bold': sortBy == 'name' }"
+            >
+              <span
+                @click="
+                  () => {
+                    sort('name');
+                  }
+                "
+              >{{ $t('components.validatorTable.validator') }}</span>
+              <template v-if="sortBy == 'name'">
+                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+                <ReceiveIcon v-else class="inline" />
+              </template>
+            </th>
+            <th
+              class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+              :class="{ 'font-bold': sortBy == 'power' }"
+            >
+              <span
+                @click="
+                  () => {
+                    sort('power');
+                  }
+                "
+              >{{ $t('components.validatorTable.votingPower') }}</span>
+              <template v-if="sortBy == 'power'">
+                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+                <ReceiveIcon v-else class="inline" />
+              </template>
+            </th>
+            <th
+              class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+              :class="{ 'font-bold': sortBy == 'commission' }"
+            >
+              <span
+                @click="
+                  () => {
+                    sort('commission');
+                  }
+                "
+              >{{ $t('components.validatorTable.commission') }}</span>
+              <template v-if="sortBy == 'commission'">
+                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+                <ReceiveIcon v-else class="inline" />
+              </template>
+            </th>
+            <th
+              class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+              :class="{ 'font-bold': sortBy == 'staked' }"
+            >
+              <span
+                @click="
+                  () => {
+                    sort('staked');
+                  }
+                "
+              >{{ $t('components.validatorTable.staked') }}</span>
+              <template v-if="sortBy == 'staked'">
+                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
+                <ReceiveIcon v-else class="inline" />
+              </template>
+            </th>
+            <th
+              v-if="hasActions"
+              class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
+            ></th>
+          </tr>
+        </thead>
+
+        <!-- table body -->
+        <tbody>
+          <tr
+            v-for="validator of filteredAndSortedValidatorList"
+            :key="validator.operator_address"
+            :set="(isDisabled = disabledList.includes(validator.operator_address))"
+            class="group"
+            :class="{ 'opacity-50': isDisabled, 'cursor-pointer': !isDisabled }"
+            @click="
+              () => {
+                detailedValidator = validator;
               }
+            "
+          >
+            <td class="py-5 flex items-center" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+              <div class="inline-flex items-center mr-4">
+                <!-- TODO: get logo url -->
+                <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
+              </div>
+              <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                {{ validator.moniker }}
+              </span>
+            </td>
+            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+              {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
+              <div class="-text-1 text-muted">
+                {{ getVotingPowerPercDisplayValue(validator.tokens) }}
+              </div>
+            </td>
+            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+              {{ getCommissionDisplayValue(validator.commission_rate) }}
+            </td>
+            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+              <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
+              <div class="-text-1 text-muted">
+                {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
+              </div>
+            </td>
+            <td v-if="hasActions" class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+              <div class="flex justify-center">
+                <Button
+                  class="ml-8"
+                  :name="$t('components.validatorTable.stake')"
+                  :full-width="false"
+                  @click.stop="
+                    () => {
+                      if (
+                        !disabledList.includes(validator.operator_address) ||
+                        currentlyEditing != validator.operator_address
+                      ) {
+                        selectValidator(validator);
+                      }
+                    }
+                  "
+                />
+                <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flex items-start pl-8 sticky top-0">
+      <Transition>
+        <ValidatorCard
+          v-if="detailedValidator"
+          :validator="detailedValidator"
+          :disabled="
+            disabledList.includes(detailedValidator.operator_address) &&
+              currentlyEditing != detailedValidator.operator_address
+          "
+          @close="
+            () => {
+              detailedValidator = null;
             }
           "
-        >
-          <td class="py-5 flex items-center" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
-            <div class="inline-flex items-center mr-4">
-              <!-- TODO: get logo url -->
-              <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
-            </div>
-            <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
-              {{ validator.moniker }}
-            </span>
-          </td>
-          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
-            {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
-            <div class="-text-1 text-muted">
-              {{ getVotingPowerPercDisplayValue(validator.tokens) }}
-            </div>
-          </td>
-          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
-            {{ getCommissionDisplayValue(validator.commission_rate) }}
-          </td>
-          <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
-            <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
-            <div class="-text-1 text-muted">
-              {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
-            </div>
-          </td>
-          <td v-if="hasActions" class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
-            <div class="flex justify-center">
-              <Button
-                variant="secondary"
-                class="ml-8"
-                :name="$t('components.validatorTable.stake')"
-                :full-width="false"
-                @click.stop="() => selectValidator(validator)"
-              />
-              <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          @clicked="
+            if (
+              !disabledList.includes(detailedValidator.operator_address) ||
+              currentlyEditing != detailedValidator.operator_address
+            ) {
+              selectValidator(detailedValidator);
+            }
+          "
+        />
+      </Transition>
+    </div>
   </section>
 </template>
 
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import orderBy from 'lodash.orderby';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
@@ -173,12 +204,12 @@ import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
+import ValidatorCard from '@/components/stake/ValidatorCard.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-
-import ValidatorBadge from '../common/ValidatorBadge.vue';
 
 enum ValStyle {
   LIST = 'list',
@@ -188,7 +219,7 @@ type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
 export default defineComponent({
   name: 'ValidatorTable',
-  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon },
+  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon, ValidatorCard },
   props: {
     validatorList: {
       type: Array as PropType<any[]>,
@@ -224,10 +255,10 @@ export default defineComponent({
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
-
+    const detailedValidator = ref(null);
     /* variables */
     const keyword = ref<string>('');
-    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST);
+    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null);
     const sortBy = ref('power');
     const sortOrder = ref('desc');
     const totalStakedAmount = computed(() => {
@@ -294,7 +325,7 @@ export default defineComponent({
       getAmountDisplayValue,
       getVotingPowerPercDisplayValue,
       selectValidator,
-
+      detailedValidator,
       hasActions,
       sort,
       sortBy,

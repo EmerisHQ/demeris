@@ -1,7 +1,6 @@
 <template>
   <div class="w-full mx-auto">
     <template v-if="step == 'validator'">
-      <h2 class="text-3 font-bold pt-8 text-left">{{ $t('components.switchForm.selectTitle') }}</h2>
       <ValidatorsTable
         :validator-list="validators"
         :disabled-list="validatorsToDisable"
