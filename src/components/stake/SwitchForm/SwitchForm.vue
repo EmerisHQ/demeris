@@ -4,7 +4,7 @@
       <ValidatorsTable
         :validator-list="validators"
         :disabled-list="validatorsToDisable"
-        :table-style="'list'"
+        :table-style="'actionlist'"
         @selectValidator="addValidator"
       />
     </template>
