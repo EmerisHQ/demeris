@@ -10,7 +10,7 @@
             :show-subtitle="false"
             :assets="balances"
             :selected-denom="baseDenom"
-            :func="() => toggleChainsModal()"
+            :func="() => toggleChainsModal(null, null)"
             @select="toggleChainsModal($event, state.chainsModalSource)"
           />
 
@@ -30,7 +30,24 @@
             />
 
             <button
-              class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
+              class="
+                py-4
+                px-5
+                flex
+                items-center
+                justify-between
+                w-full
+                outline-none
+                text-left
+                group
+                active:opacity-70
+                transition-opacity
+                text-muted
+                hover:text-text
+                focus:text-text
+                border-t border-border
+                rounded-b-2xl
+              "
               @click="toggleChainsModal(null, index)"
             >
               <div>
@@ -40,11 +57,12 @@
               <div class="flex">
                 <AmountDisplay
                   :amount="{
-                    amount: vali.from_balance,
+                    amount: chainBalance(vali.denom, vali.from_chain),
                     denom: vali.denom,
                   }"
+                  :chain="vali.from_chain"
                   :class="{
-                    'text-negative-text': compareInputToBalance(vali.amount, vali.from_balance),
+                    'text-negative-text': compareInputToBalance(vali.amount, chainBalance(vali.denom, vali.from_chain)),
                   }"
                 />
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -115,7 +133,7 @@ import { MultiDelegateForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
-  name: 'ValidatorAmountForm',
+  name: 'StakeFormAmount',
   components: {
     Alert,
     Price,
@@ -175,6 +193,7 @@ export default defineComponent({
       }
     });
     /* computeds */
+
     const balances = computed(() => {
       const nativeBalances = getNativeBalances();
       const result = [...userBalances.value];
@@ -234,13 +253,16 @@ export default defineComponent({
     const toggleChainsModal = (asset: Balance, index: number) => {
       if (asset) {
         form.stakes[index].from_chain = asset.on_chain;
-        form.stakes[index].from_balance = parseCoins(asset.amount)[0].amount;
         form.stakes[index].denom = parseCoins(asset.amount)[0].denom;
       }
       state.chainsModalSource = index;
       state.isChainsModalOpen = !state.isChainsModalOpen;
     };
-
+    const chainBalance = (denom, chain_name) => {
+      return parseCoins(
+        balances.value.find((x) => x.on_chain == chain_name && parseCoins(x.amount)[0].denom == denom).amount,
+      )[0]?.amount;
+    };
     return {
       state,
       form,
@@ -256,6 +278,7 @@ export default defineComponent({
       totalToStake,
       validatorsToStakeWith,
       hasIBC,
+      chainBalance,
     };
   },
 });

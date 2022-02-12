@@ -234,7 +234,7 @@ export type UndelegateForm = {
   denom: string;
   chain_name: string;
 };
-export type DelegateForm = UndelegateForm & { from_chain: string; from_balance: string };
+export type DelegateForm = UndelegateForm & { from_chain: string };
 export type MultiDelegateForm = {
   stakes: DelegateForm[];
 };

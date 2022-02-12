@@ -77,12 +77,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 if (featureRunning('STAKING')) {
   routes.push({
-    path: '/stake/:denom',
-    name: 'Stake',
-    component: () => import('@/views/Stake.vue'),
-  });
-  routes.push({
-    path: '/staking/:denom/:action?/:validator?',
+    path: '/staking/:denom/:action/:validator?',
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
   });

@@ -11,12 +11,7 @@
     </template>
     <template v-else-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
-      <ValidatorAmountForm
-        :validators="validators"
-        :steps="steps"
-        @next="generateSteps"
-        @selectanother="selectAnother"
-      />
+      <StakeFormAmount :validators="validators" :steps="steps" @next="generateSteps" @selectanother="selectAnother" />
     </template>
 
     <template v-else-if="['review', 'stake'].includes(step)">
@@ -55,7 +50,7 @@ import { useStore } from 'vuex';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import ValidatorAmountForm from '@/components/stake/ValidatorAmountForm.vue';
+import StakeFormAmount from '@/components/stake/StakeForm/StakeFormAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
@@ -74,7 +69,7 @@ export default defineComponent({
     TxStepsModal,
     FeatureRunningConditional,
     ValidatorsTable,
-    ValidatorAmountForm,
+    StakeFormAmount,
   },
 
   props: {
@@ -200,10 +195,9 @@ export default defineComponent({
         form.stakes.push({
           validatorAddress: validator.operator_address,
           amount: '',
-          denom: '',
-          from_chain: '',
+          denom: baseDenom,
+          from_chain: validator.chain_name,
           chain_name: validator.chain_name,
-          from_balance: '',
         });
       }
       goToStep('amount');
