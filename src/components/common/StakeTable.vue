@@ -231,7 +231,6 @@ export default defineComponent({
         assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
       } catch (e) {}
       validatorList.value = await getValidatorsByBaseDenom(props.denom);
-      console.log('validatorList', validatorList.value);
     })();
 
     /* computeds */
@@ -255,12 +254,11 @@ export default defineComponent({
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
-      // console.log(stakingBalances.value)
       return (
         Math.trunc(
           (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
             10 ** assetPrecision.value +
-            totalRewardsDisplayAmount.value) *
+            (totalRewardsDisplayAmount.value ?? 0)) *
             10 ** assetPrecision.value,
         ) /
         10 ** assetPrecision.value
@@ -277,10 +275,10 @@ export default defineComponent({
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
     });
     const totalRewardsAmount = computed(() => {
-      return parseFloat(stakingRewardsData.value?.total);
+      return parseFloat(stakingRewardsData.value?.total ?? 0);
     });
     const totalRewardsDisplayAmount = computed(() => {
-      return Math.trunc(totalRewardsAmount.value) / 10 ** assetPrecision.value;
+      return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
     });
     const unstakingAssetValue = computed(() => {
       //TODO
