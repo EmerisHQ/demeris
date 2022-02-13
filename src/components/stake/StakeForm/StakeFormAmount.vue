@@ -7,7 +7,7 @@
             v-if="state.isChainsModalOpen"
             class="fixed inset-0 z-30 bg-bg"
             title="Select chain"
-            :show-subtitle="false"
+            :show-subtitle="true"
             :assets="balances"
             :selected-denom="baseDenom"
             :func="() => toggleChainsModal(null, null)"

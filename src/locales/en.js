@@ -298,6 +298,9 @@ export const messages = {
       transferToHub: {
         swap: 'Assets are swapped on the Cosmos Hub',
         swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        stake: '{denom} are staked on the {chain} chain',
+        stakeDescription:
+          'In order to stake your {denom}, your {denom} must first be transferred to the {chain} chain.',
         addLiquidity: 'Pools are on the Cosmos Hub',
         addLiquidityDescription:
           'In order to add liquidity to a pool, your {denom} must be transferred to the Cosmos Hub.',

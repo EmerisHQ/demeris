@@ -589,7 +589,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
         }
 
-        if (['swap', 'addliquidity', 'stake'].includes(context.input.action) && context.input.steps.length > 1) {
+        if (
+          ['swap', 'addliquidity', 'stake', 'multistake'].includes(context.input.action) &&
+          context.input.steps.length > 1
+        ) {
           return true;
         }
 

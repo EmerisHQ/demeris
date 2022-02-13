@@ -33,7 +33,7 @@
         <TransactionProcessCreator
           v-if="steps.length"
           :steps="steps"
-          action="unstake"
+          action="stake"
           @pending="closeModal"
           @close="closeModal"
           @previous="$emit('previous')"
