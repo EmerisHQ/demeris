@@ -100,7 +100,12 @@
       <Button v-else variant="primary" class="w-full mt-8" @click="minimizeModal">
         <span>{{ $t('context.transactions.controls.backToEmeris') }}</span>
       </Button>
-      <p class="text-muted -text-1 px-4 mt-3">{{ $t('context.transactions.transacting.notifiedWhenCompletes') }}</p>
+      <p v-if="transaction.name === 'swap'" class="text-muted -text-1 px-4 mt-3">
+        {{ $t('context.transactions.transacting.notifiedWhenCompleteSwap') }}
+      </p>
+      <p v-else class="text-muted -text-1 px-4 mt-3">
+        {{ $t('context.transactions.transacting.notifiedWhenComplete') }}
+      </p>
     </div>
   </div>
 </template>
@@ -133,6 +138,11 @@ const titleMap = {
   addliquidity: t('components.txHandlingModal.addLiqAction'),
   withdrawliquidity: t('components.txHandlingModal.withdrawing'),
   createpool: t('components.txHandlingModal.createPoolAction'),
+  stake: t('components.txHandlingModal.stakeAction'),
+  multistake: t('components.txHandlingModal.stakeAction'),
+  unstake: t('components.txHandlingModal.unstakeAction'),
+  switch: t('components.txHandlingModal.switchAction'),
+  claim: t('components.txHandlingModal.claimAction'),
 };
 
 const getDepositDenoms = () => {

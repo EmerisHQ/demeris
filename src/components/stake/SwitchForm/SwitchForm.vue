@@ -9,7 +9,7 @@
       />
     </template>
     <template v-else-if="step === 'amount'">
-      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
+      <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.switchForm.title') }}</h2>
 
       <SwitchValidatorAmount
         :validators="validators"
@@ -20,7 +20,7 @@
       />
     </template>
 
-    <template v-else-if="['review', 'stake'].includes(step)">
+    <template v-else-if="['review', 'redelegate'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
         <template #deactivated>
           <TxStepsModal
@@ -28,8 +28,8 @@
             :data="steps"
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
-            action-name="unstake"
-            @transacting="goToStep('stake')"
+            action-name="switch"
+            @transacting="goToStep('redelegate')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -39,7 +39,7 @@
         <TransactionProcessCreator
           v-if="steps.length"
           :steps="steps"
-          action="unstake"
+          action="switch"
           @pending="closeModal"
           @close="closeModal"
           @previous="$emit('previous')"
@@ -64,7 +64,7 @@ import { RedelegateAction, RedelegateForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'stake';
+type Step = 'validator' | 'amount' | 'review' | 'redelegate';
 
 export default defineComponent({
   name: 'SwitchForm',

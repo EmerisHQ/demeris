@@ -2,7 +2,7 @@
   <List>
     <!-- Pay/Receive -->
 
-    <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.stakeLbl')">
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.stakeLbl')">
       <div class="flex justify-end items-center">
         <div class="text-right">
           <AmountDisplay
@@ -19,22 +19,24 @@
     </ListItem>
 
     <!-- Price  -->
-    <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.validatorsLbl')">
-      <template v-for="(stake, index) in tx.data" :key="'stake' + index">
-        <div class="flex justify-end">
-          <div>
-            {{ getValidatorMoniker(stake.validatorAddress) }}
-            <AmountDisplay :amount="stake.amount" />
-          </div>
-        </div>
-      </template>
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.fromLbl')">
+      <div class="flex justify-end items-center">
+        {{ getValidatorMoniker(tx.validatorSrcAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorSrcAddress)" />
+      </div>
     </ListItem>
 
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.toLbl')">
+      <div class="flex justify-end items-center">
+        {{ getValidatorMoniker(tx.validatorDstAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorDstAddress)" />
+      </div>
+    </ListItem>
     <!-- Fee -->
     <ListItem
       :size="size"
-      :label="$t('components.previews.stake.feeLbl')"
-      :hint="$t('components.previews.stake.feeLblHint')"
+      :label="$t('components.previews.switch.feeLbl')"
+      :hint="$t('components.previews.switch.feeLblHint')"
     >
       <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
@@ -45,13 +47,13 @@
   </List>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
+import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
@@ -64,6 +66,7 @@ export default defineComponent({
     CircleSymbol,
     List,
     ListItem,
+    ValidatorBadge,
   },
 
   props: {
@@ -85,32 +88,31 @@ export default defineComponent({
     const store = useStore();
     const { getValidatorsByBaseDenom } = useStaking();
 
-    const route = useRoute();
-
     const propsRef = toRefs(props);
     const validators = ref([]);
-    const baseDenom = route.params.denom as string;
-    const tx = computed(() => propsRef.step.value.transactions[0]);
-    const chainName = computed(() => {
-      return tx.value.data[0].chain_name;
-    });
-    const totalStaked = computed(() => {
-      return (tx.value.data as Actions.DelegateData[]).reduce((acc, txdata) => {
-        return acc + parseInt(txdata.amount.amount);
-      }, 0);
-    });
+    const tx = propsRef.step.value.transactions[0];
+    const baseDenom = (tx.data as Actions.RedelegateData).amount.denom;
+    const chainName = (tx.data as Actions.RedelegateData).chain_name;
+
+    const totalStaked = (tx.data as Actions.RedelegateData).amount.amount;
+
     onMounted(async () => {
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
     const getValidatorMoniker = (address) => {
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
     };
+
+    const getValidator = (address) => {
+      return validators.value.find((x) => x.operator_address == address);
+    };
     const size = props.context === 'default' ? 'md' : 'sm';
 
     return {
       store,
       size,
-      tx,
+      tx: tx.data as Actions.RedelegateData,
+      getValidator,
       getValidatorMoniker,
       baseDenom,
       chainName,

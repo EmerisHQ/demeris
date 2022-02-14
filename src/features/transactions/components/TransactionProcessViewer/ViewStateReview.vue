@@ -24,7 +24,12 @@
           :class="{ '-text-1': isSwapComponent }"
         />
       </div>
-
+      <Alert
+        v-if="step.name === 'stake' || step.name === 'switch'"
+        status="warning"
+        :message="$t('components.txHandlingModal.stakeDisclaimer')"
+        class="mt-4"
+      />
       <p class="px-8 text-center text-muted -text-1">
         {{ $t('components.txHandlingModal.noRevert') }}
         <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
@@ -46,6 +51,7 @@ import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
 import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';

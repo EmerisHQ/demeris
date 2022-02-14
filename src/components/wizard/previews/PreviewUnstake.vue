@@ -53,7 +53,6 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -94,39 +93,35 @@ export default defineComponent({
     const store = useStore();
     const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking();
 
-    const route = useRoute();
-
     const propsRef = toRefs(props);
     const validators = ref([]);
-    const baseDenom = route.params.denom as string;
-    const tx = computed(() => propsRef.step.value.transactions[0]);
+    const tx = propsRef.step.value.transactions[0];
+    const baseDenom = (tx.data as Actions.UndelegateData).amount.denom;
+    const chainName = (tx.data as Actions.UndelegateData).chain_name;
+
     const stakingRewardsData = ref(null);
-    const chainName = computed(() => {
-      return (tx.value.data as Actions.UndelegateData).chain_name;
-    });
-    const unStaked = computed(() => {
-      return (tx.value.data as Actions.UndelegateData).amount.amount;
-    });
+    const unStaked = (tx.data as Actions.UndelegateData).amount.amount;
+
     onMounted(async () => {
-      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
+      try {
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
+      } catch (e) {}
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
 
+    const validator = computed(() => {
+      return validators.value.find((x) => x.operator_address == (tx.data as Actions.UndelegateData).validatorAddress);
+    });
     const stakingRewards = computed(() => {
       if (stakingRewardsData.value !== null) {
         return parseFloat(
           stakingRewardsData.value.rewards.find(
-            (x) => x.validator_address == (tx.value.data as Actions.UndelegateData).validatorAddress,
+            (x) => x.validator_address == (tx.data as Actions.UndelegateData).validatorAddress,
           )?.reward ?? '0',
         ).toString();
       } else {
         return '0';
       }
-    });
-    const validator = computed(() => {
-      return validators.value.find(
-        (x) => x.operator_address == (tx.value.data as Actions.UndelegateData).validatorAddress,
-      );
     });
     const size = props.context === 'default' ? 'md' : 'sm';
 
@@ -136,7 +131,7 @@ export default defineComponent({
     return {
       store,
       size,
-      tx,
+      tx: tx.data as Actions.UndelegateData,
       availableAt,
 
       baseDenom,

@@ -88,10 +88,16 @@ export default defineComponent({
         }, 0);
         const unstakedValue = unbondingDelegations.value.reduce((total, unstakingBalance) => {
           const unstakedDenom = verifiedDenoms.filter((x) => x.chain_name == unstakingBalance.chain_name && x.stakable);
+
           if (unstakedDenom.length > 0) {
+            let unstakedAmount;
+            const unstakedAmounts = unstakingBalance.entries.map((z) => z.balance);
+            if (unstakedAmounts.length > 0) {
+              unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+            }
             if (store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name })) {
               let totalValue =
-                parseInt(unstakingBalance.amount) *
+                parseInt(unstakedAmount) *
                   store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: unstakedDenom[0].name }) ?? 0;
               let precision = Math.pow(
                 10,

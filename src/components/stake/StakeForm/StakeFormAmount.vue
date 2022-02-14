@@ -30,24 +30,7 @@
             />
 
             <button
-              class="
-                py-4
-                px-5
-                flex
-                items-center
-                justify-between
-                w-full
-                outline-none
-                text-left
-                group
-                active:opacity-70
-                transition-opacity
-                text-muted
-                hover:text-text
-                focus:text-text
-                border-t border-border
-                rounded-b-2xl
-              "
+              class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
               @click="toggleChainsModal(null, index)"
             >
               <div>
@@ -101,7 +84,7 @@
             </Alert>
 
             <!-- Continue button -->
-            <Button :name="$t('generic_cta.continue')" :disabled="false" @click="goToReview" />
+            <Button :name="$t('generic_cta.continue')" :disabled="disabled" @click="goToReview" />
           </div>
         </div>
       </main>
@@ -110,6 +93,7 @@
 </template>
 
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, inject, PropType, reactive, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
@@ -224,6 +208,35 @@ export default defineComponent({
         )
         .toString(),
     );
+    const disabled = computed(() => {
+      let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+      for (const validator of validatorsToStakeWith.value) {
+        if (validator.amount == '') {
+          return true;
+        }
+        if (chains[validator.from_chain]) {
+          chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
+            new BigNumber(validator.amount != '' ? validator.amount : 0),
+          );
+        } else {
+          chains[validator.from_chain] = {
+            amount: new BigNumber(validator.amount != '' ? validator.amount : 0),
+            denom: validator.denom,
+          };
+        }
+      }
+      console.log(chains);
+      for (const chain in chains) {
+        if (
+          chains[chain].amount
+            .multipliedBy(10 ** precision.value)
+            .isGreaterThan(chainBalance(chains[chain].denom, chain))
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
@@ -267,6 +280,7 @@ export default defineComponent({
       state,
       form,
       fees,
+      disabled,
       balances,
       precision,
       baseDenom,

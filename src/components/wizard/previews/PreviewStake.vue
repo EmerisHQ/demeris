@@ -20,11 +20,14 @@
 
     <!-- Price  -->
     <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.validatorsLbl')">
-      <template v-for="(stake, index) in tx.data" :key="'stake' + index">
-        <div class="flex justify-end">
+      <template v-for="(stake, index) in tx" :key="'stake' + index">
+        <div class="flex justify-end items-center pb-5">
+          <div class="flex flex-col text-right items-end">
+            <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
+            <div class="text-muted -text-1">Staked <AmountDisplay :amount="stake.amount" /></div>
+          </div>
           <div>
-            {{ getValidatorMoniker(stake.validatorAddress) }}
-            <AmountDisplay :amount="stake.amount" />
+            <ValidatorBadge :validator="getValidator(stake.validatorAddress)" size="md" class="ml-3" />
           </div>
         </div>
       </template>
@@ -45,13 +48,14 @@
   </List>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
+import BigNumber from 'bignumber.js';
+import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
@@ -64,6 +68,7 @@ export default defineComponent({
     CircleSymbol,
     List,
     ListItem,
+    ValidatorBadge,
   },
 
   props: {
@@ -84,21 +89,17 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { getValidatorsByBaseDenom } = useStaking();
-
-    const route = useRoute();
-
     const propsRef = toRefs(props);
     const validators = ref([]);
-    const baseDenom = route.params.denom as string;
-    const tx = computed(() => propsRef.step.value.transactions[0]);
-    const chainName = computed(() => {
-      return tx.value.data[0].chain_name;
-    });
-    const totalStaked = computed(() => {
-      return (tx.value.data as Actions.DelegateData[]).reduce((acc, txdata) => {
-        return acc + parseInt(txdata.amount.amount);
-      }, 0);
-    });
+    const tx = propsRef.step.value.transactions[0];
+    const chainName = (tx.data as Actions.DelegateData[])[0].chain_name;
+    const baseDenom = (tx.data as Actions.DelegateData[])[0].amount.denom;
+    const totalStaked = (tx.data as Actions.DelegateData[])
+      .reduce((acc, txdata) => {
+        return acc.plus(new BigNumber(txdata.amount.amount));
+      }, new BigNumber(0))
+      .toString();
+
     onMounted(async () => {
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
@@ -106,11 +107,14 @@ export default defineComponent({
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
     };
     const size = props.context === 'default' ? 'md' : 'sm';
-
+    const getValidator = (address) => {
+      return validators.value.find((x) => x.operator_address == address);
+    };
     return {
       store,
       size,
-      tx,
+      tx: tx.data as Actions.DelegateData[],
+      getValidator,
       getValidatorMoniker,
       baseDenom,
       chainName,

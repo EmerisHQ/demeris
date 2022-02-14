@@ -7,7 +7,7 @@
     }"
   >
     <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow" @click="selectValidator">
-      <CircleSymbol :denom="baseDenom" :chain-name="undefined" :size="size" :class="'mr-4'" @click="selectValidator" />
+      <ValidatorBadge :size="size" :validator="validator" class="mr-4" />
       <div>
         <div class="flex items-center font-medium text-1">
           {{ validator.moniker }}
@@ -35,16 +35,16 @@ import { computed, defineComponent, PropType, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
 import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import AmountInput from '@/components/ui/AmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 
 export default defineComponent({
   name: 'ValidatorSelect',
-  components: { AmountInput, Denom, CircleSymbol, Icon, Price },
+  components: { AmountInput, Denom, Icon, Price, ValidatorBadge },
   props: {
     amount: {
       type: String as PropType<string>,

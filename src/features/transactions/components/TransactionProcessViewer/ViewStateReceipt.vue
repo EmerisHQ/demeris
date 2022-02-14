@@ -41,7 +41,46 @@
             </div>
           </template>
         </template>
-
+        <template v-if="transaction.name === 'stake'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data[0].amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'switch'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'unstake'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'claim'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
         <template v-if="transaction.name === 'swap'">
           <template v-if="isSwapComponent">
             <i18n-t
@@ -202,7 +241,7 @@
 
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -222,6 +261,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ClaimData, DelegateData, RedelegateData, UndelegateData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -277,7 +317,27 @@ const title = computed(() => {
 
   return titleMap[transaction.value.name];
 });
-
+const stakedAmount = ref('0');
+if (transaction.value.name == 'stake') {
+  stakedAmount.value = (transaction.value.data as DelegateData[])
+    .reduce((acc, tx) => {
+      return acc.plus(new BigNumber(tx.amount.amount));
+    }, new BigNumber(0))
+    .toString();
+}
+if (transaction.value.name == 'unstake') {
+  stakedAmount.value = (transaction.value.data as UndelegateData).amount.amount;
+}
+if (transaction.value.name == 'switch') {
+  stakedAmount.value = (transaction.value.data as RedelegateData).amount.amount;
+}
+if (transaction.value.name == 'claim') {
+  stakedAmount.value = (transaction.value.data as ClaimData).rewards
+    .reduce((acc, data) => {
+      return acc.plus(new BigNumber(data.reward));
+    }, new BigNumber(0))
+    .toString();
+}
 const onNext = () => {
   send('CONTINUE');
 };

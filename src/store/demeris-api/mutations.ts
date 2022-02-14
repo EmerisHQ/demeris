@@ -330,7 +330,8 @@ export const mutations: MutationTree<State> & Mutations = {
       if (
         subObj.action == DemerisActionTypes.GET_BALANCES ||
         subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
-        subObj.action == DemerisActionTypes.GET_NUMBERS
+        subObj.action == DemerisActionTypes.GET_NUMBERS ||
+        subObj.action == DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS
       ) {
         state._Subscriptions.delete(sub);
       }
@@ -339,6 +340,7 @@ export const mutations: MutationTree<State> & Mutations = {
       delete state.balances[keyhash];
     }
     state.stakingBalances = {};
+    state.unbondingDelegations = {};
     state.numbers = {};
     state.transactions = new Map();
     state._InProgess = new Map();

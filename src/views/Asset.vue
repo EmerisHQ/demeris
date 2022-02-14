@@ -313,7 +313,7 @@ export default defineComponent({
       if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
         return unbondingDelegationsByChain(assetConfig.value.chain_name);
       }
-      return 0;
+      return [];
     });
 
     const stakedAmount = computed(() => {
@@ -331,14 +331,15 @@ export default defineComponent({
     });
 
     const unstakedAmount = computed(() => {
-      let unstaked = unbondingDelegation.value;
       let totalUnstakedAmount = 0;
-      if (Array.isArray(unstaked)) {
-        for (let i = 0; i < unstaked.length; i++) {
-          let amount = parseFloat(unstaked[i].amount);
-          if (amount) {
-            totalUnstakedAmount += amount;
-          }
+      if (unbondingDelegation.value.length > 0) {
+        const unstakedAmounts = unbondingDelegation.value
+          .map((y) => y.entries)
+          .flat()
+          .map((z) => z.balance);
+        if (unstakedAmounts.length > 0) {
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
         }
       }
       return totalUnstakedAmount;

@@ -281,11 +281,13 @@ export default defineComponent({
             totalAmount = totalAmount + stakedAmount;
           }
           if (featureRunning('STAKING')) {
-            const unstakedAmounts = unbondingDelegations.value.filter(
-              (x) => x.chain_name == denom_details[0].chain_name,
-            );
+            const unstakedAmounts = unbondingDelegations.value
+              .filter((x) => x.chain_name == denom_details[0].chain_name)
+              .map((y) => y.entries)
+              .flat()
+              .map((z) => z.balance);
             if (unstakedAmounts.length > 0) {
-              const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
+              const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
               totalAmount = totalAmount + unstakedAmount;
             }
           }

@@ -121,8 +121,17 @@ export type StakingBalancesResponse = {
 };
 
 // /unbonding_delegations/:address response data types
-
-export type UnbondingDelegation = StakingBalance;
+export type UnbondingDelegationEntry = {
+  balance: string;
+  completion_time: string;
+  creation_height: number;
+  initial_balance: string;
+};
+export type UnbondingDelegation = {
+  validator_address: string;
+  entries: UnbondingDelegationEntry[];
+  chain_name: string;
+};
 export type UnbondingDelegations = Array<UnbondingDelegation>;
 export type UnbondingDelegationsResponse = {
   unbonding_delegations: UnbondingDelegations;

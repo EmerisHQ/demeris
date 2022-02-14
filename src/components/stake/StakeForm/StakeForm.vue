@@ -22,8 +22,8 @@
             :data="steps"
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
-            action-name="unstake"
-            @transacting="goToStep('stake')"
+            action-name="stake"
+            @transacting="goToStep('delegate')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -59,7 +59,7 @@ import { DelegateForm, MultiDelegateAction, MultiDelegateForm } from '@/types/ac
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'stake';
+type Step = 'validator' | 'amount' | 'review' | 'delegate';
 
 export default defineComponent({
   name: 'StakeForm',
