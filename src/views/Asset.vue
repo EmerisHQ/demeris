@@ -5,7 +5,7 @@
         <!-- Info -->
 
         <header>
-          <div class="sm:flex items-center flex-wrap gap-y-3">
+          <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
               <div class="sm:flex items-baseline flex-wrap">
@@ -15,6 +15,7 @@
               <Price
                 v-tippy
                 :amount="{ amount: 0, denom }"
+                :price-diff-object="priceDiffObject"
                 class="text-1 sm:text-2 font-bold"
                 content="Current asset price"
               />
@@ -22,9 +23,17 @@
           </div>
         </header>
 
-        <!-- Balance -->
+        <!-- Asset Price Performance Chart -->
+        <AreaChart
+          v-if="showPriceChart"
+          :data-stream="dataStream"
+          :show-loading="showPriceChartLoadingSkeleton"
+          @filterChanged="getTokenPrices"
+          @priceDiff="setPriceDifference"
+        />
 
-        <MoonpayBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
+        <!-- Balance -->
+        <BuyCryptoBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
 
         <section v-else class="mt-16">
           <header class="space-y-0.5">
@@ -146,25 +155,26 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
-        <MoonpayBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
+        <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { useMeta } from 'vue-meta';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
 import ChainName from '@/components/common/ChainName.vue';
+import AreaChart from '@/components/common/charts/AreaChart.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
-import MoonpayBanner from '@/components/common/MoonpayBanner.vue';
 import Price from '@/components/common/Price.vue';
 import StakeTable from '@/components/common/StakeTable.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -175,10 +185,11 @@ import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { VerifiedDenoms } from '@/types/api';
+import { LoadingState, VerifiedDenoms } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'Asset',
@@ -196,8 +207,9 @@ export default defineComponent({
     Pools,
     TooltipPools,
     PoolBanner,
-    MoonpayBanner,
+    BuyCryptoBanner,
     ChainDownWarning,
+    AreaChart,
   },
 
   setup() {
@@ -211,6 +223,7 @@ export default defineComponent({
     });
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
+    const router = useRouter();
     const denom = computed(() => route.params.denom as string);
 
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
@@ -221,6 +234,9 @@ export default defineComponent({
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
+    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+      router.push('/');
+    }
 
     const nativeAsset = computed(() => {
       return nativeBalances.value.find((item) => item.base_denom === denom.value);
@@ -357,6 +373,65 @@ export default defineComponent({
       return availableAmount.value + stakedAmount.value;
     });
 
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const dataStream = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
+    });
+
+    const getTokenPrices = ref(null);
+    let priceDiffObject = ref(null);
+
+    const setPriceDifference = (priceDiff: any) => {
+      priceDiffObject.value = priceDiff;
+    };
+
+    if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
+      watch(displayName, async () => {
+        if (displayName.value) {
+          getTokenPrices.value('max');
+        }
+      });
+
+      getTokenPrices.value = async (days: string) => {
+        const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
+          subscribe: false,
+          params: {
+            token: displayName.value.toLowerCase(),
+          },
+        });
+
+        if (chainName) {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
+            subscribe: false,
+            params: {
+              token_id: chainName,
+              days,
+              currency: 'usd',
+            },
+          });
+        }
+      };
+    }
+
+    const isDenomAPool = computed(() => {
+      return denom.value.includes('pool');
+    });
+
+    const showPriceChart = computed(() => {
+      return isAreaChartFeatureRunning && !isDenomAPool.value;
+    });
+
+    const showPriceChartLoadingSkeleton = computed(() => {
+      return (
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
+        apistore.getters[GlobalDemerisGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
+      );
+    });
+
+    onUnmounted(() => {
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
+    });
+
     return {
       nativeAsset,
       assetConfig,
@@ -370,6 +445,12 @@ export default defineComponent({
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      dataStream,
+      getTokenPrices,
+      showPriceChart,
+      showPriceChartLoadingSkeleton,
+      priceDiffObject,
+      setPriceDifference,
     };
   },
 });

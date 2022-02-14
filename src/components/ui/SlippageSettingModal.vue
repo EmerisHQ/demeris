@@ -35,20 +35,7 @@
         </button>
         <label
           v-if="allowCustomSlippage"
-          class="
-            custom-slippage
-            h-12
-            pr-3
-            flex-shrink flex
-            items-baseline
-            justify-center
-            text-center
-            focus-within:text-right
-            bg-fg
-            rounded-xl
-            outline-none
-            text-text
-          "
+          class="custom-slippage h-12 pr-3 flex-shrink flex items-baseline justify-center text-center focus-within:text-right bg-fg rounded-xl outline-none text-text"
           :class="[
             isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
             Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
@@ -60,20 +47,7 @@
             :value="customSlippage"
             type="number"
             placeholder="Custom"
-            class="
-              custom-slippage__input
-              h-12
-              appearance-none
-              overflow-hidden
-              py-0
-              pr-0
-              pl-3
-              m-0
-              flex-grow
-              border-none
-              outline-none
-              bg-transparent
-            "
+            class="custom-slippage__input h-12 appearance-none overflow-hidden py-0 pr-0 pl-3 m-0 flex-grow border-none outline-none bg-transparent"
             :class="[isCustomSelected ? 'w-12' : 'w-20']"
             required
             @input="setCustomSlippage"
