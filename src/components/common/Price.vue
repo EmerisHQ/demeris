@@ -1,6 +1,13 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" show-dash />
+    <div
+      v-if="showPriceDiff"
+      class="-text-1 font-normal"
+      :class="priceDiffIndicator === 'gain' ? 'color-green' : 'color-red'"
+    >
+      {{ $t('pages.asset.priceDiff', priceDiffObject) }}
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -29,6 +36,10 @@ export default defineComponent({
     autoUpdate: {
       type: Boolean,
       default: true,
+    },
+    priceDiffObject: {
+      type: Object,
+      default: null,
     },
   },
   setup(props) {
@@ -97,7 +108,24 @@ export default defineComponent({
       },
     );
 
-    return { displayPrice };
+    const showPriceDiff = computed(() => {
+      return props.priceDiffObject && props.priceDiffObject.rawDiff;
+    });
+
+    const priceDiffIndicator = computed(() => {
+      return props.priceDiffObject.indicator;
+    });
+
+    return { displayPrice, showPriceDiff, priceDiffIndicator };
   },
 });
 </script>
+
+<style scoped>
+.color-green {
+  color: #008223;
+}
+.color-red {
+  color: #d80228;
+}
+</style>

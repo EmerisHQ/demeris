@@ -2,7 +2,7 @@
   {{ displayChain }}
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import { GlobalDemerisGetterTypes } from '@/store';
@@ -13,10 +13,10 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-
+    const name = toRefs(props).name;
     const displayChain = computed(() => {
-      const displayName = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: props.name });
-      return displayName || props.name;
+      const displayName = store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: name.value });
+      return displayName || name.value;
     });
     return { displayChain };
   },
