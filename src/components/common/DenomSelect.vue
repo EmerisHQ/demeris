@@ -68,18 +68,7 @@
       <AmountInput
         :model-value="amount"
         :readonly="readonly"
-        class="
-          denom-select__coin-amount-input
-          text-text
-          w-full
-          p-0
-          text-right
-          font-bold
-          bg-transparent
-          placeholder-inactive
-          appearance-none
-          border-none
-        "
+        class="denom-select__coin-amount-input text-text w-full p-0 text-right font-bold bg-transparent placeholder-inactive appearance-none border-none"
         :class="{ 'text-1': size === 'sm', 'text-2': size === 'md' }"
         placeholder="0"
         min="0"
