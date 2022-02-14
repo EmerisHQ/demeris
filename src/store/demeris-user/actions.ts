@@ -209,7 +209,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       }
 
-      isCypress
+      !isCypress
         ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
         : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
 

@@ -31,8 +31,6 @@ export class UserDropdown {
   }
 
   userDropdownExpanded() {
-    return cy.get(
-      'div[class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-30 shadow-panel"]',
-    );
+    return cy.get('.settings-modal');
   }
 }
