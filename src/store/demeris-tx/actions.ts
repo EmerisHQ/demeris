@@ -1,3 +1,5 @@
+import { Secp256k1HdWallet } from '@cosmjs/amino';
+import { stringToPath } from '@cosmjs/crypto';
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
@@ -71,6 +73,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async [DemerisActionTypes.SIGN_WITH_KEPLR]({ dispatch, rootGetters }, { msgs, chain_name, fee, registry, memo }) {
     try {
+      const isCypress = !!window['Cypress'];
       let chain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
         chain_name,
       }) as ChainData;
@@ -88,8 +91,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       // await addChain(chain_name);
 
-      await window.keplr.enable(chain.node_info.chain_id);
-      const offlineSigner = await window.getOfflineSigner(chain.node_info.chain_id);
+      if (!isCypress) {
+        await window.keplr.enable(chain.node_info.chain_id);
+      }
+
+      const offlineSigner = isCypress
+        ? await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+            prefix: chain.node_info.bech32_config.main_prefix,
+            hdPaths: [stringToPath(chain.derivation_path)],
+          })
+        : await window.getOfflineSigner(chain.node_info.chain_id);
       const [account] = await offlineSigner.getAccounts();
 
       const client = new DemerisSigningClient(undefined, offlineSigner, { registry });

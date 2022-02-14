@@ -104,14 +104,7 @@
                   <router-link
                     v-else-if="form.coinA.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinA.asset.base_denom } }"
-                    class="
-                      font-medium
-                      text-link
-                      hover:text-link-hover
-                      focus:text-link-hover
-                      active:opacity-70
-                      transition
-                    "
+                    class="font-medium text-link hover:text-link-hover focus:text-link-hover active:opacity-70 transition"
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
                     <Denom :name="form.coinA.asset.base_denom" /> &rarr;
@@ -129,24 +122,7 @@
 
                 <button
                   v-if="form.coinA.asset"
-                  class="
-                    py-4
-                    px-5
-                    flex
-                    items-center
-                    justify-between
-                    w-full
-                    outline-none
-                    text-left
-                    group
-                    active:opacity-70
-                    transition-opacity
-                    text-muted
-                    hover:text-text
-                    focus:text-text
-                    border-t border-border
-                    rounded-b-2xl
-                  "
+                  class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
                   @click="toggleChainsModal(null, 'coinA')"
                 >
                   <div>
@@ -173,14 +149,7 @@
                   <router-link
                     v-else-if="form.coinB.asset"
                     :to="{ name: 'Asset', params: { denom: form.coinB.asset.base_denom } }"
-                    class="
-                      font-medium
-                      text-link
-                      hover:text-link-hover
-                      focus:text-link-hover
-                      active:opacity-70
-                      transition
-                    "
+                    class="font-medium text-link hover:text-link-hover focus:text-link-hover active:opacity-70 transition"
                   >
                     <span>{{ $t('generic_cta.get') }}&nbsp;</span>
                     <Denom :name="form.coinB.asset.base_denom" /> &rarr;
@@ -198,24 +167,7 @@
 
                 <button
                   v-if="form.coinB.asset"
-                  class="
-                    py-4
-                    px-5
-                    flex
-                    items-center
-                    justify-between
-                    w-full
-                    outline-none
-                    text-left
-                    group
-                    active:opacity-70
-                    transition-opacity
-                    text-muted
-                    hover:text-text
-                    focus:text-text
-                    border-t border-border
-                    rounded-b-2xl
-                  "
+                  class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
                   @click="toggleChainsModal(null, 'coinB')"
                 >
                   <div>

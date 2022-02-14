@@ -3,22 +3,7 @@
     <Button rounded variant="secondary" class="w-12 h-12 flex items-center justify-center" @click="handleClick">
       <div
         v-if="notificationsCount"
-        class="
-          flex
-          items-center
-          justify-center
-          w-6
-          h-6
-          border-2 border-bg
-          bg-negative
-          rounded-full
-          absolute
-          -right-1
-          -top-1
-          font-medium
-          -text-1
-          text-text
-        "
+        class="flex items-center justify-center w-6 h-6 border-2 border-bg bg-negative rounded-full absolute -right-1 -top-1 font-medium -text-1 text-text"
       >
         <span v-if="notificationsCount > 3">3+</span>
         <span v-else>{{ notificationsCount }}</span>

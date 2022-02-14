@@ -1,22 +1,7 @@
 <template>
   <router-link
     :to="{ name: 'Pool', params: { id: pool.id } }"
-    class="
-      pool-card
-      relative
-      flex
-      transition
-      transform
-      hover:-translate-y-px
-      focus:-translate-y-px
-      shadow-card
-      hover:shadow-panel
-      rounded-2xl
-      active:transform-none active:opacity-70
-      focus-visible:ring-2
-      focus:ring-tertiary focus:ring-opacity-50
-      cursor-pointer
-    "
+    class="pool-card relative flex transition transform hover:-translate-y-px focus:-translate-y-px shadow-card hover:shadow-panel rounded-2xl active:transform-none active:opacity-70 focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 cursor-pointer"
   >
     <div
       class="flex-1 relative z-10 flex flex-col items-between justify-stretch rounded-2xl p-6 text-0 bg-surface h-40"
