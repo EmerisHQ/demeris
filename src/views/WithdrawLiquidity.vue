@@ -89,24 +89,7 @@
 
               <button
                 v-if="state.selectedAsset"
-                class="
-                  py-4
-                  px-5
-                  flex
-                  items-center
-                  justify-between
-                  w-full
-                  outline-none
-                  text-left
-                  group
-                  active:opacity-70
-                  transition-opacity
-                  text-muted
-                  hover:text-text
-                  focus:text-text
-                  border-t border-border
-                  rounded-b-2xl
-                "
+                class="py-4 px-5 flex items-center justify-between w-full outline-none text-left group active:opacity-70 transition-opacity text-muted hover:text-text focus:text-text border-t border-border rounded-b-2xl"
                 @click="toggleChainsModal(null, 'coinA')"
               >
                 <div>
