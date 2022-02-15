@@ -210,7 +210,6 @@ export default defineComponent({
     });
     provide('stakeForm', form);
     onMounted(() => {
-      console.log(propsRef);
       if (propsRef.preselected.value) {
         addValidator(lookupValidator(propsRef.preselected.value));
       }
