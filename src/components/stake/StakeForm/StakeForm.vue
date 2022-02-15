@@ -11,7 +11,7 @@
     </template>
     <template v-else-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
-      <StakeFormAmount :validators="validators" :steps="steps" @next="generateSteps" @selectanother="selectAnother" />
+      <StakeFormAmount :validators="validators" :steps="steps" @next="goToReview" @selectanother="selectAnother" />
     </template>
 
     <template v-else-if="['review', 'stake'].includes(step)">
@@ -162,7 +162,7 @@ export default defineComponent({
       }
     });
 
-    const generateSteps = async () => {
+    const goToReview = async () => {
       event('review_tx', { event_label: 'Reviewing stake tx', event_category: 'transactions' });
       goToStep('review');
     };
@@ -217,7 +217,7 @@ export default defineComponent({
     return {
       gasPrice,
       steps,
-      generateSteps,
+      goToReview,
       form,
       goToStep,
       resetHandler,

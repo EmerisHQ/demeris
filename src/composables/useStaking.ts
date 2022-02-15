@@ -2,7 +2,7 @@
 // import { computed, ref, watch } from 'vue';
 
 //TODO : add type for validator list
-type ValidatorStatus = 1 | 2 | 3;
+type ValidatorStatus = 1 | 2 | 3; // Possibly turn into enum?
 
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { Chains } from '@/types/api';
@@ -19,19 +19,6 @@ export default function useStaking() {
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
     const reducer = (accumulator, validator) => {
       if (status.includes(validator.status)) {
-        // TEST: Get a validator data(profile pic url) from keybase
-        // validator.keybaseData = null;
-        // try {
-        //   const keybaseData = await axios.get(
-        //     `https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=${validator.identity}`,
-        //   );
-        //   validator.keybaseData = keybaseData.data?.them?.[0];
-
-        // } catch {
-        //   //
-        // }
-
-        //TODO: implement staking balance at here
         accumulator.push(validator);
       }
       return accumulator;

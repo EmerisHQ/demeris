@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CurrencyDisplay :value="displayPrice" show-dash />
+    <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
     <div
       v-if="showPriceDiff"
       class="-text-1 font-normal"

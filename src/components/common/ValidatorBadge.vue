@@ -7,23 +7,7 @@
       v-if="validator.jailed"
       v-tippy
       :content="'Validator jailed'"
-      class="
-        flex
-        items-center
-        justify-center
-        w-3
-        h-3
-        border-1 border-bg
-        bg-negative
-        rounded-full
-        absolute
-        z-50
-        -right-1
-        -top-1
-        font-medium
-        -text-1
-        text-text
-      "
+      class="flex items-center justify-center w-3 h-3 border-1 border-bg bg-negative rounded-full absolute z-50 -right-1 -top-1 font-medium -text-1 text-text"
     ></div>
     <template v-if="logoUrl != ''">
       <img :src="logoUrl" :alt="validator.moniker" class="w-full h-full rounded-full relative z-10" />
@@ -73,7 +57,7 @@ export default defineComponent({
       Math.random()
         .toString(36)
         .replace(/[^a-z]+/g, '')
-        .substr(2, 10);
+        .substr(2, 10); // Generates random ID for svg clippath
     watch(
       () => validator.value,
       async (newVal) => {

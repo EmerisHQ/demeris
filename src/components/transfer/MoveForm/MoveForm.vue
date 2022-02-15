@@ -2,7 +2,7 @@
   <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.moveForm.title') }}</h2>
-      <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="generateSteps" />
+      <MoveFormAmount v-if="balances" :balances="balances" :steps="steps" @next="goToReview" />
     </template>
 
     <template v-else-if="['review', 'move'].includes(step)">
@@ -137,7 +137,7 @@ export default defineComponent({
       }
     });
 
-    const generateSteps = async () => {
+    const goToReview = async () => {
       event('review_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' });
       goToStep('review');
     };
@@ -164,7 +164,7 @@ export default defineComponent({
 
     provide('moveForm', form);
 
-    return { gasPrice, steps, generateSteps, form, goToStep, resetHandler, closeModal };
+    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal };
   },
 });
 </script>

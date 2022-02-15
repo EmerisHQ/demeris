@@ -21,9 +21,9 @@
           v-if="label"
           class="text-left flex items-center"
           :class="{
-            'font-light': weight == 'light',
-            'font-normal': weight == 'normal',
-            'font-medium': weight == 'medium',
+            'font-light': labelFontWeight == 'light',
+            'font-normal': labelFontWeight == 'normal',
+            'font-medium': labelFontWeight == 'medium',
           }"
         >
           <span>{{ label }}</span>
@@ -133,7 +133,7 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
-    weight: {
+    labelFontWeight: {
       type: String as PropType<'light' | 'normal' | 'medium'>,
       default: 'medium',
     },

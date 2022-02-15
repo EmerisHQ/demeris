@@ -16,7 +16,7 @@
         :size="'md'"
         :steps="steps"
         @previous="selectAnother"
-        @next="generateSteps"
+        @next="goToReview"
       />
     </template>
 
@@ -160,8 +160,8 @@ export default defineComponent({
       }
     });
 
-    const generateSteps = async () => {
-      event('review_tx', { event_label: 'Reviewing stake tx', event_category: 'transactions' });
+    const goToReview = async () => {
+      event('review_tx', { event_label: 'Reviewing switch tx', event_category: 'transactions' });
       goToStep('review');
     };
     const goToStep = (value: Step) => {
@@ -198,7 +198,7 @@ export default defineComponent({
     return {
       gasPrice,
       steps,
-      generateSteps,
+      goToReview,
       form,
       goToStep,
       resetHandler,

@@ -45,7 +45,11 @@
                   }"
                   :chain="vali.from_chain"
                   :class="{
-                    'text-negative-text': compareInputToBalance(vali.amount, chainBalance(vali.denom, vali.from_chain)),
+                    'text-negative-text': isGreaterWithPrecision(
+                      vali.amount,
+                      chainBalance(vali.denom, vali.from_chain),
+                      precision,
+                    ),
                   }"
                 />
                 <Icon name="ChevronRightIcon" :icon-size="1" class="ml-2" />
@@ -179,25 +183,26 @@ export default defineComponent({
     /* computeds */
 
     const balances = computed(() => {
+      // Adds 0 balances for all native assets if not owned by user
       const nativeBalances = getNativeBalances();
-      const result = [...userBalances.value];
+      const allBalances = [...userBalances.value];
 
       for (const nativeBalance of nativeBalances) {
         const hasBalance = userBalances.value.some(
           (item) => item.on_chain === nativeBalance.on_chain && item.base_denom === nativeBalance.base_denom,
         );
         if (!hasBalance) {
-          result.push(nativeBalance);
+          allBalances.push(nativeBalance);
         }
       }
 
-      result.sort((a, b) => {
+      allBalances.sort((a, b) => {
         const coinA = parseCoins(a.amount)[0];
         const coinB = parseCoins(b.amount)[0];
         return +coinB.amount - +coinA.amount;
       });
 
-      return result;
+      return allBalances;
     });
     const totalToStake = computed(() =>
       validatorsToStakeWith.value
@@ -242,11 +247,11 @@ export default defineComponent({
       }),
     );
 
-    const compareInputToBalance = (input, balance) => {
-      if (input && balance) {
-        const inputAmt = parseFloat(input);
-        const balanceAmt = Number(balance) / 10 ** precision.value;
-        return inputAmt > balanceAmt;
+    const isGreaterWithPrecision = (x, y, precision) => {
+      if (x && y) {
+        const leftOperand = new BigNumber(x);
+        const rightOperand = new BigNumber(y).dividedBy(10 ** precision);
+        return leftOperand.isGreaterThan(rightOperand);
       } else {
         return false;
       }
@@ -287,7 +292,7 @@ export default defineComponent({
       validatorAddHandler,
       toggleChainsModal,
       goToReview,
-      compareInputToBalance,
+      isGreaterWithPrecision,
       totalToStake,
       validatorsToStakeWith,
       hasIBC,

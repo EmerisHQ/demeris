@@ -23,7 +23,7 @@
           :label="'Max commission'"
           :content="$t('components.validatorCard.maxCommissionTooltip')"
           class="text-muted -text-1"
-          :weight="'normal'"
+          :label-font-weight="'normal'"
         >
           {{ maxCommission }}
         </ListItem>
@@ -34,7 +34,7 @@
           :label="'Max change rate'"
           :content="$t('components.validatorCard.maxChangeRateTooltip')"
           class="text-muted -text-1"
-          :weight="'normal'"
+          :label-font-weight="'normal'"
         >
           {{ maxChange }}
         </ListItem>
