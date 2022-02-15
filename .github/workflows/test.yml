@@ -33,10 +33,14 @@ jobs:
         run: npm install
 
       - name: Test
-        run: npm run test:unit -- --runInBand
+        run: npm run test:unit
 
   e2e:
     runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
