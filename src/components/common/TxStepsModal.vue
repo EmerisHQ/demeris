@@ -549,7 +549,6 @@ export default defineComponent({
     const acceptedWarning = ref(false);
     const currentData = computed(() => {
       const currentStepData = adjustedFeeData.value[currentStep.value];
-      console.log('TxStepsModal 550', currentStepData);
       const modifiedData = {
         isSwap: false,
         title: '',
