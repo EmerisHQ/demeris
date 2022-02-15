@@ -21,6 +21,7 @@ import { useStore } from 'vuex';
 import useCountry from '@/composables/useCountry';
 import useEmitter from '@/composables/useEmitter';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { event } from '@/utils/analytics';
 import { featureRunning } from '@/utils/FeatureManager';
 export default defineComponent({
   name: 'BuyCryptoBanner',
@@ -67,6 +68,12 @@ export default defineComponent({
     const openModal = () => {
       if (isSignedIn.value && !isDemoAccount.value) {
         emitter.emit(bannerType.value);
+        if (bannerType.value === 'simplex') {
+          event('simplex_transaction', {
+            event_label: 'Transaction with Simplex initiated',
+            event_category: 'Fiat Onramp',
+          });
+        }
       } else {
         emitter.emit('toggle-settings-modal');
       }
