@@ -16,6 +16,7 @@ jobs:
     runs-on: self-hosted
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [14.x, 16.x]
 
@@ -24,7 +25,8 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       
-      - uses: actions/cache@v2
+      - name: Cache node_modules
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -52,7 +54,8 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - uses: actions/cache@v2
+      - name: Cache node_modules
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
