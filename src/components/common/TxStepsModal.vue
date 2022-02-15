@@ -38,9 +38,6 @@
           <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
             {{ currentData.title }}
           </h1>
-          <!-- TEST -->
-          <!-- {{ currentData }} -->
-          <!-- TEST -->
           <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
             <PreviewClaim
               v-if="currentData.data.name === 'claim'"
