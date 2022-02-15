@@ -225,7 +225,6 @@ export default defineComponent({
           };
         }
       }
-      console.log(chains);
       for (const chain in chains) {
         if (
           chains[chain].amount

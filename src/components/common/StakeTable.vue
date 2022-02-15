@@ -317,18 +317,15 @@ export default defineComponent({
     };
     const goStakeActionPage = (action: string, valAddress = '') => {
       const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
-      if (action === StakingActions.STAKE) {
-        router.push(`/staking/${props.denom}/${StakingActions.STAKE}${validatorAddress ? `/${validatorAddress}` : ''}`);
-      } else if (action === StakingActions.UNSTAKE) {
-        router.push(
-          `/staking/${props.denom}/${StakingActions.UNSTAKE}${validatorAddress ? `/${validatorAddress}` : ''}`,
-        );
-      } else if (action === StakingActions.SWITCH) {
-        router.push(
-          `/staking/${props.denom}/${StakingActions.SWITCH}${validatorAddress ? `/${validatorAddress}` : ''}`,
-        );
-      } else {
-        router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
+      switch (action) {
+        case StakingActions.STAKE:
+        case StakingActions.UNSTAKE:
+        case StakingActions.SWITCH:
+          router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
+          return
+        default:
+          router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
+          return
       }
     };
     /* watch */

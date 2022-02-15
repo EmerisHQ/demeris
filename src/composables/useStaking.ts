@@ -16,9 +16,7 @@ export default function useStaking() {
   const getValidatorsByBaseDenom = async (base_denom: string, status: ValidatorStatus[] = [3]) => {
     //TODO: have our own curated DB for validator list
     const chain_name = getChainNameByBaseDenom(base_denom);
-    console.log(chain_name);
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
-    console.log(rawValidators);
     const reducer = (accumulator, validator) => {
       if (status.includes(validator.status)) {
         // TEST: Get a validator data(profile pic url) from keybase
