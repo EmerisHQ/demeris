@@ -155,7 +155,7 @@ export default defineComponent({
         });
       }
     });
-    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
+    pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType });
     const selectAnother = (e) => {
       step.value = allSteps[actionType][currentStepIndex.value - 1];
       editing.value = e;
