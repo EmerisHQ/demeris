@@ -14,7 +14,7 @@ export class Receive {
     this.searchField().type(text);
   }
   searchField() {
-    return cy.get('div[class="relative flex cursor-text"]').find('input');
+    return cy.get('div[class="suffix relative flex cursor-text"]').find('input');
   }
 
   quitWithX() {
