@@ -25,8 +25,9 @@
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
         <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" :balances="balances" />
-        <div v-else class="text-center">-</div>
-        <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
+        <SkeletonLoader v-else width="100%">
+          <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
+        </SkeletonLoader>
       </div>
     </div>
   </div>
@@ -38,6 +39,7 @@ import avatar from 'gradient-avatar';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
@@ -48,6 +50,7 @@ export default defineComponent({
 
   components: {
     TotalPrice,
+    SkeletonLoader,
   },
   props: {
     walletName: { type: String, required: false, default: '' },
@@ -95,7 +98,10 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+::v-deep(.skeleton-loader) {
+  margin-top: 0;
+}
 .avatar {
   &__gradient {
     &:before {

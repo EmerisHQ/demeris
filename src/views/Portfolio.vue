@@ -5,14 +5,8 @@
         <header>
           <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
           <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
-            <template v-if="initialLoadComplete">
-              <TotalPrice :balances="balances" small-decimals />
-            </template>
-            <template v-else>
-              <div class="w-24">
-                <EphemerisSpinner />
-              </div>
-            </template>
+            <TotalPrice v-if="initialLoadComplete" :balances="balances" small-decimals />
+            <SkeletonLoader v-else width="100%" />
           </div>
         </header>
         <section class="mt-16">
@@ -32,12 +26,7 @@
               @row-click="openAssetPage"
             />
           </template>
-          <template v-else>
-            <div class="mx-auto w-48">
-              <EphemerisSpinner />
-            </div>
-          </template>
-
+          <SkeletonLoader v-else width="100%" height="300px" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
         <section class="mt-16">
@@ -55,11 +44,7 @@
               <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
             </div>
           </template>
-          <template v-else>
-            <div class="mx-auto w-48">
-              <EphemerisSpinner />
-            </div>
-          </template>
+          <SkeletonLoader v-else width="100%" height="300px" />
         </section>
       </div>
 
@@ -81,11 +66,11 @@ import { useStore } from 'vuex';
 import AssetsTable from '@/components/assets/AssetsTable';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import Intro from '@/components/common/Intro.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
-import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -104,7 +89,7 @@ export default {
     AssetsTable,
     Pools,
     Intro,
-    EphemerisSpinner,
+    SkeletonLoader,
   },
 
   setup() {
@@ -145,3 +130,8 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+::v-deep(.skeleton-loader) {
+  margin-top: 0;
+}
+</style>
