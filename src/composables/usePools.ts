@@ -10,6 +10,11 @@ import { useStore } from '@/utils/useStore';
 let usePoolsInstance = null;
 function usePools() {
   let init = false;
+
+  let initialized;
+  const initPromise = new Promise((resolve) => {
+    initialized = resolve;
+  });
   const libStore = useStore();
   const apistore = libStore as TypedAPIStore;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
@@ -27,27 +32,31 @@ function usePools() {
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
-      if (!oldPools && init) {
-        return;
-      }
-      init = true;
-      let oldIds = [];
-      if (oldPools) {
-        oldIds = oldPools.map((x) => x.id);
-      }
-      const newIds = newPools.map((x) => x.id);
-      const addedIds = newIds.filter((x) => !oldIds.includes(x));
-      if (addedIds.length > 0) {
-        pools.value = newPools;
-        const addedPools = newPools.filter((x) => addedIds.includes(x.id));
-        for (const addedPool of addedPools) {
-          const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
-
-          apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
-            subscribe: false,
-            params: { address: hashAddress },
-          });
+      if (newPools.length > 0) {
+        if (!oldPools && init) {
+          return;
         }
+        init = true;
+        let oldIds = [];
+        if (oldPools) {
+          oldIds = oldPools.map((x) => x.id);
+        }
+        const newIds = newPools.map((x) => x.id);
+        const addedIds = newIds.filter((x) => !oldIds.includes(x));
+        if (addedIds.length > 0) {
+          pools.value = newPools;
+          const addedPools = newPools.filter((x) => addedIds.includes(x.id));
+          await Promise.all(
+            addedPools.map(async (addedPool) => {
+              const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
+              await apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
+                subscribe: false,
+                params: { address: hashAddress },
+              });
+            }),
+          );
+        }
+        initialized();
       }
     },
     { immediate: true },
@@ -70,7 +79,8 @@ function usePools() {
     For performance reasons we do not subscribe to GET_POOL_BALANCES.
     Following function is used to trigger updates as needed
   */
-  const updatePool = (pool: Pool) => {
+  const updatePool = async (pool: Pool) => {
+    await initPromise;
     const hashAddress = keyHashfromAddress(pool.reserve_account_address);
     apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
       subscribe: false,
@@ -222,11 +232,12 @@ function usePools() {
     getWithdrawBalances,
     getNextPoolId,
     getReserveBalances,
+    initPromise,
   };
 }
 export default function usePoolsFactory() {
   if (!usePoolsInstance) {
     usePoolsInstance = usePools();
   }
-  return usePoolsInstance;
+  return usePoolsInstance as ReturnType<typeof usePools>;
 }

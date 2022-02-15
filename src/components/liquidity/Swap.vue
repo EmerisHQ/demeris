@@ -170,6 +170,7 @@ import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
 import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -215,15 +216,8 @@ export default defineComponent({
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const {
-      pools,
-      filterPoolsByDenom,
-      getPoolById,
-      getPoolPrice,
-      getReserveBalances,
-      getReserveBaseDenoms,
-      updatePool,
-    } = usePools();
+    const { pools, filterPoolsByDenom, getPoolPrice, getReserveBalances, getReserveBaseDenoms, updatePool } =
+      usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
@@ -960,7 +954,7 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
-            const pool = getPoolById(id);
+            const { pool } = usePool(id);
             await updatePool(pool);
             const poolPrice = await getPoolPrice(pool);
             const reserves = await getReserveBaseDenoms(pool);

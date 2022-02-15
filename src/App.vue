@@ -141,6 +141,15 @@ export default defineComponent({
               })
               .catch((e) => {
                 console.error('Could not load liquidity pools: ' + e);
+              })
+              .finally(() => {
+                apistore
+                  .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
+                    subscribe: true,
+                  })
+                  .catch((e) => {
+                    console.error('Could not load denom prices: ' + e);
+                  });
               });
             store.dispatch('tendermint.liquidity.v1beta1/QueryParams', { options: { subscribe: true } }).catch((e) => {
               console.error('Could not load liquidity module params: ' + e);
@@ -150,13 +159,6 @@ export default defineComponent({
               .catch((e) => {
                 console.error('Could not load denom supply: ' + e);
               });
-          });
-        apistore
-          .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
-            subscribe: true,
-          })
-          .catch((e) => {
-            console.error('Could not load denom prices: ' + e);
           });
         if (autoLogin()) {
           userstore.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);

@@ -295,7 +295,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           );
         }
         await Promise.all(balanceLoads);
-        if (rootGetters[GlobalDemerisGetterTypes.USER.getFirstLoad]) {
+        if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
           dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
         }
       } else {
@@ -320,7 +320,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
           );
         }
         await Promise.all(stakingBalanceLoads);
-        dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
+
+        if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
+          dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
+        }
       } else {
         for (const keyHash of keyHashes) {
           await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
@@ -454,7 +457,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state, dispatch }, { subscribe = false }) {
     const isCypress = !!window['Cypress'];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
 
@@ -472,28 +475,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
-        for (const denom of getters['getVerifiedDenoms']) {
-          if (denom.name.startsWith('pool')) {
-            const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
-            if (pools) {
-              const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
-              if (pool) {
-                const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
-                await initPromise;
-                try {
-                  if (totalLiquidityPrice.value > 0) {
-                    const priceData = {
-                      Symbol: denom.ticker + 'USDT',
-                      Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
-                      Supply: totalSupply.value,
-                    };
-                    response.data.data.Tokens.push(priceData);
-                  }
-                } catch (e) {}
-              }
-            }
-          }
-        }
         if (response.data?.data?.Tokens) {
           if (isCypress) {
             commit(DemerisMutationTypes.SET_PRICES, {
@@ -506,6 +487,50 @@ export const actions: ActionTree<State, RootState> & Actions = {
             });
           } else {
             commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          }
+          // Set initial prices so pool calculations can find them
+          await Promise.all(
+            getters['getVerifiedDenoms'].map(async (denom) => {
+              if (denom.name.startsWith('pool')) {
+                const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
+
+                if (pools) {
+                  const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
+
+                  if (pool) {
+                    const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
+                    await initPromise;
+                    try {
+                      if (totalLiquidityPrice.value > 0) {
+                        const priceData = {
+                          Symbol: denom.ticker + 'USDT',
+                          Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
+                          Supply: totalSupply.value,
+                        };
+                        response.data.data.Tokens.push(priceData);
+                      }
+                    } catch (e) {}
+                  }
+                }
+              }
+            }),
+          );
+          if (isCypress) {
+            commit(DemerisMutationTypes.SET_PRICES, {
+              value: {
+                Fiats: response.data.data.Fiats,
+                Tokens: response.data.data.Tokens.map((x) => {
+                  return { ...x, Price: 1.1 };
+                }),
+              },
+            });
+          } else {
+            commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          }
+          // Set prices incl. pool calculations
+
+          if (rootGetters[GlobalDemerisGetterTypes.USER.getPricesFirstLoad]) {
+            dispatch(GlobalDemerisActionTypes.USER.PRICES_LOADED, null, { root: true });
           }
         }
         if (subscribe) {

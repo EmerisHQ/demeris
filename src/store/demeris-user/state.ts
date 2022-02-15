@@ -19,6 +19,7 @@ export type State = {
   gas_limit: number;
   balancesFirstLoad: boolean;
   stakingBalancesFirstLoad: boolean;
+  pricesFirstLoad: boolean;
   keplr: KeplrKeyData;
   _Subscriptions: Set<string>;
   _Session: UserData | Record<string, never>;
@@ -28,6 +29,7 @@ export function getDefaultState(): State {
     gas_limit: 500000,
     balancesFirstLoad: true,
     stakingBalancesFirstLoad: true,
+    pricesFirstLoad: true,
     keplr: null,
     _Subscriptions: new Set(),
     _Session: {},

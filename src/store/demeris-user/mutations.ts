@@ -33,6 +33,9 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
     state.balancesFirstLoad = payload;
   },
+  [MutationTypes.SET_PRICES_FIRST_LOAD](state: State, payload: boolean) {
+    state.pricesFirstLoad = payload;
+  },
   [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
     state.stakingBalancesFirstLoad = payload;
   },

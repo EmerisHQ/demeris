@@ -1,6 +1,9 @@
 export enum GetterTypes {
   getKeplr = 'getKeplr',
   getFirstLoad = 'getFirstLoad',
+  getPricesFirstLoad = 'getPricesFirstLoad',
+  getStakingBalancesFirstLoad = 'getStakingBalancesFirstLoad',
+  getBalancesFirstLoad = 'getBalancesFirstLoad',
   getGasLimit = 'getGasLimit',
   isSignedIn = 'isSignedIn',
   getKeyhashes = 'getKeyhashes',
@@ -19,6 +22,9 @@ export enum GetterTypes {
 export enum GlobalGetterTypes {
   getKeplr = 'demerisUSER/getKeplr',
   getFirstLoad = 'demerisUSER/getFirstLoad',
+  getPricesFirstLoad = 'demerisUSER/getPricesFirstLoad',
+  getStakingBalancesFirstLoad = 'demerisUSER/getStakingBalancesFirstLoad',
+  getBalancesFirstLoad = 'demerisUSER/getBalancesFirstLoad',
   getGasLimit = 'demerisUSER/getGasLimit',
   isSignedIn = 'demerisUSER/isSignedIn',
   getKeyhashes = 'demerisUSER/getKeyhashes',

@@ -115,9 +115,13 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
-    if (!isEqual(state.prices, payload.value as API.Prices)) {
-      state.prices = payload.value as API.Prices;
-    }
+    state.prices.Fiats = (payload.value as API.Prices).Fiats;
+    state.prices.Tokens = [
+      ...state.prices.Tokens.filter(
+        (x) => !(payload.value as API.Prices).Tokens.map((x) => x.Symbol).includes(x.Symbol),
+      ),
+      ...(payload.value as API.Prices).Tokens,
+    ];
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;

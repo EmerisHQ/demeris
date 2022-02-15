@@ -230,6 +230,7 @@ export default defineComponent({
     const store = useStore();
     const currentLimit = ref(props.limitRows);
     const { stakingBalances } = useAccount();
+
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
     });

@@ -5,7 +5,14 @@
         <header>
           <div class="-text-1 md:text-0 text-muted">{{ $t('context.assets.totalBalance') }}</div>
           <div class="text-2 sm:text-3 md:text-4 lg:text-5 font-bold mt-1 md:mt-2">
-            <TotalPrice :balances="balances" small-decimals />
+            <template v-if="initialLoadComplete">
+              <TotalPrice :balances="balances" small-decimals />
+            </template>
+            <template v-else>
+              <div class="w-24">
+                <EphemerisSpinner />
+              </div>
+            </template>
           </div>
         </header>
         <section class="mt-16">
@@ -15,15 +22,21 @@
               {{ $t('generic_cta.seeall') }} &rarr;
             </router-link>
           </header>
-
-          <AssetsTable
-            :balances="balances"
-            :hide-zero-assets="true"
-            variant="balance"
-            :show-headers="false"
-            :limit-rows="4"
-            @row-click="openAssetPage"
-          />
+          <template v-if="initialLoadComplete">
+            <AssetsTable
+              :balances="balances"
+              :hide-zero-assets="true"
+              variant="balance"
+              :show-headers="false"
+              :limit-rows="4"
+              @row-click="openAssetPage"
+            />
+          </template>
+          <template v-else>
+            <div class="mx-auto w-48">
+              <EphemerisSpinner />
+            </div>
+          </template>
 
           <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
@@ -32,14 +45,21 @@
             <h2 class="text-2 font-bold">{{ $t('context.pools.title') }}</h2>
           </header>
 
-          <div v-if="poolsInvested.length">
-            <Pools :pools="poolsInvested" />
-          </div>
+          <template v-if="initialLoadComplete">
+            <div v-if="poolsInvested.length">
+              <Pools :pools="poolsInvested" />
+            </div>
 
-          <div v-else class="p-8 w-full flex flex-col items-center justify-center">
-            <p class="text-muted">{{ $t('context.pools.empty') }}</p>
-            <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
-          </div>
+            <div v-else class="p-8 w-full flex flex-col items-center justify-center">
+              <p class="text-muted">{{ $t('context.pools.empty') }}</p>
+              <Button variant="secondary" class="mt-6" :name="$t('context.pools.explore')" @click="openPoolsPage" />
+            </div>
+          </template>
+          <template v-else>
+            <div class="mx-auto w-48">
+              <EphemerisSpinner />
+            </div>
+          </template>
         </section>
       </div>
 
@@ -56,6 +76,7 @@ import { computed } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AssetsTable from '@/components/assets/AssetsTable';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
@@ -64,10 +85,13 @@ import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { GlobalDemerisGetterTypes } from '@/store';
 import { pageview } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default {
   name: 'Portfolio',
@@ -80,6 +104,7 @@ export default {
     AssetsTable,
     Pools,
     Intro,
+    EphemerisSpinner,
   },
 
   setup() {
@@ -95,6 +120,7 @@ export default {
     const { balances } = useAccount();
     const { pools } = usePools();
 
+    const store = useStore();
     const openAssetPage = (asset: Record<string, string>) => {
       router.push({ name: 'Asset', params: { denom: asset.denom } });
     };
@@ -103,12 +129,20 @@ export default {
       router.push({ name: 'Pools' });
     };
 
+    const initialLoadComplete = computed(() => {
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        console.log(store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad]);
+        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+      } else {
+        return true;
+      }
+    });
     const poolsInvested = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(pools.value));
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage };
+    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete };
   },
 };
 </script>

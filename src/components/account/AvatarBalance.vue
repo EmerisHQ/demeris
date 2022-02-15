@@ -24,7 +24,7 @@
         {{ keplrAccountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
-        <TotalPrice v-if="isPriceApiAvailable" class="inline" :balances="balances" />
+        <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" :balances="balances" />
         <div v-else class="text-center">-</div>
         <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
       </div>
@@ -41,6 +41,7 @@ import { useStore } from 'vuex';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -67,9 +68,17 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
     });
 
+    const initialLoadComplete = computed(() => {
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+      } else {
+        return true;
+      }
+    });
     return {
       balances,
       keplrAddress,
+      initialLoadComplete,
       keplrAccountName,
       isPriceApiAvailable,
     };

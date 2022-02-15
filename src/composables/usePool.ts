@@ -16,8 +16,15 @@ function usePool(id: string) {
   const initPromise = new Promise((resolve) => {
     initialized = resolve;
   });
-  const { getPoolById, getPoolName, getPoolPrice, getReserveBaseDenoms, getWithdrawBalances, getIsReversePairName } =
-    usePools();
+  const {
+    getPoolById,
+    getPoolName,
+    getPoolPrice,
+    getReserveBaseDenoms,
+    getWithdrawBalances,
+    getIsReversePairName,
+    initPromise: poolInit,
+  } = usePools();
   const pool = computed(() => getPoolById(unref(id)));
   const reserveBaseDenoms = ref([]);
   const pairName = ref('-/-');
@@ -29,6 +36,7 @@ function usePool(id: string) {
     return await getPoolPrice(unref(pool));
   };
   const init = async () => {
+    await poolInit;
     pairName.value = await getPoolName(pool.value);
     isReversePairName.value = await getIsReversePairName(pool.value, pairName.value);
     reserveBaseDenoms.value = await getReserveBaseDenoms(pool.value);
@@ -91,9 +99,9 @@ function usePool(id: string) {
 
     const baseDenoms = await getReserveBaseDenoms(pool.value);
     const prices = [];
-
     baseDenoms.map((denom) => {
       const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+
       const precision = apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: denom }) || 6;
       const balance = reserveBalances.value.find((b) => {
         return b.base_denom === denom;
@@ -104,6 +112,7 @@ function usePool(id: string) {
         prices.push(liquidityPrice);
       }
     });
+
     if (prices[0] === 0 || prices[1] === 0) {
       totalLiquidityPrice.value = 0;
     } else {
