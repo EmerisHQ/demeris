@@ -134,12 +134,13 @@ export default {
       }
     });
 
-    onMounted(() =>
+    onMounted(() => {
+      console.log('event hit');
       event('simplex_transaction', {
         event_label: 'Transaction with Simplex initiated',
         event_category: 'Fiat Onramp',
-      }),
-    );
+      });
+    });
 
     return { isModalOpen, toggleSimplexModal, transactionStatus, transactionCompletedText };
   },
