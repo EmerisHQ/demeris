@@ -187,6 +187,8 @@ export const messages = {
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
         minReceivedLbl: 'Min. received if 100% swapped',
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
+        slippageValueError: 'Please enter a valid slippage rate.',
+        highSlippageMessage: 'Your swap price may be significantly above the market price.',
       },
       stakeTable: {
         staking: 'Staking',
