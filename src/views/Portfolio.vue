@@ -131,7 +131,6 @@ export default {
 
     const initialLoadComplete = computed(() => {
       if (featureRunning('REQUEST_PARALLELIZATION')) {
-        console.log(store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad]);
         return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
       } else {
         return true;
