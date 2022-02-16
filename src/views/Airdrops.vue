@@ -6,13 +6,13 @@
           <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">Airdrops</div>
         </header>
         <section class="mt-12">
-          <!-- <AirdropsTable
+          <AirdropsTable
             :airdrops="airdrops"
             :show-headers="false"
             :limit-rows="10"
             @row-click="openAirdropPage"
             @active-filter="setActiveFilter"
-          /> -->
+          />
         </section>
       </div>
 
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted,ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -40,9 +40,10 @@ import { useStore } from 'vuex';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
+import AirdropsTable from '@/components/airdrops/AirdropsTable';
 import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, TypedAPIStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
@@ -51,7 +52,7 @@ export default {
   components: {
     AppLayout,
     AirdropClaimablePanel,
-    // AirdropsTable,
+    AirdropsTable,
     AirdropsInfo,
     WarningCircleIcon,
   },
@@ -74,14 +75,27 @@ export default {
 
     const router = useRouter();
 
-    onMounted(() => {
-      require
-        .context('@/data/airdrops', true, /\.json$/)
-        .keys()
-        .forEach(async (airdrop) => {
-          console.log('checking here', airdrop.slice(2));
-          fetch(`../data/airdrops/${airdrop}`).then((response) => console.log('response', response));
+    const getAllAirdrops = async () => {
+      const gitAirdropsList = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+        subscribe: false,
+      });
+
+      gitAirdropsList.forEach((item) => {
+        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+          subscribe: false,
+          params: {
+            airdropFileName: item.name,
+          },
         });
+      });
+    };
+
+    onMounted(() => {
+      getAllAirdrops();
+    });
+
+    const airdrops = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
     });
 
     const openAirdropPage = (airdrop: Airdrop) => {
@@ -93,7 +107,7 @@ export default {
       });
     };
 
-    return { openAirdropPage, activeFilter, setActiveFilter };
+    return { airdrops, openAirdropPage, activeFilter, setActiveFilter };
   },
 };
 </script>

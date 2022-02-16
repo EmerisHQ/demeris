@@ -19,8 +19,8 @@ export type TokenPriceReq = {
 export type TokenIdReq = {
   token: string;
 };
-export type AirdropsReq = {
-  airdropName: string;
+export type GitAirdropsListReq = {
+  airdropFileName: string;
 };
 export type TokenId = string;
 export type TokenPrices = {

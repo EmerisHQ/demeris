@@ -15,6 +15,7 @@ import {
   DemerisActionByTokenIdParams,
   DemerisActionByTokenPriceParams,
   DemerisActionGetAirdropsParams,
+  DemerisActionGetGitAirdropsListParams,
   DemerisActionParams,
   DemerisActionsByAddressParams,
   DemerisActionsByChainAddressParams,
@@ -155,6 +156,10 @@ export interface Actions {
     { subscribe, params }: DemerisActionByTokenPriceParams,
   ): Promise<any>;
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }: ActionContext<State, RootState>): void;
+  [DemerisActionTypes.GET_GIT_AIRDROPS_LIST](
+    { commit }: ActionContext<State, RootState>,
+    { subscribe }: DemerisActionGetGitAirdropsListParams,
+  ): Promise<any>;
   [DemerisActionTypes.GET_AIRDROPS](
     { commit }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
@@ -679,18 +684,34 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getTokenPrices'];
   },
+  async [DemerisActionTypes.GET_GIT_AIRDROPS_LIST]({ commit }, { subscribe = false }) {
+    try {
+      const response = await axios.get(`https://api.github.com/repos/allinbits/Emeris-Airdrop/contents/airdropList`);
+      if (subscribe) {
+        commit('SUBSCRIBE', { action: DemerisActionTypes.GET_GIT_AIRDROPS_LIST });
+      }
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
+    }
+  },
   async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
-      const response = await axios.get(
-        `https://github.com/allinbits/Emeris-Airdrop/tree/main/airdropList/${params.airdropName}.json`,
-      );
-      console.log('response here', response);
-      commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: response.data });
+      const response = await fetch(
+        `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
+      )
+        .then((response) => {
+          return response.json();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      commit(DemerisMutationTypes.SET_AIRDROPS, { value: response });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }
     } catch (e) {
-      throw new SpVuexError('Demeris:getTokenPrices', 'Could not perform API query.');
+      throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
   [DemerisActionTypes.GET_SELECTED_AIRDROP]({ commit }, { params }) {
