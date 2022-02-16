@@ -151,12 +151,32 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const isCypress = !!window['Cypress'];
-      const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
+      const chains =
+        rootGetters[GlobalDemerisGetterTypes.API.getChains] ??
+        (await dispatch(
+          GlobalDemerisActionTypes.API.GET_CHAINS,
+          {
+            subscribe: false,
+          },
+          { root: true },
+        ));
 
+      for (const chain in chains) {
+        if (!chains[chain].node_info)
+          chains[chain] = await dispatch(
+            GlobalDemerisActionTypes.API.GET_CHAIN,
+            {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            },
+            { root: true },
+          );
+      }
       window.keplr.defaultOptions = {
         sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
       };
-
       if (!isCypress) {
         for (const chain in chains) {
           await addChain(chain);
