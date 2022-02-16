@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
+import { featureRunning } from '@/utils/FeatureManager';
 import Portfolio from '@/views/Portfolio.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -74,7 +75,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Playground.vue'),
   },
 ];
-
+if (featureRunning('STAKING')) {
+  routes.push({
+    path: '/staking/:denom/:action/:validator?',
+    name: 'Staking',
+    component: () => import('@/views/Staking.vue'),
+  });
+}
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,

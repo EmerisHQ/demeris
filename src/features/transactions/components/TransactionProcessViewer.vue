@@ -95,7 +95,6 @@ const removeTransactionAndClose = () => {
   transactionsStore.removeTransaction(props.stepId);
   closeModal();
 };
-
 provide(ProvideViewerKey, {
   actor,
   closeModal,
