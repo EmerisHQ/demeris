@@ -14,46 +14,54 @@
       <div class="flex justify-between my-4 space-x-2">
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 0.1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 0.1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 0.5 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 0.5 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
           class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
-          :class="[slippage === 1 && !isCustomSelected ? 'bg-brand-to-r dark:theme-inverse font-medium' : '']"
+          :class="[
+            slippage === 1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+          ]"
           @click="setSlippage(1)"
         >
           1%
         </button>
-        <label
+        <Input
           v-if="allowCustomSlippage"
-          class="custom-slippage h-12 pr-3 flex-shrink flex items-baseline justify-center text-center focus-within:text-right bg-fg rounded-xl outline-none text-text"
+          v-model:modelValue="customSlippage"
+          class="bg-fg rounded-xl outline-none text-text"
           :class="[
-            isCustomSelected ? 'custom-selected bg-brand-to-r dark:theme-inverse font-medium' : '',
-            Number(slippage) < 0 ? 'justify-end text-negative-text border-negative' : '',
+            isCustomSelected && !isCustomSlippageEditing && alertStatus !== 'error'
+              ? 'bg-surface theme-inverse dark:theme-inverse font-medium rounded-lg'
+              : '',
           ]"
-          for=""
+          :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
+          placeholder="Custom"
+          :force-border-visible="isCustomSelected && alertStatus == 'error'"
+          :value-formatter="format"
+          type="text"
+          @update:modelValue="(e) => setCustomSlippage(e)"
+          @focus:value="(e) => onCustomSlippageFocussed(e)"
+          @blur:value="(e) => onCustomSlippageFocusOut(e)"
+          @keydown="(e) => onKeyDown(e)"
         >
-          <input
-            ref="customSlippageInput"
-            :value="customSlippage"
-            type="number"
-            placeholder="Custom"
-            class="custom-slippage__input h-12 appearance-none overflow-hidden py-0 pr-0 pl-3 m-0 flex-grow border-none outline-none bg-transparent"
-            :class="[isCustomSelected ? 'w-12' : 'w-20']"
-            required
-            @input="setCustomSlippage"
-          />
-          <span :class="{ hidden: !isCustomSelected }" class="text-text">%</span>
-        </label>
+          <template #end>
+            <span v-if="isCustomSlippageEditing">%</span>
+          </template>
+        </Input>
       </div>
     </div>
     <div v-if="alertStatus" class="px-6">
@@ -90,9 +98,11 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
 import Alert from '@/components/ui/Alert.vue';
+import Input from '@/components/ui/Input.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { useStore } from '@/utils/useStore';
@@ -109,6 +119,7 @@ export default defineComponent({
   components: {
     TitleWithGoback,
     Alert,
+    Input,
   },
 
   props: {
@@ -127,54 +138,74 @@ export default defineComponent({
   },
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
+    const { t } = useI18n({ useScope: 'global' });
     const trueSlippage = computed(() => {
       return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
     });
-    const customSlippage = computed(() => {
-      if (trueSlippage.value) {
-        if (trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1) {
-          return trueSlippage.value;
-        } else {
-          return null;
-        }
-      } else {
-        return null;
-      }
+    const allowCustomSlippage = computed(() => {
+      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
     });
+
+    const inputWidth = computed(() =>
+      customSlippage.value && customSlippage.value?.toString()?.length >= 6 ? '7.5rem' : '5rem',
+    );
+    const textAlign = computed(() => (isCustomSlippageEditing.value ? 'left' : 'center'));
+    const suffixParent = computed(() => (isCustomSlippageEditing.value ? null : 0));
+    const inputBackground = computed(() => {
+      return isCustomSelected.value && state.alertStatus == 'error'
+        ? `var(--fg-solid)`
+        : isCustomSelected.value && !isCustomSlippageEditing.value && state.alertStatus !== 'error'
+        ? 'var(--text)'
+        : 'var(--fg)';
+    });
+    const isCustomSelected = ref(false);
+    const isCustomSlippageEditing = ref(false);
+    const customSlippage = ref(
+      trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1 ? trueSlippage.value : 'Custom',
+    );
+    const limitPriceText = ref('');
+    const minReceivedText = ref(null);
+
+    const format = (value: string) => {
+      let newValue = value;
+      // Only numbers
+      newValue = newValue.replace(/[^0-9.]/g, '');
+
+      if (newValue.startsWith('.')) {
+        newValue = '0' + newValue;
+      }
+
+      if (newValue.split('').filter((char) => char === '.').length > 1) {
+        // Remove subsequent separators
+        newValue = newValue.replace(/(?<=\..*)\./g, '');
+      }
+
+      return newValue;
+    };
 
     const state = reactive({
       slippage: computed(() => {
         if (trueSlippage.value) {
-          if (trueSlippage.value == 0.1 || trueSlippage.value == 0.5 || trueSlippage.value == 1) {
-            return trueSlippage.value;
-          } else {
-            return null;
-          }
+          return trueSlippage.value;
         } else {
           return 0.5;
         }
       }),
 
-      isCustomSelected: computed(() => {
-        if (customSlippage?.value) {
-          return true;
-        } else {
-          return false;
-        }
-      }),
       alertStatus: computed(() => {
-        const slippage = state.slippage ?? customSlippage.value;
+        const slippage = state.slippage;
         if (slippage) {
-          if (slippage == 0.1) {
-            return 'warning';
-          } else if (slippage <= 0.1) {
-            if (slippage < 0) {
-              return 'error';
-            } else {
-              return 'warning';
-            }
-          } else if (slippage >= 3) {
+          if (
+            slippage <= 0 ||
+            slippage > 100 ||
+            (customSlippage.value &&
+              isCustomSelected.value &&
+              customSlippage.value.toString()?.replace('%', '') != trueSlippage.value) ||
+            (isCustomSelected.value && !customSlippage.value)
+          ) {
             return 'error';
+          } else if (slippage >= 20) {
+            return 'warning';
           } else {
             return null;
           }
@@ -184,13 +215,9 @@ export default defineComponent({
       }),
       alertText: computed(() => {
         if (state.alertStatus === 'warning') {
-          return 'With a low slippage, only a very small part of your swap may be fulfilled';
+          return t('components.slippageSettingsModal.highSlippageMessage');
         } else if (state.alertStatus === 'error') {
-          if (state.slippage < 0) {
-            return 'Please enter a valid slippage rate.';
-          } else {
-            return 'Your swap price may be significantly above the market price. ';
-          }
+          return t('components.slippageSettingsModal.slippageValueError');
         } else {
           return '';
         }
@@ -203,29 +230,51 @@ export default defineComponent({
         state.validSlippageUpdater(slippage);
       },
       setCustomSlippage: (e) => {
-        state.validSlippageUpdater(e.target.value);
+        state.validSlippageUpdater(e, true);
       },
-      validSlippageUpdater(value) {
+      validSlippageUpdater(value, isCustom = false) {
         const slippage = Number(value);
+        isCustomSelected.value = isCustom;
         if (slippage > 0 && slippage <= 100) {
+          if (!isCustom) {
+            customSlippage.value = 'Custom';
+          }
           (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
             data: { slippagePerc: slippage },
           });
         }
       },
     });
-    const customSlippageInput = ref(null);
-    const limitPriceText = ref('');
-    const minReceivedText = ref(null);
 
-    const allowCustomSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
-    });
+    const onCustomSlippageFocussed = () => {
+      isCustomSlippageEditing.value = true;
+      isCustomSelected.value = true;
+      customSlippage.value = trueSlippage.value;
+    };
+
+    const onCustomSlippageFocusOut = () => {
+      isCustomSlippageEditing.value = false;
+      if (!!Number(customSlippage.value)) {
+        customSlippage.value += '%';
+      }
+    };
+
+    const onKeyDown = (e) => {
+      const keyCode = e.keyCode || e.which;
+      if (keyCode == 8 || keyCode == 27 || keyCode == 46 || keyCode == 37 || keyCode == 39) {
+        // backspace || delete || escape || arrows
+        return;
+      } else if (/^[A-Za-z]+$/.test(e.key) || /[-!$%^@&*()_+|~=`\\#{}\[\]:";'<>?,\/]/.test(e.key)) {
+        //disallow alphabets and these characters.
+        e.preventDefault();
+      }
+      return;
+    };
 
     watch(
       () => allowCustomSlippage.value,
       () => {
-        if (!allowCustomSlippage.value && state.isCustomSelected) {
+        if (!allowCustomSlippage.value && isCustomSelected.value) {
           state.setSlippage(0.5);
         }
       },
@@ -251,8 +300,8 @@ export default defineComponent({
           payAmount
             ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
             : props.swapData.isReverse
-            ? props.swapData.poolPrice.toFixed(4)
-            : (1 / props.swapData.poolPrice).toFixed(4)
+            ? props.swapData.poolPrice?.toFixed(4)
+            : (1 / props.swapData.poolPrice)?.toFixed(4)
         } ${receiveDisplayName}`;
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
           minReceivedText.value = `${
@@ -266,45 +315,47 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
-        customSlippageInput.value.focus();
+      if (state.slippage && state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
+        isCustomSelected.value = true;
+      }
+      if (!!Number(customSlippage.value)) {
+        customSlippage.value += '%';
       }
     });
 
     return {
       ...toRefs(state),
       allowCustomSlippage,
-      customSlippageInput,
       customSlippage,
       limitPriceText,
       minReceivedText,
+      onCustomSlippageFocussed,
+      isCustomSelected,
+      onCustomSlippageFocusOut,
+      isCustomSlippageEditing,
+      trueSlippage,
+      inputWidth,
+      textAlign,
+      suffixParent,
+      onKeyDown,
+      inputBackground,
+      format,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.custom-slippage {
-  &:hover &__input::placeholder {
-    color: var(--muted);
-  }
-
-  &__input {
-    min-width: 0.66em;
-    font: inherit;
-    letter-spacing: inherit;
-    outline: none;
-    -moz-appearance: textfield;
-
+::v-deep(.input) {
+  width: v-bind(inputWidth);
+  input {
     &:empty {
       text-align: center;
     }
-
     &:focus,
     &:valid {
-      text-align: right;
+      text-align: v-bind(textAlign);
     }
-
     &::placeholder,
     &:focus::placeholder {
       color: var(--inactive);
@@ -316,5 +367,18 @@ export default defineComponent({
       margin: 0;
     }
   }
+}
+
+::v-deep(.input__icon) {
+  color: var(--text);
+  padding: v-bind(suffixParent);
+  display: flex;
+  align-items: center;
+  height: inherit;
+}
+
+::v-deep(input) {
+  padding-right: 0.82rem;
+  background: v-bind(inputBackground);
 }
 </style>

@@ -40,6 +40,10 @@ export function keyHashfromAddress(address: string): string {
 export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
 }
+export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
+  const words = bech32.toWords(Buffer.from(keyhash, 'hex'));
+  return keyhash != '' ? bech32.encode(prefix, words) : '';
+}
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
   const userstore = useStore() as TypedUSERStore;

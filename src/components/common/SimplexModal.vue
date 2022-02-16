@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref, watch } from '@vue/runtime-core';
+import { computed, ref, watch } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 
 import Modal from '@/components/ui/Modal.vue';
@@ -115,15 +115,6 @@ export default {
       }
     };
 
-    // const deleteScripts = () => {
-    //   for (let id of ['simplex-script', 'simplex-cdn-script', 'simplex-iframe-script', 'simplex-css']) {
-    //     let element = document.getElementById(id);
-    //     if (element) {
-    //       element.remove();
-    //     }
-    //   }
-    // };
-
     // const unloadCheckout = () => {
     //   (window as any)?.Simplex?.unload((event) => console.log(event))
     // }
@@ -133,13 +124,6 @@ export default {
         goSimplex();
       }
     });
-
-    onMounted(() =>
-      event('simplex_transaction', {
-        event_label: 'Transaction with Simplex initiated',
-        event_category: 'Fiat Onramp',
-      }),
-    );
 
     return { isModalOpen, toggleSimplexModal, transactionStatus, transactionCompletedText };
   },

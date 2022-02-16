@@ -18,6 +18,7 @@
     />
     <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" @previous="onPrevious" />
     <ConnectWalletModal
+      v-if="transactionsStore"
       :open="transactionsStore.isConnectWalletModalOpen"
       @close="transactionsStore.toggleConnectWalletModal"
     />
@@ -52,6 +53,7 @@ const emits = defineEmits(['pending', 'close', 'previous']);
 const transactionsStore = useTransactionsStore();
 
 const { balances } = useAccount();
+
 const [stepId, service] = transactionsStore.createTransaction({
   action: props.action,
   steps: props.steps,
