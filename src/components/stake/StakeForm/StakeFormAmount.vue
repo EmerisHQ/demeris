@@ -58,6 +58,7 @@
           </fieldset>
 
           <Button
+            v-if="validatorsToStakeWith.length < 3"
             class="mt-2"
             name="Add a validator"
             variant="link"
