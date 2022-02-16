@@ -37,6 +37,7 @@ import { TypedAPIStore } from '@/store';
 import { setStore } from '@/utils/useStore';
 
 import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
+import usePoolsFactory from './composables/usePools';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
@@ -70,7 +71,7 @@ export default defineComponent({
     const userstore = store as TypedUSERStore;
     const initialized = ref(false);
     const router = useRouter();
-
+    const { pools: _pools } = usePoolsFactory();
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
     if (featureRunning('REQUEST_PARALLELIZATION')) {

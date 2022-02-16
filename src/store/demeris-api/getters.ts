@@ -100,7 +100,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return balances.length > 0 ? balances : null;
   },
   [GetterTypes.getAllValidPools]: (state) => {
-    return state.validPools ?? [];
+    return state.validPools;
   },
   [GetterTypes.getAllStakingBalances]: (state) => {
     const stakingBalances = Object.values(state.stakingBalances)

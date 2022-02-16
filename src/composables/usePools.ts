@@ -19,9 +19,8 @@ function usePools() {
   const apistore = libStore as TypedAPIStore;
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
-    return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools] ?? [];
+    return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools];
   });
-
   /*
      Following reference and watcher ensure that
      a. pools is ONLY updated if the list of pools changes to avoid expensive recalculations/rerenders
