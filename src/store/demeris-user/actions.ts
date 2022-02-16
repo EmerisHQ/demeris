@@ -148,6 +148,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const isCypress = !!window['Cypress'];
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
@@ -245,6 +246,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
       await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
