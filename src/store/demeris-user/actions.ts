@@ -226,6 +226,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
         : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
 
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
@@ -253,6 +254,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,

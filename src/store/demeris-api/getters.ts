@@ -17,6 +17,7 @@ type Namespaced<T, N extends string> = {
 export type Getters = {
   [GetterTypes.getBalances](state: State): { (params: API.APIRequests): API.Balances | null };
   [GetterTypes.getStakingBalances](state: State): { (params: API.APIRequests): API.StakingBalances | null };
+  [GetterTypes.getUnbondingDelegations](state: State): { (params: API.APIRequests): API.UnbondingDelegations | null };
   [GetterTypes.getNumbers](state: State): { (params: API.APIRequests): API.Numbers | null };
   [GetterTypes.getNumbersChain](state: State): { (params: API.APIRequests): API.SeqNumber | null };
   [GetterTypes.getRelayerStatus](state: State): boolean;
@@ -24,6 +25,7 @@ export type Getters = {
   [GetterTypes.getRelayerChainStatus](state: State): { (params: API.APIRequests): boolean };
   [GetterTypes.getAllBalances](state: State, getters, rootState, rootGetters): API.Balances | null;
   [GetterTypes.getAllStakingBalances](state: State): API.StakingBalances | null;
+  [GetterTypes.getAllUnbondingDelegations](state: State): API.UnbondingDelegations | null;
   [GetterTypes.getAllNumbers](state: State): API.Numbers | null;
   [GetterTypes.getFeeAddresses](state: State): API.FeeAddresses | null;
   [GetterTypes.getVerifiedDenoms](state: State): API.VerifiedDenoms | null;
@@ -87,6 +89,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getStakingBalances]: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
+  [GetterTypes.getUnbondingDelegations]: (state) => (params) => {
+    return state.unbondingDelegations[(params as API.AddrReq).address] ?? null;
+  },
   [GetterTypes.getAllBalances]: (state: State, _getters, _rootState, rootGetters) => {
     if (!rootGetters[GlobalUserGetterTypes.getKeplr]) {
       return null;
@@ -107,6 +112,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
       .filter((balance) => balance !== null)
       .flat();
     return stakingBalances.length > 0 ? stakingBalances : null;
+  },
+  [GetterTypes.getAllUnbondingDelegations]: (state) => {
+    const unbondingDelegations = Object.values(state.unbondingDelegations)
+      .filter((balance) => balance !== null)
+      .flat();
+    return unbondingDelegations.length > 0 ? unbondingDelegations : null;
   },
   [GetterTypes.getNumbers]: (state) => (params) => {
     return state.numbers[(params as API.AddrReq).address] ?? null;

@@ -9,7 +9,7 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
-import { hashObject } from '@/utils/basic';
+import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 
 import {
@@ -61,7 +61,15 @@ export type DemerisSessionParams = {
 export type TicketResponse = {
   ticket: string;
 };
-
+export type DemerisGetValidatorsParam = {
+  chain_name: string;
+};
+export type DemerisGetInflationParam = {
+  chain_name: string;
+};
+export type DemerisGetRewardsParam = {
+  chain_name: string;
+};
 type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
 };
@@ -79,11 +87,19 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_UNBONDING_DELEGATIONS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByAddressParams,
+  ): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Balances>;
   [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({
     dispatch,
     getters,
   }: ActionContext<State, RootState>): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({
+    dispatch,
+    getters,
+  }: ActionContext<State, RootState>): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_NUMBERS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
@@ -165,6 +181,18 @@ export interface Actions {
   [DemerisActionTypes.GET_END_BLOCK_EVENTS](
     { commit, getters }: ActionContext<State, RootState>,
     { height }: DemerisTxResultParams,
+  ): Promise<unknown>;
+  [DemerisActionTypes.GET_VALIDATORS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetValidatorsParam,
+  ): Promise<any>;
+  [DemerisActionTypes.GET_INFLATION](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetInflationParam,
+  ): Promise<unknown>;
+  [DemerisActionTypes.GET_STAKING_REWARDS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetRewardsParam,
   ): Promise<unknown>;
 
   [DemerisActionTypes.INIT](
@@ -334,6 +362,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllStakingBalances'];
   },
+  async [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({ dispatch, getters, rootGetters }) {
+    try {
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
+      for (const keyHash of keyHashes) {
+        dispatch(DemerisActionTypes.GET_UNBONDING_DELEGATIONS, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
+    }
+    return getters['getAllUnbondingDelegations'];
+  },
   async [DemerisActionTypes.VALIDATE_POOLS]({ commit, getters }, pools) {
     try {
       const vp = await validPools(pools);
@@ -379,6 +418,43 @@ export const actions: ActionTree<State, RootState> & Actions = {
       resolver();
 
       return getters['getStakingBalances'](params);
+    }
+  },
+  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getUnbondingDelegations'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/unbondingdelegations',
+        );
+        commit(DemerisMutationTypes.SET_UNBONDING_DELEGATIONS, { params, value: response.data.unbonding_delegations });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+      } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetUnbondingDelegations', 'Could not perform API query.');
+      }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getUnbondingDelegations'](params);
     }
   },
   async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
@@ -841,7 +917,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
         const checks = getEndBlockChecks({
           type: stepType,
-          requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
+          requesterAddress: await getOwnAddress({ chain_name: getters['getDexChain'] }),
         });
 
         response.data.result?.end_block_events?.forEach((item) => {
@@ -878,6 +954,36 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
     } catch (e) {
       throw new SpVuexError('Demeris: GET_END_BLOCK_EVENTS', 'Could not GET_END_BLOCK_EVENTS.' + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_VALIDATORS]({ getters }, { chain_name }: DemerisGetValidatorsParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
+      return response.data?.validators;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_VALIDATORS', `Could not get ${chain_name} validators.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_INFLATION]({ getters }, { chain_name }: DemerisGetInflationParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/mint/inflation');
+      return Number(response.data?.inflation);
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters }, { chain_name }: DemerisGetRewardsParam) {
+    try {
+      const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + address + '/delegatorrewards/' + chain_name,
+      );
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_REWARDS', `Could not get ${chain_name} rewards.` + e.message);
     }
   },
 

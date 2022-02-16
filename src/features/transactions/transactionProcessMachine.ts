@@ -379,7 +379,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         };
 
         return useStore().dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
-          msgs: [msgResult.msg],
+          msgs: msgResult.msg,
           chain_name: msgResult.chain_name,
           fee,
           registry: msgResult.registry,
@@ -589,7 +589,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
         }
 
-        if (['swap', 'addliquidity'].includes(context.input.action) && context.input.steps.length > 1) {
+        if (
+          ['swap', 'addliquidity', 'stake', 'multistake'].includes(context.input.action) &&
+          context.input.steps.length > 1
+        ) {
           return true;
         }
 

@@ -3,7 +3,7 @@ import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
 import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { Balances, StakingBalances } from '@/types/api';
+import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -137,6 +137,17 @@ export default function useAccount() {
     });
   };
 
+  const unbondingDelegations = computed<UnbondingDelegations>(() => {
+    return store.getters[GlobalDemerisGetterTypes.API.getAllUnbondingDelegations] || [];
+  });
+  const unbondingDelegationsByChain = (chain_name: string) => {
+    return unbondingDelegations.value.filter((item) => {
+      if (item) {
+        return item.chain_name === chain_name;
+      }
+    });
+  };
+
   const orderBalancesByPrice = (balances: Balances) => {
     return balances
       .map((item) => {
@@ -149,7 +160,6 @@ export default function useAccount() {
       })
       .sort((a, b) => b.price - a.price);
   };
-
   return {
     balances,
     nativeBalances,
@@ -163,5 +173,7 @@ export default function useAccount() {
     stakingBalances,
     stakingBalancesByChain,
     allLoaded,
+    unbondingDelegations,
+    unbondingDelegationsByChain,
   };
 }

@@ -16,6 +16,10 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
+  [MutationTypes.SET_UNBONDING_DELEGATIONS](
+    state: S,
+    payload: { params: API.APIRequests; value: API.UnbondingDelegations },
+  ): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
   [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
   [MutationTypes.SET_FEE_ADDRESSES](state: S, payload: { params: API.APIRequests; value: API.FeeAddresses }): void;
@@ -63,8 +67,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
-    if (!isEqual(state.stakingBalances[JSON.stringify(payload.params)], payload.value as API.StakingBalances)) {
-      state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
+    if (
+      !isEqual(state.stakingBalances[(payload.params as API.AddrReq).address], payload.value as API.StakingBalances)
+    ) {
+      state.stakingBalances[(payload.params as API.AddrReq).address] = payload.value as API.StakingBalances;
+    }
+  },
+  [MutationTypes.SET_UNBONDING_DELEGATIONS](state: State, payload: DemerisMutations) {
+    if (
+      !isEqual(
+        state.unbondingDelegations[(payload.params as API.AddrReq).address],
+        payload.value as API.UnbondingDelegations,
+      )
+    ) {
+      state.unbondingDelegations[(payload.params as API.AddrReq).address] = payload.value as API.UnbondingDelegations;
     }
   },
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
@@ -322,7 +338,8 @@ export const mutations: MutationTree<State> & Mutations = {
       if (
         subObj.action == DemerisActionTypes.GET_BALANCES ||
         subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
-        subObj.action == DemerisActionTypes.GET_NUMBERS
+        subObj.action == DemerisActionTypes.GET_NUMBERS ||
+        subObj.action == DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS
       ) {
         state._Subscriptions.delete(sub);
       }
@@ -331,6 +348,7 @@ export const mutations: MutationTree<State> & Mutations = {
       delete state.balances[keyhash];
     }
     state.stakingBalances = {};
+    state.unbondingDelegations = {};
     state.numbers = {};
     state.transactions = new Map();
     state._InProgess = new Map();

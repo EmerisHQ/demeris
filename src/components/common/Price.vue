@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CurrencyDisplay :value="displayPrice" show-dash />
+    <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
     <div
       v-if="showPriceDiff"
       class="-text-1 font-normal"
@@ -32,6 +32,10 @@ export default defineComponent({
     showZero: {
       type: Boolean,
       default: false,
+    },
+    showDash: {
+      type: Boolean,
+      default: true,
     },
     autoUpdate: {
       type: Boolean,

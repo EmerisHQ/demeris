@@ -1,0 +1,124 @@
+<template>
+  <List>
+    <!-- Pay/Receive -->
+
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.stakeLbl')">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay
+            class="font-medium"
+            :class="context === 'widget' ? 'text-0' : 'text-1'"
+            :amount="{ amount: totalStaked, denom: baseDenom }"
+          />
+          <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+            <Price :amount="{ amount: totalStaked, denom: baseDenom }" />
+          </div>
+        </div>
+        <CircleSymbol :denom="baseDenom" :chain-name="chainName" size="md" class="ml-3" />
+      </div>
+    </ListItem>
+
+    <!-- Price  -->
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.fromLbl')">
+      <div class="flex justify-end items-center">
+        {{ getValidatorMoniker(tx.validatorSrcAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorSrcAddress)" />
+      </div>
+    </ListItem>
+
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.switch.toLbl')">
+      <div class="flex justify-end items-center">
+        {{ getValidatorMoniker(tx.validatorDstAddress) }}
+        <ValidatorBadge :size="size" :validator="getValidator(tx.validatorDstAddress)" />
+      </div>
+    </ListItem>
+    <!-- Fee -->
+    <ListItem
+      :size="size"
+      :label="$t('components.previews.switch.feeLbl')"
+      :hint="$t('components.previews.switch.feeLblHint')"
+    >
+      <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+        </template>
+      </template>
+    </ListItem>
+  </List>
+</template>
+<script lang="ts">
+import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
+import { useStore } from 'vuex';
+
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
+import { List, ListItem } from '@/components/ui/List';
+import useStaking from '@/composables/useStaking';
+import * as Actions from '@/types/actions';
+import * as Base from '@/types/base';
+export default defineComponent({
+  name: 'PreviewSwitch',
+  components: {
+    AmountDisplay,
+    Price,
+    CircleSymbol,
+    List,
+    ListItem,
+    ValidatorBadge,
+  },
+
+  props: {
+    step: {
+      type: Object as PropType<Actions.Step>,
+      required: true,
+    },
+    fees: {
+      type: Object as PropType<Record<string, Base.Amount>>,
+      required: true,
+    },
+    context: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
+    },
+  },
+
+  setup(props) {
+    const store = useStore();
+    const { getValidatorsByBaseDenom } = useStaking();
+
+    const propsRef = toRefs(props);
+    const validators = ref([]);
+    const tx = propsRef.step.value.transactions[0];
+    const baseDenom = (tx.data as Actions.RedelegateData).amount.denom;
+    const chainName = (tx.data as Actions.RedelegateData).chain_name;
+
+    const totalStaked = (tx.data as Actions.RedelegateData).amount.amount;
+
+    onMounted(async () => {
+      validators.value = await getValidatorsByBaseDenom(baseDenom);
+    });
+    const getValidatorMoniker = (address) => {
+      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
+    };
+
+    const getValidator = (address) => {
+      return validators.value.find((x) => x.operator_address == address);
+    };
+    const size = props.context === 'default' ? 'md' : 'sm';
+
+    return {
+      store,
+      size,
+      tx: tx.data as Actions.RedelegateData,
+      getValidator,
+      getValidatorMoniker,
+      baseDenom,
+      chainName,
+      totalStaked,
+    };
+  },
+});
+</script>
+<style lang="scss" scoped></style>
