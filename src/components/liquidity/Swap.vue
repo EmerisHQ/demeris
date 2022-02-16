@@ -155,7 +155,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
@@ -954,11 +954,14 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
-            const { pool } = usePool(id);
-            await updatePool(pool);
-            const poolPrice = await getPoolPrice(pool);
-            const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await getReserveBalances(pool);
+
+            const { pool, initPromise } = usePool(id);
+            await initPromise;
+            await updatePool(unref(pool));
+
+            const poolPrice = await getPoolPrice(unref(pool));
+            const reserves = await getReserveBaseDenoms(unref(pool));
+            const reserveBalances = await getReserveBalances(unref(pool));
             data.selectedPoolData = {
               pool,
               poolPrice,
