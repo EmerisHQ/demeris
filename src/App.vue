@@ -18,8 +18,6 @@
     <EphemerisSpinner class="h-64 w-64" />
     <p class="leading-copy text-muted -text-1">{{ status }}</p>
   </div>
-  <!-- TODO: remove, placed here for testing -->
-  <Toast />
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
@@ -32,7 +30,6 @@ import CookieConsent from '@/components/common/CookieConsent.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
 import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
-import Toast from '@/components/ui/Toast/Toast.vue';
 import useTheme from '@/composables/useTheme';
 import TransactionsCenter from '@/features/transactions/components/TransactionsCenter.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
@@ -54,7 +51,6 @@ export default defineComponent({
     TransactionsCenter,
     FeatureRunningConditional,
     SimplexModal,
-    Toast,
     MoonpayModal,
   },
 

@@ -36,6 +36,7 @@ module.exports = {
       fg: 'var(--fg)',
       'fg-solid': 'var(--fg-solid)',
       border: 'var(--border)',
+      'link-dark': 'var(--link-dark)',
       link: {
         DEFAULT: 'var(--link)',
         hover: 'var(--link-hover)',
