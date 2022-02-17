@@ -8,15 +8,15 @@
           <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
-              <div class="sm:flex items-baseline flex-wrap">
-                <h1 class="text-1 sm:text-2 font-bold mt-4 sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
-                <span class="text-muted text-0 mt-2 flex-grow"><Ticker :name="denom" /></span>
+              <div class="items-baseline">
+                <h1 class="text-1 sm:text-2 font-bold sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
+                <div class="text-muted text-0 flex-grow"><Ticker :name="denom" /></div>
               </div>
               <Price
                 v-tippy
                 :amount="{ amount: 0, denom }"
                 :price-diff-object="priceDiffObject"
-                class="text-1 sm:text-2 font-bold"
+                class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
               />
             </div>
