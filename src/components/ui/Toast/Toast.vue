@@ -3,6 +3,7 @@
     <Transition name="fade">
       <div
         v-if="visibleToastMessages.length > 0"
+        data-test="messages-container"
         class="z-40 absolute w-full root"
         :class="{ 'root-unstacked': !isStacked }"
       >
@@ -17,14 +18,21 @@
               v-for="({ message, id }, toastIndex) in visibleToastMessages"
               :key="`message-${id}`"
               class="toast-message"
-              :style="computedToastStyle(toastIndex)"
+              :style="toastComputedStyle(toastIndex)"
+              :data-test="`toast-${toastIndex}`"
               @click="expandNotifications()"
             >
-              <button class="dismiss-button" @click="dismissNotification(id)">X</button>
+              <button
+                class="dismiss-button"
+                :data-test="`dismiss-toast-${toastIndex}`"
+                @click="dismissNotification(id)"
+              >
+                X
+              </button>
               <div class="theme-inverse text-text">{{ toastIndex }}-{{ id }}-{{ message }}</div>
               <div class="flex">
-                <Button :name="'Details'" class="text-secondary" variant="link" @click="emit('details-function', id)" />
-                <Button :name="'Undo'" class="text-secondary ml-2" variant="link" @click="emit('undo-function', id)" />
+                <Button :name="'Details'" class="text-secondary" variant="link" @click="emit('detailsFunction', id)" />
+                <Button :name="'Undo'" class="text-secondary ml-2" variant="link" @click="emit('undoFunction', id)" />
               </div>
             </div>
           </TransitionGroup>
@@ -41,12 +49,16 @@
         </div>
       </div>
     </Transition>
+    <div v-if="visibleToastMessages.length === 0">
+      toastMessages:{{ messages.length }} visibleToastMessages: {{ visibleToastMessages.length }}
+      else
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, defineProps, ref, toRefs, withDefaults } from 'vue';
+import { computed, ref, toRef, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 
@@ -59,26 +71,31 @@ interface NotificationMessage {
 interface Props {
   messages?: NotificationMessage[];
 }
+
 const props = withDefaults(defineProps<Props>(), {
   messages: () => [],
   // TODO: implement sorting props
   // sortByProperty
   // sortDirection
 });
-const { messages } = toRefs(props);
+
+const messages = toRef(props, 'messages');
 
 const emit = defineEmits<{
-  (e: 'details-function', id: number | string);
-  (e: 'undo-function', id: number | string);
+  (e: 'detailsFunction', id: number | string);
+  (e: 'undoFunction', id: number | string);
+  (e: 'onUpdate', messages: NotificationMessage[]);
 }>();
 
 const isStacked = ref(true);
 const clickableAreaRef = ref(null);
-const toastMessages = ref(messages.value);
+const toastMessages = ref(messages);
+const totalStackedToasts = 3;
 
-const visibleToastMessages = computed(() => [...toastMessages.value].reverse());
+const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
+// const visibleToastMessages = computed(() => []);
 
-function computedToastStyle(index: number): string {
+function toastComputedStyle(index: number): string {
   if (!isStacked.value) {
     return `
       position: absolute;
@@ -88,19 +105,19 @@ function computedToastStyle(index: number): string {
       z-index: ${visibleToastMessages.value.length - index};
     `;
   }
-  // const isVisible = index < totalStackedToasts
+  const isVisible = index < totalStackedToasts;
   return `
     position: absolute;
     z-index: ${visibleToastMessages.value.length - index};
     width: ${100 - index * 2}%;
     height: ${index > 0 ? '3rem' : 'auto'};
-    bottom: ${0.5 * index}rem;
-    opacity: ${1 - index * 0.1};
+    bottom: ${index === 0 ? 0 : 1 + 0.5 * index}rem;
+    opacity: ${isVisible ? 1 - index * 0.1 : 0};
    `;
 }
 
 function clearAllNotifications() {
-  toastMessages.value = [];
+  emit('onUpdate', []);
   isStacked.value = true;
 }
 
@@ -110,7 +127,7 @@ function expandNotifications() {
 }
 
 function dismissNotification(id) {
-  toastMessages.value = toastMessages.value.filter((tm) => tm.id !== id);
+  emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
 }
 
 onClickOutside(clickableAreaRef, () => (isStacked.value = true));
@@ -120,7 +137,7 @@ onClickOutside(clickableAreaRef, () => (isStacked.value = true));
 .toast-message {
   @apply flex absolute px-4 py-3 flex justify-between bg-black;
   border-radius: 0.5rem;
-  transition: all 0.5s ease-out;
+  transition: all 0.5s ease-in;
   width: 100%;
   left: 0;
   right: 0;

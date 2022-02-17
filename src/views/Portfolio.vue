@@ -55,6 +55,7 @@
           :messages="testData"
           @undo-function="($event) => undo($event)"
           @details-function="($event) => details($event)"
+          @on-update="($event) => (testData = $event)"
         />
         <button @click="addone()">add one</button>
         <Intro class="mt-4" />
