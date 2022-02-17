@@ -94,29 +94,7 @@
 
     <button
       v-if="state.currentAsset"
-      class="
-        bg-surface
-        shadow-button
-        rounded-xl
-        overflow-hidden
-        py-4
-        pl-5
-        pr-3
-        flex
-        justify-between
-        w-full
-        max-w-md
-        mx-auto
-        outline-none
-        text-left
-        group
-        focus:outline-none
-        active:opacity-70 active:transform-none
-        transform
-        hover:-translate-y-px
-        focus:-translate-y-px
-        transition
-      "
+      class="bg-surface shadow-button rounded-xl overflow-hidden py-4 pl-5 pr-3 flex justify-between w-full max-w-md mx-auto outline-none text-left group focus:outline-none active:opacity-70 active:transform-none transform hover:-translate-y-px focus:-translate-y-px transition"
       @click="toggleSelectModal()"
     >
       <div class="flex items-center flex-1">
@@ -168,28 +146,7 @@
       />
       <button
         v-if="state.currentAsset && !hasFunds"
-        class="
-          get-asset-cta
-          mt-6
-          relative
-          h-12
-          py-3
-          px-4
-          flex
-          items-center
-          w-full
-          bg-surface
-          shadow-button
-          rounded-xl
-          overflow-hidden
-          outline-none
-          text-left
-          font-medium
-          transition
-          transform
-          hover:-translate-y-px
-          active:opacity-70 active:transform-none
-        "
+        class="get-asset-cta mt-6 relative h-12 py-3 px-4 flex items-center w-full bg-surface shadow-button rounded-xl overflow-hidden outline-none text-left font-medium transition transform hover:-translate-y-px active:opacity-70 active:transform-none"
         @click="openAssetPage"
       >
         <span> {{ $t('generic_cta.get') }} <Denom :name="state.currentAsset?.base_denom" /> &rarr; </span>

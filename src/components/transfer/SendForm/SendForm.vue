@@ -7,7 +7,7 @@
 
     <template v-else-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.sendForm.amountSelect') }}</h2>
-      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="generateSteps" />
+      <SendFormAmount :balances="balances" :steps="steps" :fees="state.fees" @next="goToReview" />
     </template>
 
     <template v-else-if="['review', 'send'].includes(step)">
@@ -149,7 +149,7 @@ export default defineComponent({
         }
       },
     );
-    const generateSteps = async () => {
+    const goToReview = async () => {
       event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
       goToStep('review');
     };
@@ -177,7 +177,7 @@ export default defineComponent({
 
     provide('transferForm', form);
 
-    return { steps, form, goToStep, generateSteps, resetHandler, state, closeModal };
+    return { steps, form, goToStep, goToReview, resetHandler, state, closeModal };
   },
 });
 </script>

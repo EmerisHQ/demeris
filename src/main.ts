@@ -12,7 +12,6 @@ import { createMetaManager } from 'vue-meta';
 import VueTippy from 'vue-tippy';
 import VueApexCharts from 'vue3-apexcharts';
 
-import stringFilters from '@/filters/string';
 import { messages } from '@/locales/en';
 
 import App from './App.vue';
@@ -62,7 +61,3 @@ app
   .mount('#app');
 
 VueCookieNext.config({ expire: '180d', domain: '.emeris.com' });
-
-app.config.globalProperties.$filters = {
-  ...stringFilters,
-};
