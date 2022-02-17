@@ -1,50 +1,48 @@
 <template>
-  <div>Swap Route</div>
-  <div>X transc across Y chains</div>
-  <!-- <div v-for="item in items" :key="item" class="flex flex-col timeline-block p-4">
-    <span>
-      icon {{ item.denom }} &bull; {{ item.chain }}
-      <div v-for="subItem in item?.subItems" :key="subItem">
-        <span>sub fixed icon</span>
-        <span>{{ subItem }}</span>
+  <div class="ml-6 mt-6">
+    <div class="text-2 font-bold">Swap Route</div>
+    <div class="text-muted">X transc across Y chains</div>
+    <div class="timeline-container flex flex-col timeline-block pl-2 my-6">
+      <div v-for="item in items" :key="item" class="flex flex-col">
+        <span class="flex items-center">
+          <span class="flex items-center -ml-6 rounded-full bg-surface">
+            <CircleSymbol class="relative" variant="chain" :chain-name="'cosmos-hub'" :glow="false" size="md" />
+            <CircleSymbol :style="{ position: 'absolute' }" class="ml-1" :denom="'uatom'" :glow="true" size="sm" />
+          </span>
+          <span class="ml-4">{{ item.denom }} &middot; {{ item.chain }} </span>
+        </span>
+        <div v-if="item && item.subItems && !!item.subItems.length" class="my-6">
+          <template v-for="subItem in item?.subItems" :key="subItem">
+            <div class="sub-item flex items-center">
+              <span class="sub-item-icon rounded-full -ml-6 bg-surface">
+                <Icon class="relative" name="DaggSwapLRIcon" :icon-size="1" />
+                <!-- DaggArrowRightIcon -->
+              </span>
+              <span class="ml-4">
+                {{ subItem }}
+              </span>
+            </div>
+          </template>
+        </div>
       </div>
-    </span>
-  </div> -->
-  <Timeline
-    :items="[
-      { denom: 'atom', chain: 'somcahin', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'iris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'osmo', chain: 'osmo', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'lastcoin', chain: 'lastchain' },
-    ]"
-  >
-    <template #item="{ denom, chain, subItems }">
-      <div>
-        icon {{ denom }} &bull; {{ chain }}
-        <template v-for="subItem in subItems" :key="subItem">
-          <span>sub fixed icon {{ subItem }} </span>
-          <!-- <span>{{ subItem }}</span> -->
-        </template>
-      </div>
-    </template>
-  </Timeline>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
 import { defineComponent, ref } from 'vue';
 
-import Timeline from '@/components/common/Timeline.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
   name: 'SwapRoute',
   components: {
-    Timeline,
+    CircleSymbol,
+    Icon,
   },
   props: {},
   setup() {
-    console.log('some');
-    // console.log('some');
     const items = ref([
       { denom: 'atom', chain: 'somcahin', subItems: ['Transfer x', 'Swap Y'] },
       { denom: 'iris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
@@ -55,4 +53,21 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.timeline-container {
+  border-left: 2px solid var(--border);
+  margin-left: 1rem;
+}
+.sub-item:not(:first-child) {
+  margin-top: 0.5rem;
+}
+.sub-item-icon {
+  border: 2px solid var(--border);
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
