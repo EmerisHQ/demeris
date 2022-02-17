@@ -3151,12 +3151,14 @@ export async function validateStepsFeeBalances(
             });
           }
         } else {
-          feeWarning.feeWarning = false;
-          feeWarning.missingFees.push({
-            amount: '' + fees[chain_name][denom],
-            chain_name: chain_name,
-            denom: denom,
-          });
+          if (fees[chain_name][denom] > 0) {
+            feeWarning.feeWarning = false;
+            feeWarning.missingFees.push({
+              amount: '' + fees[chain_name][denom],
+              chain_name: chain_name,
+              denom: denom,
+            });
+          }
         }
       }
     }
