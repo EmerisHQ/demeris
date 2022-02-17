@@ -7,8 +7,8 @@ import { ActionContext, ActionTree } from 'vuex';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { event } from '@/utils/analytics';
-import { fromHexString, keyHashfromAddress } from '@/utils/basic';
+import { config as analyticsConfig,event } from '@/utils/analytics';
+import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -185,6 +185,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       commit(DemerisMutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
+      analyticsConfig({ user_id: toHexString(keyData.address) });
+
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
         if (!isCypress) {
