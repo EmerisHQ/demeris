@@ -567,6 +567,16 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_TX_DEST_HASH]({ getters }, { from_chain, to_chain, txhash }) {
     try {
       const response = await axios.get(`${getters['getEndpoint']}/tx/${from_chain}/${to_chain}/${txhash}`);
+      const data = response.data;
+
+      if (data.cause) {
+        throw new Error(data);
+      }
+
+      if (!data.tx_hash) {
+        throw new Error('Failed to fetch destination hash');
+      }
+
       return response.data;
     } catch (e) {
       console.error(e);
@@ -833,8 +843,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name, stepType }) {
     return new Promise((resolve, reject) => {
-      const chain = getters[GetterTypes.getChain]({ chain_name });
-      let wsUrl = chain?.public_node_endpoints?.tendermint_rpc;
+      let wsUrl;
+      // const chain = getters[GetterTypes.getChain]({ chain_name });
+      // let wsUrl = chain?.public_node_endpoints?.tendermint_rpc;
 
       if (!wsUrl) {
         wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
@@ -895,7 +906,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       };
 
       const handleClose = () => {
-        console.log('close');
+        console.log('connection closed');
       };
 
       ws.onopen = handleOpen;

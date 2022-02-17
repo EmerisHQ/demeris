@@ -298,7 +298,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       failed: {
         id: 'failed',
         initial: 'default',
-        entry: 'setError',
+        entry: ['setError', 'logError'],
         states: {
           default: {
             on: {
@@ -487,24 +487,31 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
 
         const traceResponse = async () => {
           if (currentTransaction.name.includes('ibc')) {
-            let retriesDestCount = 0;
             const { from_chain, to_chain } = currentTransaction.data as IBCBackwardsData;
+
+            let retriesDestCount = 0;
+            let destTx;
 
             while (retriesDestCount < 10 && shouldRetry) {
               try {
-                const destHash = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
+                destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
                   from_chain,
                   to_chain,
                   txhash: responseData.txhash,
                 });
 
-                responseData.chain_name = to_chain;
-                responseData.txhash = destHash;
+                responseData.chain_name = destTx.dest_chain;
+                responseData.txhash = destTx.tx_hash;
                 break;
               } catch {
                 retriesDestCount++;
-                await new Promise((r) => setTimeout(r, 2000));
+                await new Promise((r) => setTimeout(r, 5000));
               }
+            }
+
+            if (!destTx) {
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
             }
           }
 
@@ -575,6 +582,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
         }),
       }),
+      logError: (context, event) => {
+        console.error(event);
+      },
       logEvent: (context, __, meta) => {
         const key = meta.action.key;
         let data = {};
