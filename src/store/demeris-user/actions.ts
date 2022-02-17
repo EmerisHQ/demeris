@@ -7,8 +7,8 @@ import { ActionContext, ActionTree } from 'vuex';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { event } from '@/utils/analytics';
-import { fromHexString, keyHashfromAddress } from '@/utils/basic';
+import { config as analyticsConfig,event } from '@/utils/analytics';
+import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -185,6 +185,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       commit(DemerisMutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
+      analyticsConfig({ user_id: toHexString(keyData.address) });
+
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
         if (!isCypress) {
@@ -213,6 +215,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
         : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
 
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
@@ -238,6 +241,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,

@@ -38,7 +38,38 @@ or
 npm run serve:production
 ```
 
-## Testing transactions / swaps
+## Testing
+
+### Automated testing - Cypress (e2e testing)
+
+Before you are able to run our automated tests locally, ensure you create an `.env.local` file, with the following:
+
+```
+VUE_APP_EMERIS_MNEMONIC={ your mnemonic }
+VUE_APP_FEATURE_USE_DEV=true
+```
+
+Test commands:
+
+```
+# Run all tests in headless mode
+npx cypress run
+
+# Run one specific test in headed mode
+npx cypress run --spec cypress/integration/welcome-page-visual.spec.js --headed --no-exit
+```
+
+### Automated testing - Jest (unit testing)
+
+```
+# Run all unit tests
+npm run test:unit
+
+# Run one specific unit test
+npm run test:unit -t src/features/transactions/components/TransactionsCenterActionButton.spec.ts
+```
+
+### Manual testing transactions / swaps
 
 In order to do testing, we can send $10-$20 to devs from the demo account upon request. Ask in #emeris-frontend-team how to do this (docs to be added).
 
