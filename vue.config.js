@@ -16,13 +16,5 @@ module.exports = {
       ],
     },
   },
-  chainWebpack: (config) => {
-    config.plugins.delete('progress');
-    config.plugin('simple-progress-webpack-plugin').use(require.resolve('simple-progress-webpack-plugin'), [
-      {
-        format: 'simple', // options are minimal, compact, expanded, verbose
-      },
-    ]);
-  },
   transpileDependencies: ['@starport/tendermint-liquidity-js', 'vue-meta'],
 };
