@@ -6,14 +6,38 @@ Web version of Emeris, the Interface to the Internet of Blockchains.
 
 Before contributing, please familiarize yourself with the [Frontend Engineering Guidelines](https://www.notion.so/allinbits/Frontend-Engineering-Guidelines-873d2c6e2dda493fbf6601d527259efd).
 
-### To start Emeris in development mode
+## Running Emeris
 
-⚠️ Since currently dev is unstable at best, please refer below to "To start Emeris in staging/production mode" section.
+⚠️ Since currently dev is unstable at best, we recommend to run Emeris in production mode.
 
 ```
 npm ci
 npm run serve
 ```
+
+### Configuration
+
+By default, Emeris will run on production API's, and there will be no mnemonic configured. There are 2 ways to configure Emeris to a different environment:
+
+Ensure you create an `.env.local` file, with the following:
+
+```
+#This mnemonic is used for automated testing. Right now, our e2e tests expect ATOM to be present in the balance of the accountholder. Uncomment and replace your mnemonic to make the tests pass locally.
+#VUE_APP_EMERIS_MNEMONIC={ your mnemonic }
+
+#Uncomment below to enable dev API's
+#VUE_APP_FEATURE_USE_DEV=true
+
+#Uncomment below to enable staging API's
+#VUE_APP_FEATURE_USE_STAGING=true
+```
+
+You can also use URL parameters to easily switch evironment, like this:
+
+- https://localhost:8080?VUE_APP_FEATURE_USE_DEV=true
+- https://localhost:8080?VUE_APP_FEATURE_USE_STAGING=true
+
+### Shortcomings on development mode
 
 At the moment, when running in development mode, the swap module will not be working (we need to fix this!).
 
@@ -24,30 +48,11 @@ A potential way of solving this in the future would be if we provide 2 ways of r
 1. with simulated chains where we ourselves manage the data locally which you could locally change (so least dependencies)
 2. by running multiple chains testnets
 
-For the time being, if you want a fully functioning version of Emeris:
-
-### To start Emeris in staging/production mode
-
-```
-npm run serve:staging
-```
-
-or
-
-```
-npm run serve:production
-```
-
 ## Testing
 
 ### Automated testing - Cypress (e2e testing)
 
-Before you are able to run our automated tests locally, ensure you create an `.env.local` file, with the following:
-
-```
-VUE_APP_EMERIS_MNEMONIC={ your mnemonic }
-VUE_APP_FEATURE_USE_DEV=true
-```
+Before you are able to run our automated tests locally, ensure you configured your `.env.local` file with a mnemonic with ATOM.
 
 Test commands:
 
