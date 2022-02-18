@@ -51,6 +51,7 @@
   </div>
 </template>
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -135,6 +136,13 @@ export default defineComponent({
     const closeModal = () => {
       router.push('/');
     };
+
+    const precision = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        name: baseDenom,
+      }),
+    );
+
     const action = computed(() => {
       return {
         name: 'switch',
@@ -142,7 +150,12 @@ export default defineComponent({
           validatorSrcAddress: form.validatorAddress,
           validatorDstAddress: form.toValidatorAddress,
           amount: {
-            amount: { amount: form.amount, denom: form.denom },
+            amount: {
+              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+                .multipliedBy(10 ** precision.value)
+                .toString(),
+              denom: form.denom,
+            },
             chain_name: form.chain_name,
           },
         },
