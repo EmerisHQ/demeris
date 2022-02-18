@@ -107,7 +107,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
 
 /* Custom color utilities */
 @layer utilities {
-  @variants dark, focus {
+  @variants dark, hover, focus {
     /* Background utilities */
     .bg-app {
       background: var(--bg-image);
@@ -121,6 +121,9 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
     .bg-surface-2 {
       background: var(--surface-2-image);
     }
+  }
+  @variants dark, focus {
+    /* Background utilities */
     .bg-brand {
       background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
     }
