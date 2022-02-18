@@ -197,7 +197,7 @@ export const messages = {
         lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
         apy: 'APY',
         reward: 'Rewards',
-        stakeAsset: 'Stake {ticker}S',
+        stakeAsset: 'Stake {ticker}',
         selectValidator: 'Select a validator',
         searchValidator: 'Search validator',
         claimRewards: 'Claim rewards',
