@@ -2,15 +2,11 @@
   <div class="stake relative flex w-full min-h-screen justify-center">
     <div v-if="validatorList.length > 0" class="max-w-7xl mx-auto px-8 w-full flex-1 flex flex-col items-stretch">
       <header class="flex items-center justify-between py-6 h-24">
-        <Button
-          v-if="showBackButton"
-          variant="link"
-          :full-width="false"
-          :disabled="isBackDisabled"
-          :click-function="goBack"
-        >
-          <Icon name="ArrowLeftIcon" :icon-size="1.5" />
-        </Button>
+        <div class="w-12">
+          <Button v-if="!isBackDisabled || showBackButton" variant="link" :full-width="false" :click-function="goBack">
+            <Icon name="ArrowLeftIcon" :icon-size="1.5" />
+          </Button>
+        </div>
 
         <nav v-if="actionType" class="flex-1 flex items-center justify-center space-x-12">
           <span
