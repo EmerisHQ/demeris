@@ -233,12 +233,22 @@ export default defineComponent({
       required: false,
       default: '',
     },
+    sortingBy: {
+      type: String as PropType<'power' | 'name' | 'commission' | 'staked'>,
+      required: false,
+      default: 'power',
+    },
+    sortingOrder: {
+      type: String as PropType<'asc' | 'desc'>,
+      required: false,
+      default: 'desc',
+    },
   },
   emits: ['selectValidator'],
   setup(props, { emit }) {
     /* hooks */
     const store = useStore();
-
+    const isDisabled = ref(false);
     const propsRef = toRefs(props);
     /* preset variables */
     const chain = computed(() => {
@@ -252,8 +262,8 @@ export default defineComponent({
     /* variables */
     const keyword = ref<string>('');
     const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null);
-    const sortBy = ref('power');
-    const sortOrder = ref('desc');
+    const sortBy = ref(props.sortingBy);
+    const sortOrder = ref(props.sortingOrder);
     const totalStakedAmount = computed(() => {
       return propsRef.validatorList.value
         .reduce((acc, validator) => {
@@ -323,6 +333,7 @@ export default defineComponent({
       sort,
       sortBy,
       sortOrder,
+      isDisabled,
     };
   },
 });

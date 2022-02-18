@@ -83,3 +83,11 @@ In order to do testing, we can send $10-$20 to devs from the demo account upon r
 ```
 npm run build
 ```
+
+## Feature Flags
+
+We are currently using Feature Flags in order to toggle on/off functionality. This helps us to separate release from deploy, and they function as a safety net.
+
+Right now, because we don't have a [good feature management system in place](https://github.com/allinbits/demeris/issues/949), we list all the features in the codebase in the `.env` file as a comment.
+
+[Learn more about feature flags](https://www.notion.so/allinbits/Working-with-Feature-Flags-c0bbf36cbb2646de9e6754564394bdc2)
