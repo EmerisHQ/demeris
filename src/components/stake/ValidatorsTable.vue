@@ -38,6 +38,7 @@
               :class="{ 'font-bold': sortBy == 'name' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('name');
@@ -54,6 +55,7 @@
               :class="{ 'font-bold': sortBy == 'power' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('power');
@@ -70,6 +72,7 @@
               :class="{ 'font-bold': sortBy == 'commission' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('commission');
@@ -86,6 +89,7 @@
               :class="{ 'font-bold': sortBy == 'staked' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('staked');
