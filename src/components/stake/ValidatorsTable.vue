@@ -35,67 +35,59 @@
           <tr>
             <th
               class="align-middle font-normal -text-1 py-4 px-0 sticky top-0 z-20 bg-app text-left transition"
-              :class="{ 'font-bold': sortBy == 'name' }"
+              :class="{ 'text-text': sortBy == 'name' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('name');
                   }
                 "
-              >{{ $t('components.validatorTable.validator') }}</span>
-              <template v-if="sortBy == 'name'">
-                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-                <ReceiveIcon v-else class="inline" />
-              </template>
+              >{{ $t('components.validatorTable.validator') }}
+                <span v-if="sortBy == 'name' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'name'">&darr;</span></span>
             </th>
             <th
               class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-              :class="{ 'font-bold': sortBy == 'power' }"
+              :class="{ 'text-text': sortBy == 'power' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('power');
                   }
                 "
-              >{{ $t('components.validatorTable.votingPower') }}</span>
-              <template v-if="sortBy == 'power'">
-                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-                <ReceiveIcon v-else class="inline" />
-              </template>
+              >{{ $t('components.validatorTable.votingPower') }}
+                <span v-if="sortBy == 'power' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'power'">&darr;</span></span>
             </th>
             <th
               class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-              :class="{ 'font-bold': sortBy == 'commission' }"
+              :class="{ 'text-text': sortBy == 'commission' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('commission');
                   }
                 "
-              >{{ $t('components.validatorTable.commission') }}</span>
-              <template v-if="sortBy == 'commission'">
-                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-                <ReceiveIcon v-else class="inline" />
-              </template>
+              >{{ $t('components.validatorTable.commission') }}
+                <span v-if="sortBy == 'commission' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'commission'">&darr;</span></span>
             </th>
             <th
               class="align-middle -text-1 font-normal py-4 px-0 sticky top-0 z-20 bg-app text-right transition"
-              :class="{ 'font-bold': sortBy == 'staked' }"
+              :class="{ 'text-text': sortBy == 'staked' }"
             >
               <span
+                class="cursor-pointer"
                 @click="
                   () => {
                     sort('staked');
                   }
                 "
-              >{{ $t('components.validatorTable.staked') }}</span>
-              <template v-if="sortBy == 'staked'">
-                <SendIcon v-if="sortOrder == 'asc'" class="inline" />
-                <ReceiveIcon v-else class="inline" />
-              </template>
+              >{{ $t('components.validatorTable.staked') }}
+                <span v-if="sortBy == 'staked' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'staked'">&darr;</span></span>
             </th>
             <th
               v-if="hasActions"
@@ -202,8 +194,6 @@ import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
-import ReceiveIcon from '@/components/common/Icons/ReceiveIcon.vue';
-import SendIcon from '@/components/common/Icons/SendIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -222,7 +212,7 @@ type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
 export default defineComponent({
   name: 'ValidatorTable',
-  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ReceiveIcon, SendIcon, ValidatorCard },
+  components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
   props: {
     validatorList: {
       type: Array as PropType<any[]>,

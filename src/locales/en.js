@@ -199,7 +199,7 @@ export const messages = {
         reward: 'Rewards',
         stakeAsset: 'Stake {ticker}S',
         selectValidator: 'Select a validator',
-        searchValidator: 'Search validator',
+        searchValidator: 'Search validators',
         claimRewards: 'Claim rewards',
         stake: 'Stake',
         unstake: 'Unstake',
