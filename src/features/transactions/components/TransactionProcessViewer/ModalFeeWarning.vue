@@ -1,8 +1,10 @@
 <template>
   <Modal class="text-center" :variant="'dialog'" fullscreen>
     <template v-if="feeWarning.missingFees.length > 0">
-      <div class="text-1 font-bold mb-4">{{ $t('components.feeWarningModal.missingMany') }}</div>
-      <div class="text-muted leading-copy mb-4">{{ $t('components.feeWarningModal.missingManyText') }}</div>
+      <div class="text-1 font-bold mb-4">{{ $t('components.feeWarningModal.' + action + '.missingMany') }}</div>
+      <div class="text-muted leading-copy mb-4">
+        {{ $t('components.feeWarningModal.' + action + '.missingManyText') }}
+      </div>
       <div class="mb-8 flex flex-col items-center">
         <div v-for="missing in feeWarning.missingFees" :key="missing.denom" class="flex py-4 items-center">
           <CircleSymbol
@@ -80,6 +82,7 @@ const emitter = useEmitter();
 const store = useStore();
 
 const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]);
+const action = computed(() => state.value.context.input.action);
 const feeWarning = computed(() => state.value.context.fees.validation);
 
 const goMoon = () => {
