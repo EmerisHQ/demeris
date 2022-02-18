@@ -5,6 +5,7 @@ module.exports = {
     '^.+\\.vue$': '@vue/vue3-jest',
   },
   moduleFileExtensions: ['json', 'js', 'jsx', 'ts', 'tsx', 'vue'],
+  modulePathIgnorePatterns: ['cypress'],
   setupFiles: ['<rootDir>/tests/unit/jest.setup.js'],
   transformIgnorePatterns: ['node_modules/(?!(@starport))'],
   moduleNameMapper: {

@@ -11,6 +11,7 @@ export enum DemerisMutationTypes {
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
   SET_FEE_ADDRESSES = 'SET_FEE_ADDRESSES',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
+  SET_UNBONDING_DELEGATIONS = 'SET_UNBONDING_DELEGATIONS',
   SET_VALID_POOLS = 'SET_VALID_POOLS',
   SET_NUMBERS = 'SET_NUMBERS',
   SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
@@ -69,6 +70,7 @@ export type DemerisMutationArgs =
   | API.LoadingState
   | API.TokenId
   | API.StakingBalances
+  | API.UnbondingDelegations
   | API.Numbers
   | API.SeqNumber
   | API.VerifyTrace

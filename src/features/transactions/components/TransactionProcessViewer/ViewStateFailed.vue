@@ -221,6 +221,11 @@ const titleMap = {
   addliquidity: t('components.txHandlingModal.addLiqActionFail'),
   withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionFail'),
   createpool: t('components.txHandlingModal.createPoolActionFail'),
+  stake: t('components.txHandlingModal.stakeActionFail'),
+  multistake: t('components.txHandlingModal.stakeActionFail'),
+  unstake: t('components.txHandlingModal.unstakeActionFail'),
+  switch: t('components.txHandlingModal.switchActionFail'),
+  claim: t('components.txHandlingModal.claimActionFail'),
 };
 
 const title = computed(() => {

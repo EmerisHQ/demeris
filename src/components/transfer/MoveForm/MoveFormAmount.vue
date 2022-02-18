@@ -213,28 +213,7 @@
         />
         <button
           v-if="state.currentAsset && hasPrice && !hasFunds"
-          class="
-            get-asset-cta
-            mt-6
-            relative
-            h-12
-            py-3
-            px-4
-            flex
-            items-center
-            w-full
-            bg-surface
-            shadow-button
-            rounded-xl
-            overflow-hidden
-            outline-none
-            text-left
-            font-medium
-            transition
-            transform
-            hover:-translate-y-px
-            active:opacity-70 active:transform-none
-          "
+          class="get-asset-cta mt-6 relative h-12 py-3 px-4 flex items-center w-full bg-surface shadow-button rounded-xl overflow-hidden outline-none text-left font-medium transition transform hover:-translate-y-px active:opacity-70 active:transform-none"
           @click="openAssetPage"
         >
           <span> {{ $t('generic_cta.get') }} <Denom :name="state.currentAsset?.base_denom" /> &rarr; </span>
