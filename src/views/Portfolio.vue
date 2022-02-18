@@ -53,9 +53,9 @@
         <!-- TODO: remove, placed here for testing -->
         <Toast
           :messages="testData"
-          @undo-function="($event) => undo($event)"
-          @details-function="($event) => details($event)"
-          @on-update="($event) => (testData = $event)"
+          @onButton1Click="($event) => undo($event)"
+          @onButton2Click="($event) => details($event)"
+          @on-update="($event) => updateTestData($event)"
         />
         <button @click="addone()">add one</button>
         <Intro class="mt-4" />
@@ -138,8 +138,12 @@ export default {
     // TODO: remove, here for testing only
     const testData = ref([]);
     let i = 0;
-    for (i = 0; i < 3; i++) {
-      testData.value.push({ message: `Transaction item ${i}`, action: '', date: '', id: i });
+    for (i = 0; i < 5; i++) {
+      if (i % 2 === 0) {
+        testData.value.push({ message: `Transaction  ${i}`, action: '', date: '', id: i });
+      } else {
+        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, action: '', date: '', id: i });
+      }
     }
     function undo(id) {
       console.log('undo id', id);
@@ -149,12 +153,20 @@ export default {
     }
     function addone() {
       i++;
-      testData.value.push({ message: `Transaction item ${i}`, action: '', date: '', id: i });
-      console.log(testData.value.length);
+      if (i % 2 === 0) {
+        testData.value.push({ message: `Transaction  ${i}`, action: '', date: '', id: i });
+      } else {
+        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, action: '', date: '', id: i });
+      }
     }
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete, testData, undo, details, addone };
-    
+    function updateTestData($event) {
+      console.log('updateTestData', $event);
+      i = $event.length;
+      testData.value = $event;
+    }
+
+    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete, undo, updateTestData, details, addone, testData };
   },
 };
 </script>

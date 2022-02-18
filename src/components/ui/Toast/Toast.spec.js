@@ -1,41 +1,62 @@
-// npx jest -- src/components/ui/Toast/Toast.spec.js --watch
+// npx jest -- src/components/ui/Toast/Toast.spec.js
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 
 import Toast from './Toast.vue';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 describe('Toast', () => {
-  test('Mounts Successfully and Initial state has no notifications', () => {
+  it('Mounts Successfully and Initial state has no notifications', () => {
     const wrapper = mount(Toast);
     expect(wrapper.exists()).toBe(true);
     expect(wrapper.find('[data-test=messages-container]').exists()).toBe(false);
     expect(wrapper.findAll('.toast-message')).toHaveLength(0);
   });
 
-  test('Adding array of initial notifications, Remove 1, Add 2', async () => {
+  it('Should display 7 notifications loaded from props', async () => {
     const testData = [];
-    const totalNotifications = 2;
-    const additionalNotifications = 2;
+    const totalNotifications = 7;
+    // const additionalNotifications = 2;
     for (let i = 0; i < totalNotifications; i++) {
       testData.push({ message: `Transaction item ${i}`, action: '', date: '', id: i });
     }
     const wrapper = mount(Toast, {
-      props: { messages: testData },
+      propsData: { messages: testData },
     });
     expect(wrapper.find('[data-test=messages-container]').exists()).toBeTruthy();
-    await delay(1000);
-    expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications);
+    expect(wrapper.findAll('[data-test=toast-message]')).toHaveLength(totalNotifications);
 
-    await wrapper.find('[data-test=dismiss-toast-1]').trigger('click');
-    expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications - 1);
+    // await wrapper.find('[data-test=dismiss-toast-1]').trigger('click');
+    // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications - 1);
 
-    for (let i = totalNotifications; i < totalNotifications + additionalNotifications; i++) {
+    // for (let i = totalNotifications; i < totalNotifications + additionalNotifications; i++) {
+    //   testData.push({ message: `Transaction item ${i}`, action: '', date: '', id: i });
+    // }
+    // await wrapper.setProps({ messages: testData });
+    // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications + 2);
+  });
+
+  it.only('Should load 6 notifications and remove 1, leaving 5', async () => {
+    const testData = [];
+    const totalNotifications = 6;
+    for (let i = 0; i < totalNotifications; i++) {
       testData.push({ message: `Transaction item ${i}`, action: '', date: '', id: i });
     }
-    await wrapper.setProps({ messages: testData });
-    await delay(1000);
-    expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications + 2);
+    const wrapper = mount(Toast, {
+      propsData: { messages: testData },
+    });
+    console.log('messages1:', wrapper.props().messages);
+    console.log('toastMessages1:', wrapper.vm.toastMessages);
+
+    await wrapper.find('[data-test=dismiss-toast-1]').trigger('click');
+
+    console.log('messages2:', wrapper.props().messages.length);
+
+    // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications - 1);
   });
+
+  // it('Should load 6 notifications and add 1, leaving 7', async () => {})
+
+  // it('Should open messages, then collapse', async () => {})
+
+  // it('Should clear all messages', async () => {})
 });
