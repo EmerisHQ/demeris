@@ -218,6 +218,46 @@ export const messages = {
         missingOneTextAtom: 'Lorem ipsum Atom',
         missingMany: 'You have no assets to pay fees',
         missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        claim: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To claim your rewards, the following assets are required to pay fees.',
+        },
+        stake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        unstake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        switch: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        swap: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        addliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        withdrawliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        createpool: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        transfer: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        move: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
