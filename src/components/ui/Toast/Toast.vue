@@ -77,7 +77,7 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, nextTick, onMounted, ref, toRef, watch, withDefaults } from 'vue';
+import { computed, onMounted, ref, toRef, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -111,7 +111,7 @@ const emit = defineEmits<{
   (e: 'onUpdate', messages: NotificationMessage[]);
 }>();
 
-const isStacked = ref(true);
+const isStacked = ref(false);
 const hoverTimeout = ref(null);
 const stackingTimeout = ref(null);
 const isHovering = ref(null);
@@ -196,42 +196,33 @@ function onActivity() {
 }
 
 function updateToastPositions() {
-  nextTick(() => {
+  toastComputedStyle();
+
+  // Necessary to wait for elements to render correct height
+  window.requestAnimationFrame(() => {
     toastComputedStyle();
   });
-  setTimeout(() => {
-    toastComputedStyle();
-  }, 200);
-  setTimeout(() => {
-    toastComputedStyle();
-  }, 400);
 }
 
 watch(
-  () => isStacked.value,
+  () => [isStacked.value, visibleToastMessages.value],
   () => {
     updateToastPositions();
   },
 );
-watch(
-  () => visibleToastMessages.value,
-  () => {
-    updateToastPositions();
-  },
-);
-
-onMounted(() => {
-  updateToastPositions();
-});
 
 onClickOutside(clickableAreaRef, () => {
   isStacked.value = true;
+});
+
+onMounted(() => {
+  updateToastPositions();
 });
 </script>
 
 <style lang="postcss">
 .toast-message {
-  @apply flex absolute px-4 py-3 flex justify-between bg-black;
+  @apply flex absolute px-4 py-3 justify-between bg-black;
   border-radius: 0.5rem;
   transition: all 0.3s ease-out;
   width: 100%;
@@ -259,8 +250,8 @@ onClickOutside(clickableAreaRef, () => {
 }
 .messages-viewport-unstacked {
   height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: scroll;
+  position: relative;
 }
 
 /* TODO: use ui Button */

@@ -138,7 +138,7 @@ export default {
     // TODO: remove, here for testing only
     const testData = ref([]);
     let i = 0;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 10; i++) {
       if (i % 2 === 0) {
         testData.value.push({ message: `Transaction  ${i}`, action: '', date: '', id: i });
       } else {
