@@ -33,6 +33,7 @@
     <!-- Staking info banner -->
     <template v-if="!isStakingAssetExist">
       <div
+        data-testid="stake-table__stake-banner"
         class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
       >
         <div class="flex-1 max-w-xs">
@@ -50,6 +51,7 @@
         </div>
 
         <Button
+          data-testid="stake-table__stake-button"
           variant="secondary"
           :name="stakingButtonName"
           class="mt-8"

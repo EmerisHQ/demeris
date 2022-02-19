@@ -9,6 +9,7 @@ on:
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+  DEFAULT_NODE_VERSION: 16.x
 
 jobs:
   unit:
@@ -41,12 +42,8 @@ jobs:
       - name: Test
         run: npm run test:unit -- --runInBand
 
-  e2e:
+  build:
     runs-on: self-hosted
-
-    strategy:
-      matrix:
-        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -57,31 +54,72 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: node_modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: node_modules-${{ env.DEFAULT_NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.DEFAULT_NODE_VERSION }}
           cache: npm
 
       - name: Install (npm)
         run: npm install
 
+      - name: Build
+        run: npm run build:production
+
+      - name: Upload build dir
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ${{ github.workspace }}/dist
+
+  e2e:
+    runs-on: self-hosted
+    needs: build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env_file:
+          - env_file: .env.ci
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+          cache: npm
+  
       - name: Update system
         run: sudo apt update
-
-      - name: Install dependencies
-        run: sudo DEBIAN_FRONTEND=noninteractive apt -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Install Serve
         run: npm install -g serve
 
-      - name: Build
-        run: npm run build
-      
+      - name: Install dependencies
+        run: sudo DEBIAN_FRONTEND=noninteractive apt -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
+      - name: Download build dir
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: ${{ github.workspace }}/dist
+  
+      - name: Set env variables
+        id: vars
+        if: ${{ matrix.env_file }}
+        run: |
+          ENV_URL_PARAMS=$(cat "${{ github.workspace }}/${{ matrix.env_file }}" | tr '\n' '&')
+          ENV_CLI_PARAMS=$(cat "${{ github.workspace }}/${{ matrix.env_file }}" | tr '\n' ',')
+          CYPRESS_BASE_URL="http://localhost:8080?${ENV_URL_PARAMS}"
+          echo ::set-output name=env-args::"${ENV_CLI_PARAMS}" 
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
+          env: ${{ steps.vars.outputs.env-args }}
           start: serve -s dist -l 8080
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
@@ -90,5 +128,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: cypress-screenshots
+          name: ${{ github.job }}-${{ matrix.env_file }}-screenshots
           path: cypress/screenshots
