@@ -41,7 +41,7 @@
                 </button>
               </Transition>
               <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex">
-                <div class="theme-inverse text-text">{{ toastIndex }}-{{ message }}-{{ divHeight(toastIndex) }}px</div>
+                <div class="theme-inverse text-text">{{ toastIndex }}-{{ message }}</div>
                 <div class="flex inline-block align-middle">
                   <Button
                     :name="buttonLabel2"
@@ -117,53 +117,39 @@ const stackingTimeout = ref(null);
 const isHovering = ref(null);
 const clickableAreaRef = ref(null);
 const toastMessages = ref(messages);
-// const notificationEls = ref([]);
 const notificationComputedStyles = ref([]);
 
-const totalStackedToasts = 3;
-
 const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
-// const toastEls = computed(() => notificationEls.value.filter(el => el));
 
-function divHeight(index) {
-  1;
-  return document.getElementById(`toast-${index}`)?.offsetHeight;
-}
+const totalStackedToasts = 3;
 
 function toastComputedStyle(): void {
   visibleToastMessages.value.forEach((m, index) => {
     let style = '';
-
     let heightPreviousToasts = 0;
     for (let i = 0; i < index; i++) {
       const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight;
       if (elHeight && index !== 0) heightPreviousToasts += elHeight + 5;
     }
     const dismissControlsHeight = visibleToastMessages.value.length > 1 ? 30 : 0;
-    // const currentToastHeight = document.getElementById(`toast-${index}`)?.offsetHeight;
-    // const prevToastHeight = index === 0 ? 0 : toastEls.value[index-1]?.offsetHeight
-
     if (!isStacked.value) {
       style = `
+        bottom: ${dismissControlsHeight + heightPreviousToasts}px;
+        opacity: 1;
         position: absolute;
         width: 100%;
-        opacity: 1;
-        bottom: ${dismissControlsHeight + heightPreviousToasts}px;
         z-index: ${visibleToastMessages.value.length - index};
       `;
     } else {
       const isVisible = index < totalStackedToasts;
-      // const firstToastHeight = document.getElementById(`toast-${0}`)?.offsetHeight
-      const height = index === 0 ? '' : `height:${document.getElementById(`toast-${0}`)?.offsetHeight}px;`;
-      // const startingPosition = Math.abs(currentToastHeight - firstToastHeight)
-      // const startingPosition = Math.abs(currentToastHeight - prevToastHeight)
+      const toastHeight = index === 0 ? '' : `height:${document.getElementById(`toast-${0}`)?.offsetHeight}px;`;
       style = `
-        position: absolute;
-        z-index: ${visibleToastMessages.value.length - index};
-        ${height}
-        width: ${100 - index * 4}%;
         bottom: ${index === 0 ? 0 : 8 * index}px;
+        ${toastHeight}
         opacity: ${isVisible ? 1 - index * 0.1 : 0};
+        position: absolute;
+        width: ${100 - index * 4}%;
+        z-index: ${visibleToastMessages.value.length - index};
       `;
     }
     notificationComputedStyles.value[index] = style;
@@ -173,25 +159,16 @@ function toastComputedStyle(): void {
 function clearAllNotifications() {
   emit('onUpdate', []);
   isStacked.value = true;
-  nextTick(() => {
-    toastComputedStyle();
-  });
 }
 
 function expandNotifications() {
-  nextTick(() => {
-    toastComputedStyle();
-  });
   if (!isStacked.value || toastMessages.value.length === 1) return;
   isStacked.value = false;
 }
 
-// function dismissNotification(id) {
-//   toastComputedStyle()
-
-//   notificationEls.value = [];
-//   emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
-// }
+function dismissNotification(id) {
+  emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
+}
 
 function onInactivity() {
   isHovering.value = false;
@@ -204,7 +181,7 @@ function onInactivity() {
   // }, 4000)
 
   // hoverTimeout.value = setTimeout(() =>  {
-  //   clearAllNotifications()
+  //   // clearAllNotifications()
   // }, 5000)
 }
 
@@ -218,41 +195,45 @@ function onActivity() {
   clearTimeout(stackingTimeout.value);
 }
 
+function updateToastPositions() {
+  nextTick(() => {
+    toastComputedStyle();
+  });
+  setTimeout(() => {
+    toastComputedStyle();
+  }, 200);
+  setTimeout(() => {
+    toastComputedStyle();
+  }, 400);
+}
+
 watch(
   () => isStacked.value,
   () => {
-    nextTick(() => {
-      toastComputedStyle();
-    });
+    updateToastPositions();
   },
 );
-
 watch(
   () => visibleToastMessages.value,
   () => {
-    nextTick(() => {
-      toastComputedStyle();
-    });
+    updateToastPositions();
   },
 );
 
 onMounted(() => {
-  nextTick(() => {
-    toastComputedStyle();
-  });
+  updateToastPositions();
 });
 
-// onClickOutside(clickableAreaRef, () => {
-//   isStacked.value = true
-//   toastComputedStyle()
-//   });
+onClickOutside(clickableAreaRef, () => {
+  isStacked.value = true;
+});
 </script>
 
 <style lang="postcss">
 .toast-message {
   @apply flex absolute px-4 py-3 flex justify-between bg-black;
   border-radius: 0.5rem;
-  transition: all 0.5s ease-out;
+  transition: all 0.3s ease-out;
   width: 100%;
   left: 0;
   right: 0;
@@ -295,7 +276,7 @@ onMounted(() => {
 /* transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s;
+  transition: opacity 0.5s ease-out;
 }
 .fade-enter,
 .fade-leave-to {
@@ -303,7 +284,7 @@ onMounted(() => {
 }
 .fade-hover-enter-active,
 .fade-hover-leave-active {
-  transition: opacity 0.5s;
+  transition: opacity 0.5s ease-out;
   opacity: 1;
 }
 .fade-hover-enter,
