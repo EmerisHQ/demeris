@@ -24,13 +24,8 @@
               v-for="({ message, id }, toastIndex) in visibleToastMessages"
               :id="`toast-${toastIndex}`"
               :key="`message-${id}`"
-              :ref="
-                (el) => {
-                  notificationEls[toastIndex] = el;
-                }
-              "
               class="toast-message"
-              :style="toastComputedStyle(toastIndex)"
+              :style="notificationComputedStyles[toastIndex]"
               data-test="toast-message"
               @click="expandNotifications()"
             >
@@ -82,7 +77,7 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, nextTick, ref, toRef, watch, withDefaults } from 'vue';
+import { computed, nextTick, onMounted, ref, toRef, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -122,7 +117,8 @@ const stackingTimeout = ref(null);
 const isHovering = ref(null);
 const clickableAreaRef = ref(null);
 const toastMessages = ref(messages);
-const notificationEls = ref([]);
+// const notificationEls = ref([]);
+const notificationComputedStyles = ref([]);
 
 const totalStackedToasts = 3;
 
@@ -130,55 +126,72 @@ const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() 
 // const toastEls = computed(() => notificationEls.value.filter(el => el));
 
 function divHeight(index) {
+  1;
   return document.getElementById(`toast-${index}`)?.offsetHeight;
 }
 
-function toastComputedStyle(index: number): string {
-  let heightPreviousToasts = 0;
-  for (let i = 0; i < index; i++) {
-    const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight;
-    if (elHeight && index !== 0) heightPreviousToasts += elHeight + 5;
-  }
-  const dismissControls = 30;
-  const currentToastHeight = document.getElementById(`toast-${index}`)?.offsetHeight;
-  // const prevToastHeight = index === 0 ? 0 : toastEls.value[index-1]?.offsetHeight
+function toastComputedStyle(): void {
+  visibleToastMessages.value.forEach((m, index) => {
+    let style = '';
 
-  if (!isStacked.value) {
-    return `
+    let heightPreviousToasts = 0;
+    for (let i = 0; i < index; i++) {
+      const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight;
+      if (elHeight && index !== 0) heightPreviousToasts += elHeight + 5;
+    }
+    const dismissControlsHeight = visibleToastMessages.value.length > 1 ? 30 : 0;
+    // const currentToastHeight = document.getElementById(`toast-${index}`)?.offsetHeight;
+    // const prevToastHeight = index === 0 ? 0 : toastEls.value[index-1]?.offsetHeight
+
+    if (!isStacked.value) {
+      style = `
         position: absolute;
         width: 100%;
         opacity: 1;
-        bottom: ${dismissControls + heightPreviousToasts}px;
+        bottom: ${dismissControlsHeight + heightPreviousToasts}px;
         z-index: ${visibleToastMessages.value.length - index};
       `;
-  }
-  const isVisible = index < totalStackedToasts;
-  const firstToastHeight = document.getElementById(`toast-${0}`)?.offsetHeight;
-  // const startingPosition = Math.abs(currentToastHeight - firstToastHeight)
-  // const startingPosition = Math.abs(currentToastHeight - prevToastHeight)
-  return `
-      position: absolute;
-      z-index: ${visibleToastMessages.value.length - index};
-      width: ${100 - index * 4}%;
-      bottom: ${index === 0 ? 0 : 8 * index}px;
-      opacity: ${isVisible ? 1 - index * 0.1 : 0};
-    `;
+    } else {
+      const isVisible = index < totalStackedToasts;
+      // const firstToastHeight = document.getElementById(`toast-${0}`)?.offsetHeight
+      const height = index === 0 ? '' : `height:${document.getElementById(`toast-${0}`)?.offsetHeight}px;`;
+      // const startingPosition = Math.abs(currentToastHeight - firstToastHeight)
+      // const startingPosition = Math.abs(currentToastHeight - prevToastHeight)
+      style = `
+        position: absolute;
+        z-index: ${visibleToastMessages.value.length - index};
+        ${height}
+        width: ${100 - index * 4}%;
+        bottom: ${index === 0 ? 0 : 8 * index}px;
+        opacity: ${isVisible ? 1 - index * 0.1 : 0};
+      `;
+    }
+    notificationComputedStyles.value[index] = style;
+  });
 }
 
 function clearAllNotifications() {
   emit('onUpdate', []);
   isStacked.value = true;
+  nextTick(() => {
+    toastComputedStyle();
+  });
 }
 
 function expandNotifications() {
+  nextTick(() => {
+    toastComputedStyle();
+  });
   if (!isStacked.value || toastMessages.value.length === 1) return;
   isStacked.value = false;
 }
 
-function dismissNotification(id) {
-  notificationEls.value = [];
-  emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
-}
+// function dismissNotification(id) {
+//   toastComputedStyle()
+
+//   notificationEls.value = [];
+//   emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
+// }
 
 function onInactivity() {
   isHovering.value = false;
@@ -206,26 +219,33 @@ function onActivity() {
 }
 
 watch(
-  () => props,
-  (oldVal, newVal) => {
-    console.log('props.messages changed', oldVal, newVal);
+  () => isStacked.value,
+  () => {
+    nextTick(() => {
+      toastComputedStyle();
+    });
   },
 );
 
 watch(
   () => visibleToastMessages.value,
-  (oldVal, newVal) => {
-    console.log('visibleToastMessages changed', oldVal, newVal);
-    toastMessages.value.forEach((e, i) => {
-      console.log(`toast-${i}`, document.getElementById(`toast-${i}`)?.offsetHeight);
-      nextTick(() => {
-        console.log(`toast-${i}`, document.getElementById(`toast-${i}`)?.offsetHeight);
-      });
+  () => {
+    nextTick(() => {
+      toastComputedStyle();
     });
   },
 );
 
-onClickOutside(clickableAreaRef, () => (isStacked.value = true));
+onMounted(() => {
+  nextTick(() => {
+    toastComputedStyle();
+  });
+});
+
+// onClickOutside(clickableAreaRef, () => {
+//   isStacked.value = true
+//   toastComputedStyle()
+//   });
 </script>
 
 <style lang="postcss">
