@@ -339,22 +339,21 @@ export default defineComponent({
 .validators-table {
   width: calc(100% + 3rem);
 
-  td,
-  th {
-    &:first-child {
-      padding-left: 1.5rem;
-    }
+  th:first-child {
+    padding-left: 1rem;
+  }
 
-    &:last-child {
-      padding-right: 1.5rem;
-    }
+  th:last-child {
+    padding-right: 1rem;
   }
 
   td:first-child {
+    padding-left: 1.5rem;
     @apply rounded-l-xl;
   }
 
   td:last-child {
+    padding-right: 1.5rem;
     @apply rounded-r-xl;
   }
 }
