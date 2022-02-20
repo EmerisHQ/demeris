@@ -13,12 +13,18 @@
         class="z-40 absolute w-full root"
         :class="{ 'root-unstacked': !isStacked }"
       >
-        <div>
-          <TransitionGroup
-            name="list"
-            tag="div"
-            class="messages-viewport"
-            :class="{ 'messages-viewport-unstacked': !isStacked }"
+        <TransitionGroup
+          id="viewportRef"
+          ref="viewportRef"
+          name="list"
+          tag="div"
+          class="messages-viewport w-full"
+          :class="{ 'messages-viewport-unstacked': !isStacked }"
+        >
+          <div
+            key="aaa"
+            :style="`height:${isStacked ? 'auto' : viewportHeight + 'px'};`"
+            class="w-full absolute w-full"
           >
             <div
               v-for="({ message, id }, toastIndex) in visibleToastMessages"
@@ -58,18 +64,14 @@
                 </div>
               </div>
             </div>
-          </TransitionGroup>
-          <Transition name="fade">
-            <div
-              v-show="!isStacked && visibleToastMessages.length > 1"
-              key="button-group"
-              class="mt-1 absolute bottom-0"
-            >
-              <button class="button-xs" @click="isStacked = true">Show less</button>
-              <button class="button-xs ml-1" @click="clearAllNotifications()">Clear All</button>
-            </div>
-          </Transition>
-        </div>
+          </div>
+        </TransitionGroup>
+      </div>
+    </Transition>
+    <Transition name="fade">
+      <div v-show="!isStacked && visibleToastMessages.length > 1" key="button-group" class="mt-1 absolute bottom-0">
+        <button class="button-xs" @click="isStacked = true">Show less</button>
+        <button class="button-xs ml-1" @click="clearAllNotifications()">Clear All</button>
       </div>
     </Transition>
   </div>
@@ -111,11 +113,13 @@ const emit = defineEmits<{
   (e: 'onUpdate', messages: NotificationMessage[]);
 }>();
 
-const isStacked = ref(false);
+const isStacked = ref(true);
 const hoverTimeout = ref(null);
+const viewportHeight = ref(0);
 const stackingTimeout = ref(null);
 const isHovering = ref(null);
 const clickableAreaRef = ref(null);
+const viewportRef = ref(null);
 const toastMessages = ref(messages);
 const notificationComputedStyles = ref([]);
 
@@ -124,14 +128,16 @@ const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() 
 const totalStackedToasts = 3;
 
 function toastComputedStyle(): void {
+  // const dismissControlsHeight = visibleToastMessages.value.length > 1 ? 30 : 0;
+  const dismissControlsHeight = 0;
+  const toastSpacer = 5;
   visibleToastMessages.value.forEach((m, index) => {
     let style = '';
     let heightPreviousToasts = 0;
     for (let i = 0; i < index; i++) {
       const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight;
-      if (elHeight && index !== 0) heightPreviousToasts += elHeight + 5;
+      if (elHeight && index !== 0) heightPreviousToasts += elHeight + toastSpacer;
     }
-    const dismissControlsHeight = visibleToastMessages.value.length > 1 ? 30 : 0;
     if (!isStacked.value) {
       style = `
         bottom: ${dismissControlsHeight + heightPreviousToasts}px;
@@ -152,6 +158,11 @@ function toastComputedStyle(): void {
         z-index: ${visibleToastMessages.value.length - index};
       `;
     }
+    let totalHeight = 0;
+    visibleToastMessages.value.forEach(
+      (vt, i) => (totalHeight += document.getElementById(`toast-${i}`)?.offsetHeight + toastSpacer),
+    );
+    viewportHeight.value = totalHeight + dismissControlsHeight;
     notificationComputedStyles.value[index] = style;
   });
 }
@@ -163,6 +174,7 @@ function clearAllNotifications() {
 
 function expandNotifications() {
   if (!isStacked.value || toastMessages.value.length === 1) return;
+
   isStacked.value = false;
 }
 
@@ -197,11 +209,25 @@ function onActivity() {
 
 function updateToastPositions() {
   toastComputedStyle();
+  document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
 
   // Necessary to wait for elements to render correct height
   window.requestAnimationFrame(() => {
     toastComputedStyle();
+    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
   });
+  setTimeout(() => {
+    toastComputedStyle();
+    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+  }, 100);
+  setTimeout(() => {
+    toastComputedStyle();
+    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+  }, 200);
+  setTimeout(() => {
+    toastComputedStyle();
+    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+  }, 1000);
 }
 
 watch(
@@ -237,19 +263,19 @@ onMounted(() => {
   @apply px-2 py-1 opacity-60 bg-black bg-opacity-10 text-inverse -text-1 font-medium rounded-full focus:outline-none;
 }
 .root {
-  height: 150px;
-  transform: translateY(-150px);
+  /* height: 150px; */
+  /* transform: translateY(-150px); */
 }
 .root-unstacked {
-  height: 300px;
+  /* height: 300px; */
   transform: translateY(-300px);
 }
 .messages-viewport {
-  height: 150px;
+  /* height: 150px; */
   position: relative;
 }
 .messages-viewport-unstacked {
-  height: 300px;
+  height: 270px;
   overflow-y: scroll;
   position: relative;
 }
