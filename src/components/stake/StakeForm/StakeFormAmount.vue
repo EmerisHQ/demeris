@@ -118,7 +118,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { MultiDelegateForm, Step } from '@/types/actions';
+import { MultiStakeForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
@@ -149,7 +149,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
 
-    const form = inject<MultiDelegateForm>('stakeForm');
+    const form = inject<MultiStakeForm>('stakeForm');
     const { balances: userBalances, getNativeBalances } = useAccount();
 
     const state = reactive({

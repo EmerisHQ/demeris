@@ -45,7 +45,7 @@ import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { UndelegateAction, UndelegateForm } from '@/types/actions';
+import { UnstakeAction, UnstakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
@@ -98,7 +98,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: UndelegateForm = reactive({
+    const form: UnstakeForm = reactive({
       validatorAddress: propsRef.validator.value.operator_address,
       amount: '',
       denom: baseDenom,
@@ -128,7 +128,7 @@ export default defineComponent({
             chain_name: propsRef.validator.value.chain_name,
           },
         },
-      } as UndelegateAction;
+      } as UnstakeAction;
     });
     watch(form, async () => {
       if (

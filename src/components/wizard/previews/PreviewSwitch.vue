@@ -91,10 +91,10 @@ export default defineComponent({
     const propsRef = toRefs(props);
     const validators = ref([]);
     const tx = propsRef.step.value.transactions[0];
-    const baseDenom = (tx.data as Actions.RedelegateData).amount.denom;
-    const chainName = (tx.data as Actions.RedelegateData).chain_name;
+    const baseDenom = (tx.data as Actions.RestakeData).amount.denom;
+    const chainName = (tx.data as Actions.RestakeData).chain_name;
 
-    const totalStaked = (tx.data as Actions.RedelegateData).amount.amount;
+    const totalStaked = (tx.data as Actions.RestakeData).amount.amount;
 
     onMounted(async () => {
       validators.value = await getValidatorsByBaseDenom(baseDenom);
@@ -111,7 +111,7 @@ export default defineComponent({
     return {
       store,
       size,
-      tx: tx.data as Actions.RedelegateData,
+      tx: tx.data as Actions.RestakeData,
       getValidator,
       getValidatorMoniker,
       baseDenom,

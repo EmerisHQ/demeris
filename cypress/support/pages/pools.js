@@ -8,7 +8,7 @@ export class Pools {
 
   // ADD LIQUIDITY
   addLiquidityButton() {
-    return cy.get('span').contains('Add liquidity');
+    return cy.get('.add-liquidity').contains('Add liquidity');
   }
 
   addLiquidityClick() {

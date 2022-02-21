@@ -1247,7 +1247,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'unstake':
-        params = (action as Actions.UndelegateAction).params;
+        params = (action as Actions.UnstakeAction).params;
         steps.push({
           name: 'unstake',
           description: 'Unstake',
@@ -1266,10 +1266,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'switch':
-        params = (action as Actions.RedelegateAction).params;
+        params = (action as Actions.RestakeAction).params;
         steps.push({
           name: 'switch',
-          description: 'Redelegate',
+          description: 'Restake',
           memo: '',
           transactions: [
             {
@@ -1279,7 +1279,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
                 validatorSrcAddress: params.validatorSrcAddress,
                 validatorDstAddress: params.validatorDstAddress,
                 amount: {
-                  amount: (params as Actions.RedelegateParams).amount.amount.amount,
+                  amount: (params as Actions.RestakeParams).amount.amount.amount,
                   denom: params.amount.amount.denom,
                 },
                 chain_name: params.amount.chain_name,
@@ -1289,7 +1289,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'stake':
-        params = (action as Actions.DelegateAction).params;
+        params = (action as Actions.StakeAction).params;
         const transferStakingCoinToNative = await move({
           amount: {
             amount: params.amount.amount.amount,
@@ -1319,7 +1319,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'multistake':
-        const mdparams = (action as Actions.MultiDelegateAction).params;
+        const mdparams = (action as Actions.MultiStakeAction).params;
         let allsteps: Actions.Step[] = [];
         for (let i = 0; i < mdparams.length; i++) {
           const mdsteps = await actionHandler({ name: 'stake', memo: action.memo, params: mdparams[i] });
@@ -1536,7 +1536,7 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'stake') {
-    const data = stepTx.data as Actions.DelegateData[];
+    const data = stepTx.data as Actions.StakeData[];
     const delegatorAddress = await getOwnAddress({ chain_name: data[0].chain_name });
     const msgs = await Promise.all(
       data.map(
@@ -1554,7 +1554,7 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data[0].chain_name, registry };
   }
   if (stepTx.name == 'unstake') {
-    const data = stepTx.data as Actions.UndelegateData;
+    const data = stepTx.data as Actions.UnstakeData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
     const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgUndelegate', {
       value: {
@@ -1567,7 +1567,7 @@ export async function msgFromStepTransaction(
     return { msg: [msg], chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'switch') {
-    const data = stepTx.data as Actions.RedelegateData;
+    const data = stepTx.data as Actions.RestakeData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
     const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgBeginRedelegate', {
       value: {
@@ -1909,17 +1909,17 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'stake') {
-    const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
+    const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'unstake') {
-    const chain_name = (stepTx.data as Actions.UndelegateData).chain_name;
+    const chain_name = (stepTx.data as Actions.UnstakeData).chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'switch') {
-    const chain_name = (stepTx.data as Actions.RedelegateData).chain_name;
+    const chain_name = (stepTx.data as Actions.RestakeData).chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
@@ -2285,7 +2285,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.name == 'stake') {
-        const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
+        const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
         if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -2668,7 +2668,7 @@ export async function validateStepFeeBalances(
       }
     }
     if (stepTx.name == 'stake') {
-      const data = stepTx.data as Actions.DelegateData;
+      const data = stepTx.data as Actions.StakeData;
 
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
@@ -3097,7 +3097,7 @@ export async function validateStepsFeeBalances(
         }
       }
       if (stepTx.name == 'stake') {
-        const data = stepTx.data as Actions.DelegateData[];
+        const data = stepTx.data as Actions.StakeData[];
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];

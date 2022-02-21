@@ -47,7 +47,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { Step, UndelegateAction } from '@/types/actions';
+import { Step, UnstakeAction } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -111,7 +111,7 @@ export default defineComponent({
             chain_name: propsRef.validator.value.chain_name,
           },
         },
-      } as UndelegateAction;
+      } as UnstakeAction;
     });
     watch(
       () => action.value,
