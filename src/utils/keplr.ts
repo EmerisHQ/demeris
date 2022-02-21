@@ -28,8 +28,8 @@ export async function addChain(chain_name: string): Promise<void> {
     rpc = 'https://mainnet-node.like.co/rpc';
     rest = 'https://mainnet-node.like.co';
   } else {
-    rpc = chain.public_node_endpoints.tendermint_rpc[0];
-    rest = chain.public_node_endpoints.cosmos_api[0];
+    rpc = 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
+    rest = 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
   }
   await window.keplr.experimentalSuggestChain({
     chainId: chain.node_info.chain_id,
