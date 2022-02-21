@@ -16,22 +16,8 @@
       <StakeFormAmount :validators="validators" :steps="steps" @next="goToReview" @selectanother="selectAnother" />
     </template>
 
-    <template v-else-if="['review', 'stake'].includes(step)">
+    <template v-else-if="['review', 'stake', 'staked'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <template #deactivated>
-          <TxStepsModal
-            v-if="steps.length"
-            :data="steps"
-            :gas-price-level="gasPrice"
-            :back-route="{ name: 'Portfolio' }"
-            action-name="stake"
-            @transacting="goToStep('delegate')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-            @finish="resetHandler"
-          />
-        </template>
-
         <TransactionProcessCreator
           v-if="steps.length"
           :steps="steps"
@@ -39,6 +25,7 @@
           @pending="closeModal"
           @close="closeModal"
           @previous="$emit('previous')"
+          @success="goToStaked"
         />
       </FeatureRunningConditional>
     </template>
@@ -51,7 +38,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import StakeFormAmount from '@/components/stake/StakeForm/StakeFormAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -61,14 +47,13 @@ import { DelegateForm, MultiDelegateAction, MultiDelegateForm } from '@/types/ac
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'delegate';
+type Step = 'validator' | 'amount' | 'review' | 'staked';
 
 export default defineComponent({
   name: 'StakeForm',
 
   components: {
     TransactionProcessCreator,
-    TxStepsModal,
     FeatureRunningConditional,
     ValidatorsTable,
     StakeFormAmount,
@@ -171,6 +156,9 @@ export default defineComponent({
       event('review_tx', { event_label: 'Reviewing stake tx', event_category: 'transactions' });
       goToStep('review');
     };
+    const goToStaked = async () => {
+      goToStep('staked');
+    };
     const selectAnother = (e) => {
       valToEdit.value = e;
       goToStep('validator');
@@ -223,6 +211,7 @@ export default defineComponent({
       gasPrice,
       steps,
       goToReview,
+      goToStaked,
       form,
       goToStep,
       resetHandler,

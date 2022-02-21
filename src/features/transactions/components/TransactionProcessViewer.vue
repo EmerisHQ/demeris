@@ -8,10 +8,10 @@
       class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
-    <ViewStateReview v-else-if="state.matches('review')" />
+    <ViewStateReview v-else-if="shouldShowReview" />
     <ViewStateSigning v-else-if="state.matches('signing')" />
     <ViewStateTransacting v-else-if="state.matches('transacting')" />
-    <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
+    <ViewStateReceipt v-else-if="shouldShowReceipt" />
     <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
 
     <template v-else-if="state.matches('failed.chainStatus')">
@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, provide } from 'vue';
+import { computed, provide, watch } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
@@ -64,7 +64,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close', 'minimize', 'previous']);
+const emits = defineEmits(['close', 'minimize', 'previous', 'success']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -88,6 +88,16 @@ const minimizeModal = () => {
   }
 };
 
+const shouldShowReceipt = computed(() => {
+  const isTxReady = state.value.matches('receipt') || state.value.matches('success');
+  if (isTxReady) {
+    emits('success');
+  }
+  return isTxReady;
+});
+
+const shouldShowReview = computed(() => state.value.matches('review'));
+
 const closeModal = () => emits('close');
 const goBack = () => emits('previous');
 
@@ -102,5 +112,7 @@ provide(ProvideViewerKey, {
   removeTransactionAndClose,
   isSwapComponent,
   stepId: props.stepId,
+  shouldShowReceipt,
+  shouldShowReview,
 });
 </script>

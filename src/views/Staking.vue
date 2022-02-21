@@ -179,7 +179,7 @@ export default defineComponent({
     });
     const steps = ref<Step[]>([]);
     const allSteps = {
-      stake: ['validator', 'amount', 'review', 'delegate'],
+      stake: ['validator', 'amount', 'review', 'staked'],
       unstake: ['amount', 'review', 'undelegate'],
       switch: ['validator', 'amount', 'review', 'redelegate'],
       claim: ['review', 'claim'],
