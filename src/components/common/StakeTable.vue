@@ -301,7 +301,6 @@ export default defineComponent({
       return moniker;
     };
     const getValidatorData = (address: string): any => {
-      console.log(address);
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
           return vali;
