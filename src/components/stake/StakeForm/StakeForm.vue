@@ -25,7 +25,7 @@
           @pending="closeModal"
           @close="closeModal"
           @previous="$emit('previous')"
-          @success="goToStaked"
+          @onReceiptState="goToStaked"
         />
       </FeatureRunningConditional>
     </template>

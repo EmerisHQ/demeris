@@ -64,7 +64,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close', 'minimize', 'previous', 'success']);
+const emits = defineEmits(['close', 'minimize', 'previous', 'onReceiptState']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -92,7 +92,7 @@ watch(
   () => state.value,
   (newState) => {
     if (newState.matches('receipt') || newState.matches('success')) {
-      emits('success');
+      emits('onReceiptState');
     }
   },
 );
@@ -118,11 +118,5 @@ provide(ProvideViewerKey, {
   removeTransactionAndClose,
   isSwapComponent,
   stepId: props.stepId,
-  showTransferInterstitialConfirmationState,
-  showReviewState,
-  showSigningState,
-  showTransactingState,
-  showWaitingPreviousTransactionState,
-  showReceiptState,
 });
 </script>
