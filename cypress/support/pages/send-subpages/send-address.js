@@ -75,8 +75,14 @@ export class SendToAddressSubpage {
   }
 
   confirnAndContinueButton() {
-    return cy.get('span').contains('Confirm and continue').parent().get('button');
+    return cy.get('span').contains('Confirm and continue').parent();
   }
 
   //#endregion REVIEW step
+
+  //#region TRANSFER step
+  signTransactionPlaceholder() {
+    return cy.get('div').contains('Sign transaction');
+  }
+  //#endregion TRANSFER step
 }

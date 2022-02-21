@@ -42,7 +42,7 @@ describe('Check availability of send/address subpage elements', function () {
 
     sendToAddresseSubpage.amountHeader().should('be.visible');
     sendToAddresseSubpage.continueButton().should('be.disabled');
-    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.inputAmountOfAssets().type('0.1');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
     sendToAddresseSubpage.continueButton().click();
@@ -56,6 +56,16 @@ describe('Check availability of send/address subpage elements', function () {
 
     sendToAddresseSubpage.reviewHeader().should('be.visible');
     sendToAddresseSubpage.confirnAndContinueButton().should('not.be.disabled');
+  });
+
+  it('transfering Atom', function () {
+    recipientFormGoThrough();
+    amountFormGoThrough();
+
+    let sendToAddresseSubpage = new SendToAddressSubpage();
+
+    sendToAddresseSubpage.confirnAndContinueButton().click();
+    sendToAddresseSubpage.signTransactionPlaceholder().should('be.visible');
   });
 
   function recipientFormGoThrough() {
@@ -75,7 +85,7 @@ describe('Check availability of send/address subpage elements', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
     sendToAddresseSubpage.amountHeader().should('be.visible');
     sendToAddresseSubpage.continueButton().should('be.disabled');
-    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.inputAmountOfAssets().type('0.1');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
     sendToAddresseSubpage.continueButton().click();
