@@ -12,7 +12,7 @@
           <Icon name="ArrowLeftIcon" :icon-size="1.5" />
         </Button>
 
-        <nav v-if="actionType" class="flex-1 flex items-center justify-center space-x-12">
+        <nav v-if="showNavigation" class="flex-1 flex items-center justify-center space-x-12">
           <span
             v-for="label of allSteps[actionType]"
             :key="label"
@@ -168,6 +168,9 @@ export default defineComponent({
       }
     });
     const showBackButton = computed(() => {
+      if (step.value === 'staked') {
+        return false;
+      }
       return currentStepIndex.value > 0 && !!actionType;
     });
     const isBackDisabled = computed(() => {
@@ -235,6 +238,13 @@ export default defineComponent({
       hasPrevPath ? router.back() : router.push('/');
     };
 
+    const showNavigation = computed(() => {
+      if (step.value === 'staked') {
+        return false;
+      }
+      return actionType;
+    });
+
     return {
       balances,
       actionType,
@@ -257,6 +267,7 @@ export default defineComponent({
       unstakeAmount,
       fromValidator,
       toValidator,
+      showNavigation,
     };
   },
 });
