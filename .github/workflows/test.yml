@@ -104,8 +104,8 @@ jobs:
         with:
           name: dist
           path: ${{ github.workspace }}/dist
-  
-      - name: Set env variables
+
+      - name: Set env config
         id: vars
         if: ${{ matrix.env_file }}
         run: |
@@ -113,12 +113,12 @@ jobs:
           ENV_CLI_PARAMS=$(cat "${{ github.workspace }}/${{ matrix.env_file }}" | tr '\n' ',')
           BASE_URL="http://localhost:8080?${ENV_URL_PARAMS}"
           echo ::set-output name=env-args::"${ENV_CLI_PARAMS}" 
-          echo ::set-output name=base-url::"${BASE_URL}"
+          echo ::set-output name=cy-config::"baseUrl=${BASE_URL}"
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{ steps.vars.outputs.base-url }}
+          config: ${{ steps.vars.outputs.cy-config  }}
           env: ${{ steps.vars.outputs.env-args }}
           start: serve -s dist -l 8080
           wait-on: 'http://localhost:8080'
