@@ -70,7 +70,6 @@ export default defineComponent({
       },
     );
     onMounted(async () => {
-      console.log(validator.value);
       if (validator.value) {
         try {
           const kb = await axios.get(
