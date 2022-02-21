@@ -20,7 +20,7 @@
       />
     </template>
 
-    <template v-else-if="['review', 'redelegate'].includes(step)">
+    <template v-else-if="['review', 'restake'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
         <template #deactivated>
           <TxStepsModal
@@ -29,7 +29,7 @@
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
             action-name="switch"
-            @transacting="goToStep('redelegate')"
+            @transacting="goToStep('restake')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -60,11 +60,11 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { RedelegateAction, RedelegateForm } from '@/types/actions';
+import { RestakeAction, RestakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'redelegate';
+type Step = 'validator' | 'amount' | 'review' | 'restake';
 
 export default defineComponent({
   name: 'SwitchForm',
@@ -114,7 +114,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: RedelegateForm = reactive({
+    const form: RestakeForm = reactive({
       validatorAddress: propsRef.preselected.value,
       toValidatorAddress: '',
       amount: '',
@@ -141,9 +141,9 @@ export default defineComponent({
             chain_name: form.chain_name,
           },
         },
-      } as RedelegateAction;
+      } as RestakeAction;
     });
-    const isValid = (form: RedelegateForm) => {
+    const isValid = (form: RestakeForm) => {
       return (
         form.validatorAddress !== '' &&
         form.toValidatorAddress !== '' &&

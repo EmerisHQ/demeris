@@ -96,11 +96,11 @@ export default defineComponent({
     const propsRef = toRefs(props);
     const validators = ref([]);
     const tx = propsRef.step.value.transactions[0];
-    const baseDenom = (tx.data as Actions.UndelegateData).amount.denom;
-    const chainName = (tx.data as Actions.UndelegateData).chain_name;
+    const baseDenom = (tx.data as Actions.UnstakeData).amount.denom;
+    const chainName = (tx.data as Actions.UnstakeData).chain_name;
 
     const stakingRewardsData = ref(null);
-    const unStaked = (tx.data as Actions.UndelegateData).amount.amount;
+    const unStaked = (tx.data as Actions.UnstakeData).amount.amount;
 
     onMounted(async () => {
       try {
@@ -110,13 +110,13 @@ export default defineComponent({
     });
 
     const validator = computed(() => {
-      return validators.value.find((x) => x.operator_address == (tx.data as Actions.UndelegateData).validatorAddress);
+      return validators.value.find((x) => x.operator_address == (tx.data as Actions.UnstakeData).validatorAddress);
     });
     const stakingRewards = computed(() => {
       if (stakingRewardsData.value !== null) {
         return parseFloat(
           stakingRewardsData.value.rewards.find(
-            (x) => x.validator_address == (tx.data as Actions.UndelegateData).validatorAddress,
+            (x) => x.validator_address == (tx.data as Actions.UnstakeData).validatorAddress,
           )?.reward ?? '0',
         ).toString();
       } else {
@@ -131,7 +131,7 @@ export default defineComponent({
     return {
       store,
       size,
-      tx: tx.data as Actions.UndelegateData,
+      tx: tx.data as Actions.UnstakeData,
       availableAt,
 
       baseDenom,
