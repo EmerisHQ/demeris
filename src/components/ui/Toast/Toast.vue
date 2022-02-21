@@ -3,72 +3,69 @@
     id="toast-messages"
     ref="clickableAreaRef"
     class="relative w-full m-0 p-0"
-    @mouseleave="onInactivity()"
-    @mouseover="onActivity()"
+    @mouseleave="isMouseOverComponent = false"
+    @mousemove="isMouseOverComponent = true"
   >
-    <Transition name="fade">
+    <Transition name="fade" appear>
       <div
         v-if="visibleToastMessages.length > 0"
         data-test="messages-container"
         class="z-40 absolute w-full root"
-        :class="{ 'root-unstacked': !isStacked }"
+        :class="{ 'root-unstacked': !isStacked, 'opacity-0': visibleToastMessages.length === 0 }"
       >
-        <TransitionGroup
+        <div
           id="viewportRef"
           ref="viewportRef"
           name="list"
-          tag="div"
-          class="messages-viewport w-full"
+          class="messages-viewport w-full flex flex-col-reverse"
           :class="{ 'messages-viewport-unstacked': !isStacked }"
         >
-          <div
-            key="aaa"
-            :style="`height:${isStacked ? 'auto' : viewportHeight + 'px'};`"
-            class="w-full absolute w-full"
-          >
-            <div
-              v-for="({ message, id }, toastIndex) in visibleToastMessages"
-              :id="`toast-${toastIndex}`"
-              :key="`message-${id}`"
-              class="toast-message"
-              :style="notificationComputedStyles[toastIndex]"
-              data-test="toast-message"
-              @click="expandNotifications()"
-            >
-              <Transition name="fade-hover">
-                <button
-                  v-if="showClearButton(toastIndex)"
-                  class="dismiss-button"
-                  data-test="dismiss-toast"
-                  @click="clearAllNotifications()"
-                >
-                  <Icon v-if="visibleToastMessages.length === 1" name="CloseIcon" :icon-size="0.563" />
-                  <span v-else>Clear All</span>
-                </button>
-              </Transition>
-              <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex">
-                <div class="theme-inverse text-text">{{ toastIndex }}-{{ message }}</div>
-                <div class="flex inline-block align-middle">
-                  <Button
-                    :name="buttonLabel2"
-                    class="text-quaternary ml-3"
-                    variant="link"
-                    @click="emit('onButton2Click', id)"
-                  />
-                  <Button
-                    :name="buttonLabel1"
-                    class="text-quaternary ml-3"
-                    variant="link"
-                    @click="emit('onButton1Click', id)"
-                  />
+          <div :style="`height:${isStacked ? 'auto' : viewportHeight + 'px'};`" class="w-full absolute">
+            <TransitionGroup name="list" tag="div" appear>
+              <div
+                v-for="({ message, id }, toastIndex) in visibleToastMessages"
+                :id="`toast-${toastIndex}`"
+                :key="`message-${id}`"
+                class="toast-message"
+                :style="notificationComputedStyles[toastIndex]"
+                data-test="toast-message"
+                @click="expandNotifications()"
+              >
+                <Transition name="fade-hover">
+                  <button
+                    v-if="showClearButton(toastIndex)"
+                    class="dismiss-button"
+                    data-test="dismiss-toast"
+                    @click="clearAllNotifications()"
+                  >
+                    <Icon v-if="visibleToastMessages.length === 1" name="CloseIcon" :icon-size="0.563" />
+                    <span v-else>Clear All</span>
+                  </button>
+                </Transition>
+                <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex flex-grow">
+                  <div class="flex-1 theme-inverse text-text">{{ message }}</div>
+                  <div class="flex items-center">
+                    <Button
+                      :name="buttonLabel2"
+                      class="text-quaternary ml-3"
+                      variant="link"
+                      @click="emit('onButton2Click', id)"
+                    />
+                    <Button
+                      :name="buttonLabel1"
+                      class="text-quaternary ml-3"
+                      variant="link"
+                      @click="emit('onButton1Click', id)"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </TransitionGroup>
           </div>
-        </TransitionGroup>
+        </div>
       </div>
     </Transition>
-    <Transition name="fade">
+    <Transition name="fade-controls">
       <div v-show="!isStacked && visibleToastMessages.length > 1" key="button-group" class="mt-1 absolute bottom-0">
         <button class="button-xs" @click="isStacked = true">Show less</button>
         <button class="button-xs ml-1" @click="clearAllNotifications()">Clear All</button>
@@ -79,7 +76,7 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, onMounted, ref, toRef, watch, withDefaults } from 'vue';
+import { computed, onMounted, onUnmounted, ref, toRef, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -114,33 +111,33 @@ const emit = defineEmits<{
 }>();
 
 const isStacked = ref(true);
-const hoverTimeout = ref(null);
 const viewportHeight = ref(0);
-const stackingTimeout = ref(null);
-const isHovering = ref(null);
+const isMouseOverComponent = ref(null);
 const clickableAreaRef = ref(null);
 const viewportRef = ref(null);
 const toastMessages = ref(messages);
 const notificationComputedStyles = ref([]);
 
+const inactivityTimeout = ref(null);
+
 const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
 
 const totalStackedToasts = 3;
 
-function toastComputedStyle(): void {
-  // const dismissControlsHeight = visibleToastMessages.value.length > 1 ? 30 : 0;
-  const dismissControlsHeight = 0;
-  const toastSpacer = 5;
+function computeNotificationsStyle(): void {
+  if (visibleToastMessages.value.length === 0) return;
+
+  const notificationSpacerPx = 5;
   visibleToastMessages.value.forEach((m, index) => {
     let style = '';
     let heightPreviousToasts = 0;
     for (let i = 0; i < index; i++) {
-      const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight;
-      if (elHeight && index !== 0) heightPreviousToasts += elHeight + toastSpacer;
+      const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight || 0;
+      if (elHeight && index !== 0) heightPreviousToasts += elHeight + notificationSpacerPx;
     }
     if (!isStacked.value) {
       style = `
-        bottom: ${dismissControlsHeight + heightPreviousToasts}px;
+        bottom: ${heightPreviousToasts}px;
         opacity: 1;
         position: absolute;
         width: 100%;
@@ -148,7 +145,8 @@ function toastComputedStyle(): void {
       `;
     } else {
       const isVisible = index < totalStackedToasts;
-      const toastHeight = index === 0 ? '' : `height:${document.getElementById(`toast-${0}`)?.offsetHeight}px;`;
+      const firstToastHeight = document.getElementById('toast-0')?.offsetHeight || 0;
+      const toastHeight = index === 0 ? '' : `height:${firstToastHeight}px;`;
       style = `
         bottom: ${index === 0 ? 0 : 8 * index}px;
         ${toastHeight}
@@ -159,10 +157,11 @@ function toastComputedStyle(): void {
       `;
     }
     let totalHeight = 0;
-    visibleToastMessages.value.forEach(
-      (vt, i) => (totalHeight += document.getElementById(`toast-${i}`)?.offsetHeight + toastSpacer),
-    );
-    viewportHeight.value = totalHeight + dismissControlsHeight;
+    visibleToastMessages.value.forEach((vt, i) => {
+      const toastHeight = document.getElementById(`toast-${i}`)?.offsetHeight || 0;
+      if (toastHeight) totalHeight += toastHeight + notificationSpacerPx;
+    });
+    viewportHeight.value = totalHeight;
     notificationComputedStyles.value[index] = style;
   });
 }
@@ -180,60 +179,77 @@ function expandNotifications() {
 
 function dismissNotification(id) {
   emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
+  if (visibleToastMessages.value.length === 0) isStacked.value = false;
 }
 
-function onInactivity() {
-  isHovering.value = false;
-  clearTimeout(hoverTimeout.value);
-  clearTimeout(stackingTimeout.value);
+function onInactivityStart() {
+  if (isMouseOverComponent.value) return;
+  startDismissNotificationTimeout();
+}
 
-  // TODO: enable
-  // hoverTimeout.value = setTimeout(() =>  {
-  //   isStacked.value = true;
-  // }, 4000)
-
-  // hoverTimeout.value = setTimeout(() =>  {
-  //   // clearAllNotifications()
-  // }, 5000)
+function startDismissNotificationTimeout() {
+  clearTimeout(inactivityTimeout.value);
+  inactivityTimeout.value = setTimeout(() => {
+    const lastNotificationId = visibleToastMessages.value[visibleToastMessages.value.length - 1]?.id;
+    if (lastNotificationId >= 0) {
+      console.log('dismiss', lastNotificationId);
+      dismissNotification(lastNotificationId);
+    }
+    if (visibleToastMessages.value.length > 0) onInactivityStart();
+  }, 5000);
 }
 
 function showClearButton(index) {
-  return isHovering.value && isStacked.value && index === 0;
+  return isMouseOverComponent.value && isStacked.value && index === 0;
 }
 
 function onActivity() {
-  isHovering.value = true;
-  clearTimeout(hoverTimeout.value);
-  clearTimeout(stackingTimeout.value);
+  clearTimeout(inactivityTimeout.value);
 }
 
-function updateToastPositions() {
-  toastComputedStyle();
-  document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+function scrollNotificationsViewportToBottom() {
+  if (viewportRef.value) viewportRef.value.scrollTop = viewportRef.value.scrollHeight;
+}
 
-  // Necessary to wait for elements to render correct height
+function updateNotificationPositions() {
+  computeNotificationsStyle();
+  scrollNotificationsViewportToBottom();
+
+  // Necessary to wait for elements to render correct height as they repaint
   window.requestAnimationFrame(() => {
-    toastComputedStyle();
-    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+    computeNotificationsStyle();
+    scrollNotificationsViewportToBottom();
   });
   setTimeout(() => {
-    toastComputedStyle();
-    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+    computeNotificationsStyle();
+    scrollNotificationsViewportToBottom();
   }, 100);
   setTimeout(() => {
-    toastComputedStyle();
-    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+    computeNotificationsStyle();
+    scrollNotificationsViewportToBottom();
   }, 200);
   setTimeout(() => {
-    toastComputedStyle();
-    document.getElementById('viewportRef').scrollTop = document.getElementById('viewportRef').scrollHeight;
+    computeNotificationsStyle();
+    scrollNotificationsViewportToBottom();
   }, 1000);
 }
 
 watch(
   () => [isStacked.value, visibleToastMessages.value],
   () => {
-    updateToastPositions();
+    onInactivityStart();
+    updateNotificationPositions();
+    if (visibleToastMessages.value.length === 1) {
+      isStacked.value = true;
+    }
+  },
+);
+
+watch(
+  () => isMouseOverComponent.value,
+  () => {
+    onActivity();
+    onInactivityStart();
   },
 );
 
@@ -242,7 +258,12 @@ onClickOutside(clickableAreaRef, () => {
 });
 
 onMounted(() => {
-  updateToastPositions();
+  updateNotificationPositions();
+  onInactivityStart();
+});
+
+onUnmounted(() => {
+  clearTimeout(inactivityTimeout.value);
 });
 </script>
 
@@ -262,21 +283,16 @@ onMounted(() => {
 .button-xs {
   @apply px-2 py-1 opacity-60 bg-black bg-opacity-10 text-inverse -text-1 font-medium rounded-full focus:outline-none;
 }
-.root {
-  /* height: 150px; */
-  /* transform: translateY(-150px); */
-}
 .root-unstacked {
-  /* height: 300px; */
   transform: translateY(-300px);
 }
 .messages-viewport {
-  /* height: 150px; */
   position: relative;
 }
 .messages-viewport-unstacked {
   height: 270px;
-  overflow-y: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -286,6 +302,8 @@ onMounted(() => {
   position: absolute;
   background-color: #555555;
   left: -0.75rem;
+  min-height: 1.5rem;
+  min-width: 1.5rem;
   top: -0.5rem;
   z-index: 40;
 }
@@ -299,6 +317,19 @@ onMounted(() => {
 .fade-leave-to {
   opacity: 0;
 }
+
+.fade-controls-enter-active,
+.fade-controls-leave-active {
+  transition: opacity 0.5s ease-out;
+  transition: transform 0.5s ease-in-out;
+}
+.fade-controls-enter,
+.fade-controls-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+  height: 0;
+}
+
 .fade-hover-enter-active,
 .fade-hover-leave-active {
   transition: opacity 0.5s ease-out;
