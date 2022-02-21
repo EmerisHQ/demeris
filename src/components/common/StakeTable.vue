@@ -35,16 +35,7 @@
     <!-- Staking info banner -->
     <template v-if="!isStakingAssetExist">
       <div
-        class="
-          stake__banner
-          relative
-          border border-border
-          rounded-2xl
-          p-6
-          flex flex-col
-          justify-between
-          bg-right bg-no-repeat
-        "
+        class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
       >
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
@@ -103,7 +94,9 @@
               </td>
               <td class="text-right text-muted">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
               <td class="text-right font-medium">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" /></div>
+                <div class="flex justify-end">
+                  +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                </div>
               </td>
               <td class="text-right">
                 <Icon
@@ -308,7 +301,6 @@ export default defineComponent({
       return moniker;
     };
     const getValidatorData = (address: string): any => {
-      console.log(address);
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
           return vali;
@@ -322,10 +314,10 @@ export default defineComponent({
         case StakingActions.UNSTAKE:
         case StakingActions.SWITCH:
           router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
-          return
+          return;
         default:
           router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
-          return
+          return;
       }
     };
     /* watch */
