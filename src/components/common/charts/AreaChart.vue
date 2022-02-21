@@ -35,6 +35,7 @@ import minBy from 'lodash.minby';
 import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import useTheme from '@/composables/useTheme';
 import { TokenPrices } from '@/types/api';
 
 export default defineComponent({
@@ -84,6 +85,8 @@ export default defineComponent({
       },
     ]);
 
+    const theme = useTheme();
+
     const chartData = ref({
       options: {
         theme: {
@@ -92,6 +95,9 @@ export default defineComponent({
         tooltip: {
           enabled: true,
           x: {
+            show: true,
+          },
+          marker: {
             show: false,
           },
         },
@@ -113,6 +119,9 @@ export default defineComponent({
           labels: {
             show: false,
           },
+          tooltip: {
+            enabled: false,
+          },
           axisBorder: {
             show: false,
           },
@@ -129,8 +138,8 @@ export default defineComponent({
           gradient: {
             type: 'vertical',
             shade: 'light',
-            opacityFrom: 0.5,
-            opacityTo: 0.2,
+            opacityFrom: 0.6,
+            opacityTo: 0.1,
           },
         },
         yaxis: {
@@ -202,13 +211,13 @@ export default defineComponent({
           : 0;
 
         if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = '#00CF30';
-          chartData.value.options.fill.colors[0] = '#90EE90';
+          chartData.value.options.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
+          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
-          chartData.value.options.colors[0] = '#FF3D56';
-          chartData.value.options.fill.colors[0] = '#FF3D56';
+          chartData.value.options.colors[0] = '#ff1b44';
+          chartData.value.options.fill.colors[0] = '#ff1b44';
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
         }

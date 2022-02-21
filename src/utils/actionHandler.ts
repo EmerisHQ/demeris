@@ -1909,7 +1909,6 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'stake') {
-    console.log(stepTx);
     const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
@@ -3151,12 +3150,14 @@ export async function validateStepsFeeBalances(
             });
           }
         } else {
-          feeWarning.feeWarning = false;
-          feeWarning.missingFees.push({
-            amount: '' + fees[chain_name][denom],
-            chain_name: chain_name,
-            denom: denom,
-          });
+          if (fees[chain_name][denom] > 0) {
+            feeWarning.feeWarning = false;
+            feeWarning.missingFees.push({
+              amount: '' + fees[chain_name][denom],
+              chain_name: chain_name,
+              denom: denom,
+            });
+          }
         }
       }
     }

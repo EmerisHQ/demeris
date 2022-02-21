@@ -35,8 +35,14 @@ export default function useStaking() {
   };
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
-    const chain_name = getChainNameByBaseDenom(base_denom);
-    return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
+    try {
+      const chain_name = getChainNameByBaseDenom(base_denom);
+      return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
+    } catch (_e) {
+      // Apparently rewards endpoint errors out if staking rewards are zero
+      // or user is not staking so we catch and return an entry for no rewards
+      return { rewards: [], total: '0' + base_denom };
+    }
   };
 
   const getValidatorMoniker = (address: string, validator_list: any[]): string => {

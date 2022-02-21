@@ -1,6 +1,6 @@
 {
   "name": "emeris-web",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
@@ -115,5 +115,8 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged --allow-empty"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }

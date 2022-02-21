@@ -4,7 +4,7 @@
     <div
       v-if="showPriceDiff"
       class="-text-1 font-normal"
-      :class="priceDiffIndicator === 'gain' ? 'color-green' : 'color-red'"
+      :class="priceDiffIndicator === 'gain' ? 'text-positive-text' : 'text-negative-text'"
     >
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
@@ -124,12 +124,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.color-green {
-  color: #008223;
-}
-.color-red {
-  color: #d80228;
-}
-</style>
