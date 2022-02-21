@@ -35,38 +35,12 @@
             <div class="mt-8 pb-8 flex space-x-8">
               <router-link
                 :to="{ name: 'Send', params: { type: 'address' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
+                class="send__type flex-1 flex flex-col items-center justify-center p-8 bg-surface group dark:hover:text-inverse shadow-card hover:shadow-panel focus:shadow-panel active:opacity-70 transition rounded-2xl text-center overflow-hidden"
               >
                 <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.sendToAddress') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
+                    class="send__type__circle absolute z-0 inset-0 bg-brand rounded-full transition-transform duration-300"
                   ></span>
                   <Icon class="relative" name="SendIcon" :icon-size="1.5" />
                 </div>
@@ -77,38 +51,12 @@
 
               <router-link
                 :to="{ name: 'Send', params: { type: 'move' } }"
-                class="
-                  send__type
-                  flex-1 flex flex-col
-                  items-center
-                  justify-center
-                  p-8
-                  bg-surface
-                  group
-                  dark:hover:text-inverse
-                  shadow-card
-                  hover:shadow-panel
-                  focus:shadow-panel
-                  active:opacity-70
-                  transition
-                  rounded-2xl
-                  text-center
-                  overflow-hidden
-                "
+                class="send__type flex-1 flex flex-col items-center justify-center p-8 bg-surface group dark:hover:text-inverse shadow-card hover:shadow-panel focus:shadow-panel active:opacity-70 transition rounded-2xl text-center overflow-hidden"
               >
                 <h4 class="relative z-10 text-1 font-medium mb-8">{{ $t('components.send.moveAssets') }}</h4>
                 <div class="relative flex items-center justify-center h-16 w-16 dark:theme-inverse text-text">
                   <span
-                    class="
-                      send__type__circle
-                      absolute
-                      z-0
-                      inset-0
-                      bg-brand
-                      rounded-full
-                      transition-transform
-                      duration-300
-                    "
+                    class="send__type__circle absolute z-0 inset-0 bg-brand rounded-full transition-transform duration-300"
                   ></span>
                   <Icon class="relative" name="SwapLRIcon" :icon-size="1.5" />
                 </div>

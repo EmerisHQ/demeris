@@ -55,18 +55,7 @@
         :style="ringStyle"
       />
       <div
-        class="
-          circle-symbol__logo-container
-          w-full
-          h-full
-          rounded-full
-          flex
-          items-center
-          justify-center
-          relative
-          z-10
-          m-auto
-        "
+        class="circle-symbol__logo-container w-full h-full rounded-full flex items-center justify-center relative z-10 m-auto"
         :class="{ 'w-3/4 h-3/4': !isNativeChain }"
         :style="innerStyle"
       >

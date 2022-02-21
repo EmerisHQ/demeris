@@ -26,18 +26,7 @@
 
     <div class="fees-detail__selector flex items-center justify-stretch space-x-3">
       <button
-        class="
-          fees-detail__selector-block
-          w-full
-          h-auto
-          py-3
-          px-2
-          text-center
-          rounded-lg
-          border-none
-          outline-none
-          appearance-none
-        "
+        class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
           gasPriceLevel === GasPriceLevel.LOW
             ? 'bg-brand dark:theme-inverse text-text font-medium shadow-button'
@@ -51,18 +40,7 @@
         </div>
       </button>
       <button
-        class="
-          fees-detail__selector-block
-          w-full
-          h-auto
-          py-3
-          px-2
-          text-center
-          rounded-lg
-          border-none
-          outline-none
-          appearance-none
-        "
+        class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
           gasPriceLevel === GasPriceLevel.AVERAGE
             ? 'bg-brand dark:theme-inverse text-text font-medium'
@@ -76,18 +54,7 @@
         </div>
       </button>
       <button
-        class="
-          fees-detail__selector-block
-          w-full
-          h-auto
-          py-3
-          px-2
-          text-center
-          rounded-lg
-          border-none
-          outline-none
-          appearance-none
-        "
+        class="fees-detail__selector-block w-full h-auto py-3 px-2 text-center rounded-lg border-none outline-none appearance-none"
         :class="
           gasPriceLevel === GasPriceLevel.HIGH
             ? 'bg-brand dark:theme-inverse text-text font-medium'
@@ -392,7 +359,7 @@ export default defineComponent({
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-        maximumFractionDigits,
+        maximumFractionDigits: maximumFractionDigits <= 17 ? maximumFractionDigits : 17,
         // These options are needed to round to whole numbers if that's what you want.
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)

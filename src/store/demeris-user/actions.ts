@@ -1,3 +1,5 @@
+import { Secp256k1HdWallet } from '@cosmjs/amino';
+import { stringToPath } from '@cosmjs/crypto';
 import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import { ActionContext, ActionTree } from 'vuex';
@@ -5,8 +7,8 @@ import { ActionContext, ActionTree } from 'vuex';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { event } from '@/utils/analytics';
-import { keyHashfromAddress } from '@/utils/basic';
+import { config as analyticsConfig, event } from '@/utils/analytics';
+import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -134,14 +136,20 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
+      const isCypress = !!window['Cypress'];
       const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
+
       window.keplr.defaultOptions = {
         sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
       };
-      for (const chain in chains) {
-        await addChain(chain);
+
+      if (!isCypress) {
+        for (const chain in chains) {
+          await addChain(chain);
+        }
+
+        await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
       }
-      await window.keplr['enable']((Object.values(chains) as Array<ChainData>).map((x) => x.node_info.chain_id));
       const paths = new Set();
       const toQuery = [];
       for (const chain_name in chains) {
@@ -155,18 +163,59 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const dexchain = rootGetters[GlobalDemerisGetterTypes.API.getChain]({
         chain_name: rootGetters[GlobalDemerisGetterTypes.API.getDexChain],
       });
-      await window.keplr.enable(dexchain.node_info.chain_id);
-      const key = await window.keplr.getKey(dexchain.node_info.chain_id);
-      commit(DemerisMutationTypes.SET_KEPLR, key);
-      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: false });
-      for (const chain of toQuery) {
-        await window.keplr.enable(chain.node_info.chain_id);
-        const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
-        commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+      let keyData;
+      let signer;
+      if (!isCypress) {
+        await window.keplr.enable(dexchain.node_info.chain_id);
+        keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
+      } else {
+        signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+          prefix: dexchain.node_info.bech32_config.main_prefix,
+          hdPaths: [stringToPath(dexchain.derivation_path)],
+        });
+        const [account] = await signer.getAccounts();
+        keyData = {
+          name: 'Cypress Test',
+          algo: account.algo,
+          pubKey: account.pubkey,
+          bech32Address: account.address,
+          isNanoLedger: false,
+          address: fromHexString(keyHashfromAddress(account.address)),
+        };
       }
-      dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true });
+      commit(DemerisMutationTypes.SET_KEPLR, keyData);
+      event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
+      analyticsConfig({ user_id: toHexString(keyData.address) });
 
+      await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
+      for (const chain of toQuery) {
+        if (!isCypress) {
+          await window.keplr.enable(chain.node_info.chain_id);
+          const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
+          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        } else {
+          const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+            prefix: chain.node_info.bech32_config.main_prefix,
+            hdPaths: [stringToPath(chain.derivation_path)],
+          });
+          const [account] = await signer.getAccounts();
+          const otherKey = {
+            name: 'Cypress Test',
+            algo: account.algo,
+            pubKey: account.pubkey,
+            bech32Address: account.address,
+            isNanoLedger: false,
+            address: fromHexString(keyHashfromAddress(account.address)),
+          };
+          commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
+        }
+      }
+
+      !isCypress
+        ? dispatch('common/wallet/signIn', { keplr: await window.getOfflineSigner('cosmoshub-4') }, { root: true })
+        : dispatch('common/wallet/signIn', { keplr: signer }, { root: true });
+
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,
@@ -192,6 +241,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
+      dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(
         GlobalDemerisActionTypes.API.GET_ALL_STAKING_BALANCES,

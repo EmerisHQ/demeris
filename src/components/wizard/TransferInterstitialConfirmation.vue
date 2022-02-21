@@ -50,7 +50,7 @@ import Button from '@/components/ui/Button.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { TypedAPIStore } from '@/store';
-import { IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
+import { BaseAction, IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
 import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
 
 export default defineComponent({
@@ -63,7 +63,7 @@ export default defineComponent({
       default: false,
     },
     action: {
-      type: String as PropType<'swap' | 'addliquidity' | 'move' | 'transfer'>,
+      type: String as PropType<BaseAction['name']>,
       default: 'swap',
     },
     steps: {
@@ -79,6 +79,7 @@ export default defineComponent({
     const { nativeBalances } = useAccount();
     const { t } = useI18n({ useScope: 'global' });
     const denoms = ref([]);
+    const chains = ref([]);
 
     const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
 
@@ -109,6 +110,10 @@ export default defineComponent({
           break;
         case 'swap':
           result = t('components.transferToHub.swap');
+          break;
+        case 'stake':
+        case 'multistake':
+          result = t('components.transferToHub.stake', { denom: denoms.value[0], chain: chains.value[0] });
           break;
       }
 
@@ -156,6 +161,13 @@ export default defineComponent({
           break;
         case 'swap':
           description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
+          break;
+        case 'stake':
+        case 'multistake':
+          description = t('components.transferToHub.stakeDescription', {
+            denom: denoms.value[0],
+            chain: chains.value[0],
+          });
           break;
         case 'transfer':
           if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
@@ -210,18 +222,26 @@ export default defineComponent({
               return;
             }
             const chain = (transaction.data as IBCForwardsData).from_chain || dexChain;
+            const tochain = (transaction.data as IBCForwardsData).to_chain || dexChain;
+
             const denom = (transaction.data as TransferData).amount.denom;
-            return { chain, denom };
+            return { chain, denom, tochain };
           })
           .filter(Boolean);
 
-        denoms.value = await Promise.all(
-          stepDenoms.map(async (item) => {
-            const denom = await getBaseDenom(item.denom, item.chain);
-            const displayDenom = await getDisplayName(denom, item.chain);
-            return displayDenom;
-          }),
-        );
+        (chains.value = stepDenoms.map((item) => {
+          const displayChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
+            name: item.tochain,
+          });
+          return displayChain;
+        })),
+          (denoms.value = await Promise.all(
+            stepDenoms.map(async (item) => {
+              const denom = await getBaseDenom(item.denom, item.chain);
+              const displayDenom = await getDisplayName(denom, item.chain);
+              return displayDenom;
+            }),
+          ));
       },
       { immediate: true },
     );

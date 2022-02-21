@@ -15,27 +15,7 @@
 
       <router-link
         v-if="!isDemoAccount"
-        class="
-          text-0
-          font-medium
-          leading-5
-          h-12
-          px-4
-          ml-3
-          lg:ml-0
-          hidden
-          sm:flex
-          bg-fg
-          lg:bg-transparent
-          rounded-full
-          lg:rounded-none
-          items-center
-          justify-center
-          rounded-lg
-          group
-          active:opacity-70
-          transition
-        "
+        class="text-0 font-medium leading-5 h-12 px-4 ml-3 lg:ml-0 hidden sm:flex bg-fg lg:bg-transparent rounded-full lg:rounded-none items-center justify-center rounded-lg group active:opacity-70 transition"
         to="/receive"
       >
         <ReceiveIcon class="group-hover:text-secondary" />
@@ -44,54 +24,14 @@
       <a
         v-else
         href="javascript:void(0)"
-        class="
-          text-0
-          font-medium
-          leading-5
-          h-12
-          px-4
-          ml-3
-          lg:ml-0
-          hidden
-          sm:flex
-          bg-fg
-          lg:bg-transparent
-          rounded-full
-          lg:rounded-none
-          items-center
-          justify-center
-          rounded-lg
-          group
-          active:opacity-70
-          transition
-        "
+        class="text-0 font-medium leading-5 h-12 px-4 ml-3 lg:ml-0 hidden sm:flex bg-fg lg:bg-transparent rounded-full lg:rounded-none items-center justify-center rounded-lg group active:opacity-70 transition"
         @click="settingsRef.toggleWalletModal"
       >
         <ReceiveIcon class="group-hover:text-secondary" />
         <span class="ml-3 hidden lg:inline">{{ $t('navbar.receive') }}</span>
       </a>
       <router-link
-        class="
-          text-0
-          font-medium
-          leading-5
-          h-12
-          px-4
-          ml-3
-          lg:ml-0
-          hidden
-          sm:flex
-          bg-fg
-          lg:bg-transparent
-          rounded-full
-          lg:rounded-none
-          items-center
-          justify-center
-          rounded-lg
-          group
-          active:opacity-70
-          transition
-        "
+        class="text-0 font-medium leading-5 h-12 px-4 ml-3 lg:ml-0 hidden sm:flex bg-fg lg:bg-transparent rounded-full lg:rounded-none items-center justify-center rounded-lg group active:opacity-70 transition"
         to="/send"
       >
         <SendIcon class="group-hover:text-quinary" />

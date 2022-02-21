@@ -1,9 +1,15 @@
 <template>
   <div>
-    <SkeletonLoader v-if="showLoading && chartData.series[0].data.length <= 0" width="100%" :height="`${height}px`" />
-    <div v-if="chartData.series[0].data.length > 0">
-      <apexchart class="w-full" :height="height" :options="chartData.options" :series="chartData.series"></apexchart>
-      <div v-if="variant === 'full'" class="flex justify-between items-center">
+    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 50}px`" class="mb-8" />
+    <div v-if="hasData">
+      <apexchart
+        v-if="!showLoading"
+        class="w-full"
+        :height="height"
+        :options="chartData.options"
+        :series="chartData.series"
+      ></apexchart>
+      <div v-if="variant === 'full'" class="flex justify-between items-center -mt-4">
         <p class="-text-1 text-muted">
           {{ $t('pages.asset.highLow', { high: highestPrice, low: lowestPrice }) }}
         </p>
@@ -11,7 +17,7 @@
           <a
             v-for="(item, index) in filterItems"
             :key="index"
-            class="mx-2 rounded px-4 py-2 -text-1 cursor-pointer hover:bg-fg"
+            class="mx-1 rounded-lg px-4 py-2 -text-1 cursor-pointer"
             :class="item.value === activeFilterItem ? 'bg-fg font-medium' : 'text-muted'"
             @click="setActiveFilter(item)"
           >
@@ -26,9 +32,10 @@
 <script lang="ts">
 import maxBy from 'lodash.maxby';
 import minBy from 'lodash.minby';
-import { defineComponent, PropType, ref, watch } from 'vue';
+import { computed, defineComponent, PropType, ref, watch } from 'vue';
 
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import useTheme from '@/composables/useTheme';
 import { TokenPrices } from '@/types/api';
 
 export default defineComponent({
@@ -53,7 +60,7 @@ export default defineComponent({
       type: Boolean,
     },
   },
-  emits: ['filterChanged'],
+  emits: ['filterChanged', 'priceDiff'],
   setup(props, { emit }) {
     const filterItems = ref([
       {
@@ -78,6 +85,8 @@ export default defineComponent({
       },
     ]);
 
+    const theme = useTheme();
+
     const chartData = ref({
       options: {
         theme: {
@@ -86,6 +95,9 @@ export default defineComponent({
         tooltip: {
           enabled: true,
           x: {
+            show: true,
+          },
+          marker: {
             show: false,
           },
         },
@@ -107,6 +119,9 @@ export default defineComponent({
           labels: {
             show: false,
           },
+          tooltip: {
+            enabled: false,
+          },
           axisBorder: {
             show: false,
           },
@@ -123,8 +138,8 @@ export default defineComponent({
           gradient: {
             type: 'vertical',
             shade: 'light',
-            opacityFrom: 0.7,
-            opacityTo: 0.3,
+            opacityFrom: 0.6,
+            opacityTo: 0.1,
           },
         },
         yaxis: {
@@ -147,10 +162,36 @@ export default defineComponent({
     let lowestPrice = ref('');
     let openingPrice = ref(0);
     let closingPrice = ref(0);
+    let priceDiff = ref('');
+    let priceDiffPercent = ref('');
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
       emit('filterChanged', activeFilterItem.value);
+    };
+
+    const hasData = computed(() => {
+      return chartData.value.series[0].data.length > 0;
+    });
+
+    const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
+      let rawPriceDiff = 0;
+      if (indicator === 'gain') {
+        rawPriceDiff = closingPrice - openingPrice;
+        priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
+        priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+      } else {
+        rawPriceDiff = openingPrice - closingPrice;
+        priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
+        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+      }
+
+      emit('priceDiff', {
+        diff: priceDiff.value,
+        rawDiff: rawPriceDiff,
+        indicator: indicator,
+        percent: priceDiffPercent.value,
+      });
     };
 
     watch(
@@ -169,12 +210,16 @@ export default defineComponent({
           ? props.dataStream[props.dataStream.length - 1].y
           : 0;
 
-        if (openingPrice.value < closingPrice.value) {
-          chartData.value.options.colors[0] = '#00CF30';
-          chartData.value.options.fill.colors[0] = '#90EE90';
+        if (openingPrice.value <= closingPrice.value) {
+          chartData.value.options.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
+          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
+
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
-          chartData.value.options.colors[0] = '#FF3D56';
-          chartData.value.options.fill.colors[0] = '#FF3D56';
+          chartData.value.options.colors[0] = '#ff1b44';
+          chartData.value.options.fill.colors[0] = '#ff1b44';
+
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
         }
 
         if (props.variant === 'mini') {
@@ -187,6 +232,7 @@ export default defineComponent({
     return {
       filterItems,
       chartData,
+      hasData,
       activeFilterItem,
       highestPrice,
       lowestPrice,

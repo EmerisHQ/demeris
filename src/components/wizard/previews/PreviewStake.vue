@@ -1,0 +1,126 @@
+<template>
+  <List>
+    <!-- Pay/Receive -->
+
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.stakeLbl')">
+      <div class="flex justify-end items-center">
+        <div class="text-right">
+          <AmountDisplay
+            class="font-medium"
+            :class="context === 'widget' ? 'text-0' : 'text-1'"
+            :amount="{ amount: totalStaked, denom: baseDenom }"
+          />
+          <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
+            <Price :amount="{ amount: totalStaked, denom: baseDenom }" />
+          </div>
+        </div>
+        <CircleSymbol :denom="baseDenom" :chain-name="chainName" size="md" class="ml-3" />
+      </div>
+    </ListItem>
+
+    <!-- Price  -->
+    <ListItem v-if="tx" :size="size" :label="$t('components.previews.stake.validatorsLbl')">
+      <template v-for="(stake, index) in tx" :key="'stake' + index">
+        <div class="flex justify-end items-center pb-5">
+          <div class="flex flex-col text-right items-end">
+            <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
+            <div class="text-muted -text-1">Staked <AmountDisplay :amount="stake.amount" /></div>
+          </div>
+          <div>
+            <ValidatorBadge :validator="getValidator(stake.validatorAddress)" size="md" class="ml-3" />
+          </div>
+        </div>
+      </template>
+    </ListItem>
+
+    <!-- Fee -->
+    <ListItem
+      :size="size"
+      :label="$t('components.previews.stake.feeLbl')"
+      :hint="$t('components.previews.stake.feeLblHint')"
+    >
+      <template v-for="(fee, chain) in fees" :key="'fee_' + chain">
+        <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
+          <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" />
+        </template>
+      </template>
+    </ListItem>
+  </List>
+</template>
+<script lang="ts">
+import BigNumber from 'bignumber.js';
+import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
+import { useStore } from 'vuex';
+
+import AmountDisplay from '@/components/common/AmountDisplay.vue';
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Price from '@/components/common/Price.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
+import { List, ListItem } from '@/components/ui/List';
+import useStaking from '@/composables/useStaking';
+import * as Actions from '@/types/actions';
+import * as Base from '@/types/base';
+export default defineComponent({
+  name: 'PreviewStake',
+  components: {
+    AmountDisplay,
+    Price,
+    CircleSymbol,
+    List,
+    ListItem,
+    ValidatorBadge,
+  },
+
+  props: {
+    step: {
+      type: Object as PropType<Actions.Step>,
+      required: true,
+    },
+    fees: {
+      type: Object as PropType<Record<string, Base.Amount>>,
+      required: true,
+    },
+    context: {
+      type: String as PropType<'default' | 'widget'>,
+      default: 'default',
+    },
+  },
+
+  setup(props) {
+    const store = useStore();
+    const { getValidatorsByBaseDenom } = useStaking();
+    const propsRef = toRefs(props);
+    const validators = ref([]);
+    const tx = propsRef.step.value.transactions[0];
+    const chainName = (tx.data as Actions.DelegateData[])[0].chain_name;
+    const baseDenom = (tx.data as Actions.DelegateData[])[0].amount.denom;
+    const totalStaked = (tx.data as Actions.DelegateData[])
+      .reduce((acc, txdata) => {
+        return acc.plus(new BigNumber(txdata.amount.amount));
+      }, new BigNumber(0))
+      .toString();
+
+    onMounted(async () => {
+      validators.value = await getValidatorsByBaseDenom(baseDenom);
+    });
+    const getValidatorMoniker = (address) => {
+      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
+    };
+    const size = props.context === 'default' ? 'md' : 'sm';
+    const getValidator = (address) => {
+      return validators.value.find((x) => x.operator_address == address);
+    };
+    return {
+      store,
+      size,
+      tx: tx.data as Actions.DelegateData[],
+      getValidator,
+      getValidatorMoniker,
+      baseDenom,
+      chainName,
+      totalStaked,
+    };
+  },
+});
+</script>
+<style lang="scss" scoped></style>
