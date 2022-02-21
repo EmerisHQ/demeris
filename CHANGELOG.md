@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.12 - 2022-02-18
+
+### Features
+
+- Update support url
+- Added e2e testing
+- Slippage tolerance
+- Staking
+- Documentation
+- Analytics User ID Tracking
+- Forced build to Node 16
+
+### Fixes
+
+- Simplex GA
+- Webpack less verbose in logs
+- Chart component fixes before starting feature
+
 ## 0.1.11 - 2022-02-11
 
 ### Features
