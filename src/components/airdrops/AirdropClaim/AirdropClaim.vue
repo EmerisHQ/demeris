@@ -116,9 +116,6 @@ export default defineComponent({
   min-width: 20rem;
   /* min-height: 17rem; */
 }
-.color-blue {
-  color: #094efd;
-}
 .claim-widget {
   min-height: 24rem;
 }

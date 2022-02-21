@@ -7,7 +7,7 @@
           v-for="(item, index) in filtersItems"
           :key="index"
           class="mx-2 rounded-full bg-fg px-4 py-2 -text-1 cursor-pointer flex items-center"
-          :class="item.value === activeFilterItem && activeFilterItem !== 'more' ? 'bg-black text-white' : ''"
+          :class="{ 'bg-black text-white': item.value === activeFilterItem && activeFilterItem !== 'more' }"
         >
           <a v-if="item.value === 'more'" class="flex items-center" @click="toggleMoreFilters(item)">
             {{ showMoreFilters ? 'Less' : 'More' }}
@@ -28,7 +28,7 @@
         v-for="(moreItem, moreIndex) in moreFiltersItems"
         :key="moreIndex"
         class="mx-2 rounded-full bg-fg px-4 py-2 -text-1 cursor-pointer items-center"
-        :class="moreItem.value === activeFilterItem ? 'bg-black text-white' : ''"
+        :class="{ 'bg-black text-white': moreItem.value === activeFilterItem }"
       >
         <a @click="setActiveFilter(moreItem)">
           {{ moreItem.text }}
@@ -82,7 +82,7 @@
 
           <td class="py-5 align-middle group-hover:bg-fg transition">
             <template v-if="airdrop.eligibilityType === 'claim'">
-              <div class="flex float-right items-center color-blue">
+              <div class="flex float-right items-center text-link">
                 <a class="mr-2">Claim</a>
                 <Icon name="ArrowRightIcon" />
               </div>
@@ -93,7 +93,7 @@
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'becomeEligible'">
-              <div class="flex float-right items-center color-blue">
+              <div class="flex float-right items-center text-link">
                 <a class="mr-2">Become Eligible</a>
                 <Icon name="ArrowRightIcon" />
               </div>
@@ -104,19 +104,19 @@
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'claimed'">
-              <div class="flex float-right items-center color-green">
+              <div class="flex float-right items-center text-green-400">
                 <a class="mr-2">Claimed</a>
                 <Icon name="ClaimedIcon" />
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'autoDropped'">
-              <div class="flex float-right items-center color-green">
+              <div class="flex float-right items-center text-green-400">
                 <a class="mr-2">Auto-dropped</a>
                 <Icon name="ClaimedIcon" />
               </div>
             </template>
             <template v-else>
-              <div class="flex float-right items-center color-blue">
+              <div class="flex float-right items-center text-link">
                 <a class="mr-2">Learn More</a>
                 <Icon name="ArrowRightIcon" />
               </div>
@@ -253,17 +253,5 @@ export default defineComponent({
       border-bottom-right-radius: 0.75rem;
     }
   }
-}
-.color-blue {
-  color: #094efd;
-}
-.color-green {
-  color: #008223;
-}
-.bg-black {
-  background: black;
-}
-.text-white {
-  color: white;
 }
 </style>

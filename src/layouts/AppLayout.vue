@@ -1,5 +1,5 @@
 <template>
-  <component :is="layout" :no-margin="noMargin">
+  <component :is="layout">
     <slot />
   </component>
 </template>
@@ -11,12 +11,6 @@ import { useRoute } from 'vue-router';
 import DefaultLayout from './DefaultLayout.vue';
 export default defineComponent({
   name: 'AppLayout',
-  props: {
-    noMargin: {
-      type: Boolean,
-      default: false,
-    },
-  },
   setup() {
     const layout = markRaw(DefaultLayout);
     const route = useRoute();

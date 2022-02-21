@@ -1,5 +1,5 @@
 <template>
-  <AppLayout :no-margin="true">
+  <NoMarginLayout :no-margin="true">
     <header class="-mt-32 w-full bg-fg">
       <div class="pt-24 pb-12 px-5 md:px-8 max-w-7xl mx-auto">
         <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
@@ -29,10 +29,10 @@
 
             <!-- Links -->
             <div class="w-full flex justify-between items-center mt-12">
-              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
-              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Discord↗️</span></a>
-              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Medium↗️</span></a>
-              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="color-blue">Twitter↗️</span></a>
+              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
+              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a>
+              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a>
+              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a>
             </div>
           </div>
 
@@ -61,7 +61,7 @@
         <AirdropsCurrentBalance class="mt-8" />
       </aside>
     </div>
-  </AppLayout>
+  </NoMarginLayout>
 </template>
 
 <script lang="ts">
@@ -77,7 +77,7 @@ import GoBack from '@/components/common/headers/GoBack.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
+import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
@@ -85,7 +85,7 @@ import { pageview } from '@/utils/analytics';
 export default defineComponent({
   name: 'Airdrop',
   components: {
-    AppLayout,
+    NoMarginLayout,
     AirdropClaim,
     GoBack,
     AirdropsCurrentBalance,
@@ -134,9 +134,6 @@ export default defineComponent({
   color: #008223;
   padding: 4px 12px;
   border-radius: 6px;
-}
-.color-blue {
-  color: #094efd;
 }
 ul {
   &.eligibility-criteria {

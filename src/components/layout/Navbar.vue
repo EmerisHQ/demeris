@@ -50,9 +50,8 @@ export default defineComponent({
   components: {
     StarsIcon,
   },
-
   setup() {
-    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE') ? true : false;
+    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
 
     return {
       isAirdropsFeatureRunning,
@@ -97,46 +96,6 @@ export default defineComponent({
 }
 
 @keyframes blink {
-  from,
-  to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@-moz-keyframes blink {
-  from,
-  to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@-webkit-keyframes blink {
-  from,
-  to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@-ms-keyframes blink {
-  from,
-  to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@-o-keyframes blink {
   from,
   to {
     opacity: 0;

@@ -1,5 +1,5 @@
 <template>
-  <div class="divider bg-border"></div>
+  <div class="divider bg-border" />
 </template>
 
 <script lang="ts">
