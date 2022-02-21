@@ -169,7 +169,7 @@ export default defineComponent({
       }
     });
     const showBackButton = computed(() => {
-      return !!actionType;
+      return currentStepIndex.value > 0 && !!actionType;
     });
     const isBackDisabled = computed(() => {
       return (
@@ -206,12 +206,7 @@ export default defineComponent({
       step.value = allSteps[actionType][currentStepIndex.value + 1];
     };
     const metaSource = computed(() => {
-      let title = t('components.send.send');
-      /*
-      if (actionType) {
-        title = actionType === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
-      }
-      */
+      let title = t('context.stake.title');
 
       return {
         title,
@@ -240,7 +235,8 @@ export default defineComponent({
     };
     const onClose = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
-      router.push('/');
+      const hasPrevPath = !!router.options.history.state.back;
+      hasPrevPath ? router.back() : router.push('/');
     };
 
     return {
