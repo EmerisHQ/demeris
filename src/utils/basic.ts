@@ -2,6 +2,8 @@ import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
+import findIndex from 'lodash/findIndex';
+import includes from 'lodash/includes';
 
 import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
@@ -165,4 +167,13 @@ export function parseCoins(input: string): Coin[] {
         denom: match[2],
       };
     });
+}
+
+// A = 65, z = 122
+export function getFirstAlphabet(str: string) {
+  const index = findIndex(str, (letter) => {
+    return letter.charCodeAt(0) >= 65 && letter.charCodeAt(0) <= 122;
+  });
+  if (index !== -1) return str[index];
+  return '';
 }
