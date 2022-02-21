@@ -4,7 +4,12 @@
     <div
       v-if="showPriceDiff"
       class="-text-1 font-normal"
-      :class="priceDiffIndicator === 'gain' ? 'text-positive-text' : 'text-negative-text'"
+      :class="{
+        'color-gain-light': priceDiffIndicator === 'gain' && theme === 'light',
+        'color-gain-dark': priceDiffIndicator === 'gain' && theme === 'dark',
+        'color-loss-light': priceDiffIndicator === 'loss' && theme === 'light',
+        'color-loss-dark': priceDiffIndicator === 'loss' && theme === 'dark',
+      }"
     >
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
@@ -15,6 +20,7 @@ import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
+import useTheme from '@/composables/useTheme';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -50,7 +56,7 @@ export default defineComponent({
     const store = useStore();
     const denom = ref((props.amount as Amount).denom);
     const isLoaded = ref(false);
-
+    const theme = useTheme();
     const price = ref();
 
     const priceObserver = computed(() => {
@@ -120,7 +126,22 @@ export default defineComponent({
       return props.priceDiffObject.indicator;
     });
 
-    return { displayPrice, showPriceDiff, priceDiffIndicator };
+    return { theme, displayPrice, showPriceDiff, priceDiffIndicator };
   },
 });
 </script>
+
+<style scoped>
+.color-gain-light {
+  color: #008223;
+}
+.color-gain-dark {
+  color: #42ed05;
+}
+.color-loss-light {
+  color: #d80228;
+}
+.color-loss-dark {
+  color: #ff6072;
+}
+</style>
