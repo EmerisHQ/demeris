@@ -23,7 +23,7 @@
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
             action-name="stake"
-            @transacting="goToStep('delegate')"
+            @transacting="goToStep('stake')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -55,11 +55,11 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { DelegateForm, MultiDelegateAction, MultiDelegateForm } from '@/types/actions';
+import { MultiStakeAction, MultiStakeForm,StakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'delegate';
+type Step = 'validator' | 'amount' | 'review' | 'stake';
 
 export default defineComponent({
   name: 'StakeForm',
@@ -114,7 +114,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: MultiDelegateForm = reactive({ stakes: [] });
+    const form: MultiStakeForm = reactive({ stakes: [] });
 
     const valToEdit = ref(null as number);
     const step = computed({
@@ -143,9 +143,9 @@ export default defineComponent({
             chain_name: x.chain_name,
           };
         }),
-      } as MultiDelegateAction;
+      } as MultiStakeAction;
     });
-    const isValid = (form: DelegateForm) => {
+    const isValid = (form: StakeForm) => {
       return (
         form.validatorAddress !== '' &&
         form.amount !== '' &&
