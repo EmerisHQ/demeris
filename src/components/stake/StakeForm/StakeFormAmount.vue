@@ -216,10 +216,9 @@ export default defineComponent({
     );
     const disabled = computed(() => {
       let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+      let toStake = 0;
       for (const validator of validatorsToStakeWith.value) {
-        if (validator.amount == '') {
-          return true;
-        }
+        toStake = toStake + Number(validator.amount ?? 0);
         if (chains[validator.from_chain]) {
           chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
             new BigNumber(validator.amount != '' ? validator.amount : 0),
@@ -230,6 +229,9 @@ export default defineComponent({
             denom: validator.denom,
           };
         }
+      }
+      if (toStake == 0) {
+        return true;
       }
       for (const chain in chains) {
         if (
@@ -266,6 +268,7 @@ export default defineComponent({
       emit('selectanother', null);
     };
     const goToReview = () => {
+      form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
       emit('next');
     };
     const toggleChainsModal = (asset: Balance, index: number) => {
