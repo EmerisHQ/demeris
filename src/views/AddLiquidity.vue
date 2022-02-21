@@ -185,19 +185,25 @@
                   <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: form.coinB.asset.base_denom }" />
                 </ListItem>
                 <ListItem v-if="hasPair" inset size="md" label="Receive LP asset">
-                  <div v-tippy="{ placement: 'right' }" class="flex items-center justify-end text-left" content="TODO">
-                    <CircleSymbol
-                      :denom="hasPool ? pool.pool_coin_denom : ''"
-                      :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
-                      size="sm"
-                      class="mr-3"
-                    />
-                    <span class="font-medium">
-                      {{ state.receiveAmount }}
-                      <span class="font-bold">
-                        <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
+                  <div class="flex items-center justify-end text-left">
+                    <div
+                      v-tippy="{ placement: 'right' }"
+                      className="flex items-center"
+                      :content="$t('pages.addLiquidity.receiveLpAsset')"
+                    >
+                      <CircleSymbol
+                        :denom="hasPool ? pool.pool_coin_denom : ''"
+                        :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
+                        size="sm"
+                        class="mr-3"
+                      />
+                      <span class="font-medium">
+                        {{ state.receiveAmount }}
+                        <span class="font-bold">
+                          <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
                 </ListItem>
 

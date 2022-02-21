@@ -109,16 +109,28 @@
           <tr
             v-for="validator of filteredAndSortedValidatorList"
             :key="validator.operator_address"
-            :set="(isDisabled = disabledList.includes(validator.operator_address))"
             class="group"
-            :class="{ 'opacity-50': isDisabled, 'cursor-pointer': !isDisabled }"
+            :class="{
+              'opacity-50':
+                disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address,
+              'cursor-pointer': !(
+                disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+              ),
+            }"
             @click="
               () => {
                 detailedValidator = validator;
               }
             "
           >
-            <td class="py-5 flex items-center" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+            <td
+              class="py-5 flex items-center"
+              :class="{
+                'group-hover:bg-fg transition': !(
+                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                ),
+              }"
+            >
               <div class="inline-flex items-center mr-4">
                 <!-- TODO: get logo url -->
                 <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
@@ -127,22 +139,51 @@
                 {{ validator.moniker }}
               </span>
             </td>
-            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+            <td
+              class="text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
+                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                ),
+              }"
+            >
               {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
               <div class="-text-1 text-muted">
                 {{ getVotingPowerPercDisplayValue(validator.tokens) }}
               </div>
             </td>
-            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+            <td
+              class="text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
+                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                ),
+              }"
+            >
               {{ getCommissionDisplayValue(validator.commission_rate) }}
             </td>
-            <td class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+            <td
+              class="text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
+                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                ),
+              }"
+            >
               <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
               <div class="-text-1 text-muted">
                 {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
               </div>
             </td>
-            <td v-if="hasActions" class="text-right" :class="{ 'group-hover:bg-fg transition': !isDisabled }">
+            <td
+              v-if="hasActions"
+              class="text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
+                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                ),
+              }"
+            >
               <div class="flex justify-center">
                 <Button
                   v-tippy
@@ -150,12 +191,16 @@
                   :content="validator.jailed ? 'Validator jailed' : 'Stake'"
                   :name="$t('components.validatorTable.stake')"
                   :full-width="false"
-                  :disabled="validator.jailed"
+                  :disabled="
+                    validator.jailed ||
+                      (disabledList.includes(validator.operator_address) &&
+                        currentlyEditing != validator.operator_address)
+                  "
                   @click.stop="
                     () => {
                       if (
                         !disabledList.includes(validator.operator_address) ||
-                        currentlyEditing != validator.operator_address
+                        currentlyEditing == validator.operator_address
                       ) {
                         selectValidator(validator);
                       }
