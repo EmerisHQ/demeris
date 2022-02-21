@@ -74,7 +74,7 @@
             <ListItem inset size="md" label="Total stake">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
-                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" />
+                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" :show-dash="false" />
               </div>
             </ListItem>
 
