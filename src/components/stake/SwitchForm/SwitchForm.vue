@@ -1,16 +1,16 @@
 <template>
   <div class="w-full mx-auto">
-    <template v-if="step == 'validator'">
-      <ValidatorsTable
-        :validator-list="validators"
-        :disabled-list="validatorsToDisable"
-        :table-style="'actionlist'"
-        :sorting-by="isStaking ? 'staked' : 'power'"
-        sorting-order="desc"
-        @selectValidator="addValidator"
-      />
-    </template>
-    <template v-else-if="step === 'amount'">
+    <ValidatorsTable
+      v-show="step == 'validator'"
+      :validator-list="validators"
+      :disabled-list="validatorsToDisable"
+      :table-style="'actionlist'"
+      :sorting-by="isStaking ? 'staked' : 'power'"
+      sorting-order="desc"
+      @selectValidator="addValidator"
+    />
+
+    <template v-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.switchForm.title') }}</h2>
 
       <SwitchValidatorAmount

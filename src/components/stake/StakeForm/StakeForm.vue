@@ -1,17 +1,17 @@
 <template>
   <div class="w-full mx-auto">
-    <template v-if="step == 'validator'">
-      <ValidatorsTable
-        :validator-list="validators"
-        :disabled-list="validatorsToDisable"
-        :currently-editing="currentlyEditing"
-        :table-style="'actionlist'"
-        :sorting-by="isStaking ? 'staked' : 'power'"
-        sorting-order="desc"
-        @selectValidator="addValidator"
-      />
-    </template>
-    <template v-else-if="step === 'amount' && form.stakes.length > 0">
+    <ValidatorsTable
+      v-show="step == 'validator'"
+      :validator-list="validators"
+      :disabled-list="validatorsToDisable"
+      :currently-editing="currentlyEditing"
+      :table-style="'actionlist'"
+      :sorting-by="isStaking ? 'staked' : 'power'"
+      sorting-order="desc"
+      @selectValidator="addValidator"
+    />
+
+    <template v-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
       <StakeFormAmount :validators="validators" :steps="steps" @next="goToReview" @selectanother="selectAnother" />
     </template>
@@ -106,9 +106,11 @@ export default defineComponent({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
+
     const isStaking = computed(() => {
       return propsRef.validators.value.some((val) => parseInt(val.stakedAmount) > 0);
     });
+
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -211,7 +213,7 @@ export default defineComponent({
       return form.stakes.map((x) => x.validatorAddress);
     });
     const currentlyEditing = computed(() => {
-      return valToEdit.value ? form.stakes[valToEdit.value].validatorAddress : null;
+      return valToEdit.value !== null ? form.stakes[valToEdit.value].validatorAddress : null;
     });
     provide('stakeForm', form);
     onMounted(() => {

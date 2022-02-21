@@ -227,7 +227,6 @@ export default defineComponent({
       steps.value = actionSteps.slice();
 
       step.value = allSteps[actionType][currentStepIndex.value + 1];
-      console.log(steps);
     };
     const onClose = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
