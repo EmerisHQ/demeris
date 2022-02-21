@@ -6,10 +6,11 @@
       <div v-for="item in items" :key="item" class="flex flex-col">
         <span class="flex items-center">
           <span class="flex items-center -ml-6 rounded-full bg-surface">
-            <CircleSymbol class="relative" variant="chain" :chain-name="'cosmos-hub'" :glow="false" size="md" />
-            <CircleSymbol :style="{ position: 'absolute' }" class="ml-1" :denom="'uatom'" :glow="true" size="sm" />
+            <CircleSymbol class="relative" variant="chain" :chain-name="item.chain" :glow="false" size="md" />
+            <CircleSymbol :style="{ position: 'absolute' }" class="ml-1" :denom="item.denom" :glow="true" size="sm" />
           </span>
-          <span class="ml-4">{{ item.denom }} &middot; {{ item.chain }} </span>
+          <span class="ml-4"><span class="denom"><Denom :name="item.denom" /> </span>
+            <span class="text-muted">&middot; <ChainName :name="item.chain" /></span></span>
         </span>
         <div v-if="item && item.subItems && !!item.subItems.length" class="my-6">
           <template v-for="subItem in item?.subItems" :key="subItem">
@@ -32,7 +33,9 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
+import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import Denom from '@/components/common/Denom.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 export default defineComponent({
@@ -40,13 +43,20 @@ export default defineComponent({
   components: {
     CircleSymbol,
     Icon,
+    Denom,
+    ChainName,
   },
   props: {},
   setup() {
+    // TODO:
+    // it would be better to do these after steps/abstract steps output from dagg api are final and clear
+    // 1. Convert output of the aggregation API to a form usable by this component
+    // 2. Add X transaction over Y chains logic
+    // 3. add conditional right arrow logic (swap vs transfer icon)
     const items = ref([
-      { denom: 'atom', chain: 'somcahin', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'iris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
-      { denom: 'osmo', chain: 'osmo', subItems: ['Transfer x', 'Swap Y'] },
+      { denom: 'uatom', chain: 'cosmos-hub', subItems: ['Transfer x', 'Swap Y'] },
+      { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
+      { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
       { denom: 'lastcoin', chain: 'lastchain' },
     ]);
     return { items };
@@ -69,5 +79,8 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.denom {
+  font-weight: 600;
 }
 </style>
