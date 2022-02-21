@@ -11,7 +11,7 @@
         >
           <a v-if="item.value === 'more'" class="flex items-center" @click="toggleMoreFilters(item)">
             {{ showMoreFilters ? 'Less' : 'More' }}
-            <span class="ml-2"><CaretDownIcon v-if="!showMoreFilters" /><CaretUpIcon v-if="showMoreFilters" /></span>
+            <span class="ml-2"><Icon :name="showMoreFilters ? 'CaretUpIcon' : 'CaretDownIcon'" /></span>
           </a>
           <a v-else @click="setActiveFilter(item)">
             {{ item.text }}
@@ -84,7 +84,7 @@
             <template v-if="airdrop.eligibilityType === 'claim'">
               <div class="flex float-right items-center color-blue">
                 <a class="mr-2">Claim</a>
-                <ArrowRightIcon />
+                <Icon name="ArrowRightIcon" />
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'eligible'">
@@ -95,7 +95,7 @@
             <template v-else-if="airdrop.eligibilityType === 'becomeEligible'">
               <div class="flex float-right items-center color-blue">
                 <a class="mr-2">Become Eligible</a>
-                <ArrowRightIcon />
+                <Icon name="ArrowRightIcon" />
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'notEligible'">
@@ -106,19 +106,19 @@
             <template v-else-if="airdrop.eligibilityType === 'claimed'">
               <div class="flex float-right items-center color-green">
                 <a class="mr-2">Claimed</a>
-                <ClaimedIcon />
+                <Icon name="ClaimedIcon" />
               </div>
             </template>
             <template v-else-if="airdrop.eligibilityType === 'autoDropped'">
               <div class="flex float-right items-center color-green">
                 <a class="mr-2">Auto-dropped</a>
-                <ClaimedIcon />
+                <Icon name="ClaimedIcon" />
               </div>
             </template>
             <template v-else>
               <div class="flex float-right items-center color-blue">
                 <a class="mr-2">Learn More</a>
-                <ArrowRightIcon />
+                <Icon name="ArrowRightIcon" />
               </div>
             </template>
           </td>
@@ -133,12 +133,9 @@ import { defineComponent, PropType, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import ArrowRightIcon from '@/components/common/Icons/ArrowRightIcon.vue';
-import CaretDownIcon from '@/components/common/Icons/CaretDownIcon.vue';
-import CaretUpIcon from '@/components/common/Icons/CaretUpIcon.vue';
-import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
 import Search from '@/components/common/Search.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import Icon from '@/components/ui/Icon.vue';
 import { Airdrop } from '@/types/api';
 
 export default defineComponent({
@@ -149,10 +146,7 @@ export default defineComponent({
     CircleSymbol,
     Ticker,
     Search,
-    ArrowRightIcon,
-    ClaimedIcon,
-    CaretDownIcon,
-    CaretUpIcon,
+    Icon,
   },
 
   props: {

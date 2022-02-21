@@ -36,7 +36,7 @@
             </div>
           </div>
 
-          <Divider extra-classes="my-12" />
+          <Divider class="my-12" />
 
           <!-- Eligibility Criteria -->
           <div class="w-3/4 mb-12">
@@ -50,7 +50,7 @@
 
           <!-- Quick Info -->
           <div class="w-3/4 flex items-center text-muted border border-border rounded-xl px-6 py-4">
-            <WarningCircleIcon class="mr-4" />
+            <InformationIcon class="mr-4" />
             <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
           </div>
         </section>
@@ -74,8 +74,8 @@ import { useStore } from 'vuex';
 import AirdropClaim from '@/components/airdrops/AirdropClaim';
 import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
 import GoBack from '@/components/common/headers/GoBack.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
-import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
 import Divider from '@/components/ui/Divider.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
@@ -91,7 +91,7 @@ export default defineComponent({
     AirdropsCurrentBalance,
     Divider,
     LinkIcon,
-    WarningCircleIcon,
+    InformationIcon,
   },
 
   setup() {

@@ -3,7 +3,9 @@
     <div class="md:flex justify-between">
       <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
         <header>
-          <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">Airdrops</div>
+          <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2 capitalize">
+            {{ $t('context.airdrops.title') }}
+          </div>
         </header>
         <section class="mt-12">
           <AirdropsTable
@@ -20,7 +22,7 @@
         <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
         <!-- Quick Info -->
         <div class="mb-8 flex items-start text-muted border border-border rounded-xl p-4">
-          <WarningCircleIcon class="mr-2" />
+          <InformationIcon class="mr-2" />
           <p class="-text-1">
             Airdrop is not financial advice. Eligibility, claim action can change based on the project.
           </p>
@@ -41,7 +43,7 @@ import { useStore } from 'vuex';
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
-import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Airdrop } from '@/types/api';
@@ -54,7 +56,7 @@ export default {
     AirdropClaimablePanel,
     AirdropsTable,
     AirdropsInfo,
-    WarningCircleIcon,
+    InformationIcon,
   },
 
   setup() {

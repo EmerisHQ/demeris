@@ -19,7 +19,7 @@
         :key="index"
         class="flex justify-between items-center text-muted border border-border rounded-xl px-6 py-4 mb-4"
       >
-        <div class="w-6 h-6 rounded-md bg-black pt-1 text-white text-center -text-1 mr-4">{{ item }}</div>
+        <div class="w-6 h-6 rounded-md pt-1 text-center -text-1 mr-4">{{ item }}</div>
         <p class="w-96 -text-1 mr-6">
           Airdrop is not financial advice. Eligibility, claim action can change based on the project.
         </p>
@@ -36,7 +36,7 @@
 
       <!-- Quick Info -->
       <div class="flex items-center text-muted border border-border rounded-xl px-6 py-4 mt-12">
-        <WarningCircleIcon class="mr-4" />
+        <InformationIcon class="mr-4" />
         <p class="-text-1">
           Airdrop is not financial advice. Eligibility, claim action can change based on the project.
         </p>
@@ -49,14 +49,14 @@
 import { defineComponent } from 'vue';
 
 import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
-import WarningCircleIcon from '@/components/common/Icons/WarningCircleIcon.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Modal from '@/components/ui/Modal.vue';
 
 export default defineComponent({
   name: 'AirdropClaimModal',
   components: {
     Modal,
-    WarningCircleIcon,
+    InformationIcon,
     ClaimedIcon,
   },
   props: {
@@ -78,12 +78,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.bg-black {
-  background: black;
-}
-.text-white {
-  color: white;
-}
-</style>
