@@ -7,7 +7,7 @@
           v-for="(item, index) in filtersItems"
           :key="index"
           class="mx-2 rounded-full bg-fg px-4 py-2 -text-1 cursor-pointer flex items-center"
-          :class="item.value === activeFilterItem && activeFilterItem !== 'more' ? 'bg-black text-white' : ''"
+          :class="{'bg-black text-white' : item.value === activeFilterItem && activeFilterItem !== 'more'}"
         >
           <a v-if="item.value === 'more'" class="flex items-center" @click="toggleMoreFilters(item)">
             {{ showMoreFilters ? 'Less' : 'More' }}
