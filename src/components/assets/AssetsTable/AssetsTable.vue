@@ -171,6 +171,7 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 import getPrice from '@/utils/getPrice';
 
 type TableStyleType = 'full' | 'balance';
@@ -229,7 +230,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const currentLimit = ref(props.limitRows);
-    const { stakingBalances } = useAccount();
+    const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
     });
@@ -278,6 +279,17 @@ export default defineComponent({
           if (stakedAmounts.length > 0) {
             const stakedAmount = stakedAmounts.reduce((acc, item) => +parseInt(item.amount) + acc, 0);
             totalAmount = totalAmount + stakedAmount;
+          }
+          if (featureRunning('STAKING')) {
+            const unstakedAmounts = unbondingDelegations.value
+              .filter((x) => x.chain_name == denom_details[0].chain_name)
+              .map((y) => y.entries)
+              .flat()
+              .map((z) => z.balance);
+            if (unstakedAmounts.length > 0) {
+              const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+              totalAmount = totalAmount + unstakedAmount;
+            }
           }
         }
         return {

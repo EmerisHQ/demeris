@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-30 shadow-panel">
+    <div class="settings-modal absolute right-0 bg-surface rounded-2xl w-full sm:w-72 z-40 shadow-panel">
       <!-- basic settings -->
       <div v-if="!isAdvancedSettingsOpen" class="settings-modal-basic">
         <div class="py-2">
@@ -8,10 +8,7 @@
             {{ $t('components.settingsMenu.connectedWallet') }}
           </p>
           <AvatarBalance wallet-name="Keplr" />
-          <div
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-            @click="disconnectWallet"
-          >
+          <div class="menu-item" @click="disconnectWallet">
             <span v-if="isDemoAccount">{{ $t('components.settingsMenu.connectWallet') }}</span>
             <span v-else>{{ $t('components.settingsMenu.disconnectWallet') }}</span>
           </div>
@@ -20,10 +17,7 @@
         <hr class="border-t border-border" />
 
         <div class="py-2">
-          <div
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-            @click="toggleAdvancedSettings"
-          >
+          <div class="menu-item" @click="toggleAdvancedSettings">
             <span>{{ $t('components.settingsMenu.settings') }}</span>
             <Icon class="text-muted" name="CaretRightIcon" :icon-size="1" />
           </div>
@@ -32,29 +26,22 @@
         <hr class="border-t border-border" />
 
         <div class="py-2">
-          <a
-            href="https://emeris.com/support"
-            target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-          >
+          <a href="https://support.emeris.com" target="_blank" class="menu-item">
             <span>{{ $t('components.settingsMenu.support') }}</span>
             <span>&#8599;</span>
           </a>
 
-          <a
-            href="https://twitter.com/emerisHQ"
-            target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-          >
+          <a href="https://t.me/EmerisHQ" target="_blank" class="menu-item">
+            <span>{{ $t('components.settingsMenu.telegram') }}</span>
+            <span>&#8599;</span>
+          </a>
+
+          <a href="https://twitter.com/emerisHQ" target="_blank" class="menu-item">
             <span>{{ $t('components.settingsMenu.twitter') }}</span>
             <span>&#8599;</span>
           </a>
 
-          <a
-            href="https://emeris.com"
-            target="_blank"
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-          >
+          <a href="https://emeris.com" target="_blank" class="menu-item">
             <span>emeris.com</span>
             <span>&#8599;</span>
           </a>
@@ -134,19 +121,16 @@
             <span>{{ $t('components.settingsMenu.setGasLimit') }}</span>
             <AmountInput v-model="settings.gasLimit" :max-decimals="0" class="w-1/2 text-right bg-transparent" />
           </div>
-          <button
-            class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg"
-            @click="confirmToggleSetting('allowCustomSlippage')"
-          >
+          <button class="menu-item" @click="confirmToggleSetting('allowCustomSlippage')">
             <span>{{ $t('components.settingsMenu.allowCustomSlippage') }}</span>
             <Switch v-model="settings.allowCustomSlippage" class="pointer-events-none" />
           </button>
           <!--
-          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewUnverified')">
+          <button class="menu-item" @click="confirmToggleSetting('viewUnverified')">
             <span>{{ $t('components.settingsMenu.viewAllAssets') }}</span>
             <Switch v-model="settings.viewUnverified" class="pointer-events-none" />
           </button>
-          <button class="flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg" @click="confirmToggleSetting('viewLPAssetPools')">
+          <button class="menu-item" @click="confirmToggleSetting('viewLPAssetPools')">
             <span>{{ $t('components.settingsMenu.viewLPAssetPools') }}</span>
             <Switch v-model="settings.viewLPAssetPools" class="pointer-events-none" />
           </button>
@@ -403,6 +387,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+.menu-item {
+  @apply flex items-center justify-between h-10 py-2 px-6 w-full cursor-pointer hover:bg-fg;
+}
+</style>
 
 <style lang="scss">
 .settings-modal {

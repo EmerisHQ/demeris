@@ -47,6 +47,18 @@
           Pool <Ticker :name="getBaseDenomSync(transactionAction.data.coinA.denom)" /> ·
           <Ticker :name="getBaseDenomSync(transactionAction.data.coinB.denom)" />
         </template>
+        <template v-if="action === 'claim'">
+          Claim <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+        </template>
+        <template v-if="action === 'stake'">
+          Delegate <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
+        </template>
+        <template v-if="action === 'unstake'">
+          Undelegate <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+        </template>
+        <template v-if="action === 'switch'">
+          Redelegate <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+        </template>
       </p>
 
       <p class="item-description -text-1 opacity-75">

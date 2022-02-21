@@ -1,6 +1,7 @@
 export enum GetterTypes {
   getBalances = 'getBalances',
   getStakingBalances = 'getStakingBalances',
+  getUnbondingDelegations = 'getUnbondingDelegations',
   getNumbers = 'getNumbers',
   getNumbersChain = 'getNumbersChain',
   getRelayerStatus = 'getRelayerStatus',
@@ -8,6 +9,7 @@ export enum GetterTypes {
   getRelayerChainStatus = 'getRelayerChainStatus',
   getAllBalances = 'getAllBalances',
   getAllStakingBalances = 'getAllStakingBalances',
+  getAllUnbondingDelegations = 'getAllUnbondingDelegations',
   getAllNumbers = 'getAllNumbers',
   getFeeAddresses = 'getFeeAddresses',
   isVerified = 'isVerified',
@@ -45,6 +47,7 @@ export enum GetterTypes {
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
   getStakingBalances = 'demerisAPI/getStakingBalances',
+  getUnbondingDelegations = 'demerisAPI/getUnbondingDelegations',
   getNumbers = 'demerisAPI/getNumbers',
   getNumbersChain = 'demerisAPI/getNumbersChain',
   getRelayerStatus = 'demerisAPI/getRelayerStatus',
@@ -52,6 +55,7 @@ export enum GlobalGetterTypes {
   getRelayerChainStatus = 'demerisAPI/getRelayerChainStatus',
   getAllBalances = 'demerisAPI/getAllBalances',
   getAllStakingBalances = 'demerisAPI/getAllStakingBalances',
+  getAllUnbondingDelegations = 'demerisAPI/getAllUnbondingDelegations',
   getAllNumbers = 'demerisAPI/getAllNumbers',
   getFeeAddresses = 'demerisAPI/getFeeAddresses',
   isVerified = 'demerisAPI/isVerified',
