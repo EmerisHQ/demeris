@@ -80,9 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - env_file:
-          - env_file: .env.ci
+        env_file: [false, .env.ci]
 
     steps:
       - uses: actions/checkout@v2
