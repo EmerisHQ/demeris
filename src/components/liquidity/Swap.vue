@@ -46,6 +46,11 @@
             reset();
           }
         "
+        @finish="
+          () => {
+            isFinished = true;
+          }
+        "
         @previous="reviewModalToggle"
       />
     </FeatureRunningConditional>
@@ -225,7 +230,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
     const transactionsStore = useTransactionsStore();
-
+    const isFinished = ref(false); // keep track of txstepsmodal status
     const isSignedIn = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
@@ -567,7 +572,9 @@ export default defineComponent({
       },
       (watchValues, oldWatchValues) => {
         //when wallet connected/disconnected set again
-        if (watchValues[1].length !== oldWatchValues[1].length) {
+        if (watchValues[1].length !== oldWatchValues[1].length && !isFinished.value) {
+          //Do not reset everything if we're in the finished state (view tx receipt)
+          isOpen.value = false;
           isInit.value = false;
           data.payCoinAmount = null;
           data.receiveCoinAmount = null;
@@ -766,6 +773,7 @@ export default defineComponent({
         data.receiveCoinAmount = null;
         data.selectedPoolData = null;
         isInit.value = false;
+        isFinished.value = false; // reset for new swap
       },
       //programatically get inactive color
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
@@ -1006,7 +1014,10 @@ export default defineComponent({
           };
           data.actionHandlerResult = await actionHandler(swapParams as SwapAction);
         } else {
-          data.actionHandlerResult = null;
+          if (!isOpen.value) {
+            // do not reset steps while steps modal is open
+            data.actionHandlerResult = null;
+          }
         }
       },
     );
@@ -1186,6 +1197,7 @@ export default defineComponent({
       otherAssetsToPay,
       otherAssetsToReceive,
       dexStatus,
+      isFinished,
     };
   },
 });

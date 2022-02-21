@@ -76,7 +76,7 @@
             <AmountDisplay
               :amount="{
                 amount: stakedAmount,
-                denom: getBaseDenomSync(transaction.data.amount.denom),
+                denom: getBaseDenomSync(parseCoins(transaction.data.total)[0].denom),
               }"
             />
           </p>
@@ -261,7 +261,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { ClaimData, DelegateData, RedelegateData, UndelegateData } from '@/types/actions';
+import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -319,24 +319,20 @@ const title = computed(() => {
 });
 const stakedAmount = ref('0');
 if (transaction.value.name == 'stake') {
-  stakedAmount.value = (transaction.value.data as DelegateData[])
+  stakedAmount.value = (transaction.value.data as StakeData[])
     .reduce((acc, tx) => {
       return acc.plus(new BigNumber(tx.amount.amount));
     }, new BigNumber(0))
     .toString();
 }
 if (transaction.value.name == 'unstake') {
-  stakedAmount.value = (transaction.value.data as UndelegateData).amount.amount;
+  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount;
 }
 if (transaction.value.name == 'switch') {
-  stakedAmount.value = (transaction.value.data as RedelegateData).amount.amount;
+  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount;
 }
 if (transaction.value.name == 'claim') {
-  stakedAmount.value = (transaction.value.data as ClaimData).rewards
-    .reduce((acc, data) => {
-      return acc.plus(new BigNumber(data.reward));
-    }, new BigNumber(0))
-    .toString();
+  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
 }
 const onNext = () => {
   send('CONTINUE');
