@@ -88,19 +88,21 @@ const minimizeModal = () => {
   }
 };
 
-const showReceiptState = computed(() => {
-  const isTxReady = state.value.matches('receipt') || state.value.matches('success');
-  if (isTxReady) {
-    emits('success');
-  }
-  return isTxReady;
-});
+watch(
+  () => state.value,
+  (newState) => {
+    if (newState.matches('receipt') || newState.matches('success')) {
+      emits('success');
+    }
+  },
+);
 
 const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'));
 const showReviewState = computed(() => state.value.matches('review'));
 const showSigningState = computed(() => state.value.matches('signing'));
 const showTransactingState = computed(() => state.value.matches('transacting'));
 const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
+const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'));
 
 const closeModal = () => emits('close');
 const goBack = () => emits('previous');
