@@ -28,7 +28,7 @@ export default defineComponent({
     },
   },
   emits: ['go-back'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const handleGoBackClick = () => {
       emit('go-back');
     };
