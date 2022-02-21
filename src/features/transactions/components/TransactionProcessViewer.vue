@@ -1,18 +1,18 @@
 <template>
   <div class="flex-1 flex flex-col w-full" :class="{ 'items-center': !isSwapComponent }">
     <TransferInterstitialConfirmation
-      v-if="state.matches('ibcConfirmation')"
+      v-if="showTransferInterstitialConfirmationState"
       :action="state.context.input.action"
       :steps="state.context.formattedSteps"
       :is-swap-component="isSwapComponent"
       class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
-    <ViewStateReview v-else-if="shouldShowReview" />
-    <ViewStateSigning v-else-if="state.matches('signing')" />
-    <ViewStateTransacting v-else-if="state.matches('transacting')" />
-    <ViewStateReceipt v-else-if="shouldShowReceipt" />
-    <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
+    <ViewStateReview v-else-if="showReviewState" />
+    <ViewStateSigning v-else-if="showSigningState" />
+    <ViewStateTransacting v-else-if="showTransactingState" />
+    <ViewStateReceipt v-else-if="showReceiptState" />
+    <ViewStateWaitingTransaction v-else-if="showWaitingPreviousTransactionState" />
 
     <template v-else-if="state.matches('failed.chainStatus')">
       <ModalChainDown />
@@ -88,7 +88,7 @@ const minimizeModal = () => {
   }
 };
 
-const shouldShowReceipt = computed(() => {
+const showReceiptState = computed(() => {
   const isTxReady = state.value.matches('receipt') || state.value.matches('success');
   if (isTxReady) {
     emits('success');
@@ -96,7 +96,11 @@ const shouldShowReceipt = computed(() => {
   return isTxReady;
 });
 
-const shouldShowReview = computed(() => state.value.matches('review'));
+const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'));
+const showReviewState = computed(() => state.value.matches('review'));
+const showSigningState = computed(() => state.value.matches('signing'));
+const showTransactingState = computed(() => state.value.matches('transacting'));
+const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
 
 const closeModal = () => emits('close');
 const goBack = () => emits('previous');
@@ -112,7 +116,11 @@ provide(ProvideViewerKey, {
   removeTransactionAndClose,
   isSwapComponent,
   stepId: props.stepId,
-  shouldShowReceipt,
-  shouldShowReview,
+  showTransferInterstitialConfirmationState,
+  showReviewState,
+  showSigningState,
+  showTransactingState,
+  showWaitingPreviousTransactionState,
+  showReceiptState,
 });
 </script>
