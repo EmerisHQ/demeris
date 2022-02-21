@@ -26,7 +26,7 @@
         <hr class="border-t border-border" />
 
         <div class="py-2">
-          <a href="https://emeris.com/support" target="_blank" class="menu-item">
+          <a href="https://support.emeris.com" target="_blank" class="menu-item">
             <span>{{ $t('components.settingsMenu.support') }}</span>
             <span>&#8599;</span>
           </a>

@@ -200,7 +200,10 @@ export type Chain = {
   genesis_hash?: string;
   node_info?: NodeInfo;
   derivation_path?: string;
-  public_node_endpoints?: Record<string, string | null>;
+  public_node_endpoints?: {
+    tendermint_rpc?: string[];
+    cosmos_api?: string[];
+  };
 };
 export type ChainResponse = {
   chain: Chain;
