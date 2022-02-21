@@ -319,14 +319,14 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           broadcast: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
-              RETRY: { target: '#transacting' },
+              RETRY: { target: '#signing' },
               ABORT: '#aborted',
             },
           },
           confirmations: {
             entry: { type: 'logEvent', key: 'failed_tx' },
             on: {
-              RETRY: { target: '#transacting' },
+              RETRY: { target: '#signing' },
               ABORT: '#aborted',
             },
           },
