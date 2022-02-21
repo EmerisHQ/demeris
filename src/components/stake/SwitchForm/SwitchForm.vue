@@ -5,6 +5,8 @@
         :validator-list="validators"
         :disabled-list="validatorsToDisable"
         :table-style="'actionlist'"
+        :sorting-by="isStaking ? 'staked' : 'power'"
+        sorting-order="desc"
         @selectValidator="addValidator"
       />
     </template>
@@ -109,6 +111,9 @@ export default defineComponent({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
+    const isStaking = computed(() => {
+      return propsRef.validators.value.some((val) => parseInt(val.stakedAmount) > 0);
+    });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const gasPrice = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
@@ -206,6 +211,7 @@ export default defineComponent({
       addValidator,
       selectAnother,
       validatorsToDisable,
+      isStaking,
     };
   },
 });
