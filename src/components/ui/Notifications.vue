@@ -25,9 +25,9 @@
                 v-for="({ message, id }, toastIndex) in visibleToastMessages"
                 :id="`toast-${toastIndex}`"
                 :key="`message-${id}`"
-                class="toast-message w-full flex absolute px-4 py-3 justify-between bg-surface rounded-lg left-0 bottom-0 right-0 mx-auto"
+                class="notification w-full flex absolute px-4 py-3 justify-between bg-surface rounded-lg left-0 bottom-0 right-0 mx-auto"
                 :style="notificationComputedStyles[toastIndex]"
-                data-test="toast-message"
+                data-test="single-notification-message"
                 @click="expandNotifications()"
               >
                 <Transition name="fade-hover">
@@ -290,7 +290,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="postcss">
-.toast-message {
+.notification {
   transition: all 0.3s ease-out;
 }
 .root-unstacked {
