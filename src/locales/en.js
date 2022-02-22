@@ -140,9 +140,9 @@ export const messages = {
         estimate: 'Estimated total fees',
       },
       validatorCard: {
-        commissionTooltip: 'TODO: commission tooltip',
-        maxCommissionTooltip: 'TODO: Max commission tooltip',
-        maxChangeRateTooltip: 'TODO: maxChangeRate tooltip',
+        commissionLabel: 'Commission',
+        maxCommissionLabel: 'Max commission',
+        maxChangeRateLabel: 'Max change rate',
       },
       stakeForm: {
         selectTitle: 'Select a validator',
