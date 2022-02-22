@@ -1,4 +1,4 @@
-// npx jest -- src/components/ui/Toast/Toast.spec.js
+// npx jest -- src/components/ui/Notifications.spec.js
 import { mount } from '@vue/test-utils';
 
 import Notifications from './Notifications.vue';
@@ -34,14 +34,17 @@ describe('Notifications', () => {
   //   // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications + 2);
   // });
 
-  it.only('Should load 6 notifications and remove 1, leaving 5', async () => {
+  it.only('Updates to props update HTML', async () => {
+    // create test messages for notifications
     const testData = [];
     const totalNotifications = 6;
     for (let i = 0; i < totalNotifications; i++) {
       testData.push({ message: `Transaction item ${i}`, id: i });
     }
-    const wrapper = mount(Toast, {
-      propsData: {
+
+    const wrapper = mount(Notifications, {
+      sync: true,
+      props: {
         messages: testData,
         button1Label: 'Undo',
         button2Label: 'Details',
@@ -49,6 +52,15 @@ describe('Notifications', () => {
         clearAllLabel: 'Clear All',
       },
     });
+
+    expect(wrapper.html()).toContain('Undo');
+    expect(wrapper.html()).toContain('Details');
+
+    await wrapper.setProps({ button1Label: 'Undo2' });
+    await wrapper.setProps({ button2Label: 'Details2' });
+
+    expect(wrapper.html()).toContain('Undo2');
+    expect(wrapper.html()).toContain('Details2');
 
     // :messages="testData"
     //       button1-label="Undo"
@@ -60,14 +72,23 @@ describe('Notifications', () => {
     //       @onButton2Click="($event) => details($event)"
     //       @on-update="($event) => updateTestData($event)"
 
-    console.log('messages1:', wrapper.props().messages);
+    console.log('messages1:', wrapper.props().messages.length);
 
-    await wrapper.find('[data-test=clear-all-notifications-button]').trigger('click');
-    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
+
+    testData.pop();
+
+    await wrapper.setProps({ messages: testData });
+
+    // hack to try to make jest update dom... does not work.
+    // await wrapper.vm.$parent.$forceUpdate();
+    // await wrapper.vm.$nextTick();
+
+    // debugger
 
     console.log('messages2:', wrapper.props().messages.length);
 
-    // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications - 1);
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications - 1);
   });
 
   // it('Should load 6 notifications and add 1, leaving 7', async () => {})
