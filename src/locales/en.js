@@ -103,6 +103,7 @@ export const messages = {
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
+        acceptText: 'OK',
       },
       asset: {
         pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
