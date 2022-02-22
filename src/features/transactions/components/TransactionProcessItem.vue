@@ -51,13 +51,13 @@
           Claim <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
         <template v-if="action === 'stake'">
-          Delegate <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
+          Stake <Ticker :name="getBaseDenomSync(transactionAction.data[0].amount.denom)" />
         </template>
         <template v-if="action === 'unstake'">
-          Undelegate <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          Unstake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
         <template v-if="action === 'switch'">
-          Redelegate <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
+          Restake <Ticker :name="getBaseDenomSync(transactionAction.data.amount.denom)" />
         </template>
       </p>
 

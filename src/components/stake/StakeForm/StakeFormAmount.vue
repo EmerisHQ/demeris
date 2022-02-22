@@ -74,7 +74,7 @@
             <ListItem inset size="md" label="Total stake">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
-                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" />
+                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" :show-dash="false" />
               </div>
             </ListItem>
 
@@ -118,7 +118,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { MultiDelegateForm, Step } from '@/types/actions';
+import { MultiStakeForm, Step } from '@/types/actions';
 import { Balance } from '@/types/api';
 import { isNative, parseCoins } from '@/utils/basic';
 export default defineComponent({
@@ -149,7 +149,7 @@ export default defineComponent({
     const { t } = useI18n({ useScope: 'global' });
     const store = useStore();
 
-    const form = inject<MultiDelegateForm>('stakeForm');
+    const form = inject<MultiStakeForm>('stakeForm');
     const { balances: userBalances, getNativeBalances } = useAccount();
 
     const state = reactive({
@@ -216,10 +216,9 @@ export default defineComponent({
     );
     const disabled = computed(() => {
       let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+      let toStake = 0;
       for (const validator of validatorsToStakeWith.value) {
-        if (validator.amount == '') {
-          return true;
-        }
+        toStake = toStake + Number(validator.amount ?? 0);
         if (chains[validator.from_chain]) {
           chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
             new BigNumber(validator.amount != '' ? validator.amount : 0),
@@ -230,6 +229,9 @@ export default defineComponent({
             denom: validator.denom,
           };
         }
+      }
+      if (toStake == 0) {
+        return true;
       }
       for (const chain in chains) {
         if (
@@ -266,6 +268,7 @@ export default defineComponent({
       emit('selectanother', null);
     };
     const goToReview = () => {
+      form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
       emit('next');
     };
     const toggleChainsModal = (asset: Balance, index: number) => {
