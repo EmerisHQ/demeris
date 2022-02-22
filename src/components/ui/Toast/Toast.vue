@@ -1,6 +1,5 @@
 <template>
   <div
-    id="toast-messages"
     ref="clickableAreaRef"
     class="relative w-full m-0 p-0"
     @mouseleave="isMouseOverComponent = false"
@@ -10,7 +9,7 @@
       <div
         v-if="visibleToastMessages.length > 0"
         data-test="messages-container"
-        class="z-40 absolute w-full root"
+        class="z-40 absolute w-full root theme-inverse dark:theme-inverse"
         :class="{ 'root-unstacked': !isStacked, 'opacity-0': visibleToastMessages.length === 0 }"
       >
         <div
@@ -26,7 +25,7 @@
                 v-for="({ message, id }, toastIndex) in visibleToastMessages"
                 :id="`toast-${toastIndex}`"
                 :key="`message-${id}`"
-                class="toast-message"
+                class="toast-message w-full flex absolute px-4 py-3 justify-between bg-surface rounded-lg left-0 bottom-0 right-0 mx-auto"
                 :style="notificationComputedStyles[toastIndex]"
                 data-test="toast-message"
                 @click="expandNotifications()"
@@ -34,16 +33,16 @@
                 <Transition name="fade-hover">
                   <button
                     v-if="showClearButton(toastIndex)"
-                    class="dismiss-button"
+                    class="dismiss-button absolute bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
                     data-test="dismiss-toast"
                     @click="clearAllNotifications()"
                   >
                     <Icon v-if="visibleToastMessages.length === 1" name="CloseIcon" :icon-size="0.563" />
-                    <span v-else>Clear All</span>
+                    <span v-else class="text-text">{{ clearAllLabel }}</span>
                   </button>
                 </Transition>
                 <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex flex-grow">
-                  <div class="flex-1 theme-inverse text-text">{{ message }}</div>
+                  <div class="flex-1 text-text">{{ message }}</div>
                   <div class="flex items-center">
                     <Button
                       :name="buttonLabel2"
@@ -66,9 +65,23 @@
       </div>
     </Transition>
     <Transition name="fade-controls">
-      <div v-show="!isStacked && visibleToastMessages.length > 1" key="button-group" class="mt-1 absolute bottom-0">
-        <button class="button-xs" @click="isStacked = true">Show less</button>
-        <button class="button-xs ml-1" @click="clearAllNotifications()">Clear All</button>
+      <div
+        v-show="!isStacked && visibleToastMessages.length > 1"
+        key="button-group"
+        class="mt-1 absolute bottom-0 text-text theme-inverse dark:theme-inverse"
+      >
+        <button
+          class="px-2 py-1 opacity-60 bg-surface -text-1 text-text font-medium rounded-full focus:outline-none"
+          @click="isStacked = true"
+        >
+          {{ showLessLabel }}
+        </button>
+        <button
+          class="px-2 py-1 opacity-60 bg-surface -text-1 text-text font-medium rounded-full focus:outline-none ml-1"
+          @click="clearAllNotifications()"
+        >
+          {{ clearAllLabel }}
+        </button>
       </div>
     </Transition>
   </div>
@@ -83,23 +96,23 @@ import Icon from '@/components/ui/Icon.vue';
 
 interface NotificationMessage {
   message: string;
-  date: string;
   id: number | string;
 }
 
 interface Props {
-  messages?: NotificationMessage[];
   buttonLabel1?: string;
   buttonLabel2?: string;
+  clearAllLabel: string;
+  messages?: NotificationMessage[];
+  showLessLabel: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  buttonLabel1: '',
+  buttonLabel2: '',
+  clearAllLabel: '',
   messages: () => [],
-  buttonLabel1: 'Undo',
-  buttonLabel2: 'Details',
-  // TODO: implement sorting props
-  // sortByProperty
-  // sortDirection
+  showLessLabel: '',
 });
 
 const messages = toRef(props, 'messages');
@@ -110,18 +123,15 @@ const emit = defineEmits<{
   (e: 'onUpdate', messages: NotificationMessage[]);
 }>();
 
-const isStacked = ref(true);
+const isStacked = ref<boolean>(true);
 const viewportHeight = ref(0);
-const isMouseOverComponent = ref(null);
+const isMouseOverComponent = ref<boolean>(false);
 const clickableAreaRef = ref(null);
 const viewportRef = ref(null);
-const toastMessages = ref(messages);
-const notificationComputedStyles = ref([]);
-
+const toastMessages = ref<NotificationMessage[]>(messages);
+const notificationComputedStyles = ref<string[]>([]);
 const inactivityTimeout = ref(null);
-
 const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
-
 const totalStackedToasts = 3;
 
 function computeNotificationsStyle(): void {
@@ -166,52 +176,46 @@ function computeNotificationsStyle(): void {
   });
 }
 
-function clearAllNotifications() {
+function clearAllNotifications(): void {
   emit('onUpdate', []);
   isStacked.value = true;
 }
 
-function expandNotifications() {
+function expandNotifications(): void {
   if (!isStacked.value || toastMessages.value.length === 1) return;
 
   isStacked.value = false;
 }
 
-function dismissNotification(id) {
+function dismissNotification(id): void {
   emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
   if (visibleToastMessages.value.length === 0) isStacked.value = false;
 }
 
-function onInactivityStart() {
+function onInactivityStart(): void {
   if (isMouseOverComponent.value) return;
   startDismissNotificationTimeout();
 }
 
-function startDismissNotificationTimeout() {
+function startDismissNotificationTimeout(): void {
   clearTimeout(inactivityTimeout.value);
+  return;
   inactivityTimeout.value = setTimeout(() => {
     const lastNotificationId = visibleToastMessages.value[visibleToastMessages.value.length - 1]?.id;
-    if (lastNotificationId >= 0) {
-      console.log('dismiss', lastNotificationId);
-      dismissNotification(lastNotificationId);
-    }
+    if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
     if (visibleToastMessages.value.length > 0) onInactivityStart();
   }, 5000);
 }
 
-function showClearButton(index) {
+function showClearButton(index): boolean {
   return isMouseOverComponent.value && isStacked.value && index === 0;
 }
 
-function onActivity() {
-  clearTimeout(inactivityTimeout.value);
-}
-
-function scrollNotificationsViewportToBottom() {
+function scrollNotificationsViewportToBottom(): void {
   if (viewportRef.value) viewportRef.value.scrollTop = viewportRef.value.scrollHeight;
 }
 
-function updateNotificationPositions() {
+function updateNotificationPositions(): void {
   computeNotificationsStyle();
   scrollNotificationsViewportToBottom();
 
@@ -248,7 +252,7 @@ watch(
 watch(
   () => isMouseOverComponent.value,
   () => {
-    onActivity();
+    clearTimeout(inactivityTimeout.value);
     onInactivityStart();
   },
 );
@@ -269,19 +273,7 @@ onUnmounted(() => {
 
 <style lang="postcss">
 .toast-message {
-  @apply flex absolute px-4 py-3 justify-between bg-black;
-  border-radius: 0.5rem;
   transition: all 0.3s ease-out;
-  width: 100%;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-/* TODO: replace with regular ui button component */
-.button-xs {
-  @apply px-2 py-1 opacity-60 bg-black bg-opacity-10 text-inverse -text-1 font-medium rounded-full focus:outline-none;
 }
 .root-unstacked {
   transform: translateY(-300px);
@@ -293,13 +285,9 @@ onUnmounted(() => {
   height: 270px;
   overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
 }
-
 /* TODO: use ui Button */
 .dismiss-button {
-  @apply py-1 px-2 text-inverse -text-1 font-medium rounded-full focus:outline-none;
-  position: absolute;
   background-color: #555555;
   left: -0.75rem;
   min-height: 1.5rem;
