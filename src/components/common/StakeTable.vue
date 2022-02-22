@@ -94,7 +94,7 @@
               </td>
               <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
               <td class="text-right font-medium bg-surface">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" /></div>
+                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" /></div>
               </td>
               <td class="text-right rounded-r-xl bg-surface">
                 <Icon
@@ -304,7 +304,6 @@ export default defineComponent({
       return moniker;
     };
     const getValidatorData = (address: string): any => {
-      console.log(address);
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
           return vali;

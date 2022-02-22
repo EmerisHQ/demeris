@@ -144,7 +144,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { RedelegateForm, Step } from '@/types/actions';
+import { RestakeForm, Step } from '@/types/actions';
 
 import ValidatorDisplay from '../ValidatorDisplay.vue';
 
@@ -176,7 +176,7 @@ export default defineComponent({
 
     const { getStakingRewardsByBaseDenom } = useStaking();
 
-    const form = inject<RedelegateForm>('switchForm');
+    const form = inject<RestakeForm>('switchForm');
 
     const propsRef = toRefs(props);
     const fees = ref({});

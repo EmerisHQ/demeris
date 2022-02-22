@@ -56,18 +56,18 @@ export type ClaimRewardsParams = {
   total: string;
   chain_name: string;
 };
-export type DelegateParams = {
+export type StakeParams = {
   validatorAddress: string;
   amount: Base.ChainAmount;
 };
 
-export type MultiDelegateParams = Array<DelegateParams>;
+export type MultiStakeParams = Array<StakeParams>;
 
-export type UndelegateParams = {
+export type UnstakeParams = {
   validatorAddress: string;
   amount: Base.ChainAmount;
 };
-export type RedelegateParams = {
+export type RestakeParams = {
   validatorSrcAddress: string;
   validatorDstAddress: string;
   amount: Base.ChainAmount;
@@ -82,10 +82,10 @@ export type TransferAction = BaseAction & { params: TransferParams };
 export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
 export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
-export type MultiDelegateAction = BaseAction & { params: MultiDelegateParams };
-export type DelegateAction = BaseAction & { params: DelegateParams };
-export type UndelegateAction = BaseAction & { params: UndelegateParams };
-export type RedelegateAction = BaseAction & { params: RedelegateParams };
+export type MultiStakeAction = BaseAction & { params: MultiStakeParams };
+export type StakeAction = BaseAction & { params: StakeParams };
+export type UnstakeAction = BaseAction & { params: UnstakeParams };
+export type RestakeAction = BaseAction & { params: RestakeParams };
 export type Any =
   | SwapAction
   | RedeemAction
@@ -95,10 +95,10 @@ export type Any =
   | CreatePoolAction
   | MoveAction
   | ClaimRewardsAction
-  | DelegateAction
-  | MultiDelegateAction
-  | UndelegateAction
-  | RedelegateAction;
+  | StakeAction
+  | MultiStakeAction
+  | UnstakeAction
+  | RestakeAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -149,17 +149,17 @@ export type ClaimData = {
   rewards: { reward: string; validator_address: string }[];
   chain_name: string;
 };
-export type DelegateData = {
+export type StakeData = {
   validatorAddress: string;
   amount: Base.Amount;
   chain_name: string;
 };
-export type UndelegateData = {
+export type UnstakeData = {
   validatorAddress: string;
   amount: Base.Amount;
   chain_name: string;
 };
-export type RedelegateData = {
+export type RestakeData = {
   validatorSrcAddress: string;
   validatorDstAddress: string;
   amount: Base.Amount;
@@ -191,9 +191,9 @@ export type StepTransaction = {
     | WithdrawLiquidityData
     | CreatePoolData
     | ClaimData
-    | DelegateData[]
-    | UndelegateData
-    | RedelegateData;
+    | StakeData[]
+    | UnstakeData
+    | RestakeData;
 };
 export type Step = {
   name:
@@ -228,17 +228,17 @@ export type SendAddressForm = {
   isTermChecked?: boolean;
   balance: Base.Amount;
 };
-export type UndelegateForm = {
+export type UnstakeForm = {
   validatorAddress: string;
   amount: string;
   denom: string;
   chain_name: string;
 };
-export type DelegateForm = UndelegateForm & { from_chain: string };
-export type MultiDelegateForm = {
-  stakes: DelegateForm[];
+export type StakeForm = UnstakeForm & { from_chain: string };
+export type MultiStakeForm = {
+  stakes: StakeForm[];
 };
-export type RedelegateForm = {
+export type RestakeForm = {
   validatorAddress: string;
   toValidatorAddress: string;
   amount: string;

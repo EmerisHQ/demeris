@@ -32,7 +32,7 @@
 
       <main class="pt-8 pb-28 flex-1 flex flex-col items-center justify-center">
         <template v-if="actionType == 'claim'">
-          <div class="w-full">
+          <div class="w-full" :class="{ 'mt-0 mb-auto': step == 'validator' }">
             <ClaimForm
               v-if="validatorList.length > 0"
               v-model:step="step"
@@ -42,7 +42,7 @@
           </div>
         </template>
         <template v-if="actionType == 'switch'">
-          <div class="w-full">
+          <div class="w-full" :class="{ 'mt-0 mb-auto': step == 'validator' }">
             <SwitchForm
               v-if="validatorList.length > 0"
               v-model:step="step"
@@ -53,7 +53,7 @@
           </div>
         </template>
         <template v-if="actionType == 'stake'">
-          <div class="w-full">
+          <div class="w-full" :class="{ 'mt-0 mb-auto': step == 'validator' }">
             <StakeForm
               v-if="validatorList.length > 0"
               v-model:step="step"
@@ -64,7 +64,7 @@
           </div>
         </template>
         <template v-if="actionType == 'unstake'">
-          <div class="w-full max-w-lg">
+          <div class="w-full max-w-lg" :class="{ 'mt-0 mb-auto': step == 'validator' }">
             <UnstakeForm v-model:step="step" :validator="selectedValidators.slice()[0]" @previous="goBack" />
           </div>
         </template>
@@ -229,7 +229,6 @@ export default defineComponent({
       steps.value = actionSteps.slice();
 
       step.value = allSteps[actionType][currentStepIndex.value + 1];
-      console.log(steps);
     };
     const onClose = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
