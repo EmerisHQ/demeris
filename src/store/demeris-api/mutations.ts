@@ -50,6 +50,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
   [MutationTypes.RESET_STATE](state: S): void;
+  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: S): void;
   [MutationTypes.SIGN_OUT](state: S, payload: string[]): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -332,7 +333,7 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
   },
-  [MutationTypes.SIGN_OUT](state: State, payload: string[]) {
+  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: State) {
     for (const sub of state._Subscriptions.values()) {
       const subObj = JSON.parse(sub);
       if (
@@ -344,6 +345,8 @@ export const mutations: MutationTree<State> & Mutations = {
         state._Subscriptions.delete(sub);
       }
     }
+  },
+  [MutationTypes.SIGN_OUT](state: State, payload: string[]) {
     for (const keyhash of payload ?? []) {
       delete state.balances[keyhash];
     }

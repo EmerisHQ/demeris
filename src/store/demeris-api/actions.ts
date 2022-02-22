@@ -1003,8 +1003,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.RESET_STATE);
   },
   async [DemerisActionTypes.SIGN_OUT]({ commit, state }, keyHashes) {
-    commit(DemerisMutationTypes.SIGN_OUT, keyHashes);
+    commit(DemerisMutationTypes.CLEAR_SUBSCRIPTIONS);
+    // Although on the CLEAR_SUBSCRIPTIONS mutation we remove any subscriptions from the previously signed in account
+    // there is a chance some requests were already in progress and may return after we clear them so we await completion
+    // before deleting state data on SIGN_OUT mutation
     await Promise.all(state._InProgess.values());
+    commit(DemerisMutationTypes.SIGN_OUT, keyHashes);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach(async (subscription_json) => {
