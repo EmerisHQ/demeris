@@ -14,7 +14,7 @@
 import axios from 'axios';
 import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 
-import { getFirstAlphabet } from '@/utils/basic';
+import { checkStringIsKeybase,getFirstAlphabet } from '@/utils/basic';
 export default defineComponent({
   name: 'ValidatorImg',
   props: {
@@ -33,14 +33,13 @@ export default defineComponent({
     watch(
       () => validator.value,
       async (newValue) => {
-        imgUrl.value = await fetchValidatorImg(newValue.identity);
+        imgUrl.value = await fetchValidatorImg(newValue);
         monikerFirst.value = getFirstAlphabet(newValue.moniker);
       },
     );
 
     onMounted(async () => {
-      if (!validator.value) return;
-      imgUrl.value = await fetchValidatorImg(validator.value.identity);
+      imgUrl.value = await fetchValidatorImg(validator.value);
       monikerFirst.value = getFirstAlphabet(validator.value.moniker);
     });
     return {
@@ -50,10 +49,11 @@ export default defineComponent({
   },
 });
 
-async function fetchValidatorImg(identity: string) {
+async function fetchValidatorImg(validator: Record<string, string>): Promise<string> {
+  if (!checkStringIsKeybase(validator?.identity)) return '';
   try {
     const res = await axios.get(
-      'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + identity + '&fields=pictures',
+      'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + validator.identity + '&fields=pictures',
     );
     const url = res.data?.them[0]?.pictures?.primary?.url ?? '';
     return url;

@@ -2,8 +2,8 @@ import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
+import every from 'lodash/every';
 import findIndex from 'lodash/findIndex';
-import includes from 'lodash/includes';
 
 import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
@@ -176,4 +176,18 @@ export function getFirstAlphabet(str: string) {
   });
   if (index !== -1) return str[index];
   return '';
+}
+
+const KEYBASE_LENGTH = 16;
+// 0~9 48-57, A~F 65~70
+function isHexValue(letter: string) {
+  const charCode = letter.charCodeAt(0);
+  return (charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 70);
+}
+
+export function checkStringIsKeybase(str: string) {
+  if (!str || str?.length !== KEYBASE_LENGTH) return false;
+  return every(str, (letter) => {
+    return isHexValue(letter);
+  });
 }
