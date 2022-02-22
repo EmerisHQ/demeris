@@ -144,6 +144,16 @@ export default defineComponent({
                 console.error('Could not load liquidity pools: ' + e);
               })
               .finally(() => {
+                // Pool token prices are calculated as part of the GET_PRICES dispatch
+                // This is something to fix during the refactor/revamp of the store where
+                // most of the functionality in composables such as usePool(s)/usePrice etc.
+                // will be relegated to getters in the store.
+                // In the meantime however, in order to calculate pool token prices during
+                // the first call to the /prices endpoint, we must have pool details available
+                // so we can grab their reserve account address and reserve denom balances
+                // in order to calculate the TVL of the pool and thus the token's price.
+                // Otherwise we'd have to wait 5 seconds till the next polling cycle leading
+                // to worse UX.
                 apistore
                   .dispatch(GlobalDemerisActionTypes.API.GET_PRICES, {
                     subscribe: true,

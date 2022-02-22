@@ -147,6 +147,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
+      // Prior to signing in with a new account we must SIGN_OUT to remove all account related data from the store
+      // i.e. balances/staking_balances/subscriptions to those endpoints etc.
+      // We could call global reset_state but then we'd have to reload all non user-specific data (pools, chains, denoms etc.)
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
@@ -163,7 +166,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
           },
           { root: true },
         ));
-
       for (const chain in chains) {
         if (!chains[chain].node_info)
           chains[chain] = await dispatch(
@@ -177,6 +179,13 @@ export const actions: ActionTree<State, RootState> & Actions = {
             { root: true },
           );
       }
+      // The only case where the getChains getter would not return full data for a chain
+      // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
+      // This happens with the autoLogin feature or if the user clicks on connect_wallet as soon as it appears
+      // Since their async load has already been initiated this does not make new requests but makes use of the _InProgress
+      // caching and just waits for the previous ones to be resolved (hence it's a threading...or lack thereof issue since
+      // no actual requests are involved)
+
       window.keplr.defaultOptions = {
         sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
       };
