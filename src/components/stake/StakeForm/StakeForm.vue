@@ -97,7 +97,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step', 'previous', 'unselect'],
+  emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);
@@ -176,8 +176,11 @@ export default defineComponent({
       valToEdit.value = e;
       goToStep('validator');
     };
-    const unselect = (e) => {
-      emit('unselect', e);
+    const unselect = (validatorToRemove) => {
+      form.stakes = form.stakes.filter((val) => val.validatorAddress !== validatorToRemove.validatorAddress);
+      if (form.stakes.length === 0) {
+        goToStep('validator');
+      }
     };
     const goToStep = (value: Step) => {
       step.value = value;

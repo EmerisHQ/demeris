@@ -27,7 +27,7 @@
                 (newAmount) => (form.stakes.find((x) => x.validatorAddress == vali.validatorAddress).amount = newAmount)
               "
               @select="() => validatorSelectHandler(index)"
-              @unselect="() => validatorUnselectHandler(vali.validator)"
+              @unselect="() => validatorUnselectHandler(vali)"
             />
 
             <button

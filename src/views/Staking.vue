@@ -58,7 +58,6 @@
               :validators="validatorList"
               :preselected="validator"
               @previous="goBack"
-              @unselect="unselect"
             />
           </div>
         </template>
@@ -229,9 +228,6 @@ export default defineComponent({
       step.value = undefined;
       router.back();
     };
-    const unselect = (e) => {
-      validatorList.value = validatorList.value.filter((val) => val.operator_address !== e.operator_address);
-    };
     const setSteps = (actionSteps) => {
       steps.value = actionSteps.slice();
 
@@ -256,7 +252,6 @@ export default defineComponent({
       addValidator,
       selectedValidators,
       selectAnother,
-      unselect,
       totalStakedAmount,
       disabledValidators,
       resetHandler,
