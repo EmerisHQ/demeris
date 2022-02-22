@@ -76,7 +76,7 @@
             <AmountDisplay
               :amount="{
                 amount: stakedAmount,
-                denom: getBaseDenomSync(transaction.data.amount.denom),
+                denom: getBaseDenomSync(parseCoins(transaction.data.total)[0].denom),
               }"
             />
           </p>
@@ -332,11 +332,7 @@ if (transaction.value.name == 'switch') {
   stakedAmount.value = (transaction.value.data as RedelegateData).amount.amount;
 }
 if (transaction.value.name == 'claim') {
-  stakedAmount.value = (transaction.value.data as ClaimData).rewards
-    .reduce((acc, data) => {
-      return acc.plus(new BigNumber(data.reward));
-    }, new BigNumber(0))
-    .toString();
+  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
 }
 const onNext = () => {
   send('CONTINUE');
