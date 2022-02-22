@@ -15,9 +15,7 @@
         >
           {{ $t('components.stakeTable.unstaking') }}
           <div class="text-0 font-normal text-muted">
-            <div class="text-0 font-normal text-muted">
-              {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
-            </div>
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
           </div>
         </h2>
       </div>
@@ -161,11 +159,56 @@
           </tbody>
         </table>
       </div>
-      <div v-show="selectedTab === 2">unstaking</div>
+      <div v-show="selectedTab === 2">
+        <table class="w-full table-fixed mt-8 text-right">
+          <colgroup>
+            <col width="30%" />
+            <col width="20%" />
+            <col width="25%" />
+            <col width="25%" />
+          </colgroup>
+
+          <!-- table body -->
+          <tbody>
+            <!-- staked validators -->
+            <template v-for="unbondingBalance of unbondingBalances">
+              <tr
+                v-for="(entry, index) of unbondingBalance.entries"
+                :key="unbondingBalance.validator_address + '_' + index"
+                class="group"
+              >
+                <td class="py-6 flex items-center transition">
+                  <div class="inline-flex items-center mr-4">
+                    <ValidatorBadge
+                      :validator="
+                        validatorList.find(
+                          (x) => keyHashfromAddress(x.operator_address) == unbondingBalance.validator_address,
+                        )
+                      "
+                      class="w-8 h-8 rounded-full bg-fg z-1"
+                    />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ getValidatorMoniker(unbondingBalance.validator_address) }}
+                  </span>
+                </td>
+                <td class="text-left text-muted">{{ getTimeToString(entry.completion_time) }}</td>
+                <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
+                <td class="text-right font-medium">
+                  <Price :amount="{ denom: denom, amount: entry.balance }" />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </template>
   </div>
 </template>
 <script lang="tsx">
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -201,12 +244,14 @@ export default defineComponent({
     },
   },
   setup(props) {
+    dayjs.extend(relativeTime);
     const { useDenom } = useDenoms();
     const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
       useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
+
     const store = useStore();
     /* variables */
     const selectedTab = ref<number>(1);
@@ -236,23 +281,29 @@ export default defineComponent({
     const assetPrecision = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: props.denom,
+          name: propsRef.denom.value,
         }) ?? '6'
       );
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
+    const getTimeToString = (isodate: string) => {
+      return dayjs().to(dayjs(isodate));
+    };
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
+
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+          denom: propsRef.denom.value,
+        }),
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
@@ -270,8 +321,7 @@ export default defineComponent({
       return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
-      // TODO: implement unstaking asset check
-      return false;
+      return unbondingBalances.value.length > 0;
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
@@ -283,8 +333,14 @@ export default defineComponent({
       return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
     });
     const unstakingAssetValue = computed(() => {
-      //TODO
-      return 77;
+      return unbondingBalances.value
+        .map((x) => x.entries)
+        .flat()
+        .reduce((acc, entry) => {
+          return acc.plus(new BigNumber(entry.balance));
+        }, new BigNumber(0))
+        .dividedBy(10 ** assetPrecision.value)
+        .toString();
     });
 
     /* functions */
@@ -340,6 +396,7 @@ export default defineComponent({
 
     return {
       StakingActions,
+      getTimeToString,
       isUnstakingAssetExist,
       isStakingAssetExist,
       unbondingBalances,
