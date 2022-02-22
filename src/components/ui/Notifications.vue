@@ -33,8 +33,8 @@
                 <Transition name="fade-hover">
                   <button
                     v-if="showClearButton(toastIndex)"
-                    class="dismiss-button absolute bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
-                    data-test="dismiss-toast"
+                    class="clear-all-button absolute bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
+                    data-test="clear-all-notifications-button"
                     @click="clearAllNotifications()"
                     @mouseover="isHoverClearAllButton = true"
                     @mouseleave="isHoverClearAllButton = false"
@@ -302,7 +302,7 @@ onUnmounted(() => {
   overflow-x: hidden;
 }
 /* TODO: use ui Button */
-.dismiss-button {
+.clear-all-button {
   background-color: #555555;
   left: -0.75rem;
   min-height: 1.5rem;
