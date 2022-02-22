@@ -13,27 +13,27 @@
       <div class="-text-1 font-medium">{{ $t('components.slippageSettingsModal.title') }}</div>
       <div class="flex justify-between my-4 space-x-2">
         <button
-          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          class="h-12 flex-grow rounded-xl outline-none text-text"
           :class="[
-            slippage === 0.1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+            slippage === 0.1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
           @click="setSlippage(0.1)"
         >
           0.1%
         </button>
         <button
-          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          class="h-12 flex-grow rounded-xl outline-none text-text"
           :class="[
-            slippage === 0.5 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+            slippage === 0.5 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
           @click="setSlippage(0.5)"
         >
           0.5%
         </button>
         <button
-          class="h-12 flex-grow bg-fg rounded-xl outline-none text-text"
+          class="h-12 flex-grow rounded-xl outline-none text-text"
           :class="[
-            slippage === 1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : '',
+            slippage === 1 && !isCustomSelected ? 'bg-surface theme-inverse dark:theme-inverse font-medium' : 'bg-fg',
           ]"
           @click="setSlippage(1)"
         >
@@ -42,11 +42,11 @@
         <Input
           v-if="allowCustomSlippage"
           v-model:modelValue="customSlippage"
-          class="bg-fg rounded-xl outline-none text-text"
+          class="rounded-xl outline-none text-text"
           :class="[
             isCustomSelected && !isCustomSlippageEditing && alertStatus !== 'error'
               ? 'bg-surface theme-inverse dark:theme-inverse font-medium rounded-lg'
-              : '',
+              : 'bg-fg',
           ]"
           :border-colour="isCustomSelected && customSlippage != trueSlippage ? 'bg-negative' : null"
           placeholder="Custom"
