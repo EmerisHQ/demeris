@@ -805,20 +805,21 @@ export default {
           parseCoins(form.coinA.asset.amount)[0].denom,
           parseCoins(form.coinB.asset.amount)[0].denom,
         ].sort();
+        if (pools.value) {
+          for (const poolIterator of pools.value) {
+            const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
-        for (const poolIterator of pools.value) {
-          const reserveDenoms = await getReserveBaseDenoms(poolIterator);
-
-          if (
-            [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
-            poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
-          ) {
-            // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
-            state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
-            if (poolIterator.id != route.params.id) {
-              router.push('/pools/add/' + poolIterator.id);
+            if (
+              [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+              poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
+            ) {
+              // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+              state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
+              if (poolIterator.id != route.params.id) {
+                router.push('/pools/add/' + poolIterator.id);
+              }
+              return;
             }
-            return;
           }
         }
         router.push('/pools/add');
@@ -1006,7 +1007,7 @@ export default {
           return;
         }
 
-        const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
+        const poolFromRoute = pools.value?.find((item) => item.id === poolId.value);
 
         if (poolFromRoute) {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);

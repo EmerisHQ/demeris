@@ -103,6 +103,7 @@ export const messages = {
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
+        acceptText: 'OK',
       },
       asset: {
         pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
@@ -139,9 +140,9 @@ export const messages = {
         estimate: 'Estimated total fees',
       },
       validatorCard: {
-        commissionTooltip: 'TODO: commission tooltip',
-        maxCommissionTooltip: 'TODO: Max commission tooltip',
-        maxChangeRateTooltip: 'TODO: maxChangeRate tooltip',
+        commissionLabel: 'Commission',
+        maxCommissionLabel: 'Max commission',
+        maxChangeRateLabel: 'Max change rate',
       },
       stakeForm: {
         selectTitle: 'Select a validator',

@@ -46,7 +46,7 @@ export function getDefaultState(): State {
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
-    validPools: [],
+    validPools: null,
     prices: {
       Fiats: [],
       Tokens: [],
