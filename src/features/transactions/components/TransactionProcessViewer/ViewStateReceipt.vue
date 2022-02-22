@@ -267,16 +267,13 @@ import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 
 import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
 
-const { actor, isSwapComponent, removeTransactionAndClose, stepId } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
 const { state, send } = actor;
 
 const globalStore = useStore();
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
-
-const transactionsStore = useTransactionsStore();
 
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);

@@ -485,7 +485,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           callback({ type: 'GOT_RESPONSE', data: responseData });
         };
 
-        const traceResponse = async () => {
+        const findIBCDestHash = async () => {
           if (currentTransaction.name.includes('ibc')) {
             const { from_chain, to_chain } = currentTransaction.data as IBCBackwardsData;
 
@@ -514,6 +514,10 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
             }
           }
+        };
+
+        const traceResponse = async () => {
+          await findIBCDestHash();
 
           try {
             const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {

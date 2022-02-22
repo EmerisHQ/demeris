@@ -25,7 +25,6 @@ import {
   DemerisActionTypes,
   DemerisSubscriptions,
 } from './action-types';
-import { GetterTypes } from './getter-types';
 import { DemerisMutationTypes, UserData } from './mutation-types';
 import { ChainData, State } from './state';
 
