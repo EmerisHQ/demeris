@@ -1,16 +1,16 @@
 <template>
   <div class="w-full mx-auto">
-    <template v-if="step == 'validator'">
-      <ValidatorsTable
-        :validator-list="validators"
-        :disabled-list="validatorsToDisable"
-        :table-style="'actionlist'"
-        :sorting-by="isStaking ? 'staked' : 'power'"
-        sorting-order="desc"
-        @selectValidator="addValidator"
-      />
-    </template>
-    <template v-else-if="step === 'amount'">
+    <ValidatorsTable
+      v-show="step == 'validator'"
+      :validator-list="validators"
+      :disabled-list="validatorsToDisable"
+      :table-style="'actionlist'"
+      :sorting-by="isStaking ? 'staked' : 'power'"
+      sorting-order="desc"
+      @selectValidator="addValidator"
+    />
+
+    <template v-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.switchForm.title') }}</h2>
 
       <SwitchValidatorAmount
@@ -22,7 +22,7 @@
       />
     </template>
 
-    <template v-else-if="['review', 'redelegate'].includes(step)">
+    <template v-else-if="['review', 'restake'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
         <template #deactivated>
           <TxStepsModal
@@ -31,7 +31,7 @@
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
             action-name="switch"
-            @transacting="goToStep('redelegate')"
+            @transacting="goToStep('restake')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -51,6 +51,7 @@
   </div>
 </template>
 <script lang="ts">
+import BigNumber from 'bignumber.js';
 import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -62,11 +63,11 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { RedelegateAction, RedelegateForm } from '@/types/actions';
+import { RestakeAction, RestakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'redelegate';
+type Step = 'validator' | 'amount' | 'review' | 'restake';
 
 export default defineComponent({
   name: 'SwitchForm',
@@ -119,7 +120,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: RedelegateForm = reactive({
+    const form: RestakeForm = reactive({
       validatorAddress: propsRef.preselected.value,
       toValidatorAddress: '',
       amount: '',
@@ -135,6 +136,13 @@ export default defineComponent({
     const closeModal = () => {
       router.push('/');
     };
+
+    const precision = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+        name: baseDenom,
+      }),
+    );
+
     const action = computed(() => {
       return {
         name: 'switch',
@@ -142,13 +150,18 @@ export default defineComponent({
           validatorSrcAddress: form.validatorAddress,
           validatorDstAddress: form.toValidatorAddress,
           amount: {
-            amount: { amount: form.amount, denom: form.denom },
+            amount: {
+              amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
+                .multipliedBy(10 ** precision.value)
+                .toString(),
+              denom: form.denom,
+            },
             chain_name: form.chain_name,
           },
         },
-      } as RedelegateAction;
+      } as RestakeAction;
     });
-    const isValid = (form: RedelegateForm) => {
+    const isValid = (form: RestakeForm) => {
       return (
         form.validatorAddress !== '' &&
         form.toValidatorAddress !== '' &&

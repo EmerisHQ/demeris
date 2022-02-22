@@ -653,6 +653,7 @@ export const messages = {
         createWarning: 'Creating a pool is risky business',
         arbitrageWarning:
           'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
+        receiveLpAsset: 'The shares you will receive based on your contribution to the underlying pool',
       },
       asset: {
         balance: 'Balance',
