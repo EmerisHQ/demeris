@@ -231,7 +231,6 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const denom = computed(() => route.params.denom as string);
-
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
       useAccount();

@@ -19,6 +19,9 @@ export type TokenPriceReq = {
 export type TokenIdReq = {
   token: string;
 };
+export type DenomReq = {
+  denom: string;
+};
 export type TokenId = string;
 export type TokenPrices = {
   x: string;
@@ -306,7 +309,7 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq | DenomReq;
 
 export type SwapEndBlockResponse = {
   exchanged_offer_coin_amount: string;

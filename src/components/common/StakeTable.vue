@@ -166,7 +166,7 @@
   </div>
 </template>
 <script lang="tsx">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -202,29 +202,32 @@ export default defineComponent({
   },
   setup(props) {
     const { useDenom } = useDenoms();
-    const {
-      getValidatorsByBaseDenom,
-      getChainDisplayInflationByBaseDenom,
-      getStakingRewardsByBaseDenom,
-      getChainNameByBaseDenom,
-    } = useStaking();
+    const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
+      useStaking();
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
-    const { stakingBalancesByChain } = useAccount();
+    const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
     const store = useStore();
     /* variables */
     const selectedTab = ref<number>(1);
     const assetStakingAPY = ref<number | string>('-');
     const stakingRewardsData = ref(null);
     const validatorList = ref<Array<any>>([]);
+    const propsRef = toRefs(props);
 
-    /* created */
-    (async () => {
-      try {
-        assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(props.denom);
-      } catch (e) {}
-      validatorList.value = await getValidatorsByBaseDenom(props.denom);
-    })();
+    const chain_name = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    );
+    watch(
+      () => chain_name.value,
+      async (newVal, _) => {
+        if (newVal) {
+          assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
+          validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+        }
+      },
+      { immediate: true },
+    );
 
     /* computeds */
     const isSignedIn = computed(() => {
@@ -238,12 +241,18 @@ export default defineComponent({
       );
     });
     const stakingBalances = computed(() => {
-      return stakingBalancesByChain(getChainNameByBaseDenom(props.denom));
+      return stakingBalancesByChain(
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+      );
     });
-
+    const unbondingBalances = computed(() => {
+      return unbondingDelegationsByChain(
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+      );
+    });
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: getChainNameByBaseDenom(props.denom),
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
@@ -333,6 +342,7 @@ export default defineComponent({
       StakingActions,
       isUnstakingAssetExist,
       isStakingAssetExist,
+      unbondingBalances,
       stakingButtonName,
       selectedTab,
       totalRewardsAmount,
