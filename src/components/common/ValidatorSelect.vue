@@ -1,11 +1,18 @@
 <template>
   <div
-    class="denom-select flex items-center"
+    class="denom-select flex items-center hover-show-delete relative"
     :class="{
       'py-4 px-6': size === 'sm',
       'py-6 px-5': size === 'md',
     }"
   >
+    <button
+      class="w-6 h-6 flex items-center justify-evenly cursor-pointer hidden delete-button rounded-full absolute"
+      style="top: -20px; right: -12px; background: #00000054; color: white"
+      @click="removeValidator"
+    >
+      <Icon :name="'CloseIcon'" :icon-size="1" />
+    </button>
     <div class="self-stretch flex items-center flex-shrink-0 pr-3 cursor-pointer flex-grow" @click="selectValidator">
       <ValidatorBadge :size="size" :validator="validator" class="mr-4" />
       <div>
@@ -64,7 +71,7 @@ export default defineComponent({
       },
     },
   },
-  emits: ['update:amount', 'select'],
+  emits: ['update:amount', 'select', 'unselect'],
   setup(props, { emit }) {
     const route = useRoute();
     const store = useStore();
@@ -86,8 +93,13 @@ export default defineComponent({
       emit('select', propsRef.validator.value);
     };
 
+    const removeValidator = () => {
+      emit('unselect', propsRef.validator.value);
+    };
+
     return {
       selectValidator,
+      removeValidator,
       inputAmount,
       baseDenom,
       precision,
@@ -96,6 +108,16 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
+.hover-show-delete {
+  &:hover {
+    .delete-button {
+      display: block;
+    }
+  }
+  .delete-button:hover {
+    display: block;
+  }
+}
 .denom-select {
   &--empty &__coin,
   &--empty &__coin-image {
