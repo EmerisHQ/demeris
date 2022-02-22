@@ -16,7 +16,7 @@
           id="viewportRef"
           ref="viewportRef"
           name="list"
-          class="messages-viewport w-full flex flex-col-reverse"
+          class="w-full relative flex flex-col-reverse"
           :class="{ 'messages-viewport-unstacked': !isStacked }"
         >
           <div :style="`height:${isStacked ? 'auto' : viewportHeight + 'px'};`" class="w-full absolute">
@@ -36,22 +36,35 @@
                     class="dismiss-button absolute bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
                     data-test="dismiss-toast"
                     @click="clearAllNotifications()"
+                    @mouseover="isHoverClearAllButton = true"
+                    @mouseleave="isHoverClearAllButton = false"
                   >
-                    <Icon v-if="visibleToastMessages.length === 1" name="CloseIcon" :icon-size="0.563" />
-                    <span v-else class="text-text">{{ clearAllLabel }}</span>
+                    <Icon
+                      v-if="visibleToastMessages.length === 1 || !isHoverClearAllButton"
+                      key="icon"
+                      name="CloseIcon"
+                      :icon-size="0.563"
+                    />
+                    <span
+                      v-if="visibleToastMessages.length > 1 && isHoverClearAllButton"
+                      key="text"
+                      class="text-text"
+                    >{{ clearAllLabel }}</span>
                   </button>
                 </Transition>
                 <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex flex-grow">
                   <div class="flex-1 text-text">{{ message }}</div>
-                  <div class="flex items-center">
+                  <div v-if="button1Label || button2Label" class="flex items-center">
                     <Button
-                      :name="buttonLabel2"
+                      v-if="button2Label"
+                      :name="button2Label"
                       class="text-quaternary ml-3"
                       variant="link"
                       @click="emit('onButton2Click', id)"
                     />
                     <Button
-                      :name="buttonLabel1"
+                      v-if="button1Label"
+                      :name="button1Label"
                       class="text-quaternary ml-3"
                       variant="link"
                       @click="emit('onButton1Click', id)"
@@ -89,7 +102,7 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { computed, onMounted, onUnmounted, ref, toRef, watch, withDefaults } from 'vue';
+import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -100,22 +113,24 @@ interface NotificationMessage {
 }
 
 interface Props {
-  buttonLabel1?: string;
-  buttonLabel2?: string;
+  button1Label?: string;
+  button2Label?: string;
   clearAllLabel: string;
+  dismissInterval?: number;
   messages?: NotificationMessage[];
   showLessLabel: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  buttonLabel1: '',
-  buttonLabel2: '',
+  button1Label: '',
+  button2Label: '',
   clearAllLabel: '',
+  dismissInterval: 5000,
   messages: () => [],
   showLessLabel: '',
 });
 
-const messages = toRef(props, 'messages');
+const { button1Label, button2Label, clearAllLabel, messages, showLessLabel, dismissInterval } = toRefs(props);
 
 const emit = defineEmits<{
   (e: 'onButton2Click', id: number | string);
@@ -126,6 +141,7 @@ const emit = defineEmits<{
 const isStacked = ref<boolean>(true);
 const viewportHeight = ref(0);
 const isMouseOverComponent = ref<boolean>(false);
+const isHoverClearAllButton = ref<boolean>(false);
 const clickableAreaRef = ref(null);
 const viewportRef = ref(null);
 const toastMessages = ref<NotificationMessage[]>(messages);
@@ -192,19 +208,18 @@ function dismissNotification(id): void {
   if (visibleToastMessages.value.length === 0) isStacked.value = false;
 }
 
-function onInactivityStart(): void {
+function startInactivityTimer(): void {
   if (isMouseOverComponent.value) return;
   startDismissNotificationTimeout();
 }
 
 function startDismissNotificationTimeout(): void {
   clearTimeout(inactivityTimeout.value);
-  return;
   inactivityTimeout.value = setTimeout(() => {
     const lastNotificationId = visibleToastMessages.value[visibleToastMessages.value.length - 1]?.id;
     if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
-    if (visibleToastMessages.value.length > 0) onInactivityStart();
-  }, 5000);
+    if (visibleToastMessages.value.length > 0) startInactivityTimer();
+  }, dismissInterval.value);
 }
 
 function showClearButton(index): boolean {
@@ -224,6 +239,9 @@ function updateNotificationPositions(): void {
     computeNotificationsStyle();
     scrollNotificationsViewportToBottom();
   });
+
+  // TODO: improve this - elements change size over time
+  // and requires re-calculation in first few seconds
   setTimeout(() => {
     computeNotificationsStyle();
     scrollNotificationsViewportToBottom();
@@ -241,7 +259,7 @@ function updateNotificationPositions(): void {
 watch(
   () => [isStacked.value, visibleToastMessages.value],
   () => {
-    onInactivityStart();
+    startInactivityTimer();
     updateNotificationPositions();
     if (visibleToastMessages.value.length === 1) {
       isStacked.value = true;
@@ -253,7 +271,7 @@ watch(
   () => isMouseOverComponent.value,
   () => {
     clearTimeout(inactivityTimeout.value);
-    onInactivityStart();
+    startInactivityTimer();
   },
 );
 
@@ -263,7 +281,7 @@ onClickOutside(clickableAreaRef, () => {
 
 onMounted(() => {
   updateNotificationPositions();
-  onInactivityStart();
+  startInactivityTimer();
 });
 
 onUnmounted(() => {
@@ -278,9 +296,6 @@ onUnmounted(() => {
 .root-unstacked {
   transform: translateY(-300px);
 }
-.messages-viewport {
-  position: relative;
-}
 .messages-viewport-unstacked {
   height: 270px;
   overflow-y: auto;
@@ -292,7 +307,7 @@ onUnmounted(() => {
   left: -0.75rem;
   min-height: 1.5rem;
   min-width: 1.5rem;
-  top: -0.5rem;
+  top: -0.8rem;
   z-index: 40;
 }
 
@@ -305,7 +320,6 @@ onUnmounted(() => {
 .fade-leave-to {
   opacity: 0;
 }
-
 .fade-controls-enter-active,
 .fade-controls-leave-active {
   transition: opacity 0.5s ease-out;
