@@ -5,6 +5,9 @@ process.env.VUE_APP_GIT_VERSION = gitVersion();
 process.env.VUE_APP_VERSION = pkg.version;
 
 module.exports = {
+  devServer: {
+    overlay: false,
+  },
   configureWebpack: {
     module: {
       rules: [
