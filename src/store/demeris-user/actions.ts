@@ -150,6 +150,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
+      // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
+      // This status is used for displaying skeleton loaders appropriately
+
       const isCypress = !!window['Cypress'];
       const chains =
         rootGetters[GlobalDemerisGetterTypes.API.getChains] ??
