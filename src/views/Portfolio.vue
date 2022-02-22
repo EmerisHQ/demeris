@@ -51,7 +51,7 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap />
         <!-- TODO: remove, placed here for testing -->
-        <Toast
+        <Notifications
           :messages="testData"
           button1-label="Undo"
           :dismiss-interval="5000"
@@ -63,6 +63,7 @@
           @on-update="($event) => updateTestData($event)"
         />
         <button class="my-4" @click="addone()">Add new Notification</button>
+        
         <Intro class="mt-4" />
       </aside>
     </div>
@@ -84,7 +85,7 @@ import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
-import Toast from '@/components/ui/Toast/Toast.vue';
+import Notifications from '@/components/ui/Notifications.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -102,7 +103,7 @@ export default {
     TotalPrice,
     AssetsTable,
     Pools,
-    Toast,
+    Notifications,
     Intro,
     SkeletonLoader,
   },
@@ -159,9 +160,9 @@ export default {
     function addone() {
       i++;
       if (i % 2 === 0) {
-        testData.value.push({ message: `Transaction  ${i}`, id: i });
+        testData.value.push({ message: `New transaction  ${i}`, id: i });
       } else {
-        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, id: i });
+        testData.value.push({ message: `New transaction with overflowing text ${i}`, id: i });
       }
     }
 
