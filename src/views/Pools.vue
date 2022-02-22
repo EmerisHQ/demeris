@@ -4,7 +4,7 @@
       <h1 class="text-2 sm:text-3 md:text-4 font-bold">Pools</h1>
     </header>
 
-    <PoolsTable :pools="pools" />
+    <PoolsTable v-if="pools" :pools="pools" />
   </AppLayout>
 </template>
 

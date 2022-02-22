@@ -37,7 +37,7 @@ export default defineComponent({
     });
     const { pools } = usePools();
     const pool = computed(() => {
-      return pools.value.find((x) => x.pool_coin_denom == propsRef.name.value);
+      return pools.value?.find((x) => x.pool_coin_denom == propsRef.name.value);
     });
     return {
       validPool,

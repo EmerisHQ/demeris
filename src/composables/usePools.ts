@@ -31,6 +31,9 @@ function usePools() {
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
+      if (newPools === null) {
+        return;
+      }
       if (newPools.length > 0) {
         if (!oldPools && init) {
           return;
@@ -55,8 +58,10 @@ function usePools() {
             }),
           );
         }
-        initialized();
+      } else {
+        pools.value = newPools;
       }
+      initialized();
     },
     { immediate: true },
   );
@@ -71,7 +76,7 @@ function usePools() {
   */
 
   const getPoolById = (id: string) => {
-    return pools.value.find((item) => item.id === id) ?? null;
+    return pools.value?.find((item) => item.id === id) ?? null;
   };
 
   /*

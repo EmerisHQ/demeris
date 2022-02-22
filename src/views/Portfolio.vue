@@ -122,7 +122,7 @@ export default {
       }
     });
     const poolsInvested = computed(() => {
-      const poolsCopy = JSON.parse(JSON.stringify(pools.value));
+      const poolsCopy = pools.value?.slice() ?? [];
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
 

@@ -193,20 +193,20 @@ export const getters: GetterTree<State, RootState> & Getters = {
 
     let referencePool = null;
     let reserveBaseDenoms = [];
+    if (pools) {
+      for (const pool of pools) {
+        reserveBaseDenoms = [];
 
-    for (const pool of pools) {
-      reserveBaseDenoms = [];
+        for (const coinDenom of pool.reserve_coin_denoms) {
+          reserveBaseDenoms.push(traces[coinDenom.split('/')[1]]?.base_denom ?? coinDenom);
+        }
 
-      for (const coinDenom of pool.reserve_coin_denoms) {
-        reserveBaseDenoms.push(traces[coinDenom.split('/')[1]]?.base_denom ?? coinDenom);
-      }
-
-      if (reserveBaseDenoms.includes('uatom') && reserveBaseDenoms.includes(base_denom)) {
-        referencePool = pool;
-        break;
+        if (reserveBaseDenoms.includes('uatom') && reserveBaseDenoms.includes(base_denom)) {
+          referencePool = pool;
+          break;
+        }
       }
     }
-
     if (!referencePool) {
       return;
     }
