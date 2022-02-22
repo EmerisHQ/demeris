@@ -7,8 +7,8 @@
     }"
   >
     <button
-      class="w-6 h-6 flex items-center justify-evenly cursor-pointer hidden delete-button rounded-full"
-      style="top: -20px; position: absolute; right: -12px; background: #00000054; color: white"
+      class="w-6 h-6 flex items-center justify-evenly cursor-pointer hidden delete-button rounded-full absolute"
+      style="top: -20px; right: -12px; background: #00000054; color: white"
       @click="removeValidator"
     >
       <Icon :name="'CloseIcon'" :icon-size="1" />
@@ -109,6 +109,9 @@ export default defineComponent({
     .delete-button {
       display: block;
     }
+  }
+  .delete-button:hover {
+    display: block;
   }
 }
 .denom-select {
