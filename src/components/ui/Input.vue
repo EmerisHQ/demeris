@@ -1,42 +1,14 @@
 <template>
   <div class="input w-full max-w-md flex items-center">
     <div
-      class="
-        input__wrapper
-        relative
-        flex-1
-        w-full
-        h-12
-        text-inactive
-        hover:text-muted
-        focus-within:text-muted
-        transition-colors
-      "
+      class="input__wrapper relative flex-1 w-full h-12 text-inactive hover:text-muted focus-within:text-muted transition-colors"
     >
       <div v-if="hasStartSlot" class="input__icon absolute z-20 top-0 left-0 p-4 pointer-events-none">
         <slot name="start" />
       </div>
       <input
         v-model="model"
-        class="
-          relative
-          z-10
-          h-12
-          w-full
-          py-2
-          text-0
-          font-normal
-          text-text
-          placeholder-inactive
-          hover:placeholder-muted
-          focus:placeholder-inactive
-          bg-fg
-          focus:bg-surface
-          rounded-xl
-          focus:rounded-lg
-          border-none
-          appearance-none
-        "
+        class="relative z-10 h-12 w-full py-2 text-0 font-normal text-text placeholder-inactive hover:placeholder-muted focus:placeholder-inactive bg-fg focus:bg-surface rounded-xl focus:rounded-lg border-none appearance-none"
         :class="[hasStartSlot ? 'pl-10' : 'pl-4', hasEndSlot ? 'pr-10' : 'pr-4']"
         v-bind="$attrs"
         @focus="$emit('focus:value', $event.target.value)"

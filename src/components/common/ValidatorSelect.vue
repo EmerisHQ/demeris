@@ -33,7 +33,11 @@
         placeholder="0"
         min="0"
       />
-      <Price :amount="{ denom: baseDenom, amount: (parseFloat(inputAmount) * 10 ** precision).toString() }" />
+      <Price
+        :amount="{ denom: baseDenom, amount: (parseFloat(inputAmount) * 10 ** precision).toString() }"
+        :show-zero="true"
+        :show-dash="false"
+      />
     </label>
   </div>
 </template>

@@ -1,17 +1,17 @@
 <template>
   <div class="w-full mx-auto">
-    <template v-if="step == 'validator'">
-      <ValidatorsTable
-        :validator-list="validators"
-        :disabled-list="validatorsToDisable"
-        :currently-editing="currentlyEditing"
-        :table-style="'actionlist'"
-        :sorting-by="isStaking ? 'staked' : 'power'"
-        sorting-order="desc"
-        @selectValidator="addValidator"
-      />
-    </template>
-    <template v-else-if="step === 'amount' && form.stakes.length > 0">
+    <ValidatorsTable
+      v-show="step == 'validator'"
+      :validator-list="validators"
+      :disabled-list="validatorsToDisable"
+      :currently-editing="currentlyEditing"
+      :table-style="'actionlist'"
+      :sorting-by="isStaking ? 'staked' : 'power'"
+      sorting-order="desc"
+      @selectValidator="addValidator"
+    />
+
+    <template v-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
       <StakeFormAmount
         :validators="validators"
@@ -31,7 +31,7 @@
             :gas-price-level="gasPrice"
             :back-route="{ name: 'Portfolio' }"
             action-name="stake"
-            @transacting="goToStep('delegate')"
+            @transacting="goToStep('stake')"
             @failed="goToStep('review')"
             @reset="resetHandler"
             @finish="resetHandler"
@@ -63,11 +63,11 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { DelegateForm, MultiDelegateAction, MultiDelegateForm } from '@/types/actions';
+import { MultiStakeAction, MultiStakeForm,StakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
-type Step = 'validator' | 'amount' | 'review' | 'delegate';
+type Step = 'validator' | 'amount' | 'review' | 'stake';
 
 export default defineComponent({
   name: 'StakeForm',
@@ -112,9 +112,11 @@ export default defineComponent({
         chain_name: propsRef.validators.value[0].chain_name,
       });
     });
+
     const isStaking = computed(() => {
       return propsRef.validators.value.some((val) => parseInt(val.stakedAmount) > 0);
     });
+
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -125,7 +127,7 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
     });
 
-    const form: MultiDelegateForm = reactive({ stakes: [] });
+    const form: MultiStakeForm = reactive({ stakes: [] });
 
     const valToEdit = ref(null as number);
     const step = computed({
@@ -154,9 +156,9 @@ export default defineComponent({
             chain_name: x.chain_name,
           };
         }),
-      } as MultiDelegateAction;
+      } as MultiStakeAction;
     });
-    const isValid = (form: DelegateForm) => {
+    const isValid = (form: StakeForm) => {
       return (
         form.validatorAddress !== '' &&
         form.amount !== '' &&
@@ -223,7 +225,7 @@ export default defineComponent({
       return form.stakes.map((x) => x.validatorAddress);
     });
     const currentlyEditing = computed(() => {
-      return valToEdit.value ? form.stakes[valToEdit.value].validatorAddress : null;
+      return valToEdit.value !== null ? form.stakes[valToEdit.value].validatorAddress : null;
     });
     provide('stakeForm', form);
     onMounted(() => {
