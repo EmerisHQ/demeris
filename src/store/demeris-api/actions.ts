@@ -1002,8 +1002,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
   },
-  [DemerisActionTypes.SIGN_OUT]({ commit }, keyHashes) {
+  async [DemerisActionTypes.SIGN_OUT]({ commit, state }, keyHashes) {
     commit(DemerisMutationTypes.SIGN_OUT, keyHashes);
+    await Promise.all(state._InProgess.values());
+    console.log(state._InProgess.values());
+    console.log('All completed');
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {
     state._Subscriptions.forEach(async (subscription_json) => {

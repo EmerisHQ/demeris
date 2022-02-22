@@ -7,7 +7,7 @@ import { ActionContext, ActionTree } from 'vuex';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { config as analyticsConfig,event } from '@/utils/analytics';
+import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
@@ -146,10 +146,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
-      await dispatch(DemerisActionTypes.SIGN_OUT);
       const isCypress = !!window['Cypress'];
       const chains =
         rootGetters[GlobalDemerisGetterTypes.API.getChains] ??
@@ -266,10 +266,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
+      await dispatch(DemerisActionTypes.SIGN_OUT);
       commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
       commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
-      await dispatch(DemerisActionTypes.SIGN_OUT);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
