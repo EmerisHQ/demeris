@@ -35,7 +35,7 @@ describe('Toast', () => {
     // expect(wrapper.findAll('.toast-message')).toHaveLength(totalNotifications + 2);
   });
 
-  it.only('Should load 6 notifications and remove 1, leaving 5', async () => {
+  it('Should load 6 notifications and remove 1, leaving 5', async () => {
     const testData = [];
     const totalNotifications = 6;
     for (let i = 0; i < totalNotifications; i++) {
@@ -45,7 +45,6 @@ describe('Toast', () => {
       propsData: { messages: testData },
     });
     console.log('messages1:', wrapper.props().messages);
-    console.log('toastMessages1:', wrapper.vm.toastMessages);
 
     await wrapper.find('[data-test=dismiss-toast-1]').trigger('click');
 

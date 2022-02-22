@@ -53,6 +53,10 @@
         <!-- TODO: remove, placed here for testing -->
         <Toast
           :messages="testData"
+          button-label1="label1"
+          button-label2="label2"
+          show-less-label="Show Less2"
+          clear-all-label="Clear All1"
           @onButton1Click="($event) => undo($event)"
           @onButton2Click="($event) => details($event)"
           @on-update="($event) => updateTestData($event)"
@@ -140,9 +144,9 @@ export default {
     let i = 0;
     // for (i = 0; i < 10; i++) {
     //   if (i % 2 === 0) {
-    //     testData.value.push({ message: `Transaction  ${i}`, action: '', date: '', id: i });
+    //     testData.value.push({ message: `Transaction  ${i}`, id: i });
     //   } else {
-    //     testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, action: '', date: '', id: i });
+    //     testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, id: i });
     //   }
     // }
     function undo(id) {
@@ -154,9 +158,9 @@ export default {
     function addone() {
       i++;
       if (i % 2 === 0) {
-        testData.value.push({ message: `Transaction  ${i}`, action: '', date: '', id: i });
+        testData.value.push({ message: `Transaction  ${i}`, id: i });
       } else {
-        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, action: '', date: '', id: i });
+        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, id: i });
       }
     }
 

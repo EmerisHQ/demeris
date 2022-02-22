@@ -25,7 +25,6 @@ module.exports = {
       none: 'none',
     },
     colors: {
-      black: 'var(--black)',
       transparent: 'transparent',
       current: 'currentColor',
       text: 'var(--text)',
