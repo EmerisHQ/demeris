@@ -2,14 +2,14 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useAccount() {
-  const store = useStore() as TypedAPIStore;
+  const store = useStore() as RootStoreType;
   const isDemoAccount = computed(() => {
     return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
   });
@@ -68,7 +68,9 @@ export default function useAccount() {
 
     return sortedBalances;
   });
-
+  const allLoaded = computed(() => {
+    return !store.getters.getFirstLoad;
+  });
   const nativeBalances = computed(() => getNativeBalances({ balances, aggregate: true }));
 
   const getNativeBalances = (
@@ -170,6 +172,7 @@ export default function useAccount() {
     isDemoAccount,
     stakingBalances,
     stakingBalancesByChain,
+    allLoaded,
     unbondingDelegations,
     unbondingDelegationsByChain,
   };
