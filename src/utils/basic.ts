@@ -2,7 +2,6 @@ import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
-import every from 'lodash/every';
 import findIndex from 'lodash/findIndex';
 
 import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
@@ -179,6 +178,6 @@ export function getFirstAlphabet(str: string) {
 }
 
 export function checkStringIsKeybase(str: string) {
-  if (!str) return false;
-  return /[0-9a-fA-F]{16}/.test(str);
+  if (!str || str.length !== 16) return false;
+  return /[0-9A-F]{16}/.test(str.toUpperCase());
 }

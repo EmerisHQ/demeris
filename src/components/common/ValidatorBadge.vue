@@ -47,7 +47,7 @@ export default defineComponent({
       default: 'md',
     },
   },
-  setup(props) {
+  setup() {
     const clipPathId =
       'clip-' +
       Math.random()
