@@ -178,16 +178,7 @@ export function getFirstAlphabet(str: string) {
   return '';
 }
 
-const KEYBASE_LENGTH = 16;
-// 0~9 48-57, A~F 65~70
-function isHexValue(letter: string) {
-  const charCode = letter.charCodeAt(0);
-  return (charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 70);
-}
-
 export function checkStringIsKeybase(str: string) {
-  if (!str || str?.length !== KEYBASE_LENGTH) return false;
-  return every(str, (letter) => {
-    return isHexValue(letter);
-  });
+  if (!str) return false;
+  return /[0-9a-fA-F]{16}/.test(str);
 }
