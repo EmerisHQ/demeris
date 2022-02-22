@@ -1909,7 +1909,6 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'stake') {
-    console.log(stepTx);
     const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;

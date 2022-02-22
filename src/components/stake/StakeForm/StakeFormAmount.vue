@@ -27,6 +27,7 @@
                 (newAmount) => (form.stakes.find((x) => x.validatorAddress == vali.validatorAddress).amount = newAmount)
               "
               @select="() => validatorSelectHandler(index)"
+              @unselect="() => validatorUnselectHandler(vali)"
             />
 
             <button
@@ -74,7 +75,7 @@
             <ListItem inset size="md" label="Total stake">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
               <div class="text-muted">
-                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" />
+                <Price :amount="{ denom: baseDenom, amount: totalToStake }" :show-zero="true" :show-dash="false" />
               </div>
             </ListItem>
 
@@ -143,7 +144,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['selectanother', 'next'],
+  emits: ['selectanother', 'next', 'unselect'],
   setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
@@ -216,10 +217,9 @@ export default defineComponent({
     );
     const disabled = computed(() => {
       let chains: Record<string, { amount: BigNumber; denom: string }> = {};
+      let toStake = 0;
       for (const validator of validatorsToStakeWith.value) {
-        if (validator.amount == '') {
-          return true;
-        }
+        toStake = toStake + Number(validator.amount ?? 0);
         if (chains[validator.from_chain]) {
           chains[validator.from_chain].amount = chains[validator.from_chain].amount.plus(
             new BigNumber(validator.amount != '' ? validator.amount : 0),
@@ -230,6 +230,9 @@ export default defineComponent({
             denom: validator.denom,
           };
         }
+      }
+      if (toStake == 0) {
+        return true;
       }
       for (const chain in chains) {
         if (
@@ -262,10 +265,14 @@ export default defineComponent({
     const validatorSelectHandler = (index) => {
       emit('selectanother', index);
     };
+    const validatorUnselectHandler = (validator) => {
+      emit('unselect', validator);
+    };
     const validatorAddHandler = () => {
       emit('selectanother', null);
     };
     const goToReview = () => {
+      form.stakes = form.stakes.filter((stake) => Number(stake.amount ?? 0) != 0);
       emit('next');
     };
     const toggleChainsModal = (asset: Balance, index: number) => {
@@ -290,6 +297,7 @@ export default defineComponent({
       precision,
       baseDenom,
       validatorSelectHandler,
+      validatorUnselectHandler,
       validatorAddHandler,
       toggleChainsModal,
       goToReview,

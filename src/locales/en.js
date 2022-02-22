@@ -103,6 +103,7 @@ export const messages = {
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
+        acceptText: 'OK',
       },
       asset: {
         pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
@@ -139,9 +140,9 @@ export const messages = {
         estimate: 'Estimated total fees',
       },
       validatorCard: {
-        commissionTooltip: 'TODO: commission tooltip',
-        maxCommissionTooltip: 'TODO: Max commission tooltip',
-        maxChangeRateTooltip: 'TODO: maxChangeRate tooltip',
+        commissionLabel: 'Commission',
+        maxCommissionLabel: 'Max commission',
+        maxChangeRateLabel: 'Max change rate',
       },
       stakeForm: {
         selectTitle: 'Select a validator',
@@ -218,6 +219,46 @@ export const messages = {
         missingOneTextAtom: 'Lorem ipsum Atom',
         missingMany: 'You have no assets to pay fees',
         missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        claim: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To claim your rewards, the following assets are required to pay fees.',
+        },
+        stake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        unstake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        switch: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        swap: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        addliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        withdrawliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        createpool: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        transfer: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        move: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
@@ -612,6 +653,7 @@ export const messages = {
         createWarning: 'Creating a pool is risky business',
         arbitrageWarning:
           'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
+        receiveLpAsset: 'The shares you will receive based on your contribution to the underlying pool',
       },
       asset: {
         balance: 'Balance',
