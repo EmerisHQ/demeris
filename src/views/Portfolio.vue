@@ -53,15 +53,16 @@
         <!-- TODO: remove, placed here for testing -->
         <Toast
           :messages="testData"
-          button-label1="label1"
-          button-label2="label2"
-          show-less-label="Show Less2"
-          clear-all-label="Clear All1"
+          button1-label="Undo"
+          :dismiss-interval="5000"
+          button2-label="Details"
+          show-less-label="Show Less"
+          clear-all-label="Clear All"
           @onButton1Click="($event) => undo($event)"
           @onButton2Click="($event) => details($event)"
           @on-update="($event) => updateTestData($event)"
         />
-        <button @click="addone()">add one</button>
+        <button class="my-4" @click="addone()">Add new Notification</button>
         <Intro class="mt-4" />
       </aside>
     </div>
