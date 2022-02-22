@@ -1,15 +1,22 @@
 <template>
-  <div v-if="!consented" class="consent_banner">
-    <div class="consent_banner__message text-muted -text-1 px-5 py-3 rounded-xl flex">
-      <div class="consent_banner__message__text">
+  <div v-if="!consented" class="consent_banner fixed left-8 bottom-8 center mx-auto">
+    <div
+      class="consent_banner__inner bg-surface dark:border border-border text-muted -text-1 rounded-xl flex items-center"
+    >
+      <div class="px-5 py-3 border-r border-border">
         {{ $t('components.cookieConsent.message') }}
-        <a href="https://www.cookiesandyou.com/" target="_blank" rel="noopener">{{
+        <a class="text-link" href="https://emeris.com/privacy" target="_blank" rel="noopener">{{
           $t('components.cookieConsent.linkText')
         }}</a>
       </div>
-      <div class="consent_banner__message__close ml-2" @click="acceptCookies">
-        <Icon name="CloseIcon" :icon-size="1.25" />
-      </div>
+      <Button
+        variant="link"
+        size="sm"
+        class="mx-5 text-link"
+        :full-width="false"
+        :click-function="acceptCookies"
+        :name="$t('components.cookieConsent.acceptText')"
+      />
     </div>
   </div>
 </template>
@@ -17,11 +24,11 @@
 import { defineComponent, ref } from 'vue';
 import { useCookie } from 'vue-cookie-next';
 
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue';
 
 export default defineComponent({
   name: 'CookieConsent',
-  components: { Icon },
+  components: { Button },
   setup() {
     const { setCookie, getCookie } = useCookie();
     const consented = ref(getCookie('cookie-consent-accepted'));
@@ -36,23 +43,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .consent_banner {
-  position: fixed;
   z-index: 1200;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0 auto;
-  bottom: 10vh;
-  text-align: center;
+}
 
-  &__message {
-    background: black;
-    color: white;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.6;
-    a {
-      color: var(--secondary);
-    }
+.consent_banner__inner {
+  box-shadow: -8px 24px 48px rgba(0, 0, 0, 0.2);
+  .dark & {
+    box-shadow: -8px 24px 48px rgba(0, 0, 0, 0.6);
   }
 }
 </style>

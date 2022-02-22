@@ -55,47 +55,36 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --warning: #fb7c07;
 }
 
-@layer base {
-  /* Brand colors */
-  :root {
-    --primary: #fffd38;
-    --secondary: #a8ff89;
-    --tertiary: #30ffdf;
-    --quaternary: #4ef2e4;
-    --quinary: #64dafb;
-    --gold: #d5bc83;
-  }
-  /*
-    Currently only `prefers-color-scheme` is supported.
-    Later, we'll have a setting to set the theme manually.
-    This will require careful attention to specificity for inverse theme classes.
-  */
-  /* Light theme */
-  :root {
-    @include themeLight;
-  }
-  /* + Elements with inverse theme in light mode */
-  .theme-inverse {
-    @include themeDark;
-  }
+/* Brand colors */
+:root {
+  --primary: #fffd38;
+  --secondary: #a8ff89;
+  --tertiary: #30ffdf;
+  --quaternary: #4ef2e4;
+  --quinary: #64dafb;
+  --gold: #d5bc83;
+}
+/*
+  Currently only `prefers-color-scheme` is supported.
+  Later, we'll have a setting to set the theme manually.
+  This will require careful attention to specificity for inverse theme classes.
+*/
+/* Light theme */
+:root {
+  @include themeLight;
+}
+/* + Elements with inverse theme in light mode */
+.theme-inverse {
+  @include themeDark;
+}
 
-  /* Dark theme:
-   * It will prefer system option on initial render.
-   * Then when the class is programatically set as 'dark' or 'light' (loaded from localStorage),
-   * it overrides css variables;
-   */
-  @media (prefers-color-scheme: dark) {
-    html:not(.light) {
-      @include themeDark;
-
-      /* Elements with inverse theme in dark mode */
-      .dark\:theme-inverse {
-        @include themeLight;
-      }
-    }
-  }
-
-  html.dark {
+/* Dark theme:
+ * It will prefer system option on initial render.
+ * Then when the class is programatically set as 'dark' or 'light' (loaded from localStorage),
+ * it overrides css variables;
+ */
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
     @include themeDark;
 
     /* Elements with inverse theme in dark mode */
@@ -104,59 +93,66 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
     }
   }
 }
+html.dark {
+  @include themeDark;
+
+  /* Elements with inverse theme in dark mode */
+  .dark\:theme-inverse {
+    @include themeLight;
+  }
+}
 
 /* Custom color utilities */
-@layer utilities {
-  @variants dark, hover, focus {
-    /* Background utilities */
-    .bg-app {
-      background: var(--bg-image);
-    }
-    .bg-fg {
-      background: var(--fg);
-    }
-    .bg-surface {
-      background: var(--surface-image);
-    }
-    .bg-surface-2 {
-      background: var(--surface-2-image);
-    }
+@variants dark, hover, focus {
+  /* Background utilities */
+  .bg-app {
+    background: var(--bg-image);
   }
-  @variants dark, focus {
-    /* Background utilities */
-    .bg-brand {
-      background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
-    }
-    .bg-brand-to-r {
-      background: var(--primary) $brand-gradient-to-r;
-    }
-    .bg-brand-to-br {
-      background: var(--primary) $brand-gradient-to-br;
-    }
-    .bg-gold-circular {
-      background: center / cover no-repeat url('~@/assets/images/texture-gold-circular.jpg'), var(--gold);
-    }
-    .bg-gold-to-r {
-      background: var(--gold) $gold-to-r;
-    }
-    .bg-gold-to-b {
-      background: var(--gold) $gold-to-b;
-    }
-    .bg-gold-to-br {
-      background: var(--gold) $gold-to-br;
-    }
+  .bg-fg {
+    background: var(--fg);
   }
-  /* Border utilities */
-  @variants dark, group-hover, focus-within, hover, focus {
-    .border-brand {
-      border-color: var(--primary);
-      border-image: url('~@/assets/images/gradient-primary.jpg');
-      border-image-slice: 20%;
-    }
-    .border-gold-circular {
-      border-color: var(--gold);
-      border-image: url('~@/assets/images/texture-gold-circular.jpg');
-      border-image-slice: 20%;
-    }
+  .bg-surface {
+    background: var(--surface-image);
+  }
+  .bg-surface-2 {
+    background: var(--surface-2-image);
+  }
+}
+@variants dark, focus {
+  /* Background utilities */
+  .bg-brand {
+    background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
+  }
+  .bg-brand-to-r {
+    background: var(--primary) $brand-gradient-to-r;
+  }
+  .bg-brand-to-br {
+    background: var(--primary) $brand-gradient-to-br;
+  }
+  .bg-gold-circular {
+    background: center / cover no-repeat url('~@/assets/images/texture-gold-circular.jpg'), var(--gold);
+  }
+  .bg-gold-to-r {
+    background: var(--gold) $gold-to-r;
+  }
+  .bg-gold-to-b {
+    background: var(--gold) $gold-to-b;
+  }
+  .bg-gold-to-br {
+    background: var(--gold) $gold-to-br;
+  }
+}
+
+/* Border utilities */
+@variants dark, group-hover, focus-within, hover, focus {
+  .border-brand {
+    border-color: var(--primary);
+    border-image: url('~@/assets/images/gradient-primary.jpg');
+    border-image-slice: 20%;
+  }
+  .border-gold-circular {
+    border-color: var(--gold);
+    border-image: url('~@/assets/images/texture-gold-circular.jpg');
+    border-image-slice: 20%;
   }
 }

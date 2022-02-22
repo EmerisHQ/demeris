@@ -13,7 +13,13 @@
 
     <template v-if="step === 'amount' && form.stakes.length > 0">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.stakeForm.title') }}</h2>
-      <StakeFormAmount :validators="validators" :steps="steps" @next="goToReview" @selectanother="selectAnother" />
+      <StakeFormAmount
+        :validators="validators"
+        :steps="steps"
+        @next="goToReview"
+        @selectanother="selectAnother"
+        @unselect="unselect"
+      />
     </template>
 
     <template v-else-if="['review', 'stake'].includes(step)">
@@ -57,7 +63,7 @@ import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { MultiStakeAction, MultiStakeForm,StakeForm } from '@/types/actions';
+import { MultiStakeAction, MultiStakeForm, StakeForm } from '@/types/actions';
 import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
@@ -177,6 +183,12 @@ export default defineComponent({
       valToEdit.value = e;
       goToStep('validator');
     };
+    const unselect = (validatorToRemove) => {
+      form.stakes = form.stakes.filter((val) => val.validatorAddress !== validatorToRemove.validatorAddress);
+      if (form.stakes.length === 0) {
+        goToStep('validator');
+      }
+    };
     const goToStep = (value: Step) => {
       step.value = value;
     };
@@ -233,6 +245,7 @@ export default defineComponent({
       validatorsToDisable,
       currentlyEditing,
       selectAnother,
+      unselect,
       valToEdit,
       isStaking,
     };

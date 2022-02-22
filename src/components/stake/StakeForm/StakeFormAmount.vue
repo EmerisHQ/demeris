@@ -27,6 +27,7 @@
                 (newAmount) => (form.stakes.find((x) => x.validatorAddress == vali.validatorAddress).amount = newAmount)
               "
               @select="() => validatorSelectHandler(index)"
+              @unselect="() => validatorUnselectHandler(vali)"
             />
 
             <button
@@ -143,7 +144,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['selectanother', 'next'],
+  emits: ['selectanother', 'next', 'unselect'],
   setup(props, { emit }) {
     /* hooks */
     const { t } = useI18n({ useScope: 'global' });
@@ -264,6 +265,9 @@ export default defineComponent({
     const validatorSelectHandler = (index) => {
       emit('selectanother', index);
     };
+    const validatorUnselectHandler = (validator) => {
+      emit('unselect', validator);
+    };
     const validatorAddHandler = () => {
       emit('selectanother', null);
     };
@@ -293,6 +297,7 @@ export default defineComponent({
       precision,
       baseDenom,
       validatorSelectHandler,
+      validatorUnselectHandler,
       validatorAddHandler,
       toggleChainsModal,
       goToReview,
