@@ -139,14 +139,14 @@ const emit = defineEmits<{
 }>();
 
 const isStacked = ref<boolean>(true);
-const viewportHeight = ref(0);
+const viewportHeight = ref<number>(0);
 const isMouseOverComponent = ref<boolean>(false);
 const isHoverClearAllButton = ref<boolean>(false);
-const clickableAreaRef = ref(null);
-const viewportRef = ref(null);
+const clickableAreaRef = ref<HTMLElement | null>(null);
+const viewportRef = ref<HTMLElement | null>(null);
 const toastMessages = ref<NotificationMessage[]>(messages);
 const notificationComputedStyles = ref<string[]>([]);
-const inactivityTimeout = ref(null);
+const inactivityTimeoutId = ref(null);
 const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
 const totalStackedToasts = 3;
 
@@ -203,7 +203,7 @@ function expandNotifications(): void {
   isStacked.value = false;
 }
 
-function dismissNotification(id): void {
+function dismissNotification(id: number | string): void {
   emit('onUpdate', [...toastMessages.value.filter((tm) => tm.id !== id)]);
   if (visibleToastMessages.value.length === 0) isStacked.value = false;
 }
@@ -214,8 +214,8 @@ function startInactivityTimer(): void {
 }
 
 function startDismissNotificationTimeout(): void {
-  clearTimeout(inactivityTimeout.value);
-  inactivityTimeout.value = setTimeout(() => {
+  clearTimeout(inactivityTimeoutId.value);
+  inactivityTimeoutId.value = setTimeout(() => {
     const lastNotificationId = visibleToastMessages.value[visibleToastMessages.value.length - 1]?.id;
     if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
     if (visibleToastMessages.value.length > 0) startInactivityTimer();
@@ -270,7 +270,7 @@ watch(
 watch(
   () => isMouseOverComponent.value,
   () => {
-    clearTimeout(inactivityTimeout.value);
+    clearTimeout(inactivityTimeoutId.value);
     startInactivityTimer();
   },
 );
@@ -285,7 +285,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  clearTimeout(inactivityTimeout.value);
+  clearTimeout(inactivityTimeoutId.value);
 });
 </script>
 
