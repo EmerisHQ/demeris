@@ -492,7 +492,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
-            while (retriesDestCount < 10 && shouldRetry) {
+            while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
                   from_chain,
@@ -505,7 +505,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 break;
               } catch {
                 retriesDestCount++;
-                await new Promise((r) => setTimeout(r, 5000));
+                await new Promise((r) => setTimeout(r, 4000));
               }
             }
 
@@ -515,18 +515,23 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
           }
 
-          const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
-            chain_name: responseData.chain_name,
-            txhash: responseData.txhash,
-            stepType: currentStep.name,
-          });
+          try {
+            const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+              chain_name: responseData.chain_name,
+              txhash: responseData.txhash,
+              stepType: currentStep.name,
+            });
 
-          responseData.websocket = wsResult;
+            responseData.websocket = wsResult;
 
-          await fetchEndBlock(wsResult.height);
+            await fetchEndBlock(wsResult.height);
 
-          // @ts-ignore
-          callback({ type: 'GOT_RESPONSE', data: responseData });
+            // @ts-ignore
+            callback({ type: 'GOT_RESPONSE', data: responseData });
+          } catch {
+            // @ts-ignore
+            return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+          }
         };
 
         if (featureRunning('WEBSOCKET_RESPONSE')) {

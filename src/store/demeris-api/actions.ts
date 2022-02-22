@@ -660,7 +660,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
       return response.data;
     } catch (e) {
-      console.error(e);
       throw new SpVuexError('Demeris:GetTXDestHash', 'Could not perform API query.');
     }
   },
@@ -922,37 +921,34 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters, dispatch }, { txhash, chain_name, stepType }) {
+  async [DemerisActionTypes.TRACE_TX_RESPONSE](_, { txhash, chain_name }) {
     return new Promise((resolve, reject) => {
-      let wsUrl;
-      // const chain = getters[GetterTypes.getChain]({ chain_name });
-      // let wsUrl = chain?.public_node_endpoints?.tendermint_rpc;
+      const timeout = 60000;
+      const wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
 
-      if (!wsUrl) {
-        wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
-      }
-
-      const ws = new WebSocket(wsUrl);
+      const wss = new WebSocket(wsUrl);
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
       const subscribeQuery = `tm.event = 'Tx' AND tx.hash = '${txhash}'`;
 
-      const txRPC = () => {
-        ws.send(
+      let done = false;
+
+      const getTxRPC = () => {
+        wss.send(
           JSON.stringify({
             jsonrpc: '2.0',
             method: 'tx',
-            id: 'tx',
+            id: `tx-${txHash64}`,
             params: [txHash64, false],
           }),
         );
       };
 
-      const subscribeRPC = () => {
-        ws.send(
+      const subscribeTxRPC = () => {
+        wss.send(
           JSON.stringify({
             jsonrpc: '2.0',
             method: 'subscribe',
-            id: 'subscribe',
+            id: `subscribe-${txHash64}`,
             params: {
               query: subscribeQuery,
             },
@@ -961,27 +957,31 @@ export const actions: ActionTree<State, RootState> & Actions = {
       };
 
       const handleOpen = () => {
-        txRPC();
-        subscribeRPC();
+        getTxRPC();
+        subscribeTxRPC();
       };
 
       const handleMessage = (evt: MessageEvent) => {
         const data = JSON.parse(evt.data);
 
+        if (done) return;
+        if (data.id.indexOf(txHash64) < 0) return;
+
         if (data.error) {
           // Not found
-          if (data.error.code === -32603) {
-            return;
-          }
+          if (data.error.code === -32603) return;
 
+          done = true;
           reject(new Error(data.error));
         }
 
         if (data.result?.data?.value?.TxResult) {
+          done = true;
           resolve(data.result.data.value.TxResult);
         }
 
         if (data?.result?.tx_result) {
+          done = true;
           resolve(data.result.tx_result);
         }
       };
@@ -990,9 +990,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
         console.log('connection closed');
       };
 
-      ws.onopen = handleOpen;
-      ws.onmessage = handleMessage;
-      ws.onclose = handleClose;
+      wss.onopen = handleOpen;
+      wss.onmessage = handleMessage;
+      wss.onclose = handleClose;
+
+      setTimeout(() => {
+        done = true;
+        reject(new Error('Could not find transaction response'));
+      }, timeout);
     });
   },
 

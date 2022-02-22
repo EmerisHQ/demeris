@@ -88,13 +88,14 @@ const minimizeModal = () => {
   }
 };
 
-const closeModal = () => emits('close');
+const closeModal = (payload?) => emits('close', payload);
 const goBack = () => emits('previous');
 
-const removeTransactionAndClose = () => {
+const removeTransactionAndClose = (payload) => {
   transactionsStore.removeTransaction(props.stepId);
-  closeModal();
+  closeModal(payload);
 };
+
 provide(ProvideViewerKey, {
   actor,
   closeModal,

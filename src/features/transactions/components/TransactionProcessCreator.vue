@@ -64,7 +64,7 @@ const isPending = computed(() => transactionsStore.isPending(stepId));
 const { state } = useActor(service);
 
 const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
-const onClose = () => emits('close');
+const onClose = (payload) => emits('close', payload);
 const onPrevious = () => emits('previous');
 
 watch(isPending, (value) => {
