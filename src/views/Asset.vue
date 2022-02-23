@@ -89,6 +89,13 @@
           </dl>
         </section>
 
+        <!-- Staking -->
+        <template v-if="stakingEnabled">
+          <section v-if="assetConfig?.stakable" class="mt-16">
+            <StakeTable class="mt-8" :denom="denom" />
+          </section>
+        </template>
+
         <!-- Chains -->
 
         <section v-if="assets.length" class="mt-16">
@@ -130,13 +137,6 @@
             </li>
           </ul>
         </section>
-
-        <!-- Staking -->
-        <template v-if="stakingEnabled">
-          <section v-if="assetConfig?.stakable" class="mt-16">
-            <StakeTable class="mt-8" :denom="denom" />
-          </section>
-        </template>
 
         <!-- Pools -->
 
