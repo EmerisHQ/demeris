@@ -1,24 +1,26 @@
 <template>
-  <div v-if="!consented" class="consent_banner fixed left-8 bottom-8 center mx-auto">
-    <div
-      class="consent_banner__inner bg-surface dark:border border-border text-muted -text-1 rounded-xl flex items-center"
-    >
-      <div class="px-5 py-3 border-r border-border">
-        {{ $t('components.cookieConsent.message') }}
-        <a class="text-link" href="https://emeris.com/privacy" target="_blank" rel="noopener">{{
-          $t('components.cookieConsent.linkText')
-        }}</a>
+  <transition name="fade" appear>
+    <div v-if="!consented" class="consent_banner fixed left-8 bottom-8 center mx-auto">
+      <div
+        class="consent_banner__inner bg-surface dark:border border-border text-muted -text-1 rounded-xl flex items-center"
+      >
+        <div class="px-5 py-3 border-r border-border">
+          {{ $t('components.cookieConsent.message') }}
+          <a class="text-link" href="https://emeris.com/privacy" target="_blank" rel="noopener">{{
+            $t('components.cookieConsent.linkText')
+          }}</a>
+        </div>
+        <Button
+          variant="link"
+          size="sm"
+          class="mx-5 text-link"
+          :full-width="false"
+          :click-function="acceptCookies"
+          :name="$t('components.cookieConsent.acceptText')"
+        />
       </div>
-      <Button
-        variant="link"
-        size="sm"
-        class="mx-5 text-link"
-        :full-width="false"
-        :click-function="acceptCookies"
-        :name="$t('components.cookieConsent.acceptText')"
-      />
     </div>
-  </div>
+  </transition>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
@@ -51,5 +53,17 @@ export default defineComponent({
   .dark & {
     box-shadow: -8px 24px 48px rgba(0, 0, 0, 0.6);
   }
+}
+
+.fade-enter-active {
+  transition: opacity 0.2s ease-out, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fade-leave-active {
+  transition: opacity 0.3s cubic-bezier(0.32, 0, 0.67, 0), transform 0.3s cubic-bezier(0.32, 0, 0.67, 0);
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
 }
 </style>

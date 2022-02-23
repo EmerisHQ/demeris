@@ -4,9 +4,8 @@
   </metainfo>
   <div v-if="initialized">
     <CookieConsent />
-    <ChainDownWrapper>
-      <router-view />
-    </ChainDownWrapper>
+    <ChainDownToast />
+    <router-view />
     <FeatureRunningConditional name="TRANSACTIONS_CENTER">
       <TransactionsCenter />
     </FeatureRunningConditional>
@@ -25,7 +24,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
+import ChainDownToast from '@/components/common/ChainDownToast.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
 import SimplexModal from '@/components/common/SimplexModal.vue';
@@ -45,7 +44,7 @@ export default defineComponent({
 
   components: {
     EphemerisSpinner,
-    ChainDownWrapper,
+    ChainDownToast,
     CookieConsent,
     TransactionsCenter,
     FeatureRunningConditional,

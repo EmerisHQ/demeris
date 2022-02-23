@@ -94,7 +94,7 @@ export const messages = {
     components: {
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
-        appearsDown: 'Emeris connection to {chain} appears to be down',
+        appearsDown: '{chain} appears to be down.',
         partUnavailable:
           'Emeris connection to {chain} appears to be down. Part of your {denom} may be temporarily unavailable.',
         fullUnavailable: 'Your {denom} on {chain} is unavailable right now.',
