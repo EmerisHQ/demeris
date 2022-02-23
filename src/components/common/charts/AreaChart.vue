@@ -90,12 +90,20 @@ export default defineComponent({
     const chartData = ref({
       options: {
         theme: {
-          mode: 'dark',
+          mode: theme.value,
         },
         tooltip: {
           enabled: true,
           x: {
             show: true,
+          },
+          y: {
+            formatter: (value) => {
+              return `$${value}`;
+            },
+            title: {
+              formatter: (seriesName) => '',
+            },
           },
           marker: {
             show: false,
@@ -195,6 +203,14 @@ export default defineComponent({
     };
 
     watch(
+      () => [theme.value],
+      () => {
+        chartData.value.options.theme.mode = theme.value;
+        emit('filterChanged', activeFilterItem.value);
+      },
+    );
+
+    watch(
       () => [props.dataStream, props.variant],
       async () => {
         chartData.value.series[0].data = props.dataStream;
@@ -211,13 +227,13 @@ export default defineComponent({
           : 0;
 
         if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
-          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#54f21b' : '#a8ff89';
+          chartData.value.options.colors[0] = theme.value === 'light' ? '#00CF30' : '#50CF49';
+          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#00CF30' : '#50CF49';
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
-          chartData.value.options.colors[0] = '#ff1b44';
-          chartData.value.options.fill.colors[0] = '#ff1b44';
+          chartData.value.options.colors[0] = theme.value === 'light' ? '#FE475F' : '#FF3D56';
+          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#FE475F' : '#FF3D56';
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
         }
