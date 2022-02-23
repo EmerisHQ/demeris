@@ -19,6 +19,8 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --fg-solid: #f7f7f7;
   --surface: #fff;
   --surface-image: var(--surface);
+  --surface-2: #fff;
+  --surface-2-image: var(--surface-2);
   --border: rgba(0, 0, 0, 0.07);
   --link: #094efd;
   --link-hover: var(--text);
@@ -41,6 +43,8 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --fg-solid: #1f1f1f;
   --surface: #181818;
   --surface-image: 148px repeat url('~@/assets/images/texture-grain.png'), #171717;
+  --surface-2: #262626;
+  --surface-2-image: 148px repeat url('~@/assets/images/texture-grain.png'), #232323;
   --border: rgba(255, 255, 255, 0.09);
   --link: var(--quinary);
   --link-hover: #fff;
@@ -89,7 +93,6 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
     }
   }
 }
-
 html.dark {
   @include themeDark;
 
@@ -99,8 +102,8 @@ html.dark {
   }
 }
 
-// /* Custom color utilities */
-@variants dark, focus {
+/* Custom color utilities */
+@variants dark, hover, focus {
   /* Background utilities */
   .bg-app {
     background: var(--bg-image);
@@ -111,6 +114,12 @@ html.dark {
   .bg-surface {
     background: var(--surface-image);
   }
+  .bg-surface-2 {
+    background: var(--surface-2-image);
+  }
+}
+@variants dark, focus {
+  /* Background utilities */
   .bg-brand {
     background: center / cover no-repeat url('~@/assets/images/gradient-primary.jpg'), var(--primary);
   }
@@ -133,6 +142,7 @@ html.dark {
     background: var(--gold) $gold-to-br;
   }
 }
+
 /* Border utilities */
 @variants dark, group-hover, focus-within, hover, focus {
   .border-brand {
