@@ -97,11 +97,13 @@
                 </div>
               </td>
               <td class="text-right">
-                <Icon
-                  name="CaretRightIcon"
-                  :icon-size="1"
-                  class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
-                />
+                <div class="flex justify-end">
+                  <Icon
+                    name="CaretRightIcon"
+                    :icon-size="1"
+                    class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                  />
+                </div>
               </td>
             </tr>
 
