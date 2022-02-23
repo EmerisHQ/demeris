@@ -9,10 +9,7 @@
       :content="'Validator jailed'"
       class="flex items-center justify-center w-3 h-3 border-1 border-bg bg-negative rounded-full absolute z-50 -right-1 -top-1 font-medium -text-1 text-text"
     ></div>
-    <template v-if="logoUrl != ''">
-      <img :src="logoUrl" :alt="validator.moniker" class="w-full h-full rounded-full relative z-10" />
-      <img alt="Logo glow" :src="logoUrl" class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter" />
-    </template>
+    <ValidatorImg :validator="validator" />
     <svg class="absolute w-0 h-0">
       <defs>
         <clipPath :id="clipPathId" clipPathUnits="objectBoundingBox">
@@ -28,13 +25,15 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
-import { defineComponent, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+import ValidatorImg from '@/components/common/ValidatorImg.vue';
+
+export type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export default defineComponent({
   name: 'ValidatorBadge',
+  components: { ValidatorImg },
   props: {
     validator: {
       type: Object,
@@ -48,39 +47,14 @@ export default defineComponent({
       default: 'md',
     },
   },
-  setup(props) {
-    const { validator } = toRefs(props);
-    const logoUrl = ref('');
-
+  setup() {
     const clipPathId =
       'clip-' +
       Math.random()
         .toString(36)
         .replace(/[^a-z]+/g, '')
         .substr(2, 10); // Generates random ID for svg clippath
-    watch(
-      () => validator.value,
-      async (newVal) => {
-        try {
-          const kb = await axios.get(
-            'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + newVal.identity + '&fields=pictures',
-          );
-          logoUrl.value = kb.data?.them[0]?.pictures?.primary?.url ?? '';
-        } catch (e) {}
-      },
-    );
-    onMounted(async () => {
-      if (validator.value) {
-        try {
-          const kb = await axios.get(
-            'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + validator.value.identity + '&fields=pictures',
-          );
-          logoUrl.value = kb.data?.them[0]?.pictures?.primary?.url ?? '';
-        } catch (e) {}
-      }
-    });
     return {
-      logoUrl,
       clipPathId,
     };
   },
@@ -110,11 +84,6 @@ export default defineComponent({
 
   &--xl {
     --symbol-size: 6rem;
-  }
-
-  &__logo-glow {
-    filter: blur(calc(0.4 * var(--symbol-size)));
-    top: 12.5%;
   }
 
   &__logo-container {
