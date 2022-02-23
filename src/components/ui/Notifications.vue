@@ -19,11 +19,16 @@
           class="w-full relative flex flex-col-reverse"
           :class="{ 'messages-viewport-unstacked': !isStacked }"
         >
-          <div :style="`height:${isStacked ? 'auto' : viewportHeight + 'px'};`" class="w-full absolute">
+          <div :style="`height:${isStacked ? 'auto' : notificationViewportHeight + 'px'};`" class="w-full absolute">
             <TransitionGroup name="list" tag="div" appear>
               <div
                 v-for="({ message, id }, toastIndex) in visibleToastMessages"
                 :id="`toast-${toastIndex}`"
+                :ref="
+                  (el) => {
+                    notificationHTMLRefs[toastIndex] = el;
+                  }
+                "
                 :key="`message-${id}`"
                 class="notification w-full flex absolute px-4 py-3 justify-between bg-surface rounded-lg left-0 bottom-0 right-0 mx-auto"
                 :style="notificationComputedStyles[toastIndex]"
@@ -139,56 +144,52 @@ const emit = defineEmits<{
 }>();
 
 const isStacked = ref<boolean>(true);
-const viewportHeight = ref<number>(0);
+const notificationViewportHeight = ref<number>(0);
 const isMouseOverComponent = ref<boolean>(false);
 const isHoverClearAllButton = ref<boolean>(false);
 const clickableAreaRef = ref<HTMLElement | null>(null);
 const viewportRef = ref<HTMLElement | null>(null);
+const notificationHTMLRefs = ref<HTMLElement[]>([]);
 const toastMessages = ref<NotificationMessage[]>(messages);
 const notificationComputedStyles = ref<string[]>([]);
 const inactivityTimeoutId = ref(null);
 const visibleToastMessages = computed(() => [...toastMessages.value]?.reverse() ?? []);
 const totalStackedToasts = 3;
 
-function computeNotificationsStyle(): void {
+function computeNotificationsStyles(): void {
   if (visibleToastMessages.value.length === 0) return;
-
   const notificationSpacerPx = 5;
   visibleToastMessages.value.forEach((m, index) => {
+    const heightPreviousNotifications = [...Array(index)].reduce(
+      (totalHeight, _, i) => totalHeight + notificationHTMLRefs.value[i]?.offsetHeight + notificationSpacerPx,
+      0,
+    );
     let style = '';
-    let heightPreviousToasts = 0;
-    for (let i = 0; i < index; i++) {
-      const elHeight = document.getElementById(`toast-${i}`)?.offsetHeight || 0;
-      if (elHeight && index !== 0) heightPreviousToasts += elHeight + notificationSpacerPx;
-    }
     if (!isStacked.value) {
       style = `
-        bottom: ${heightPreviousToasts}px;
+        bottom: ${heightPreviousNotifications}px;
         opacity: 1;
-        position: absolute;
         width: 100%;
         z-index: ${visibleToastMessages.value.length - index};
       `;
     } else {
       const isVisible = index < totalStackedToasts;
-      const firstToastHeight = document.getElementById('toast-0')?.offsetHeight || 0;
+      const firstToastHeight = notificationHTMLRefs.value[0]?.offsetHeight;
       const toastHeight = index === 0 ? '' : `height:${firstToastHeight}px;`;
       style = `
         bottom: ${index === 0 ? 0 : 8 * index}px;
         ${toastHeight}
         opacity: ${isVisible ? 1 - index * 0.1 : 0};
-        position: absolute;
         width: ${100 - index * 4}%;
         z-index: ${visibleToastMessages.value.length - index};
       `;
     }
-    let totalHeight = 0;
-    visibleToastMessages.value.forEach((vt, i) => {
-      const toastHeight = document.getElementById(`toast-${i}`)?.offsetHeight || 0;
-      if (toastHeight) totalHeight += toastHeight + notificationSpacerPx;
-    });
-    viewportHeight.value = totalHeight;
     notificationComputedStyles.value[index] = style;
+    notificationViewportHeight.value = visibleToastMessages.value.reduce(
+      (calculatedViewportHeight, _, i) =>
+        calculatedViewportHeight + notificationHTMLRefs.value[i]?.offsetHeight + notificationSpacerPx,
+      0,
+    );
   });
 }
 
@@ -231,27 +232,27 @@ function scrollNotificationsViewportToBottom(): void {
 }
 
 function updateNotificationPositions(): void {
-  computeNotificationsStyle();
+  computeNotificationsStyles();
   scrollNotificationsViewportToBottom();
 
   // Necessary to wait for elements to render correct height as they repaint
   window.requestAnimationFrame(() => {
-    computeNotificationsStyle();
+    computeNotificationsStyles();
     scrollNotificationsViewportToBottom();
   });
 
   // TODO: improve this - elements change size over time
   // and requires re-calculation in first few seconds
   setTimeout(() => {
-    computeNotificationsStyle();
+    computeNotificationsStyles();
     scrollNotificationsViewportToBottom();
   }, 100);
   setTimeout(() => {
-    computeNotificationsStyle();
+    computeNotificationsStyles();
     scrollNotificationsViewportToBottom();
   }, 200);
   setTimeout(() => {
-    computeNotificationsStyle();
+    computeNotificationsStyles();
     scrollNotificationsViewportToBottom();
   }, 1000);
 }
