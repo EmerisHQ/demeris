@@ -1,14 +1,16 @@
 @import './tailwind';
 
 // theme config
-@import '_base';
-@import '_typography';
-@import '_theme-colors';
-@import '_shadows';
+@layer base {
+  @import '_base';
+  @import '_typography';
+  @import '_theme-colors';
+}
+
+@layer utilities {
+  @import '_shadows';
+  @import '_animations';
+}
 
 // third-party components
 @import '_tippy';
-
-// todo
-@import '_animations';
-@import '_snippets';

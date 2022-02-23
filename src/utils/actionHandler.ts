@@ -25,6 +25,7 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
+import { featureRunning } from './FeatureManager';
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
@@ -1247,7 +1248,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'unstake':
-        params = (action as Actions.UndelegateAction).params;
+        params = (action as Actions.UnstakeAction).params;
         steps.push({
           name: 'unstake',
           description: 'Unstake',
@@ -1266,10 +1267,10 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'switch':
-        params = (action as Actions.RedelegateAction).params;
+        params = (action as Actions.RestakeAction).params;
         steps.push({
           name: 'switch',
-          description: 'Redelegate',
+          description: 'Restake',
           memo: '',
           transactions: [
             {
@@ -1279,7 +1280,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
                 validatorSrcAddress: params.validatorSrcAddress,
                 validatorDstAddress: params.validatorDstAddress,
                 amount: {
-                  amount: (params as Actions.RedelegateParams).amount.amount.amount,
+                  amount: (params as Actions.RestakeParams).amount.amount.amount,
                   denom: params.amount.amount.denom,
                 },
                 chain_name: params.amount.chain_name,
@@ -1289,7 +1290,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'stake':
-        params = (action as Actions.DelegateAction).params;
+        params = (action as Actions.StakeAction).params;
         const transferStakingCoinToNative = await move({
           amount: {
             amount: params.amount.amount.amount,
@@ -1319,7 +1320,7 @@ export async function actionHandler(action: Actions.Any): Promise<Array<Actions.
         });
         break;
       case 'multistake':
-        const mdparams = (action as Actions.MultiDelegateAction).params;
+        const mdparams = (action as Actions.MultiStakeAction).params;
         let allsteps: Actions.Step[] = [];
         for (let i = 0; i < mdparams.length; i++) {
           const mdsteps = await actionHandler({ name: 'stake', memo: action.memo, params: mdparams[i] });
@@ -1536,7 +1537,7 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'stake') {
-    const data = stepTx.data as Actions.DelegateData[];
+    const data = stepTx.data as Actions.StakeData[];
     const delegatorAddress = await getOwnAddress({ chain_name: data[0].chain_name });
     const msgs = await Promise.all(
       data.map(
@@ -1554,7 +1555,7 @@ export async function msgFromStepTransaction(
     return { msg: msgs, chain_name: data[0].chain_name, registry };
   }
   if (stepTx.name == 'unstake') {
-    const data = stepTx.data as Actions.UndelegateData;
+    const data = stepTx.data as Actions.UnstakeData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
     const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgUndelegate', {
       value: {
@@ -1567,7 +1568,7 @@ export async function msgFromStepTransaction(
     return { msg: [msg], chain_name: data.chain_name, registry };
   }
   if (stepTx.name == 'switch') {
-    const data = stepTx.data as Actions.RedelegateData;
+    const data = stepTx.data as Actions.RestakeData;
     const delegatorAddress = await getOwnAddress({ chain_name: data.chain_name });
     const msg = await libStore.dispatch('cosmos.staking.v1beta1/MsgBeginRedelegate', {
       value: {
@@ -1581,7 +1582,10 @@ export async function msgFromStepTransaction(
     return { msg: [msg], chain_name: data.chain_name, registry };
   }
 }
+// TODO make getter so it out updates on getFeeTokens getter
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+  if (!chain_name) return [];
+
   const apistore = useStore() as TypedAPIStore;
   const denoms = apistore.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
     chain_name,
@@ -1764,21 +1768,40 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      for (const denom of ibcDenoms) {
-        await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-          {
-            subscribe: false,
-            cache: false,
-            params: {
-              chain_name: chain,
-              hash: denom.split('/')[1],
-            },
-          },
-          { root: true },
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        await Promise.all(
+          ibcDenoms.map((denom) =>
+            apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                cache: false,
+                params: {
+                  chain_name: chain,
+                  hash: denom.split('/')[1],
+                },
+              },
+              { root: true },
+            ),
+          ),
         );
+      } else {
+        for (const denom of ibcDenoms) {
+          await apistore.dispatch(
+            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              cache: false,
+              params: {
+                chain_name: chain,
+                hash: denom.split('/')[1],
+              },
+            },
+            { root: true },
+          );
+        }
+        break;
       }
-      break;
     } catch (e) {
       error = e;
       retries++;
@@ -1909,17 +1932,17 @@ export async function feeForStepTransaction(stepTx: Actions.StepTransaction): Pr
     return fee;
   }
   if (stepTx.name == 'stake') {
-    const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
+    const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'unstake') {
-    const chain_name = (stepTx.data as Actions.UndelegateData).chain_name;
+    const chain_name = (stepTx.data as Actions.UnstakeData).chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
   if (stepTx.name == 'switch') {
-    const chain_name = (stepTx.data as Actions.RedelegateData).chain_name;
+    const chain_name = (stepTx.data as Actions.RestakeData).chain_name;
     const fee = await getFeeForChain(chain_name);
     return fee;
   }
@@ -2031,62 +2054,127 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 }
 
 export async function validBalances(balances: Balances): Promise<Balances> {
-  const apistore = useStore() as TypedAPIStore;
+  const apistore = useStore() as RootStoreType;
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
-  for (const balance of balances) {
-    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-    if (!ownAddress) continue;
-    const hashAddress = keyHashfromAddress(ownAddress);
+  if (featureRunning('REQUEST_PARALLELIZATION')) {
+    await Promise.all(
+      balances.map(async (balance) => {
+        // TODO: refactor this into something prettier.
+        const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+        if (ownAddress) {
+          const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress) {
-      continue;
-    }
+          if (balance.address !== hashAddress) {
+            return;
+          }
 
-    if (Object.keys(balance.ibc).length == 0) {
-      if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
-        validBalances.push(balance);
-      }
-    } else {
-      if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+          if (Object.keys(balance.ibc).length == 0) {
+            if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+              validBalances.push(balance);
+            }
+          } else {
+            if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+              return;
+            }
+            let verifyTrace;
+            try {
+              verifyTrace =
+                apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                  chain_name: balance.on_chain,
+                  hash: balance.ibc.hash,
+                }) ??
+                (await apistore.dispatch(
+                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                  { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+                  { root: true },
+                ));
+            } catch (e) {
+              return;
+            }
+
+            if (!verifyTrace || !verifyTrace.verified) {
+              return;
+            }
+
+            const primaryChannel =
+              apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+                chain_name: balance.on_chain,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              }) ??
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: balance.on_chain,
+                    destination_chain_name: verifyTrace.trace[0].counterparty_name,
+                  },
+                },
+                { root: true },
+              ));
+            if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+              validBalances.push(balance);
+            }
+          }
+        }
+      }),
+    );
+  } else {
+    for (const balance of balances) {
+      const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+      if (!ownAddress) continue;
+      const hashAddress = keyHashfromAddress(ownAddress);
+
+      if (balance.address !== hashAddress) {
         continue;
       }
-      let verifyTrace;
-      try {
-        verifyTrace =
-          apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+
+      if (Object.keys(balance.ibc).length == 0) {
+        if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+          validBalances.push(balance);
+        }
+      } else {
+        if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+          continue;
+        }
+        let verifyTrace;
+        try {
+          verifyTrace =
+            apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+              chain_name: balance.on_chain,
+              hash: balance.ibc.hash,
+            }) ??
+            (await apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+              { root: true },
+            ));
+        } catch (e) {
+          continue;
+        }
+
+        if (!verifyTrace || !verifyTrace.verified) {
+          continue;
+        }
+
+        const primaryChannel =
+          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
             chain_name: balance.on_chain,
-            hash: balance.ibc.hash,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-            { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+            {
+              subscribe: false,
+              params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+            },
             { root: true },
           ));
-      } catch (e) {
-        continue;
-      }
-
-      if (!verifyTrace || !verifyTrace.verified) {
-        continue;
-      }
-
-      const primaryChannel =
-        apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-          chain_name: balance.on_chain,
-          destination_chain_name: verifyTrace.trace[0].counterparty_name,
-        }) ??
-        (await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-          {
-            subscribe: false,
-            params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
-          },
-          { root: true },
-        ));
-      if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-        validBalances.push(balance);
+        if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+          validBalances.push(balance);
+        }
       }
     }
   }
@@ -2099,52 +2187,106 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
   const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
-  for (const pool of pools) {
-    const firstDenom = pool.reserve_coin_denoms[0];
-    const secondDenom = pool.reserve_coin_denoms[1];
+  if (featureRunning('REQUEST_PARALLELIZATION')) {
+    await Promise.all(
+      pools.map(async (pool) => {
+        const firstDenom = pool.reserve_coin_denoms[0];
+        const secondDenom = pool.reserve_coin_denoms[1];
 
-    if (!firstDenom.includes('ibc')) {
-      if (verifiedDenoms.find((item) => item.name === firstDenom)) {
-        // first denom is base denom and valid, check second denom
-        if (!secondDenom.includes('ibc')) {
-          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-            // first denom is base denom and valid, second denom is base denom and valid
+        if (!firstDenom.includes('ibc')) {
+          if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+            // first denom is base denom and valid, check second denom
+            if (!secondDenom.includes('ibc')) {
+              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                // first denom is base denom and valid, second denom is base denom and valid
 
-            validPools.push(pool);
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            } else {
+              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                // first denom is base and valid, second denom is IBC and valid
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            }
           } else {
-            continue;
+            return;
           }
         } else {
-          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-            // first denom is base and valid, second denom is IBC and valid
-            validPools.push(pool);
+          if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+            if (!secondDenom.includes('ibc')) {
+              // second denom is not IBC denom
+              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                // first denom is IBC and valid, second denom is base and valid
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            } else {
+              // second denom is IBC denom, check if it goes through primary channel
+              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            }
           } else {
-            continue;
+            return;
           }
         }
-      } else {
-        continue;
-      }
-    } else {
-      if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
-        if (!secondDenom.includes('ibc')) {
-          // second denom is not IBC denom
-          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-            // first denom is IBC and valid, second denom is base and valid
-            validPools.push(pool);
+      }),
+    );
+  } else {
+    for (const pool of pools) {
+      const firstDenom = pool.reserve_coin_denoms[0];
+      const secondDenom = pool.reserve_coin_denoms[1];
+
+      if (!firstDenom.includes('ibc')) {
+        if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+          // first denom is base denom and valid, check second denom
+          if (!secondDenom.includes('ibc')) {
+            if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+              // first denom is base denom and valid, second denom is base denom and valid
+
+              validPools.push(pool);
+            } else {
+              continue;
+            }
           } else {
-            continue;
+            if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+              // first denom is base and valid, second denom is IBC and valid
+              validPools.push(pool);
+            } else {
+              continue;
+            }
           }
         } else {
-          // second denom is IBC denom, check if it goes through primary channel
-          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-            validPools.push(pool);
-          } else {
-            continue;
-          }
+          continue;
         }
       } else {
-        continue;
+        if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+          if (!secondDenom.includes('ibc')) {
+            // second denom is not IBC denom
+            if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+              // first denom is IBC and valid, second denom is base and valid
+              validPools.push(pool);
+            } else {
+              continue;
+            }
+          } else {
+            // second denom is IBC denom, check if it goes through primary channel
+            if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+              validPools.push(pool);
+            } else {
+              continue;
+            }
+          }
+        } else {
+          continue;
+        }
       }
     }
   }
@@ -2285,7 +2427,7 @@ export async function chainStatusForSteps(steps: Actions.Step[]) {
         }
       }
       if (stepTx.name == 'stake') {
-        const chain_name = (stepTx.data as Actions.DelegateData[])[0].chain_name;
+        const chain_name = (stepTx.data as Actions.StakeData[])[0].chain_name;
         if (!apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name })) {
           allClear = false;
           if (failedChains.includes(chain_name)) {
@@ -2668,7 +2810,7 @@ export async function validateStepFeeBalances(
       }
     }
     if (stepTx.name == 'stake') {
-      const data = stepTx.data as Actions.DelegateData;
+      const data = stepTx.data as Actions.StakeData;
 
       const balance = balances.find((x) => {
         const amount = parseCoins(x.amount)[0];
@@ -3097,7 +3239,7 @@ export async function validateStepsFeeBalances(
         }
       }
       if (stepTx.name == 'stake') {
-        const data = stepTx.data as Actions.DelegateData[];
+        const data = stepTx.data as Actions.StakeData[];
 
         const balance = balances.find((x) => {
           const amount = parseCoins(x.amount)[0];
