@@ -44,7 +44,6 @@ const displayChain = computed(() => {
 });
 
 const isHubDown = computed(() => {
-  return true;
   const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: dexChain });
   return status === false;
 });
