@@ -14,7 +14,7 @@
 import axios from 'axios';
 import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 
-import { checkStringIsKeybase,getFirstAlphabet } from '@/utils/basic';
+import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic';
 export default defineComponent({
   name: 'ValidatorImg',
   props: {
@@ -36,12 +36,8 @@ export default defineComponent({
         imgUrl.value = await fetchValidatorImg(newValue);
         monikerFirst.value = getFirstAlphabet(newValue.moniker);
       },
+      { immediate: true },
     );
-
-    onMounted(async () => {
-      imgUrl.value = await fetchValidatorImg(validator.value);
-      monikerFirst.value = getFirstAlphabet(validator.value.moniker);
-    });
     return {
       imgUrl,
       monikerFirst,

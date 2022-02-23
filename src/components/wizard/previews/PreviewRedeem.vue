@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted,PropType, watch } from 'vue';
+import { computed, defineComponent, onMounted, PropType, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -147,16 +147,8 @@ export default defineComponent({
           newVal.from.address = await getOwnAddress({ chain_name: newVal.from.chain });
         }
       },
+      { immediate: true },
     );
-
-    onMounted(async () => {
-      if (transactionInfo.value.to.chain) {
-        transactionInfo.value.to.address = await getOwnAddress({ chain_name: transactionInfo.value.to.chain });
-      }
-      if (transactionInfo.value.from.chain) {
-        transactionInfo.value.from.address = await getOwnAddress({ chain_name: transactionInfo.value.from.chain });
-      }
-    });
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
       const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
