@@ -1,46 +1,43 @@
 <template>
-  <div class="wrapper w-full relative">
-    <div class="bg-bg rounded-2xl pb-6 shadow-card">
-      <!-- Claim Header -->
-      <div>
-        <img
-          src="~@/assets/images/airdrop-claimable-header-light.png"
-          alt="Airdrop Claimable Header"
-          class="rounded-t-2xl"
-        />
-        <!-- <img
-          v-if="activeFilter === 'all'"
-          src="~@/assets/images/airdrop-claimable-header-dark.png"
-          alt="Airdrop Claimable Header"
-          class="rounded-t-2xl"
-        /> -->
+  <div>
+    <div v-if="isDemoAccountBanner" class="mt-8 flex justify-between bg-text text-inverse rounded-2xl shadow-card">
+      <div class="w-1/2 p-6">
+        <p class="text-2 font-bold mb-4">Find out which airdrops you are eligible for</p>
+        <p class="-text-1 text-inverse mb-2 flex items-center">
+          Connect your wallet
+          <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+        </p>
       </div>
 
-      <!-- Has Airdrop amount -->
-      <div class="px-6 mb-6">
-        <p class="-text-1 text-muted mb-2">Congratulations!</p>
-        <p class="text-2 font-medium">You have 4 Airdrops to claim</p>
+      <img src="~@/assets/images/demo-account-banner.png" alt="Claimable airdrops header" class="w-1/2" />
+    </div>
+
+    <div v-if="!isDemoAccountBanner" class="mt-8 flex justify-between bg-text text-inverse rounded-2xl shadow-card">
+      <div class="w-1/2 p-6">
+        <p class="text-2 font-bold mb-4">Congratulations! You have 4 Airdrops to claim</p>
+        <p class="-text-1 text-inverse mb-2 flex items-center">
+          Claim now
+          <Icon name="ArrowRightIcon" :icon-size="0.6" class="ml-2" />
+        </p>
       </div>
 
-      <!-- Claim button -->
-      <div class="px-6">
-        <Button name="Show eligible Airdrop" />
-      </div>
+      <img src="~@/assets/images/claimable-airdrops-header.png" alt="Claimable airdrops header" class="w-1/2" />
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { computed, defineComponent, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
-import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import useTheme from '@/composables/useTheme';
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 
 export default defineComponent({
   name: 'AirdropClaimablePanel',
   components: {
-    Button,
+    Icon,
   },
   props: {
     activeFilter: {
@@ -48,7 +45,6 @@ export default defineComponent({
       default: 'all',
     },
   },
-
   setup() {
     const theme = useTheme();
     const apistore = useStore() as TypedAPIStore;
@@ -57,19 +53,17 @@ export default defineComponent({
       return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
     });
 
-    const buttonText = computed(() => {
-      return '';
-    });
-
-    const titleText = computed(() => {
-      return '';
+    const isDemoAccountBanner = computed(() => {
+      return (
+        !apistore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] ||
+        apistore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+      );
     });
 
     return {
       theme,
       selectedAirdrop,
-      buttonText,
-      titleText,
+      isDemoAccountBanner,
     };
   },
 });
@@ -78,6 +72,5 @@ export default defineComponent({
 <style lang="scss" scoped>
 .wrapper {
   min-width: 20rem;
-  /* min-height: 17rem; */
 }
 </style>

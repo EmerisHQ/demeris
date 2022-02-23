@@ -552,6 +552,9 @@ export const messages = {
         amount: 'Amount',
         viewAll: 'View all',
         allAirdrops: 'All airdrops',
+        airdropContentDisclaimer:
+          'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
+        featureProjects: 'Feature your project’s airdrop',
       },
       pools: {
         title: 'Pools',

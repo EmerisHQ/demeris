@@ -1,12 +1,29 @@
 <template>
   <AppLayout>
     <div class="md:flex justify-between">
-      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
-        <header>
-          <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2 capitalize">
-            {{ $t('context.airdrops.title') }}
+      <aside class="w-3/12">
+        <AirdropsFilter />
+        <AirdropsInfo />
+
+        <!-- Quick Info -->
+        <div class="mt-12 text-muted -text-1">
+          <p class="mb-4">
+            {{ $t('context.airdrops.airdropContentDisclaimer') }}
+          </p>
+          <p class="text-text font-medium">{{ $t('context.airdrops.featureProjects') }}</p>
+        </div>
+      </aside>
+
+      <div class="w-9/12 max-w-3xl mb-16 md:mb-0">
+        <header class="flex justify-between items-center">
+          <div class="text-2 sm:text-3 lg:text-4 font-bold mt-1 md:mt-2">
+            {{ $t('context.airdrops.allAirdrops') }}
+          </div>
+          <div class="w-1/4">
+            <Search v-model:keyword="keyword" placeholder="Search airdrops" class="pools__search max-w-xs w-full" />
           </div>
         </header>
+        <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
         <section class="mt-12">
           <AirdropsTable
             :airdrops="airdrops"
@@ -17,35 +34,25 @@
           />
         </section>
       </div>
-
-      <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
-        <AirdropClaimablePanel :active-filter="activeFilter" class="mb-6" />
-        <!-- Quick Info -->
-        <div class="mb-8 flex items-start text-muted border border-border rounded-xl p-4">
-          <InformationIcon class="mr-2" />
-          <p class="-text-1">
-            Airdrop is not financial advice. Eligibility, claim action can change based on the project.
-          </p>
-        </div>
-        <AirdropsInfo />
-      </aside>
     </div>
   </AppLayout>
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
+import AirdropsFilter from '@/components/airdrops/AirdropsFilter';
 import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
 import AirdropsTable from '@/components/airdrops/AirdropsTable';
-import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
+import Search from '@/components/common/Search.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { apistore } from '@/store/setup';
 import { Airdrop } from '@/types/api';
 import { pageview } from '@/utils/analytics';
 
@@ -56,11 +63,11 @@ export default {
     AirdropClaimablePanel,
     AirdropsTable,
     AirdropsInfo,
-    InformationIcon,
+    AirdropsFilter,
+    Search,
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
     const { t } = useI18n({ useScope: 'global' });
     pageview({ page_title: 'Airdrops', page_path: '/' });
     useMeta(
@@ -70,6 +77,7 @@ export default {
     );
 
     const activeFilter = ref('');
+    let gitAirdropsList = ref([]);
 
     const setActiveFilter = (value: string) => {
       activeFilter.value = value;
@@ -78,11 +86,11 @@ export default {
     const router = useRouter();
 
     const getAllAirdrops = async () => {
-      const gitAirdropsList = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
         subscribe: false,
       });
 
-      gitAirdropsList.forEach((item) => {
+      gitAirdropsList.value.forEach((item) => {
         apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
           subscribe: false,
           params: {

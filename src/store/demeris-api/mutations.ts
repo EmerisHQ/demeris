@@ -303,6 +303,21 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.SET_AIRDROPS](state: State, payload: DemerisMutations) {
     const tempAirdrop: any = payload.value;
+
+    if (tempAirdrop.eligibilityCheckEndpoint) {
+      tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');
+    }
+
+    if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
+      tempAirdrop.dateStatus = 'not_started';
+    } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ongoing';
+    } else if (tempAirdrop.airdropEndDate.getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ended';
+    } else {
+      tempAirdrop.dateStatus = 'not_started';
+    }
+
     state.airdrops.push(tempAirdrop);
   },
   [MutationTypes.SET_TOKEN_ID_STATUS](state: State, payload: DemerisMutations) {

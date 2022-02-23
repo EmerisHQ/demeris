@@ -788,7 +788,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const response: any = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
-      commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.json() });
+      commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
       }

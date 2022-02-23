@@ -368,8 +368,10 @@ export type Airdrop = {
   discordUrl: string;
   mediumUrl: string;
   airdropBlogUrl: string;
-  startDate: string;
-  endDate: string;
+  airdropStartDate: string;
+  airdropEndDate: string;
+  airdropStatus: string;
+  dateStatus: string;
   snapshotDate: string;
   snapshotBlockHeight: string;
   eligibilityCriteria: AirdropEligibilityCriteria[];

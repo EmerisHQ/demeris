@@ -1,11 +1,6 @@
 <template>
-  <div>
-    <div class="mb-6">
-      <p>What is an airdrop? ↗️</p>
-    </div>
-    <div>
-      <p>Feature your upcoming airdrop ↗️</p>
-    </div>
+  <div class="bg-fg rounded-xl cursor-pointer mt-12">
+    <img src="~@/assets/images/what-is-airdrop.png" alt="Airdrops Info" />
   </div>
 </template>
 
