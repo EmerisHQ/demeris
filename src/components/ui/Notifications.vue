@@ -9,17 +9,17 @@
       <div
         v-if="visibleNotificationMessages.length > 0"
         data-test="messages-container"
-        class="z-40 absolute w-full root theme-inverse dark:theme-inverse"
-        :class="{ 'root-unstacked': !isStacked, 'opacity-0': visibleNotificationMessages.length === 0 }"
+        class="z-40 absolute w-full theme-inverse dark:theme-inverse"
+        :class="{ unstacked: !isStacked, 'opacity-0': visibleNotificationMessages.length === 0 }"
       >
         <div
           ref="viewportRef"
           name="list"
           class="w-full relative flex flex-col-reverse"
-          :class="{ 'messages-viewport-unstacked': !isStacked }"
+          :class="{ 'messages-viewport-unstacked overflow-y-auto overflow-x-hidden': !isStacked }"
         >
           <div :style="`height:${isStacked ? 'auto' : notificationViewportHeight + 'px'};`" class="w-full absolute">
-            <TransitionGroup name="list" tag="div" appear>
+            <TransitionGroup name="notification-list" tag="div" appear>
               <div
                 v-for="({ message, id }, toastIndex) in visibleNotificationMessages"
                 :ref="
@@ -33,10 +33,10 @@
                 data-test="single-notification-message"
                 @click="expandNotifications()"
               >
-                <Transition name="fade-hover">
+                <Transition name="fade" appear>
                   <button
                     v-if="showClearButton(toastIndex)"
-                    class="clear-all-button absolute bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
+                    class="clear-all-button absolute z-40 bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
                     data-test="clear-all-notifications-button"
                     @click="clearAllNotifications()"
                     @mouseover="isHoverClearAllButton = true"
@@ -80,7 +80,7 @@
         </div>
       </div>
     </Transition>
-    <Transition name="fade-controls">
+    <Transition name="fade" appear>
       <div
         v-show="!isStacked && visibleNotificationMessages.length > 1"
         key="button-group"
@@ -133,7 +133,14 @@ const props = withDefaults(defineProps<Props>(), {
   showLessLabel: '',
 });
 
-const { button1Label, button2Label, clearAllLabel, messages, showLessLabel, dismissInterval } = toRefs(props);
+const {
+  button1Label,
+  button2Label,
+  clearAllLabel,
+  messages: notificationMessages,
+  showLessLabel,
+  dismissInterval,
+} = toRefs(props);
 
 const emit = defineEmits<{
   (e: 'onButton2Click', id: number | string);
@@ -143,13 +150,12 @@ const emit = defineEmits<{
 
 const isStacked = ref<boolean>(true);
 const isUpdatingStyles = ref<boolean>(false);
-const notificationViewportHeight = ref<number>(0);
 const isMouseOverComponent = ref<boolean>(false);
 const isHoverClearAllButton = ref<boolean>(false);
+const notificationViewportHeight = ref<number>(0);
 const clickableAreaRef = ref<HTMLElement | null>(null);
 const viewportRef = ref<HTMLElement | null>(null);
 const notificationHTMLRefs = ref<HTMLDivElement[]>([]);
-const notificationMessages = ref<NotificationMessage[]>(messages);
 const notificationComputedStyles = ref<string[]>([]);
 const inactivityTimeoutId = ref(null);
 const styleCalculationTimeoutId = ref(null);
@@ -159,6 +165,7 @@ const visibleNotificationMessages = computed(() => [...notificationMessages.valu
 const totalStackedNotifications = 3;
 
 function computeNotificationsStyles(): void {
+  // styles are computed on demand to update dom
   if (visibleNotificationMessages.value.length === 0) return;
   const notificationSpacerPx = 5;
   visibleNotificationMessages.value.forEach((m, index) => {
@@ -214,7 +221,6 @@ function dismissNotification(id: number | string): void {
 }
 
 function startInactivityTimer(): void {
-  console.log('startInactivityTimer isMouseOverComponent.value', isMouseOverComponent.value);
   if (isMouseOverComponent.value) return;
   startDismissNotificationTimeout();
 }
@@ -286,7 +292,6 @@ onClickOutside(clickableAreaRef, () => {
 });
 
 onMounted(() => {
-  // updateNotificationPositions();
   startInactivityTimer();
 });
 
@@ -299,25 +304,19 @@ onUnmounted(() => {
 .notification {
   transition: all 0.3s ease-out;
 }
-.root-unstacked {
+.unstacked {
   transform: translateY(-300px);
 }
 .messages-viewport-unstacked {
   height: 270px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
-/* TODO: use ui Button */
 .clear-all-button {
   background-color: #555555;
   left: -0.75rem;
   min-height: 1.5rem;
   min-width: 1.5rem;
   top: -0.8rem;
-  z-index: 40;
 }
-
-/* transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease-out;
@@ -326,33 +325,12 @@ onUnmounted(() => {
 .fade-leave-to {
   opacity: 0;
 }
-.fade-controls-enter-active,
-.fade-controls-leave-active {
-  transition: opacity 0.5s ease-out;
-  transition: transform 0.5s ease-in-out;
-}
-.fade-controls-enter,
-.fade-controls-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
-  height: 0;
-}
-
-.fade-hover-enter-active,
-.fade-hover-leave-active {
-  transition: opacity 0.5s ease-out;
-  opacity: 1;
-}
-.fade-hover-enter,
-.fade-hover-leave-to {
-  opacity: 0;
-}
-.list-enter-active,
-.list-leave-active {
+.notification-list-enter-active,
+.notification-list-leave-active {
   transition: all 0.5s ease;
 }
-.list-enter-from,
-.list-leave-to {
+.notification-list-enter-from,
+.notification-list-leave-to {
   opacity: 0 !important;
   transform: translateX(30px);
 }
