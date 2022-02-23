@@ -317,15 +317,18 @@ export default defineComponent({
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
-      return (
-        Math.trunc(
-          (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
-            10 ** assetPrecision.value +
-            (totalRewardsDisplayAmount.value ?? 0)) *
-            10 ** assetPrecision.value,
-        ) /
-        10 ** assetPrecision.value
+      const total = new BigNumber(totalRewardsAmount.value).plus(
+        stakingBalances.value.reduce(
+          (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
+          new BigNumber(0),
+        ),
       );
+      if (total.isLessThan(1)) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      } else {
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
+        return totalDisplay.toFixed(assetPrecision.value);
+      }
     });
     const isStakingAssetExist = computed(() => {
       return stakingBalances.value.length > 0;
@@ -340,7 +343,12 @@ export default defineComponent({
       return parseFloat(stakingRewardsData.value?.total ?? 0);
     });
     const totalRewardsDisplayAmount = computed(() => {
-      return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
+      if (totalRewardsAmount.value < 1) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      }
+      return new BigNumber(totalRewardsAmount.value ?? 0)
+        .dividedBy(10 ** assetPrecision.value)
+        .toFixed(assetPrecision.value);
     });
     const unstakingAssetValue = computed(() => {
       return unbondingBalances.value
