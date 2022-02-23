@@ -1,17 +1,18 @@
 // body for specificity - probably should create a 'theme' for tippy instead.
 body {
   .tippy-box {
-    background: var(--text);
-    color: var(--inverse);
-    font-size: 0.8125rem;
-    line-height: 1.625;
-    border-radius: 0.6125rem;
+    @apply bg-text;
+    @apply text-inverse;
+    @apply -text-1;
+    @apply leading-copy;
+    @apply rounded-xl;
     @apply shadow-dropdown;
   }
   .tippy-arrow {
-    color: var(--text);
+    @apply text-text;
   }
   .tippy-content {
-    padding: 0.5rem 0.75rem;
+    @apply py-2;
+    @apply px-3;
   }
 }

@@ -11,7 +11,6 @@
     ></div>
     <template v-if="logoUrl != ''">
       <img :src="logoUrl" :alt="validator.moniker" class="w-full h-full rounded-full relative z-10" />
-      <img alt="Logo glow" :src="logoUrl" class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter" />
     </template>
     <svg class="absolute w-0 h-0">
       <defs>

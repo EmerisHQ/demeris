@@ -43,6 +43,7 @@ export enum GetterTypes {
   getSelectedAirdrop = 'getSelectedAirdrop',
   getTokenIdLoadingStatus = 'getTokenIdLoadingStatus',
   getChainStatus = 'getChainStatus',
+  getChainNameByBaseDenom = 'getChainNameByBaseDenom',
 }
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
@@ -89,4 +90,5 @@ export enum GlobalGetterTypes {
   getSelectedAirdrop = 'demerisAPI/getSelectedAirdrop',
   getTokenIdLoadingStatus = 'demerisAPI/getTokenIdLoadingStatus',
   getChainStatus = 'demerisAPI/getChainStatus',
+  getChainNameByBaseDenom = 'demerisAPI/getChainNameByBaseDenom',
 }

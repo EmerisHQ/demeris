@@ -92,9 +92,9 @@ export default defineComponent({
     const propsRef = toRefs(props);
     const validators = ref([]);
     const tx = propsRef.step.value.transactions[0];
-    const chainName = (tx.data as Actions.DelegateData[])[0].chain_name;
-    const baseDenom = (tx.data as Actions.DelegateData[])[0].amount.denom;
-    const totalStaked = (tx.data as Actions.DelegateData[])
+    const chainName = (tx.data as Actions.StakeData[])[0].chain_name;
+    const baseDenom = (tx.data as Actions.StakeData[])[0].amount.denom;
+    const totalStaked = (tx.data as Actions.StakeData[])
       .reduce((acc, txdata) => {
         return acc.plus(new BigNumber(txdata.amount.amount));
       }, new BigNumber(0))
@@ -113,7 +113,7 @@ export default defineComponent({
     return {
       store,
       size,
-      tx: tx.data as Actions.DelegateData[],
+      tx: tx.data as Actions.StakeData[],
       getValidator,
       getValidatorMoniker,
       baseDenom,
