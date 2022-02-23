@@ -24,8 +24,8 @@
         <div class="flex justify-end items-center pb-5">
           <div class="flex flex-col text-right items-end">
             <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
-            <div><AmountDisplay :amount="stake.amount" /></div>
-            <div class="text-muted -text-1">
+            <div v-if="!isReceipt"><AmountDisplay :amount="stake.amount" /></div>
+            <div v-if="getStakingBalance(stake.validatorAddress) != 0" class="text-muted -text-1">
               Staked <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress), denom: baseDenom }" />
             </div>
           </div>
@@ -91,6 +91,11 @@ export default defineComponent({
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
     },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
   },
 
   setup(props) {
@@ -118,7 +123,7 @@ export default defineComponent({
       );
     });
     const getStakingBalance = (address) => {
-      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address)).amount;
+      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
     };
     const getValidatorMoniker = (address) => {
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';

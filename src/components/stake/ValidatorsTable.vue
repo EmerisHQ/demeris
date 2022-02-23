@@ -110,11 +110,12 @@
             "
           >
             <td
-
               class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap"
-              :class="{ 'group-hover:bg-fg transition': !(
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }"
+                ),
+              }"
             >
               <div class="inline-flex items-center mr-4 align-middle">
                 <!-- TODO: get logo url -->
@@ -124,38 +125,58 @@
                 {{ validator.moniker }}
               </span>
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
               <div class="-text-1 text-muted">
                 {{ getVotingPowerPercDisplayValue(validator.tokens) }}
               </div>
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               {{ getCommissionDisplayValue(validator.commission_rate) }}
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
               <div class="-text-1 text-muted">
                 {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
               </div>
             </td>
 
-            <td v-if="hasActions" class="py-4 pl-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              v-if="hasActions"
+              class="py-4 pl-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               <div class="flex justify-center pl-4">
                 <Button
                   v-tippy
                   class="ml-8"
                   :content="validator.jailed ? 'Validator jailed' : null"
                   :name="$t('components.validatorTable.stake')"
-
                   :disabled="
                     validator.jailed ||
                       (disabledList.includes(validator.operator_address) &&

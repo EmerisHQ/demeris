@@ -98,6 +98,11 @@ export default defineComponent({
       type: Object as PropType<WithdrawLiquidityEndBlockResponse>,
       default: undefined,
     },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
   },
 
   setup(props) {

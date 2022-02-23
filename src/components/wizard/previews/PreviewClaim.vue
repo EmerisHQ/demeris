@@ -96,6 +96,11 @@ export default defineComponent({
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
     },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
   },
 
   setup(props: any) {
