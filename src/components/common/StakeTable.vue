@@ -264,7 +264,6 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n({ useScope: 'global' });
     const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
-
     const store = useStore();
     /* variables */
     const selectedTab = ref<number>(1);
@@ -311,7 +310,6 @@ export default defineComponent({
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
-
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
         chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
