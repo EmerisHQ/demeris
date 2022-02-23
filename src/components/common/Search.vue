@@ -4,25 +4,7 @@
       <input
         ref="searchInput"
         :value="keyword"
-        class="
-          relative
-          z-10
-          h-12
-          w-full
-          py-2
-          pr-4
-          text-0
-          font-normal
-          text-text
-          bg-fg
-          focus:bg-surface focus:rounded-lg
-          placeholder-inactive
-          hover:placeholder-muted
-          focus:placeholder-inactive
-          rounded-xl
-          border-none
-          appearance-none
-        "
+        class="relative z-10 h-12 w-full py-2 pr-4 text-0 font-normal text-text bg-fg focus:bg-surface focus:rounded-lg placeholder-inactive hover:placeholder-muted focus:placeholder-inactive rounded-xl border-none appearance-none"
         :class="[isSearchIconVisible ? 'pl-10' : 'pl-4']"
         :type="inputType"
         :placeholder="placeholder"
@@ -39,19 +21,7 @@
       <Icon
         v-if="isCloseIconVisible"
         v-show="keyword !== ''"
-        class="
-          icon-reset
-          absolute
-          z-10
-          h-full
-          px-3
-          right-0
-          text-inactive
-          hover:text-text
-          focus:text-text
-          cursor-pointer
-          transition-colors
-        "
+        class="icon-reset absolute z-10 h-full px-3 right-0 text-inactive hover:text-text focus:text-text cursor-pointer transition-colors"
         :name="'CloseCircleIcon'"
         :icon-size="1"
         @click="

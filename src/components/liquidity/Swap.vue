@@ -160,7 +160,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, reactive, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
@@ -175,6 +175,7 @@ import SlippageSettingModal from '@/components/ui/SlippageSettingModal.vue';
 import useAccount from '@/composables/useAccount';
 import useCalculation from '@/composables/useCalculation';
 import useModal from '@/composables/useModal';
+import usePool from '@/composables/usePool';
 import usePools from '@/composables/usePools';
 import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
@@ -187,6 +188,7 @@ import { getTicker } from '@/utils/actionHandler';
 import { actionHandler, getFeeForChain } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 import { isNative, parseCoins } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import FeatureRunningConditional from '../common/FeatureRunningConditional.vue';
 
@@ -219,15 +221,8 @@ export default defineComponent({
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
-    const {
-      pools,
-      filterPoolsByDenom,
-      getPoolById,
-      getPoolPrice,
-      getReserveBalances,
-      getReserveBaseDenoms,
-      updatePool,
-    } = usePools();
+    const { pools, filterPoolsByDenom, getPoolPrice, getReserveBalances, getReserveBaseDenoms, updatePool } =
+      usePools();
     const { getDisplayPrice } = usePrice();
     const { balances, orderBalancesByPrice } = useAccount();
     const isInit = ref(false);
@@ -271,89 +266,92 @@ export default defineComponent({
     onMounted(async () => {
       const pairs = [];
       const newPools = pools.value;
-      for (let pool of newPools) {
-        let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
-        let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
+      if (newPools) {
+        // pools.value may be null
+        for (let pool of newPools) {
+          let reserveCoinA = { denom: pool.reserve_coin_denoms[0], base_denom: '', chain_name: '' };
+          let reserveCoinB = { denom: pool.reserve_coin_denoms[1], base_denom: '', chain_name: '' };
 
-        if (isNative(pool.reserve_coin_denoms[0])) {
-          reserveCoinA.base_denom = reserveCoinA.denom;
-          reserveCoinA.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
-        } else {
-          const verifyTraceA =
-            store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-              chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
-              hash: pool.reserve_coin_denoms[0].split('/')[1],
-            }) ??
-            (await store.dispatch(
-              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-              {
-                subscribe: false,
-                params: {
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
-                  hash: pool.reserve_coin_denoms[0].split('/')[1],
+          if (isNative(pool.reserve_coin_denoms[0])) {
+            reserveCoinA.base_denom = reserveCoinA.denom;
+            reserveCoinA.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+          } else {
+            const verifyTraceA =
+              store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                hash: pool.reserve_coin_denoms[0].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    hash: pool.reserve_coin_denoms[0].split('/')[1],
+                  },
                 },
-              },
-              { root: true },
-            ));
-          reserveCoinA.base_denom = verifyTraceA.base_denom;
-          reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
-        }
+                { root: true },
+              ));
+            reserveCoinA.base_denom = verifyTraceA.base_denom;
+            reserveCoinA.chain_name = verifyTraceA.trace[verifyTraceA.trace.length - 1].counterparty_name;
+          }
 
-        if (isNative(pool.reserve_coin_denoms[1])) {
-          reserveCoinB.base_denom = reserveCoinB.denom;
-          reserveCoinB.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
-        } else {
-          const verifyTraceB =
-            store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
-              chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
-              hash: pool.reserve_coin_denoms[1].split('/')[1],
-            }) ??
-            (await store.dispatch(
-              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-              {
-                subscribe: false,
-                params: {
-                  chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
-                  hash: pool.reserve_coin_denoms[1].split('/')[1],
+          if (isNative(pool.reserve_coin_denoms[1])) {
+            reserveCoinB.base_denom = reserveCoinB.denom;
+            reserveCoinB.chain_name = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+          } else {
+            const verifyTraceB =
+              store.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                hash: pool.reserve_coin_denoms[1].split('/')[1],
+              }) ??
+              (await store.dispatch(
+                GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
+                    hash: pool.reserve_coin_denoms[1].split('/')[1],
+                  },
                 },
-              },
-              { root: true },
-            ));
-          reserveCoinB.base_denom = verifyTraceB.base_denom;
-          reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
-        }
-        const pairAB = {
-          pool_id: pool.id,
-          pay: reserveCoinA,
-          receive: { denom: reserveCoinB.denom },
-        };
-        const pairBA = {
-          pool_id: pool.id,
-          pay: reserveCoinB,
-          receive: { denom: reserveCoinA.denom },
-        };
+                { root: true },
+              ));
+            reserveCoinB.base_denom = verifyTraceB.base_denom;
+            reserveCoinB.chain_name = verifyTraceB.trace[verifyTraceB.trace.length - 1].counterparty_name;
+          }
+          const pairAB = {
+            pool_id: pool.id,
+            pay: reserveCoinA,
+            receive: { denom: reserveCoinB.denom },
+          };
+          const pairBA = {
+            pool_id: pool.id,
+            pay: reserveCoinB,
+            receive: { denom: reserveCoinA.denom },
+          };
 
-        // TODO: get isAdvanced from local storage
-        const isAdvanced = true;
+          // TODO: get isAdvanced from local storage
+          const isAdvanced = true;
 
-        //Pool coin included(advanced) or excluded
-        if (isAdvanced) {
-          pairs.push(pairAB);
-          pairs.push(pairBA);
-        } else {
-          if (!hasPoolCoin(pairAB)) {
+          //Pool coin included(advanced) or excluded
+          if (isAdvanced) {
             pairs.push(pairAB);
             pairs.push(pairBA);
+          } else {
+            if (!hasPoolCoin(pairAB)) {
+              pairs.push(pairAB);
+              pairs.push(pairBA);
+            }
+          }
+
+          //helper
+          function hasPoolCoin(pair) {
+            const poolPrefix = 'pool';
+            return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
           }
         }
-
-        //helper
-        function hasPoolCoin(pair) {
-          const poolPrefix = 'pool';
-          return pair.pay.denom.startsWith(poolPrefix) || pair.receive.denom.startsWith(poolPrefix);
-        }
+        availablePairs.value = pairs;
       }
-      availablePairs.value = pairs;
     });
     watch(
       () => pools.value,
@@ -785,27 +783,59 @@ export default defineComponent({
     });
 
     //tx fee setting
-    watch(
-      () => data.payCoinData?.denom,
-      async () => {
-        if (!data.payCoinData) {
-          return;
-        }
+    if (featureRunning('REQUEST_PARALLELIZATION')) {
+      watch(
+        () => [
+          data.payCoinData?.denom,
+          store.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
+            chain_name: data.payCoinData?.on_chain,
+          }),
+          store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
+        ],
+        async ([denom, feeTokens, gasPriceLevel]) => {
+          if (!denom || feeTokens.length === 0 || !gasPriceLevel) {
+            return;
+          }
 
-        if (
-          data.payCoinData?.denom.startsWith('pool') ||
-          (data.payCoinData?.denom.startsWith('ibc') &&
-            data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
-        ) {
-          txFee.value = 0;
-        } else {
-          const fees = await getFeeForChain(data.payCoinData?.on_chain);
-          txFee.value =
-            fees[0].amount[gasPriceLevel.value] *
-            10 ** store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
-        }
-      },
-    );
+          if (
+            denom.startsWith('pool') ||
+            (denom.startsWith('ibc') &&
+              data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
+          ) {
+            txFee.value = 0;
+          } else {
+            const fees = await getFeeForChain(data.payCoinData?.on_chain);
+            txFee.value =
+              fees[0].amount[gasPriceLevel] *
+              10 **
+                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+          }
+        },
+      );
+    } else {
+      watch(
+        () => data.payCoinData?.denom,
+        async () => {
+          if (!data.payCoinData) {
+            return;
+          }
+
+          if (
+            data.payCoinData?.denom.startsWith('pool') ||
+            (data.payCoinData?.denom.startsWith('ibc') &&
+              data.payCoinData?.on_chain == store.getters[GlobalDemerisGetterTypes.API.getDexChain])
+          ) {
+            txFee.value = 0;
+          } else {
+            const fees = await getFeeForChain(data.payCoinData?.on_chain);
+            txFee.value =
+              fees[0].amount[gasPriceLevel.value] *
+              10 **
+                store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom });
+          }
+        },
+      );
+    }
 
     //max button text set
     watch(
@@ -935,11 +965,14 @@ export default defineComponent({
           clearInterval(setIntervalId.value);
           setIntervalId.value = setInterval(async () => {
             const id = poolId.value;
-            const pool = getPoolById(id);
-            await updatePool(pool);
-            const poolPrice = await getPoolPrice(pool);
-            const reserves = await getReserveBaseDenoms(pool);
-            const reserveBalances = await getReserveBalances(pool);
+
+            const { pool, initPromise } = usePool(id);
+            await initPromise;
+            await updatePool(unref(pool));
+
+            const poolPrice = await getPoolPrice(unref(pool));
+            const reserves = await getReserveBaseDenoms(unref(pool));
+            const reserveBalances = await getReserveBalances(unref(pool));
             data.selectedPoolData = {
               pool,
               poolPrice,

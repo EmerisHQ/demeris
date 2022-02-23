@@ -103,6 +103,7 @@ export const messages = {
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
+        acceptText: 'OK',
       },
       asset: {
         pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
@@ -139,9 +140,9 @@ export const messages = {
         estimate: 'Estimated total fees',
       },
       validatorCard: {
-        commissionTooltip: 'TODO: commission tooltip',
-        maxCommissionTooltip: 'TODO: Max commission tooltip',
-        maxChangeRateTooltip: 'TODO: maxChangeRate tooltip',
+        commissionLabel: 'Commission',
+        maxCommissionLabel: 'Max commission',
+        maxChangeRateLabel: 'Max change rate',
       },
       stakeForm: {
         selectTitle: 'Select a validator',
@@ -199,7 +200,7 @@ export const messages = {
         reward: 'Rewards',
         stakeAsset: 'Stake {ticker}',
         selectValidator: 'Select a validator',
-        searchValidator: 'Search validator',
+        searchValidator: 'Search validators',
         claimRewards: 'Claim rewards',
         stake: 'Stake',
         unstake: 'Unstake',
@@ -652,6 +653,7 @@ export const messages = {
         createWarning: 'Creating a pool is risky business',
         arbitrageWarning:
           'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
+        receiveLpAsset: 'The shares you will receive based on your contribution to the underlying pool',
       },
       asset: {
         balance: 'Balance',

@@ -13,26 +13,22 @@
     <div class="text-muted py-6 w-full text-left">{{ validator.details }}</div>
     <List class="w-full">
       <ListItem size="sm" direction="col">
-        <ListItem v-tippy size="xs" :label="'Commission'" :content="$t('components.validatorCard.commissionTooltip')">
+        <ListItem size="xs" :label="$t('components.validatorCard.commissionLabel')">
           {{ commission }}
         </ListItem>
         <ListItem
-          v-tippy
           inset
           size="xs"
-          :label="'Max commission'"
-          :content="$t('components.validatorCard.maxCommissionTooltip')"
+          :label="$t('components.validatorCard.maxCommissionLabel')"
           class="text-muted -text-1"
           :label-font-weight="'normal'"
         >
           {{ maxCommission }}
         </ListItem>
         <ListItem
-          v-tippy
           inset
           size="xs"
-          :label="'Max change rate'"
-          :content="$t('components.validatorCard.maxChangeRateTooltip')"
+          :label="$t('components.validatorCard.maxChangeRateLabel')"
           class="text-muted -text-1"
           :label-font-weight="'normal'"
         >

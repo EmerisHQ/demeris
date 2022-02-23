@@ -267,7 +267,7 @@ export default defineComponent({
       () => toRefs(props),
       async () => {
         if (isPoolCoin.value) {
-          let existingPool = pools.value.find((pool) => pool.pool_coin_denom === (props.denom as string));
+          let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
 
           if (existingPool) {
             denoms.value = await getReserveBaseDenoms(existingPool);

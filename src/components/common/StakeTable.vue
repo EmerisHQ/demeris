@@ -28,23 +28,14 @@
         :full-width="false"
         @click="() => goStakeActionPage(StakingActions.STAKE)"
       >
-        <Icon name="PlusIcon" :icon-size="2" />
+        <Icon name="PlusIcon" :icon-size="1.5" />
       </Button>
     </div>
 
     <!-- Staking info banner -->
     <template v-if="!isStakingAssetExist">
       <div
-        class="
-          stake__banner
-          relative
-          border border-border
-          rounded-2xl
-          p-6
-          flex flex-col
-          justify-between
-          bg-right bg-no-repeat
-        "
+        class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
       >
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
@@ -90,10 +81,10 @@
             <!-- claim rewards -->
             <tr
               v-if="totalRewardsAmount"
-              class="group cursor-pointer shadow-card rounded-xl"
+              class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
               @click="goStakeActionPage(StakingActions.CLAIM)"
             >
-              <td class="py-6 flex items-center">
+              <td class="py-6 flex items-center rounded-l-xl bg-surface">
                 <div class="inline-flex items-center ml-6 mr-4">
                   <img src="@/assets/svg/icons/reward.svg" />
                 </div>
@@ -101,21 +92,21 @@
                   {{ $t('components.stakeTable.claimRewards') }}
                 </span>
               </td>
-              <td class="text-right text-muted">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
-              <td class="text-right font-medium">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" /></div>
+              <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
+              <td class="text-right font-medium bg-surface">
+                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" /></div>
               </td>
-              <td class="text-right">
+              <td class="text-right rounded-r-xl bg-surface">
                 <Icon
                   name="CaretRightIcon"
                   :icon-size="1"
-                  class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
+                  class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
                 />
               </td>
             </tr>
 
             <!-- staked validators -->
-            <tr v-for="validator of stakingBalances" :key="validator.validator_address" class="group cursor-pointer">
+            <tr v-for="validator of stakingBalances" :key="validator.validator_address">
               <td class="py-6 flex items-center transition">
                 <div class="inline-flex items-center mr-4">
                   <ValidatorBadge
@@ -134,28 +125,33 @@
                 <Price :amount="{ denom: denom, amount: validator.amount }" />
               </td>
               <td class="text-right">
-                <tippy placement="right" trigger="click" :interactive="true" :arrow="false" :offset="[0, -20]">
-                  <Icon
-                    name="ThreeDotsIcon"
-                    :icon-size="1"
-                    class="ml-1.5 px-1.5 self-stretch text-muted group-hover:text-text transition-colors"
-                  />
+                <tippy
+                  placement="right-start"
+                  trigger="click"
+                  delay="0"
+                  :interactive="true"
+                  :arrow="false"
+                  :offset="[-24, 0]"
+                >
+                  <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
+                    <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+                  </Button>
                   <template #content>
-                    <div class="w-64 text-0 font-normal text-left">
+                    <div class="w-64 text-0 font-normal text-left -mx-3">
                       <div
-                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
+                        class="py-2 px-6 cursor-pointer hover:text-link"
                         @click="goStakeActionPage(StakingActions.STAKE, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.stake') }}
                       </div>
                       <div
-                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
+                        class="py-2 px-6 cursor-pointer hover:text-link"
                         @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.unstake') }}
                       </div>
                       <div
-                        class="py-2.5 px-6 cursor-pointer hover:text-text text-muted"
+                        class="py-2 px-6 cursor-pointer hover:text-link"
                         @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
                       >
                         {{ $t('components.stakeTable.switchValidator') }}
@@ -308,7 +304,6 @@ export default defineComponent({
       return moniker;
     };
     const getValidatorData = (address: string): any => {
-      console.log(address);
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
           return vali;
@@ -322,10 +317,10 @@ export default defineComponent({
         case StakingActions.UNSTAKE:
         case StakingActions.SWITCH:
           router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
-          return
+          return;
         default:
           router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
-          return
+          return;
       }
     };
     /* watch */
@@ -363,7 +358,7 @@ export default defineComponent({
 </script>
 <style scoped>
 * >>> .tippy-box {
-  background: var(--inverse);
+  background: var(--surface);
   color: var(--text);
 }
 </style>
