@@ -31,19 +31,7 @@
         disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
       ]"
       :disabled="disabled"
-      class="
-        button
-        relative
-        font-medium
-        border-none
-        focus:outline-none
-        active:opacity-70 active:transform-none
-        transition
-        cursor-pointer
-        select-none
-        overflow-ellipsis
-        whitespace-nowrap
-      "
+      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
@@ -52,7 +40,7 @@
 
       <span
         v-if="name"
-        class="inline-flex gap-x-3 items-center"
+        class="inline-flex gap-x-2 items-center"
         :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
       ><slot /><span>{{ name }}</span><slot name="right" /></span>
 
