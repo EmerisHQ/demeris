@@ -70,7 +70,6 @@ export enum GlobalGetterTypes {
   getAllValidPools = 'demerisAPI/getAllValidPools',
   getDexChain = 'demerisAPI/getDexChain',
   getTxStatus = 'demerisAPI/getTxStatus',
-  getOwnAddress = 'demerisAPI/getOwnAddress',
   getVerifyTrace = 'demerisAPI/getVerifyTrace',
   getFeeAddress = 'demerisAPI/getFeeAddress',
   getBech32Config = 'demerisAPI/getBech32Config',
