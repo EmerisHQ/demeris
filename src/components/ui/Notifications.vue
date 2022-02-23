@@ -168,7 +168,7 @@ function computeNotificationsStyles(): void {
   // styles are computed on demand to update dom
   if (visibleNotificationMessages.value.length === 0) return;
   const notificationSpacerPx = 5;
-  visibleNotificationMessages.value.forEach((m, index) => {
+  visibleNotificationMessages.value.forEach((_, index) => {
     const heightPreviousNotifications = [...Array(index)].reduce(
       (totalHeight, _, i) => totalHeight + notificationHTMLRefs.value[i]?.offsetHeight + notificationSpacerPx,
       0,
