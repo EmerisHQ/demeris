@@ -1,16 +1,7 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
-    <div
-      v-if="showPriceDiff"
-      class="-text-1 font-normal"
-      :class="{
-        'color-gain-light': priceDiffIndicator === 'gain' && theme === 'light',
-        'color-gain-dark': priceDiffIndicator === 'gain' && theme === 'dark',
-        'color-loss-light': priceDiffIndicator === 'loss' && theme === 'light',
-        'color-loss-dark': priceDiffIndicator === 'loss' && theme === 'dark',
-      }"
-    >
+    <div v-if="showPriceDiff" class="-text-1 font-normal" :class="priceDiffColor">
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
   </div>
@@ -126,7 +117,19 @@ export default defineComponent({
       return props.priceDiffObject.indicator;
     });
 
-    return { theme, displayPrice, showPriceDiff, priceDiffIndicator };
+    const priceDiffColor = computed(() => {
+      if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
+        return 'color-gain-light';
+      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
+        return 'color-gain-dark';
+      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'dark') {
+        return 'color-loss-light';
+      } else {
+        return 'color-loss-dark';
+      }
+    });
+
+    return { theme, displayPrice, showPriceDiff, priceDiffIndicator, priceDiffColor };
   },
 });
 </script>
