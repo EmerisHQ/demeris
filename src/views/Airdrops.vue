@@ -110,7 +110,7 @@ export default {
 
     const openAirdropPage = (airdrop: Airdrop) => {
       router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
-      apistore.dispatch(GlobalDemerisActionTypes.API.GET_SELECTED_AIRDROP, {
+      apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },

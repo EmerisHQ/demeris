@@ -180,7 +180,7 @@ export interface Actions {
     { commit }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
-  [DemerisActionTypes.GET_SELECTED_AIRDROP](
+  [DemerisActionTypes.SET_SELECTED_AIRDROP](
     { commit }: ActionContext<State, RootState>,
     { params }: DemerisActionSetAirdropParams,
   ): void;
@@ -796,7 +796,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:getAirdrops', 'Could not perform API query.');
     }
   },
-  [DemerisActionTypes.GET_SELECTED_AIRDROP]({ commit }, { params }) {
+  [DemerisActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
     commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params });
   },
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
