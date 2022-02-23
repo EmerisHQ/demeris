@@ -68,10 +68,10 @@
         <!-- staking reward table -->
         <table class="w-full table-fixed mt-8 text-right">
           <colgroup>
-            <col width="29%" />
-            <col width="29%" />
-            <col width="29%" />
-            <col width="13%" />
+            <col width="32%" />
+            <col width="38%" />
+            <col width="20%" />
+            <col width="8%" />
           </colgroup>
 
           <!-- table body -->
@@ -125,7 +125,7 @@
                 <Price :amount="{ denom: denom, amount: validator.amount }" />
               </td>
               <td class="text-right">
-                <tippy placement="right" trigger="click" :interactive="true" :arrow="false" :offset="[0, -20]">
+                <tippy placement="right" trigger="click" :interactive="true" :arrow="false" class="flex justify-end">
                   <Icon
                     name="ThreeDotsIcon"
                     :icon-size="1"
@@ -192,7 +192,14 @@
                     {{ getValidatorMoniker(unbondingBalance.validator_address) }}
                   </span>
                 </td>
-                <td class="text-left text-muted">{{ getTimeToString(entry.completion_time) }}</td>
+                <td class="text-left text-muted">
+                  <div class="inline-flex items-center">
+                    <TimeIcon class="mr-2" />
+                    <span>
+                      {{ getTimeToString(entry.completion_time) }}
+                    </span>
+                  </div>
+                </td>
                 <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
                 <td class="text-right font-medium">
                   <Price :amount="{ denom: denom, amount: entry.balance }" />
@@ -215,8 +222,10 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -226,8 +235,6 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
-import ValidatorBadge from './ValidatorBadge.vue';
-
 export default defineComponent({
   components: {
     Button,
@@ -236,6 +243,7 @@ export default defineComponent({
     Price,
     Icon,
     ValidatorBadge,
+    TimeIcon,
   },
   props: {
     denom: {
