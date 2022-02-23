@@ -108,7 +108,7 @@ export default defineComponent({
 
     const openAirdropPage = (airdrop: Airdrop) => {
       router.push('/airdrop');
-      apistore.dispatch(GlobalDemerisActionTypes.API.GET_SELECTED_AIRDROP, {
+      apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },
