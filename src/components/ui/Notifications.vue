@@ -21,23 +21,23 @@
           <div :style="`height:${isStacked ? 'auto' : notificationViewportHeight + 'px'};`" class="w-full absolute">
             <TransitionGroup name="notification-list" tag="div" appear>
               <div
-                v-for="({ message, id }, toastIndex) in visibleNotificationMessages"
+                v-for="({ message, id }, displayIndex) in visibleNotificationMessages"
                 :ref="
                   (el:HTMLDivElement) => {
-                    notificationHTMLRefs[toastIndex] = el;
+                    notificationHTMLRefs[displayIndex] = el;
                   }
                 "
                 :key="`message-${id}`"
                 class="notification w-full flex absolute px-4 py-3 justify-between bg-surface rounded-lg left-0 bottom-0 right-0 mx-auto"
-                :style="notificationComputedStyles[toastIndex]"
+                :style="notificationComputedStyles[displayIndex]"
                 data-test="single-notification-message"
                 @click="expandNotifications()"
               >
                 <Transition name="fade" appear>
                   <button
-                    v-if="showClearButton(toastIndex)"
+                    v-if="showClearButton(displayIndex)"
                     class="clear-all-button absolute z-40 bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
-                    data-test="clear-all-notifications-button"
+                    :data-test="`clear-all-notifications-button-${displayIndex}`"
                     @click="clearAllNotifications()"
                     @mouseover="isHoverClearAllButton = true"
                     @mouseleave="isHoverClearAllButton = false"
@@ -55,7 +55,11 @@
                     >{{ clearAllLabel }}</span>
                   </button>
                 </Transition>
-                <div :style="{ opacity: toastIndex === 0 || !isStacked ? 1 : 0 }" class="flex flex-grow">
+                <div
+                  :style="{ opacity: displayIndex === 0 || !isStacked ? 1 : 0 }"
+                  class="flex flex-grow"
+                  :data-test="`notification-${displayIndex}`"
+                >
                   <div class="flex-1 text-text">{{ message }}</div>
                   <div v-if="button1Label || button2Label" class="flex items-center">
                     <Button
@@ -82,17 +86,19 @@
     </Transition>
     <Transition name="fade" appear>
       <div
-        v-show="!isStacked && visibleNotificationMessages.length > 1"
+        v-if="!isStacked && visibleNotificationMessages.length > 1"
         key="button-group"
         class="mt-1 absolute bottom-0 text-text theme-inverse dark:theme-inverse"
       >
         <button
+          data-test="show-less-notifications-footer"
           class="px-2 py-1 opacity-60 bg-surface -text-1 text-text font-medium rounded-full focus:outline-none"
           @click="isStacked = true"
         >
           {{ showLessLabel }}
         </button>
         <button
+          data-test="clear-all-notifications-footer"
           class="px-2 py-1 opacity-60 bg-surface -text-1 text-text font-medium rounded-full focus:outline-none ml-1"
           @click="clearAllNotifications()"
         >

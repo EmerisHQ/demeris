@@ -3,15 +3,74 @@ import { shallowMount } from '@vue/test-utils';
 
 import Notifications from './Notifications.vue';
 
-describe('Notifications', () => {
-  it.only('Updates to props update HTML', async () => {
-    const testData = [];
-    const totalNotifications = 6;
-    for (let i = 0; i < totalNotifications; i++) {
-      testData.push({ message: `Transaction item ${i}`, id: i });
-    }
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
-    let wrapper = shallowMount(Notifications, {
+describe('Notifications', () => {
+  it('Mounts with no messages displayed', async () => {
+    const wrapper = shallowMount(Notifications, {
+      props: {
+        button1Label: 'Undo',
+        button2Label: 'Details',
+        showLessLabel: 'Show Less',
+        clearAllLabel: 'Clear All',
+      },
+    });
+    expect(wrapper.find('[data-test=messages-container]').exists()).toBe(false);
+  });
+
+  it('Mounts with 6 messages pre-displayed', async () => {
+    const totalNotifications = 6;
+    const testData = [...Array(totalNotifications)].map((_, i) => ({ message: `Transaction item ${i}`, id: i }));
+    const wrapper = shallowMount(Notifications, {
+      props: {
+        messages: testData,
+      },
+    });
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
+  });
+
+  it('Mounts with 6 notifications and displays 5 after updating props', async () => {
+    const totalNotifications = 6;
+    const testData = [...Array(totalNotifications)].map((_, i) => ({ message: `Transaction item ${i}`, id: i }));
+    const wrapper = shallowMount(Notifications, {
+      props: {
+        messages: testData,
+        button1Label: 'Undo',
+        button2Label: 'Details',
+        showLessLabel: 'Show Less',
+        clearAllLabel: 'Clear All',
+      },
+    });
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
+    await wrapper.setProps({ messages: [...testData.slice(1)] });
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications - 1);
+  });
+
+  it('Mounts with 6 notifications and displays 5 after updating props', async () => {
+    const totalNotifications = 1;
+    const testData = [...Array(totalNotifications)].map((_, i) => ({ message: `Transaction item ${i}`, id: i }));
+    const wrapper = shallowMount(Notifications, {
+      props: {
+        messages: testData,
+        button1Label: 'Undo',
+        button2Label: 'Details',
+        showLessLabel: 'Show Less',
+        clearAllLabel: 'Clear All',
+      },
+    });
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
+    await wrapper.setProps({ messages: [...testData.slice(1)] });
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications - 1);
+  });
+
+  it('Updates label props', async () => {
+    const totalNotifications = 1;
+    const testData = [...Array(totalNotifications)].map((_, i) => ({ message: `Transaction item ${i}`, id: i }));
+    const wrapper = shallowMount(Notifications, {
       props: {
         messages: testData,
         button1Label: 'Undo',
@@ -23,31 +82,43 @@ describe('Notifications', () => {
 
     expect(wrapper.html()).toContain('Undo');
     expect(wrapper.html()).toContain('Details');
-
-    await wrapper.setProps({ button1Label: 'Undo2' });
-    await wrapper.setProps({ button2Label: 'Details2' });
-
-    // works
+    await wrapper.setProps({ button1Label: 'Undo2', button2Label: 'Details2' });
     expect(wrapper.html()).toContain('Undo2');
     expect(wrapper.html()).toContain('Details2');
-
-    // works
-    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
-    console.log('prop messages length1:', wrapper.props().messages.length);
-
-    testData.pop();
-    await wrapper.setProps({ messages: testData });
-
-    // shows correct length
-    console.log('prop messages length2:', wrapper.props().messages.length);
-
-    // fails - still shows old dom
-    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications - 1);
   });
 
-  // it('Should load 6 notifications and add 1, leaving 7', async () => {})
+  it.only('Opens with 0 notifications, loads 6 then dismisses all.', async () => {
+    const totalNotifications = 6;
+    const testData = [...Array(totalNotifications)].map((_, i) => ({ message: `Transaction item ${i}`, id: i }));
+    const wrapper = shallowMount(Notifications, {
+      props: {
+        messages: [],
+        button1Label: 'Undo',
+        button2Label: 'Details',
+        showLessLabel: 'Show Less',
+        clearAllLabel: 'Clear All',
+      },
+    });
 
-  // it('Should open messages, then collapse', async () => {})
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test="clear-all-notifications-footer"]').exists()).toBe(false);
 
-  // it('Should clear all messages', async () => {})
+    await wrapper.setProps({ messages: testData });
+
+    expect(wrapper.findAll('[data-test="single-notification-message"]')).toHaveLength(totalNotifications);
+
+    await wrapper.find('[data-test="notification-0"]').trigger('click');
+
+    expect(wrapper.find('[data-test="clear-all-notifications-footer"]').exists()).toBe(true);
+
+    await wrapper.find('[data-test="clear-all-notifications-footer"]').trigger('click');
+
+    // failing test
+    expect(wrapper.findAll('[data-test="single-notification-message"]').exists()).toBe(false);
+  });
+
+  // check mouse over button
+  // expect(wrapper.find('[data-test="clear-all-notifications-button-0"]').exists()).toBe(false)
+  //   await wrapper.find('[data-test="notification-0"]').trigger('mouseover')
+  //   expect(wrapper.find('[data-test="clear-all-notifications-button-0"]').exists()).toBe(true)
 });
