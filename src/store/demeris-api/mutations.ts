@@ -298,11 +298,11 @@ export const mutations: MutationTree<State> & Mutations = {
     state.tokenId = newPayload.data[newPayload.token];
   },
   [MutationTypes.SET_SELECTED_AIRDROP](state: State, payload: DemerisMutations) {
-    const newPayload: any = payload.value;
-    state.selectedAirdrop = newPayload.airdrop;
+    const newPayload = payload.value as API.Airdrop;
+    state.selectedAirdrop = newPayload;
   },
   [MutationTypes.SET_AIRDROPS](state: State, payload: DemerisMutations) {
-    const tempAirdrop: any = payload.value;
+    const tempAirdrop = payload.value as API.Airdrop;
 
     if (tempAirdrop.eligibilityCheckEndpoint) {
       tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');

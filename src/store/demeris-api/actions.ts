@@ -797,7 +797,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
   [DemerisActionTypes.SET_SELECTED_AIRDROP]({ commit }, { params }) {
-    commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params });
+    commit(DemerisMutationTypes.SET_SELECTED_AIRDROP, { value: params.airdrop });
   },
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });

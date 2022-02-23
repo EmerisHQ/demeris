@@ -368,8 +368,8 @@ export type Airdrop = {
   discordUrl: string;
   mediumUrl: string;
   airdropBlogUrl: string;
-  airdropStartDate: string;
-  airdropEndDate: string;
+  airdropStartDate: Date;
+  airdropEndDate: Date;
   airdropStatus: string;
   dateStatus: string;
   snapshotDate: string;

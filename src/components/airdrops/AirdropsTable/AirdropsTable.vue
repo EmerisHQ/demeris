@@ -64,13 +64,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 
 import ChainName from '@/components/common/ChainName.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Ticker from '@/components/common/Ticker.vue';
-import { GlobalDemerisActionTypes } from '@/store';
-import { apistore } from '@/store/setup';
 import { Airdrop } from '@/types/api';
 
 export default defineComponent({

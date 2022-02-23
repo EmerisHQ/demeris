@@ -23,31 +23,34 @@
 
 <script lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 export default {
   emits: ['active-filter'],
   setup(_, { emit }) {
+    const { t } = useI18n({ useScope: 'global' });
+
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
-        text: 'All airdrops',
-        value: 'all',
+        text: t('context.airdrops.airdropstableFilterItems.all.text'),
+        value: t('context.airdrops.airdropstableFilterItems.all.value'),
       },
       {
-        text: 'My airdrops',
-        value: 'mine',
+        text: t('context.airdrops.airdropstableFilterItems.mine.text'),
+        value: t('context.airdrops.airdropstableFilterItems.mine.value'),
       },
       {
-        text: 'Upcoming',
-        value: 'upcoming',
+        text: t('context.airdrops.airdropstableFilterItems.upcoming.text'),
+        value: t('context.airdrops.airdropstableFilterItems.upcoming.value'),
       },
       {
-        text: 'Live',
-        value: 'live',
+        text: t('context.airdrops.airdropstableFilterItems.live.text'),
+        value: t('context.airdrops.airdropstableFilterItems.live.value'),
       },
       {
-        text: 'Past',
-        value: 'past',
+        text: t('context.airdrops.airdropstableFilterItems.past.text'),
+        value: t('context.airdrops.airdropstableFilterItems.past.value'),
       },
     ];
 
