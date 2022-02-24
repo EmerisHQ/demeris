@@ -1,5 +1,12 @@
 name: Generate demo-account.js
-on: [workflow_dispatch]
+
+on:
+  workflow_dispatch:
+    [ feat-auto-demo-addresses  ]
+  push:
+    branches: [ feat-auto-demo-addresses ]
+  pull_request:
+    branches: [ feat-auto-demo-addresses ]
 
 jobs:
   generate-demo-accounts-file:
