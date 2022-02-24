@@ -89,6 +89,13 @@
           </dl>
         </section>
 
+        <!-- Staking -->
+        <template v-if="stakingEnabled">
+          <section v-if="assetConfig?.stakable" class="mt-16">
+            <StakeTable class="mt-8" :denom="denom" />
+          </section>
+        </template>
+
         <!-- Chains -->
 
         <section v-if="assets.length" class="mt-16">
@@ -130,13 +137,6 @@
             </li>
           </ul>
         </section>
-
-        <!-- Staking -->
-        <template v-if="stakingEnabled">
-          <section v-if="assetConfig?.stakable" class="mt-16">
-            <StakeTable class="mt-8" :denom="denom" />
-          </section>
-        </template>
 
         <!-- Pools -->
 
@@ -231,7 +231,6 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const denom = computed(() => route.params.denom as string);
-
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
       useAccount();

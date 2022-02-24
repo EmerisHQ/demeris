@@ -108,7 +108,7 @@ export default {
     watch(
       () => props.pools,
       async (newVal) => {
-        if (newVal.length > 0) {
+        if (newVal?.length > 0) {
           renderedPools.value = await Promise.all(
             props.pools.map(async (pool: any) => {
               pool.displayName = await getPoolName(pool);

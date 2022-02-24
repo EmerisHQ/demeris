@@ -25,6 +25,7 @@ import {
   keyHashfromAddress,
   parseCoins,
 } from './basic';
+import { featureRunning } from './FeatureManager';
 
 // Basic step-building blocks
 export async function redeem({ amount, chain_name }: ChainAmount) {
@@ -1581,7 +1582,10 @@ export async function msgFromStepTransaction(
     return { msg: [msg], chain_name: data.chain_name, registry };
   }
 }
+// TODO make getter so it out updates on getFeeTokens getter
 export async function getFeeForChain(chain_name: string): Promise<Array<Actions.FeeWDenom>> {
+  if (!chain_name) return [];
+
   const apistore = useStore() as TypedAPIStore;
   const denoms = apistore.getters[GlobalDemerisGetterTypes.API.getFeeTokens]({
     chain_name,
@@ -1764,21 +1768,40 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
   while (limit > retries) {
     try {
-      for (const denom of ibcDenoms) {
-        await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-          {
-            subscribe: false,
-            cache: false,
-            params: {
-              chain_name: chain,
-              hash: denom.split('/')[1],
-            },
-          },
-          { root: true },
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        await Promise.all(
+          ibcDenoms.map((denom) =>
+            apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              {
+                subscribe: false,
+                cache: false,
+                params: {
+                  chain_name: chain,
+                  hash: denom.split('/')[1],
+                },
+              },
+              { root: true },
+            ),
+          ),
         );
+      } else {
+        for (const denom of ibcDenoms) {
+          await apistore.dispatch(
+            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+            {
+              subscribe: false,
+              cache: false,
+              params: {
+                chain_name: chain,
+                hash: denom.split('/')[1],
+              },
+            },
+            { root: true },
+          );
+        }
+        break;
       }
-      break;
     } catch (e) {
       error = e;
       retries++;
@@ -2031,62 +2054,127 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 }
 
 export async function validBalances(balances: Balances): Promise<Balances> {
-  const apistore = useStore() as TypedAPIStore;
+  const apistore = useStore() as RootStoreType;
   const validBalances = [];
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
 
-  for (const balance of balances) {
-    const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
-    if (!ownAddress) continue;
-    const hashAddress = keyHashfromAddress(ownAddress);
+  if (featureRunning('REQUEST_PARALLELIZATION')) {
+    await Promise.all(
+      balances.map(async (balance) => {
+        // TODO: refactor this into something prettier.
+        const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+        if (ownAddress) {
+          const hashAddress = keyHashfromAddress(ownAddress);
 
-    if (balance.address !== hashAddress) {
-      continue;
-    }
+          if (balance.address !== hashAddress) {
+            return;
+          }
 
-    if (Object.keys(balance.ibc).length == 0) {
-      if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
-        validBalances.push(balance);
-      }
-    } else {
-      if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+          if (Object.keys(balance.ibc).length == 0) {
+            if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+              validBalances.push(balance);
+            }
+          } else {
+            if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+              return;
+            }
+            let verifyTrace;
+            try {
+              verifyTrace =
+                apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+                  chain_name: balance.on_chain,
+                  hash: balance.ibc.hash,
+                }) ??
+                (await apistore.dispatch(
+                  GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+                  { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+                  { root: true },
+                ));
+            } catch (e) {
+              return;
+            }
+
+            if (!verifyTrace || !verifyTrace.verified) {
+              return;
+            }
+
+            const primaryChannel =
+              apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+                chain_name: balance.on_chain,
+                destination_chain_name: verifyTrace.trace[0].counterparty_name,
+              }) ??
+              (await apistore.dispatch(
+                GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+                {
+                  subscribe: false,
+                  params: {
+                    chain_name: balance.on_chain,
+                    destination_chain_name: verifyTrace.trace[0].counterparty_name,
+                  },
+                },
+                { root: true },
+              ));
+            if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+              validBalances.push(balance);
+            }
+          }
+        }
+      }),
+    );
+  } else {
+    for (const balance of balances) {
+      const ownAddress = await getOwnAddress({ chain_name: balance.on_chain });
+      if (!ownAddress) continue;
+      const hashAddress = keyHashfromAddress(ownAddress);
+
+      if (balance.address !== hashAddress) {
         continue;
       }
-      let verifyTrace;
-      try {
-        verifyTrace =
-          apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+
+      if (Object.keys(balance.ibc).length == 0) {
+        if (verifiedDenoms.find((item) => item.name === balance.base_denom)) {
+          validBalances.push(balance);
+        }
+      } else {
+        if (!balance.ibc.path || balance.ibc.path.split('/').length > 2) {
+          continue;
+        }
+        let verifyTrace;
+        try {
+          verifyTrace =
+            apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
+              chain_name: balance.on_chain,
+              hash: balance.ibc.hash,
+            }) ??
+            (await apistore.dispatch(
+              GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
+              { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+              { root: true },
+            ));
+        } catch (e) {
+          continue;
+        }
+
+        if (!verifyTrace || !verifyTrace.verified) {
+          continue;
+        }
+
+        const primaryChannel =
+          apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
             chain_name: balance.on_chain,
-            hash: balance.ibc.hash,
+            destination_chain_name: verifyTrace.trace[0].counterparty_name,
           }) ??
           (await apistore.dispatch(
-            GlobalDemerisActionTypes.API.GET_VERIFY_TRACE,
-            { subscribe: false, params: { chain_name: balance.on_chain, hash: balance.ibc.hash } },
+            GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+            {
+              subscribe: false,
+              params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+            },
             { root: true },
           ));
-      } catch (e) {
-        continue;
-      }
-
-      if (!verifyTrace || !verifyTrace.verified) {
-        continue;
-      }
-
-      const primaryChannel =
-        apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-          chain_name: balance.on_chain,
-          destination_chain_name: verifyTrace.trace[0].counterparty_name,
-        }) ??
-        (await apistore.dispatch(
-          GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-          {
-            subscribe: false,
-            params: { chain_name: balance.on_chain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
-          },
-          { root: true },
-        ));
-      if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-        validBalances.push(balance);
+        if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+          validBalances.push(balance);
+        }
       }
     }
   }
@@ -2099,52 +2187,106 @@ export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]>
   const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
   const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
-  for (const pool of pools) {
-    const firstDenom = pool.reserve_coin_denoms[0];
-    const secondDenom = pool.reserve_coin_denoms[1];
+  if (featureRunning('REQUEST_PARALLELIZATION')) {
+    await Promise.all(
+      pools.map(async (pool) => {
+        const firstDenom = pool.reserve_coin_denoms[0];
+        const secondDenom = pool.reserve_coin_denoms[1];
 
-    if (!firstDenom.includes('ibc')) {
-      if (verifiedDenoms.find((item) => item.name === firstDenom)) {
-        // first denom is base denom and valid, check second denom
-        if (!secondDenom.includes('ibc')) {
-          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-            // first denom is base denom and valid, second denom is base denom and valid
+        if (!firstDenom.includes('ibc')) {
+          if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+            // first denom is base denom and valid, check second denom
+            if (!secondDenom.includes('ibc')) {
+              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                // first denom is base denom and valid, second denom is base denom and valid
 
-            validPools.push(pool);
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            } else {
+              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                // first denom is base and valid, second denom is IBC and valid
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            }
           } else {
-            continue;
+            return;
           }
         } else {
-          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-            // first denom is base and valid, second denom is IBC and valid
-            validPools.push(pool);
+          if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+            if (!secondDenom.includes('ibc')) {
+              // second denom is not IBC denom
+              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                // first denom is IBC and valid, second denom is base and valid
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            } else {
+              // second denom is IBC denom, check if it goes through primary channel
+              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                validPools.push(pool);
+              } else {
+                return;
+              }
+            }
           } else {
-            continue;
+            return;
           }
         }
-      } else {
-        continue;
-      }
-    } else {
-      if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
-        if (!secondDenom.includes('ibc')) {
-          // second denom is not IBC denom
-          if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-            // first denom is IBC and valid, second denom is base and valid
-            validPools.push(pool);
+      }),
+    );
+  } else {
+    for (const pool of pools) {
+      const firstDenom = pool.reserve_coin_denoms[0];
+      const secondDenom = pool.reserve_coin_denoms[1];
+
+      if (!firstDenom.includes('ibc')) {
+        if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+          // first denom is base denom and valid, check second denom
+          if (!secondDenom.includes('ibc')) {
+            if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+              // first denom is base denom and valid, second denom is base denom and valid
+
+              validPools.push(pool);
+            } else {
+              continue;
+            }
           } else {
-            continue;
+            if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+              // first denom is base and valid, second denom is IBC and valid
+              validPools.push(pool);
+            } else {
+              continue;
+            }
           }
         } else {
-          // second denom is IBC denom, check if it goes through primary channel
-          if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-            validPools.push(pool);
-          } else {
-            continue;
-          }
+          continue;
         }
       } else {
-        continue;
+        if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+          if (!secondDenom.includes('ibc')) {
+            // second denom is not IBC denom
+            if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+              // first denom is IBC and valid, second denom is base and valid
+              validPools.push(pool);
+            } else {
+              continue;
+            }
+          } else {
+            // second denom is IBC denom, check if it goes through primary channel
+            if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+              validPools.push(pool);
+            } else {
+              continue;
+            }
+          }
+        } else {
+          continue;
+        }
       }
     }
   }

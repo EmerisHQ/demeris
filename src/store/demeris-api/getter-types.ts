@@ -41,6 +41,7 @@ export enum GetterTypes {
   getTokenId = 'getTokenId',
   getTokenIdLoadingStatus = 'getTokenIdLoadingStatus',
   getChainStatus = 'getChainStatus',
+  getChainNameByBaseDenom = 'getChainNameByBaseDenom',
 }
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
@@ -84,4 +85,5 @@ export enum GlobalGetterTypes {
   getTokenId = 'demerisAPI/getTokenId',
   getTokenIdLoadingStatus = 'demerisAPI/getTokenIdLoadingStatus',
   getChainStatus = 'demerisAPI/getChainStatus',
+  getChainNameByBaseDenom = 'demerisAPI/getChainNameByBaseDenom',
 }

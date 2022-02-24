@@ -50,7 +50,7 @@ export default defineComponent({
       const chainStatus = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
         chain_name: props.chainName,
       });
-      return chainStatus.failed?.length > 0;
+      return chainStatus?.failed?.length > 0;
     });
 
     return { displayChain, chainDown };
