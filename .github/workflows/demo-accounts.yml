@@ -35,7 +35,7 @@ jobs:
         # cache-dependency-path: '**/package-lock.json'
 
     # - run: npm ci
-    - run: npm run generate-demo-acounts
+    - run: npm run generate:demo-acounts
 
     - name: Commit and push demo accounts to develop
       run: |

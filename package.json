@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint",
     "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
-    "generate-demo-acounts": "node .github/workflows/generate/demo-accounts.js",
+    "generate:demo-acounts": "node .github/workflows/generate/demo-accounts.js",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

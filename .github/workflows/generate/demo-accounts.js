@@ -5,9 +5,7 @@ const { bech32 } = require('bech32');
 const { Secp256k1HdWallet } = require('@cosmjs/amino');
 const { stringToPath } = require('@cosmjs/crypto');
 
-// TODO: read mnemonic from env -> from secret
-const mnemonic = process.env.TEST;
-console.log('mnemonic', mnemonic);
+const MNEMONIC = process.env.DEMO_ACCOUNT_MNEMONIC;
 
 const getDemoAccountDetails = async () => {
   const {
@@ -24,7 +22,7 @@ const getDemoAccountDetails = async () => {
       } = await axios.get(`https://staging.demeris.io/v1/chain/${chainName}`);
       const addressPrefix = chain.node_info.bech32_config.main_prefix;
       const derivationPath = chain.derivation_path;
-      const signer = await Secp256k1HdWallet.fromMnemonic(mnemonic, {
+      const signer = await Secp256k1HdWallet.fromMnemonic(MNEMONIC, {
         hdPaths: [stringToPath(derivationPath)],
         prefix: addressPrefix,
       });
