@@ -31,13 +31,10 @@ jobs:
         node-version: '16'
       env:
         DEMO_ACCOUNT_MNEMONIC: ${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
-        # cache: 'npm'
-        # cache-dependency-path: '**/package-lock.json'
 
-    # - run: npm ci
-    - run: |
-        npm install dotenv
-        npm run generate:demo-acounts
+    - run: npm ci
+
+    - run: npm run generate:demo-acounts
 
     - name: Commit and push demo accounts to develop
       run: |

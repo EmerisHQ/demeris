@@ -6,6 +6,7 @@ const { Secp256k1HdWallet } = require('@cosmjs/amino');
 const { stringToPath } = require('@cosmjs/crypto');
 
 const MNEMONIC = process.env.DEMO_ACCOUNT_MNEMONIC;
+console.log('MNEMONIC length', MNEMONIC.length);
 
 const getDemoAccountDetails = async () => {
   const {
