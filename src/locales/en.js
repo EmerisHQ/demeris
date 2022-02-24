@@ -117,6 +117,11 @@ export const messages = {
       },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
       },
       send: {
         send: 'Send',
@@ -124,6 +129,13 @@ export const messages = {
         moveAssetsDescription: 'Move assets between your addresses on different chains.',
         sendToAddress: 'Send to address',
         sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+        navigation: {
+          recipient: 'Recipient',
+          amount: 'Amount',
+          review: 'Review',
+          move: 'Move',
+          send: 'Send',
+        },
       },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
