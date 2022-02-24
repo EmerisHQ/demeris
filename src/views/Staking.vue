@@ -14,7 +14,7 @@
 
         <nav v-if="actionType" class="flex-1 flex items-center justify-center space-x-12">
           <span
-            v-for="label of stakingSteps[actionType]"
+            v-for="label of allSteps[actionType]"
             :key="label"
             class="capitalize font-medium cursor-default"
             :class="step === label ? 'text-text' : 'text-inactive'"
@@ -90,10 +90,11 @@ import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { Messages } from '@/locales/en';
-import { StakingActions,Step } from '@/types/actions';
+import { Step } from '@/types/actions';
 import { pageview } from '@/utils/analytics';
 import { keyHashfromAddress } from '@/utils/basic';
+
+type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
 
 export default defineComponent({
   name: 'Staking',
@@ -108,35 +109,28 @@ export default defineComponent({
   },
 
   setup() {
-    const { messages, locale, t } = useI18n({ useScope: 'global' });
-    const i18nLocale = locale.value;
-
-    //  required to get the currentStepIndex anyway
-    const stakingSteps = (messages.value as Messages)[i18nLocale].pages.staking;
-
+    const { t } = useI18n({ useScope: 'global' });
     const router = useRouter();
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const editing = ref(null);
     const { getValidatorsByBaseDenom } = useStaking();
     const { balances, stakingBalances } = useAccount();
-    const actionType = route.params.action as StakingActions;
+    const actionType = route.params.action as ActionType;
     const validator = route.params.validator as string;
     const baseDenom = route.params.denom as string;
     const validatorList = ref([]);
     const totalStakedAmount = ref<number>(0);
     const unstakeAmount = ref<string>('0');
     const selectedValidators = ref([]);
-
-    const step = ref<string>(stakingSteps[actionType][0]);
-
+    const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator');
     const fromValidator = ref({});
     const toValidator = ref({});
     onMounted(async () => {
       validatorList.value = await getValidatorsByBaseDenom(baseDenom);
       const preselectedValidator = validatorList.value.find((x) => x.operator_address == validator);
       if (preselectedValidator) {
-        if (actionType === StakingActions.SWITCH) {
+        if (actionType == 'switch') {
           fromValidator.value = preselectedValidator;
         } else {
           selectedValidators.value.push(preselectedValidator);
@@ -163,7 +157,7 @@ export default defineComponent({
     });
     pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType });
     const selectAnother = (e) => {
-      step.value = stakingSteps[actionType][currentStepIndex.value - 1];
+      step.value = allSteps[actionType][currentStepIndex.value - 1];
       editing.value = e;
     };
     const disabledValidators = computed(() => {
@@ -184,6 +178,12 @@ export default defineComponent({
       );
     });
     const steps = ref<Step[]>([]);
+    const allSteps = {
+      stake: ['validator', 'amount', 'review', 'stake'],
+      unstake: ['amount', 'review', 'unstake'],
+      switch: ['validator', 'amount', 'review', 'restake'],
+      claim: ['review', 'claim'],
+    };
 
     const resetHandler = () => {
       if (actionType == 'claim') {
@@ -194,7 +194,7 @@ export default defineComponent({
         step.value = 'validator';
       }
     };
-    const currentStepIndex = computed(() => stakingSteps[actionType]?.indexOf(step.value));
+    const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
     const addValidator = (val) => {
       if (editing.value !== null) {
         selectedValidators.value[editing.value] = val;
@@ -202,7 +202,7 @@ export default defineComponent({
         selectedValidators.value.push(val);
       }
       editing.value = null;
-      step.value = stakingSteps[actionType][currentStepIndex.value + 1];
+      step.value = allSteps[actionType][currentStepIndex.value + 1];
     };
     const metaSource = computed(() => {
       let title = t('context.stake.title');
@@ -216,7 +216,7 @@ export default defineComponent({
     const goBack = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
       if (currentStepIndex.value > 0) {
-        step.value = stakingSteps[actionType][currentStepIndex.value - 1];
+        step.value = allSteps[actionType][currentStepIndex.value - 1];
         return;
       }
 
@@ -226,7 +226,7 @@ export default defineComponent({
     const setSteps = (actionSteps) => {
       steps.value = actionSteps.slice();
 
-      step.value = stakingSteps[actionType][currentStepIndex.value + 1];
+      step.value = allSteps[actionType][currentStepIndex.value + 1];
     };
     const onClose = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
@@ -238,7 +238,7 @@ export default defineComponent({
       balances,
       actionType,
       step,
-      stakingSteps,
+      allSteps,
       goBack,
       showBackButton,
       onClose,

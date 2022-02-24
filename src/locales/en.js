@@ -1,5 +1,3 @@
-import { StakingActions } from '@/types/actions';
-
 export const messages = {
   en: {
     appInit: {
@@ -661,6 +659,7 @@ export const messages = {
         balance: 'Balance',
         available: 'Available',
         staked: 'Staked',
+        pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
@@ -694,12 +693,6 @@ export const messages = {
       send: {
         where: 'Where are you sending assets?',
       },
-      staking: {
-        [StakingActions.STAKE]: ['validator', 'amount', 'review', 'stake'],
-        [StakingActions.UNSTAKE]: ['amount', 'review', 'unstake'],
-        [StakingActions.SWITCH]: ['validator', 'amount', 'review', 'restake'],
-        [StakingActions.CLAIM]: ['review', 'claim'],
-      },
       welcome: {},
       withdrawLiquidity: {
         withdraw: 'Withdraw',
@@ -712,5 +705,3 @@ export const messages = {
     },
   },
 };
-
-export type Messages = Record<string, typeof messages.en>;
