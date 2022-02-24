@@ -77,32 +77,12 @@ export default {
     );
 
     const activeFilter = ref('');
-    let gitAirdropsList = ref([]);
 
     const setActiveFilter = (value: string) => {
       activeFilter.value = value;
     };
 
     const router = useRouter();
-
-    const getAllAirdrops = async () => {
-      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
-        subscribe: false,
-      });
-
-      gitAirdropsList.value.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
-          subscribe: false,
-          params: {
-            airdropFileName: item.name,
-          },
-        });
-      });
-    };
-
-    onMounted(() => {
-      getAllAirdrops();
-    });
 
     const airdrops = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];

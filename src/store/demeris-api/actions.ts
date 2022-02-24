@@ -177,7 +177,7 @@ export interface Actions {
     { subscribe }: DemerisActionGetGitAirdropsListParams,
   ): Promise<any>;
   [DemerisActionTypes.GET_AIRDROPS](
-    { commit }: ActionContext<State, RootState>,
+    { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
   [DemerisActionTypes.SET_SELECTED_AIRDROP](
@@ -783,11 +783,22 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response: any = await axios.get(
+      const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+
+      // if (response.data.eligibilityCheckEndpoint) {
+      //   const eligibilityEndpoint = response.data.eligibilityCheckEndpoint.replace('<address>', '');
+
+      //   const eligibilityCheckResponse = await axios.get(
+      //     `${eligibilityEndpoint}cosmos1nj4g0jnz0mcvkntjfa6srgmvymzj3pdl33t26e`,
+      //   );
+
+      //   console.log('checking here in action', eligibilityCheckResponse);
+      // }
+
       commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
