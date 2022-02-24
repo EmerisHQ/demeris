@@ -14,7 +14,7 @@
       </h2>
 
       <p class="text-muted leading-copy mb-4">
-        <i18n-t keypath="context.transactions.waitingPrevious.description">
+        <i18n-t scope="global" keypath="context.transactions.waitingPrevious.description">
           <template #chain><ChainName :name="sourceChain" /></template>
         </i18n-t>
       </p>
