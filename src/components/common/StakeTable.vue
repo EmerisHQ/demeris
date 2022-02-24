@@ -141,8 +141,26 @@
                   <template #content>
                     <div class="w-64 text-0 font-normal text-left -mx-3">
                       <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.STAKE, validator.validator_address)"
+                        class="py-2 px-6"
+                        :class="{
+                          'text-muted': validatorList.find(
+                            (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                          ).jailed,
+                          'cursor-pointer hover:text-link': !validatorList.find(
+                            (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                          ).jailed,
+                        }"
+                        @click="
+                          () => {
+                            if (
+                              !validatorList.find(
+                                (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                              ).jailed
+                            ) {
+                              goStakeActionPage(StakingActions.STAKE, validator.validator_address);
+                            }
+                          }
+                        "
                       >
                         {{ $t('components.stakeTable.stake') }}
                       </div>
