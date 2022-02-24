@@ -7,7 +7,7 @@ import { ActionContext, ActionTree } from 'vuex';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
-import { config as analyticsConfig,event } from '@/utils/analytics';
+import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
@@ -58,6 +58,8 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     seen: boolean,
   ): Promise<void>;
+  [DemerisActionTypes.BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
+  [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }: ActionContext<State, RootState>): Promise<void>;
   [DemerisActionTypes.SET_SESSION_DATA](
     { commit, getters, state }: ActionContext<State, RootState>,
     { data: UserData }: DemerisSessionParams,
@@ -95,6 +97,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   async [DemerisActionTypes.REDEEM_SET_HAS_SEEN]({}, seen) {
     seen ? window.localStorage.setItem('redeem', 'true') : window.localStorage.setItem('redeem', 'false');
+  },
+  async [DemerisActionTypes.PRICES_LOADED]({ commit }) {
+    commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, false);
+  },
+  async [DemerisActionTypes.BALANCES_LOADED]({ commit }) {
+    commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, false);
+  },
+  async [DemerisActionTypes.STAKING_BALANCES_LOADED]({ commit }) {
+    commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, false);
   },
   async [DemerisActionTypes.LOAD_SESSION_DATA]({ commit }, { walletName, isDemoAccount = false }) {
     const data = window.localStorage.getItem(walletName);
@@ -136,13 +147,48 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN]({ commit, dispatch, rootGetters }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
+      // Prior to signing in with a new account we must SIGN_OUT to remove all account related data from the store
+      // i.e. balances/staking_balances/subscriptions to those endpoints etc.
+      // We could call global reset_state but then we'd have to reload all non user-specific data (pools, chains, denoms etc.)
+      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
+      // All *_FIRST_LOAD booleans indicate that the app is in the process of doing an initial load of the items in question
+      // This status is used for displaying skeleton loaders appropriately
+
       const isCypress = !!window['Cypress'];
-      const chains = rootGetters[GlobalDemerisGetterTypes.API.getChains];
+      const chains =
+        rootGetters[GlobalDemerisGetterTypes.API.getChains] ??
+        (await dispatch(
+          GlobalDemerisActionTypes.API.GET_CHAINS,
+          {
+            subscribe: false,
+          },
+          { root: true },
+        ));
+      for (const chain in chains) {
+        if (!chains[chain].node_info)
+          chains[chain] = await dispatch(
+            GlobalDemerisActionTypes.API.GET_CHAIN,
+            {
+              subscribe: true,
+              params: {
+                chain_name: chain,
+              },
+            },
+            { root: true },
+          );
+      }
+      // The only case where the getChains getter would not return full data for a chain
+      // is if the app hasn't finished initializing yet (i.e. GET_CHAIN actions have been dispatched but not returned yet)
+      // This happens with the autoLogin feature or if the user clicks on connect_wallet as soon as it appears
+      // Since their async load has already been initiated this does not make new requests but makes use of the _InProgress
+      // caching and just waits for the previous ones to be resolved (hence it's a threading...or lack thereof issue since
+      // no actual requests are involved)
 
       window.keplr.defaultOptions = {
         sign: { preferNoSetFee: true, preferNoSetMemo: true, disableBalanceCheck: true },
       };
-
       if (!isCypress) {
         for (const chain in chains) {
           await addChain(chain);
@@ -233,6 +279,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.SIGN_IN_WITH_WATCHER]({ commit, dispatch }) {
     try {
       await dispatch(DemerisActionTypes.SIGN_OUT);
+      commit(DemerisMutationTypes.SET_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_STAKING_BALANCES_FIRST_LOAD, true);
+      commit(DemerisMutationTypes.SET_PRICES_FIRST_LOAD, true);
       const key = demoAccount;
       commit(DemerisMutationTypes.SET_KEPLR, { ...key });
       for (const hash of key.keyHashes) {
