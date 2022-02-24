@@ -198,7 +198,7 @@ export const messages = {
           review: 'Review',
           stake: 'Stake',
           restake: 'Restake',
-          unstake: 'unstake',
+          unstake: 'Unstake',
           transfer: 'Transfer',
           claim: 'Claim',
         },
