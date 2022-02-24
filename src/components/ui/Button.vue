@@ -9,6 +9,7 @@
     <button
       :class="[
         `button-${variant}`,
+        { 'button-none': size === 'none' },
         { 'text-0 leading-5 rounded-xl': size === 'md' },
         { 'button-sm -text-1 leading-4 rounded-lg': size === 'sm' },
         { 'flex items-center justify-center': !name },
@@ -99,7 +100,10 @@ export default defineComponent({
 }
 
 .button {
-  min-width: 3rem;
+  &:not(.button-none) {
+    min-width: 3rem;
+  }
+
   &.button-link {
     min-width: 1rem;
   }

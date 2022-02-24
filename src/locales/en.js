@@ -600,6 +600,9 @@ export const messages = {
           swappedOnHub: 'Swapped on the Cosmos Hub',
         },
         widget: {
+          title: 'Transactions',
+          emptyMessage: 'Your transactions will appear here.',
+          removeItem: 'Remove and cancel transaction',
           description: {
             validating: 'Preparing transaction...',
             transacting: 'Transaction in progress...',
@@ -633,6 +636,10 @@ export const messages = {
           sendAnotherAsset: 'Send another asset',
           swapAnotherAsset: 'Swap another asset',
           backToEmeris: 'Back to Emeris',
+          showLess: 'Show less',
+          showMore: 'Show more',
+          undo: 'Undo',
+          clearAll: 'Clear all',
         },
       },
     },

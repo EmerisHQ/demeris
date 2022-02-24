@@ -239,7 +239,7 @@ function startDismissNotificationTimeout(): void {
       return;
     }
     const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id;
-    if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
+    if (lastNotificationId) dismissNotification(lastNotificationId);
     if (visibleNotificationMessages.value.length > 0) startInactivityTimer();
   }, dismissInterval.value);
 }

@@ -1,29 +1,55 @@
 <template>
-  <div v-if="pendingTransactions.length && !isModalOpen && !transactionsStore.isPendingModalOpen" class="relative">
+  <div v-if="canShownCenter" class="relative">
     <TransactionsCenterActionButton
       v-if="transactionsStore.isBottomSheetMinimized"
       class="fixed bottom-8 right-8 z-50"
     />
 
     <section
-      v-else
       class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg"
     >
-      <header class="flex items-center space-between py-4 px-6">
-        <p class="font-bold flex-1 text-1">Transactions</p>
+      <Notifications
+        :messages="state.notifications"
+        class="absolute -top-3"
+        :button1-label="$t('context.transactions.controls.undo')"
+        :clear-all-label="$t('context.transactions.controls.clearAll')"
+        :show-less-label="$t('context.transactions.controls.showLess')"
+        @on-update="state.notifications = $event"
+        @on-button1-click="undoRemoval"
+      />
+
+      <header class="flex items-center space-between pt-5 pb-4 px-6">
+        <p class="font-bold flex-1 text-1">{{ $t('context.transactions.widget.title') }}</p>
         <div class="flex items-center space-x-4">
-          <button @click="transactionsStore.toggleBottomSheet">
+          <button v-if="pendingTransactions.length" @click="transactionsStore.toggleBottomSheet">
             <Icon name="CaretDownIcon" :icon-size="1.4" />
           </button>
         </div>
       </header>
 
       <ul
-        class="flex flex-col space-y-1 overflow-y-auto"
+        class="flex flex-col space-y-1 overflow-y-visible"
         :style="{ maxHeight: '300px' }"
         :class="hasMore || state.viewAll ? 'pb-16' : 'pb-4'"
       >
-        <li v-for="[id, service] of pendingTransactions" :key="id">
+        <li v-if="!pendingTransactions.length" class="px-6 text-muted">
+          {{ $t('context.transactions.widget.emptyMessage') }}
+        </li>
+
+        <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
+          <Button
+            v-tippy="{
+              placement: 'left',
+              trigger: service.state.done ? 'manual' : 'mouseenter focus',
+            }"
+            size="none"
+            class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
+            :content="$t('context.transactions.widget.removeItem')"
+            rounded
+            @click="removeTransactionItem(id)"
+          >
+            <Icon name="CloseIcon" :icon-size="0.85" />
+          </Button>
           <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(id)" />
         </li>
       </ul>
@@ -31,7 +57,7 @@
       <Button
         v-if="hasMore || state.viewAll"
         :full-width="false"
-        :name="state.viewAll ? 'Show less' : 'Show more'"
+        :name="state.viewAll ? $t('context.transactions.widget.showLess') : $t('context.transactions.widget.showMore')"
         size="sm"
         variant="secondary"
         class="absolute bottom-5 left-0 right-0 items-center justify-center"
@@ -70,25 +96,37 @@
   </teleport>
 </template>
 
-<script type="ts" setup>
-import { computed, reactive } from "@vue/reactivity";
+<script lang="ts" setup>
+import { computed, reactive } from '@vue/reactivity';
 
-import Button from "@/components/ui/Button.vue";
-import Icon from "@/components/ui/Icon.vue";
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
+import Notifications from '@/components/ui/Notifications.vue';
 
-import { useTransactionsStore } from "../transactionsStore";
+import { useTransactionsStore } from '../transactionsStore';
 import TransactionProcessItem from './TransactionProcessItem.vue';
-import TransactionProcessViewer from "./TransactionProcessViewer.vue";
-import TransactionsCenterActionButton from "./TransactionsCenterActionButton.vue";
+import TransactionProcessViewer from './TransactionProcessViewer.vue';
+import TransactionsCenterActionButton from './TransactionsCenterActionButton.vue';
 
 const transactionsStore = useTransactionsStore();
 
 const state = reactive({
-  viewAll: false
-})
+  viewAll: false,
+  notifications: [],
+});
 
-const rowsLimit = computed(() => state.viewAll ? undefined : 3);
+const canShownCenter = computed(() => {
+  if (pendingTransactions.value.length || state.notifications.length) {
+    if (isModalOpen.value || transactionsStore.isPendingModalOpen) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+});
+
+const rowsLimit = computed(() => (state.viewAll ? undefined : 3));
 
 const selectItem = (stepId) => {
   transactionsStore.setCurrentId(stepId);
@@ -106,7 +144,7 @@ const selectItem = (stepId) => {
   }
 
   transactionsStore.toggleViewerModal();
-}
+};
 
 const closeModal = () => {
   transactionsStore.setCurrentId(undefined);
@@ -116,9 +154,25 @@ const closeModal = () => {
   transactionsStore.toggleViewerModal();
 };
 
-const toggleViewAll = () => state.viewAll = !state.viewAll;
+const toggleViewAll = () => (state.viewAll = !state.viewAll);
+
+const removeTransactionItem = (id: string) => {
+  state.notifications.push({ message: 'Transaction item removed', id });
+  transactionsStore.removeTransactionFromPending(id);
+};
+
+const undoRemoval = (id: string) => {
+  transactionsStore.setTransactionAsPending(id);
+  state.notifications = [];
+};
 
 const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit.value));
 const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit.value);
 </script>
+
+<style lang="postcss">
+.transactions-center__close-btn .button {
+  @apply w-6 h-6;
+}
+</style>
