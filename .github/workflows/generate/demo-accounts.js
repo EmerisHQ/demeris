@@ -1,11 +1,13 @@
 const fs = require('fs');
+require('dotenv').config();
 const axios = require('axios');
 const { bech32 } = require('bech32');
 const { Secp256k1HdWallet } = require('@cosmjs/amino');
 const { stringToPath } = require('@cosmjs/crypto');
 
 // TODO: read mnemonic from env -> from secret
-const mnemonic = 'nominee fox avoid drive fringe capital main shaft sample basic flag view';
+const mnemonic = process.env.TEST;
+console.log('mnemonic', mnemonic);
 
 const getDemoAccountDetails = async () => {
   const {
@@ -22,7 +24,6 @@ const getDemoAccountDetails = async () => {
       } = await axios.get(`https://staging.demeris.io/v1/chain/${chainName}`);
       const addressPrefix = chain.node_info.bech32_config.main_prefix;
       const derivationPath = chain.derivation_path;
-
       const signer = await Secp256k1HdWallet.fromMnemonic(mnemonic, {
         hdPaths: [stringToPath(derivationPath)],
         prefix: addressPrefix,
@@ -33,12 +34,11 @@ const getDemoAccountDetails = async () => {
       demoAccountAddresses[chainName] = address;
     }),
   );
-
   createDemoAccountsFile(demoAccountAddresses, [...keyHashes]);
 };
 
 const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
-  const fileContents = `export const demoAccount = {
+  const fileContentsTemplate = `export const demoAccount = {
     name: 'Demo Account',
     algo: 'secp256k1',
     pubKey: {
@@ -104,10 +104,8 @@ const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
   };
   export const demoAddresses = ${JSON.stringify(demoAccountAddresses, null, 2)};
   `;
-
   const fileName = `${__dirname}/../../../src/store/demeris-user/demo-account-new.js`;
-
-  fs.writeFile(fileName, fileContents, (err) => {
+  fs.writeFile(fileName, fileContentsTemplate, (err) => {
     if (err) {
       return console.log('error saving file', err);
     }
