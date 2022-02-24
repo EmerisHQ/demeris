@@ -32,13 +32,12 @@ jobs:
 
     - run: npm ci
 
-    - run: npm run generate:demo-acounts
+    - run: npm run generate:demo-acounts && git status
       env:
         DEMO_ACCOUNT_MNEMONIC: ${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
 
     - name: Commit and push demo accounts to develop
-      run: |
-        cd ../ && git status
+      run: git status
       
       # git add rc/store/demeris-user/demo-account.js
       
