@@ -106,6 +106,7 @@ export default defineComponent({
     watch(form, async () => {
       if (
         form.balance.amount != '0' &&
+        form.balance.amount != '' &&
         form.balance.denom != '' &&
         form.on_chain != '' &&
         form.to_chain != '' &&
