@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside, useDocumentVisibility, useElementVisibility } from '@vueuse/core';
+import { onClickOutside, useDebounceFn, useDocumentVisibility, useElementVisibility } from '@vueuse/core';
 import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
@@ -158,7 +158,6 @@ const emit = defineEmits<{
 }>();
 
 const isStacked = ref<boolean>(true);
-const isUpdatingStyles = ref<boolean>(false);
 const isMouseOverComponent = ref<boolean>(false);
 const isHoverClearAllButton = ref<boolean>(false);
 const notificationViewportHeight = ref<number>(0);
@@ -211,9 +210,6 @@ function computeNotificationsStyles(): void {
       0,
     );
   });
-  setTimeout(() => {
-    isUpdatingStyles.value = false;
-  }, 100);
 }
 
 function clearAllNotifications(): void {
@@ -277,10 +273,10 @@ function updateNotificationPositions(): void {
 
 function observeNotificationsDimensionChange() {
   const resizeObserver = new ResizeObserver((e) => {
-    if (e && !isUpdatingStyles.value) {
-      isUpdatingStyles.value = true;
-      updateNotificationPositions();
-    }
+    if (e)
+      useDebounceFn(() => {
+        updateNotificationPositions();
+      }, 1000);
   });
   notificationHTMLRefs.value.forEach((e) => {
     if (e) {
