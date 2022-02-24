@@ -22,6 +22,7 @@ type State = {
   isConnectWalletModalOpen: boolean;
   isCancelModalOpen: boolean;
   isPendingModalOpen: boolean;
+  isRemoveModalOpen: boolean;
   hasShownNotification: boolean;
   currentId: string;
 };
@@ -36,6 +37,7 @@ export const useTransactionsStore = defineStore('transactions', {
       isConnectWalletModalOpen: false,
       isCancelModalOpen: false,
       isPendingModalOpen: false,
+      isRemoveModalOpen: false,
       hasShownNotification: false,
       currentId: undefined,
     } as State),
@@ -51,6 +53,14 @@ export const useTransactionsStore = defineStore('transactions', {
 
     togglePendingModal() {
       this.isPendingModalOpen = !this.isPendingModalOpen;
+    },
+
+    toggleRemoveModal() {
+      this.isRemoveModalOpen = !this.isRemoveModalOpen;
+    },
+
+    closeRemoveModal() {
+      this.isRemoveModalOpen = false;
     },
 
     closePendingModal() {

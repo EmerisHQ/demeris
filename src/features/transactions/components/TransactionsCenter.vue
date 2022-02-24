@@ -6,16 +6,19 @@
     />
 
     <section
+      v-else
       class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg"
     >
       <Notifications
         :messages="state.notifications"
         class="absolute -top-3"
         :button1-label="$t('context.transactions.controls.undo')"
+        :button2-label="$t('context.transactions.controls.details')"
         :clear-all-label="$t('context.transactions.controls.clearAll')"
         :show-less-label="$t('context.transactions.controls.showLess')"
         @on-update="state.notifications = $event"
         @on-button1-click="undoRemoval"
+        @on-button2-click="showDetails"
       />
 
       <header class="flex items-center space-between pt-5 pb-4 px-6">
@@ -74,7 +77,7 @@
 
   <teleport to="body">
     <TransactionProcessViewer
-      v-if="transactionsStore.isPendingModalOpen"
+      v-if="transactionsStore.isPendingModalOpen || transactionsStore.isRemoveModalOpen"
       :step-id="transactionsStore.currentId"
       @close="closeModal"
       @previous="closeModal"
@@ -118,7 +121,7 @@ const state = reactive({
 
 const canShownCenter = computed(() => {
   if (pendingTransactions.value.length || state.notifications.length) {
-    if (isModalOpen.value || transactionsStore.isPendingModalOpen) {
+    if (isModalOpen.value || transactionsStore.isPendingModalOpen || transactionsStore.isRemoveModalOpen) {
       return false;
     }
     return true;
@@ -147,12 +150,21 @@ const selectItem = (stepId) => {
 };
 
 const closeModal = () => {
+  removeNotification(transactionsStore.currentId);
+
   transactionsStore.setCurrentId(undefined);
   if (transactionsStore.isPendingModalOpen) {
     transactionsStore.closePendingModal();
   }
-  transactionsStore.toggleViewerModal();
+  if (transactionsStore.isRemoveModalOpen) {
+    transactionsStore.closeRemoveModal();
+  }
+  if (isModalOpen.value) {
+    transactionsStore.toggleViewerModal();
+  }
 };
+
+const removeNotification = (id: string) => (state.notifications = state.notifications.filter((note) => note.id !== id));
 
 const toggleViewAll = () => (state.viewAll = !state.viewAll);
 
@@ -163,7 +175,12 @@ const removeTransactionItem = (id: string) => {
 
 const undoRemoval = (id: string) => {
   transactionsStore.setTransactionAsPending(id);
-  state.notifications = [];
+  removeNotification(id);
+};
+
+const showDetails = (id: string) => {
+  removeNotification(id);
+  transactionsStore.toggleRemoveModal();
 };
 
 const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);

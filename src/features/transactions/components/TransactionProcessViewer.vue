@@ -34,11 +34,12 @@
 
   <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
   <ModalPendingTransaction v-if="transactionsStore.isPendingModalOpen" />
+  <ModalRemove v-if="transactionsStore.isRemoveModalOpen" />
 </template>
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, provide } from 'vue';
+import { computed, nextTick, provide } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
@@ -50,6 +51,7 @@ import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
 import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
 import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue';
 import ModalPendingTransaction from './TransactionProcessViewer/ModalPendingTransaction.vue';
+import ModalRemove from './TransactionProcessViewer/ModalRemove.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
@@ -92,8 +94,8 @@ const closeModal = () => emits('close');
 const goBack = () => emits('previous');
 
 const removeTransactionAndClose = () => {
-  transactionsStore.removeTransaction(props.stepId);
   closeModal();
+  nextTick(() => transactionsStore.removeTransaction(props.stepId));
 };
 provide(ProvideViewerKey, {
   actor,
