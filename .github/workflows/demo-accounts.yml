@@ -29,15 +29,17 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '16'
-
     - run: npm ci
-
     - run: npm run generate:demo-acounts && git status
       env:
         DEMO_ACCOUNT_MNEMONIC: ${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
 
     - name: Commit and push demo accounts to develop
       run: git status
+    
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update demo accounts static file
       
       # git add rc/store/demeris-user/demo-account.js
       
