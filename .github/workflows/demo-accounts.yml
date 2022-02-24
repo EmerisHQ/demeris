@@ -38,7 +38,7 @@ jobs:
 
     - name: Commit and push demo accounts to develop
       run: |
-        git status
+        cd ../../ && git status
       
       # git add rc/store/demeris-user/demo-account.js
       

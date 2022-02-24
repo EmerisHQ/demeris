@@ -6,7 +6,6 @@ const { Secp256k1HdWallet } = require('@cosmjs/amino');
 const { stringToPath } = require('@cosmjs/crypto');
 
 const MNEMONIC = process.env.DEMO_ACCOUNT_MNEMONIC;
-console.log('MNEMONIC length', MNEMONIC.length);
 
 const getDemoAccountDetails = async () => {
   const {
@@ -108,7 +107,7 @@ const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
     if (err) {
       return console.log('error saving file', err);
     }
-    console.log('The file was saved!');
+    console.log('File created successfully.');
   });
 };
 
