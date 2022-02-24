@@ -193,24 +193,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
-    if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
+    if (state.traces[(payload.params as API.VerifyTraceReq).chain_name]) {
       if (
         !isEqual(
-          state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-            (payload.params as API.VerifyTraceReq).hash
-          ],
+          state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash],
           payload.value as API.VerifyTrace,
         )
       ) {
-        state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-          (payload.params as API.VerifyTraceReq).hash
-        ] = payload.value as API.VerifyTrace;
+        state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+          payload.value as API.VerifyTrace;
       }
     } else {
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-        (payload.params as API.VerifyTraceReq).hash
-      ] = payload.value as API.VerifyTrace;
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name] = {};
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+        payload.value as API.VerifyTrace;
     }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
@@ -340,7 +336,7 @@ export const mutations: MutationTree<State> & Mutations = {
         subObj.action == DemerisActionTypes.GET_BALANCES ||
         subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
         subObj.action == DemerisActionTypes.GET_NUMBERS ||
-        subObj.action == DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS
+        subObj.action == DemerisActionTypes.GET_UNBONDING_DELEGATIONS
       ) {
         state._Subscriptions.delete(sub);
       }

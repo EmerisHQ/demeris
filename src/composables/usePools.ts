@@ -126,7 +126,7 @@ function usePools() {
 
   // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
   const filterPoolsByDenom = (denom: string) => {
-    return pools.value.filter((item) => item.reserve_coin_denoms.includes(denom));
+    return pools.value?.filter((item) => item.reserve_coin_denoms.includes(denom)) ?? [];
   };
 
   const getPoolPrice = async (pool: Pool) => {
