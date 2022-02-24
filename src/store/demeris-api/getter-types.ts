@@ -26,7 +26,6 @@ export enum GetterTypes {
   getAllValidPools = 'getAllValidPools',
   getDexChain = 'getDexChain',
   getTxStatus = 'getTxStatus',
-  getOwnAddress = 'getOwnAddress',
   getVerifyTrace = 'getVerifyTrace',
   getFeeAddress = 'getFeeAddress',
   getBech32Config = 'getBech32Config',
