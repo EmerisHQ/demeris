@@ -50,6 +50,19 @@
 
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap />
+        <!-- TODO: remove, placed here for testing -->
+        <Notifications
+          :messages="testData"
+          button1-label="Undo"
+          :dismiss-interval="5000"
+          button2-label="Details"
+          show-less-label="Show Less"
+          clear-all-label="Clear All"
+          @onButton1Click="($event) => undo($event)"
+          @onButton2Click="($event) => details($event)"
+          @on-update="($event) => updateTestData($event)"
+        />
+        <button class="my-4" @click="addone()">Add new Notification</button>
         <Intro class="mt-4" />
       </aside>
     </div>
@@ -57,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
+import { computed, ref } from '@vue/runtime-core';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -71,6 +84,7 @@ import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
 import Button from '@/components/ui/Button.vue';
+import Notifications from '@/components/ui/Notifications.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -88,6 +102,7 @@ export default {
     TotalPrice,
     AssetsTable,
     Pools,
+    Notifications,
     Intro,
     SkeletonLoader,
   },
@@ -125,8 +140,49 @@ export default {
       const poolsCopy = pools.value?.slice() ?? [];
       return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
     });
+    // TODO: remove, here for testing only
+    const testData = ref([]);
+    let i = 0;
+    // for (i = 0; i < 10; i++) {
+    //   if (i % 2 === 0) {
+    //     testData.value.push({ message: `Transaction  ${i}`, id: i });
+    //   } else {
+    //     testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, id: i });
+    //   }
+    // }
+    function undo(id) {
+      console.log('undo id', id);
+    }
+    function details(id) {
+      console.log('details id', id);
+    }
+    function addone() {
+      i++;
+      if (i % 2 === 0) {
+        testData.value.push({ message: `Transaction  ${i}`, id: i });
+      } else {
+        testData.value.push({ message: `Transaction asasdas dasd a sdas dasd item ${i}`, id: i });
+      }
+    }
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete };
+    function updateTestData($event) {
+      console.log('updateTestData', $event);
+      i = $event.length;
+      testData.value = $event;
+    }
+
+    return {
+      balances,
+      poolsInvested,
+      openAssetPage,
+      openPoolsPage,
+      initialLoadComplete,
+      undo,
+      updateTestData,
+      details,
+      addone,
+      testData,
+    };
   },
 };
 </script>

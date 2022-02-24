@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside } from '@vueuse/core';
+import { onClickOutside, useDocumentVisibility, useElementVisibility } from '@vueuse/core';
 import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
@@ -122,6 +122,7 @@ interface NotificationMessage {
 }
 
 interface Props {
+  autoDismiss?: boolean;
   button1Label?: string;
   button2Label?: string;
   clearAllLabel: string;
@@ -131,6 +132,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  autoDismiss: true,
   button1Label: '',
   button2Label: '',
   clearAllLabel: '',
@@ -140,6 +142,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const {
+  autoDismiss,
   button1Label,
   button2Label,
   clearAllLabel,
@@ -169,6 +172,8 @@ const styleCalculationTimeoutId = ref(null);
 const visibleNotificationMessages = computed(() => [...notificationMessages.value]?.reverse() ?? []);
 
 const totalStackedNotifications = 3;
+const isDocumentVisible = useDocumentVisibility();
+const isComponentVisible = useElementVisibility(clickableAreaRef);
 
 function computeNotificationsStyles(): void {
   // styles are computed on demand to update dom
@@ -227,14 +232,23 @@ function dismissNotification(id: number | string): void {
 }
 
 function startInactivityTimer(): void {
-  if (isMouseOverComponent.value) return;
+  if (
+    isMouseOverComponent.value ||
+    !isComponentVisible.value ||
+    isDocumentVisible.value === 'hidden' ||
+    !autoDismiss.value
+  ) {
+    return;
+  }
   startDismissNotificationTimeout();
 }
 
 function startDismissNotificationTimeout(): void {
   clearTimeout(inactivityTimeoutId.value);
   inactivityTimeoutId.value = setTimeout(() => {
-    if (isMouseOverComponent.value) return;
+    if (isMouseOverComponent.value || !isComponentVisible.value || isDocumentVisible.value === 'hidden') {
+      return;
+    }
     const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id;
     if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
     if (visibleNotificationMessages.value.length > 0) startInactivityTimer();
@@ -283,6 +297,13 @@ watch(
     updateNotificationPositions();
     observeNotificationsDimensionChange();
     if (visibleNotificationMessages.value.length === 1) isStacked.value = true;
+  },
+);
+
+watch(
+  () => isDocumentVisible.value,
+  (isVisible) => {
+    if (isVisible === 'visible') startInactivityTimer();
   },
 );
 
