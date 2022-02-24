@@ -1,4 +1,4 @@
-name: Generate demo-account.js
+name: Generate static demo-account.js
 
 on:
   workflow_dispatch:
