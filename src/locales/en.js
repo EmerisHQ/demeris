@@ -92,6 +92,13 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
+      },
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
         appearsDown: 'Emeris connection to {chain} appears to be down',
