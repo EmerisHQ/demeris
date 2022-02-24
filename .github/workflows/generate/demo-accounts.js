@@ -102,7 +102,7 @@ const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
   };
   export const demoAddresses = ${JSON.stringify(demoAccountAddresses, null, 2)};
   `;
-  const fileName = `${__dirname}/../../../src/store/demeris-user/demo-account-new.js`;
+  const fileName = `${__dirname}/../../../src/store/demeris-user/demo-account.js`;
   fs.writeFile(fileName, fileContentsTemplate, (err) => {
     if (err) {
       return console.log('error saving file', err);
