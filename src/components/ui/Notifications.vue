@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside, useDebounceFn, useDocumentVisibility, useElementVisibility } from '@vueuse/core';
+import { onClickOutside, useDebounceFn } from '@vueuse/core';
 import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
@@ -171,8 +171,6 @@ const styleCalculationTimeoutId = ref(null);
 const visibleNotificationMessages = computed(() => [...notificationMessages.value]?.reverse() ?? []);
 
 const totalStackedNotifications = 3;
-const isDocumentVisible = useDocumentVisibility();
-const isComponentVisible = useElementVisibility(clickableAreaRef);
 
 function computeNotificationsStyles(): void {
   // styles are computed on demand to update dom
@@ -228,12 +226,7 @@ function dismissNotification(id: number | string): void {
 }
 
 function startInactivityTimer(): void {
-  if (
-    isMouseOverComponent.value ||
-    !isComponentVisible.value ||
-    isDocumentVisible.value === 'hidden' ||
-    !autoDismiss.value
-  ) {
+  if (isMouseOverComponent.value || !autoDismiss.value) {
     return;
   }
   startDismissNotificationTimeout();
@@ -242,7 +235,7 @@ function startInactivityTimer(): void {
 function startDismissNotificationTimeout(): void {
   clearTimeout(inactivityTimeoutId.value);
   inactivityTimeoutId.value = setTimeout(() => {
-    if (isMouseOverComponent.value || !isComponentVisible.value || isDocumentVisible.value === 'hidden') {
+    if (isMouseOverComponent.value) {
       return;
     }
     const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id;
@@ -293,13 +286,6 @@ watch(
     updateNotificationPositions();
     observeNotificationsDimensionChange();
     if (visibleNotificationMessages.value.length === 1) isStacked.value = true;
-  },
-);
-
-watch(
-  () => isDocumentVisible.value,
-  (isVisible) => {
-    if (isVisible === 'visible') startInactivityTimer();
   },
 );
 
