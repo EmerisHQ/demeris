@@ -1,4 +1,4 @@
-name: Generate static demo-account.js
+name: Generate demo-account.js
 
 on:
   workflow_dispatch: 
@@ -6,7 +6,7 @@ on:
     types: [created]
 
 jobs:
-  generate-demo-accounts-file:
+  generate-demo-accounts:
     runs-on: self-hosted
 
     steps:
