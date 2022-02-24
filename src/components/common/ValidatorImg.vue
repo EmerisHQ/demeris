@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import axios from 'axios';
-import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
+import { defineComponent, ref, toRefs, watch } from 'vue';
 
 import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic';
 export default defineComponent({
