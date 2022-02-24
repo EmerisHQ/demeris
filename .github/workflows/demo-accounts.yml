@@ -34,8 +34,7 @@ jobs:
 
     - run: npm run generate:demo-acounts
       env:
-        # DEMO_ACCOUNT_MNEMONIC: ${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
-        DEMO_ACCOUNT_MNEMONIC: Test String
+        DEMO_ACCOUNT_MNEMONIC: ${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
 
     - name: Commit and push demo accounts to develop
       run: |
