@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.13 - 2022-02-24
+
+### Features
+
+### Fixes
+
+- More chart component fixes before starting feature
+
 ## 0.1.12 - 2022-02-18
 
 ### Features
