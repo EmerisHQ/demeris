@@ -13,9 +13,9 @@ name: Generate Wallet Demo Accounts
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ feat-auto-demo-addresses ]
   pull_request:
-    branches: [ develop ]
+    branches: [ feat-auto-demo-addresses ]
 
 jobs:
   generate-demo-accounts:
