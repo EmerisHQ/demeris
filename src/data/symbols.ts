@@ -132,6 +132,27 @@ const GravityDex: SymbolConfig = {
   },
 };
 
+const Juno: SymbolConfig = {
+  colors: {
+    primary: '#FD675C',
+    secondary: '#FFBDBA',
+  },
+};
+
+const LikeCoin: SymbolConfig = {
+  colors: {
+    primary: '#286A7A',
+    secondary: '#60D1E2',
+  },
+};
+
+const BitCanna: SymbolConfig = {
+  colors: {
+    primary: '#46DD94',
+    secondary: '#77EFE9',
+  },
+};
+
 const chains: Record<string, SymbolConfig> = {
   'cosmos-hub': Cosmos,
   akash: Akash,
@@ -146,6 +167,9 @@ const chains: Record<string, SymbolConfig> = {
   emoney: EMoney,
   sifchain: Sifchain,
   injective: Injective,
+  juno: Juno,
+  likecoin: LikeCoin,
+  bitcanna: BitCanna,
 };
 
 const denoms: Record<string, SymbolConfig> = {
@@ -165,6 +189,9 @@ const denoms: Record<string, SymbolConfig> = {
   uluna: Terra,
   uinj: Injective,
   rowan: Sifchain,
+  ujuno: Juno,
+  nanolike: LikeCoin,
+  ubcna: BitCanna,
 };
 
 const protocols: Record<string, SymbolConfig> = {

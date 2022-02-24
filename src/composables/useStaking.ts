@@ -5,17 +5,15 @@
 type ValidatorStatus = 1 | 2 | 3; // Possibly turn into enum?
 
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { Chains } from '@/types/api';
 import { keyHashfromAddress } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
 
 export default function useStaking() {
   const store = useStore();
-  const chains: Chains = store.getters[GlobalDemerisGetterTypes.API.getChains];
 
   const getValidatorsByBaseDenom = async (base_denom: string, status: ValidatorStatus[] = [3]) => {
     //TODO: have our own curated DB for validator list
-    const chain_name = getChainNameByBaseDenom(base_denom);
+    const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
     const reducer = (accumulator, validator) => {
       if (status.includes(validator.status)) {
@@ -29,14 +27,14 @@ export default function useStaking() {
   };
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {
-    const chain_name = getChainNameByBaseDenom(base_denom);
+    const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     const inflation = await store.dispatch(GlobalDemerisActionTypes.API.GET_INFLATION, { chain_name });
     return Math.trunc(inflation * 10000) / 100;
   };
 
   const getStakingRewardsByBaseDenom = async (base_denom: string): Promise<unknown> => {
     try {
-      const chain_name = getChainNameByBaseDenom(base_denom);
+      const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
       return await store.dispatch(GlobalDemerisActionTypes.API.GET_STAKING_REWARDS, { chain_name });
     } catch (_e) {
       // Apparently rewards endpoint errors out if staking rewards are zero
@@ -58,18 +56,10 @@ export default function useStaking() {
     return moniker;
   };
 
-  //helpers
-  function getChainNameByBaseDenom(base_denom: string): string {
-    return Object.values(chains).find((chain) => {
-      return chain.denoms.find((denom) => denom.name === base_denom);
-    }).chain_name;
-  }
-
   return {
     getValidatorMoniker,
     getValidatorsByBaseDenom,
     getChainDisplayInflationByBaseDenom,
     getStakingRewardsByBaseDenom,
-    getChainNameByBaseDenom,
   };
 }
