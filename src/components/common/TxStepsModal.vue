@@ -518,7 +518,7 @@ export default defineComponent({
       return steps;
     });
     watch(
-      () => props.data,
+      () => refProps.data.value,
       async (newData) => {
         chainsStatus.value = await chainStatusForSteps(props.data);
         fees.value = await Promise.all(
