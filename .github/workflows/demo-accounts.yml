@@ -2,12 +2,19 @@ name: Generate demo-account.js
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - feat-auto-demo-addresses
-  # pull_request:
-  #   branches:
-  #     - feat-auto-demo-addresses
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+  push:
+    branches:
+      - feat-auto-demo-addresses
+  pull_request:
+    branches:
+      - feat-auto-demo-addresses
 jobs:
   generate-demo-accounts-file:
     runs-on: self-hosted
