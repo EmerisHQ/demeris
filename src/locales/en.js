@@ -191,6 +191,18 @@ export const messages = {
         slippageValueError: 'Please enter a valid slippage rate.',
         highSlippageMessage: 'Your swap price may be significantly above the market price.',
       },
+      staking: {
+        navigation: {
+          validator: 'Validator',
+          amount: 'Amount',
+          review: 'Review',
+          stake: 'Stake',
+          restake: 'Restake',
+          unstake: 'unstake',
+          transfer: 'Transfer',
+          claim: 'Claim',
+        },
+      },
       stakeTable: {
         staking: 'Staking',
         unstaking: 'Unstaking',
@@ -659,7 +671,6 @@ export const messages = {
         balance: 'Balance',
         available: 'Available',
         staked: 'Staked',
-        pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
