@@ -34,7 +34,9 @@ jobs:
 
     - run: npm ci
 
-    - run: npm run generate:demo-acounts
+    - run: |
+      export DEMO_ACCOUNT_MNEMONIC=${{ secrets.DEMO_ACCOUNT_MNEMONIC }}
+      npm run generate:demo-acounts
 
     - name: Commit and push demo accounts to develop
       run: |
