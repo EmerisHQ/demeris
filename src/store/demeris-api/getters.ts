@@ -6,6 +6,7 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
 import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
 import { GetterTypes } from './getter-types';
@@ -77,6 +78,7 @@ export type Getters = {
   [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
   [GetterTypes.getTokenId](state: State): string | null;
   [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
+  [GetterTypes.getChainNameByBaseDenom](state: State): { (params: API.APIRequests): string };
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisAPI'>;
@@ -104,7 +106,7 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return balances.length > 0 ? balances : null;
   },
   [GetterTypes.getAllValidPools]: (state) => {
-    return state.validPools ?? [];
+    return state.validPools;
   },
   [GetterTypes.getAllStakingBalances]: (state) => {
     const stakingBalances = Object.values(state.stakingBalances)
@@ -192,20 +194,20 @@ export const getters: GetterTree<State, RootState> & Getters = {
 
     let referencePool = null;
     let reserveBaseDenoms = [];
+    if (pools) {
+      for (const pool of pools) {
+        reserveBaseDenoms = [];
 
-    for (const pool of pools) {
-      reserveBaseDenoms = [];
+        for (const coinDenom of pool.reserve_coin_denoms) {
+          reserveBaseDenoms.push(traces[coinDenom.split('/')[1]]?.base_denom ?? coinDenom);
+        }
 
-      for (const coinDenom of pool.reserve_coin_denoms) {
-        reserveBaseDenoms.push(traces[coinDenom.split('/')[1]]?.base_denom ?? coinDenom);
-      }
-
-      if (reserveBaseDenoms.includes('uatom') && reserveBaseDenoms.includes(base_denom)) {
-        referencePool = pool;
-        break;
+        if (reserveBaseDenoms.includes('uatom') && reserveBaseDenoms.includes(base_denom)) {
+          referencePool = pool;
+          break;
+        }
       }
     }
-
     if (!referencePool) {
       return;
     }
@@ -285,24 +287,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
     );
   },
   [GetterTypes.getVerifyTrace]: (state) => (params) => {
-    if (
-      state.chains[(params as API.VerifyTraceReq).chain_name] &&
-      state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces
-    ) {
-      return (
-        state.chains[(params as API.VerifyTraceReq).chain_name]?.verifiedTraces[(params as API.VerifyTraceReq).hash] ??
-        null
-      );
+    if (state.traces[(params as API.VerifyTraceReq).chain_name]) {
+      return state.traces[(params as API.VerifyTraceReq).chain_name][(params as API.VerifyTraceReq).hash] ?? null;
     } else {
       return null;
     }
   },
   [GetterTypes.getAllVerifiedTraces]: (state) => {
     let result = {};
-    for (const chain of Object.values(state.chains)) {
+    for (const traces of Object.values(state.traces)) {
       result = {
         ...result,
-        ...chain.verifiedTraces,
+        ...traces,
       };
     }
     return result;
@@ -314,7 +310,11 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.chains[(params as API.ChainReq).chain_name]?.node_info.bech32_config ?? null;
   },
   [GetterTypes.getFeeTokens]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.denoms.filter((x) => x.fee_token) ?? null;
+    if (featureRunning('REQUEST_PARALLELIZATION')) {
+      return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? [];
+    } else {
+      return state.chains[(params as API.ChainReq).chain_name]?.denoms?.filter((x) => x.fee_token) ?? null;
+    }
   },
   [GetterTypes.getChain]: (state) => (params) => {
     return state.chains[(params as API.ChainReq).chain_name] ?? null;
@@ -346,6 +346,15 @@ export const getters: GetterTree<State, RootState> & Getters = {
     return state.tokenIdLoadingStatus;
   },
   [GetterTypes.getChainStatus]: (state) => (params) => {
-    return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
+    if (featureRunning('REQUEST_PARALLELIZATION')) {
+      return state.chains[(params as API.ChainReq).chain_name]?.status;
+    } else {
+      return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
+    }
+  },
+  [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
+    return Object.values(state.chains)?.find((chain) => {
+      return chain.denoms?.find((denom) => denom.name === (params as API.DenomReq).denom);
+    })?.chain_name;
   },
 };
