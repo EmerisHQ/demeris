@@ -21,7 +21,7 @@
         />
 
         <template #content>
-          <i18n-t keypath="components.coinList.tooltip">
+          <i18n-t scope="global" keypath="components.coinList.tooltip">
             <template #asset>
               <Denom :name="coin.base_denom" />
             </template>

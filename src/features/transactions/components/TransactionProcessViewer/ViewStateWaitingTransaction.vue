@@ -11,7 +11,7 @@
       </h1>
 
       <p class="text-muted text-center" :class="isSwapComponent ? 'px-8' : 'px-16'">
-        <i18n-t keypath="context.transactions.waitingPrevious.description">
+        <i18n-t scope="global" keypath="context.transactions.waitingPrevious.description">
           <template #type>{{ transactionNameMap[transaction.name] }}</template>
           <template #chain><ChainName :name="sourceChain" /></template>
         </i18n-t>
