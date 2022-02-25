@@ -556,26 +556,11 @@ export const messages = {
           'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
         featureProjects: 'Feature your project’s airdrop',
         airdropstableFilterItems: {
-          all: {
-            text: 'All airdrops',
-            value: 'all',
-          },
-          mine: {
-            text: 'My airdrops',
-            value: 'mine',
-          },
-          upcoming: {
-            text: 'Upcoming',
-            value: 'upcoming',
-          },
-          live: {
-            text: 'Live',
-            value: 'live',
-          },
-          past: {
-            text: 'Past',
-            value: 'past',
-          },
+          all: 'All airdrops',
+          mine: 'My airdrops',
+          upcoming: 'Upcoming',
+          live: 'Live',
+          past: 'Past',
         },
       },
       pools: {

@@ -20,7 +20,7 @@
       </tr>
     </thead>
 
-    <tbody v-if="true">
+    <tbody>
       <tr
         v-for="(airdrop, index) in airdrops"
         :key="index"

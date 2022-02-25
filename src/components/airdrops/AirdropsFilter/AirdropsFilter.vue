@@ -33,24 +33,24 @@ export default {
     const activeFilterItem = ref('all');
     const filtersItems = [
       {
-        text: t('context.airdrops.airdropstableFilterItems.all.text'),
-        value: t('context.airdrops.airdropstableFilterItems.all.value'),
+        text: t('context.airdrops.airdropstableFilterItems.all'),
+        value: 'all',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.mine.text'),
-        value: t('context.airdrops.airdropstableFilterItems.mine.value'),
+        text: t('context.airdrops.airdropstableFilterItems.mine'),
+        value: 'mine',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.upcoming.text'),
-        value: t('context.airdrops.airdropstableFilterItems.upcoming.value'),
+        text: t('context.airdrops.airdropstableFilterItems.upcoming'),
+        value: 'upcoming',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.live.text'),
-        value: t('context.airdrops.airdropstableFilterItems.live.value'),
+        text: t('context.airdrops.airdropstableFilterItems.live'),
+        value: 'live',
       },
       {
-        text: t('context.airdrops.airdropstableFilterItems.past.text'),
-        value: t('context.airdrops.airdropstableFilterItems.past.value'),
+        text: t('context.airdrops.airdropstableFilterItems.past'),
+        value: 'past',
       },
     ];
 
