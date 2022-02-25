@@ -2,7 +2,7 @@ name: static demo-account.js
 
 on:
   workflow_dispatch:
-    branches: [develop, feat/943-generate-static-demo-account-js]
+    branches: [ feat/943-generate-static-demo-account-js ]
   push:
     branches: [ feat/943-generate-static-demo-account-js ]
   pull_request:
