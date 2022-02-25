@@ -92,6 +92,13 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
+      },
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
         appearsDown: 'Emeris connection to {chain} appears to be down',
@@ -110,6 +117,11 @@ export const messages = {
       },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
       },
       send: {
         send: 'Send',
@@ -117,6 +129,13 @@ export const messages = {
         moveAssetsDescription: 'Move assets between your addresses on different chains.',
         sendToAddress: 'Send to address',
         sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+        navigation: {
+          recipient: 'Recipient',
+          amount: 'Amount',
+          review: 'Review',
+          move: 'Move',
+          send: 'Send',
+        },
       },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
@@ -190,6 +209,18 @@ export const messages = {
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
         slippageValueError: 'Please enter a valid slippage rate.',
         highSlippageMessage: 'Your swap price may be significantly above the market price.',
+      },
+      staking: {
+        navigation: {
+          validator: 'Validator',
+          amount: 'Amount',
+          review: 'Review',
+          stake: 'Stake',
+          restake: 'Restake',
+          unstake: 'Unstake',
+          transfer: 'Transfer',
+          claim: 'Claim',
+        },
       },
       stakeTable: {
         staking: 'Staking',
@@ -659,7 +690,6 @@ export const messages = {
         balance: 'Balance',
         available: 'Available',
         staked: 'Staked',
-        pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
