@@ -13,7 +13,7 @@
             class="capitalize font-medium cursor-default"
             :class="state.step === label ? 'text-text' : 'text-inactive'"
           >
-            {{ label }}
+            {{ $t('components.addLiquidity.navigation.' + label) }}
           </span>
         </nav>
 
@@ -316,7 +316,6 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-/* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';

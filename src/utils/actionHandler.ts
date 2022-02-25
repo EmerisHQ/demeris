@@ -1785,6 +1785,7 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
             ),
           ),
         );
+        break;
       } else {
         for (const denom of ibcDenoms) {
           await apistore.dispatch(
