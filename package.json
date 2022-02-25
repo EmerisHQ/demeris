@@ -111,8 +111,7 @@
     ],
     "*.{js,ts,tsx,vue}": [
       "eslint --fix",
-      "npm run lint",
-      "prettier --write"
+      "npm run lint"
     ]
   },
   "simple-git-hooks": {

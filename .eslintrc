@@ -8,7 +8,7 @@
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
-  "plugins": ["@typescript-eslint", "simple-import-sort", "unused-imports"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "unused-imports", "prettier"],
   "extends": [
     "@vue/typescript/recommended",
     "plugin:vue/vue3-recommended",
