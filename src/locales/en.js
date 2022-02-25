@@ -216,6 +216,7 @@ export const messages = {
           amount: 'Amount',
           review: 'Review',
           stake: 'Stake',
+          staked: 'Staked',
           restake: 'Restake',
           unstake: 'Unstake',
           transfer: 'Transfer',
