@@ -1,14 +1,6 @@
-name: static demo-account.js
+name: Generate demo-account.js
 
-on: 
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level2'     
-        required: true
-        default: 'warning'
-      tags:
-        description: 'Test scenario tags'  
+on: workflow_dispatch:
 
 jobs:
   demo-accounts:
