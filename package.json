@@ -4,10 +4,11 @@
   "private": true,
   "author": "Tendermint, Inc <hello@tendermint.com>",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
     "test:unit": "jest",
     "lint": "vue-cli-service lint",
-    "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
     "generate:demo-acounts": "node .github/workflows/generate/demo-accounts.js",
     "prepare": "simple-git-hooks"
