@@ -146,6 +146,11 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
   },
 
   setup(props) {

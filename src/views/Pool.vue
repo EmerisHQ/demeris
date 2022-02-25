@@ -174,6 +174,7 @@
         </section>
       </aside>
     </div>
+    <SkeletonLoader v-else width="100%" height="300px" />
   </AppLayout>
 </template>
 
@@ -187,6 +188,7 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Denom from '@/components/common/Denom.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import Pools from '@/components/liquidity/Pools.vue';
@@ -213,6 +215,7 @@ export default defineComponent({
     Pools,
     Price,
     Ticker,
+    SkeletonLoader,
   },
 
   setup() {

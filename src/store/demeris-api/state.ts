@@ -2,7 +2,6 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 export type ChainMeta = {
-  verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
   relayerBalance?: API.RelayerBalance;
   status?: boolean;
@@ -27,6 +26,7 @@ export type State = {
   prices: API.Prices;
   relayer: boolean;
   chains: Record<string, ChainData>;
+  traces: Record<string, Record<string, API.VerifyTrace>>;
   transactions: Map<string, TransactionItem>;
   tokenPrices: API.TokenPrices[];
   tokenPricesLoadingStatus: API.LoadingState;
@@ -46,7 +46,7 @@ export function getDefaultState(): State {
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
-    validPools: [],
+    validPools: null,
     prices: {
       Fiats: [],
       Tokens: [],
@@ -57,6 +57,7 @@ export function getDefaultState(): State {
     tokenIdLoadingStatus: API.LoadingState.INIT,
     relayer: false,
     chains: {},
+    traces: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),

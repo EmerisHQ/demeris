@@ -13,7 +13,7 @@
             class="capitalize font-medium cursor-default"
             :class="state.step === label ? 'text-text' : 'text-inactive'"
           >
-            {{ label }}
+            {{ $t('components.withdrawLiquidity.navigation.' + label) }}
           </span>
         </nav>
 

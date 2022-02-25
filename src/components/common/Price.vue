@@ -1,11 +1,7 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
-    <div
-      v-if="showPriceDiff"
-      class="-text-1 font-normal"
-      :class="priceDiffIndicator === 'gain' ? 'text-positive-text' : 'text-negative-text'"
-    >
+    <div v-if="showPriceDiff" class="-text-1 font-normal" :class="priceDiffColor">
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
   </div>
@@ -15,6 +11,7 @@ import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
+import useTheme from '@/composables/useTheme';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { Amount } from '@/types/base';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -50,7 +47,7 @@ export default defineComponent({
     const store = useStore();
     const denom = ref((props.amount as Amount).denom);
     const isLoaded = ref(false);
-
+    const theme = useTheme();
     const price = ref();
 
     const priceObserver = computed(() => {
@@ -120,7 +117,34 @@ export default defineComponent({
       return props.priceDiffObject.indicator;
     });
 
-    return { displayPrice, showPriceDiff, priceDiffIndicator };
+    const priceDiffColor = computed(() => {
+      if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
+        return 'color-gain-light';
+      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
+        return 'color-gain-dark';
+      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'dark') {
+        return 'color-loss-light';
+      } else {
+        return 'color-loss-dark';
+      }
+    });
+
+    return { theme, displayPrice, showPriceDiff, priceDiffIndicator, priceDiffColor };
   },
 });
 </script>
+
+<style scoped>
+.color-gain-light {
+  color: #008223;
+}
+.color-gain-dark {
+  color: #42ed05;
+}
+.color-loss-light {
+  color: #d80228;
+}
+.color-loss-dark {
+  color: #ff6072;
+}
+</style>

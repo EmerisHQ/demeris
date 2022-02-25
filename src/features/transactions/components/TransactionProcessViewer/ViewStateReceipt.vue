@@ -85,6 +85,7 @@
           <template v-if="isSwapComponent">
             <i18n-t
               v-if="getSwapPercent() < 100"
+              scope="global"
               tag="p"
               class="text-center px-4"
               keypath="components.txHandlingModal.notSwapped"
@@ -104,7 +105,13 @@
               </template>
             </i18n-t>
 
-            <i18n-t v-else tag="p" class="text-center px-4" keypath="components.txHandlingModal.received">
+            <i18n-t
+              v-else
+              scope="global"
+              tag="p"
+              class="text-center px-4"
+              keypath="components.txHandlingModal.received"
+            >
               <template #amount>
                 <span class="font-bold">
                   <AmountDisplay
@@ -177,6 +184,7 @@
               :context="isSwapComponent ? 'widget' : 'default'"
               :class="{ '-text-1': isSwapComponent }"
               :bordered="isSwapComponent"
+              :is-receipt="true"
               :fees="state.context.fees.totals[lastResult.stepIndex]"
               class="border-b"
             />
@@ -219,7 +227,7 @@
 
         <template v-if="transaction.name === 'swap'">
           <Button variant="secondary" @click="goToSend">
-            <i18n-t keypath="context.transactions.controls.sendAmount">
+            <i18n-t scope="global" keypath="context.transactions.controls.sendAmount">
               <template #amount>
                 <AmountDisplay
                   :amount="{
@@ -261,7 +269,7 @@ import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
 import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { ClaimData, DelegateData, RedelegateData, UndelegateData } from '@/types/actions';
+import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -319,17 +327,17 @@ const title = computed(() => {
 });
 const stakedAmount = ref('0');
 if (transaction.value.name == 'stake') {
-  stakedAmount.value = (transaction.value.data as DelegateData[])
+  stakedAmount.value = (transaction.value.data as StakeData[])
     .reduce((acc, tx) => {
       return acc.plus(new BigNumber(tx.amount.amount));
     }, new BigNumber(0))
     .toString();
 }
 if (transaction.value.name == 'unstake') {
-  stakedAmount.value = (transaction.value.data as UndelegateData).amount.amount;
+  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount;
 }
 if (transaction.value.name == 'switch') {
-  stakedAmount.value = (transaction.value.data as RedelegateData).amount.amount;
+  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount;
 }
 if (transaction.value.name == 'claim') {
   stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
