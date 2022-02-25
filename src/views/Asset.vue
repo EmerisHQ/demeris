@@ -160,7 +160,7 @@
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
         <StakingBanner
-          v-else
+          v-else-if="isStakingRunning"
           :display-denom="nativeAsset.displayName"
           :base-denom="nativeAsset.base_denom"
           class="mt-5"
@@ -470,6 +470,8 @@ export default defineComponent({
       apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
     });
 
+    const isStakingRunning = featureRunning('STAKING');
+
     return {
       nativeAsset,
       assetConfig,
@@ -491,6 +493,7 @@ export default defineComponent({
       showPriceChartLoadingSkeleton,
       priceDiffObject,
       setPriceDifference,
+      isStakingRunning,
     };
   },
 });
