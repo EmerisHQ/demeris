@@ -10,7 +10,7 @@ const MNEMONIC = process.env.DEMO_ACCOUNT_MNEMONIC;
 const getDemoAccountDetails = async () => {
   const {
     data: { chains },
-  } = await axios.get('https://staging.demeris.io/v1/chains');
+  } = await axios.get('https://api.emeris.com/v1/chains');
   const chainNames = chains?.map((c) => c.chain_name);
 
   const demoAccountAddresses = {};
@@ -19,7 +19,7 @@ const getDemoAccountDetails = async () => {
     chainNames.map(async (chainName) => {
       const {
         data: { chain },
-      } = await axios.get(`https://staging.demeris.io/v1/chain/${chainName}`);
+      } = await axios.get(`https://api.emeris.com/v1/chain/${chainName}`);
       const addressPrefix = chain.node_info.bech32_config.main_prefix;
       const derivationPath = chain.derivation_path;
       const signer = await Secp256k1HdWallet.fromMnemonic(MNEMONIC, {
@@ -96,7 +96,7 @@ const createDemoAccountsFile = (demoAccountAddresses, keyHashes) => {
       18: 143,
       19: 192,
     },
-    bech32Address: 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
+    bech32Address: 'cosmos14y53meat0ehx2k0c38knym9zczzezedryndanj',
     isNanoLedger: false,
     keyHashes: ${JSON.stringify(keyHashes, null, 2)},
   };
