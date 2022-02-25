@@ -19,6 +19,7 @@ import { messages } from '@/locales/en';
 import App from './App.vue';
 import router from './router';
 import { store } from './store/setup';
+import { featureRunning } from './utils/FeatureManager';
 
 const i18n = createI18n({
   globalInjection: true,
@@ -44,20 +45,22 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app.use(VueApexCharts);
 
-Sentry.init({
-  app,
-  dsn: 'https://062027a7ae3c4e85b35fed27465f9615@o1152630.ingest.sentry.io/6232236',
-  integrations: [
-    new BrowserTracing({
-      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['localhost', 'app.emeris.com', /^\//],
-    }),
-  ],
-  // Set tracesSampleRate to 1.0 to capture 100%
-  // of transactions for performance monitoring.
-  // We recommend adjusting this value in production
-  tracesSampleRate: parseFloat(process.env.VUE_APP_SENTRY_TRACES_SAMPLE_RATE),
-});
+if (featureRunning('SENTRY')) {
+  Sentry.init({
+    app,
+    dsn: 'https://062027a7ae3c4e85b35fed27465f9615@o1152630.ingest.sentry.io/6232236',
+    integrations: [
+      new BrowserTracing({
+        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        tracingOrigins: ['localhost', 'app.emeris.com', /^\//],
+      }),
+    ],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: parseFloat(process.env.VUE_APP_SENTRY_TRACES_SAMPLE_RATE),
+  });
+}
 
 app
   .use(i18n)
