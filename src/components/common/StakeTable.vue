@@ -15,9 +15,7 @@
         >
           {{ $t('components.stakeTable.unstaking') }}
           <div class="text-0 font-normal text-muted">
-            <div class="text-0 font-normal text-muted">
-              {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
-            </div>
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
           </div>
         </h2>
       </div>
@@ -40,7 +38,7 @@
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            <i18n-t keypath="components.stakeTable.lockUpAndEarnRewards">
+            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
               <template #ticker>
                 <Ticker :name="denom" />
               </template>
@@ -70,10 +68,10 @@
         <!-- staking reward table -->
         <table class="w-full table-fixed mt-8 text-right">
           <colgroup>
-            <col width="29%" />
-            <col width="29%" />
-            <col width="29%" />
-            <col width="13%" />
+            <col width="32%" />
+            <col width="38%" />
+            <col width="20%" />
+            <col width="8%" />
           </colgroup>
 
           <!-- table body -->
@@ -94,14 +92,18 @@
               </td>
               <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
               <td class="text-right font-medium bg-surface">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" /></div>
+                <div class="flex justify-end">
+                  +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                </div>
               </td>
               <td class="text-right rounded-r-xl bg-surface">
-                <Icon
-                  name="CaretRightIcon"
-                  :icon-size="1"
-                  class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
-                />
+               <div class="flex justify-end">
+                  <Icon
+                    name="CaretRightIcon"
+                    :icon-size="1"
+                    class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                  />
+                </div>
               </td>
             </tr>
 
@@ -164,19 +166,73 @@
           </tbody>
         </table>
       </div>
-      <div v-show="selectedTab === 2">unstaking</div>
+      <div v-show="selectedTab === 2">
+        <table class="w-full table-fixed mt-8 text-right">
+          <colgroup>
+            <col width="30%" />
+            <col width="20%" />
+            <col width="25%" />
+            <col width="25%" />
+          </colgroup>
+
+          <!-- table body -->
+          <tbody>
+            <!-- staked validators -->
+            <template v-for="unbondingBalance of unbondingBalances">
+              <tr
+                v-for="(entry, index) of unbondingBalance.entries"
+                :key="unbondingBalance.validator_address + '_' + index"
+                class="group"
+              >
+                <td class="py-6 flex items-center transition">
+                  <div class="inline-flex items-center mr-4">
+                    <ValidatorBadge
+                      :validator="
+                        validatorList.find(
+                          (x) => keyHashfromAddress(x.operator_address) == unbondingBalance.validator_address,
+                        )
+                      "
+                      class="w-8 h-8 rounded-full bg-fg z-1"
+                    />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ getValidatorMoniker(unbondingBalance.validator_address) }}
+                  </span>
+                </td>
+                <td class="text-left text-muted">
+                  <div class="inline-flex items-center">
+                    <TimeIcon class="mr-2" />
+                    <span>
+                      {{ getTimeToString(entry.completion_time) }}
+                    </span>
+                  </div>
+                </td>
+                <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
+                <td class="text-right font-medium">
+                  <Price :amount="{ denom: denom, amount: entry.balance }" />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </template>
   </div>
 </template>
 <script lang="tsx">
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -186,8 +242,6 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
-import ValidatorBadge from './ValidatorBadge.vue';
-
 export default defineComponent({
   components: {
     Button,
@@ -196,6 +250,7 @@ export default defineComponent({
     Price,
     Icon,
     ValidatorBadge,
+    TimeIcon,
   },
   props: {
     denom: {
@@ -204,6 +259,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    dayjs.extend(relativeTime);
     const { useDenom } = useDenoms();
     const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
       useStaking();
@@ -239,42 +295,49 @@ export default defineComponent({
     const assetPrecision = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: props.denom,
+          name: propsRef.denom.value,
         }) ?? '6'
       );
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
+    const getTimeToString = (isodate: string) => {
+      return dayjs().to(dayjs(isodate));
+    };
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+          denom: propsRef.denom.value,
+        }),
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
-      return (
-        Math.trunc(
-          (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
-            10 ** assetPrecision.value +
-            (totalRewardsDisplayAmount.value ?? 0)) *
-            10 ** assetPrecision.value,
-        ) /
-        10 ** assetPrecision.value
+      const total = new BigNumber(totalRewardsAmount.value).plus(
+        stakingBalances.value.reduce(
+          (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
+          new BigNumber(0),
+        ),
       );
+      if (total.isLessThan(1)) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      } else {
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
+        return totalDisplay.toFixed(assetPrecision.value);
+      }
     });
     const isStakingAssetExist = computed(() => {
       return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
-      // TODO: implement unstaking asset check
-      return false;
+      return unbondingBalances.value.length > 0;
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
@@ -283,11 +346,22 @@ export default defineComponent({
       return parseFloat(stakingRewardsData.value?.total ?? 0);
     });
     const totalRewardsDisplayAmount = computed(() => {
-      return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
+      if (totalRewardsAmount.value < 1) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      }
+      return new BigNumber(totalRewardsAmount.value ?? 0)
+        .dividedBy(10 ** assetPrecision.value)
+        .toFixed(assetPrecision.value);
     });
     const unstakingAssetValue = computed(() => {
-      //TODO
-      return 77;
+      return unbondingBalances.value
+        .map((x) => x.entries)
+        .flat()
+        .reduce((acc, entry) => {
+          return acc.plus(new BigNumber(entry.balance));
+        }, new BigNumber(0))
+        .dividedBy(10 ** assetPrecision.value)
+        .toString();
     });
 
     /* functions */
@@ -343,6 +417,7 @@ export default defineComponent({
 
     return {
       StakingActions,
+      getTimeToString,
       isUnstakingAssetExist,
       isStakingAssetExist,
       unbondingBalances,

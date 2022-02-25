@@ -85,6 +85,7 @@
           <template v-if="isSwapComponent">
             <i18n-t
               v-if="getSwapPercent() < 100"
+              scope="global"
               tag="p"
               class="text-center px-4"
               keypath="components.txHandlingModal.notSwapped"
@@ -104,7 +105,13 @@
               </template>
             </i18n-t>
 
-            <i18n-t v-else tag="p" class="text-center px-4" keypath="components.txHandlingModal.received">
+            <i18n-t
+              v-else
+              scope="global"
+              tag="p"
+              class="text-center px-4"
+              keypath="components.txHandlingModal.received"
+            >
               <template #amount>
                 <span class="font-bold">
                   <AmountDisplay
@@ -177,6 +184,7 @@
               :context="isSwapComponent ? 'widget' : 'default'"
               :class="{ '-text-1': isSwapComponent }"
               :bordered="isSwapComponent"
+              :is-receipt="true"
               :fees="state.context.fees.totals[lastResult.stepIndex]"
               class="border-b"
             />
@@ -219,7 +227,7 @@
 
         <template v-if="transaction.name === 'swap'">
           <Button variant="secondary" @click="goToSend">
-            <i18n-t keypath="context.transactions.controls.sendAmount">
+            <i18n-t scope="global" keypath="context.transactions.controls.sendAmount">
               <template #amount>
                 <AmountDisplay
                   :amount="{
