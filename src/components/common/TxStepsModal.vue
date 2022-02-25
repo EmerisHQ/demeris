@@ -419,6 +419,8 @@ export default defineComponent({
       router.go(-1);
     };
     const fees = ref([]);
+
+    const refProps = toRefs(props);
     const connectModalOpen = ref(false);
     const retry = ref(false);
     const hasMore = ref(false);
@@ -520,12 +522,14 @@ export default defineComponent({
     watch(
       () => refProps.data.value,
       async (newData) => {
-        chainsStatus.value = await chainStatusForSteps(props.data);
-        fees.value = await Promise.all(
-          (newData as Step[])?.map(async (step) => {
-            return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
-          }),
-        );
+        if (newData) {
+          chainsStatus.value = await chainStatusForSteps(newData);
+          fees.value = await Promise.all(
+            (newData as Step[])?.map(async (step) => {
+              return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+            }),
+          );
+        }
       },
     );
     const txToResolve = ref({});
@@ -1088,8 +1092,6 @@ export default defineComponent({
     const emitHandler = (event) => {
       emit(event);
     };
-
-    const refProps = toRefs(props);
 
     watch(
       refProps,
