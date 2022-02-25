@@ -1,6 +1,6 @@
 name: Generate demo-account.js
 
-on: workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   demo-accounts:
