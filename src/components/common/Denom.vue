@@ -4,10 +4,8 @@
 <script lang="ts">
 import { defineComponent, ref, toRefs, watch } from 'vue';
 
-import useDenoms from '@/composables/useDenoms';
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
-import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 export default defineComponent({
