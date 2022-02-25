@@ -7,7 +7,8 @@
 
     <section
       v-else
-      class="transactions-center w-96 fixed bottom-0 right-8 z-50 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg"
+      class="transactions-center w-96 fixed bottom-0 right-8 bg-surface dark:bg-fg-solid shadow-dropdown rounded-t-lg"
+      :class="{ 'z-50': !transactionsStore.isRemoveModalOpen }"
     >
       <Notifications
         :messages="state.notifications"
@@ -40,20 +41,7 @@
         </li>
 
         <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
-          <Button
-            v-tippy="{
-              placement: 'left',
-              trigger: service.state.done ? 'manual' : 'mouseenter focus',
-            }"
-            size="none"
-            class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
-            :content="$t('context.transactions.widget.removeItem')"
-            rounded
-            @click="removeTransactionItem(id)"
-          >
-            <Icon name="CloseIcon" :icon-size="0.85" />
-          </Button>
-          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(id)" />
+          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(id)" @remove="onRemoveTransactionItem(id)" />
         </li>
       </ul>
 
@@ -99,8 +87,8 @@
   </teleport>
 </template>
 
-<script lang="ts" setup>
-import { computed, reactive } from '@vue/reactivity';
+<script lang="tsx" setup>
+import { computed, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -121,7 +109,7 @@ const state = reactive({
 
 const canShownCenter = computed(() => {
   if (pendingTransactions.value.length || state.notifications.length) {
-    if (isModalOpen.value || transactionsStore.isPendingModalOpen || transactionsStore.isRemoveModalOpen) {
+    if (isModalOpen.value || transactionsStore.isPendingModalOpen) {
       return false;
     }
     return true;
@@ -168,7 +156,7 @@ const removeNotification = (id: string) => (state.notifications = state.notifica
 
 const toggleViewAll = () => (state.viewAll = !state.viewAll);
 
-const removeTransactionItem = (id: string) => {
+const onRemoveTransactionItem = (id: string) => {
   state.notifications.push({ message: 'Transaction item removed', id });
   transactionsStore.removeTransactionFromPending(id);
 };
@@ -179,7 +167,7 @@ const undoRemoval = (id: string) => {
 };
 
 const showDetails = (id: string) => {
-  removeNotification(id);
+  transactionsStore.setCurrentId(id);
   transactionsStore.toggleRemoveModal();
 };
 

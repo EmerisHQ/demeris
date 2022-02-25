@@ -1,5 +1,19 @@
 <template>
-  <button class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
+  <Button
+    v-tippy="{
+      placement: 'left',
+      trigger: !state.done ? 'mouseenter focus' : 'manual',
+    }"
+    size="none"
+    class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
+    :content="$t('context.transactions.widget.removeItem')"
+    rounded
+    @click="removeTransactionItem"
+  >
+    <Icon name="CloseIcon" :icon-size="0.85" />
+  </Button>
+
+  <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
@@ -173,6 +187,9 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['remove']);
+const removeTransactionItem = () => emit('remove');
+
 const globalStore = useStore();
 const { service } = toRefs(props);
 const { state, send } = useActor(service);
@@ -218,4 +235,10 @@ const getIconAssets = () => {
 
   return assets;
 };
+</script>
+
+<script lang="ts">
+export default {
+  inheritAttrs: false,
+}
 </script>
