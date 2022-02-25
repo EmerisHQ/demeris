@@ -40,7 +40,7 @@ import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
-import { Step, UndelegateForm } from '@/types/actions';
+import { Step, UnstakeForm } from '@/types/actions';
 
 import UnstakeFormAmountInput from './UnstakeFormAmountInput.vue';
 
@@ -71,7 +71,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
 
-    const form = inject<UndelegateForm>('unstakeForm');
+    const form = inject<UnstakeForm>('unstakeForm');
     const { getStakingRewardsByBaseDenom } = useStaking();
     const propsRef = toRefs(props);
     const fees = ref({});

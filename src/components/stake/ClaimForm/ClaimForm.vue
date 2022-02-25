@@ -74,7 +74,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getStakingRewardsByBaseDenom, getValidatorMoniker, getChainNameByBaseDenom } = useStaking();
+    const { getStakingRewardsByBaseDenom, getValidatorMoniker } = useStaking();
 
     const propsRef = toRefs(props);
     const chain = computed(() => {
@@ -97,7 +97,7 @@ export default defineComponent({
     };
     onMounted(async () => {
       const rewardsData = (await getStakingRewardsByBaseDenom(baseDenom)) as any;
-      const chainName = await getChainNameByBaseDenom(baseDenom);
+      const chainName = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom });
       const rewardsDataWithMoniker = rewardsData.rewards.map((reward) => {
         reward.moniker = getValidatorMoniker(reward.validator_address, propsRef.validators.value);
         return reward;

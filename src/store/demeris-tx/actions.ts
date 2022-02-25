@@ -148,7 +148,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
 
   [DemerisActionTypes.RESET_STATE]({ commit }) {
-    console.log('reset_state called');
     commit(DemerisMutationTypes.RESET_STATE);
   },
 

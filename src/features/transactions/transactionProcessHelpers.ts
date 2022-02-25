@@ -5,9 +5,9 @@ import { Sender } from 'xstate';
 import { GlobalDemerisGetterTypes } from '@/store';
 import {
   CreatePoolData,
-  DelegateData,
   IBCBackwardsData,
   IBCForwardsData,
+  StakeData,
   Step,
   StepTransaction,
   SwapData,
@@ -57,7 +57,7 @@ export const getSourceChainFromTransaction = (transaction: StepTransaction): str
     case 'ibc_backward':
       return (transaction.data as IBCForwardsData).from_chain;
     case 'stake':
-      return (transaction.data as DelegateData[])[0].chain_name;
+      return (transaction.data as StakeData[])[0].chain_name;
     default:
       return dexChain;
   }

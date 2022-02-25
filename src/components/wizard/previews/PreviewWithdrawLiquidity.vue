@@ -69,7 +69,6 @@ import ChainName from '@/components/common/ChainName.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import { List, ListItem } from '@/components/ui/List';
 import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
 import { GlobalDemerisGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
@@ -104,11 +103,9 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { getPoolById } = usePools();
-
     const data = computed(() => {
       if (props.response) {
-        const pool = getPoolById(props.response.pool_id);
+        const { pool } = usePool(props.response.pool_id);
         const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
         const precisions = {
           coinA:
