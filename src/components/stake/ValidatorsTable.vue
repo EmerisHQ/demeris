@@ -185,8 +185,9 @@
                   @click.stop="
                     () => {
                       if (
-                        !disabledList.includes(validator.operator_address) ||
-                        currentlyEditing == validator.operator_address
+                        (!disabledList.includes(validator.operator_address) ||
+                          currentlyEditing == validator.operator_address) &&
+                        !validator.jailed
                       ) {
                         selectValidator(validator);
                       }
@@ -206,8 +207,9 @@
           v-if="detailedValidator"
           :validator="detailedValidator"
           :disabled="
-            disabledList.includes(detailedValidator.operator_address) &&
-              currentlyEditing != detailedValidator.operator_address
+            detailedValidator.jailed ||
+              (disabledList.includes(detailedValidator.operator_address) &&
+                currentlyEditing != detailedValidator.operator_address)
           "
           @close="
             () => {
@@ -216,8 +218,9 @@
           "
           @clicked="
             if (
-              !disabledList.includes(detailedValidator.operator_address) ||
-              currentlyEditing != detailedValidator.operator_address
+              (!disabledList.includes(detailedValidator.operator_address) ||
+                currentlyEditing == detailedValidator.operator_address) &&
+              !detailedValidator.jailed
             ) {
               selectValidator(detailedValidator);
             }
@@ -314,7 +317,7 @@ export default defineComponent({
     const filteredAndSortedValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
       return propsRef.validatorList.value
-        .filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1)
+        .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
         .sort((a, b) => {
           switch (sortBy.value) {
             case 'power':
