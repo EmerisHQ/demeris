@@ -110,9 +110,9 @@
       "prettier --write"
     ],
     "*.{js,ts,tsx,vue}": [
-      "prettier --write",
       "eslint --fix",
-      "npm run lint"
+      "npm run lint",
+      "prettier --write"
     ]
   },
   "simple-git-hooks": {
