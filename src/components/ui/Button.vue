@@ -21,8 +21,11 @@
         { 'w-full': fullWidth },
         { 'rounded-full': rounded },
         {
-          'bg-surface shadow-button transform hover:-translate-y-px focus:-translate-y-px focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
+          'bg-surface shadow-button transform focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
             variant !== 'link',
+        },
+        {
+          'focus:-translate-y-px hover:-translate-y-px': animate,
         },
         { 'theme-inverse dark:theme-inverse text-text': variant === 'primary' },
         { 'relative inline': variant === 'link' },
@@ -31,19 +34,7 @@
         disabled ? 'text-inactive pointer-events-none cursor-default' : 'text-current cursor-pointer',
       ]"
       :disabled="disabled"
-      class="
-        button
-        relative
-        font-medium
-        border-none
-        focus:outline-none
-        active:opacity-70 active:transform-none
-        transition
-        cursor-pointer
-        select-none
-        overflow-ellipsis
-        whitespace-nowrap
-      "
+      class="button relative font-medium border-none focus:outline-none active:opacity-70 active:transform-none transition cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
       @click="clickFunction?.($event), emit('click', $event)"
     >
       <div v-show="status === 'loading'" class="spinner absolute inset-0 flex items-center justify-center">
@@ -83,6 +74,7 @@ export default defineComponent({
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
     disabled: { type: Boolean, default: false },
+    animate: { type: Boolean, default: true },
   },
   emits: ['click'],
   setup(props, { emit }) {

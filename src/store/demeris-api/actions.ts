@@ -789,13 +789,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
 
-      // if (response.data.eligibilityCheckEndpoint) {
+      const chain_name = response.data.chainName === 'Lum Network' ? 'lum' : response.data.chainName.toLowerCase();
+      const ownAddress = await getOwnAddress({ chain_name });
+
+      console.log('ownAddress', response.data.chainName.toLowerCase(), ownAddress);
+
+      // if (response.data.eligibilityCheckEndpoint && ownAddress) {
       //   const eligibilityEndpoint = response.data.eligibilityCheckEndpoint.replace('<address>', '');
-
-      //   const eligibilityCheckResponse = await axios.get(
-      //     `${eligibilityEndpoint}cosmos1nj4g0jnz0mcvkntjfa6srgmvymzj3pdl33t26e`,
-      //   );
-
+      //   const eligibilityCheckResponse = await axios.get(`${eligibilityEndpoint}${ownAddress}`);
       //   console.log('checking here in action', eligibilityCheckResponse);
       // }
 
