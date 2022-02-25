@@ -3,7 +3,6 @@ name: static demo-account.js
 on:
   # TODO: Before merge, change branch to production
   workflow_dispatch:
-    branches: [ develop, feat/943-generate-static-demo-account-js ]
   push:
     branches: [ develop, feat/943-generate-static-demo-account-js ]
   pull_request:
