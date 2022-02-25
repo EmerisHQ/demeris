@@ -1,7 +1,8 @@
 <template>
   <div
     class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
-    :class="[`circle-symbol--${variant}`, `circle-symbol--${size}`]"
+    :style="[customSize && `height:${customSize}px;width:${customSize}px`]"
+    :class="[customSize === 0 && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
     <CircleSymbolStatus
       v-if="assetConfig?.chain_name"
@@ -41,7 +42,7 @@
         :style="ringStyle"
       />
       <img
-        v-if="glow"
+        v-if="glow && customSize === 0"
         alt="Logo glow"
         :src="assetConfig.logo"
         class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter"
@@ -80,6 +81,9 @@
 </template>
 
 <script lang="ts">
+/*
+ * when customSize is set glow is forced to false
+ */
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -131,6 +135,10 @@ export default defineComponent({
     size: {
       type: String as PropType<CircleSymbolSize>,
       default: 'md',
+    },
+    customSize: {
+      type: Number,
+      default: 0,
     },
     logo: {
       type: Boolean,

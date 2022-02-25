@@ -93,7 +93,7 @@ export const messages = {
     },
     components: {
       stakingBanner: {
-        title: 'Earn ATOM',
+        title: 'Earn',
         text: 'Earn passive income with an average',
         textAPY: 'APY',
         cta: 'Start staking ->',

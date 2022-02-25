@@ -51,7 +51,6 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap />
         <Intro class="mt-4" />
-        <StakingBanner class="mt-4" />
       </aside>
     </div>
   </AppLayout>
@@ -68,7 +67,6 @@ import AssetsTable from '@/components/assets/AssetsTable';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import Intro from '@/components/common/Intro.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import StakingBanner from '@/components/common/StakingBanner.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import Pools from '@/components/liquidity/Pools.vue';
 import LiquiditySwap from '@/components/liquidity/Swap.vue';
@@ -83,7 +81,6 @@ import { featureRunning } from '@/utils/FeatureManager';
 export default {
   name: 'Portfolio',
   components: {
-    StakingBanner,
     AppLayout,
     Button,
     BuyCryptoBanner,
