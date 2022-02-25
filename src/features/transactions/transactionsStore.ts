@@ -170,7 +170,7 @@ export const useTransactionsStore = defineStore('transactions', {
         gasLimit: globalStore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
       });
 
-      service.subscribe(function (state) {
+      service.subscribe((state) => {
         if (state.matches('signing.active')) {
           Object.values(allTransactions()).forEach((itemService: TransactionProcessService) => {
             if (['receipt', 'review'].some(itemService.state.matches)) {

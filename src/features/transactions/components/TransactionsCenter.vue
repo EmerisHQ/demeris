@@ -17,6 +17,7 @@
         :button2-label="$t('context.transactions.controls.details')"
         :clear-all-label="$t('context.transactions.controls.clearAll')"
         :show-less-label="$t('context.transactions.controls.showLess')"
+        :auto-dismiss="!transactionsStore.isRemoveModalOpen"
         @on-update="state.notifications = $event"
         @on-button1-click="undoRemoval"
         @on-button2-click="showDetails"
@@ -41,7 +42,12 @@
         </li>
 
         <li v-for="[id, service] of pendingTransactions" :key="id" class="relative transition-all group hover:bg-fg">
-          <TransactionProcessItem class="py-4 px-6" :service="service" @click="selectItem(id)" @remove="onRemoveTransactionItem(id)" />
+          <TransactionProcessItem
+            class="py-4 px-6"
+            :service="service"
+            @click="selectItem(id)"
+            @remove="onRemoveTransactionItem(id)"
+          />
         </li>
       </ul>
 
@@ -69,6 +75,7 @@
       :step-id="transactionsStore.currentId"
       @close="closeModal"
       @previous="closeModal"
+      @undo="undoRemoval(transactionsStore.currentId)"
     />
 
     <Modal
@@ -157,7 +164,10 @@ const removeNotification = (id: string) => (state.notifications = state.notifica
 const toggleViewAll = () => (state.viewAll = !state.viewAll);
 
 const onRemoveTransactionItem = (id: string) => {
-  state.notifications.push({ message: 'Transaction item removed', id });
+  const service = transactionsStore.transactions[id];
+  const snapshot = service.getSnapshot();
+
+  state.notifications.push({ message: 'Transaction item removed', id, hideButton2: snapshot.done });
   transactionsStore.removeTransactionFromPending(id);
 };
 
@@ -175,9 +185,3 @@ const isModalOpen = computed(() => transactionsStore.isViewerModalOpen);
 const pendingTransactions = computed(() => Object.entries(transactionsStore.pending).slice(0, rowsLimit.value));
 const hasMore = computed(() => Object.entries(transactionsStore.pending).length > rowsLimit.value);
 </script>
-
-<style lang="postcss">
-.transactions-center__close-btn .button {
-  @apply w-6 h-6;
-}
-</style>

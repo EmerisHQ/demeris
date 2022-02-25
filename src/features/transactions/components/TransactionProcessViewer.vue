@@ -34,7 +34,7 @@
 
   <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
   <ModalPendingTransaction v-if="transactionsStore.isPendingModalOpen" />
-  <ModalRemove v-if="transactionsStore.isRemoveModalOpen" />
+  <ModalRemove v-if="transactionsStore.isRemoveModalOpen" @undo="emit('undo')" />
 </template>
 
 <script lang="ts" setup>
@@ -66,7 +66,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close', 'minimize', 'previous']);
+const emit = defineEmits(['close', 'minimize', 'previous', 'undo']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -90,8 +90,8 @@ const minimizeModal = () => {
   }
 };
 
-const closeModal = () => emits('close');
-const goBack = () => emits('previous');
+const closeModal = () => emit('close');
+const goBack = () => emit('previous');
 
 const removeTransactionAndClose = () => {
   closeModal();

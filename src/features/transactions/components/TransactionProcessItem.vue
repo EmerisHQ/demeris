@@ -154,6 +154,12 @@
   </button>
 </template>
 
+<script lang="ts">
+export default {
+  inheritAttrs: false,
+};
+</script>
+
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
 import { computed, PropType, toRefs } from 'vue';
@@ -237,8 +243,8 @@ const getIconAssets = () => {
 };
 </script>
 
-<script lang="ts">
-export default {
-  inheritAttrs: false,
+<style lang="postcss">
+.transactions-center__close-btn .button {
+  @apply w-6 h-6;
 }
-</script>
+</style>

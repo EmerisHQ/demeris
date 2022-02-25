@@ -10,6 +10,7 @@
             ? `context.transactions.remove.descriptionProcessing`
             : `context.transactions.remove.description`
         "
+        scope="global"
       >
         <template #chain>
           <ChainName :name="chainName" />
@@ -38,6 +39,7 @@ import {
 } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';
 
+const emit = defineEmits(['undo']);
 const transactionsStore = useTransactionsStore();
 
 const { actor, removeTransactionAndClose, minimizeModal } = inject(ProvideViewerKey);
@@ -47,6 +49,7 @@ const transaction = computed(() => getCurrentTransaction(state.value.context));
 const chainName = computed(() => getSourceChainFromTransaction(transaction.value));
 
 const onUndo = () => {
+  emit('undo');
   transactionsStore.closeRemoveModal();
   transactionsStore.setTransactionAsPending();
   minimizeModal();
