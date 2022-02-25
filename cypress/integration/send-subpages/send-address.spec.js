@@ -42,7 +42,7 @@ describe('Check availability of send/address subpage elements', function () {
 
     sendToAddresseSubpage.amountHeader().should('be.visible');
     sendToAddresseSubpage.continueButton().should('be.disabled');
-    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.inputAmountOfAssets().type('0.000001');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
     sendToAddresseSubpage.continueButton().click();
@@ -55,7 +55,7 @@ describe('Check availability of send/address subpage elements', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
 
     sendToAddresseSubpage.reviewHeader().should('be.visible');
-    sendToAddresseSubpage.confirnAndContinueButton().should('not.be.disabled');
+    sendToAddresseSubpage.confirmAndContinueButton().should('not.be.disabled');
   });
 
   function recipientFormGoThrough() {
@@ -75,7 +75,7 @@ describe('Check availability of send/address subpage elements', function () {
     let sendToAddresseSubpage = new SendToAddressSubpage();
     sendToAddresseSubpage.amountHeader().should('be.visible');
     sendToAddresseSubpage.continueButton().should('be.disabled');
-    sendToAddresseSubpage.inputAmountOfAssets().type('1');
+    sendToAddresseSubpage.inputAmountOfAssets().type('0.000001');
     sendToAddresseSubpage.continueButton().should('not.be.disabled');
     sendToAddresseSubpage.selectSlowTransactionFee();
     sendToAddresseSubpage.continueButton().click();

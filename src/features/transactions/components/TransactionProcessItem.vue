@@ -62,33 +62,50 @@
       </p>
 
       <p class="item-description -text-1 opacity-75">
-        <i18n-t v-if="state.matches('validating')" keypath="context.transactions.widget.description.validating" />
+        <i18n-t
+          v-if="state.matches('validating')"
+          scope="global"
+          keypath="context.transactions.widget.description.validating"
+        />
         <template v-else-if="state.matches('transacting') && transactionOffset">
           {{ $t('context.transactions.widget.description.transactingPartial', transactionOffset) }}
         </template>
         <i18n-t
           v-else-if="state.matches('transacting')"
+          scope="global"
           keypath="context.transactions.widget.description.transacting"
         />
-        <i18n-t v-else-if="state.matches('signing')" keypath="context.transactions.widget.description.signing" />
+        <i18n-t
+          v-else-if="state.matches('signing')"
+          scope="global"
+          keypath="context.transactions.widget.description.signing"
+        />
         <i18n-t
           v-else-if="state.matches('waitingPreviousTransaction')"
+          scope="global"
           keypath="context.transactions.widget.description.waitingPreviousTransaction"
         />
-        <i18n-t v-else-if="state.matches('success')" keypath="context.transactions.widget.description.success" />
+        <i18n-t
+          v-else-if="state.matches('success')"
+          scope="global"
+          keypath="context.transactions.widget.description.success"
+        />
         <i18n-t
           v-else-if="state.matches('failed.sign')"
+          scope="global"
           keypath="context.transactions.widget.description.failed.sign"
           tag="span"
           class="text-negative"
         />
         <i18n-t
           v-else-if="state.matches('failed.unknown')"
+          scope="global"
           keypath="context.transactions.widget.description.failed.unknown"
           tag="span"
         />
         <i18n-t
           v-else-if="state.matches('failed')"
+          scope="global"
           keypath="context.transactions.widget.description.failed.default"
           tag="span"
           class="text-negative"
@@ -96,7 +113,11 @@
         <template v-else-if="state.matches('review') && transactionOffset">
           {{ $t('context.transactions.widget.description.reviewPartial', transactionOffset) }}
         </template>
-        <i18n-t v-else-if="state.matches('review')" keypath="context.transactions.widget.description.review" />
+        <i18n-t
+          v-else-if="state.matches('review')"
+          scope="global"
+          keypath="context.transactions.widget.description.review"
+        />
         <template v-else-if="state.matches('receipt')">
           {{ $t('context.transactions.widget.description.receipt', transactionOffset) }}
         </template>

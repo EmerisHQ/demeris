@@ -38,7 +38,7 @@
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            <i18n-t keypath="components.stakeTable.lockUpAndEarnRewards">
+            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
               <template #ticker>
                 <Ticker :name="denom" />
               </template>
@@ -92,7 +92,9 @@
               </td>
               <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
               <td class="text-right font-medium bg-surface">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" /></div>
+                <div class="flex justify-end">
+                  +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                </div>
               </td>
               <td class="text-right rounded-r-xl bg-surface">
                <div class="flex justify-end">

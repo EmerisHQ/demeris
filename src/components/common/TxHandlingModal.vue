@@ -94,7 +94,7 @@
       <div v-if="status === 'complete'" class="status__detail-detail mt-4 leading-copy">
         <template v-if="tx.name == 'swap' || tx.name == 'partial-swap'">
           <span v-if="txResult?.swappedPercent !== 0">
-            <i18n-t keypath="components.txHandlingModal.received">
+            <i18n-t scope="global" keypath="components.txHandlingModal.received">
               <template #amount>
                 <span class="font-bold">
                   <AmountDisplay
@@ -112,7 +112,7 @@
             </i18n-t>
           </span>
           <div v-if="txResult?.swappedPercent < 100" style="margin: 1.6rem 0">
-            <i18n-t keypath="components.txHandlingModal.notSwapped">
+            <i18n-t scope="global" keypath="components.txHandlingModal.notSwapped">
               <template #amount>
                 <span class="font-bold">
                   <AmountDisplay
@@ -222,7 +222,7 @@
       </div>
       <div v-if="status === 'failed'" class="mx-auto max-w-sm leading-copy text-muted mt-2 mb-8">
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
-          <i18n-t keypath="components.txHandlingModal.notTransferredAtoB">
+          <i18n-t scope="global" keypath="components.txHandlingModal.notTransferredAtoB">
             <template #amount>
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
             </template>
@@ -235,7 +235,7 @@
           </i18n-t>
         </template>
         <template v-if="tx.name == 'transfer'">
-          <i18n-t keypath="components.txHandlingModal.notTransferred">
+          <i18n-t scope="global" keypath="components.txHandlingModal.notTransferred">
             <template #amount>
               <AmountDisplay :amount="{ amount: tx.data.amount.amount, denom: getDenom(tx.data.amount.denom) }" />
             </template>
@@ -245,7 +245,7 @@
           </i18n-t>
         </template>
         <template v-if="tx.name == 'swap'">
-          <i18n-t keypath="components.txHandlingModal.failedSwap">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedSwap">
             <template #amount>
               <AmountDisplay :amount="{ amount: tx.data.from.amount, denom: getDenom(tx.data.from.denom) }" />
             </template>
@@ -255,7 +255,7 @@
           </i18n-t>
         </template>
         <template v-if="tx.name == 'addliquidity'">
-          <i18n-t keypath="components.txHandlingModal.failedAddLiquidity">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedAddLiquidity">
             <template #denomA> <Denom :name="getDenom(tx.data.coinA.denom)" /> &middot; </template>
             <template #denomB>
               <Denom :name="getDenom(tx.data.coinB.denom)" />
@@ -263,7 +263,7 @@
           </i18n-t>
         </template>
         <template v-if="tx.name == 'createpool'">
-          <i18n-t keypath="components.txHandlingModal.failedCreatePool">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedCreatePool">
             <template #denomA>
               <Denom :name="getDenom(tx.data.coinA.denom)" />
             </template>
@@ -273,7 +273,7 @@
           </i18n-t>
         </template>
         <template v-if="tx.name == 'withdrawliquidity'">
-          <i18n-t keypath="components.txHandlingModal.failedWithdrawLiquidity">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedWithdrawLiquidity">
             <template #denom>
               <Denom :name="getDenom(tx.data.poolCoin.denom)" />
             </template>
