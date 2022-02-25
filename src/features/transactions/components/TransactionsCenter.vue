@@ -94,7 +94,7 @@
   </teleport>
 </template>
 
-<script lang="tsx" setup>
+<script lang="ts" setup>
 import { computed, reactive } from 'vue';
 
 import Button from '@/components/ui/Button.vue';
