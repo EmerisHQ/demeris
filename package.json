@@ -7,6 +7,7 @@
     "serve": "vue-cli-service serve",
     "test:unit": "jest",
     "lint": "vue-cli-service lint",
+    "lint:fix": "vue-cli-service lint --fix",
     "build": "NODE_ENV=development vue-cli-service build --mode development",
     "build:production": "vue-cli-service build --mode production",
     "prepare": "simple-git-hooks"
@@ -110,7 +111,7 @@
     ],
     "*.{js,ts,tsx,vue}": [
       "prettier --write",
-      "npm run lint"
+      "npm run lint:fix"
     ]
   },
   "simple-git-hooks": {
