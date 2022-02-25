@@ -92,6 +92,12 @@ export const messages = {
       },
     },
     components: {
+      stakingBanner: {
+        title: 'Earn ATOM',
+        text: 'Earn passive income with an average',
+        textAPY: 'APY',
+        cta: 'Start staking ->',
+      },
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
         appearsDown: 'Emeris connection to {chain} appears to be down',
