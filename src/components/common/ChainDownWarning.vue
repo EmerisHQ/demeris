@@ -2,7 +2,7 @@
   <tippy>
     <Icon name="InformationIcon" class="text-warning" :icon-size="iconSize" />
     <template #content>
-      <i18n-t :keypath="i18nPath">
+      <i18n-t scope="global" :keypath="i18nPath">
         <template #chain>
           <ChainName :name="chain" />
         </template>

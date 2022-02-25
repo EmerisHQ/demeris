@@ -9,7 +9,6 @@ on:
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
-  VUE_APP_FEATURE_USE_DEV: true
 
 jobs:
   unit:
