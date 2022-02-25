@@ -26,7 +26,7 @@
               @row-click="openAssetPage"
             />
           </template>
-          <SkeletonLoader v-else width="100%" height="300px" />
+          <SkeletonLoader v-else width="100%" height="300px" class="mb-3" />
           <BuyCryptoBanner v-if="!balances.length" size="large" />
         </section>
         <section class="mt-16">
