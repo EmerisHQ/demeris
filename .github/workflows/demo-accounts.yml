@@ -1,12 +1,14 @@
 name: static demo-account.js
 
-on:
-  # TODO: Before merge, change branch to production
+on: 
   workflow_dispatch:
-  push:
-    branches: [ develop, feat/943-generate-static-demo-account-js ]
-  pull_request:
-    branches: [ develop, feat/943-generate-static-demo-account-js ]
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'  
 
 jobs:
   demo-accounts:
