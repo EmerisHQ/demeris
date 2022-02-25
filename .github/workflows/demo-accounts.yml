@@ -2,6 +2,9 @@ name: static demo-account.js
 
 on:
   workflow_dispatch:
+    branches:
+      - develop
+      - feat/943-generate-static-demo-account-js
 
 jobs:
   demo-accounts:
