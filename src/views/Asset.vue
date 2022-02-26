@@ -240,7 +240,7 @@ export default defineComponent({
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
-    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+    if (!assetConfig.value) {
       router.push('/');
     }
 
