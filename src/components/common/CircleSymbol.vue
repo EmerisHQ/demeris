@@ -1,8 +1,8 @@
 <template>
   <div
     class="circle-symbol relative flex items-center justify-center flex-shrink-0 rounded-full"
-    :style="[customSize && `height:${customSize}px;width:${customSize}px`]"
-    :class="[customSize === 0 && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
+    :style="[customSize && `height:${customSize};width:${customSize}`]"
+    :class="[customSize === '' && `circle-symbol--${size}`, `circle-symbol--${variant}`]"
   >
     <CircleSymbolStatus
       v-if="assetConfig?.chain_name"
@@ -42,7 +42,7 @@
         :style="ringStyle"
       />
       <img
-        v-if="glow && customSize === 0"
+        v-if="glow && customSize === ''"
         alt="Logo glow"
         :src="assetConfig.logo"
         class="circle-symbol__logo-glow absolute w-full h-full opacity-50 filter"
@@ -137,8 +137,8 @@ export default defineComponent({
       default: 'md',
     },
     customSize: {
-      type: Number,
-      default: 0,
+      type: String,
+      default: '',
     },
     logo: {
       type: Boolean,

@@ -96,7 +96,7 @@ export const messages = {
         title: 'Earn',
         text: 'Earn passive income with an average',
         textAPY: 'APY',
-        cta: 'Start staking ->',
+        cta: 'Start staking',
       },
       addLiquidity: {
         navigation: {
