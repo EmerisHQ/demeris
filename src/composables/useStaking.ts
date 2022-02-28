@@ -1,9 +1,3 @@
-// import axios from 'axios';
-// import { computed, ref, watch } from 'vue';
-
-//TODO : add type for validator list
-type ValidatorStatus = 1 | 2 | 3; // Possibly turn into enum?
-
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { keyHashfromAddress } from '@/utils/basic';
 import { useStore } from '@/utils/useStore';
@@ -11,7 +5,7 @@ import { useStore } from '@/utils/useStore';
 export default function useStaking() {
   const store = useStore();
 
-  const getValidatorsByBaseDenom = async (base_denom: string, status: ValidatorStatus[] = [3]) => {
+  const getValidatorsByBaseDenom = async (base_denom: string) => {
     //TODO: have our own curated DB for validator list
     const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
