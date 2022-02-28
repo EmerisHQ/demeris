@@ -178,7 +178,7 @@ export interface Actions {
     { subscribe }: DemerisActionGetGitAirdropsListParams,
   ): Promise<any>;
   [DemerisActionTypes.GET_AIRDROPS](
-    { commit }: ActionContext<State, RootState>,
+    { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
   [DemerisActionTypes.SET_SELECTED_AIRDROP](
@@ -864,11 +864,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response: any = await axios.get(
+      const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+
       commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });

@@ -342,8 +342,7 @@ export type WithdrawLiquidityEndBlockResponse = {
 };
 
 export type AirdropEligibilityCriteria = {
-  Criteria: number;
-  desc: string;
+  description: string;
 };
 
 export type AirdropClaimAction = {

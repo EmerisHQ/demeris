@@ -3,7 +3,10 @@
     <p class="-text-1 text-muted mb-4">Current Balance</p>
     <div class="flex justify-between items-center">
       <div class="w-10 h-10 mr-4">
-        <img :src="selectedAirdrop.tokenIcon" alt="Airdrop Logo" />
+        <img v-if="selectedAirdrop.tokenIcon" :src="selectedAirdrop.tokenIcon" alt="Airdrop Logo" />
+        <div v-else class="w-10 h-10 bg-text text-inverse rounded-full text-center pt-1.5 text-1">
+          {{ selectedAirdrop.chainName.slice(0, 1) }}
+        </div>
       </div>
       <div class="w-10/12">
         <p class="font-medium">$1,234.56</p>
