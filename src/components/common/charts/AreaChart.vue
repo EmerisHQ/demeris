@@ -90,7 +90,7 @@ export default defineComponent({
     const chartData = ref({
       options: {
         theme: {
-          mode: 'dark',
+          mode: theme.value,
         },
         tooltip: {
           enabled: true,

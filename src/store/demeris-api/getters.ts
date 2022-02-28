@@ -78,6 +78,7 @@ export type Getters = {
   [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
   [GetterTypes.getTokenId](state: State): string | null;
   [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
+  [GetterTypes.getChainNameByBaseDenom](state: State): { (params: API.APIRequests): string };
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisAPI'>;
@@ -286,24 +287,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
     );
   },
   [GetterTypes.getVerifyTrace]: (state) => (params) => {
-    if (
-      state.chains[(params as API.VerifyTraceReq).chain_name] &&
-      state.chains[(params as API.VerifyTraceReq).chain_name].verifiedTraces
-    ) {
-      return (
-        state.chains[(params as API.VerifyTraceReq).chain_name]?.verifiedTraces[(params as API.VerifyTraceReq).hash] ??
-        null
-      );
+    if (state.traces[(params as API.VerifyTraceReq).chain_name]) {
+      return state.traces[(params as API.VerifyTraceReq).chain_name][(params as API.VerifyTraceReq).hash] ?? null;
     } else {
       return null;
     }
   },
   [GetterTypes.getAllVerifiedTraces]: (state) => {
     let result = {};
-    for (const chain of Object.values(state.chains)) {
+    for (const traces of Object.values(state.traces)) {
       result = {
         ...result,
-        ...chain.verifiedTraces,
+        ...traces,
       };
     }
     return result;
@@ -356,5 +351,10 @@ export const getters: GetterTree<State, RootState> & Getters = {
     } else {
       return state.chains[(params as API.ChainReq).chain_name]?.status ?? false;
     }
+  },
+  [GetterTypes.getChainNameByBaseDenom]: (state) => (params) => {
+    return Object.values(state.chains)?.find((chain) => {
+      return chain.denoms?.find((denom) => denom.name === (params as API.DenomReq).denom);
+    })?.chain_name;
   },
 };
