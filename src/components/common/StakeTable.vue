@@ -15,9 +15,7 @@
         >
           {{ $t('components.stakeTable.unstaking') }}
           <div class="text-0 font-normal text-muted">
-            <div class="text-0 font-normal text-muted">
-              {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
-            </div>
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
           </div>
         </h2>
       </div>
@@ -194,14 +192,20 @@
   </div>
 </template>
 <script lang="tsx">
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -210,9 +214,6 @@ import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
-
-import SkeletonLoader from './loaders/SkeletonLoader.vue';
-import ValidatorBadge from './ValidatorBadge.vue';
 
 export default defineComponent({
   components: {
@@ -231,6 +232,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    dayjs.extend(relativeTime);
     const { useDenom } = useDenoms();
     const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
       useStaking();
@@ -266,42 +268,49 @@ export default defineComponent({
     const assetPrecision = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: props.denom,
+          name: propsRef.denom.value,
         }) ?? '6'
       );
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
+    const getTimeToString = (isodate: string) => {
+      return dayjs().to(dayjs(isodate));
+    };
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+          denom: propsRef.denom.value,
+        }),
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
-      return (
-        Math.trunc(
-          (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
-            10 ** assetPrecision.value +
-            (totalRewardsDisplayAmount.value ?? 0)) *
-            10 ** assetPrecision.value,
-        ) /
-        10 ** assetPrecision.value
+      const total = new BigNumber(totalRewardsAmount.value).plus(
+        stakingBalances.value.reduce(
+          (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
+          new BigNumber(0),
+        ),
       );
+      if (total.isLessThan(1)) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      } else {
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
+        return totalDisplay.toFixed(assetPrecision.value);
+      }
     });
     const isStakingAssetExist = computed(() => {
       return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
-      // TODO: implement unstaking asset check
-      return false;
+      return unbondingBalances.value.length > 0;
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
@@ -310,11 +319,22 @@ export default defineComponent({
       return parseFloat(stakingRewardsData.value?.total ?? 0);
     });
     const totalRewardsDisplayAmount = computed(() => {
-      return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
+      if (totalRewardsAmount.value < 1) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      }
+      return new BigNumber(totalRewardsAmount.value ?? 0)
+        .dividedBy(10 ** assetPrecision.value)
+        .toFixed(assetPrecision.value);
     });
     const unstakingAssetValue = computed(() => {
-      //TODO
-      return 77;
+      return unbondingBalances.value
+        .map((x) => x.entries)
+        .flat()
+        .reduce((acc, entry) => {
+          return acc.plus(new BigNumber(entry.balance));
+        }, new BigNumber(0))
+        .dividedBy(10 ** assetPrecision.value)
+        .toString();
     });
 
     /* functions */
@@ -370,6 +390,7 @@ export default defineComponent({
 
     return {
       StakingActions,
+      getTimeToString,
       isUnstakingAssetExist,
       isStakingAssetExist,
       unbondingBalances,
