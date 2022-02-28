@@ -90,7 +90,7 @@ export default defineComponent({
     const chartData = ref({
       options: {
         theme: {
-          mode: theme.value,
+          mode: 'dark',
         },
         tooltip: {
           enabled: true,
@@ -102,7 +102,7 @@ export default defineComponent({
               return `$${value}`;
             },
             title: {
-              formatter: (seriesName) => '',
+              formatter: () => '',
             },
           },
           marker: {
@@ -201,14 +201,6 @@ export default defineComponent({
         percent: priceDiffPercent.value,
       });
     };
-
-    watch(
-      () => [theme.value],
-      () => {
-        chartData.value.options.theme.mode = theme.value;
-        emit('filterChanged', activeFilterItem.value);
-      },
-    );
 
     watch(
       () => [props.dataStream, props.variant],
