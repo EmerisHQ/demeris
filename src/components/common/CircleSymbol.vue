@@ -90,6 +90,7 @@ import { useStore } from 'vuex';
 type CircleSymbolVariant = 'asset' | 'chain';
 type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
+import gdexSvg from '@/assets/svg/symbols/gdex.svg';
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
@@ -265,7 +266,7 @@ export default defineComponent({
 
     const symbolImage = computed(() => {
       if (isPoolCoin.value) {
-        return require(`@/assets/svg/symbols/gdex.svg`);
+        return gdexSvg;
       }
 
       return undefined;

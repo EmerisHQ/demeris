@@ -216,7 +216,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         await window.keplr.enable(dexchain.node_info.chain_id);
         keyData = await window.keplr.getKey(dexchain.node_info.chain_id);
       } else {
-        signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+        signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
           prefix: dexchain.node_info.bech32_config.main_prefix,
           hdPaths: [stringToPath(dexchain.derivation_path)],
         });
@@ -242,7 +242,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
           const otherKey = await window.keplr.getKey(chain.node_info.chain_id);
           commit(DemerisMutationTypes.ADD_KEPLR_KEYHASH, keyHashfromAddress(otherKey.bech32Address));
         } else {
-          const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+          const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
             prefix: chain.node_info.bech32_config.main_prefix,
             hdPaths: [stringToPath(chain.derivation_path)],
           });

@@ -54,7 +54,7 @@ export async function getOwnAddress({ chain_name }) {
   } else {
     const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name });
     if (isCypress) {
-      const signer = await Secp256k1HdWallet.fromMnemonic(process.env.VUE_APP_EMERIS_MNEMONIC, {
+      const signer = await Secp256k1HdWallet.fromMnemonic(import.meta.env.VITE_EMERIS_MNEMONIC, {
         prefix: chain.node_info.bech32_config.main_prefix,
         hdPaths: [stringToPath(chain.derivation_path)],
       });

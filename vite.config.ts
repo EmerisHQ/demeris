@@ -20,4 +20,11 @@ export default defineConfig({
   server: {
     port: 8080,
   },
+  css: {
+    preprocessorOptions: {
+      less: {
+        rootpath: 'http://localhost:8080/src',
+      },
+    },
+  },
 });
