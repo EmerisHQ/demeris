@@ -70,6 +70,8 @@ export type Getters = {
   [GetterTypes.getPrimaryChannel](state: State): { (params: API.APIRequests): string | null };
   [GetterTypes.getPrimaryChannels](state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
   [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
+  [GetterTypes.getAirdrops](state: State): API.Airdrop[] | null;
+  [GetterTypes.getSelectedAirdrop](state: State): API.Airdrop | null;
   [GetterTypes.getTokenId](state: State): string | null;
   [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
   [GetterTypes.getChainNameByBaseDenom](state: State): { (params: API.APIRequests): string };
@@ -321,6 +323,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getTokenPrices]: (state) => {
     return state.tokenPrices;
+  },
+  [GetterTypes.getAirdrops]: (state) => {
+    return state.airdrops;
+  },
+  [GetterTypes.getSelectedAirdrop]: (state) => {
+    return state.selectedAirdrop;
   },
   [GetterTypes.getTokenId]: (state) => {
     return state.tokenId;
