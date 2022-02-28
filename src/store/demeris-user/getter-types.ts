@@ -17,7 +17,6 @@ export enum GetterTypes {
   getSlippagePerc = 'getSlippagePerc',
   theme = 'theme',
   getPreferredGasPriceLevel = 'getPreferredGasPriceLevel',
-  getOwnAddress = 'getOwnAddress',
 }
 export enum GlobalGetterTypes {
   getKeplr = 'demerisUSER/getKeplr',
@@ -38,5 +37,4 @@ export enum GlobalGetterTypes {
   getSlippagePerc = 'demerisUSER/getSlippagePerc',
   theme = 'demerisUSER/theme',
   getPreferredGasPriceLevel = 'demerisUSER/getPreferredGasPriceLevel',
-  getOwnAddress = 'demerisUSER/getOwnAddress',
 }
