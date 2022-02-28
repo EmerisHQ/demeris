@@ -2,7 +2,7 @@
   <section
     class="denom-select flex flex-col items-center rounded-2xl shadow-panel bg-surface w-96"
     :class="{
-      'py-6 px-8': size === 'md',
+      'p-8': size === 'md',
     }"
   >
     <Button
