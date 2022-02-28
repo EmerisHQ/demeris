@@ -789,17 +789,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
 
-      const chain_name = response.data.chainName === 'Lum Network' ? 'lum' : response.data.chainName.toLowerCase();
-      const ownAddress = await getOwnAddress({ chain_name });
-
-      console.log('ownAddress', response.data.chainName.toLowerCase(), ownAddress);
-
-      // if (response.data.eligibilityCheckEndpoint && ownAddress) {
-      //   const eligibilityEndpoint = response.data.eligibilityCheckEndpoint.replace('<address>', '');
-      //   const eligibilityCheckResponse = await axios.get(`${eligibilityEndpoint}${ownAddress}`);
-      //   console.log('checking here in action', eligibilityCheckResponse);
-      // }
-
       commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
