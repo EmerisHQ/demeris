@@ -218,6 +218,164 @@ export default defineComponent({
     //SETTINGS-START
     const priceUpdateTerm = 10; //price update term (sec)
     //SETTINGS-END
+
+    const data = reactive({
+      //conditional-text-start
+      buttonName: computed(() => {
+        if (data.isBothSelected) {
+          if (!data.selectedPoolData) {
+            return t('components.swap.noPool');
+          } else if (data.isNotEnoughLiquidity) {
+            return t('components.swap.swapLimit');
+          } else if (data.isOver) {
+            return t('components.swap.insufficentFunds');
+          } else if (!dexStatus.value) {
+            return t('components.swap.unAvailable');
+          } else {
+            if (data.isPriceChanged) {
+              return t('components.swap.updatePrice');
+            } else {
+              if (data.buttonStatus === 'active' && !data.buttonDisabled) {
+                return t('components.swap.review');
+              }
+              return t('components.swap.swap');
+            }
+          }
+        } else {
+          return t('components.swap.swap');
+        }
+      }),
+      buttonTooltipText: computed(() => {
+        if (data.isNotEnoughLiquidity) {
+          return t('components.swap.tooltipSwapLimit');
+        } else if (data.isBothSelected) {
+          if (!data.selectedPoolData) {
+            return t('components.swap.tooltipNoPool');
+          } else if (!dexStatus.value) {
+            return t('components.swap.tooltipChainDown');
+          } else {
+            return '';
+          }
+        } else {
+          return '';
+        }
+      }),
+      buttonStatus: computed(() => {
+        if (!isInit.value || data.isLoading) {
+          return 'loading';
+        } else {
+          return 'active';
+        }
+      }),
+      buttonDisabled: computed(() => {
+        return !data.isSwapReady;
+      }),
+      maxButtonText: 'Max',
+      maxAmount: computed(() => {
+        const selectedCoinBalance = parseInt(
+          allBalances.value.filter((coin) => {
+            return coin.denom === data.payCoinData?.denom;
+          })[0]?.amount,
+        );
+        const swapFeeRate =
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
+
+        if (selectedCoinBalance > Math.ceil(selectedCoinBalance * swapFeeRate) + txFee.value) {
+          return selectedCoinBalance - Math.ceil(selectedCoinBalance * swapFeeRate) - txFee.value ?? 0;
+        } else {
+          return 0;
+        }
+      }),
+      //conditional-text-end
+
+      //pay-receive-data-start
+      payCoinData: null,
+      payCoinAmount: null,
+      receiveCoinData: null,
+      receiveCoinAmount: null,
+      //pay-receive-data-end
+
+      //selectedPoolData for various calculation(pool price, swap price ...etc)
+      selectedPoolData: null,
+
+      //fees(swap + tx)
+      fees: computed(() => {
+        const swapFeeRate =
+          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
+          0.0015;
+        const fee = data.payCoinAmount * swapFeeRate;
+        return Math.ceil(fee * 1000000) / 1000000 ?? 0;
+      }),
+      // pool search loading
+      isLoading: false,
+
+      // for swap action
+      actionHandlerResult: null,
+
+      // booleans-start(for various status check)
+      isOver: computed(() => {
+        if (isSignedIn.value && data.payCoinData) {
+          return Number(data.payCoinAmount) + Number(data.fees) >
+            parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
+              Math.pow(
+                10,
+                parseInt(
+                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
+                ),
+              )
+            ? true
+            : false;
+        } else {
+          return false;
+        }
+      }),
+      isNotEnoughLiquidity: computed(() => {
+        if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
+          return true;
+        } else {
+          return false;
+        }
+      }),
+      isBothSelected: computed(() => {
+        return data.payCoinData && data.receiveCoinData;
+      }),
+      isAmount: computed(() => {
+        if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }),
+      isSwapReady: computed(() => {
+        return !(
+          data.isOver ||
+          !data.isBothSelected ||
+          data.isNotEnoughLiquidity ||
+          !data.isAmount ||
+          !isSignedIn.value ||
+          data.selectedPoolData === null ||
+          !dexStatus.value
+        );
+      }),
+      isChildModalOpen: false,
+      isPriceChanged: false,
+      isAssetList: false,
+      isFeesOpen: false,
+      // booleans-end
+      reset: () => {
+        data.payCoinData = null;
+        data.payCoinAmount = null;
+        data.receiveCoinData = null;
+        data.receiveCoinAmount = null;
+        data.selectedPoolData = null;
+        isInit.value = false;
+        isFinished.value = false; // reset for new swap
+      },
+      //programatically get inactive color
+      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
+    });
+
     const { getPayCoinAmount, getReceiveCoinAmount, getPrecisedAmount, calculateSlippage } = useCalculation();
     const { isOpen, toggleModal: reviewModalToggle } = useModal();
     const { isOpen: isSlippageSettingModalOpen, toggleModal: slippageSettingModalToggle } = useModal();
@@ -624,163 +782,6 @@ export default defineComponent({
 
     //fee info
     const txFee = ref(0);
-
-    const data = reactive({
-      //conditional-text-start
-      buttonName: computed(() => {
-        if (data.isBothSelected) {
-          if (!data.selectedPoolData) {
-            return t('components.swap.noPool');
-          } else if (data.isNotEnoughLiquidity) {
-            return t('components.swap.swapLimit');
-          } else if (data.isOver) {
-            return t('components.swap.insufficentFunds');
-          } else if (!dexStatus.value) {
-            return t('components.swap.unAvailable');
-          } else {
-            if (data.isPriceChanged) {
-              return t('components.swap.updatePrice');
-            } else {
-              if (data.buttonStatus === 'active' && !data.buttonDisabled) {
-                return t('components.swap.review');
-              }
-              return t('components.swap.swap');
-            }
-          }
-        } else {
-          return t('components.swap.swap');
-        }
-      }),
-      buttonTooltipText: computed(() => {
-        if (data.isNotEnoughLiquidity) {
-          return t('components.swap.tooltipSwapLimit');
-        } else if (data.isBothSelected) {
-          if (!data.selectedPoolData) {
-            return t('components.swap.tooltipNoPool');
-          } else if (!dexStatus.value) {
-            return t('components.swap.tooltipChainDown');
-          } else {
-            return '';
-          }
-        } else {
-          return '';
-        }
-      }),
-      buttonStatus: computed(() => {
-        if (!isInit.value || data.isLoading) {
-          return 'loading';
-        } else {
-          return 'active';
-        }
-      }),
-      buttonDisabled: computed(() => {
-        return !data.isSwapReady;
-      }),
-      maxButtonText: 'Max',
-      maxAmount: computed(() => {
-        const selectedCoinBalance = parseInt(
-          allBalances.value.filter((coin) => {
-            return coin.denom === data.payCoinData?.denom;
-          })[0]?.amount,
-        );
-        const swapFeeRate =
-          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
-          0.0015;
-
-        if (selectedCoinBalance > Math.ceil(selectedCoinBalance * swapFeeRate) + txFee.value) {
-          return selectedCoinBalance - Math.ceil(selectedCoinBalance * swapFeeRate) - txFee.value ?? 0;
-        } else {
-          return 0;
-        }
-      }),
-      //conditional-text-end
-
-      //pay-receive-data-start
-      payCoinData: null,
-      payCoinAmount: null,
-      receiveCoinData: null,
-      receiveCoinAmount: null,
-      //pay-receive-data-end
-
-      //selectedPoolData for various calculation(pool price, swap price ...etc)
-      selectedPoolData: null,
-
-      //fees(swap + tx)
-      fees: computed(() => {
-        const swapFeeRate =
-          parseFloat(String(store.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate / 2)) ??
-          0.0015;
-        const fee = data.payCoinAmount * swapFeeRate;
-        return Math.ceil(fee * 1000000) / 1000000 ?? 0;
-      }),
-      // pool search loading
-      isLoading: false,
-
-      // for swap action
-      actionHandlerResult: null,
-
-      // booleans-start(for various status check)
-      isOver: computed(() => {
-        if (isSignedIn.value && data.payCoinData) {
-          return Number(data.payCoinAmount) + Number(data.fees) >
-            parseInt(allBalances?.value.find((asset) => asset?.denom === data.payCoinData?.denom)?.amount ?? '0') /
-              Math.pow(
-                10,
-                parseInt(
-                  store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: data.payCoinData?.base_denom }),
-                ),
-              )
-            ? true
-            : false;
-        } else {
-          return false;
-        }
-      }),
-      isNotEnoughLiquidity: computed(() => {
-        if (slippage.value >= 0.2 || (data.payCoinAmount === 0 && data.receiveCoinAmount > 0)) {
-          return true;
-        } else {
-          return false;
-        }
-      }),
-      isBothSelected: computed(() => {
-        return data.payCoinData && data.receiveCoinData;
-      }),
-      isAmount: computed(() => {
-        if (data.payCoinAmount > 0 && data.receiveCoinAmount > 0) {
-          return true;
-        } else {
-          return false;
-        }
-      }),
-      isSwapReady: computed(() => {
-        return !(
-          data.isOver ||
-          !data.isBothSelected ||
-          data.isNotEnoughLiquidity ||
-          !data.isAmount ||
-          !isSignedIn.value ||
-          data.selectedPoolData === null ||
-          !dexStatus.value
-        );
-      }),
-      isChildModalOpen: false,
-      isPriceChanged: false,
-      isAssetList: false,
-      isFeesOpen: false,
-      // booleans-end
-      reset: () => {
-        data.payCoinData = null;
-        data.payCoinAmount = null;
-        data.receiveCoinData = null;
-        data.receiveCoinAmount = null;
-        data.selectedPoolData = null;
-        isInit.value = false;
-        isFinished.value = false; // reset for new swap
-      },
-      //programatically get inactive color
-      feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
-    });
 
     //tx fee setting
     if (featureRunning('REQUEST_PARALLELIZATION')) {

@@ -25,6 +25,9 @@ export default defineConfig({
       less: {
         rootpath: 'http://localhost:8080/src',
       },
+      scss: {
+        rootpath: 'http://localhost:8080/src',
+      },
     },
   },
 });
