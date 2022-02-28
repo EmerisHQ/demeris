@@ -84,5 +84,12 @@ export class SendToAddressSubpage {
   signTransactionPlaceholder() {
     return cy.get('div').contains('Sign transaction');
   }
+  transactionSuccess() {
+    return cy.get('div').contains('Transferred');
+  }
+
+  doneButton() {
+    return cy.get('span').contains('Done').parent();
+  }
   //#endregion TRANSFER step
 }

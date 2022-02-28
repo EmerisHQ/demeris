@@ -66,6 +66,10 @@ describe('Check availability of send/address subpage elements', function () {
 
     sendToAddresseSubpage.confirnAndContinueButton().click();
     sendToAddresseSubpage.signTransactionPlaceholder().should('be.visible');
+    // this should finish the flow with transfering atom, if cypress didnt require actions in keplr before
+    // sendToAddresseSubpage.transactionSuccess().should('be.visible');
+    // sendToAddresseSubpage.doneButton().click();
+    cy.url().should('eq', Cypress.config().baseUrl);
   });
 
   function recipientFormGoThrough() {

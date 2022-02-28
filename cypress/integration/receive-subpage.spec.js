@@ -1,5 +1,6 @@
 import { Receive } from '../support/pages/receive';
 import { WelcomePage } from '../support/pages/welcome-page';
+import { SubPagesPaths } from '../support/sub-pages-paths';
 
 describe('Navbar elements location and availibility', function () {
   beforeEach(() => {
@@ -12,6 +13,7 @@ describe('Navbar elements location and availibility', function () {
 
   it('Portfolio, Assets, Pools, Logo - Navbar elements', function () {
     let receivePage = new Receive();
+    const recipientAddress = 'cosmos1ws4ae7ysl496j4e4pkg0yazpkf6nyrak3ptwpt';
     receivePage.goTo();
 
     receivePage.fillInSearchField('ATOM');
@@ -21,8 +23,13 @@ describe('Navbar elements location and availibility', function () {
     receivePage.searchField().clear();
     receivePage.fillInSearchField('test');
     receivePage.teble().should('be.empty');
-
     receivePage.quitWithX();
     cy.url().should('eq', Cypress.config().baseUrl);
+
+    receivePage.goTo();
+    receivePage.fillInSearchField('ATOM');
+    receivePage.teble(1).click();
+
+    //check the recipient address is valid
   });
 });
