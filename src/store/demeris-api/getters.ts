@@ -62,12 +62,6 @@ export type Getters = {
   [GetterTypes.isVerified](state: State): {
     (params: { denom: string; chain_name: string }): boolean;
   };
-  [GetterTypes.getOwnAddress](
-    state: State,
-    getters,
-    rootState,
-    rootGetters,
-  ): { (params: API.APIRequests): string | null };
   [GetterTypes.getVerifyTrace](state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   [GetterTypes.getFeeAddress](state: State): { (params: API.APIRequests): API.FeeAddress | null };
   [GetterTypes.getBech32Config](state: State): { (params: API.APIRequests): API.Bech32Config | null };
@@ -277,14 +271,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getTxStatus]: (state) => (params) => {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
-  },
-  [GetterTypes.getOwnAddress]: (state: State, _getters, _rootState, rootGetters) => (params) => {
-    return (
-      chainAddressfromAddress(
-        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-        rootGetters[GlobalUserGetterTypes.getKeplr].bech32Address,
-      ) ?? null
-    );
   },
   [GetterTypes.getVerifyTrace]: (state) => (params) => {
     if (state.traces[(params as API.VerifyTraceReq).chain_name]) {
