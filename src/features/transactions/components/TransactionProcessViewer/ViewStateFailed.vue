@@ -29,7 +29,7 @@
 
       <p v-if="state.matches('failed.broadcast')" class="text-center px-6">
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
-          <i18n-t keypath="components.txHandlingModal.notTransferredAtoB">
+          <i18n-t scope="global" keypath="components.txHandlingModal.notTransferredAtoB">
             <template #amount>
               <AmountDisplay
                 :amount="{
@@ -48,7 +48,7 @@
         </template>
 
         <template v-if="transaction.name == 'transfer'">
-          <i18n-t keypath="components.txHandlingModal.notTransferred">
+          <i18n-t scope="global" keypath="components.txHandlingModal.notTransferred">
             <template #amount>
               <AmountDisplay
                 :amount="{
@@ -64,7 +64,7 @@
         </template>
 
         <template v-if="transaction.name == 'swap'">
-          <i18n-t keypath="components.txHandlingModal.failedSwap">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedSwap">
             <template #amount>
               <AmountDisplay
                 :amount="{ amount: transaction.data.from.amount, denom: getBaseDenomSync(transaction.data.from.denom) }"
@@ -77,7 +77,7 @@
         </template>
 
         <template v-if="transaction.name == 'addliquidity'">
-          <i18n-t keypath="components.txHandlingModal.failedAddLiquidity">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedAddLiquidity">
             <template #denomA> <Denom :name="getBaseDenomSync(transaction.data.coinA.denom)" /> &middot; </template>
             <template #denomB>
               <Denom :name="getBaseDenomSync(transaction.data.coinB.denom)" />
@@ -86,7 +86,7 @@
         </template>
 
         <template v-if="transaction.name == 'createpool'">
-          <i18n-t keypath="components.txHandlingModal.failedCreatePool">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedCreatePool">
             <template #denomA>
               <Denom :name="getBaseDenomSync(transaction.data.coinA.denom)" />
             </template>
@@ -97,7 +97,7 @@
         </template>
 
         <template v-if="transaction.name == 'withdrawliquidity'">
-          <i18n-t keypath="components.txHandlingModal.failedWithdrawLiquidity">
+          <i18n-t scope="global" keypath="components.txHandlingModal.failedWithdrawLiquidity">
             <template #denom>
               <Denom :name="getBaseDenomSync(transaction.data.poolCoin.denom)" />
             </template>
@@ -114,7 +114,7 @@
           !subtitle && transaction.name === 'swap' && ['default', 'broadcast', 'confirmations'].some(state.matches)
         "
       >
-        <i18n-t keypath="components.txHandlingModal.notSwapped">
+        <i18n-t scope="global" keypath="components.txHandlingModal.notSwapped">
           <template #amount>
             <span class="font-bold">
               <AmountDisplay :amount="lastResult?.transaction.data.from" />

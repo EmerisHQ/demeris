@@ -23,7 +23,7 @@
     </fieldset>
 
     <fieldset class="mt-8">
-      <Button :name="$t('generic_cta.continue')" :disabled="!isValid" :click-function="isValid && onSubmit" />
+      <Button :name="$t('generic_cta.continue')" :disabled="!isValid" :click-function="onSubmit" />
     </fieldset>
   </div>
 </template>
@@ -71,13 +71,14 @@ export default defineComponent({
 
         return false;
       } catch (e) {
-        console.error(e);
         return false;
       }
     });
 
     const onSubmit = () => {
-      emit('next');
+      if (isValid.value) {
+        emit('next');
+      }
     };
 
     return { form, isValid, isValidAddress, onSubmit };

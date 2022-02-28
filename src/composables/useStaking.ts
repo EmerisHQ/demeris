@@ -22,8 +22,8 @@ export default function useStaking() {
       return accumulator;
     };
 
-    const curatedValidatorList = await Promise.all(rawValidators.reduce(reducer, []));
-    return [...curatedValidatorList];
+    //const curatedValidatorList = await Promise.all(rawValidators.reduce(reducer, []));
+    return [...rawValidators];
   };
 
   const getChainDisplayInflationByBaseDenom = async (base_denom: string): Promise<number> => {

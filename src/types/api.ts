@@ -19,6 +19,9 @@ export type TokenPriceReq = {
 export type TokenIdReq = {
   token: string;
 };
+export type GitAirdropsListReq = {
+  airdropFileName: string;
+};
 export type DenomReq = {
   denom: string;
 };
@@ -336,6 +339,52 @@ export type WithdrawLiquidityEndBlockResponse = {
   withdraw_fee_coins: string;
   withdrawer: string;
   success: string;
+};
+
+export type AirdropEligibilityCriteria = {
+  Criteria: number;
+  desc: string;
+};
+
+export type AirdropClaimAction = {
+  actionType: string;
+  tokenAutodropReceivingChain: string;
+  AutodropBlockheight: string;
+  AutodropSendingAddress: string;
+  action: number;
+  desc: string;
+  actionURL: string;
+  cosmosSDKMessageType: string;
+  unlockPercentage: number;
+};
+
+export type Airdrop = {
+  project: string;
+  projectWebsiteUrl: string;
+  eligibilityType: string;
+  projectDescription: string;
+  chainName: string;
+  chainID: string;
+  tokenTicker: string;
+  tokenIcon: string;
+  twitterUrl: string;
+  discordUrl: string;
+  mediumUrl: string;
+  airdropBlogUrl: string;
+  airdropStartDate: Date;
+  airdropEndDate: Date;
+  airdropStatus: string;
+  dateStatus: string;
+  snapshotDate: string;
+  snapshotBlockHeight: string;
+  eligibilityCriteria: AirdropEligibilityCriteria[];
+  eligibilityCheckEndpoint: string;
+  unanimousClaim: boolean;
+  claimActions: AirdropClaimAction[];
+};
+
+export type selectedAirdropReq = {
+  airdrop: Airdrop;
 };
 
 export type TransactionDetailResponse = {

@@ -46,6 +46,7 @@ export const messages = {
       portfolio: 'Portfolio',
       assets: 'Assets',
       pools: 'Pools',
+      airdrops: 'Airdrops',
       send: 'Send',
       receive: 'Receive',
       settings: 'Settings',
@@ -92,6 +93,13 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
+      },
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
         appearsDown: 'Emeris connection to {chain} appears to be down',
@@ -110,6 +118,11 @@ export const messages = {
       },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
       },
       send: {
         send: 'Send',
@@ -117,6 +130,13 @@ export const messages = {
         moveAssetsDescription: 'Move assets between your addresses on different chains.',
         sendToAddress: 'Send to address',
         sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+        navigation: {
+          recipient: 'Recipient',
+          amount: 'Amount',
+          review: 'Review',
+          move: 'Move',
+          send: 'Send',
+        },
       },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
@@ -190,6 +210,18 @@ export const messages = {
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
         slippageValueError: 'Please enter a valid slippage rate.',
         highSlippageMessage: 'Your swap price may be significantly above the market price.',
+      },
+      staking: {
+        navigation: {
+          validator: 'Validator',
+          amount: 'Amount',
+          review: 'Review',
+          stake: 'Stake',
+          restake: 'Restake',
+          unstake: 'Unstake',
+          transfer: 'Transfer',
+          claim: 'Claim',
+        },
       },
       stakeTable: {
         staking: 'Staking',
@@ -544,6 +576,25 @@ export const messages = {
         lastDay: '24h',
         viewAll: 'View all',
       },
+      airdrops: {
+        title: 'Airdrops',
+        asset: 'Asset',
+        date: 'Date',
+        action: 'Action',
+        amount: 'Amount',
+        viewAll: 'View all',
+        allAirdrops: 'All airdrops',
+        airdropContentDisclaimer:
+          'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
+        featureProjects: 'Feature your project’s airdrop',
+        airdropstableFilterItems: {
+          all: 'All airdrops',
+          mine: 'My airdrops',
+          upcoming: 'Upcoming',
+          live: 'Live',
+          past: 'Past',
+        },
+      },
       pools: {
         title: 'Pools',
         mine: 'My pools',
@@ -659,7 +710,6 @@ export const messages = {
         balance: 'Balance',
         available: 'Available',
         staked: 'Staked',
-        pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
