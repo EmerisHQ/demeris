@@ -8,7 +8,7 @@
     <Button v-tippy class="self-end" rounded variant="secondary" :content="$t('generic_cta.close')" @click="close">
       <Icon name="CloseIcon" :icon-size="1.5" />
     </Button>
-    <ValidatorBadge :validator="validator" :size="'xl'" />
+    <ValidatorBadge :validator="validator" size="xl" />
     <div class="text-1 font-medium py-6">{{ validator.moniker }}</div>
     <div class="text-muted py-6 w-full text-left">{{ validator.details }}</div>
     <List class="w-full">

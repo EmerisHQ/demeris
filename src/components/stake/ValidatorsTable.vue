@@ -117,13 +117,19 @@
                 ),
               }"
             >
-              <div class="inline-flex items-center mr-4 align-middle">
-                <!-- TODO: get logo url -->
-                <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
+              <div
+                v-tippy
+                :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
+                class="items-center"
+              >
+                <div class="inline-flex items-center mr-4 align-middle">
+                  <!-- TODO: get logo url -->
+                  <ValidatorBadge :validator="validator" class="z-1" />
+                </div>
+                <span class="text-left font-medium" :class="{ 'text-inactive': validator.jailed }">
+                  {{ validator.moniker }}
+                </span>
               </div>
-              <span class="text-left font-medium">
-                {{ validator.moniker }}
-              </span>
             </td>
             <td
               class="py-4 px-2 text-right"
@@ -175,7 +181,7 @@
                 <Button
                   v-tippy
                   class="ml-8"
-                  :content="validator.jailed ? 'Validator jailed' : null"
+                  :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
                   :name="$t('components.validatorTable.stake')"
                   :disabled="
                     validator.jailed ||
