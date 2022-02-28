@@ -202,14 +202,6 @@ export default defineComponent({
       });
     };
 
-    // watch(
-    //   () => [theme.value],
-    //   () => {
-    //     chartData.value.options.theme.mode = theme.value;
-    //     emit('filterChanged', activeFilterItem.value);
-    //   },
-    // );
-
     watch(
       () => [props.dataStream, props.variant],
       async () => {
