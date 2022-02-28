@@ -1,56 +1,53 @@
 <template>
-  <div
+  <section
     class="denom-select flex flex-col items-center rounded-2xl shadow-panel bg-surface w-96"
     :class="{
       'py-6 px-8': size === 'md',
     }"
   >
-    <Button v-tippy class="self-end" rounded variant="secondary" :content="$t('generic_cta.close')" @click="close">
-      <Icon name="CloseIcon" :icon-size="1.5" />
-    </Button>
-    <ValidatorBadge :validator="validator" :size="'xl'" />
-    <div class="text-1 font-medium py-6">{{ validator.moniker }}</div>
-    <div class="text-muted py-6 w-full text-left">{{ validator.details }}</div>
-    <List class="w-full">
+    <Button
+      class="self-end absolute"
+      variant="link"
+      :full-width="false"
+      :name="$t('generic_cta.close')"
+      :click-function="close"
+    />
+    <ValidatorBadge :validator="validator" size="xl" />
+    <h2 class="text-2 font-medium mt-6">{{ validator.moniker }}</h2>
+    <span
+      v-if="validator.jailed"
+      v-tippy
+      content="Validator jailed. Staking temporarily unavailable."
+      class="mt-3 py-1 px-3 rounded-3xl border border-negative-text text-negative-text -text-1"
+    >Unavailable</span>
+    <p class="text-muted mt-4 w-full text-left">{{ validator.details }}</p>
+    <List class="w-full mt-8">
       <ListItem size="sm" direction="col">
-        <ListItem size="xs" :label="$t('components.validatorCard.commissionLabel')">
+        <ListItem inset size="xs" :label="$t('components.validatorCard.commissionLabel')">
           {{ commission }}
         </ListItem>
-        <ListItem
-          inset
-          size="xs"
-          :label="$t('components.validatorCard.maxCommissionLabel')"
-          class="text-muted -text-1"
-          :label-font-weight="'normal'"
-        >
+        <ListItem inset size="xs" :label="$t('components.validatorCard.maxCommissionLabel')">
           {{ maxCommission }}
         </ListItem>
-        <ListItem
-          inset
-          size="xs"
-          :label="$t('components.validatorCard.maxChangeRateLabel')"
-          class="text-muted -text-1"
-          :label-font-weight="'normal'"
-        >
+        <ListItem inset size="xs" :label="$t('components.validatorCard.maxChangeRateLabel')">
           {{ maxChange }}
         </ListItem>
       </ListItem>
       <Button :rounded="false" :disabled="disabled" @click="clicked">Stake</Button>
     </List>
-  </div>
+  </section>
 </template>
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from 'vue';
 
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
 import List from '@/components/ui/List/List.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 
 export default defineComponent({
   name: 'ValidatorCard',
-  components: { Button, Icon, ValidatorBadge, List, ListItem },
+  components: { Button, ValidatorBadge, List, ListItem },
   props: {
     validator: {
       type: Object,
