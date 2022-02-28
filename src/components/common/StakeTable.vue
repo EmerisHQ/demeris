@@ -1,54 +1,61 @@
-<script lang="tsx">
-import type { PropType } from 'vue';
-import { defineComponent } from 'vue';
-
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Button from '@/components/ui/Button.vue';
-import type { StakingBalance } from '@/types/api';
-
-export default defineComponent({
-  components: {
-    Button,
-    CircleSymbol,
-    Ticker,
-  },
-  props: {
-    denom: {
-      type: String,
-      required: true,
-    },
-    stakingBalances: {
-      type: Array as PropType<StakingBalance[]>,
-      default: () => [],
-    },
-  },
-});
-</script>
-
 <template>
   <div>
-    <template v-if="!stakingBalances.length">
+    <!-- Title -->
+    <div v-if="isStakingAssetExist" class="flex justify-between">
+      <div class="flex">
+        <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
+          {{ $t('components.stakeTable.staking') }}
+          <div class="text-0 font-normal text-muted">{{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" /></div>
+        </h2>
+        <h2
+          v-if="isUnstakingAssetExist"
+          class="text-2 font-bold ml-6 cursor-pointer"
+          :class="getTabClass(2)"
+          @click="selectTab(2)"
+        >
+          {{ $t('components.stakeTable.unstaking') }}
+          <div class="text-0 font-normal text-muted">
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
+          </div>
+        </h2>
+      </div>
+
+      <Button
+        :name="$t('components.stakeTable.stake')"
+        variant="link"
+        :full-width="false"
+        @click="() => goStakeActionPage(StakingActions.STAKE)"
+      >
+        <Icon name="PlusIcon" :icon-size="1.5" />
+      </Button>
+    </div>
+
+    <!-- Staking info banner -->
+    <template v-if="!isStakingAssetExist">
       <div
-        class="
-          stake__banner
-          relative
-          border border-border
-          rounded-2xl
-          p-6
-          flex flex-col
-          justify-between
-          bg-right bg-no-repeat
-        "
+        class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
       >
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            {{ $t('components.stakeTable.lockUp') }} <Ticker :name="denom" /> {{ $t('components.stakeTable.andEarn') }}
+            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
+              <template #ticker>
+                <Ticker :name="denom" />
+              </template>
+              <template #apy>
+                <strong>{{ assetStakingAPY }}% {{ $t('components.stakeTable.apy') }}.</strong>
+              </template>
+            </i18n-t>
           </p>
         </div>
 
-        <Button variant="secondary" name="Coming soon" class="mt-8" disabled :full-width="false" />
+        <Button
+          variant="secondary"
+          :name="stakingButtonName"
+          class="mt-8"
+          :click-function="() => goStakeActionPage(StakingActions.STAKE)"
+          :full-width="false"
+        />
 
         <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
           <CircleSymbol :denom="denom" size="xl" />
@@ -57,122 +64,359 @@ export default defineComponent({
     </template>
 
     <template v-else>
-      <div class="stake__rewards">
-        <span class="stake__rewards__label">{{ $t('components.stakeTable.reward') }}</span>
-        <span class="stake__rewards__label__amount">0.495 ATOM</span>
-        <span class="stake__rewards__label__balance">+$10.15</span>
-      </div>
+      <template v-if="validatorList.length > 0">
+        <div v-show="selectedTab === 1">
+          <!-- staking reward table -->
+          <table class="w-full table-fixed mt-8 text-right">
+            <colgroup>
+              <col width="29%" />
+              <col width="29%" />
+              <col width="29%" />
+              <col width="13%" />
+            </colgroup>
 
-      <ul class="stake__list">
-        <li class="stake__list__item">
-          <div class="stake__list__item__validator">
-            <span class="stake__list__item__validator__avatar"> N </span>
-            <span class="stake__list__item__validator__name"> nylira </span>
-          </div>
+            <!-- table body -->
+            <tbody>
+              <!-- claim rewards -->
+              <tr
+                v-if="totalRewardsAmount"
+                class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
+                @click="goStakeActionPage(StakingActions.CLAIM)"
+              >
+                <td class="py-6 flex items-center rounded-l-xl bg-surface">
+                  <div class="inline-flex items-center ml-6 mr-4">
+                    <img src="@/assets/svg/icons/reward.svg" />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ $t('components.stakeTable.claimRewards') }}
+                  </span>
+                </td>
+                <td class="text-right text-muted bg-surface">
+                  {{ totalRewardsDisplayAmount }} <Ticker :name="denom" />
+                </td>
+                <td class="text-right font-medium bg-surface">
+                  <div class="flex justify-end">
+                    +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                  </div>
+                </td>
+                <td class="text-right rounded-r-xl bg-surface">
+                  <Icon
+                    name="CaretRightIcon"
+                    :icon-size="1"
+                    class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
+                  />
+                </td>
+              </tr>
 
-          <span class="stake__list__item__amount"> 82.46 ATOM </span>
-
-          <div class="stake__list__item__balance">
-            <span class="stake__list__item__balance__value">$1,690.50</span>
-          </div>
-        </li>
-      </ul>
+              <!-- staked validators -->
+              <tr v-for="validator of stakingBalances" :key="validator.validator_address">
+                <td class="py-6 flex items-center transition">
+                  <div class="inline-flex items-center mr-4">
+                    <ValidatorBadge
+                      :validator="
+                        validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
+                      "
+                      class="w-8 h-8 rounded-full bg-fg z-1"
+                    />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ getValidatorMoniker(validator.validator_address) }}
+                  </span>
+                </td>
+                <td class="text-right text-muted">{{ getDisplayAmount(validator.amount) }} <Ticker :name="denom" /></td>
+                <td class="text-right font-medium">
+                  <Price :amount="{ denom: denom, amount: validator.amount }" />
+                </td>
+                <td class="text-right">
+                  <tippy
+                    placement="right-start"
+                    trigger="click"
+                    delay="0"
+                    :interactive="true"
+                    :arrow="false"
+                    :offset="[-24, 0]"
+                  >
+                    <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
+                      <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+                    </Button>
+                    <template #content>
+                      <div class="w-64 text-0 font-normal text-left -mx-3">
+                        <div
+                          class="py-2 px-6"
+                          :class="{
+                            'text-muted': validatorList.find(
+                              (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                            ).jailed,
+                            'cursor-pointer hover:text-link': !validatorList.find(
+                              (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                            ).jailed,
+                          }"
+                          @click="
+                            () => {
+                              if (
+                                !validatorList.find(
+                                  (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                                ).jailed
+                              ) {
+                                goStakeActionPage(StakingActions.STAKE, validator.validator_address);
+                              }
+                            }
+                          "
+                        >
+                          {{ $t('components.stakeTable.stake') }}
+                        </div>
+                        <div
+                          class="py-2 px-6 cursor-pointer hover:text-link"
+                          @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
+                        >
+                          {{ $t('components.stakeTable.unstake') }}
+                        </div>
+                        <div
+                          class="py-2 px-6 cursor-pointer hover:text-link"
+                          @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
+                        >
+                          {{ $t('components.stakeTable.switchValidator') }}
+                        </div>
+                      </div>
+                    </template>
+                  </tippy>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-show="selectedTab === 2">unstaking</div>
+      </template>
+      <SkeletonLoader v-else width="100%" height="300px" />
     </template>
   </div>
 </template>
+<script lang="tsx">
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { computed, defineComponent, ref, toRefs, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
-<style lang="scss">
-.stake {
-  &__banner {
-    background-image: url('~@/assets/images/gold-ephemeris-ring-1.png'),
-      url('~@/assets/images/gold-ephemeris-ring-2.png');
-    background-size: 230px, 290px;
-    background-position: 88%, 93%;
-  }
+import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
+import Price from '@/components/common/Price.vue';
+import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
+import Button from '@/components/ui/Button.vue';
+import Icon from '@/components/ui/Icon.vue';
+import useAccount from '@/composables/useAccount';
+import useDenoms from '@/composables/useDenoms';
+import useStaking from '@/composables/useStaking';
+import { GlobalDemerisGetterTypes } from '@/store';
+import { StakingActions } from '@/types/actions';
+import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
-  // Moved from old styles in Asset.vue
-  &__rewards {
-    margin-top: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
-    background: var(--fg);
-    display: flex;
-    align-items: center;
+export default defineComponent({
+  components: {
+    Button,
+    CircleSymbol,
+    Ticker,
+    Price,
+    Icon,
+    ValidatorBadge,
+    SkeletonLoader,
+  },
+  props: {
+    denom: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props) {
+    dayjs.extend(relativeTime);
+    const { useDenom } = useDenoms();
+    const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
+      useStaking();
+    const router = useRouter();
+    const { t } = useI18n({ useScope: 'global' });
+    const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
+    const store = useStore();
+    /* variables */
+    const selectedTab = ref<number>(1);
+    const assetStakingAPY = ref<number | string>('-');
+    const stakingRewardsData = ref(null);
+    const validatorList = ref<Array<any>>([]);
+    const propsRef = toRefs(props);
 
-    &__label {
-      flex: 1;
-      font-weight: 600;
-    }
+    const chain_name = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+    );
+    watch(
+      () => chain_name.value,
+      async (newVal, _) => {
+        if (newVal) {
+          assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
+          validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+        }
+      },
+      { immediate: true },
+    );
 
-    &__amount {
-      margin-left: 1rem;
-      color: var(--muted);
-    }
-
-    &__balance {
-      margin-left: 1rem;
-      font-weight: 600;
-      text-align: right;
-    }
-
-    &__button {
-      margin-left: 1rem;
-      padding: 0.75rem 1.5rem;
-      background-color: black;
-      color: white;
-      font-weight: 600;
-      border-radius: 1.25rem;
-    }
-  }
-
-  &__item {
-    &__validator {
-      flex: 1 1 0%;
-      display: flex;
-      align-items: center;
-
-      &__avatar {
-        border-radius: 0.5rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        background-color: rgba(0, 0, 0, 0.1);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* computeds */
+    const isSignedIn = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
+    });
+    const assetPrecision = computed(() => {
+      return (
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
+          name: propsRef.denom.value,
+        }) ?? '6'
+      );
+    });
+    const stakingBalances = computed(() => {
+      return stakingBalancesByChain(
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+      );
+    });
+    const getTimeToString = (isodate: string) => {
+      return dayjs().to(dayjs(isodate));
+    };
+    const unbondingBalances = computed(() => {
+      return unbondingDelegationsByChain(
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
+      );
+    });
+    const operator_prefix = computed(() => {
+      return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+          denom: propsRef.denom.value,
+        }),
+      }).val_addr;
+    });
+    const totalStakedAssetDisplayAmount = computed(() => {
+      const total = new BigNumber(totalRewardsAmount.value).plus(
+        stakingBalances.value.reduce(
+          (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
+          new BigNumber(0),
+        ),
+      );
+      if (total.isLessThan(1)) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      } else {
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
+        return totalDisplay.toFixed(assetPrecision.value);
       }
-
-      &__name {
-        margin-left: 1rem;
-        flex: 1 1 0%;
-        font-weight: bold;
+    });
+    const isStakingAssetExist = computed(() => {
+      return stakingBalances.value.length > 0;
+    });
+    const isUnstakingAssetExist = computed(() => {
+      return unbondingBalances.value.length > 0;
+    });
+    const stakingButtonName = computed(() => {
+      return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
+    });
+    const totalRewardsAmount = computed(() => {
+      return parseFloat(stakingRewardsData.value?.total ?? 0);
+    });
+    const totalRewardsDisplayAmount = computed(() => {
+      if (totalRewardsAmount.value < 1) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
       }
-    }
+      return new BigNumber(totalRewardsAmount.value ?? 0)
+        .dividedBy(10 ** assetPrecision.value)
+        .toFixed(assetPrecision.value);
+    });
+    const unstakingAssetValue = computed(() => {
+      return unbondingBalances.value
+        .map((x) => x.entries)
+        .flat()
+        .reduce((acc, entry) => {
+          return acc.plus(new BigNumber(entry.balance));
+        }, new BigNumber(0))
+        .dividedBy(10 ** assetPrecision.value)
+        .toString();
+    });
 
-    &__amount {
-      margin-left: 1rem;
-      width: 33.33%;
-      text-align: right;
-      color: var(--muted);
-    }
-
-    &__balance {
-      margin-left: 1rem;
-      width: 33.33%;
-      display: flex;
-      align-items: center;
-
-      &__value {
-        flex: 1 1 0%;
-        text-align: right;
-        font-weight: 600;
+    /* functions */
+    const selectTab = (tabNumber?: number): void => {
+      selectedTab.value = tabNumber;
+    };
+    const getTabClass = (tabNumber: number): string => {
+      return selectedTab.value === tabNumber ? '' : 'text-inactive';
+    };
+    const getDisplayAmount = (amount: any): number => {
+      return Number(amount) / 10 ** assetPrecision.value;
+    };
+    const getValidatorMoniker = (address: string): string => {
+      let moniker;
+      validatorList.value.some((vali) => {
+        if (keyHashfromAddress(vali.operator_address) === address) {
+          moniker = vali.moniker;
+          return true;
+        } else {
+          return false;
+        }
+      });
+      return moniker;
+    };
+    const getValidatorData = (address: string): any => {
+      validatorList.value.some((vali) => {
+        if (keyHashfromAddress(vali.operator_address) === address) {
+          return vali;
+        }
+      });
+    };
+    const goStakeActionPage = (action: string, valAddress = '') => {
+      const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
+      switch (action) {
+        case StakingActions.STAKE:
+        case StakingActions.UNSTAKE:
+        case StakingActions.SWITCH:
+          router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
+          return;
+        default:
+          router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
+          return;
       }
-    }
+    };
+    /* watch */
+    watch(
+      () => isSignedIn.value,
+      async () => {
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(props.denom);
+      },
+      { immediate: true },
+    );
 
-    &__more {
-      margin-left: 1rem;
-      padding: 0.25rem;
-    }
-  }
+    return {
+      StakingActions,
+      getTimeToString,
+      isUnstakingAssetExist,
+      isStakingAssetExist,
+      unbondingBalances,
+      stakingButtonName,
+      selectedTab,
+      totalRewardsAmount,
+      totalRewardsDisplayAmount,
+      unstakingAssetValue,
+      totalStakedAssetDisplayAmount,
+      assetStakingAPY,
+      getDisplayAmount,
+      getValidatorData,
+      stakingBalances,
+      goStakeActionPage,
+      getValidatorMoniker,
+      getTabClass,
+      selectTab,
+      keyHashfromAddress,
+      validatorList,
+    };
+  },
+});
+</script>
+<style scoped>
+* >>> .tippy-box {
+  background: var(--surface);
+  color: var(--text);
 }
 </style>

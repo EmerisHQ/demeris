@@ -13,7 +13,7 @@
             class="capitalize font-medium cursor-default"
             :class="state.step === label ? 'text-text' : 'text-inactive'"
           >
-            {{ label }}
+            {{ $t('components.addLiquidity.navigation.' + label) }}
           </span>
         </nav>
 
@@ -185,19 +185,25 @@
                   <AmountDisplay :amount="{ amount: exchangeAmount.coinB, denom: form.coinB.asset.base_denom }" />
                 </ListItem>
                 <ListItem v-if="hasPair" inset size="md" label="Receive LP asset">
-                  <div v-tippy="{ placement: 'right' }" class="flex items-center justify-end text-left" content="TODO">
-                    <CircleSymbol
-                      :denom="hasPool ? pool.pool_coin_denom : ''"
-                      :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
-                      size="sm"
-                      class="mr-3"
-                    />
-                    <span class="font-medium">
-                      {{ state.receiveAmount }}
-                      <span class="font-bold">
-                        <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
+                  <div class="flex items-center justify-end text-left">
+                    <div
+                      v-tippy="{ placement: 'right' }"
+                      className="flex items-center"
+                      :content="$t('pages.addLiquidity.receiveLpAsset')"
+                    >
+                      <CircleSymbol
+                        :denom="hasPool ? pool.pool_coin_denom : ''"
+                        :pool-denoms="hasPool ? [] : [form.coinA.asset?.base_denom, form.coinB.asset?.base_denom]"
+                        size="sm"
+                        class="mr-3"
+                      />
+                      <span class="font-medium">
+                        {{ state.receiveAmount }}
+                        <span class="font-bold">
+                          <Ticker :name="hasPool ? pool.pool_coin_denom : previewPoolCoinDenom" />
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
                 </ListItem>
 
@@ -310,7 +316,6 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Ticker from '@/components/common/Ticker.vue';
 import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import Alert from '@/components/ui/Alert.vue';
-/* import AmountInput from '@/components/ui/AmountInput.vue'; */
 import Button from '@/components/ui/Button.vue';
 import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -799,20 +804,21 @@ export default {
           parseCoins(form.coinA.asset.amount)[0].denom,
           parseCoins(form.coinB.asset.amount)[0].denom,
         ].sort();
+        if (pools.value) {
+          for (const poolIterator of pools.value) {
+            const reserveDenoms = await getReserveBaseDenoms(poolIterator);
 
-        for (const poolIterator of pools.value) {
-          const reserveDenoms = await getReserveBaseDenoms(poolIterator);
-
-          if (
-            [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
-            poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
-          ) {
-            // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
-            state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
-            if (poolIterator.id != route.params.id) {
-              router.push('/pools/add/' + poolIterator.id);
+            if (
+              [...reserveDenoms].sort().join().toLowerCase() === baseDenoms.join().toLowerCase() ||
+              poolIterator.reserve_coin_denoms.join().toLowerCase() === denoms.join().toLowerCase()
+            ) {
+              // original order is changed after below if statement ex) ["uxprt", "uatom"] => ["uatom" , "uxprt"]
+              state.poolBaseDenoms = JSON.parse(JSON.stringify(reserveDenoms));
+              if (poolIterator.id != route.params.id) {
+                router.push('/pools/add/' + poolIterator.id);
+              }
+              return;
             }
-            return;
           }
         }
         router.push('/pools/add');
@@ -1000,7 +1006,7 @@ export default {
           return;
         }
 
-        const poolFromRoute = pools.value.find((item) => item.id === poolId.value);
+        const poolFromRoute = pools.value?.find((item) => item.id === poolId.value);
 
         if (poolFromRoute) {
           const poolBaseDenoms = await getReserveBaseDenoms(poolFromRoute);

@@ -1,6 +1,8 @@
 import './assets/scss/index.scss';
 import 'tippy.js/dist/tippy.css';
 
+import { BrowserTracing } from '@sentry/tracing';
+import * as Sentry from '@sentry/vue';
 import vueLib from '@starport/vue';
 import mitt from 'mitt';
 import { createPinia } from 'pinia';
@@ -12,12 +14,12 @@ import { createMetaManager } from 'vue-meta';
 import VueTippy from 'vue-tippy';
 import VueApexCharts from 'vue3-apexcharts';
 
-import stringFilters from '@/filters/string';
 import { messages } from '@/locales/en';
 
 import App from './App.vue';
 import router from './router';
 import { store } from './store/setup';
+import { featureRunning } from './utils/FeatureManager';
 
 const i18n = createI18n({
   globalInjection: true,
@@ -38,9 +40,28 @@ const i18n = createI18n({
 const emitter = mitt();
 
 const app = createApp(App);
+
 app.config.globalProperties.emitter = emitter;
 app.config.globalProperties._depsLoaded = true;
 app.use(VueApexCharts);
+
+if (featureRunning('SENTRY')) {
+  Sentry.init({
+    app,
+    dsn: 'https://062027a7ae3c4e85b35fed27465f9615@o1152630.ingest.sentry.io/6232236',
+    integrations: [
+      new BrowserTracing({
+        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        tracingOrigins: ['app.emeris.com'],
+      }),
+    ],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: parseFloat(process.env.VUE_APP_SENTRY_TRACES_SAMPLE_RATE),
+  });
+}
+
 app
   .use(i18n)
   .use(store)
@@ -62,7 +83,3 @@ app
   .mount('#app');
 
 VueCookieNext.config({ expire: '180d', domain: '.emeris.com' });
-
-app.config.globalProperties.$filters = {
-  ...stringFilters,
-};

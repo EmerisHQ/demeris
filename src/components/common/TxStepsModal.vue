@@ -38,8 +38,14 @@
           <h1 class="font-bold" :class="variant === 'widget' ? 'px-6 text-2 text-left' : 'py-8 text-3 text-center'">
             {{ currentData.title }}
           </h1>
-
           <div v-if="currentData && currentData.fees" :class="variant === 'widget' ? 'px-6 py-6' : 'py-8'">
+            <PreviewClaim
+              v-if="currentData.data.name === 'claim'"
+              :step="currentData.data"
+              :fees="currentData.fees"
+              :context="variant"
+              :class="{ '-text-1': variant === 'widget' }"
+            />
             <PreviewSwap
               v-if="currentData.data.name === 'swap'"
               :step="currentData.data"
@@ -66,7 +72,7 @@
               :context="variant"
             />
             <PreviewTransfer
-              v-else
+              v-else-if="currentData.data.name === 'transfer'"
               :step="currentData.data"
               :fees="currentData.fees"
               :context="variant"
@@ -273,6 +279,7 @@ import Icon from '@/components/ui/Icon.vue';
 import Modal from '@/components/ui/Modal.vue';
 import ModalButton from '@/components/ui/ModalButton.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
 import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
@@ -332,6 +339,7 @@ export default defineComponent({
     ConnectWalletModal,
     AmountDisplay,
     TransferInterstitialConfirmation,
+    PreviewClaim,
   },
   props: {
     actionName: {
@@ -411,6 +419,8 @@ export default defineComponent({
       router.go(-1);
     };
     const fees = ref([]);
+
+    const refProps = toRefs(props);
     const connectModalOpen = ref(false);
     const retry = ref(false);
     const hasMore = ref(false);
@@ -510,14 +520,16 @@ export default defineComponent({
       return steps;
     });
     watch(
-      () => props.data,
+      () => refProps.data.value,
       async (newData) => {
-        chainsStatus.value = await chainStatusForSteps(props.data);
-        fees.value = await Promise.all(
-          (newData as Step[])?.map(async (step) => {
-            return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
-          }),
-        );
+        if (newData) {
+          chainsStatus.value = await chainStatusForSteps(newData);
+          fees.value = await Promise.all(
+            (newData as Step[])?.map(async (step) => {
+              return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+            }),
+          );
+        }
       },
     );
     const txToResolve = ref({});
@@ -553,6 +565,7 @@ export default defineComponent({
         data: Step;
       };
       switch (currentStepData.name) {
+        //TODO: i18n
         case 'swap':
           modifiedData.isSwap = true;
           modifiedData.title = 'Review your swap details';
@@ -571,6 +584,9 @@ export default defineComponent({
           break;
         case 'createpool':
           modifiedData.title = 'Review your liquidity pool provision';
+          break;
+        case 'claim':
+          modifiedData.title = t('context.stake.claimRewards');
           break;
       }
       modifiedData.fees = fees.value[currentStep.value];
@@ -689,9 +705,11 @@ export default defineComponent({
                 event_label: 'Confirmed ' + stepTx.name + ' tx',
                 event_category: 'transactions',
               });
+              //for supporting multi msgs
+
               try {
                 tx = await txstore.dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
-                  msgs: [res.msg],
+                  msgs: res.msg,
                   chain_name: res.chain_name,
                   fee,
                   registry: res.registry,
@@ -1074,8 +1092,6 @@ export default defineComponent({
     const emitHandler = (event) => {
       emit(event);
     };
-
-    const refProps = toRefs(props);
 
     watch(
       refProps,

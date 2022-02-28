@@ -41,11 +41,51 @@
             </div>
           </template>
         </template>
-
+        <template v-if="transaction.name === 'stake'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data[0].amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'switch'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'unstake'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(transaction.data.amount.denom),
+              }"
+            />
+          </p>
+        </template>
+        <template v-if="transaction.name === 'claim'">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: stakedAmount,
+                denom: getBaseDenomSync(parseCoins(transaction.data.total)[0].denom),
+              }"
+            />
+          </p>
+        </template>
         <template v-if="transaction.name === 'swap'">
           <template v-if="isSwapComponent">
             <i18n-t
               v-if="getSwapPercent() < 100"
+              scope="global"
               tag="p"
               class="text-center px-4"
               keypath="components.txHandlingModal.notSwapped"
@@ -65,7 +105,13 @@
               </template>
             </i18n-t>
 
-            <i18n-t v-else tag="p" class="text-center px-4" keypath="components.txHandlingModal.received">
+            <i18n-t
+              v-else
+              scope="global"
+              tag="p"
+              class="text-center px-4"
+              keypath="components.txHandlingModal.received"
+            >
               <template #amount>
                 <span class="font-bold">
                   <AmountDisplay
@@ -138,6 +184,7 @@
               :context="isSwapComponent ? 'widget' : 'default'"
               :class="{ '-text-1': isSwapComponent }"
               :bordered="isSwapComponent"
+              :is-receipt="true"
               :fees="state.context.fees.totals[lastResult.stepIndex]"
               class="border-b"
             />
@@ -180,7 +227,7 @@
 
         <template v-if="transaction.name === 'swap'">
           <Button variant="secondary" @click="goToSend">
-            <i18n-t keypath="context.transactions.controls.sendAmount">
+            <i18n-t scope="global" keypath="context.transactions.controls.sendAmount">
               <template #amount>
                 <AmountDisplay
                   :amount="{
@@ -202,7 +249,7 @@
 
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -214,10 +261,15 @@ import Collapse from '@/components/ui/Collapse.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
+import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
 import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
 import { getBaseDenomSync } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
@@ -241,6 +293,11 @@ const titleMap = {
   addliquidity: t('components.txHandlingModal.addLiqActionComplete'),
   withdrawliquidity: t('components.txHandlingModal.withdrawLiqActionComplete'),
   createpool: t('components.txHandlingModal.createPoolActionComplete'),
+  claim: t('components.txHandlingModal.claimActionComplete'),
+  switch: t('components.txHandlingModal.switchActionComplete'),
+  stake: t('components.txHandlingModal.stakeActionComplete'),
+  multistake: t('components.txHandlingModal.stakeActionComplete'),
+  unstake: t('components.txHandlingModal.unstakeActionComplete'),
 };
 
 const previewComponentMap = {
@@ -248,6 +305,11 @@ const previewComponentMap = {
   ibc_forward: PreviewTransfer,
   transfer: PreviewTransfer,
   swap: PreviewSwap,
+  stake: PreviewStake,
+  multistake: PreviewStake,
+  unstake: PreviewUnstake,
+  claim: PreviewClaim,
+  switch: PreviewSwitch,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
@@ -263,7 +325,23 @@ const title = computed(() => {
 
   return titleMap[transaction.value.name];
 });
-
+const stakedAmount = ref('0');
+if (transaction.value.name == 'stake') {
+  stakedAmount.value = (transaction.value.data as StakeData[])
+    .reduce((acc, tx) => {
+      return acc.plus(new BigNumber(tx.amount.amount));
+    }, new BigNumber(0))
+    .toString();
+}
+if (transaction.value.name == 'unstake') {
+  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount;
+}
+if (transaction.value.name == 'switch') {
+  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount;
+}
+if (transaction.value.name == 'claim') {
+  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
+}
 const onNext = () => {
   send('CONTINUE');
 };

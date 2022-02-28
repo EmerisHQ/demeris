@@ -2,7 +2,13 @@
   <section class="flex flex-col">
     <div class="flex items-center justify-between md:mt-2 mb-3 sm:mb-4 md:mb-6">
       <Search v-model:keyword="keyword" placeholder="Search assets and pools" class="pools__search max-w-xs w-full" />
-      <Button name="Add liquidity" variant="link" :full-width="false" @click="openAddLiqudityPage">
+      <Button
+        class="add-liquidity"
+        name="Add liquidity"
+        variant="link"
+        :full-width="false"
+        @click="openAddLiqudityPage"
+      >
         <Icon name="PlusIcon" :icon-size="1.5" />
       </Button>
     </div>
@@ -102,7 +108,7 @@ export default {
     watch(
       () => props.pools,
       async (newVal) => {
-        if (newVal.length > 0) {
+        if (newVal?.length > 0) {
           renderedPools.value = await Promise.all(
             props.pools.map(async (pool: any) => {
               pool.displayName = await getPoolName(pool);

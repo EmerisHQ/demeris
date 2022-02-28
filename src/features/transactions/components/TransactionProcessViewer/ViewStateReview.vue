@@ -24,7 +24,12 @@
           :class="{ '-text-1': isSwapComponent }"
         />
       </div>
-
+      <Alert
+        v-if="step.name === 'stake' || step.name === 'switch'"
+        status="warning"
+        :message="$t('components.txHandlingModal.stakeDisclaimer')"
+        class="mt-4"
+      />
       <p class="px-8 text-center text-muted -text-1">
         {{ $t('components.txHandlingModal.noRevert') }}
         <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
@@ -46,10 +51,15 @@ import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
+import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
 import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
 import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
 import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 
@@ -69,18 +79,28 @@ const previewComponentMap = {
   transfer: PreviewTransfer,
   move: PreviewTransfer,
   swap: PreviewSwap,
+  stake: PreviewStake,
+  multistake: PreviewStake,
+  unstake: PreviewUnstake,
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
+  claim: PreviewClaim,
+  switch: PreviewSwitch,
 };
 
 const titleMap = {
   transfer: t('context.transactions.review.transfer'),
+  stake: t('context.transactions.review.stake'),
+  unstake: t('context.transactions.review.unstake'),
+  multistake: t('context.transactions.review.stake'),
   move: t('context.transactions.review.move'),
   swap: t('context.transactions.review.swap'),
   addliquidity: t('context.transactions.review.addliquidity'),
   withdrawliquidity: t('context.transactions.review.withdrawliquidity'),
   createpool: t('context.transactions.review.createpool'),
+  claim: t('context.transactions.review.claim'),
+  switch: t('context.transactions.review.switch'),
 };
 
 const step = computed(() => getCurrentStep(state.value.context));

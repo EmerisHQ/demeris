@@ -7,7 +7,7 @@ import * as API from '@/types/api';
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { DemerisConfig } from './actions';
 import { APIPromise, DemerisMutations, DemerisMutationTypes as MutationTypes } from './mutation-types';
-import { getDefaultState, State } from './state';
+import { ChainData, getDefaultState, State } from './state';
 
 export type Mutations<S = State> = {
   [MutationTypes.SET_BALANCES](state: S, payload: { params: API.APIRequests; value: API.Balances }): void;
@@ -15,6 +15,10 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_STAKING_BALANCES](
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
+  ): void;
+  [MutationTypes.SET_UNBONDING_DELEGATIONS](
+    state: S,
+    payload: { params: API.APIRequests; value: API.UnbondingDelegations },
   ): void;
   [MutationTypes.SET_NUMBERS](state: S, payload: { params: API.APIRequests; value: API.Numbers }): void;
   [MutationTypes.SET_NUMBERS_CHAIN](state: S, payload: { params: API.APIRequests; value: API.SeqNumber }): void;
@@ -28,7 +32,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_VERIFY_TRACE](state: S, payload: { params: API.APIRequests; value: API.VerifyTrace }): void;
   [MutationTypes.SET_FEE_ADDRESS](state: S, payload: { params: API.APIRequests; value: API.FeeAddress }): void;
   [MutationTypes.SET_BECH32_CONFIG](state: S, payload: { params: API.APIRequests; value: API.Bech32Config }): void;
-  [MutationTypes.SET_CHAIN](state: S, payload: { value: API.Chain }): void;
+  [MutationTypes.SET_CHAIN](state: S, payload: { value: ChainData }): void;
   [MutationTypes.SET_PRIMARY_CHANNEL](state: S, payload: { params: API.APIRequests; value: API.PrimaryChannel }): void;
   [MutationTypes.SET_PRIMARY_CHANNELS](
     state: S,
@@ -46,6 +50,7 @@ export type Mutations<S = State> = {
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
   [MutationTypes.RESET_STATE](state: S): void;
+  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: S): void;
   [MutationTypes.SIGN_OUT](state: S, payload: string[]): void;
   [MutationTypes.SUBSCRIBE](state: S, subscription: DemerisSubscriptions): void;
   [MutationTypes.UNSUBSCRIBE](state: S, subsctiption: DemerisSubscriptions): void;
@@ -63,8 +68,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_STAKING_BALANCES](state: State, payload: DemerisMutations) {
-    if (!isEqual(state.stakingBalances[JSON.stringify(payload.params)], payload.value as API.StakingBalances)) {
-      state.stakingBalances[JSON.stringify(payload.params)] = payload.value as API.StakingBalances;
+    if (
+      !isEqual(state.stakingBalances[(payload.params as API.AddrReq).address], payload.value as API.StakingBalances)
+    ) {
+      state.stakingBalances[(payload.params as API.AddrReq).address] = payload.value as API.StakingBalances;
+    }
+  },
+  [MutationTypes.SET_UNBONDING_DELEGATIONS](state: State, payload: DemerisMutations) {
+    if (
+      !isEqual(
+        state.unbondingDelegations[(payload.params as API.AddrReq).address],
+        payload.value as API.UnbondingDelegations,
+      )
+    ) {
+      state.unbondingDelegations[(payload.params as API.AddrReq).address] = payload.value as API.UnbondingDelegations;
     }
   },
   [MutationTypes.SET_NUMBERS](state: State, payload: DemerisMutations) {
@@ -115,9 +132,13 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_PRICES](state: State, payload: DemerisMutations) {
-    if (!isEqual(state.prices, payload.value as API.Prices)) {
-      state.prices = payload.value as API.Prices;
-    }
+    state.prices.Fiats = (payload.value as API.Prices).Fiats;
+    state.prices.Tokens = [
+      ...state.prices.Tokens.filter(
+        (x) => !(payload.value as API.Prices).Tokens.map((x) => x.Symbol).includes(x.Symbol),
+      ),
+      ...(payload.value as API.Prices).Tokens,
+    ];
   },
   [MutationTypes.SET_TX_STATUS](state: State, payload: DemerisMutations) {
     const ticket = payload.value as API.Ticket;
@@ -172,24 +193,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
-    if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
+    if (state.traces[(payload.params as API.VerifyTraceReq).chain_name]) {
       if (
         !isEqual(
-          state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-            (payload.params as API.VerifyTraceReq).hash
-          ],
+          state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash],
           payload.value as API.VerifyTrace,
         )
       ) {
-        state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-          (payload.params as API.VerifyTraceReq).hash
-        ] = payload.value as API.VerifyTrace;
+        state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+          payload.value as API.VerifyTrace;
       }
     } else {
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-        (payload.params as API.VerifyTraceReq).hash
-      ] = payload.value as API.VerifyTrace;
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name] = {};
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+        payload.value as API.VerifyTrace;
     }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
@@ -213,16 +230,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_CHAIN](state: State, payload: DemerisMutations) {
+    const { status, ...toUpdate } = payload.value as ChainData;
+    if (!state.chains[(payload.params as API.ChainReq).chain_name].status) {
+      (toUpdate as ChainData).status = status;
+    }
     if (
       !isEqual(state.chains[(payload.params as API.ChainReq).chain_name], {
         ...state.chains[(payload.params as API.ChainReq).chain_name],
-        ...(payload.value as API.Chain),
+        ...(payload.value as ChainData),
         relayerBalance: { address: ``, chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
       })
     ) {
       state.chains[(payload.params as API.ChainReq).chain_name] = {
         ...state.chains[(payload.params as API.ChainReq).chain_name],
-        ...(payload.value as API.Chain),
+        ...toUpdate,
         relayerBalance: { address: '', chain_name: (payload.params as API.ChainReq).chain_name, enough_balance: false },
       };
     }
@@ -308,21 +329,25 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.RESET_STATE](state: State) {
     Object.assign(state, getDefaultState());
   },
-  [MutationTypes.SIGN_OUT](state: State, payload: string[]) {
+  [MutationTypes.CLEAR_SUBSCRIPTIONS](state: State) {
     for (const sub of state._Subscriptions.values()) {
       const subObj = JSON.parse(sub);
       if (
         subObj.action == DemerisActionTypes.GET_BALANCES ||
         subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
-        subObj.action == DemerisActionTypes.GET_NUMBERS
+        subObj.action == DemerisActionTypes.GET_NUMBERS ||
+        subObj.action == DemerisActionTypes.GET_UNBONDING_DELEGATIONS
       ) {
         state._Subscriptions.delete(sub);
       }
     }
+  },
+  [MutationTypes.SIGN_OUT](state: State, payload: string[]) {
     for (const keyhash of payload ?? []) {
       delete state.balances[keyhash];
     }
     state.stakingBalances = {};
+    state.unbondingDelegations = {};
     state.numbers = {};
     state.transactions = new Map();
     state._InProgess = new Map();

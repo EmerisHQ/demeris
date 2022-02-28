@@ -4,7 +4,20 @@ import * as API from './api';
 import * as Base from './base';
 
 export type BaseAction = {
-  name: 'swap' | 'redeem' | 'addliquidity' | 'withdrawliquidity' | 'transfer' | 'move' | 'createpool' | 'memo-transfer';
+  name:
+    | 'swap'
+    | 'redeem'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'transfer'
+    | 'move'
+    | 'createpool'
+    | 'memo-transfer'
+    | 'claim'
+    | 'stake'
+    | 'multistake'
+    | 'unstake'
+    | 'switch';
   memo?: string;
 };
 export type SwapParams = {
@@ -38,6 +51,27 @@ export type CreatePoolParams = {
   coinA: Base.ChainAmount;
   coinB: Base.ChainAmount;
 };
+export type ClaimRewardsParams = {
+  rewards: { validator_address: string; reward: string }[];
+  total: string;
+  chain_name: string;
+};
+export type StakeParams = {
+  validatorAddress: string;
+  amount: Base.ChainAmount;
+};
+
+export type MultiStakeParams = Array<StakeParams>;
+
+export type UnstakeParams = {
+  validatorAddress: string;
+  amount: Base.ChainAmount;
+};
+export type RestakeParams = {
+  validatorSrcAddress: string;
+  validatorDstAddress: string;
+  amount: Base.ChainAmount;
+};
 export type RedeemParams = Array<Base.ChainAmount>;
 export type SwapAction = BaseAction & { params: SwapParams };
 export type MoveAction = BaseAction & { params: MoveParams };
@@ -47,6 +81,11 @@ export type WithdrawLiquidityAction = BaseAction & { params: WithdrawLiquidityPa
 export type TransferAction = BaseAction & { params: TransferParams };
 export type MemoTransferAction = BaseAction & { params: TransferParams };
 export type CreatePoolAction = BaseAction & { params: CreatePoolParams };
+export type ClaimRewardsAction = BaseAction & { params: ClaimRewardsParams };
+export type MultiStakeAction = BaseAction & { params: MultiStakeParams };
+export type StakeAction = BaseAction & { params: StakeParams };
+export type UnstakeAction = BaseAction & { params: UnstakeParams };
+export type RestakeAction = BaseAction & { params: RestakeParams };
 export type Any =
   | SwapAction
   | RedeemAction
@@ -54,7 +93,12 @@ export type Any =
   | AddLiquidityAction
   | WithdrawLiquidityAction
   | CreatePoolAction
-  | MoveAction;
+  | MoveAction
+  | ClaimRewardsAction
+  | StakeAction
+  | MultiStakeAction
+  | UnstakeAction
+  | RestakeAction;
 export type StepTransactionDetails = {
   typeUrl: string;
   value: Record<string, unknown>;
@@ -100,8 +144,41 @@ export type WithdrawLiquidityData = {
   poolCoin: Base.Amount;
   pool: Pool;
 };
+export type ClaimData = {
+  total: string;
+  rewards: { reward: string; validator_address: string }[];
+  chain_name: string;
+};
+export type StakeData = {
+  validatorAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+export type UnstakeData = {
+  validatorAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+export type RestakeData = {
+  validatorSrcAddress: string;
+  validatorDstAddress: string;
+  amount: Base.Amount;
+  chain_name: string;
+};
+
 export type StepTransaction = {
-  name: 'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
+  name:
+    | 'ibc_forward'
+    | 'ibc_backward'
+    | 'swap'
+    | 'transfer'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'createpool'
+    | 'claim'
+    | 'stake'
+    | 'unstake'
+    | 'switch';
   status: 'pending' | 'active' | 'completed';
   addFee?: boolean;
   feeToAdd?: FeeWDenom[];
@@ -112,10 +189,25 @@ export type StepTransaction = {
     | TransferData
     | AddLiquidityData
     | WithdrawLiquidityData
-    | CreatePoolData;
+    | CreatePoolData
+    | ClaimData
+    | StakeData[]
+    | UnstakeData
+    | RestakeData;
 };
 export type Step = {
-  name: 'transfer' | 'redeem' | 'swap' | 'addliquidity' | 'withdrawliquidity' | 'createpool' | 'move';
+  name:
+    | 'transfer'
+    | 'redeem'
+    | 'swap'
+    | 'addliquidity'
+    | 'withdrawliquidity'
+    | 'createpool'
+    | 'move'
+    | 'claim'
+    | 'stake'
+    | 'unstake'
+    | 'switch';
   description: string;
   memo?: string;
   output?: {
@@ -136,7 +228,23 @@ export type SendAddressForm = {
   isTermChecked?: boolean;
   balance: Base.Amount;
 };
-
+export type UnstakeForm = {
+  validatorAddress: string;
+  amount: string;
+  denom: string;
+  chain_name: string;
+};
+export type StakeForm = UnstakeForm & { from_chain: string };
+export type MultiStakeForm = {
+  stakes: StakeForm[];
+};
+export type RestakeForm = {
+  validatorAddress: string;
+  toValidatorAddress: string;
+  amount: string;
+  denom: string;
+  chain_name: string;
+};
 export type MoveAssetsForm = {
   balance: Base.Amount;
   on_chain: string;
@@ -162,7 +270,7 @@ export type Pool = {
   pool_coin_denom: string;
 };
 export type MsgMeta = {
-  msg: EncodeObject;
+  msg: EncodeObject[];
   chain_name: string;
   registry: Registry;
 };
@@ -183,3 +291,19 @@ export type FeeWarning = {
     denom: string;
   };
 };
+export enum StakingActions {
+  STAKE = 'stake',
+  UNSTAKE = 'unstake',
+  SWITCH = 'switch',
+  CLAIM = 'claim',
+}
+export enum StakingActionSteps {
+  VALIDATOR = 'Validator',
+  AMOUNT = 'Amount',
+  REVIEW = 'Review',
+  STAKE = 'Stake',
+  RESTAKE = 'Restake',
+  UNSTAKE = 'Unstake',
+  TRANSFER = 'Transfer',
+  CLAIM = 'Claim',
+}

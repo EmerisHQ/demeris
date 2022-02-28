@@ -2,7 +2,6 @@ import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 export type ChainMeta = {
-  verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
   relayerBalance?: API.RelayerBalance;
   status?: boolean;
@@ -20,12 +19,14 @@ export type State = {
   hub_chain: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
+  unbondingDelegations: Record<string, API.UnbondingDelegations>;
   numbers: Record<string, API.Numbers>;
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
   verifiedDenoms: API.VerifiedDenoms;
   prices: API.Prices;
   relayer: boolean;
   chains: Record<string, ChainData>;
+  traces: Record<string, Record<string, API.VerifyTrace>>;
   transactions: Map<string, TransactionItem>;
   tokenPrices: API.TokenPrices[];
   tokenPricesLoadingStatus: API.LoadingState;
@@ -41,10 +42,11 @@ export function getDefaultState(): State {
     hub_chain: 'cosmoshub-4',
     balances: {},
     stakingBalances: {},
+    unbondingDelegations: {},
     numbers: {},
     chainnumbers: {},
     verifiedDenoms: [],
-    validPools: [],
+    validPools: null,
     prices: {
       Fiats: [],
       Tokens: [],
@@ -55,6 +57,7 @@ export function getDefaultState(): State {
     tokenIdLoadingStatus: API.LoadingState.INIT,
     relayer: false,
     chains: {},
+    traces: {},
     transactions: new Map(),
     _Subscriptions: new Set(),
     _InProgess: new Map(),

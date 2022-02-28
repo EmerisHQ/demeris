@@ -4,12 +4,13 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
-import { GlobalDemerisGetterTypes, RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
-import { hashObject } from '@/utils/basic';
+import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
+import { featureRunning } from '@/utils/FeatureManager';
 
 import {
   DemerisActionByTokenIdParams,
@@ -60,7 +61,15 @@ export type DemerisSessionParams = {
 export type TicketResponse = {
   ticket: string;
 };
-
+export type DemerisGetValidatorsParam = {
+  chain_name: string;
+};
+export type DemerisGetInflationParam = {
+  chain_name: string;
+};
+export type DemerisGetRewardsParam = {
+  chain_name: string;
+};
 type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
 };
@@ -78,11 +87,19 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
   ): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_UNBONDING_DELEGATIONS](
+    { commit, getters }: ActionContext<State, RootState>,
+    { subscribe, params }: DemerisActionsByAddressParams,
+  ): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_ALL_BALANCES]({ dispatch, getters }: ActionContext<State, RootState>): Promise<API.Balances>;
   [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({
     dispatch,
     getters,
   }: ActionContext<State, RootState>): Promise<API.StakingBalances>;
+  [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({
+    dispatch,
+    getters,
+  }: ActionContext<State, RootState>): Promise<API.UnbondingDelegations>;
   [DemerisActionTypes.GET_NUMBERS](
     { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionsByAddressParams,
@@ -165,6 +182,18 @@ export interface Actions {
     { commit, getters }: ActionContext<State, RootState>,
     { height }: DemerisTxResultParams,
   ): Promise<unknown>;
+  [DemerisActionTypes.GET_VALIDATORS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetValidatorsParam,
+  ): Promise<any>;
+  [DemerisActionTypes.GET_INFLATION](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetInflationParam,
+  ): Promise<unknown>;
+  [DemerisActionTypes.GET_STAKING_REWARDS](
+    { getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetRewardsParam,
+  ): Promise<unknown>;
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
@@ -185,7 +214,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.GET_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BALANCES]({ commit, dispatch, getters, state }, { subscribe = false, params }) {
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -205,6 +234,27 @@ export const actions: ActionTree<State, RootState> & Actions = {
           getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/balance',
         );
 
+        if (featureRunning('REQUEST_PARALLELIZATION') && response.data.balances) {
+          const tracesLoaded = [];
+          for (const balance of response.data.balances as API.Balances) {
+            if (
+              // balance.ibc holds resolved ibc denoms so we can show the name of the coin. this functions as a cache. so if it was loaded in the past we don't need to load it again.
+              Object.keys(balance.ibc).length != 0 &&
+              !getters['getVerifyTrace']({
+                chain_name: balance.on_chain,
+                hash: balance.ibc.hash,
+              })
+            ) {
+              tracesLoaded.push(
+                dispatch(DemerisActionTypes.GET_VERIFY_TRACE, {
+                  subscribe: false,
+                  params: { chain_name: balance.on_chain, hash: balance.ibc.hash },
+                }),
+              );
+            }
+          }
+          await Promise.all(tracesLoaded);
+        }
         commit(DemerisMutationTypes.SET_BALANCES, { params, value: response.data.balances });
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_BALANCES, payload: { params } });
@@ -265,8 +315,21 @@ export const actions: ActionTree<State, RootState> & Actions = {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
 
-      for (const keyHash of keyHashes) {
-        dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const balanceLoads = [];
+        for (const keyHash of keyHashes) {
+          balanceLoads.push(
+            dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } }),
+          );
+        }
+        await Promise.all(balanceLoads);
+        if (rootGetters[GlobalDemerisGetterTypes.USER.getBalancesFirstLoad]) {
+          dispatch(GlobalDemerisActionTypes.USER.BALANCES_LOADED, null, { root: true });
+        }
+      } else {
+        for (const keyHash of keyHashes) {
+          await dispatch(DemerisActionTypes.GET_BALANCES, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllBalances', 'Could not perform API query.');
@@ -276,13 +339,39 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_STAKING_BALANCES]({ dispatch, getters, rootGetters }) {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
-      for (const keyHash of keyHashes) {
-        dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const stakingBalanceLoads = [];
+        for (const keyHash of keyHashes) {
+          stakingBalanceLoads.push(
+            dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } }),
+          );
+        }
+        await Promise.all(stakingBalanceLoads);
+
+        if (rootGetters[GlobalDemerisGetterTypes.USER.getStakingBalancesFirstLoad]) {
+          dispatch(GlobalDemerisActionTypes.USER.STAKING_BALANCES_LOADED, null, { root: true });
+        }
+      } else {
+        for (const keyHash of keyHashes) {
+          await dispatch(DemerisActionTypes.GET_STAKING_BALANCES, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllStakingBalances', 'Could not perform API query.');
     }
     return getters['getAllStakingBalances'];
+  },
+  async [DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS]({ dispatch, getters, rootGetters }) {
+    try {
+      const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
+      for (const keyHash of keyHashes) {
+        dispatch(DemerisActionTypes.GET_UNBONDING_DELEGATIONS, { subscribe: true, params: { address: keyHash } });
+      }
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetAllUnbondingDelegations', 'Could not perform API query.');
+    }
+    return getters['getAllUnbondingDelegations'];
   },
   async [DemerisActionTypes.VALIDATE_POOLS]({ commit, getters }, pools) {
     try {
@@ -331,6 +420,43 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getStakingBalances'](params);
     }
   },
+  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS]({ commit, getters, state }, { subscribe = false, params }) {
+    const reqHash = hashObject({ action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+
+    if (state._InProgess.get(reqHash)) {
+      await state._InProgess.get(reqHash);
+
+      return getters['getUnbondingDelegations'](params);
+    } else {
+      let resolver;
+      let rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
+      try {
+        const response = await axios.get(
+          getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/unbondingdelegations',
+        );
+        commit(DemerisMutationTypes.SET_UNBONDING_DELEGATIONS, { params, value: response.data.unbonding_delegations });
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+      } catch (e) {
+        commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+        rejecter(e);
+        if (subscribe) {
+          commit('SUBSCRIBE', { action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
+        }
+        throw new SpVuexError('Demeris:GetUnbondingDelegations', 'Could not perform API query.');
+      }
+      commit(DemerisMutationTypes.DELETE_IN_PROGRESS, reqHash);
+      resolver();
+
+      return getters['getUnbondingDelegations'](params);
+    }
+  },
   async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
@@ -366,8 +492,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
   async [DemerisActionTypes.GET_ALL_NUMBERS]({ dispatch, getters, rootGetters }) {
     try {
       const keyHashes = rootGetters[GlobalDemerisGetterTypes.USER.getKeyhashes];
-      for (const keyHash of keyHashes) {
-        await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        const numberLoads = [];
+        for (const keyHash of keyHashes) {
+          numberLoads.push(dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } }));
+        }
+        await Promise.all(numberLoads);
+      } else {
+        for (const keyHash of keyHashes) {
+          await dispatch(DemerisActionTypes.GET_NUMBERS, { subscribe: true, params: { address: keyHash } });
+        }
       }
     } catch (e) {
       throw new SpVuexError('Demeris:GetAllNumbers', 'Could not perform API query.');
@@ -398,7 +533,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state, dispatch }, { subscribe = false }) {
     const isCypress = !!window['Cypress'];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
 
@@ -416,28 +551,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/oracle/prices');
-        for (const denom of getters['getVerifiedDenoms']) {
-          if (denom.name.startsWith('pool')) {
-            const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
-            if (pools) {
-              const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
-              if (pool) {
-                const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
-                await initPromise;
-                try {
-                  if (totalLiquidityPrice.value > 0) {
-                    const priceData = {
-                      Symbol: denom.ticker + 'USDT',
-                      Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
-                      Supply: totalSupply.value,
-                    };
-                    response.data.data.Tokens.push(priceData);
-                  }
-                } catch (e) {}
-              }
-            }
-          }
-        }
         if (response.data?.data?.Tokens) {
           if (isCypress) {
             commit(DemerisMutationTypes.SET_PRICES, {
@@ -450,6 +563,50 @@ export const actions: ActionTree<State, RootState> & Actions = {
             });
           } else {
             commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          }
+          // Set initial prices so pool calculations can find them
+          await Promise.all(
+            getters['getVerifiedDenoms'].map(async (denom) => {
+              if (denom.name.startsWith('pool')) {
+                const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
+
+                if (pools) {
+                  const pool = pools.find((pool) => pool.pool_coin_denom == denom.name);
+
+                  if (pool) {
+                    const { totalLiquidityPrice, totalSupply, initPromise } = usePool(pool.id);
+                    await initPromise;
+                    try {
+                      if (totalLiquidityPrice.value > 0) {
+                        const priceData = {
+                          Symbol: denom.ticker + 'USDT',
+                          Price: (totalLiquidityPrice.value * 10 ** 6) / totalSupply.value,
+                          Supply: totalSupply.value,
+                        };
+                        response.data.data.Tokens.push(priceData);
+                      }
+                    } catch (e) {}
+                  }
+                }
+              }
+            }),
+          );
+          if (isCypress) {
+            commit(DemerisMutationTypes.SET_PRICES, {
+              value: {
+                Fiats: response.data.data.Fiats,
+                Tokens: response.data.data.Tokens.map((x) => {
+                  return { ...x, Price: 1.1 };
+                }),
+              },
+            });
+          } else {
+            commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
+          }
+          // Set prices incl. pool calculations
+
+          if (rootGetters[GlobalDemerisGetterTypes.USER.getPricesFirstLoad]) {
+            dispatch(GlobalDemerisActionTypes.USER.PRICES_LOADED, null, { root: true });
           }
         }
         if (subscribe) {
@@ -615,7 +772,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit(DemerisMutationTypes.SET_IN_PROGRESS, { hash: reqHash, promise });
       try {
         const response = await axios.get(getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name);
-        commit(DemerisMutationTypes.SET_CHAIN, { params, value: response.data.chain });
+        commit(DemerisMutationTypes.SET_CHAIN, { params, value: { ...response.data.chain, status: true } });
         if (subscribe) {
           commit('SUBSCRIBE', { action: DemerisActionTypes.GET_CHAIN, payload: { params } });
         }
@@ -747,12 +904,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
     function sleep(ms) {
-      const wakeUpTime = Date.now() + ms;
-      while (Date.now() < wakeUpTime) {}
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     try {
-      sleep(800);
+      await sleep(800); // Apparently it takes some time for end block events to be available on the rpc endpoint after the tx is delivered and our tx ticket updates so this is why this was added originally.
       const response = await axios.get(`${getters['getEndpoint']}/block_results?height=${height}`);
       const successData = {};
 
@@ -761,7 +917,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
         const checks = getEndBlockChecks({
           type: stepType,
-          requesterAddress: getters['getOwnAddress']({ chain_name: getters['getDexChain'] }),
+          requesterAddress: await getOwnAddress({ chain_name: getters['getDexChain'] }),
         });
 
         response.data.result?.end_block_events?.forEach((item) => {
@@ -801,6 +957,36 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.GET_VALIDATORS]({ getters }, { chain_name }: DemerisGetValidatorsParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
+      return response.data?.validators;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_VALIDATORS', `Could not get ${chain_name} validators.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_INFLATION]({ getters }, { chain_name }: DemerisGetInflationParam) {
+    try {
+      const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/mint/inflation');
+      return Number(response.data?.inflation);
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_INFLATION', `Could not get ${chain_name} inflation.` + e.message);
+    }
+  },
+
+  async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters }, { chain_name }: DemerisGetRewardsParam) {
+    try {
+      const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
+      const response = await axios.get(
+        getters['getEndpoint'] + '/account/' + address + '/delegatorrewards/' + chain_name,
+      );
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GET_REWARDS', `Could not get ${chain_name} rewards.` + e.message);
+    }
+  },
+
   // Internal module actions
 
   [DemerisActionTypes.INIT](
@@ -816,7 +1002,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
   [DemerisActionTypes.RESET_STATE]({ commit }) {
     commit(DemerisMutationTypes.RESET_STATE);
   },
-  [DemerisActionTypes.SIGN_OUT]({ commit }, keyHashes) {
+  async [DemerisActionTypes.SIGN_OUT]({ commit, state }, keyHashes) {
+    commit(DemerisMutationTypes.CLEAR_SUBSCRIPTIONS);
+    // Although on the CLEAR_SUBSCRIPTIONS mutation we remove any subscriptions from the previously signed in account
+    // there is a chance some requests were already in progress and may return after we clear them so we await completion
+    // before deleting state data on SIGN_OUT mutation
+    await Promise.all(state._InProgess.values());
     commit(DemerisMutationTypes.SIGN_OUT, keyHashes);
   },
   [DemerisActionTypes.STORE_UPDATE]({ state, dispatch }) {

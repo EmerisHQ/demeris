@@ -2,6 +2,7 @@ import { GasPriceLevel, Pool } from '@/types/actions';
 import * as API from '@/types/api';
 
 import { DemerisConfig } from './actions';
+import { ChainData } from './state';
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
@@ -11,6 +12,7 @@ export enum DemerisMutationTypes {
   SET_BECH32_CONFIG = 'SET_BECH32_CONFIG',
   SET_FEE_ADDRESSES = 'SET_FEE_ADDRESSES',
   SET_STAKING_BALANCES = 'SET_STAKING_BALANCES',
+  SET_UNBONDING_DELEGATIONS = 'SET_UNBONDING_DELEGATIONS',
   SET_VALID_POOLS = 'SET_VALID_POOLS',
   SET_NUMBERS = 'SET_NUMBERS',
   SET_NUMBERS_CHAIN = 'SET_NUMBERS_CHAIN',
@@ -32,6 +34,7 @@ export enum DemerisMutationTypes {
   SET_IN_PROGRESS = 'SET_IN_PROGRESS',
   DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS',
   RESET_STATE = 'RESET_STATE',
+  CLEAR_SUBSCRIPTIONS = 'CLEAR_SUBSCRIPTIONS',
   SIGN_OUT = 'SIGN_OUT',
   SUBSCRIBE = 'SUBSCRIBE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
@@ -69,11 +72,13 @@ export type DemerisMutationArgs =
   | API.LoadingState
   | API.TokenId
   | API.StakingBalances
+  | API.UnbondingDelegations
   | API.Numbers
   | API.SeqNumber
   | API.VerifyTrace
   | API.Chains
   | API.Chain
+  | ChainData
   | API.Ticket
   | API.RelayerBalances
   | API.VerifiedDenoms

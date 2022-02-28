@@ -24,9 +24,10 @@
         {{ keplrAccountName }}
       </div>
       <div :class="[walletName ? '-text-1 text-muted' : 'text-0 font-medium leading-none']">
-        <TotalPrice v-if="isPriceApiAvailable" class="inline" :balances="balances" />
-        <div v-else class="text-center">-</div>
-        <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
+        <TotalPrice v-if="isPriceApiAvailable && initialLoadComplete" class="inline" :balances="balances" />
+        <SkeletonLoader v-else width="100%">
+          <span v-if="walletName" class="ml-1">&middot; {{ walletName }}</span>
+        </SkeletonLoader>
       </div>
     </div>
   </div>
@@ -38,15 +39,18 @@ import avatar from 'gradient-avatar';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import TotalPrice from '@/components/common/TotalPrice.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisGetterTypes } from '@/store';
+import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
   name: 'AvatarBalance',
 
   components: {
     TotalPrice,
+    SkeletonLoader,
   },
   props: {
     walletName: { type: String, required: false, default: '' },
@@ -67,9 +71,17 @@ export default defineComponent({
       return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
     });
 
+    const initialLoadComplete = computed(() => {
+      if (featureRunning('REQUEST_PARALLELIZATION')) {
+        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+      } else {
+        return true;
+      }
+    });
     return {
       balances,
       keplrAddress,
+      initialLoadComplete,
       keplrAccountName,
       isPriceApiAvailable,
     };
@@ -86,7 +98,10 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+::v-deep(.skeleton-loader) {
+  margin-top: 0;
+}
 .avatar {
   &__gradient {
     &:before {

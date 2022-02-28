@@ -2,6 +2,7 @@ import { Coin, Secp256k1HdWallet } from '@cosmjs/amino';
 import { sha256, stringToPath } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { bech32 } from 'bech32';
+import findIndex from 'lodash/findIndex';
 
 import { GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
 import { demoAddresses } from '@/store/demeris-user/demo-account';
@@ -39,6 +40,10 @@ export function keyHashfromAddress(address: string): string {
 }
 export function chainAddressfromAddress(prefix: string, address: string) {
   return bech32.encode(prefix, bech32.decode(address).words);
+}
+export function chainAddressfromKeyhash(prefix: string, keyhash: string) {
+  const words = bech32.toWords(Buffer.from(keyhash, 'hex'));
+  return keyhash != '' ? bech32.encode(prefix, words) : '';
 }
 export async function getOwnAddress({ chain_name }) {
   const isCypress = !!window['Cypress'];
@@ -161,4 +166,18 @@ export function parseCoins(input: string): Coin[] {
         denom: match[2],
       };
     });
+}
+
+// A = 65, z = 122
+export function getFirstAlphabet(str: string) {
+  const index = findIndex(str, (letter) => {
+    return letter.charCodeAt(0) >= 65 && letter.charCodeAt(0) <= 122;
+  });
+  if (index !== -1) return str[index];
+  return '';
+}
+
+export function checkStringIsKeybase(str: string) {
+  if (!str || str.length !== 16) return false;
+  return /[0-9A-F]{16}/.test(str.toUpperCase());
 }

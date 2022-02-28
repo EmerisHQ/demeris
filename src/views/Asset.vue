@@ -5,17 +5,18 @@
         <!-- Info -->
 
         <header>
-          <div class="sm:flex items-center flex-wrap gap-y-3">
+          <div class="sm:flex flex-wrap gap-y-3">
             <CircleSymbol :denom="denom" size="md" class="mr-3" />
             <div class="flex-grow flex items-baseline justify-between flex-nowrap">
-              <div class="sm:flex items-baseline flex-wrap">
-                <h1 class="text-1 sm:text-2 font-bold mt-4 sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
-                <span class="text-muted text-0 mt-2 flex-grow"><Ticker :name="denom" /></span>
+              <div class="items-baseline">
+                <h1 class="text-1 sm:text-2 font-bold sm:mt-0 sm:mr-3"><Denom :name="denom" /></h1>
+                <div class="text-muted text-0 flex-grow"><Ticker :name="denom" /></div>
               </div>
               <Price
                 v-tippy
                 :amount="{ amount: 0, denom }"
-                class="text-1 sm:text-2 font-bold"
+                :price-diff-object="priceDiffObject"
+                class="text-1 sm:text-2 font-bold text-right"
                 content="Current asset price"
               />
             </div>
@@ -28,6 +29,7 @@
           :data-stream="dataStream"
           :show-loading="showPriceChartLoadingSkeleton"
           @filterChanged="getTokenPrices"
+          @priceDiff="setPriceDifference"
         />
 
         <!-- Balance -->
@@ -67,7 +69,13 @@
               </dd>
             </div>
 
-            <div>
+            <div v-if="assetConfig?.stakable && stakingEnabled">
+              <dt class="text-muted">{{ $t('pages.asset.unbonding') }}</dt>
+              <dd class="font-medium mt-0.5">
+                <AmountDisplay :amount="{ amount: unstakedAmount, denom }" />
+              </dd>
+            </div>
+            <div v-else>
               <dt class="text-muted">{{ $t('pages.asset.pooled') }}</dt>
               <dd class="font-medium mt-0.5">
                 <tippy>
@@ -80,6 +88,13 @@
             </div>
           </dl>
         </section>
+
+        <!-- Staking -->
+        <template v-if="stakingEnabled">
+          <section v-if="assetConfig?.stakable" class="mt-16">
+            <StakeTable class="mt-8" :denom="denom" />
+          </section>
+        </template>
 
         <!-- Chains -->
 
@@ -137,14 +152,6 @@
           </header>
 
           <Pools :pools="poolsDisplay" class="mt-8" />
-        </section>
-
-        <!-- Staking -->
-
-        <section v-if="assetConfig?.stakable" class="mt-16">
-          <h2 class="text-2 font-bold">{{ $t('pages.asset.staking') }}</h2>
-
-          <StakeTable class="mt-8" :denom="denom" />
         </section>
       </main>
 
@@ -219,20 +226,21 @@ export default defineComponent({
     const isPoolCoin = computed(() => {
       return denom.value.startsWith('pool');
     });
+    const stakingEnabled = featureRunning('STAKING');
     const apistore = useStore() as TypedAPIStore;
     const route = useRoute();
     const router = useRouter();
     const denom = computed(() => route.params.denom as string);
-
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
-    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances } = useAccount();
+    const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
+      useAccount();
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
     const assetConfig = computed(() => {
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
-    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+    if (!assetConfig.value) {
       router.push('/');
     }
 
@@ -264,6 +272,10 @@ export default defineComponent({
         const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+            subscribe: false,
+            params: { chain_name: dexChain },
+          });
           const invPrimaryChannel =
             apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
               chain_name: dexChain,
@@ -299,6 +311,13 @@ export default defineComponent({
       }
       return 0;
     });
+    const unbondingDelegation = computed(() => {
+      // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
+      if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
+        return unbondingDelegationsByChain(assetConfig.value.chain_name);
+      }
+      return [];
+    });
 
     const stakedAmount = computed(() => {
       let staked = stakingBalance.value;
@@ -314,6 +333,20 @@ export default defineComponent({
       return totalStakedAmount;
     });
 
+    const unstakedAmount = computed(() => {
+      let totalUnstakedAmount = 0;
+      if (unbondingDelegation.value.length > 0) {
+        const unstakedAmounts = unbondingDelegation.value
+          .map((y) => y.entries)
+          .flat()
+          .map((z) => z.balance);
+        if (unstakedAmounts.length > 0) {
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
+          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
+        }
+      }
+      return totalUnstakedAmount;
+    });
     const poolsInvestedWithAsset = computed(() => {
       const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
       const balancesCopy = JSON.parse(JSON.stringify(balances.value));
@@ -368,14 +401,20 @@ export default defineComponent({
     });
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value;
+      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
     });
 
     const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
     const dataStream = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
     });
+
     const getTokenPrices = ref(null);
+    let priceDiffObject = ref(null);
+
+    const setPriceDifference = (priceDiff: any) => {
+      priceDiffObject.value = priceDiff;
+    };
 
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
@@ -434,13 +473,17 @@ export default defineComponent({
       poolsInvestedWithAsset,
       availableAmount,
       stakedAmount,
+      unstakedAmount,
       pooledAmount,
       totalAmount,
       isPoolCoin,
+      stakingEnabled,
       dataStream,
       getTokenPrices,
       showPriceChart,
       showPriceChartLoadingSkeleton,
+      priceDiffObject,
+      setPriceDifference,
     };
   },
 });

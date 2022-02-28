@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## 0.1.12 - 2022-02-18
+
+### Features
+
+- Update support url
+- Added e2e testing
+- Slippage tolerance
+- Staking
+- Documentation
+- Analytics User ID Tracking
+- Forced build to Node 16
+
+### Fixes
+
+- Simplex GA
+- Webpack less verbose in logs
+- Chart component fixes before starting feature
+
+## 0.1.11 - 2022-02-11
+
+### Features
+
+- Price difference value and percentage implemented (under price)
+
+### Fixes
+
+- Minor fixes on base chart component and asset price performance chart
+
+## 0.1.10 - 2022-02-10
+
+### Features
+
+- Dex Aggregation Exchanges Filter
+- Simplex integration for US
+
+### Fixes
+
+- Display of wrong denom name in asset tables
+- Prevent failure with min pool receive amount
+- Pending transaction modal behavior
+
 ## 0.1.9 - 2022-02-07
 
 ### Features
@@ -28,6 +69,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fixed some copy in the transaction widget
 - Fixes Ts error
 - Fixes flickering in circlesymbol
+- Fixes Asset line chart component not displaying when switching between assets
 
 ## 0.1.7 - 2022-01-17
 

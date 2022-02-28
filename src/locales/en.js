@@ -22,6 +22,7 @@ export const messages = {
       agree: 'Agree',
       cancel: 'Cancel',
       confirm: 'Confirm',
+      close: 'Close',
       continue: 'Continue',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
@@ -91,6 +92,13 @@ export const messages = {
       },
     },
     components: {
+      addLiquidity: {
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
+      },
       chainDown: {
         assetsUnavailable: 'Your assets on this chain may be unavailable for some time.',
         appearsDown: 'Emeris connection to {chain} appears to be down',
@@ -102,12 +110,18 @@ export const messages = {
       cookieConsent: {
         message: 'By using this website, you agree to our',
         linkText: 'Cookie Policy.',
+        acceptText: 'OK',
       },
       asset: {
         pooledTooltip: 'Pooled assets are not added to your balance because pool ratios continuously change.',
       },
       withdrawLiquidity: {
         title: 'Withdraw liquidity',
+        navigation: {
+          amount: 'Amount',
+          review: 'Review',
+          send: 'Send',
+        },
       },
       send: {
         send: 'Send',
@@ -115,6 +129,13 @@ export const messages = {
         moveAssetsDescription: 'Move assets between your addresses on different chains.',
         sendToAddress: 'Send to address',
         sendToAddressDescription: 'Send assets to someone else or another account with a crypto address.',
+        navigation: {
+          recipient: 'Recipient',
+          amount: 'Amount',
+          review: 'Review',
+          move: 'Move',
+          send: 'Send',
+        },
       },
       chainSelect: {
         text1: 'You have {asset} on {chainNo} {chains}.',
@@ -136,6 +157,22 @@ export const messages = {
         slowWarning: 'Your transaction may take longer to be processed.',
         swapFee: 'Swap fee',
         estimate: 'Estimated total fees',
+      },
+      validatorCard: {
+        commissionLabel: 'Commission',
+        maxCommissionLabel: 'Max commission',
+        maxChangeRateLabel: 'Max change rate',
+      },
+      stakeForm: {
+        selectTitle: 'Select a validator',
+        title: 'Enter amount to stake',
+      },
+      switchForm: {
+        selectTitle: 'Select a validator',
+        title: 'Enter amount to restake',
+      },
+      unstakeForm: {
+        title: 'Enter amount to unstake',
       },
       moveForm: {
         title: 'Move assets',
@@ -170,13 +207,42 @@ export const messages = {
         disclaimer: 'Assets will not be swapped at a higher rate than the limit rate.',
         minReceivedLbl: 'Min. received if 100% swapped',
         minReceivedLblHint: 'Minimum you will receive if your entire swap is fulfilled.',
+        slippageValueError: 'Please enter a valid slippage rate.',
+        highSlippageMessage: 'Your swap price may be significantly above the market price.',
+      },
+      staking: {
+        navigation: {
+          validator: 'Validator',
+          amount: 'Amount',
+          review: 'Review',
+          stake: 'Stake',
+          restake: 'Restake',
+          unstake: 'Unstake',
+          transfer: 'Transfer',
+          claim: 'Claim',
+        },
       },
       stakeTable: {
+        staking: 'Staking',
+        unstaking: 'Unstaking',
         earnRewards: 'Earn rewards by staking',
-        lockUp: 'Lock up your',
-        andEarn: 'and earn continuous staking rewards.',
+        lockUpAndEarnRewards: 'Lock up your {ticker} and earn passive income with an average {apy}',
+        apy: 'APY',
         reward: 'Rewards',
-        apy: '9.7% APY',
+        stakeAsset: 'Stake {ticker}',
+        selectValidator: 'Select a validator',
+        searchValidator: 'Search validators',
+        claimRewards: 'Claim rewards',
+        stake: 'Stake',
+        unstake: 'Unstake',
+        switchValidator: 'Switch validator',
+      },
+      validatorTable: {
+        validator: 'Validator',
+        votingPower: 'Voting power',
+        commission: 'Commission',
+        staked: 'Staked',
+        stake: 'Stake',
       },
       feeWarningModal: {
         missingOne: 'You need {denom} to pay fees',
@@ -184,6 +250,46 @@ export const messages = {
         missingOneTextAtom: 'Lorem ipsum Atom',
         missingMany: 'You have no assets to pay fees',
         missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        claim: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To claim your rewards, the following assets are required to pay fees.',
+        },
+        stake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        unstake: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        switch: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        swap: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'For this transfer and swap, the following assets are required to pay fees.',
+        },
+        addliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        withdrawliquidity: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        createpool: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        transfer: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
+        move: {
+          missingMany: 'You have no assets to pay fees',
+          missingManyText: 'To proceed, the following assets are required to pay fees.',
+        },
         ibcWarning: 'You may need {denom} to pay fees',
         ibcWarningText: 'In order to use your {ibcDenom} on {chain}, you may need {denom} to pay fees',
       },
@@ -219,6 +325,10 @@ export const messages = {
         transferAction: 'Transferring',
         swapAction: 'Swapping',
         createPoolAction: 'Creating pool',
+        stakeAction: 'Staking',
+        unstakeAction: 'Unstaking',
+        claimAction: 'Claiming rewards',
+        switchAction: 'Switching validators',
         addLiqAction: 'Adding liquidity',
         withdrawLiqAction: 'Withdrawing liquidity',
         withdrawing: 'Withdrawing',
@@ -235,12 +345,21 @@ export const messages = {
         createPoolActionComplete: 'Pool created',
         addLiqActionComplete: 'Liquidity added',
         withdrawLiqActionComplete: 'Liquidity withdrawn',
-
+        stakeActionComplete: 'Staked',
+        switchActionComplete: 'Switched validator',
+        claimActionComplete: 'Rewards claimed',
+        unstakeActionComplete: 'Unstaked',
         swapActionFail: 'Assets failed to be swapped',
         createPoolActionFail: 'Create pool failed',
         addLiqActionFail: 'Add liquidity failed',
         withdrawLiqActionFail: 'Liquidity withdrawal failed',
         txFail: 'Transaction failed',
+        stakeActionFail: 'Staking failed',
+        switchActionFail: 'Switching validator failed',
+        claimActionFail: 'Claiming rewards failed',
+        unstakeActionFail: 'Unstaking failed',
+        stakeDisclaimer:
+          'Your tokens are blocked while staking. You start to earn rewards from the first day. You can unstake or switch validators at any time.',
         noRevert: 'Once executed, transactions cannot be reverted. By continuing, you agree to our',
         received: 'You received {amount} on {chainName}.',
         notSwapped: 'Your {amount} on {chainName} was not swapped.',
@@ -270,6 +389,9 @@ export const messages = {
       transferToHub: {
         swap: 'Assets are swapped on the Cosmos Hub',
         swapDescription: 'Your {denom} must first be transferred to the Cosmos Hub before they can be swapped.',
+        stake: '{denom} are staked on the {chain} chain',
+        stakeDescription:
+          'In order to stake your {denom}, your {denom} must first be transferred to the {chain} chain.',
         addLiquidity: 'Pools are on the Cosmos Hub',
         addLiquidityDescription:
           'In order to add liquidity to a pool, your {denom} must be transferred to the Cosmos Hub.',
@@ -338,6 +460,36 @@ export const messages = {
           swapFeeLbl: 'Swap fee',
           swapFeeLblHint: 'Swap fee paid to liquidity providers',
         },
+        claim: {
+          totalRewards: 'Total rewards',
+          validators: 'Validators',
+          transactionFee: 'Transaction fee',
+          rewards: 'rewards',
+        },
+        stake: {
+          stakeLbl: 'Stake',
+          validatorsLbl: 'Validators',
+          stakedLbl: 'Stake',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'Base fee paid to the network',
+        },
+        switch: {
+          stakeLbl: 'Stake',
+          fromLbl: 'From',
+          toLbl: 'To',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'Base fee paid to the network',
+        },
+        unstake: {
+          unstakeLbl: 'Unstake',
+          claimLbl: 'Claim rewards',
+          fromLbl: 'From',
+          periodLbl: 'Unstaking period',
+          periodVal: '{days} days',
+          availLbl: 'Staked assets available',
+          feeLbl: 'Transaction fee',
+          feeLblHint: 'Base fee paid to the network',
+        },
       },
       settingsMenu: {
         theme: 'Theme',
@@ -351,6 +503,7 @@ export const messages = {
         disconnectWallet: 'Disconnect wallet',
         connectWallet: 'Connect wallet',
         support: 'Support',
+        telegram: 'Telegram',
         twitter: 'Twitter',
         privacy: 'Privacy',
         tos: 'Terms of Service',
@@ -432,12 +585,18 @@ export const messages = {
         empty: 'Pools you add liquidity to will appear here.',
         explore: 'Explore pools',
       },
+      stake: {
+        title: 'Stake',
+        enterAmount: 'Enter amount to stake',
+        claimRewards: 'Claim rewards',
+      },
       transactions: {
         status: 'Status',
         ticket: 'Ticket',
         error: 'Error',
         transacting: {
-          notifiedWhenCompletes: 'You will be notified when your swap completes.',
+          notifiedWhenCompleteSwap: 'You will be notified when your swap is complete.',
+          notifiedWhenComplete: 'You will be notified when your transaction is complete.',
         },
         review: {
           transfer: 'Review your transfer details',
@@ -446,6 +605,10 @@ export const messages = {
           addliquidity: 'Review your pool liquidity provision',
           withdrawliquidity: 'Review your liquidity withdrawal',
           createpool: 'Review your liquidity pool provision',
+          claim: 'Claim rewards',
+          stake: 'Review your stake',
+          unstake: 'Review your unstaking details',
+          switch: 'Review your restaking details',
         },
         cancel: {
           title: 'Are you sure you want to cancel this transaction?',
@@ -521,17 +684,20 @@ export const messages = {
         createWarning: 'Creating a pool is risky business',
         arbitrageWarning:
           'As the first liquidity provider, you are setting the pool price. This means that if you don’t know what you are doing, you may risk significant loss as a result of arbitrage.',
+        receiveLpAsset: 'The shares you will receive based on your contribution to the underlying pool',
       },
       asset: {
         balance: 'Balance',
         available: 'Available',
         staked: 'Staked',
-        pooled: 'Pooled',
         pooledWarning: 'Pooled Warning',
         chains: 'Chains',
         pools: 'Pools',
+        pooled: 'Pooled',
         staking: 'Staking',
+        unbonding: 'Unstaking',
         highLow: 'High {high} / Low {low}',
+        priceDiff: '{diff} ({percent})',
       },
       assets: {
         assets: 'Assets',

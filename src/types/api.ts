@@ -19,6 +19,9 @@ export type TokenPriceReq = {
 export type TokenIdReq = {
   token: string;
 };
+export type DenomReq = {
+  denom: string;
+};
 export type TokenId = string;
 export type TokenPrices = {
   x: string;
@@ -120,6 +123,23 @@ export type StakingBalancesResponse = {
   staking_balances: StakingBalances;
 };
 
+// /unbonding_delegations/:address response data types
+export type UnbondingDelegationEntry = {
+  balance: string;
+  completion_time: string;
+  creation_height: number;
+  initial_balance: string;
+};
+export type UnbondingDelegation = {
+  validator_address: string;
+  entries: UnbondingDelegationEntry[];
+  chain_name: string;
+};
+export type UnbondingDelegations = Array<UnbondingDelegation>;
+export type UnbondingDelegationsResponse = {
+  unbonding_delegations: UnbondingDelegations;
+};
+
 // /verified_denoms endpoint data types
 
 export type VerifiedDenom = Denom & { chain_name: string };
@@ -183,6 +203,10 @@ export type Chain = {
   genesis_hash?: string;
   node_info?: NodeInfo;
   derivation_path?: string;
+  public_node_endpoints?: {
+    tendermint_rpc?: string[];
+    cosmos_api?: string[];
+  };
 };
 export type ChainResponse = {
   chain: Chain;
@@ -285,7 +309,7 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq | DenomReq;
 
 export type SwapEndBlockResponse = {
   exchanged_offer_coin_amount: string;

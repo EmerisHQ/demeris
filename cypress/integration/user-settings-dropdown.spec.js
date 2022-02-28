@@ -16,7 +16,7 @@ describe('Navbar elements location and availibility', function () {
 
     userDropdown.expand();
 
-    userDropdown.support().should('have.attr', 'href', 'https://emeris.com/support');
+    userDropdown.support().should('have.attr', 'href', 'https://support.emeris.com');
     userDropdown.support().should('be.visible');
 
     userDropdown.twitter().should('have.attr', 'href', 'https://twitter.com/emerisHQ');
