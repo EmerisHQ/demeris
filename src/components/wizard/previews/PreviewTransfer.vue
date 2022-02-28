@@ -6,6 +6,7 @@
           <AmountDisplay
             class="font-medium"
             :class="context === 'widget' ? 'text-0' : 'text-1'"
+            :chain="transactionInfo.from.chain"
             :amount="{ amount: transactionInfo.from.amount, denom: denomName }"
           />
           <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
@@ -68,6 +69,7 @@
           <AmountDisplay
             class="font-medium"
             :class="context !== 'widget' ? 'text-1' : 'text-0'"
+            :chain="transactionInfo.to.chain"
             :amount="{ amount: transactionInfo.to.amount, denom: denomName }"
           />
           <div class="block text-muted -text-1" :class="{ 'mt-0.5': context !== 'widget' }">
@@ -145,6 +147,11 @@ export default defineComponent({
     bordered: {
       type: Boolean,
       default: true,
+    },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
     },
   },
 

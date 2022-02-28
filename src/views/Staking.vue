@@ -21,7 +21,7 @@
             class="capitalize font-medium cursor-default"
             :class="step === label ? 'text-text' : 'text-inactive'"
           >
-            {{ label }}
+            {{ $t('components.staking.navigation.' + label) }}
           </span>
         </nav>
 

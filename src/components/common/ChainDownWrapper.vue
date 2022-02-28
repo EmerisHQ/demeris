@@ -8,7 +8,7 @@
     </span>
 
     <span class="font-bold">
-      <i18n-t keypath="components.chainDown.appearsDown">
+      <i18n-t scope="global" keypath="components.chainDown.appearsDown">
         <template #chain>
           <ChainName :name="dexChain" />
         </template>

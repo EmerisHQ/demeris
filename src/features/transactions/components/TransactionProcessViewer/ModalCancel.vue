@@ -5,7 +5,7 @@
       {{ $t('context.transactions.cancel.title') }}
     </h2>
     <p class="text-muted leading-copy mb-8">
-      <i18n-t :keypath="`context.transactions.cancel.description`" />
+      <i18n-t scope="global" :keypath="`context.transactions.cancel.description`" />
     </p>
     <template #buttons>
       <ModalButton :name="$t('context.transactions.controls.keepIt')" :click-function="onKeep" />

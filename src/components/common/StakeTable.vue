@@ -15,9 +15,7 @@
         >
           {{ $t('components.stakeTable.unstaking') }}
           <div class="text-0 font-normal text-muted">
-            <div class="text-0 font-normal text-muted">
-              {{ totalStakedAssetDisplayAmount }} <Ticker :name="denom" />
-            </div>
+            <div class="text-0 font-normal text-muted">{{ unstakingAssetValue }} <Ticker :name="denom" /></div>
           </div>
         </h2>
       </div>
@@ -40,7 +38,7 @@
         <div class="flex-1 max-w-xs">
           <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
           <p class="text-muted leading-copy mt-3">
-            <i18n-t keypath="components.stakeTable.lockUpAndEarnRewards">
+            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
               <template #ticker>
                 <Ticker :name="denom" />
               </template>
@@ -66,117 +64,148 @@
     </template>
 
     <template v-else>
-      <div v-show="selectedTab === 1">
-        <!-- staking reward table -->
-        <table class="w-full table-fixed mt-8 text-right">
-          <colgroup>
-            <col width="29%" />
-            <col width="29%" />
-            <col width="29%" />
-            <col width="13%" />
-          </colgroup>
+      <template v-if="validatorList.length > 0">
+        <div v-show="selectedTab === 1">
+          <!-- staking reward table -->
+          <table class="w-full table-fixed mt-8 text-right">
+            <colgroup>
+              <col width="29%" />
+              <col width="29%" />
+              <col width="29%" />
+              <col width="13%" />
+            </colgroup>
 
-          <!-- table body -->
-          <tbody>
-            <!-- claim rewards -->
-            <tr
-              v-if="totalRewardsAmount"
-              class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
-              @click="goStakeActionPage(StakingActions.CLAIM)"
-            >
-              <td class="py-6 flex items-center rounded-l-xl bg-surface">
-                <div class="inline-flex items-center ml-6 mr-4">
-                  <img src="@/assets/svg/icons/reward.svg" />
-                </div>
-                <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
-                  {{ $t('components.stakeTable.claimRewards') }}
-                </span>
-              </td>
-              <td class="text-right text-muted bg-surface">{{ totalRewardsDisplayAmount }} <Ticker :name="denom" /></td>
-              <td class="text-right font-medium bg-surface">
-                <div class="flex justify-end">+<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" /></div>
-              </td>
-              <td class="text-right rounded-r-xl bg-surface">
-                <Icon
-                  name="CaretRightIcon"
-                  :icon-size="1"
-                  class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
-                />
-              </td>
-            </tr>
-
-            <!-- staked validators -->
-            <tr v-for="validator of stakingBalances" :key="validator.validator_address">
-              <td class="py-6 flex items-center transition">
-                <div class="inline-flex items-center mr-4">
-                  <ValidatorBadge
-                    :validator="
-                      validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
-                    "
-                    class="w-8 h-8 rounded-full bg-fg z-1"
+            <!-- table body -->
+            <tbody>
+              <!-- claim rewards -->
+              <tr
+                v-if="totalRewardsAmount"
+                class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
+                @click="goStakeActionPage(StakingActions.CLAIM)"
+              >
+                <td class="py-6 flex items-center rounded-l-xl bg-surface">
+                  <div class="inline-flex items-center ml-6 mr-4">
+                    <img src="@/assets/svg/icons/reward.svg" />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ $t('components.stakeTable.claimRewards') }}
+                  </span>
+                </td>
+                <td class="text-right text-muted bg-surface">
+                  {{ totalRewardsDisplayAmount }} <Ticker :name="denom" />
+                </td>
+                <td class="text-right font-medium bg-surface">
+                  <div class="flex justify-end">
+                    +<Price :amount="{ denom: denom, amount: totalRewardsAmount }" :show-dash="false" />
+                  </div>
+                </td>
+                <td class="text-right rounded-r-xl bg-surface">
+                  <Icon
+                    name="CaretRightIcon"
+                    :icon-size="1"
+                    class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
                   />
-                </div>
-                <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
-                  {{ getValidatorMoniker(validator.validator_address) }}
-                </span>
-              </td>
-              <td class="text-right text-muted">{{ getDisplayAmount(validator.amount) }} <Ticker :name="denom" /></td>
-              <td class="text-right font-medium">
-                <Price :amount="{ denom: denom, amount: validator.amount }" />
-              </td>
-              <td class="text-right">
-                <tippy
-                  placement="right-start"
-                  trigger="click"
-                  delay="0"
-                  :interactive="true"
-                  :arrow="false"
-                  :offset="[-24, 0]"
-                >
-                  <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
-                    <Icon name="ThreeDotsIcon" :icon-size="1.5" />
-                  </Button>
-                  <template #content>
-                    <div class="w-64 text-0 font-normal text-left -mx-3">
-                      <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.STAKE, validator.validator_address)"
-                      >
-                        {{ $t('components.stakeTable.stake') }}
+                </td>
+              </tr>
+
+              <!-- staked validators -->
+              <tr v-for="validator of stakingBalances" :key="validator.validator_address">
+                <td class="py-6 flex items-center transition">
+                  <div class="inline-flex items-center mr-4">
+                    <ValidatorBadge
+                      :validator="
+                        validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
+                      "
+                      class="w-8 h-8 rounded-full bg-fg z-1"
+                    />
+                  </div>
+                  <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                    {{ getValidatorMoniker(validator.validator_address) }}
+                  </span>
+                </td>
+                <td class="text-right text-muted">{{ getDisplayAmount(validator.amount) }} <Ticker :name="denom" /></td>
+                <td class="text-right font-medium">
+                  <Price :amount="{ denom: denom, amount: validator.amount }" />
+                </td>
+                <td class="text-right">
+                  <tippy
+                    placement="right-start"
+                    trigger="click"
+                    delay="0"
+                    :interactive="true"
+                    :arrow="false"
+                    :offset="[-24, 0]"
+                  >
+                    <Button :full-width="false" variant="link" class="text-muted hover:text-text w-12" rounded>
+                      <Icon name="ThreeDotsIcon" :icon-size="1.5" />
+                    </Button>
+                    <template #content>
+                      <div class="w-64 text-0 font-normal text-left -mx-3">
+                        <div
+                          class="py-2 px-6"
+                          :class="{
+                            'text-muted': validatorList.find(
+                              (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                            ).jailed,
+                            'cursor-pointer hover:text-link': !validatorList.find(
+                              (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                            ).jailed,
+                          }"
+                          @click="
+                            () => {
+                              if (
+                                !validatorList.find(
+                                  (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
+                                ).jailed
+                              ) {
+                                goStakeActionPage(StakingActions.STAKE, validator.validator_address);
+                              }
+                            }
+                          "
+                        >
+                          {{ $t('components.stakeTable.stake') }}
+                        </div>
+                        <div
+                          class="py-2 px-6 cursor-pointer hover:text-link"
+                          @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
+                        >
+                          {{ $t('components.stakeTable.unstake') }}
+                        </div>
+                        <div
+                          class="py-2 px-6 cursor-pointer hover:text-link"
+                          @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
+                        >
+                          {{ $t('components.stakeTable.switchValidator') }}
+                        </div>
                       </div>
-                      <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.UNSTAKE, validator.validator_address)"
-                      >
-                        {{ $t('components.stakeTable.unstake') }}
-                      </div>
-                      <div
-                        class="py-2 px-6 cursor-pointer hover:text-link"
-                        @click="goStakeActionPage(StakingActions.SWITCH, validator.validator_address)"
-                      >
-                        {{ $t('components.stakeTable.switchValidator') }}
-                      </div>
-                    </div>
-                  </template>
-                </tippy>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div v-show="selectedTab === 2">unstaking</div>
+                    </template>
+                  </tippy>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-show="selectedTab === 2">unstaking</div>
+      </template>
+      <SkeletonLoader v-else width="100%" height="300px" />
     </template>
   </div>
 </template>
 <script lang="tsx">
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { computed, defineComponent, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
@@ -186,8 +215,6 @@ import { GlobalDemerisGetterTypes } from '@/store';
 import { StakingActions } from '@/types/actions';
 import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 
-import ValidatorBadge from './ValidatorBadge.vue';
-
 export default defineComponent({
   components: {
     Button,
@@ -196,6 +223,7 @@ export default defineComponent({
     Price,
     Icon,
     ValidatorBadge,
+    SkeletonLoader,
   },
   props: {
     denom: {
@@ -204,6 +232,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    dayjs.extend(relativeTime);
     const { useDenom } = useDenoms();
     const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
       useStaking();
@@ -239,42 +268,49 @@ export default defineComponent({
     const assetPrecision = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
-          name: props.denom,
+          name: propsRef.denom.value,
         }) ?? '6'
       );
     });
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
+    const getTimeToString = (isodate: string) => {
+      return dayjs().to(dayjs(isodate));
+    };
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
-        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
       );
     });
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
-        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: props.denom }),
+        chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
+          denom: propsRef.denom.value,
+        }),
       }).val_addr;
     });
     const totalStakedAssetDisplayAmount = computed(() => {
-      return (
-        Math.trunc(
-          (stakingBalances.value.reduce((total, currentValue) => total + Number(currentValue.amount), 0) /
-            10 ** assetPrecision.value +
-            (totalRewardsDisplayAmount.value ?? 0)) *
-            10 ** assetPrecision.value,
-        ) /
-        10 ** assetPrecision.value
+      const total = new BigNumber(totalRewardsAmount.value).plus(
+        stakingBalances.value.reduce(
+          (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
+          new BigNumber(0),
+        ),
       );
+      if (total.isLessThan(1)) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      } else {
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
+        return totalDisplay.toFixed(assetPrecision.value);
+      }
     });
     const isStakingAssetExist = computed(() => {
       return stakingBalances.value.length > 0;
     });
     const isUnstakingAssetExist = computed(() => {
-      // TODO: implement unstaking asset check
-      return false;
+      return unbondingBalances.value.length > 0;
     });
     const stakingButtonName = computed(() => {
       return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
@@ -283,11 +319,22 @@ export default defineComponent({
       return parseFloat(stakingRewardsData.value?.total ?? 0);
     });
     const totalRewardsDisplayAmount = computed(() => {
-      return Math.trunc(totalRewardsAmount.value ?? 0) / 10 ** assetPrecision.value;
+      if (totalRewardsAmount.value < 1) {
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+      }
+      return new BigNumber(totalRewardsAmount.value ?? 0)
+        .dividedBy(10 ** assetPrecision.value)
+        .toFixed(assetPrecision.value);
     });
     const unstakingAssetValue = computed(() => {
-      //TODO
-      return 77;
+      return unbondingBalances.value
+        .map((x) => x.entries)
+        .flat()
+        .reduce((acc, entry) => {
+          return acc.plus(new BigNumber(entry.balance));
+        }, new BigNumber(0))
+        .dividedBy(10 ** assetPrecision.value)
+        .toString();
     });
 
     /* functions */
@@ -343,6 +390,7 @@ export default defineComponent({
 
     return {
       StakingActions,
+      getTimeToString,
       isUnstakingAssetExist,
       isStakingAssetExist,
       unbondingBalances,

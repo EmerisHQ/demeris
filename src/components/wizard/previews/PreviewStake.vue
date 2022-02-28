@@ -24,7 +24,10 @@
         <div class="flex justify-end items-center pb-5">
           <div class="flex flex-col text-right items-end">
             <div>{{ getValidatorMoniker(stake.validatorAddress) }}</div>
-            <div class="text-muted -text-1">Staked <AmountDisplay :amount="stake.amount" /></div>
+            <div v-if="!isReceipt"><AmountDisplay :amount="stake.amount" /></div>
+            <div v-if="getStakingBalance(stake.validatorAddress) != 0" class="text-muted -text-1">
+              Staked <AmountDisplay :amount="{ amount: getStakingBalance(stake.validatorAddress), denom: baseDenom }" />
+            </div>
           </div>
           <div>
             <ValidatorBadge :validator="getValidator(stake.validatorAddress)" size="md" class="ml-3" />
@@ -49,7 +52,7 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -57,9 +60,13 @@ import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import { List, ListItem } from '@/components/ui/List';
+import useAccount from '@/composables/useAccount';
 import useStaking from '@/composables/useStaking';
+import { GlobalDemerisGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { keyHashfromAddress } from '@/utils/basic';
+
 export default defineComponent({
   name: 'PreviewStake',
   components: {
@@ -84,12 +91,18 @@ export default defineComponent({
       type: String as PropType<'default' | 'widget'>,
       default: 'default',
     },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
   },
 
   setup(props) {
     const store = useStore();
     const { getValidatorsByBaseDenom } = useStaking();
     const propsRef = toRefs(props);
+    const { stakingBalancesByChain } = useAccount();
     const validators = ref([]);
     const tx = propsRef.step.value.transactions[0];
     const chainName = (tx.data as Actions.StakeData[])[0].chain_name;
@@ -103,6 +116,15 @@ export default defineComponent({
     onMounted(async () => {
       validators.value = await getValidatorsByBaseDenom(baseDenom);
     });
+
+    const stakingBalances = computed(() => {
+      return stakingBalancesByChain(
+        store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
+      );
+    });
+    const getStakingBalance = (address) => {
+      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
+    };
     const getValidatorMoniker = (address) => {
       return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
     };
@@ -116,6 +138,7 @@ export default defineComponent({
       tx: tx.data as Actions.StakeData[],
       getValidator,
       getValidatorMoniker,
+      getStakingBalance,
       baseDenom,
       chainName,
       totalStaked,

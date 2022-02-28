@@ -110,11 +110,12 @@
             "
           >
             <td
-
               class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap"
-              :class="{ 'group-hover:bg-fg transition': !(
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }"
+                ),
+              }"
             >
               <div class="inline-flex items-center mr-4 align-middle">
                 <!-- TODO: get logo url -->
@@ -124,38 +125,58 @@
                 {{ validator.moniker }}
               </span>
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
               <div class="-text-1 text-muted">
                 {{ getVotingPowerPercDisplayValue(validator.tokens) }}
               </div>
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               {{ getCommissionDisplayValue(validator.commission_rate) }}
             </td>
-            <td class="py-4 px-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              class="py-4 px-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
               <div class="-text-1 text-muted">
                 {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
               </div>
             </td>
 
-            <td v-if="hasActions" class="py-4 pl-2 text-right" :class="{ 'group-hover:bg-fg transition': !(
+            <td
+              v-if="hasActions"
+              class="py-4 pl-2 text-right"
+              :class="{
+                'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ) }">
+                ),
+              }"
+            >
               <div class="flex justify-center pl-4">
                 <Button
                   v-tippy
                   class="ml-8"
                   :content="validator.jailed ? 'Validator jailed' : null"
                   :name="$t('components.validatorTable.stake')"
-
                   :disabled="
                     validator.jailed ||
                       (disabledList.includes(validator.operator_address) &&
@@ -164,8 +185,9 @@
                   @click.stop="
                     () => {
                       if (
-                        !disabledList.includes(validator.operator_address) ||
-                        currentlyEditing == validator.operator_address
+                        (!disabledList.includes(validator.operator_address) ||
+                          currentlyEditing == validator.operator_address) &&
+                        !validator.jailed
                       ) {
                         selectValidator(validator);
                       }
@@ -185,8 +207,9 @@
           v-if="detailedValidator"
           :validator="detailedValidator"
           :disabled="
-            disabledList.includes(detailedValidator.operator_address) &&
-              currentlyEditing != detailedValidator.operator_address
+            detailedValidator.jailed ||
+              (disabledList.includes(detailedValidator.operator_address) &&
+                currentlyEditing != detailedValidator.operator_address)
           "
           @close="
             () => {
@@ -195,8 +218,9 @@
           "
           @clicked="
             if (
-              !disabledList.includes(detailedValidator.operator_address) ||
-              currentlyEditing != detailedValidator.operator_address
+              (!disabledList.includes(detailedValidator.operator_address) ||
+                currentlyEditing == detailedValidator.operator_address) &&
+              !detailedValidator.jailed
             ) {
               selectValidator(detailedValidator);
             }
@@ -293,7 +317,7 @@ export default defineComponent({
     const filteredAndSortedValidatorList = computed(() => {
       const query = keyword.value.toLowerCase();
       return propsRef.validatorList.value
-        .filter((vali: any) => vali.moniker.toLowerCase().indexOf(query) !== -1)
+        .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
         .sort((a, b) => {
           switch (sortBy.value) {
             case 'power':
