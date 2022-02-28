@@ -52,7 +52,7 @@ if (featureRunning('SENTRY')) {
     integrations: [
       new BrowserTracing({
         routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-        tracingOrigins: ['app.emeris.com'],
+        tracingOrigins: ['app.emeris.com', /^\//],
       }),
     ],
     // Set tracesSampleRate to 1.0 to capture 100%
