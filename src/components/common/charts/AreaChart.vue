@@ -102,7 +102,7 @@ export default defineComponent({
               return `$${value}`;
             },
             title: {
-              formatter: (seriesName) => '',
+              formatter: () => '',
             },
           },
           marker: {

@@ -15,12 +15,6 @@ export default function useStaking() {
     //TODO: have our own curated DB for validator list
     const chain_name = store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: base_denom });
     const rawValidators = await store.dispatch(GlobalDemerisActionTypes.API.GET_VALIDATORS, { chain_name });
-    const reducer = (accumulator, validator) => {
-      if (status.includes(validator.status)) {
-        accumulator.push(validator);
-      }
-      return accumulator;
-    };
 
     //const curatedValidatorList = await Promise.all(rawValidators.reduce(reducer, []));
     return [...rawValidators];
