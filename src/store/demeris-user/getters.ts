@@ -2,7 +2,6 @@ import { GetterTree } from 'vuex';
 
 import { RootState } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
-import * as API from '@/types/api';
 import { keyHashfromAddress } from '@/utils/basic';
 
 import { GetterTypes } from './getter-types';
@@ -28,7 +27,6 @@ export type Getters = {
   [GetterTypes.getKeplrAddress](state): string;
   [GetterTypes.theme](state: State): string;
   [GetterTypes.getPreferredGasPriceLevel](state: State): GasPriceLevel;
-  [GetterTypes.getOwnAddress](state: State): { (params: API.APIRequests): string | null };
 };
 
 export type GlobalGetters = Namespaced<Getters, 'demerisUSER'>;
@@ -66,15 +64,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getKeplrAccountName]: (state) => {
     return state.keplr?.name ?? null;
-  },
-  [GetterTypes.getOwnAddress]: (_state) => (_params) => {
-    return null;
-    // return (
-    //   chainAddressfromAddress(
-    //     state.chains[GetterTypes.(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-    //     state.keplr.bech32Address,
-    //   ) ?? null
-    // );
   },
   [GetterTypes.getKeplrAddress]: (state) => {
     if (state.keplr) {
