@@ -201,7 +201,7 @@
         </tbody>
       </table>
     </div>
-    <div class="flex items-start pl-8 sticky top-0">
+    <div class="flex items-start pl-8 sticky top-8 z-20">
       <Transition>
         <ValidatorCard
           v-if="detailedValidator"
