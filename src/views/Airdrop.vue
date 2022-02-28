@@ -7,7 +7,12 @@
         <div class="mt-8">
           <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
           <div class="items-center">
-            <span class="text-muted">{{ selectedAirdrop.tokenTicker }} <span>{{ selectedAirdrop.chainName }} Chain</span></span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
+            <span class="text-muted">
+              {{ selectedAirdrop.tokenTicker }}
+              <span class="bg-text h-1 w-1 rounded-full inline-block mb-1 mx-2"></span>
+              <span>{{ selectedAirdrop.chainName }} Chain</span>
+            </span>
+            <span class="live-tag -text-1 ml-2 font-medium">Live</span>
           </div>
         </div>
       </div>
@@ -22,8 +27,12 @@
 
             <!-- Description -->
             <div>
-              <p class="mb-4 description-text">
-                {{ selectedAirdrop.projectDescription }}
+              <p
+                v-for="(item, index) in selectedAirdrop.projectDescription.split('.')"
+                :key="index"
+                class="mb-4 description-text"
+              >
+                {{ item }}.
               </p>
             </div>
 
@@ -42,16 +51,19 @@
           <div class="w-3/4 mb-12">
             <div class="text-1 font-medium mt-1 mb-6">How to be eligible</div>
             <ul class="eligibility-criteria">
-              <li v-for="criteriaItem in selectedAirdrop.eligibilityCriteria" :key="criteriaItem.Criteria">
-                {{ criteriaItem.desc }}
+              <li v-for="(criteriaItem, index) in selectedAirdrop.eligibilityCriteria" :key="index">
+                {{ criteriaItem.description }}
               </li>
             </ul>
           </div>
 
           <!-- Quick Info -->
-          <div class="w-3/4 flex items-center text-muted border border-border rounded-xl px-6 py-4">
-            <InformationIcon class="mr-4" />
-            <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
+          <div>
+            <p class="font-medium mb-4">More details ↗️</p>
+            <div class="w-3/4 flex items-center text-muted bg-fg rounded-xl px-6 py-4">
+              <InformationIcon class="mr-4" />
+              <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
+            </div>
           </div>
         </section>
       </div>
