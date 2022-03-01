@@ -2,10 +2,8 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div v-if="initialized">
-    <FeatureRunningConditional name="MAINTENANCE_SCREEN">
-      <MaintenanceScreen />
-    </FeatureRunningConditional>
+  <MaintenanceScreen v-if="showMaintenanceScreen" />
+  <div v-else-if="initialized">
     <CookieConsent />
     <ChainDownWrapper>
       <router-view />
@@ -60,6 +58,12 @@ export default defineComponent({
   },
 
   setup() {
+    let showMaintenanceScreen = false;
+    if (featureRunning('MAINTENANCE_SCREEN')) {
+      return {
+        showMaintenanceScreen: true
+      };
+    }
     const store = useStore();
     let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
     let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
@@ -299,7 +303,7 @@ export default defineComponent({
         }
       });
     }
-    return { initialized, status };
+    return { initialized, status, showMaintenanceScreen };
   },
   errorCaptured(err) {
     console.error(err);
