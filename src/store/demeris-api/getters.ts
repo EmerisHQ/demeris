@@ -5,7 +5,7 @@ import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
-import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
+import { keyHashfromAddress } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';

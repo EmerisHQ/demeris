@@ -39,11 +39,10 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 
 import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
 import AirdropsFilter from '@/components/airdrops/AirdropsFilter';
