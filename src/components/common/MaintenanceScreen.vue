@@ -5,7 +5,7 @@
       <img v-else :src="logoDark" />
     </div>
     <div class="w-full flex-1 pb-16">
-      <div class="flex flex-col  justify-center w-full h-full">
+      <div class="flex flex-col justify-center w-full h-full">
         <div class="mb-16 w-full text-center flex justify-center">
           <img :src="surfer" />
         </div>
@@ -39,20 +39,14 @@ import Icon from '@/components/ui/Icon.vue';
 
 const isBrowserDarkMode = useDark()
 const footerLinks = ref([
-  {label:'telegram',url:'https://t.me/EmerisHQ'},
-  {label:'medium',url:'https://medium.com/emeris-blog'},
-  {label:'twitter',url:'https://twitter.com/emerisHQ'},
+  { label: 'telegram', url: 'https://t.me/EmerisHQ' },
+  { label: 'medium', url: 'https://medium.com/emeris-blog' },
+  { label: 'twitter', url: 'https://twitter.com/emerisHQ' },
 ])
 </script>
 
 <style>
 .custom-width{
   width: 495px;
-}
-.footer-link{
- font-size: .813rem !important;
-}
-.gray-icon{
-  display: inline-block !important;
 }
 </style>
