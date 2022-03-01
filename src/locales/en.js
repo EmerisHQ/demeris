@@ -1,9 +1,5 @@
 export const messages = {
   en: {
-    maintenance:{
-      title:'The site is currently down for maintenance',
-      subTitle:'Our site is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience'
-    },
     appInit: {
       title: 'Entering the portal',
       status: {
@@ -18,82 +14,6 @@ export const messages = {
         liquidityConfigure: 'Configuring liquidity module...',
         poolFetching: 'Fetching liquidity pools...',
         signingIn: 'Signing in...',
-      },
-    },
-    generic_cta: {
-      seeall: 'See all',
-      done: 'Done',
-      agree: 'Agree',
-      cancel: 'Cancel',
-      confirm: 'Confirm',
-      close: 'Close',
-      continue: 'Continue',
-      noFunds: 'Insufficient funds',
-      insufficientAmount: 'Insufficient amount',
-      filterNoResults: "No results for '{keyword}'",
-      filterRetry: 'Try adjusting your search',
-      max: 'Max',
-      noSupply: 'Supply amount must be > 1',
-      understand: 'I understand',
-      getAtom: 'Get ATOM',
-      proceed: 'Proceed',
-      learnMore: 'Learn more',
-      get: 'Get',
-      connectToEmeris: 'Connect to Emeris',
-      tryTheDemo: 'Try the demo',
-      chainDown: '{displayChain} chain appears to be down.',
-      balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
-      showDetails: 'Show details',
-      hideDetails: 'Hide details',
-    },
-    navbar: {
-      portfolio: 'Portfolio',
-      assets: 'Assets',
-      pools: 'Pools',
-      airdrops: 'Airdrops',
-      send: 'Send',
-      receive: 'Receive',
-      settings: 'Settings',
-    },
-    wallet: {
-      connect: {
-        button: 'Connect wallet',
-        modal1: {
-          title: 'Connect your wallet',
-          text: 'Connect your Keplr wallet via the Keplr browser extension to use Emeris.',
-          button: 'Connect Keplr',
-          demo: 'Try the demo',
-          needHelp: 'Need help?',
-          opening: 'Opening Keplr',
-          connecting: 'Connecting',
-          connectingHelp: 'Stuck connecting? Make sure you have created an account in Keplr first.',
-        },
-        modal2: {
-          title: 'Keplr is required',
-          text: 'Install the Keplr browser extension and connect your Keplr wallet to use Emeris.',
-          button: 'Install Keplr',
-        },
-        modal3: {
-          title: 'Not compatible',
-          text: 'Emeris is only supported on Chrome, Brave, and Edge. We are working hard on supporting for more browsers.',
-          button1: 'Install Chrome',
-          button2: 'Install Brave',
-        },
-        modal3welcome: {
-          title: 'Your browser is not currently supported',
-        },
-        modal4: {
-          title: 'Emeris is in beta',
-          subtitle: 'Use at your own risk.',
-          text1:
-            'The current features available on the site are offered in "beta" form ("Beta Services").  By using the Beta Services, You understand and acknowledge that the Beta Services are being provided as a "Beta" version and made available on an "As Is" or "As Available" basis. The Beta Services may contain bugs, errors, and other problems. YOU ASSUME ALL RISKS AND ALL COSTS ASSOCIATED WITH YOUR USE OF THE BETA SERVICES.  By using this website, you also agree to these Terms of Service.',
-          tos: 'Terms of Service',
-        },
-        modal5: {
-          title: 'Unsupported device',
-          text: 'Emeris will support mobile devices in the future. In the meantime please use the app on a desktop device.',
-          button: 'Visit emeris.com',
-        },
       },
     },
     components: {
@@ -691,6 +611,45 @@ export const messages = {
         },
       },
     },
+    generic_cta: {
+      seeall: 'See all',
+      done: 'Done',
+      agree: 'Agree',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      close: 'Close',
+      continue: 'Continue',
+      noFunds: 'Insufficient funds',
+      insufficientAmount: 'Insufficient amount',
+      filterNoResults: "No results for '{keyword}'",
+      filterRetry: 'Try adjusting your search',
+      max: 'Max',
+      noSupply: 'Supply amount must be > 1',
+      understand: 'I understand',
+      getAtom: 'Get ATOM',
+      proceed: 'Proceed',
+      learnMore: 'Learn more',
+      get: 'Get',
+      connectToEmeris: 'Connect to Emeris',
+      tryTheDemo: 'Try the demo',
+      chainDown: '{displayChain} chain appears to be down.',
+      balancesInaccurate: 'Your balances on this chain may be temporarily inaccurate.',
+      showDetails: 'Show details',
+      hideDetails: 'Hide details',
+    },
+    maintenance:{
+      title:'The site is currently down for maintenance',
+      subTitle:'Our site is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience'
+    },
+    navbar: {
+      portfolio: 'Portfolio',
+      assets: 'Assets',
+      pools: 'Pools',
+      airdrops: 'Airdrops',
+      send: 'Send',
+      receive: 'Receive',
+      settings: 'Settings',
+    },
     pages: {
       addLiquidity: {
         addLiquidity: 'Add liquidity',
@@ -755,6 +714,47 @@ export const messages = {
         receive: 'Receive',
         on: 'On',
         hubWarning: 'Your assets will be transferred to Cosmos Hub',
+      },
+    },
+    wallet: {
+      connect: {
+        button: 'Connect wallet',
+        modal1: {
+          title: 'Connect your wallet',
+          text: 'Connect your Keplr wallet via the Keplr browser extension to use Emeris.',
+          button: 'Connect Keplr',
+          demo: 'Try the demo',
+          needHelp: 'Need help?',
+          opening: 'Opening Keplr',
+          connecting: 'Connecting',
+          connectingHelp: 'Stuck connecting? Make sure you have created an account in Keplr first.',
+        },
+        modal2: {
+          title: 'Keplr is required',
+          text: 'Install the Keplr browser extension and connect your Keplr wallet to use Emeris.',
+          button: 'Install Keplr',
+        },
+        modal3: {
+          title: 'Not compatible',
+          text: 'Emeris is only supported on Chrome, Brave, and Edge. We are working hard on supporting for more browsers.',
+          button1: 'Install Chrome',
+          button2: 'Install Brave',
+        },
+        modal3welcome: {
+          title: 'Your browser is not currently supported',
+        },
+        modal4: {
+          title: 'Emeris is in beta',
+          subtitle: 'Use at your own risk.',
+          text1:
+            'The current features available on the site are offered in "beta" form ("Beta Services").  By using the Beta Services, You understand and acknowledge that the Beta Services are being provided as a "Beta" version and made available on an "As Is" or "As Available" basis. The Beta Services may contain bugs, errors, and other problems. YOU ASSUME ALL RISKS AND ALL COSTS ASSOCIATED WITH YOUR USE OF THE BETA SERVICES.  By using this website, you also agree to these Terms of Service.',
+          tos: 'Terms of Service',
+        },
+        modal5: {
+          title: 'Unsupported device',
+          text: 'Emeris will support mobile devices in the future. In the meantime please use the app on a desktop device.',
+          button: 'Visit emeris.com',
+        },
       },
     },
   },
