@@ -1,5 +1,9 @@
 export const messages = {
   en: {
+    maintenance:{
+      title:'The site is currently down for maintenance',
+      subTitle:'Our site is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience'
+    },
     appInit: {
       title: 'Entering the portal',
       status: {
