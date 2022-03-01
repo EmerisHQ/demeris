@@ -7,7 +7,7 @@ on:
     branches:
       - develop
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: '*/10 * * * *'
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
@@ -96,7 +96,7 @@ jobs:
           path: cypress/screenshots
 
       - name: Notify Slack
-        if: github.event.schedule == "*/10 * * * *"
+        if: github.event.schedule == '*/10 * * * *'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: emeris-frontend-github
