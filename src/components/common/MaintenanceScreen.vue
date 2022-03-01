@@ -21,11 +21,11 @@
         <Icon class="text-text opacity-30 gray-icon mr-2" name="LinkIcon" :icon-size="0.813" />
         telegram&#8599;
       </a>
-      <a class="mr-6 footer-link" href="https://twitter.com/emerisHQ">
+      <a class="mr-6 footer-link" href="https://medium.com/emeris-blog">
         <Icon class="text-text opacity-30 gray-icon  mr-2" name="LinkIcon" :icon-size="0.813" /> 
         medium&#8599;
       </a>
-      <a class="mr-6 footer-link" href="https://medium.com/emeris-blog">
+      <a class="mr-6 footer-link" href="https://twitter.com/emerisHQ">
         <Icon class="text-text opacity-30 gray-icon  mr-2" name="LinkIcon" :icon-size="0.813" /> 
         twitter&#8599;
       </a>
