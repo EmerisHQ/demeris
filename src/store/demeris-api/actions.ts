@@ -993,7 +993,6 @@ export const actions: ActionTree<State, RootState> & Actions = {
       const handleOpen = async () => {
         await getTxRPC();
         if (!done) {
-          debugger
           subscribeTxRPC();
         }
       };
