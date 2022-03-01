@@ -1,7 +1,8 @@
 <template>
   <div class=" w-full h-full m-0 p-0 z-50 text-text">
     <div class="mt-7 mb-24 flex justify-center">
-      <img :src="logo" />
+      <img v-if="!isDarkMode" :src="logo" />
+      <img v-else :src="logoDark" />
     </div>
     <div class="w-full mb-16 flex justify-center">
       <img :src="surfer" />
@@ -34,9 +35,14 @@
 </template>
 
 <script lang="ts" setup>
+import { useDark } from '@vueuse/core'
+
 import logo from "@/assets/images/maintenance-logo.png"
+import logoDark from "@/assets/images/maintenance-logo-dark.png"
 import surfer from "@/assets/images/maintenance-surfer.png"
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/Icon.vue'
+
+const isDarkMode = useDark()
 </script>
 
 <style>
