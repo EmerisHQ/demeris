@@ -1,13 +1,16 @@
 <template>
   <div class="w-full h-screen flex flex-col">
-    <div class="flex justify-center mt-7 mb-8">
-      <img v-if="!isBrowserDarkMode" :src="logo" />
-      <img v-else :src="logoDark" />
+    <div class="flex justify-start mt-4 mb-8">
+      <div class="logo flex items-center h-auto ml-8" data-cy="navbar-logo">
+        <Brandmark class="block w-12 h-12 transition-transform duration-300" />
+        <div class="bg-fg ml-2 py-1 px-2 rounded-full text-muted -text-2 text-center">Beta</div>
+      </div>
     </div>
     <div class="w-full flex-1 pb-16">
       <div class="flex flex-col justify-center w-full h-full">
         <div class="mb-16 w-full text-center flex justify-center">
-          <img :src="surfer" />
+          <img v-if="!isBrowserDarkMode" :src="surfer" style="max-width:577px" />
+          <img v-else :src="surferDark" style="max-width:577px" />
         </div>
         <div class="w-full text-center flex justify-center mb-8">
           <div class="custom-width">
@@ -32,16 +35,16 @@
 import { useDark } from '@vueuse/core'
 import { ref }from 'vue'
 
-import logo from "@/assets/images/maintenance-logo.png"
-import logoDark from "@/assets/images/maintenance-logo-dark.png"
 import surfer from "@/assets/images/maintenance-surfer.png"
+import surferDark from "@/assets/images/maintenance-surfer-dark.png"
+import Brandmark from '@/components/common/Brandmark.vue';
 import Icon from '@/components/ui/Icon.vue';
 
 const isBrowserDarkMode = useDark()
 const footerLinks = ref([
-  { label: 'telegram', url: 'https://t.me/EmerisHQ' },
-  { label: 'medium', url: 'https://medium.com/emeris-blog' },
-  { label: 'twitter', url: 'https://twitter.com/emerisHQ' },
+  { label: 'Telegram', url: 'https://t.me/EmerisHQ' },
+  { label: 'Medium', url: 'https://medium.com/emeris-blog' },
+  { label: 'Twitter', url: 'https://twitter.com/emerisHQ' },
 ])
 </script>
 
