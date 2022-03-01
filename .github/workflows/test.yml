@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - develop
+  schedule:
+    - cron: "*/10 * * * *"
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
@@ -92,3 +94,15 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+
+      - name: Notify Slack
+        if: github.event.schedule == "*/10 * * * *"
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: emeris-frontend-github
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'E2E tests results'
+          SLACK_TITLE: E2E tests
+          SLACK_USERNAME: E2E test bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
