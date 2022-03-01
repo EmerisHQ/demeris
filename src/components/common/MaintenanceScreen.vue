@@ -8,12 +8,12 @@
     </div>
     <div class="w-full flex-1 pb-16">
       <div class="flex flex-col justify-center w-full h-full">
-        <div class="mb-16 w-full text-center flex justify-center">
-          <img v-if="!isBrowserDarkMode" :src="surfer" style="max-width:577px" />
-          <img v-else :src="surferDark" style="max-width:577px" />
+        <div class="mb-16 w-full text-center flex justify-center" style="max-width:577px">
+          <img v-if="!isBrowserDarkMode" :src="surfer" />
+          <img v-else :src="surferDark" />
         </div>
         <div class="w-full text-center flex justify-center mb-8">
-          <div class="custom-width">
+          <div style="max-width:495px">
             <h1 class="font-bold text-3 mb-4">{{ $t('maintenance.title') }}</h1>
             <p class="text-text opacity-60">{{ $t('maintenance.subTitle') }}</p>
           </div>
@@ -47,9 +47,3 @@ const footerLinks = ref([
   { label: 'Twitter', url: 'https://twitter.com/emerisHQ' },
 ])
 </script>
-
-<style>
-.custom-width{
-  width: 495px;
-}
-</style>
