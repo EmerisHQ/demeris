@@ -19,15 +19,15 @@
     <div class="w-full flex items-center flex justify-center text-link text-0 mb-32">
       <a class="mr-6 align-middle footer-link" href="https://t.me/EmerisHQ">
         <Icon class="text-text opacity-30 gray-icon mr-2" name="LinkIcon" :icon-size="0.813" />
-        telegram↗️
+        telegram&#8599;
       </a>
       <a class="mr-6 footer-link" href="https://twitter.com/emerisHQ">
         <Icon class="text-text opacity-30 gray-icon  mr-2" name="LinkIcon" :icon-size="0.813" /> 
-        medium↗️
+        medium&#8599;
       </a>
       <a class="mr-6 footer-link" href="https://medium.com/emeris-blog">
         <Icon class="text-text opacity-30 gray-icon  mr-2" name="LinkIcon" :icon-size="0.813" /> 
-        twitter↗️
+        twitter&#8599;
       </a>
     </div>
   </div>
