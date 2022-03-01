@@ -169,7 +169,7 @@ export const messages = {
         title: 'Enter amount to stake',
       },
       switchForm: {
-        selectTitle: 'Select a validator to switch to',
+        selectTitle: 'Select a new validator',
         title: 'Enter amount to restake',
       },
       unstakeForm: {
