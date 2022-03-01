@@ -1,14 +1,14 @@
 <template>
   <Alert v-if="pool" status="info" class="mt-4" size="md" :show-icon="false">
     <h5 class="font-bold text-text">
-      <i18n-t keypath="components.poolBanner.title">
+      <i18n-t scope="global" keypath="components.poolBanner.title">
         <template #denom>
           <Denom :name="name" />
         </template>
       </i18n-t>
     </h5>
     <p class="mt-3 text-muted -text-1 leading-copy">
-      <i18n-t keypath="components.poolBanner.body">
+      <i18n-t scope="global" keypath="components.poolBanner.body">
         <template #denom>
           <Denom :name="name" />
         </template>

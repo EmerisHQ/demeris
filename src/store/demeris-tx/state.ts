@@ -1,7 +1,6 @@
 import * as API from '@/types/api';
 
 export type ChainMeta = {
-  verifiedTraces?: Record<string, API.VerifyTrace>;
   primaryChannels?: Record<string, API.PrimaryChannel>;
   relayerBalance?: API.RelayerBalance;
   status?: boolean;

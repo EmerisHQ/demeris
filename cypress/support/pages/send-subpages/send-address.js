@@ -32,6 +32,10 @@ export class SendToAddressSubpage {
   continueButton() {
     return cy.get('span').contains('Continue').parent().parent();
   }
+
+  confirmAndContinueButton() {
+    return cy.get('span').contains('Confirm and continue');
+  }
   //#endregion RECIPIENT step
 
   //#region AMOUNT step

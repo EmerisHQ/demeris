@@ -231,7 +231,6 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const denom = computed(() => route.params.denom as string);
-
     pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
       useAccount();
@@ -241,7 +240,7 @@ export default defineComponent({
       const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
-    if (featureRunning('HIDE_UNVERIFIED_ASSETS') && !assetConfig.value) {
+    if (!assetConfig.value) {
       router.push('/');
     }
 
@@ -273,6 +272,10 @@ export default defineComponent({
         const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
+          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
+            subscribe: false,
+            params: { chain_name: dexChain },
+          });
           const invPrimaryChannel =
             apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
               chain_name: dexChain,

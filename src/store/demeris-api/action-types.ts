@@ -33,6 +33,9 @@ export enum DemerisActionTypes {
   GET_RELAYER_STATUS = 'GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'GET_RELAYER_BALANCES',
   GET_TXS = 'GET_TXS',
+  GET_GIT_AIRDROPS_LIST = 'GET_GIT_AIRDROPS_LIST',
+  GET_AIRDROPS = 'GET_AIRDROPS',
+  SET_SELECTED_AIRDROP = 'SET_SELECTED_AIRDROP',
   GET_VALIDATORS = 'GET_VALIDATORS',
   GET_INFLATION = 'GET_INFLATION',
   GET_STAKING_REWARDS = 'GET_STAKING_REWARDS',
@@ -77,6 +80,9 @@ export enum GlobalDemerisActionTypes {
   GET_RELAYER_STATUS = 'demerisAPI/GET_RELAYER_STATUS',
   GET_RELAYER_BALANCES = 'demerisAPI/GET_RELAYER_BALANCES',
   GET_TXS = 'demerisAPI/GET_TXS',
+  GET_GIT_AIRDROPS_LIST = 'demerisAPI/GET_GIT_AIRDROPS_LIST',
+  GET_AIRDROPS = 'demerisAPI/GET_AIRDROPS',
+  SET_SELECTED_AIRDROP = 'demerisAPI/SET_SELECTED_AIRDROP',
   GET_VALIDATORS = 'demerisAPI/GET_VALIDATORS',
   GET_INFLATION = 'demerisAPI/GET_INFLATION',
   GET_STAKING_REWARDS = 'demerisAPI/GET_STAKING_REWARDS',
@@ -99,6 +105,16 @@ export type DemerisActionsByAddressParams = {
 export type DemerisActionByTokenPriceParams = {
   subscribe: boolean;
   params?: API.TokenPriceReq;
+};
+export type DemerisActionGetGitAirdropsListParams = {
+  subscribe: boolean;
+};
+export type DemerisActionGetAirdropsParams = {
+  subscribe: boolean;
+  params: API.GitAirdropsListReq;
+};
+export type DemerisActionSetAirdropParams = {
+  params?: API.selectedAirdropReq;
 };
 export type DemerisActionByTokenIdParams = {
   subscribe: boolean;

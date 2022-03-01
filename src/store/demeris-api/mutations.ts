@@ -45,7 +45,8 @@ export type Mutations<S = State> = {
   ): void;
   [MutationTypes.SET_TOKEN_ID](state: S, payload: { value: API.TokenId }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
-
+  [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: API.Airdrop }): void;
+  [MutationTypes.SET_AIRDROPS](state: S, payload: { value: API.Airdrop }): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -193,24 +194,20 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_VERIFY_TRACE](state: State, payload: DemerisMutations) {
-    if (state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces) {
+    if (state.traces[(payload.params as API.VerifyTraceReq).chain_name]) {
       if (
         !isEqual(
-          state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-            (payload.params as API.VerifyTraceReq).hash
-          ],
+          state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash],
           payload.value as API.VerifyTrace,
         )
       ) {
-        state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-          (payload.params as API.VerifyTraceReq).hash
-        ] = payload.value as API.VerifyTrace;
+        state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+          payload.value as API.VerifyTrace;
       }
     } else {
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces = {};
-      state.chains[(payload.params as API.VerifyTraceReq).chain_name].verifiedTraces[
-        (payload.params as API.VerifyTraceReq).hash
-      ] = payload.value as API.VerifyTrace;
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name] = {};
+      state.traces[(payload.params as API.VerifyTraceReq).chain_name][(payload.params as API.VerifyTraceReq).hash] =
+        payload.value as API.VerifyTrace;
     }
   },
   [MutationTypes.SET_FEE_ADDRESS](state: State, payload: DemerisMutations) {
@@ -305,6 +302,29 @@ export const mutations: MutationTree<State> & Mutations = {
     const newPayload: any = payload.value;
     state.tokenId = newPayload.data[newPayload.token];
   },
+  [MutationTypes.SET_SELECTED_AIRDROP](state: State, payload: DemerisMutations) {
+    const newPayload = payload.value as API.Airdrop;
+    state.selectedAirdrop = newPayload;
+  },
+  [MutationTypes.SET_AIRDROPS](state: State, payload: DemerisMutations) {
+    const tempAirdrop = payload.value as API.Airdrop;
+
+    if (tempAirdrop.eligibilityCheckEndpoint) {
+      tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');
+    }
+
+    if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
+      tempAirdrop.dateStatus = 'not_started';
+    } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ongoing';
+    } else if (tempAirdrop.airdropEndDate.getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ended';
+    } else {
+      tempAirdrop.dateStatus = 'not_started';
+    }
+
+    state.airdrops.push(tempAirdrop);
+  },
   [MutationTypes.SET_TOKEN_ID_STATUS](state: State, payload: DemerisMutations) {
     state.tokenIdLoadingStatus = payload.value as API.LoadingState;
   },
@@ -340,7 +360,7 @@ export const mutations: MutationTree<State> & Mutations = {
         subObj.action == DemerisActionTypes.GET_BALANCES ||
         subObj.action == DemerisActionTypes.GET_STAKING_BALANCES ||
         subObj.action == DemerisActionTypes.GET_NUMBERS ||
-        subObj.action == DemerisActionTypes.GET_ALL_UNBONDING_DELEGATIONS
+        subObj.action == DemerisActionTypes.GET_UNBONDING_DELEGATIONS
       ) {
         state._Subscriptions.delete(sub);
       }

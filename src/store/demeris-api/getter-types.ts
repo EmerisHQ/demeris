@@ -26,7 +26,6 @@ export enum GetterTypes {
   getAllValidPools = 'getAllValidPools',
   getDexChain = 'getDexChain',
   getTxStatus = 'getTxStatus',
-  getOwnAddress = 'getOwnAddress',
   getVerifyTrace = 'getVerifyTrace',
   getFeeAddress = 'getFeeAddress',
   getBech32Config = 'getBech32Config',
@@ -39,8 +38,11 @@ export enum GetterTypes {
   getTokenPrices = 'getTokenPrices',
   getTokenPricesLoadingStatus = 'getTokenPricesLoadingStatus',
   getTokenId = 'getTokenId',
+  getAirdrops = 'getAirdrops',
+  getSelectedAirdrop = 'getSelectedAirdrop',
   getTokenIdLoadingStatus = 'getTokenIdLoadingStatus',
   getChainStatus = 'getChainStatus',
+  getChainNameByBaseDenom = 'getChainNameByBaseDenom',
 }
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
@@ -70,7 +72,6 @@ export enum GlobalGetterTypes {
   getAllValidPools = 'demerisAPI/getAllValidPools',
   getDexChain = 'demerisAPI/getDexChain',
   getTxStatus = 'demerisAPI/getTxStatus',
-  getOwnAddress = 'demerisAPI/getOwnAddress',
   getVerifyTrace = 'demerisAPI/getVerifyTrace',
   getFeeAddress = 'demerisAPI/getFeeAddress',
   getBech32Config = 'demerisAPI/getBech32Config',
@@ -83,6 +84,9 @@ export enum GlobalGetterTypes {
   getTokenPrices = 'demerisAPI/getTokenPrices',
   getTokenPricesLoadingStatus = 'demerisAPI/getTokenPricesLoadingStatus',
   getTokenId = 'demerisAPI/getTokenId',
+  getAirdrops = 'demerisAPI/getAirdrops',
+  getSelectedAirdrop = 'demerisAPI/getSelectedAirdrop',
   getTokenIdLoadingStatus = 'demerisAPI/getTokenIdLoadingStatus',
   getChainStatus = 'demerisAPI/getChainStatus',
+  getChainNameByBaseDenom = 'demerisAPI/getChainNameByBaseDenom',
 }
