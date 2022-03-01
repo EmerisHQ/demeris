@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-screen flex flex-col dark:bg-red">
+  <div class="w-full h-screen flex flex-col">
     <div class="flex justify-center mt-7 mb-8">
       <img v-if="!isBrowserDarkMode" :src="logo" />
       <img v-else :src="logoDark" />
