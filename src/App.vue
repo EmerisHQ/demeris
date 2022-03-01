@@ -3,6 +3,9 @@
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
   <div v-if="initialized">
+    <FeatureRunningConditional name="MAINTENANCE_SCREEN">
+      <MaintenanceScreen />
+    </FeatureRunningConditional>
     <CookieConsent />
     <ChainDownWrapper>
       <router-view />
@@ -27,6 +30,7 @@ import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
+import MaintenanceScreen from '@/components/common/MaintenanceScreen.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
 import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
@@ -52,6 +56,7 @@ export default defineComponent({
     FeatureRunningConditional,
     SimplexModal,
     MoonpayModal,
+    MaintenanceScreen,
   },
 
   setup() {
