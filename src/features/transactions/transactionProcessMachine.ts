@@ -525,7 +525,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
               txhash: responseData.txhash,
               stepType: currentStep.name,
             });
-
+            debugger;
             responseData.websocket = wsResult;
 
             await fetchEndBlock(wsResult.height);

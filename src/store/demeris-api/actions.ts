@@ -11,6 +11,7 @@ import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
+import TendermintWS from '@/utils/TendermintWS';
 
 import {
   DemerisActionByTokenIdParams,
@@ -921,50 +922,40 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
 
   async [DemerisActionTypes.TRACE_TX_RESPONSE](_, { txhash, chain_name }) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const timeout = 60000;
       const wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
 
-      const wss = new WebSocket(wsUrl);
+      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
       const subscribeQuery = `tm.event = 'Tx' AND tx.hash = '${txhash}'`;
 
       let done = false;
 
-      const getTxRPC = () => {
-        wss.send(
-          JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'tx',
-            id: `tx-${txHash64}`,
-            params: [txHash64, false],
-          }),
-        );
+      const getTxRPC = async () => {
+        const result = await wss.call('tx', [txHash64, false]);
+        handleMessage(result);
       };
 
       const subscribeTxRPC = () => {
-        wss.send(
-          JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'subscribe',
-            id: `subscribe-${txHash64}`,
-            params: {
-              query: subscribeQuery,
-            },
-          }),
+        wss.subscribe(
+          {
+            query: subscribeQuery,
+          },
+          handleMessage,
         );
       };
 
-      const handleOpen = () => {
-        getTxRPC();
-        subscribeTxRPC();
+      const handleOpen = async () => {
+        await getTxRPC();
+        debugger;
+        if (!done) {
+          subscribeTxRPC();
+        }
       };
 
-      const handleMessage = (evt: MessageEvent) => {
-        const data = JSON.parse(evt.data);
-
+      const handleMessage = async (data: Record<string, any>) => {
         if (done) return;
-        if (data.id.indexOf(txHash64) < 0) return;
 
         if (data.error) {
           // Not found
@@ -985,13 +976,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       };
 
-      const handleClose = () => {
-        console.log('connection closed');
-      };
-
-      wss.onopen = handleOpen;
-      wss.onmessage = handleMessage;
-      wss.onclose = handleClose;
+      await wss.connect();
+      handleOpen();
 
       setTimeout(() => {
         done = true;
