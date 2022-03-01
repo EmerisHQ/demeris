@@ -16,7 +16,7 @@
         </p>
       </div>
     </div>
-    <div class="w-full flex items-center flex justify-center text-link text-0">
+    <div class="w-full flex items-center flex justify-center text-link text-0 mb-32">
       <a class="mr-6 align-middle footer-link" href="https://t.me/EmerisHQ">
         <Icon class="text-text opacity-30 gray-icon mr-2" name="LinkIcon" :icon-size="0.813" />
         telegram↗️
