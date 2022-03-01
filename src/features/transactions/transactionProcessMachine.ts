@@ -492,6 +492,8 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
+            await new Promise(resolve => setTimeout(resolve, 800)); // Wait for the block time
+
             while (retriesDestCount < 15 && shouldRetry) {
               try {
                 destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
