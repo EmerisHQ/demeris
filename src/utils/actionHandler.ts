@@ -3330,7 +3330,8 @@ export async function isValidIBCReserveDenom(
   } catch (e) {
     return false;
   }
-  if (!verifyTrace) {
+  if (!verifyTrace || !verifyTrace.verified) {
+    console.error('Couldn\'t verify trace for', JSON.stringify(verifyTrace))
     return false;
   }
   if (verifyTrace.path.split('/').length > 2) {
@@ -3338,11 +3339,6 @@ export async function isValidIBCReserveDenom(
   }
 
   if (!verifiedDenoms.find((item) => item.name === verifyTrace.base_denom)) {
-    return false;
-  }
-
-  if (!verifyTrace || !verifyTrace.verified) {
-    console.error('Couldn\'t verify trace for', JSON.stringify(verifyTrace))
     return false;
   }
 
