@@ -69,10 +69,10 @@
           <!-- staking reward table -->
           <table class="w-full table-fixed mt-8 text-right">
             <colgroup>
-              <col width="29%" />
-              <col width="29%" />
-              <col width="29%" />
-              <col width="13%" />
+              <col width="32%" />
+              <col width="38%" />
+              <col width="20%" />
+              <col width="8%" />
             </colgroup>
 
             <!-- table body -->
@@ -100,11 +100,13 @@
                   </div>
                 </td>
                 <td class="text-right rounded-r-xl bg-surface">
-                  <Icon
-                    name="CaretRightIcon"
-                    :icon-size="1"
-                    class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
-                  />
+                  <div class="flex justify-end">
+                    <Icon
+                      name="CaretRightIcon"
+                      :icon-size="1"
+                      class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                    />
+                  </div>
                 </td>
               </tr>
 
@@ -185,7 +187,56 @@
             </tbody>
           </table>
         </div>
-        <div v-show="selectedTab === 2">unstaking</div>
+        <div v-show="selectedTab === 2">
+          <table class="w-full table-fixed mt-8 text-right">
+            <colgroup>
+              <col width="30%" />
+              <col width="20%" />
+              <col width="25%" />
+              <col width="25%" />
+            </colgroup>
+
+            <!-- table body -->
+            <tbody>
+              <!-- staked validators -->
+              <template v-for="unbondingBalance of unbondingBalances">
+                <tr
+                  v-for="(entry, index) of unbondingBalance.entries"
+                  :key="unbondingBalance.validator_address + '_' + index"
+                  class="group"
+                >
+                  <td class="py-6 flex items-center transition">
+                    <div class="inline-flex items-center mr-4">
+                      <ValidatorBadge
+                        :validator="
+                          validatorList.find(
+                            (x) => keyHashfromAddress(x.operator_address) == unbondingBalance.validator_address,
+                          )
+                        "
+                        class="w-8 h-8 rounded-full bg-fg z-1"
+                      />
+                    </div>
+                    <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                      {{ getValidatorMoniker(unbondingBalance.validator_address) }}
+                    </span>
+                  </td>
+                  <td class="text-left text-muted">
+                    <div class="inline-flex items-center">
+                      <TimeIcon class="mr-2" />
+                      <span>
+                        {{ getTimeToString(entry.completion_time) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
+                  <td class="text-right font-medium">
+                    <Price :amount="{ denom: denom, amount: entry.balance }" />
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </template>
       <SkeletonLoader v-else width="100%" height="300px" />
     </template>
@@ -201,6 +252,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -223,6 +275,7 @@ export default defineComponent({
     Icon,
     ValidatorBadge,
     SkeletonLoader,
+    TimeIcon,
   },
   props: {
     denom: {
