@@ -222,8 +222,8 @@ export default defineComponent({
           : 0;
 
         if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = theme.value === 'light' ? '#00CF30' : '#50CF49';
-          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#00CF30' : '#50CF49';
+          chartData.value.options.colors[0] = theme.value === 'light' ? '#00CF30' : '#89FF9B';
+          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#00CF30' : '#89FF9B';
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
