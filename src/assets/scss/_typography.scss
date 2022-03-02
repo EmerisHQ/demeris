@@ -10,8 +10,6 @@
   }
 }
 
-/* TODO: only import the necessary font weights + variable font - see WIP code below */
-
 /*
    Font families:
 
@@ -37,7 +35,8 @@
   font-style: normal;
   font-weight: 560;
   font-display: swap;
-  src: url('/assets/fonts/Inter-Medium.woff') format('woff');
+  // semi-bold because 560 rounded makes 600
+  src: url('/assets/fonts/Inter-SemiBold.woff') format('woff');
 }
 
 @font-face {
@@ -55,6 +54,6 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('/assets/fonts/Inter-roman.var.woff') format('woff');
+  src: url('/assets/fonts/Inter.tff') format('tff');
   font-named-instance: 'Regular';
 }
