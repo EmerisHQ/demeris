@@ -100,11 +100,13 @@
                   </div>
                 </td>
                 <td class="text-right rounded-r-xl bg-surface">
-                  <Icon
-                    name="CaretRightIcon"
-                    :icon-size="1"
-                    class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
-                  />
+                  <div class="flex justify-end">
+                    <Icon
+                      name="CaretRightIcon"
+                      :icon-size="1"
+                      class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                    />
+                  </div>
                 </td>
               </tr>
 
