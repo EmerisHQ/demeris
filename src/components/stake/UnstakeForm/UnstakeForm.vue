@@ -5,22 +5,8 @@
       <UnstakeFormAmount v-if="validator" :validator="validator" :steps="steps" @next="goToReview" />
     </template>
 
-    <template v-else-if="['review', 'unstake'].includes(step)">
+    <template v-else-if="['review', 'unstake', 'unstaked'].includes(step)">
       <FeatureRunningConditional name="TRANSACTIONS_CENTER">
-        <template #deactivated>
-          <TxStepsModal
-            v-if="steps.length"
-            :data="steps"
-            :gas-price-level="gasPrice"
-            :back-route="{ name: 'Portfolio' }"
-            action-name="unstake"
-            @transacting="goToStep('unstake')"
-            @failed="goToStep('review')"
-            @reset="resetHandler"
-            @finish="resetHandler"
-          />
-        </template>
-
         <TransactionProcessCreator
           v-if="steps.length"
           :steps="steps"
@@ -28,6 +14,7 @@
           @pending="closeModal"
           @close="closeModal"
           @previous="$emit('previous')"
+          @onReceiptState="goToUnstaked"
         />
       </FeatureRunningConditional>
     </template>
@@ -41,7 +28,6 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
@@ -51,14 +37,13 @@ import { event } from '@/utils/analytics';
 
 import UnstakeFormAmount from './UnstakeFormAmount.vue';
 
-type Step = 'amount' | 'review' | 'unstake';
+type Step = 'amount' | 'review' | 'unstaked';
 
 export default defineComponent({
   name: 'UnstakeForm',
 
   components: {
     TransactionProcessCreator,
-    TxStepsModal,
     FeatureRunningConditional,
     UnstakeFormAmount,
   },
@@ -153,6 +138,10 @@ export default defineComponent({
       step.value = value;
     };
 
+    const goToUnstaked = async () => {
+      goToStep('unstaked');
+    };
+
     const resetHandler = () => {
       form.validatorAddress = '';
       form.denom = '';
@@ -169,7 +158,7 @@ export default defineComponent({
 
     provide('unstakeForm', form);
 
-    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal };
+    return { gasPrice, steps, goToReview, goToUnstaked, form, goToStep, resetHandler, closeModal };
   },
 });
 </script>

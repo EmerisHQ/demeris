@@ -170,7 +170,7 @@ export default defineComponent({
       }
     });
     const showBackButton = computed(() => {
-      if (step.value === 'staked') {
+      if (step.value === 'staked' || step.value === 'unstaked') {
         return false;
       }
       return currentStepIndex.value > 0 && !!actionType;
@@ -240,7 +240,7 @@ export default defineComponent({
     };
 
     const showNavigation = computed(() => {
-      if (step.value === 'staked') {
+      if (step.value === 'staked' || step.value === 'unstaked') {
         return false;
       }
       return actionType;
