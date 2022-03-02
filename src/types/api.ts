@@ -128,6 +128,19 @@ export type StakingBalancesResponse = {
   staking_balances: StakingBalances;
 };
 
+// /chain/:chain_name/staking/params response data types
+
+export type UnstakingPeriod = {
+  chain_name: string;
+  unbonding_time: number;
+  max_validators: number;
+  max_entries: number;
+  historical_entries: number;
+  bond_denom: string;
+};
+export type UnstakingPeriods = Array<UnstakingPeriod>;
+
+
 // /unbonding_delegations/:address response data types
 export type UnbondingDelegationEntry = {
   balance: string;
