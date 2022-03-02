@@ -839,7 +839,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getPrimaryChannels'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_TOKEN_PRICES]({ commit, getters }, { subscribe = false, params }) {
-    commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.LOADING });
+    commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, {
+      value: params.showSkeleton ? API.LoadingState.LOADING : API.LoadingState.LOADED,
+    });
     try {
       const response = await axios.get(
         getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
@@ -887,7 +889,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });
   },
   async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters }, { subscribe = false, params }) {
-    commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, { value: API.LoadingState.LOADING });
+    commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, {
+      value: params.showSkeleton ? API.LoadingState.LOADING : API.LoadingState.LOADED,
+    });
     try {
       const response = await axios.get(getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`);
       commit(DemerisMutationTypes.SET_TOKEN_ID, { value: { ...response.data, token: params.token } });
