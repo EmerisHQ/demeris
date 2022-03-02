@@ -13,6 +13,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --inverse: #fff;
   --transparent: rgba(255, 255, 255, 0);
   --bg: #fff;
+  --darkBanner: #171717;
   // --bg-image: 148px repeat url('~@/assets/images/texture-grain.png'), #fff;
   --bg-image: var(--bg); // Gautier doesn't like the grain
   --fg: rgba(0, 0, 0, 0.03);
@@ -38,6 +39,7 @@ $gold-to-br: linear-gradient(135deg, $gold-color-stops);
   --inverse: #000;
   --transparent: rgba(0, 0, 0, 0);
   --bg: #000;
+  --darkBanner: #171717;
   --bg-image: 148px repeat url('~@/assets/images/bg-dark.jpg'), #000;
   --fg: rgba(255, 255, 255, 0.1);
   --fg-solid: #1f1f1f;

@@ -90,7 +90,7 @@
 
         <!-- Staking -->
         <template v-if="stakingEnabled">
-          <section v-if="assetConfig?.stakable" class="mt-16">
+          <section v-if="assetConfig?.stakable">
             <StakeTable class="mt-8" :denom="denom" />
           </section>
         </template>

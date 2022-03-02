@@ -18,9 +18,9 @@ export const messages = {
     },
     components: {
       stakingBanner: {
-        title: 'Earn',
-        text: 'Earn passive income with an average',
-        textAPY: 'APY',
+        title: 'Stake',
+        text: 'Stake with a validator to receive an average of',
+        textAPY: 'APR',
         cta: 'Start staking',
       },
       addLiquidity: {

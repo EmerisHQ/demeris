@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Title -->
-    <div v-if="isStakingAssetExist" class="flex justify-between">
+    <div v-if="isStakingAssetExist" class="flex justify-between mt-16">
       <div class="flex">
         <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
           {{ $t('components.stakeTable.staking') }}
@@ -29,39 +29,6 @@
         <Icon name="PlusIcon" :icon-size="1.5" />
       </Button>
     </div>
-
-    <!-- Staking info banner -->
-    <template v-if="!isStakingAssetExist">
-      <div
-        class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
-      >
-        <div class="flex-1 max-w-xs">
-          <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
-          <p class="text-muted leading-copy mt-3">
-            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
-              <template #ticker>
-                <Ticker :name="denom" />
-              </template>
-              <template #apy>
-                <strong>{{ assetStakingAPY }}% {{ $t('components.stakeTable.apy') }}.</strong>
-              </template>
-            </i18n-t>
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          :name="stakingButtonName"
-          class="mt-8"
-          :click-function="() => goStakeActionPage(StakingActions.STAKE)"
-          :full-width="false"
-        />
-
-        <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
-          <CircleSymbol :denom="denom" size="xl" />
-        </div>
-      </div>
-    </template>
 
     <template v-else>
       <template v-if="validatorList.length > 0">
@@ -200,7 +167,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -217,7 +183,6 @@ import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 export default defineComponent({
   components: {
     Button,
-    CircleSymbol,
     Ticker,
     Price,
     Icon,
