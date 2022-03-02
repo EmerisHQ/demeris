@@ -2,7 +2,7 @@
   <section class="flex items-start">
     <div class="flex flex-col">
       <header class="flex flex-wrap justify-between items-end">
-        <h2 class="text-3 font-bold pb-6">{{ $t('components.stakeForm.selectTitle') }}</h2>
+        <h2 class="text-3 font-bold pb-6">{{ tableTitle }}</h2>
         <!-- search -->
         <Search
           v-model:keyword="keyword"
@@ -253,9 +253,13 @@ enum ValStyle {
 type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
 export default defineComponent({
-  name: 'ValidatorTable',
+  name: 'ValidatorsTable',
   components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
   props: {
+    tableTitle: {
+      type: String as PropType<string>,
+      required:true,
+    },
     validatorList: {
       type: Array as PropType<any[]>,
       required: true,

@@ -4,6 +4,7 @@
       v-show="step == 'validator'"
       :validator-list="validators"
       :disabled-list="validatorsToDisable"
+      :table-title="$t('components.switchForm.selectTitle')"
       :table-style="'actionlist'"
       :sorting-by="isStaking ? 'staked' : 'power'"
       sorting-order="desc"
