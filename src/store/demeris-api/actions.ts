@@ -34,6 +34,7 @@ import { ChainData, State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;
+  wsEndpoint?: string;
   refreshTime?: number;
   hub_chain?: string;
   gas_limit?: number;
@@ -965,10 +966,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.TRACE_TX_RESPONSE](_, { txhash, chain_name }) {
+  async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
     return new Promise(async (resolve, reject) => {
       const timeout = 60000;
-      const wsUrl = `wss://staging.demeris.io/v1/chain/${chain_name}/websocket`;
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
 
       const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
       const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
@@ -977,7 +978,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       let done = false;
 
       const getTxRPC = async () => {
-        const result = await wss.call('tx', [txHash64, false]);
+        const result = await wss.call('tx', [txHash64, false]).catch(reject);
         handleMessage(result);
       };
 
@@ -990,11 +991,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
         );
       };
 
-      const handleOpen = async () => {
-        await getTxRPC();
-        if (!done) {
-          subscribeTxRPC();
-        }
+      const handleOpen = () => {
+        getTxRPC();
+        subscribeTxRPC();
       };
 
       const handleMessage = async (data: Record<string, any>) => {
@@ -1019,7 +1018,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
         }
       };
 
-      await wss.connect();
+      await wss.connect().catch(reject);
       handleOpen();
 
       setTimeout(() => {
@@ -1118,10 +1117,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
+    { endpoint, wsEndpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
   ) {
     console.log('Vuex nodule: demeris initialized!');
-    commit('INIT', { endpoint, hub_chain, gas_limit });
+    commit('INIT', { wsEndpoint, endpoint, hub_chain, gas_limit });
     setInterval(() => {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);
