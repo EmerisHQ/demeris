@@ -619,6 +619,7 @@ export const messages = {
       confirm: 'Confirm',
       close: 'Close',
       continue: 'Continue',
+      signLater: 'Sigh transaction later',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",
@@ -637,9 +638,10 @@ export const messages = {
       showDetails: 'Show details',
       hideDetails: 'Hide details',
     },
-    maintenance:{
-      title:'Emeris will be back soon',
-      subTitle:'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.'
+    maintenance: {
+      title: 'Emeris will be back soon',
+      subTitle:
+        'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.',
     },
     navbar: {
       portfolio: 'Portfolio',
