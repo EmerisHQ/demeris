@@ -148,11 +148,17 @@ export default defineComponent({
 .color-gain-system {
   color: #008223;
 }
+.color-gain-system {
+  color: #008223;
+}
 .color-loss-light {
   color: #d80228;
 }
 .color-loss-dark {
   color: #FF6072;
+}
+.color-loss-system {
+  color: #d80228;
 }
 .color-loss-system {
   color: #d80228;
