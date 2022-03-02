@@ -93,7 +93,7 @@ export const messages = {
         title: 'Enter amount to stake',
       },
       switchForm: {
-        selectTitle: 'Select a validator',
+        selectTitle: 'Select a new validator',
         title: 'Enter amount to restake',
       },
       unstakeForm: {
@@ -638,8 +638,8 @@ export const messages = {
       hideDetails: 'Hide details',
     },
     maintenance:{
-      title:'The site is currently down for maintenance',
-      subTitle:'Our site is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience'
+      title:'Emeris will be back soon',
+      subTitle:'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.'
     },
     navbar: {
       portfolio: 'Portfolio',
