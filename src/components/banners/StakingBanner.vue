@@ -27,10 +27,12 @@
 </template>
 <script lang="ts">
 import BigNumber from 'bignumber.js';
-import { defineComponent, ref, toRefs, watch } from 'vue';
+import { computed, defineComponent, ref, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
 
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import useStaking from '@/composables/useStaking';
+import { GlobalDemerisGetterTypes } from '@/store';
 export default defineComponent({
   name: 'StakingBanner',
   components: {
@@ -47,14 +49,20 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { baseDenom } = toRefs(props);
-    const apy = ref<string>('');
     const { getChainDisplayInflationByBaseDenom } = useStaking();
+    const store = useStore();
+
+    const propsRef = toRefs(props);
+    const apy = ref<string>('');
+
+    const chain_name = computed(() =>
+      store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.baseDenom.value }),
+    );
     watch(
-      () => baseDenom.value,
+      chain_name,
       async (newValue) => {
         if (!newValue) return;
-        const inflation = await getChainDisplayInflationByBaseDenom(newValue);
+        const inflation = await getChainDisplayInflationByBaseDenom(propsRef.baseDenom.value);
 
         //   display -.- instead of a faulty 0 value APY
         if (isNaN(inflation) || Number(inflation) <= 0) return;

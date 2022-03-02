@@ -218,6 +218,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -239,6 +240,7 @@ export default defineComponent({
     Icon,
     ValidatorBadge,
     SkeletonLoader,
+    TimeIcon,
   },
   props: {
     denom: {
