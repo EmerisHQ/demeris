@@ -45,7 +45,8 @@ export type Mutations<S = State> = {
   ): void;
   [MutationTypes.SET_TOKEN_ID](state: S, payload: { value: API.TokenId }): void;
   [MutationTypes.SET_CHAIN_STATUS](state: S, payload: { params: API.APIRequests; value: boolean }): void;
-
+  [MutationTypes.SET_SELECTED_AIRDROP](state: S, payload: { value: API.Airdrop }): void;
+  [MutationTypes.SET_AIRDROPS](state: S, payload: { value: API.Airdrop }): void;
   [MutationTypes.INIT](state: S, payload: DemerisConfig): void;
   [MutationTypes.SET_IN_PROGRESS](state: S, payload: APIPromise): void;
   [MutationTypes.DELETE_IN_PROGRESS](state: S, payload: string): void;
@@ -290,6 +291,7 @@ export const mutations: MutationTree<State> & Mutations = {
         };
       });
       state.tokenPrices = historicalPrices;
+      window.dispatchEvent(new Event("resize"));
     } else {
       state.tokenPrices = [];
     }
@@ -300,6 +302,29 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_TOKEN_ID](state: State, payload: DemerisMutations) {
     const newPayload: any = payload.value;
     state.tokenId = newPayload.data[newPayload.token];
+  },
+  [MutationTypes.SET_SELECTED_AIRDROP](state: State, payload: DemerisMutations) {
+    const newPayload = payload.value as API.Airdrop;
+    state.selectedAirdrop = newPayload;
+  },
+  [MutationTypes.SET_AIRDROPS](state: State, payload: DemerisMutations) {
+    const tempAirdrop = payload.value as API.Airdrop;
+
+    if (tempAirdrop.eligibilityCheckEndpoint) {
+      tempAirdrop.eligibilityCheckEndpoint = tempAirdrop.eligibilityCheckEndpoint.replace('<address>', '');
+    }
+
+    if (!new Date(tempAirdrop.airdropStartDate).getTime()) {
+      tempAirdrop.dateStatus = 'not_started';
+    } else if (new Date(tempAirdrop.airdropStartDate).getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ongoing';
+    } else if (tempAirdrop.airdropEndDate.getTime() <= new Date().getTime()) {
+      tempAirdrop.dateStatus = 'ended';
+    } else {
+      tempAirdrop.dateStatus = 'not_started';
+    }
+
+    state.airdrops.push(tempAirdrop);
   },
   [MutationTypes.SET_TOKEN_ID_STATUS](state: State, payload: DemerisMutations) {
     state.tokenIdLoadingStatus = payload.value as API.LoadingState;

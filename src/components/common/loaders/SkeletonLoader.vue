@@ -46,7 +46,6 @@ export default {
   overflow: hidden;
   vertical-align: middle;
   background-color: rgba($color: #000000, $alpha: 0.1);
-  margin-top: 3rem;
 
   &::after {
     position: absolute;
