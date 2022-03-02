@@ -15,9 +15,11 @@ export type TokenPriceReq = {
   token_id: string;
   days: string;
   currency: string;
+  showSkeleton: boolean;
 };
 export type TokenIdReq = {
   token: string;
+  showSkeleton: boolean;
 };
 export type GitAirdropsListReq = {
   airdropFileName: string;
