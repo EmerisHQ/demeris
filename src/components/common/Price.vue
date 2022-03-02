@@ -120,9 +120,9 @@ export default defineComponent({
     const priceDiffColor = computed(() => {
       if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
         return 'color-gain-light';
-      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
+      } else if (priceDiffIndicator.value === 'gain' && (theme.value === 'dark' || theme.value === 'system')) {
         return 'color-gain-dark';
-      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'dark') {
+      } else if (priceDiffIndicator.value === 'loss' && (theme.value === 'dark' || theme.value === 'system')) {
         return 'color-loss-light';
       } else {
         return 'color-loss-dark';
