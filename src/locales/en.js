@@ -46,6 +46,7 @@ export const messages = {
       portfolio: 'Portfolio',
       assets: 'Assets',
       pools: 'Pools',
+      airdrops: 'Airdrops',
       send: 'Send',
       receive: 'Receive',
       settings: 'Settings',
@@ -575,6 +576,25 @@ export const messages = {
         lastWeek: 'Last 7 Days',
         lastDay: '24h',
         viewAll: 'View all',
+      },
+      airdrops: {
+        title: 'Airdrops',
+        asset: 'Asset',
+        date: 'Date',
+        action: 'Action',
+        amount: 'Amount',
+        viewAll: 'View all',
+        allAirdrops: 'All airdrops',
+        airdropContentDisclaimer:
+          'Content in this section is provided by individual projects and may be subject to change at any time. It is not intended as financial advice.',
+        featureProjects: 'Feature your project’s airdrop',
+        airdropstableFilterItems: {
+          all: 'All airdrops',
+          mine: 'My airdrops',
+          upcoming: 'Upcoming',
+          live: 'Live',
+          past: 'Past',
+        },
       },
       pools: {
         title: 'Pools',

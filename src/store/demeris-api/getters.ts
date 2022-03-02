@@ -5,7 +5,7 @@ import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
 import { parseCoins } from '@/utils/basic';
-import { chainAddressfromAddress, keyHashfromAddress } from '@/utils/basic';
+import { keyHashfromAddress } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
 
 import { GlobalGetterTypes as GlobalUserGetterTypes } from '../demeris-user';
@@ -62,12 +62,6 @@ export type Getters = {
   [GetterTypes.isVerified](state: State): {
     (params: { denom: string; chain_name: string }): boolean;
   };
-  [GetterTypes.getOwnAddress](
-    state: State,
-    getters,
-    rootState,
-    rootGetters,
-  ): { (params: API.APIRequests): string | null };
   [GetterTypes.getVerifyTrace](state: State): { (params: API.APIRequests): API.VerifyTrace | null };
   [GetterTypes.getFeeAddress](state: State): { (params: API.APIRequests): API.FeeAddress | null };
   [GetterTypes.getBech32Config](state: State): { (params: API.APIRequests): API.Bech32Config | null };
@@ -76,6 +70,8 @@ export type Getters = {
   [GetterTypes.getPrimaryChannel](state: State): { (params: API.APIRequests): string | null };
   [GetterTypes.getPrimaryChannels](state: State): { (params: API.APIRequests): API.PrimaryChannels | null };
   [GetterTypes.getTokenPrices](state: State): API.TokenPrices[] | null;
+  [GetterTypes.getAirdrops](state: State): API.Airdrop[] | null;
+  [GetterTypes.getSelectedAirdrop](state: State): API.Airdrop | null;
   [GetterTypes.getTokenId](state: State): string | null;
   [GetterTypes.getChainStatus](state: State): { (params: API.APIRequests): boolean };
   [GetterTypes.getChainNameByBaseDenom](state: State): { (params: API.APIRequests): string };
@@ -278,14 +274,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getTxStatus]: (state) => (params) => {
     return state.transactions.get(JSON.stringify(params))?.promise ?? null;
   },
-  [GetterTypes.getOwnAddress]: (state: State, _getters, _rootState, rootGetters) => (params) => {
-    return (
-      chainAddressfromAddress(
-        state.chains[(params as API.ChainReq).chain_name].node_info.bech32_config.main_prefix,
-        rootGetters[GlobalUserGetterTypes.getKeplr].bech32Address,
-      ) ?? null
-    );
-  },
   [GetterTypes.getVerifyTrace]: (state) => (params) => {
     if (state.traces[(params as API.VerifyTraceReq).chain_name]) {
       return state.traces[(params as API.VerifyTraceReq).chain_name][(params as API.VerifyTraceReq).hash] ?? null;
@@ -335,6 +323,12 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getTokenPrices]: (state) => {
     return state.tokenPrices;
+  },
+  [GetterTypes.getAirdrops]: (state) => {
+    return state.airdrops;
+  },
+  [GetterTypes.getSelectedAirdrop]: (state) => {
+    return state.selectedAirdrop;
   },
   [GetterTypes.getTokenId]: (state) => {
     return state.tokenId;
