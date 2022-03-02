@@ -178,7 +178,7 @@ export default defineComponent({
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
-      emit('filterChanged', activeFilterItem.value);
+      emit('filterChanged', activeFilterItem.value, false);
     };
 
     const hasData = computed(() => {

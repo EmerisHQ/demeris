@@ -419,15 +419,16 @@ export default defineComponent({
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
         if (displayName.value) {
-          getTokenPrices.value('1');
+          getTokenPrices.value('1', true);
         }
       });
 
-      getTokenPrices.value = async (days: string) => {
+      getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
         const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
           subscribe: false,
           params: {
             token: displayName.value.toLowerCase(),
+            showSkeleton,
           },
         });
 
@@ -438,6 +439,7 @@ export default defineComponent({
               token_id: chainName,
               days,
               currency: 'usd',
+              showSkeleton,
             },
           });
         }
