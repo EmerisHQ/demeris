@@ -13,11 +13,10 @@
       :src="require(`@/assets/images/stake-panel-ephemeris.png`)"
       class="right-0 rounded-2xl absolute top-0 h-full z-0"
     />
-    <!-- removed since the gradient is probably dependant on the colour of the token -->
-    <!--    <img-->
-    <!--      :src="require(`@/assets/images/stakie-panel-gradient.png`)"-->
-    <!--      class="right-0 rounded-2xl absolute top-0 h-full z-10"-->
-    <!--    />-->
+    <img
+      :src="require(`@/assets/images/stakie-panel-gradient.png`)"
+      class="right-0 rounded-2xl absolute top-0 h-full z-10"
+    />
     <div class="staking-banner__circles z-50 absolute right-0 top-0">
       <CircleSymbol :denom="baseDenom" custom-size="50px" />
       <CircleSymbol :denom="baseDenom" custom-size="26px" />
