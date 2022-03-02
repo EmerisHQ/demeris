@@ -1,0 +1,151 @@
+<template>
+  <NoMarginLayout :no-margin="true">
+    <header class="-mt-32 w-full bg-fg">
+      <div class="pt-24 pb-12 px-5 md:px-8 max-w-7xl mx-auto">
+        <GoBack :title="`${$t('context.airdrops.allAirdrops')}`" @go-back="goBackToAirdropspage" />
+        <!-- Airdrop Title -->
+        <div class="mt-8">
+          <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
+          <div class="items-center">
+            <span class="text-muted">{{ selectedAirdrop.tokenTicker }} <span>{{ selectedAirdrop.chainName }} Chain</span></span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="md:flex justify-between px-5 md:px-8 max-w-7xl mx-auto">
+      <div class="flex flex-col md:col-span-5 lg:col-span-5 w-full max-w-3xl lg:pr-px mb-16 md:mb-0">
+        <section class="mt-8">
+          <!-- About the Project -->
+          <div class="w-3/4">
+            <div class="text-1 font-medium mt-1 mb-6">About {{ selectedAirdrop.project }}</div>
+
+            <!-- Description -->
+            <div>
+              <p class="mb-4 description-text">
+                {{ selectedAirdrop.projectDescription }}
+              </p>
+            </div>
+
+            <!-- Links -->
+            <div class="w-full flex justify-between items-center mt-12">
+              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
+              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a>
+              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a>
+              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a>
+            </div>
+          </div>
+
+          <Divider class="my-12" />
+
+          <!-- Eligibility Criteria -->
+          <div class="w-3/4 mb-12">
+            <div class="text-1 font-medium mt-1 mb-6">How to be eligible</div>
+            <ul class="eligibility-criteria">
+              <li v-for="criteriaItem in selectedAirdrop.eligibilityCriteria" :key="criteriaItem.Criteria">
+                {{ criteriaItem.desc }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="w-3/4 flex items-center text-muted border border-border rounded-xl px-6 py-4">
+            <InformationIcon class="mr-4" />
+            <p class="-text-1">Airdrop criteria is subject to change by project maintainers.</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="-mt-32 flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 max-w-xs">
+        <AirdropClaim />
+        <AirdropsCurrentBalance class="mt-8" />
+      </aside>
+    </div>
+  </NoMarginLayout>
+</template>
+
+<script lang="ts">
+import { computed, defineComponent, toRaw } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useMeta } from 'vue-meta';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+import AirdropClaim from '@/components/airdrops/AirdropClaim';
+import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
+import GoBack from '@/components/common/headers/GoBack.vue';
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
+import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
+import Divider from '@/components/ui/Divider.vue';
+import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import { Airdrop } from '@/types/api';
+import { pageview } from '@/utils/analytics';
+
+export default defineComponent({
+  name: 'Airdrop',
+  components: {
+    NoMarginLayout,
+    AirdropClaim,
+    GoBack,
+    AirdropsCurrentBalance,
+    Divider,
+    LinkIcon,
+    InformationIcon,
+  },
+
+  setup() {
+    const apistore = useStore() as TypedAPIStore;
+    const { t } = useI18n({ useScope: 'global' });
+    pageview({ page_title: 'Airdrops', page_path: '/' });
+    useMeta(
+      computed(() => ({
+        title: t('navbar.airdrops'),
+      })),
+    );
+
+    const router = useRouter();
+
+    const openAirdropPage = (airdrop: Airdrop) => {
+      router.push('/airdrop');
+      apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
+        params: {
+          airdrop,
+        },
+      });
+    };
+
+    const selectedAirdrop = computed(() => {
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
+    });
+
+    const goBackToAirdropspage = () => {
+      router.push('/airdrops');
+    };
+
+    return { openAirdropPage, selectedAirdrop, goBackToAirdropspage };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.live-tag {
+  background: rgba(0, 207, 48, 0.16);
+  color: #008223;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+ul {
+  &.eligibility-criteria {
+    list-style: circle;
+    padding-left: 1.5rem;
+    li {
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+  }
+}
+.description-text {
+  line-height: 1.5;
+}
+</style>
