@@ -1,11 +1,15 @@
 <template>
   <div>
-    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 50}px`" class="mb-8" />
+    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 17}px`" class="mb-8" />
     <div v-if="hasData">
       <apexchart
         v-if="!showLoading"
         class="w-full"
-        :class="{ 'dark-mode': theme === 'dark' || theme === 'system', 'light-mode': theme === 'light' }"
+        :class="{
+          'dark-mode': theme === 'dark',
+          'light-mode': theme === 'light',
+          'system-mode': theme === 'system',
+        }"
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
@@ -164,7 +168,7 @@ export default defineComponent({
       ],
     });
 
-    const activeFilterItem = ref('max');
+    const activeFilterItem = ref('1');
     let highestPrice = ref('');
     let lowestPrice = ref('');
     let openingPrice = ref(0);
@@ -253,6 +257,18 @@ export default defineComponent({
 <style lang="scss">
 .apexcharts-tooltip {
   border-radius: 8px !important;
+}
+.system-mode {
+  .apexcharts-tooltip.apexcharts-theme-light {
+    background: rgba(30, 30, 30, 1) !important;
+    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
+    border: none !important;
+    color: white !important;
+    .apexcharts-tooltip-title {
+      background: inherit !important;
+      border-bottom: none !important;
+    }
+  }
 }
 .light-mode {
   .apexcharts-tooltip.apexcharts-theme-light {
