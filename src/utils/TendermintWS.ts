@@ -1,3 +1,4 @@
+// Based in https://github.com/clockworkgr/tendermintjs-ws/blob/master/src/tendermintws.ts
 import EventEmitter from 'events';
 import WebSocket from 'isomorphic-ws';
 
