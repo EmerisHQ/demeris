@@ -619,7 +619,7 @@ export const messages = {
       confirm: 'Confirm',
       close: 'Close',
       continue: 'Continue',
-      signLater: 'Sigh transaction later',
+      signLater: 'Sign transaction later',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",
