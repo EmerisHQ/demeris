@@ -96,7 +96,8 @@ jobs:
           path: cypress/screenshots
 
       - name: Notify Slack
-        if: github.event.schedule == '*/10 * * * *'
+        # if: github.event.schedule == '*/10 * * * *'
+        # if: failure()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: emeris-frontend-github
