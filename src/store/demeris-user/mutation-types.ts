@@ -1,7 +1,7 @@
-import { GasPriceLevel, Pool } from '@/types/actions';
-import * as API from '@/types/api';
+import { GasPriceLevel, Pool } from '@/types/actions'
+import * as API from '@/types/api'
 
-import { DemerisConfig } from './actions';
+import { DemerisConfig } from './actions'
 
 export enum DemerisMutationTypes {
   ADD_KEPLR_KEYHASH = 'ADD_KEPLR_KEYHASH',
@@ -18,24 +18,24 @@ export enum DemerisMutationTypes {
   UNSUBSCRIBE = 'UNSUBSCRIBE',
 }
 export type APIPromise = {
-  hash: string;
-  promise: Promise<void>;
-};
+  hash: string
+  promise: Promise<void>
+}
 export type UserData = {
-  customSlippage?: boolean;
-  viewLPAssetPools?: boolean;
-  viewUnverified?: boolean;
-  gasPriceLevel?: GasPriceLevel;
-  hasSeenRedeem?: boolean;
-  slippagePerc?: number;
-  isDemoAccount?: boolean;
-  theme?: string;
-  updateDT?: number;
-};
+  customSlippage?: boolean
+  viewLPAssetPools?: boolean
+  viewUnverified?: boolean
+  gasPriceLevel?: GasPriceLevel
+  hasSeenRedeem?: boolean
+  slippagePerc?: number
+  isDemoAccount?: boolean
+  theme?: string
+  updateDT?: number
+}
 export type UserSession = {
-  walletName: string;
-  walletData: UserData;
-};
+  walletName: string
+  walletData: UserData
+}
 export type DemerisMutationArgs =
   | API.Balances
   | boolean
@@ -58,18 +58,18 @@ export type DemerisMutationArgs =
   | DemerisConfig
   | KeplrKeyData
   | string
-  | Pool[];
+  | Pool[]
 
 export type DemerisMutations = {
-  params?: API.APIRequests;
-  value: DemerisMutationArgs;
-};
+  params?: API.APIRequests
+  value: DemerisMutationArgs
+}
 export type KeplrKeyData = {
-  name: string;
-  algo: string;
-  pubKey: Uint8Array;
-  address: Uint8Array;
-  bech32Address: string;
-  uid?: string;
-  keyHashes?: string[];
-};
+  name: string
+  algo: string
+  pubKey: Uint8Array
+  address: Uint8Array
+  bech32Address: string
+  uid?: string
+  keyHashes?: string[]
+}

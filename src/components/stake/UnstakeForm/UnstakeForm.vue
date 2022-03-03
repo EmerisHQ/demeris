@@ -22,22 +22,22 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, PropType, provide, reactive, ref, toRefs, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { UnstakeAction, UnstakeForm } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue'
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
+import { UnstakeAction, UnstakeForm } from '@/types/actions'
+import { actionHandler } from '@/utils/actionHandler'
+import { event } from '@/utils/analytics'
 
-import UnstakeFormAmount from './UnstakeFormAmount.vue';
+import UnstakeFormAmount from './UnstakeFormAmount.vue'
 
-type Step = 'amount' | 'review' | 'unstaked';
+type Step = 'amount' | 'review' | 'unstaked'
 
 export default defineComponent({
   name: 'UnstakeForm',
@@ -57,7 +57,7 @@ export default defineComponent({
       type: Array as PropType<any[]>,
       required: true,
       default: () => {
-        return [];
+        return []
       },
     },
     validator: {
@@ -69,42 +69,42 @@ export default defineComponent({
   emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
-    const steps = ref([]);
-    const store = useStore();
-    const router = useRouter();
+    const steps = ref([])
+    const store = useStore()
+    const router = useRouter()
 
-    const propsRef = toRefs(props);
+    const propsRef = toRefs(props)
     const validatorObj = computed(() => {
-      return propsRef.validators.value.find((x) => x.operator_address == propsRef.validator.value);
-    });
+      return propsRef.validators.value.find((x) => x.operator_address == propsRef.validator.value)
+    })
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name });
-    });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name })
+    })
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
-    );
+    )
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]
+    })
 
     const form: UnstakeForm = reactive({
       validatorAddress: validatorObj.value.operator_address,
       amount: '',
       denom: baseDenom,
       chain_name: validatorObj.value.chain_name,
-    });
+    })
 
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
-    });
+    })
 
     const closeModal = () => {
-      router.push('/');
-    };
+      router.push('/')
+    }
     const action = computed(() => {
       return {
         name: 'unstake',
@@ -120,8 +120,8 @@ export default defineComponent({
             chain_name: validatorObj.value.chain_name,
           },
         },
-      } as UnstakeAction;
-    });
+      } as UnstakeAction
+    })
     watch(form, async () => {
       if (
         form.validatorAddress != '' &&
@@ -130,44 +130,44 @@ export default defineComponent({
         form.amount != '' &&
         step.value != 'review'
       ) {
-        steps.value = await actionHandler(action.value);
+        steps.value = await actionHandler(action.value)
       } else {
-        steps.value = [];
+        steps.value = []
       }
-    });
+    })
 
     const goToReview = async () => {
-      event('review_tx', { event_label: 'Reviewing unstake tx', event_category: 'transactions' });
-      goToStep('review');
-    };
-
-    const goToStep = (value: Step) => {
-      step.value = value;
-    };
-
-    const goToUnstaked = async () => {
-      goToStep('unstaked');
-    };
-
-    const resetHandler = () => {
-      form.validatorAddress = '';
-      form.denom = '';
-      form.amount = '';
-      form.chain_name = '';
-      steps.value = [];
-
-      goToStep('amount');
-    };
-
-    if (!props.step) {
-      step.value = 'amount';
+      event('review_tx', { event_label: 'Reviewing unstake tx', event_category: 'transactions' })
+      goToStep('review')
     }
 
-    provide('unstakeForm', form);
+    const goToStep = (value: Step) => {
+      step.value = value
+    }
 
-    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal, validatorObj, goToUnstaked };
+    const goToUnstaked = async () => {
+      goToStep('unstaked')
+    }
+
+    const resetHandler = () => {
+      form.validatorAddress = ''
+      form.denom = ''
+      form.amount = ''
+      form.chain_name = ''
+      steps.value = []
+
+      goToStep('amount')
+    }
+
+    if (!props.step) {
+      step.value = 'amount'
+    }
+
+    provide('unstakeForm', form)
+
+    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal, validatorObj, goToUnstaked }
   },
-});
+})
 </script>
 
 <style lang="scss"></style>

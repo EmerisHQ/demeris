@@ -25,9 +25,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue'
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -47,27 +47,27 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const emitCancel = () => {
-      emit('cancel');
-    };
+      emit('cancel')
+    }
 
     const emitTryDemo = () => {
-      emit('try-demo');
-    };
+      emit('try-demo')
+    }
 
     const openUrl = () => {
       window.open(
         'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap?hl=en',
         '_blank',
         'noopener',
-      );
-    };
+      )
+    }
     const reloadApp = () => {
-      location.reload();
-    };
+      location.reload()
+    }
 
-    return { emitCancel, openUrl, reloadApp, emitTryDemo };
+    return { emitCancel, openUrl, reloadApp, emitTryDemo }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

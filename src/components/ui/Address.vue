@@ -31,11 +31,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Button from '@/components/ui/Button.vue';
-import Clipboard from '@/components/ui/Clipboard.vue';
+import ChainName from '@/components/common/ChainName.vue'
+import Button from '@/components/ui/Button.vue'
+import Clipboard from '@/components/ui/Clipboard.vue'
 
 export default defineComponent({
   name: 'Address',
@@ -77,13 +77,13 @@ export default defineComponent({
     const model = computed({
       get: () => props.address,
       set: (value) => emit('update:address', value),
-    });
+    })
     const pasteClip = () => {
-      navigator.clipboard.readText().then((clipText) => (model.value = clipText));
-    };
-    return { model, pasteClip };
+      navigator.clipboard.readText().then((clipText) => (model.value = clipText))
+    }
+    return { model, pasteClip }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

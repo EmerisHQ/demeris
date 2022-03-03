@@ -1,3 +1,3 @@
-import SendForm from './SendForm.vue';
+import SendForm from './SendForm.vue'
 
-export default SendForm;
+export default SendForm

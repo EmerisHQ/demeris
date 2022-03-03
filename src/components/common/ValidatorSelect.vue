@@ -42,16 +42,16 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, toRefs } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import Denom from '@/components/common/Denom.vue';
-import Price from '@/components/common/Price.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import Denom from '@/components/common/Denom.vue'
+import Price from '@/components/common/Price.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import AmountInput from '@/components/ui/AmountInput.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
 
 export default defineComponent({
   name: 'ValidatorSelect',
@@ -67,35 +67,35 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
   },
   emits: ['update:amount', 'select', 'unselect'],
   setup(props, { emit }) {
-    const route = useRoute();
-    const store = useStore();
-    const baseDenom = route.params.denom as string;
+    const route = useRoute()
+    const store = useStore()
+    const baseDenom = route.params.denom as string
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
-    );
+    )
 
-    const propsRef = toRefs(props);
+    const propsRef = toRefs(props)
 
     const inputAmount = computed({
       get: () => propsRef.amount.value,
       set: (value) => emit('update:amount', value),
-    });
+    })
 
     const selectValidator = () => {
-      emit('select', propsRef.validator.value);
-    };
+      emit('select', propsRef.validator.value)
+    }
 
     const removeValidator = () => {
-      emit('unselect', propsRef.validator.value);
-    };
+      emit('unselect', propsRef.validator.value)
+    }
 
     return {
       selectValidator,
@@ -103,9 +103,9 @@ export default defineComponent({
       inputAmount,
       baseDenom,
       precision,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .hover-show-delete {

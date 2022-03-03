@@ -75,12 +75,12 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, toRaw } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, ref, toRaw } from 'vue'
+import { useStore } from 'vuex'
 
-import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimModal.vue';
-import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import AirdropClaimModal from '@/components/airdrops/AirdropClaim/AirdropClaimModal.vue'
+import Button from '@/components/ui/Button.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
 
 export default defineComponent({
   name: 'AirdropClaim',
@@ -90,25 +90,25 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const apistore = useStore() as TypedAPIStore
 
-    const isClaimModalOpen = ref(false);
+    const isClaimModalOpen = ref(false)
 
     const toggleClaimModal = () => {
-      isClaimModalOpen.value = !isClaimModalOpen.value;
-    };
+      isClaimModalOpen.value = !isClaimModalOpen.value
+    }
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
-    });
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop])
+    })
 
     return {
       isClaimModalOpen,
       toggleClaimModal,
       selectedAirdrop,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

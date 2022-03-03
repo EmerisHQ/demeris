@@ -9,37 +9,37 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/reactivity';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
+import { computed } from '@vue/reactivity'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRouter } from 'vue-router'
 
-import AssetsTable from '@/components/assets/AssetsTable';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { pageview } from '@/utils/analytics';
+import AssetsTable from '@/components/assets/AssetsTable'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { pageview } from '@/utils/analytics'
 
 export default {
   name: 'Assets',
   components: { AppLayout, AssetsTable },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
+    const { t } = useI18n({ useScope: 'global' })
 
     useMeta(
       computed(() => ({
         title: t('context.assets.title'),
       })),
-    );
+    )
 
-    const router = useRouter();
-    pageview({ page_title: 'Assets', page_path: '/assets' });
+    const router = useRouter()
+    pageview({ page_title: 'Assets', page_path: '/assets' })
     const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
-    };
+      router.push({ name: 'Asset', params: { denom: asset.denom } })
+    }
 
-    return { openAssetPage };
+    return { openAssetPage }
   },
-};
+}
 </script>
 
 <style lang="scss" scoped></style>

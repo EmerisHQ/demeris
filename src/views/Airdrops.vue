@@ -39,21 +39,21 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRouter } from 'vue-router'
 
-import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue';
-import AirdropsFilter from '@/components/airdrops/AirdropsFilter';
-import AirdropsInfo from '@/components/airdrops/AirdropsInfo';
-import AirdropsTable from '@/components/airdrops/AirdropsTable';
-import Search from '@/components/common/Search.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { apistore } from '@/store/setup';
-import { Airdrop } from '@/types/api';
-import { pageview } from '@/utils/analytics';
+import AirdropClaimablePanel from '@/components/airdrops/AirdropClaim/AirdropClaimablePanel.vue'
+import AirdropsFilter from '@/components/airdrops/AirdropsFilter'
+import AirdropsInfo from '@/components/airdrops/AirdropsInfo'
+import AirdropsTable from '@/components/airdrops/AirdropsTable'
+import Search from '@/components/common/Search.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store'
+import { apistore } from '@/store/setup'
+import { Airdrop } from '@/types/api'
+import { pageview } from '@/utils/analytics'
 
 export default {
   name: 'Airdrops',
@@ -67,27 +67,27 @@ export default {
   },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Airdrops', page_path: '/' });
+    const { t } = useI18n({ useScope: 'global' })
+    pageview({ page_title: 'Airdrops', page_path: '/' })
     useMeta(
       computed(() => ({
         title: t('navbar.airdrops'),
       })),
-    );
+    )
 
-    const activeFilter = ref('');
-    let gitAirdropsList = ref([]);
+    const activeFilter = ref('')
+    let gitAirdropsList = ref([])
 
     const setActiveFilter = (value: string) => {
-      activeFilter.value = value;
-    };
+      activeFilter.value = value
+    }
 
-    const router = useRouter();
+    const router = useRouter()
 
     const getAllAirdrops = async () => {
       gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
         subscribe: false,
-      });
+      })
 
       gitAirdropsList.value.forEach((item) => {
         apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
@@ -95,28 +95,28 @@ export default {
           params: {
             airdropFileName: item.name,
           },
-        });
-      });
-    };
+        })
+      })
+    }
 
     onMounted(() => {
-      getAllAirdrops();
-    });
+      getAllAirdrops()
+    })
 
     const airdrops = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
-    });
+      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops]
+    })
 
     const openAirdropPage = (airdrop: Airdrop) => {
-      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } });
+      router.push({ name: 'Airdrop', params: { airdrop: airdrop.tokenTicker } })
       apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },
-      });
-    };
+      })
+    }
 
-    return { airdrops, openAirdropPage, activeFilter, setActiveFilter };
+    return { airdrops, openAirdropPage, activeFilter, setActiveFilter }
   },
-};
+}
 </script>

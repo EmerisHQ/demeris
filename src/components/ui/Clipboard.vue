@@ -4,7 +4,7 @@
       <Button
         :click-function="
           () => {
-            copy(text);
+            copy(text)
           }
         "
         variant="secondary"
@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue'
 
-import CopyIcon from '@/components/common/Icons/CopyIcon.vue';
-import Button from '@/components/ui/Button.vue';
-import useClipboard from '@/composables/useClipboard';
+import CopyIcon from '@/components/common/Icons/CopyIcon.vue'
+import Button from '@/components/ui/Button.vue'
+import useClipboard from '@/composables/useClipboard'
 
 export default defineComponent({
   name: 'Clipboard',
@@ -44,16 +44,16 @@ export default defineComponent({
   },
 
   setup() {
-    const { copy, isSupported, hasCopied } = useClipboard();
-    const tippyRef = ref(null);
+    const { copy, isSupported, hasCopied } = useClipboard()
+    const tippyRef = ref(null)
 
     watch(hasCopied, () => {
-      hasCopied.value ? tippyRef.value.show() : tippyRef.value.hide();
-    });
+      hasCopied.value ? tippyRef.value.show() : tippyRef.value.hide()
+    })
 
-    return { copy, isSupported, hasCopied, tippyRef };
+    return { copy, isSupported, hasCopied, tippyRef }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

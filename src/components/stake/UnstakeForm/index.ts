@@ -1,3 +1,3 @@
-import UnstakeForm from './UnstakeForm.vue';
+import UnstakeForm from './UnstakeForm.vue'
 
-export default UnstakeForm;
+export default UnstakeForm

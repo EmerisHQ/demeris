@@ -2,9 +2,9 @@
   {{ ticker }}
 </template>
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue'
 
-import useDenoms from '@/composables/useDenoms';
+import useDenoms from '@/composables/useDenoms'
 
 export default defineComponent({
   name: 'Ticker',
@@ -12,27 +12,27 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    let ticker = ref('-');
-    const loaded = false;
-    const { useDenom } = useDenoms();
+    let ticker = ref('-')
+    const loaded = false
+    const { useDenom } = useDenoms()
     watch(
       () => props.name,
       (denomName, oldDenomName) => {
         if (denomName != oldDenomName || !loaded) {
-          const { tickerName } = useDenom(denomName);
+          const { tickerName } = useDenom(denomName)
           watch(
             () => tickerName.value,
             (newName) => {
-              ticker.value = newName;
+              ticker.value = newName
             },
             { immediate: true },
-          );
+          )
         }
       },
       { immediate: true },
-    );
+    )
 
-    return { ticker };
+    return { ticker }
   },
-});
+})
 </script>

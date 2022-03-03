@@ -138,4 +138,4 @@ module.exports = {
     gradientColorStops: false,
   },
   plugins: [],
-};
+}

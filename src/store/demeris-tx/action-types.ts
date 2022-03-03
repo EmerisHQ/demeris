@@ -1,4 +1,4 @@
-import * as API from '@/types/api';
+import * as API from '@/types/api'
 export enum DemerisActionTypes {
   RESET_STATE = 'RESET_STATE',
   UNSUBSCRIBE = 'UNSUBSCRIBE',
@@ -12,10 +12,10 @@ export enum GlobalDemerisActionTypes {
   SIGN_WITH_KEPLR = 'demerisTX/SIGN_WITH_KEPLR',
 }
 export type DemerisActionParams = {
-  subscribe: boolean;
-  params?: API.APIRequests;
-};
+  subscribe: boolean
+  params?: API.APIRequests
+}
 export type DemerisSubscriptions = {
-  action: Exclude<DemerisActionTypes, typeof DemerisActionTypes.BROADCAST_TX>;
-  payload: Omit<DemerisActionParams, 'subscribe'>;
-};
+  action: Exclude<DemerisActionTypes, typeof DemerisActionTypes.BROADCAST_TX>
+  payload: Omit<DemerisActionParams, 'subscribe'>
+}

@@ -93,17 +93,17 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
-import { useStore } from '@/utils/useStore';
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue'
+import AmountInput from '@/components/ui/AmountInput.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { getDisplayName } from '@/utils/actionHandler'
+import { useStore } from '@/utils/useStore'
 export default defineComponent({
   name: 'DenomSelect',
   components: { AmountInput, ChainName, Denom, CircleSymbol, Icon, DenomSelectModal },
@@ -115,7 +115,7 @@ export default defineComponent({
     otherAssets: {
       type: Object,
       default: () => {
-        return {};
+        return {}
       },
     },
     amount: { type: [String, Number], required: false, default: null },
@@ -129,17 +129,17 @@ export default defineComponent({
     const inputAmount = computed({
       get: () => props.amount,
       set: (value) => emit('update:amount', value),
-    });
+    })
 
     const isSelected = computed(() => {
-      return props?.selectedDenom === null ? false : true;
-    });
+      return props?.selectedDenom === null ? false : true
+    })
 
     const hasOptions = computed(() => {
-      return props.assets.length > 0;
-    });
+      return props.assets.length > 0
+    })
 
-    const displayName = ref('');
+    const displayName = ref('')
     watch(
       () => props.selectedDenom,
       async () => {
@@ -147,42 +147,42 @@ export default defineComponent({
           displayName.value = await getDisplayName(
             props.selectedDenom.base_denom,
             useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
-          );
+          )
         }
       },
-    );
+    )
 
     const coinImage = computed(() => {
       try {
-        const denom = displayName.value;
-        let denomIconName = 'empty';
+        const denom = displayName.value
+        let denomIconName = 'empty'
         if (denom.includes('Gravity')) {
-          denomIconName = 'pool';
+          denomIconName = 'pool'
         } else {
           //TODO adjust url
-          denomIconName = denom.toLowerCase();
+          denomIconName = denom.toLowerCase()
         }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`);
-        return image;
+        const image = require(`@/assets/coins/${isSelected.value ? denomIconName : 'empty'}.png`)
+        return image
       } catch {
-        return require(`@/assets/coins/empty.png`);
+        return require(`@/assets/coins/empty.png`)
       }
-    });
+    })
 
-    const isOpen = ref(false);
+    const isOpen = ref(false)
 
     function toggleDenomSelectModal() {
       if (!hasOptions.value || props.readonly) {
-        return;
+        return
       }
-      isOpen.value = !isOpen.value;
-      emit('modalToggle', isOpen.value);
+      isOpen.value = !isOpen.value
+      emit('modalToggle', isOpen.value)
     }
 
     function denomSelectHandler(payload) {
-      emit('select', payload);
-      toggleDenomSelectModal();
+      emit('select', payload)
+      toggleDenomSelectModal()
     }
 
     return {
@@ -194,9 +194,9 @@ export default defineComponent({
       toggleDenomSelectModal,
       denomSelectHandler,
       displayName,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .denom-select {

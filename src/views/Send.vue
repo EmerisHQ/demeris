@@ -78,78 +78,78 @@
 </template>
 
 <script lang="ts">
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRoute, useRouter } from 'vue-router'
 
-import MoveForm from '@/components/transfer/MoveForm';
-import SendForm from '@/components/transfer/SendForm';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { pageview } from '@/utils/analytics';
+import MoveForm from '@/components/transfer/MoveForm'
+import SendForm from '@/components/transfer/SendForm'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import { useTransactionsStore } from '@/features/transactions/transactionsStore'
+import { pageview } from '@/utils/analytics'
 
-type TransferType = 'address' | 'move';
+type TransferType = 'address' | 'move'
 
 export default {
   name: 'Send',
   components: { Button, SendForm, MoveForm, Icon },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    const router = useRouter();
-    const transactionsStore = useTransactionsStore();
-    const route = useRoute();
-    const transferType = computed(() => route.params.type as TransferType);
+    const { t } = useI18n({ useScope: 'global' })
+    const router = useRouter()
+    const transactionsStore = useTransactionsStore()
+    const route = useRoute()
+    const transferType = computed(() => route.params.type as TransferType)
 
-    const step = ref(undefined);
-    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type });
-    const { balances } = useAccount();
+    const step = ref(undefined)
+    pageview({ page_title: 'Send: ' + route.params.type, page_path: '/send/' + route.params.type })
+    const { balances } = useAccount()
 
     const showBackButton = computed(() => {
-      return !!transferType.value;
-    });
+      return !!transferType.value
+    })
 
     const allSteps = {
       address: ['recipient', 'amount', 'review', 'send'],
       move: ['amount', 'review', 'move'],
-    };
+    }
 
-    const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value));
+    const currentStepIndex = computed(() => allSteps[transferType.value]?.indexOf(step.value))
 
     const metaSource = computed(() => {
-      let title = t('components.send.send');
+      let title = t('components.send.send')
       if (transferType.value) {
-        title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets');
+        title = transferType.value === 'address' ? t('components.send.sendToAddress') : t('components.send.moveAssets')
       }
 
       return {
         title,
-      };
-    });
-    useMeta(metaSource);
+      }
+    })
+    useMeta(metaSource)
 
     const goBack = () => {
-      transactionsStore.removeTransaction(transactionsStore.currentId);
+      transactionsStore.removeTransaction(transactionsStore.currentId)
       if (currentStepIndex.value > 0) {
-        step.value = allSteps[transferType.value][currentStepIndex.value - 1];
-        return;
+        step.value = allSteps[transferType.value][currentStepIndex.value - 1]
+        return
       }
 
-      step.value = undefined;
-      router.back();
-    };
+      step.value = undefined
+      router.back()
+    }
 
     const onClose = () => {
-      transactionsStore.setTransactionAsPending();
-      router.push('/');
-    };
+      transactionsStore.setTransactionAsPending()
+      router.push('/')
+    }
 
-    return { balances, transferType, step, allSteps, goBack, showBackButton, onClose };
+    return { balances, transferType, step, allSteps, goBack, showBackButton, onClose }
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>

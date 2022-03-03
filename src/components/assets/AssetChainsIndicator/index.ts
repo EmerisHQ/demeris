@@ -1,3 +1,3 @@
-import AssetChainsIndicator from './AssetChainsIndicator.vue';
+import AssetChainsIndicator from './AssetChainsIndicator.vue'
 
-export default AssetChainsIndicator;
+export default AssetChainsIndicator

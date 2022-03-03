@@ -248,42 +248,42 @@
 </template>
 
 <script lang="ts" setup>
-import BigNumber from 'bignumber.js';
-import { computed, inject, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import Button from '@/components/ui/Button.vue';
-import Collapse from '@/components/ui/Collapse.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import Icon from '@/components/ui/Icon.vue';
-import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
-import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
-import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
-import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
-import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
-import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
-import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
-import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions';
-import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api';
-import { getBaseDenomSync } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import Button from '@/components/ui/Button.vue'
+import Collapse from '@/components/ui/Collapse.vue'
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import Icon from '@/components/ui/Icon.vue'
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue'
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue'
+import PreviewStake from '@/components/wizard/previews/PreviewStake.vue'
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue'
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue'
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue'
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue'
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ClaimData, RestakeData, StakeData, UnstakeData } from '@/types/actions'
+import { AddLiquidityEndBlockResponse, WithdrawLiquidityEndBlockResponse } from '@/types/api'
+import { getBaseDenomSync } from '@/utils/actionHandler'
+import { parseCoins } from '@/utils/basic'
 
-import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers'
 
-const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey)
 
-const { state, send } = actor;
-const globalStore = useStore();
-const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
-const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
-const transaction = computed(() => lastResult.value.transaction);
+const { state, send } = actor
+const globalStore = useStore()
+const { t } = useI18n({ useScope: 'global' })
+const router = useRouter()
+const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0])
+const transaction = computed(() => lastResult.value.transaction)
 
 const titleMap = {
   ibc_backward: t('components.txHandlingModal.transferred'),
@@ -298,7 +298,7 @@ const titleMap = {
   stake: t('components.txHandlingModal.stakeActionComplete'),
   multistake: t('components.txHandlingModal.stakeActionComplete'),
   unstake: t('components.txHandlingModal.unstakeActionComplete'),
-};
+}
 
 const previewComponentMap = {
   ibc_backward: PreviewTransfer,
@@ -313,80 +313,80 @@ const previewComponentMap = {
   addliquidity: PreviewAddLiquidity,
   withdrawliquidity: PreviewWithdrawLiquidity,
   createpool: PreviewAddLiquidity,
-};
+}
 
 const title = computed(() => {
   if (transaction.value.name === 'swap') {
-    const swappedPercent = getSwapPercent();
+    const swappedPercent = getSwapPercent()
     if (swappedPercent < 100) {
-      return t('components.txHandlingModal.swapActionPartiallyComplete');
+      return t('components.txHandlingModal.swapActionPartiallyComplete')
     }
   }
 
-  return titleMap[transaction.value.name];
-});
-const stakedAmount = ref('0');
+  return titleMap[transaction.value.name]
+})
+const stakedAmount = ref('0')
 if (transaction.value.name == 'stake') {
   stakedAmount.value = (transaction.value.data as StakeData[])
     .reduce((acc, tx) => {
-      return acc.plus(new BigNumber(tx.amount.amount));
+      return acc.plus(new BigNumber(tx.amount.amount))
     }, new BigNumber(0))
-    .toString();
+    .toString()
 }
 if (transaction.value.name == 'unstake') {
-  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount;
+  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount
 }
 if (transaction.value.name == 'switch') {
-  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount;
+  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount
 }
 if (transaction.value.name == 'claim') {
-  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
+  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount
 }
 const onNext = () => {
-  send('CONTINUE');
-};
+  send('CONTINUE')
+}
 
 const goToMove = () => {
-  router.push(`/send/move`);
-  removeTransactionAndClose();
-};
+  router.push(`/send/move`)
+  removeTransactionAndClose()
+}
 
 const goToSend = () => {
-  const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
-  const denom = lastResult.value.endBlock?.demand_coin_denom;
-  router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
-  removeTransactionAndClose();
-};
+  const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount
+  const denom = lastResult.value.endBlock?.demand_coin_denom
+  router.push(`/send/move?base_denom=${denom}&amount=${amount}`)
+  removeTransactionAndClose()
+}
 
 const getDepositTotal = () => {
-  const endBlock = lastResult.value.endBlock as AddLiquidityEndBlockResponse;
-  const amounts = parseCoins(endBlock.accepted_coins);
+  const endBlock = lastResult.value.endBlock as AddLiquidityEndBlockResponse
+  const amounts = parseCoins(endBlock.accepted_coins)
 
-  let total = new BigNumber(0);
+  let total = new BigNumber(0)
   for (const item of amounts) {
-    const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
-    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
-    total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
+    const baseDenom = getBaseDenomSync(item.denom)
+    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom })
+    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6
+    total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision))
   }
-  return total.toNumber();
-};
+  return total.toNumber()
+}
 
 const getWithdrawTotal = () => {
-  const endBlock = lastResult.value.endBlock as WithdrawLiquidityEndBlockResponse;
-  const amounts = parseCoins(endBlock.withdraw_coins);
+  const endBlock = lastResult.value.endBlock as WithdrawLiquidityEndBlockResponse
+  const amounts = parseCoins(endBlock.withdraw_coins)
 
-  let total = new BigNumber(0);
+  let total = new BigNumber(0)
   for (const item of amounts) {
-    const baseDenom = getBaseDenomSync(item.denom);
-    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
-    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6;
-    total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision));
+    const baseDenom = getBaseDenomSync(item.denom)
+    const price = globalStore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom })
+    const precision = globalStore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom }) ?? 6
+    total = total.plus(new BigNumber(price).multipliedBy(item.amount).shiftedBy(-precision))
   }
-  return total.toNumber();
-};
+  return total.toNumber()
+}
 
-const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock);
+const getSwapPercent = () => getSwappedPercent(lastResult.value.endBlock)
 </script>
 
 <style scoped>

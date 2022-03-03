@@ -4,7 +4,7 @@
       :title="'Price'"
       :func="
         () => {
-          emitHandler('goback');
+          emitHandler('goback')
         }
       "
     />
@@ -97,22 +97,22 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import Alert from '@/components/ui/Alert.vue';
-import Input from '@/components/ui/Input.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
-import { useStore } from '@/utils/useStore';
+import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue'
+import Alert from '@/components/ui/Alert.vue'
+import Input from '@/components/ui/Input.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootStoreType } from '@/store'
+import { getDisplayName } from '@/utils/actionHandler'
+import { useStore } from '@/utils/useStore'
 
 type SwapData = {
-  pay: { denom: string; amount: number };
-  receive: { denom: string; amount: number };
-  poolPrice: number;
-  isReverse: boolean;
-};
+  pay: { denom: string; amount: number }
+  receive: { denom: string; amount: number }
+  poolPrice: number
+  isReverse: boolean
+}
 
 export default defineComponent({
   name: 'SlippageSettingModal',
@@ -132,68 +132,68 @@ export default defineComponent({
           receive: { denom: '', amount: 0 },
           poolPrice: 0,
           isReverse: false,
-        };
+        }
       },
     },
   },
   emits: ['goback'],
   setup(props: { swapData: SwapData }, { emit }) {
-    const { t } = useI18n({ useScope: 'global' });
+    const { t } = useI18n({ useScope: 'global' })
     const trueSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5;
-    });
+      return useStore().getters[GlobalDemerisGetterTypes.USER.getSlippagePerc] || 0.5
+    })
     const allowCustomSlippage = computed(() => {
-      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage];
-    });
+      return useStore().getters[GlobalDemerisGetterTypes.USER.allowCustomSlippage]
+    })
 
     const inputWidth = computed(() =>
       customSlippage.value && customSlippage.value?.toString()?.length >= 6 ? '7.5rem' : '5rem',
-    );
-    const textAlign = computed(() => (isCustomSlippageEditing.value ? 'left' : 'center'));
-    const suffixParent = computed(() => (isCustomSlippageEditing.value ? null : 0));
+    )
+    const textAlign = computed(() => (isCustomSlippageEditing.value ? 'left' : 'center'))
+    const suffixParent = computed(() => (isCustomSlippageEditing.value ? null : 0))
     const inputBackground = computed(() => {
       return isCustomSelected.value && state.alertStatus == 'error'
         ? `var(--fg-solid)`
         : isCustomSelected.value && !isCustomSlippageEditing.value && state.alertStatus !== 'error'
         ? 'var(--text)'
-        : 'var(--fg)';
-    });
-    const isCustomSelected = ref(false);
-    const isCustomSlippageEditing = ref(false);
+        : 'var(--fg)'
+    })
+    const isCustomSelected = ref(false)
+    const isCustomSlippageEditing = ref(false)
     const customSlippage = ref(
       trueSlippage.value != 0.1 && trueSlippage.value != 0.5 && trueSlippage.value != 1 ? trueSlippage.value : 'Custom',
-    );
-    const limitPriceText = ref('');
-    const minReceivedText = ref(null);
+    )
+    const limitPriceText = ref('')
+    const minReceivedText = ref(null)
 
     const format = (value: string) => {
-      let newValue = value;
+      let newValue = value
       // Only numbers
-      newValue = newValue.replace(/[^0-9.]/g, '');
+      newValue = newValue.replace(/[^0-9.]/g, '')
 
       if (newValue.startsWith('.')) {
-        newValue = '0' + newValue;
+        newValue = '0' + newValue
       }
 
       if (newValue.split('').filter((char) => char === '.').length > 1) {
         // Remove subsequent separators
-        newValue = newValue.replace(/(?<=\..*)\./g, '');
+        newValue = newValue.replace(/(?<=\..*)\./g, '')
       }
 
-      return newValue;
-    };
+      return newValue
+    }
 
     const state = reactive({
       slippage: computed(() => {
         if (trueSlippage.value) {
-          return trueSlippage.value;
+          return trueSlippage.value
         } else {
-          return 0.5;
+          return 0.5
         }
       }),
 
       alertStatus: computed(() => {
-        const slippage = state.slippage;
+        const slippage = state.slippage
         if (slippage) {
           if (
             slippage <= 0 ||
@@ -203,82 +203,82 @@ export default defineComponent({
               customSlippage.value.toString()?.replace('%', '') != trueSlippage.value) ||
             (isCustomSelected.value && !customSlippage.value)
           ) {
-            return 'error';
+            return 'error'
           } else if (slippage >= 20) {
-            return 'warning';
+            return 'warning'
           } else {
-            return null;
+            return null
           }
         } else {
-          return null;
+          return null
         }
       }),
       alertText: computed(() => {
         if (state.alertStatus === 'warning') {
-          return t('components.slippageSettingsModal.highSlippageMessage');
+          return t('components.slippageSettingsModal.highSlippageMessage')
         } else if (state.alertStatus === 'error') {
-          return t('components.slippageSettingsModal.slippageValueError');
+          return t('components.slippageSettingsModal.slippageValueError')
         } else {
-          return '';
+          return ''
         }
       }),
 
       emitHandler: (event) => {
-        emit(event);
+        emit(event)
       },
       setSlippage: (slippage) => {
-        state.validSlippageUpdater(slippage);
+        state.validSlippageUpdater(slippage)
       },
       setCustomSlippage: (e) => {
-        state.validSlippageUpdater(e, true);
+        state.validSlippageUpdater(e, true)
       },
       validSlippageUpdater(value, isCustom = false) {
-        const slippage = Number(value);
-        isCustomSelected.value = isCustom;
+        const slippage = Number(value)
+        isCustomSelected.value = isCustom
         if (slippage > 0 && slippage <= 100) {
           if (!isCustom) {
-            customSlippage.value = 'Custom';
+            customSlippage.value = 'Custom'
           }
-          (useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
+          ;(useStore() as RootStoreType).dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, {
             data: { slippagePerc: slippage },
-          });
+          })
         }
       },
-    });
+    })
 
     const onCustomSlippageFocussed = () => {
-      isCustomSlippageEditing.value = true;
-      isCustomSelected.value = true;
-      customSlippage.value = trueSlippage.value;
-    };
+      isCustomSlippageEditing.value = true
+      isCustomSelected.value = true
+      customSlippage.value = trueSlippage.value
+    }
 
     const onCustomSlippageFocusOut = () => {
-      isCustomSlippageEditing.value = false;
+      isCustomSlippageEditing.value = false
       if (!!Number(customSlippage.value)) {
-        customSlippage.value += '%';
+        customSlippage.value += '%'
       }
-    };
+    }
 
     const onKeyDown = (e) => {
-      const keyCode = e.keyCode || e.which;
+      const keyCode = e.keyCode || e.which
       if (keyCode == 8 || keyCode == 27 || keyCode == 46 || keyCode == 37 || keyCode == 39) {
         // backspace || delete || escape || arrows
-        return;
+        return
       } else if (/^[A-Za-z]+$/.test(e.key) || /[-!$%^@&*()_+|~=`\\#{}\[\]:";'<>?,\/]/.test(e.key)) {
         //disallow alphabets and these characters.
-        e.preventDefault();
+        e.preventDefault()
       }
-      return;
-    };
+      return
+    }
 
     watch(
       () => allowCustomSlippage.value,
       () => {
         if (!allowCustomSlippage.value && isCustomSelected.value) {
-          state.setSlippage(0.5);
+          state.setSlippage(0.5)
         }
       },
-    );
+    )
 
     //TODO: dynamic digit float calculation
     watch(
@@ -287,41 +287,41 @@ export default defineComponent({
         const payDisplayName = await getDisplayName(
           props.swapData.pay.denom,
           useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
-        );
+        )
         const receiveDisplayName = await getDisplayName(
           props.swapData.receive.denom,
           useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
-        );
-        const payAmount = props.swapData.pay.amount;
-        const receiveAmount = props.swapData.receive.amount;
+        )
+        const payAmount = props.swapData.pay.amount
+        const receiveAmount = props.swapData.receive.amount
 
-        let slippageTolerancePercent = 1 - state.slippage / 100;
+        let slippageTolerancePercent = 1 - state.slippage / 100
         limitPriceText.value = `1 ${payDisplayName} = ${
           payAmount
             ? Math.floor((receiveAmount / payAmount) * slippageTolerancePercent * 10000) / 10000
             : props.swapData.isReverse
             ? props.swapData.poolPrice?.toFixed(4)
             : (1 / props.swapData.poolPrice)?.toFixed(4)
-        } ${receiveDisplayName}`;
+        } ${receiveDisplayName}`
         if (props.swapData.pay.amount && props.swapData.receive.amount) {
           minReceivedText.value = `${
             Math.floor(receiveAmount * slippageTolerancePercent * 10000) / 10000
-          } ${receiveDisplayName}`;
+          } ${receiveDisplayName}`
         } else {
-          minReceivedText.value = null;
+          minReceivedText.value = null
         }
       },
       { immediate: true },
-    );
+    )
 
     onMounted(() => {
       if (state.slippage && state.slippage != 0.1 && state.slippage != 0.5 && state.slippage != 1) {
-        isCustomSelected.value = true;
+        isCustomSelected.value = true
       }
       if (!!Number(customSlippage.value)) {
-        customSlippage.value += '%';
+        customSlippage.value += '%'
       }
-    });
+    })
 
     return {
       ...toRefs(state),
@@ -340,9 +340,9 @@ export default defineComponent({
       onKeyDown,
       inputBackground,
       format,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

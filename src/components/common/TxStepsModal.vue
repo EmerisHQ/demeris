@@ -4,7 +4,7 @@
       :open="connectModalOpen"
       @close="
         () => {
-          connectModalOpen = false;
+          connectModalOpen = false
         }
       "
     />
@@ -27,8 +27,8 @@
           :steps="data"
           :is-swap-component="variant === 'widget'"
           @continue="
-            isTransferConfirmationOpen = false;
-            interstitialProceed = true;
+            isTransferConfirmationOpen = false
+            interstitialProceed = true
           "
         />
       </template>
@@ -129,7 +129,7 @@
           :fullscreen="variant === 'default'"
           @close="
             () => {
-              feeWarning.feeWarning = false;
+              feeWarning.feeWarning = false
             }
           "
         >
@@ -171,8 +171,8 @@
                 :name="$t('generic_cta.cancel')"
                 :click-function="
                   () => {
-                    feeWarning.feeWarning = false;
-                    emitHandler('reset');
+                    feeWarning.feeWarning = false
+                    emitHandler('reset')
                   }
                 "
               />
@@ -195,7 +195,7 @@
                 :name="$t('generic_cta.understand')"
                 :click-function="
                   () => {
-                    feeWarning.feeWarning = false;
+                    feeWarning.feeWarning = false
                   }
                 "
               />
@@ -205,7 +205,7 @@
                 :name="$t('generic_cta.cancel')"
                 :click-function="
                   () => {
-                    feeWarning.feeWarning = false;
+                    feeWarning.feeWarning = false
                   }
                 "
               />
@@ -213,9 +213,9 @@
                 :name="$t('generic_cta.proceed')"
                 :click-function="
                   () => {
-                    feeWarning.feeWarning = false;
-                    acceptedWarning = true;
-                    confirm();
+                    feeWarning.feeWarning = false
+                    acceptedWarning = true
+                    confirm()
                   }
                 "
               />
@@ -236,24 +236,24 @@
         @next="nextTx"
         @retry="
           () => {
-            retry = true;
-            nextTx();
+            retry = true
+            nextTx()
           }
         "
         @close="
           () => {
-            nextTx();
-            toggleTxHandlingModal();
+            nextTx()
+            toggleTxHandlingModal()
           }
         "
         @done="
           () => {
             if (transaction.name == 'swap') {
-              emitHandler('reset');
+              emitHandler('reset')
             } else {
-              nextTx();
+              nextTx()
               if (!hasMore) {
-                goBack();
+                goBack()
               }
             }
           }
@@ -264,38 +264,38 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, nextTick, onMounted, PropType, ref, toRaw, toRefs, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { RouteLocationRaw, useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import TxHandlingModal from '@/components/common/TxHandlingModal.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
-import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
-import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
-import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue';
-import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
-import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
-import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
-import useAccount from '@/composables/useAccount';
-import useCountry from '@/composables/useCountry';
-import useEmitter from '@/composables/useEmitter';
+import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue'
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import GobackWithClose from '@/components/common/headers/GobackWithClose.vue'
+import TxHandlingModal from '@/components/common/TxHandlingModal.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue'
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue'
+import PreviewRedeem from '@/components/wizard/previews/PreviewRedeem.vue'
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue'
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue'
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue'
+import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue'
+import useAccount from '@/composables/useAccount'
+import useCountry from '@/composables/useCountry'
+import useEmitter from '@/composables/useEmitter'
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
   TypedAPIStore,
   TypedTXStore,
   TypedUSERStore,
-} from '@/store';
+} from '@/store'
 import {
   CreatePoolData,
   FeeTotals,
@@ -306,8 +306,8 @@ import {
   SwapData,
   TransferData,
   WithdrawLiquidityData,
-} from '@/types/actions';
-import { Balances } from '@/types/api';
+} from '@/types/actions'
+import { Balances } from '@/types/api'
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -317,10 +317,10 @@ import {
   getDisplayName,
   msgFromStepTransaction,
   validateStepsFeeBalances,
-} from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
-import getPrice from '@/utils/getPrice';
+} from '@/utils/actionHandler'
+import { event } from '@/utils/analytics'
+import { parseCoins } from '@/utils/basic'
+import getPrice from '@/utils/getPrice'
 
 export default defineComponent({
   name: 'TxStepsModal',
@@ -362,21 +362,21 @@ export default defineComponent({
   },
   emits: ['goback', 'close', 'transacting', 'failed', 'complete', 'reset', 'finish'],
   setup(props, { emit }) {
-    const emitter = useEmitter();
+    const emitter = useEmitter()
 
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
-    const txstore = useStore() as TypedTXStore;
+    const apistore = useStore() as TypedAPIStore
+    const userstore = useStore() as TypedUSERStore
+    const txstore = useStore() as TypedTXStore
 
-    const { t } = useI18n({ useScope: 'global' });
+    const { t } = useI18n({ useScope: 'global' })
 
-    const gasPriceLevel = computed(() => userstore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => userstore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel])
 
     const isSignedIn = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
-    });
-    const interstitialProceed = ref(false);
-    const chainsStatus = ref({ status: true, failed: [], relayer: true });
+      return userstore.getters[GlobalDemerisGetterTypes.USER.isSignedIn]
+    })
+    const interstitialProceed = ref(false)
+    const chainsStatus = ref({ status: true, failed: [], relayer: true })
     const failedChainsText = computed(() => {
       const failed = chainsStatus.value.failed
         .map((x) =>
@@ -384,50 +384,50 @@ export default defineComponent({
             name: x,
           }),
         )
-        .join(',');
+        .join(',')
       if (chainsStatus.value.failed.length > 1) {
-        return failed + ' ' + t('components.txStepsModal.chainsDown');
+        return failed + ' ' + t('components.txStepsModal.chainsDown')
       } else {
-        return failed + ' ' + t('components.txStepsModal.chainDown');
+        return failed + ' ' + t('components.txStepsModal.chainDown')
       }
-    });
+    })
 
     const buyCrypto = () => {
       if (isSignedIn.value) {
         if (useCountry().includes('America')) {
-          emitter.emit('simplex');
+          emitter.emit('simplex')
         } else {
-          emitter.emit('moonpay');
+          emitter.emit('moonpay')
         }
       } else {
-        emitter.emit('toggle-settings-modal');
+        emitter.emit('toggle-settings-modal')
       }
-    };
-    const router = useRouter();
-    const route = useRoute();
+    }
+    const router = useRouter()
+    const route = useRoute()
     const goPortfolio = () => {
       if (route.path == '/') {
-        emit('reset');
+        emit('reset')
       } else {
-        router.push('/');
+        router.push('/')
       }
-    };
+    }
     const goBack = () => {
       if (props.backRoute) {
-        router.push(props.backRoute);
-        return;
+        router.push(props.backRoute)
+        return
       }
-      router.go(-1);
-    };
-    const fees = ref([]);
+      router.go(-1)
+    }
+    const fees = ref([])
 
-    const refProps = toRefs(props);
-    const connectModalOpen = ref(false);
-    const retry = ref(false);
-    const hasMore = ref(false);
-    const isFinal = ref(false);
-    const isTransferConfirmationOpen = ref(false);
-    const { balances } = useAccount();
+    const refProps = toRefs(props)
+    const connectModalOpen = ref(false)
+    const retry = ref(false)
+    const hasMore = ref(false)
+    const isFinal = ref(false)
+    const isTransferConfirmationOpen = ref(false)
+    const { balances } = useAccount()
     const feeWarning = ref({
       missingFees: [],
       ibcWarning: false,
@@ -437,168 +437,168 @@ export default defineComponent({
         chain_name: '',
         denom: '',
       },
-    });
-    const txResult = ref(null);
+    })
+    const txResult = ref(null)
     onMounted(async () => {
-      chainsStatus.value = await chainStatusForSteps(props.data);
+      chainsStatus.value = await chainStatusForSteps(props.data)
       fees.value = await Promise.all(
         (props.data as Step[]).map(async (step) => {
-          return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+          return await feeForStep(step, gasPriceLevel.value as GasPriceLevel)
         }),
-      );
-    });
+      )
+    })
 
     const adjustedFeeData = computed(() => {
-      const steps = [] as Step[];
+      const steps = [] as Step[]
       for (const step of JSON.parse(JSON.stringify(props.data)) as Step[]) {
         for (const stepTx of step.transactions) {
           if (stepTx.addFee) {
             const sourceBalance = balances.value.find((x) => {
-              const amount = parseCoins(x.amount)[0];
+              const amount = parseCoins(x.amount)[0]
               if (
                 amount.denom == (stepTx.data as IBCBackwardsData).amount.denom &&
                 x.base_denom == stepTx.feeToAdd[0].denom
               ) {
-                return true;
+                return true
               } else {
-                return false;
+                return false
               }
-            });
+            })
             if (sourceBalance) {
-              const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount);
-              const fee = parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]);
-              const txAmount = parseInt((stepTx.data as IBCBackwardsData).amount.amount);
+              const amount = parseInt(parseCoins(sourceBalance.amount)[0].amount)
+              const fee = parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value])
+              const txAmount = parseInt((stepTx.data as IBCBackwardsData).amount.amount)
               if (txAmount + fee > amount) {
                 if (txAmount == amount) {
-                  stepTx.feeToAdd = [];
-                  stepTx.addFee = false;
+                  stepTx.feeToAdd = []
+                  stepTx.addFee = false
                 } else {
-                  stepTx.feeToAdd[0].amount[gasPriceLevel.value] = amount - fee + '';
+                  stepTx.feeToAdd[0].amount[gasPriceLevel.value] = amount - fee + ''
                 }
               }
             }
             const baseDenomBalance = balances.value.find((x) => {
-              const amount = parseCoins(x.amount)[0];
+              const amount = parseCoins(x.amount)[0]
               if (amount.denom == x.base_denom && x.base_denom == stepTx.feeToAdd[0].denom) {
-                return true;
+                return true
               } else {
-                return false;
+                return false
               }
-            });
+            })
             if (baseDenomBalance) {
-              const amount = parseCoins(baseDenomBalance.amount)[0];
+              const amount = parseCoins(baseDenomBalance.amount)[0]
               if (parseInt(stepTx.feeToAdd[0].amount[gasPriceLevel.value]) < parseInt(amount.amount)) {
-                stepTx.feeToAdd = [];
-                stepTx.addFee = false;
+                stepTx.feeToAdd = []
+                stepTx.addFee = false
               }
             }
           }
           if (stepTx.name == 'ibc_forward') {
             const baseDenomBalance = balances.value.find((x) => {
-              const amount = parseCoins(x.amount)[0];
+              const amount = parseCoins(x.amount)[0]
               if (amount.denom == x.base_denom && x.base_denom == (stepTx.data as IBCForwardsData).amount.denom) {
-                return true;
+                return true
               } else {
-                return false;
+                return false
               }
-            });
+            })
             const fee =
               parseInt((stepTx.data as IBCForwardsData).chain_fee[0].amount[gasPriceLevel.value]) *
-              userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit];
-            const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount);
+              userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
+            const txAmount = parseInt((stepTx.data as IBCForwardsData).amount.amount)
             if (baseDenomBalance) {
-              const amount = parseCoins(baseDenomBalance.amount)[0];
+              const amount = parseCoins(baseDenomBalance.amount)[0]
               if (parseInt(amount.amount) - txAmount < fee) {
-                (stepTx.data as IBCForwardsData).amount.amount = parseInt(amount.amount) - fee + '';
+                ;(stepTx.data as IBCForwardsData).amount.amount = parseInt(amount.amount) - fee + ''
               }
             } else {
-              (stepTx.data as IBCForwardsData).amount.amount = txAmount - fee + '';
+              ;(stepTx.data as IBCForwardsData).amount.amount = txAmount - fee + ''
             }
           }
         }
-        steps.push(step);
+        steps.push(step)
       }
-      return steps;
-    });
+      return steps
+    })
     watch(
       () => refProps.data.value,
       async (newData) => {
         if (newData) {
-          chainsStatus.value = await chainStatusForSteps(newData);
+          chainsStatus.value = await chainStatusForSteps(newData)
           fees.value = await Promise.all(
             (newData as Step[])?.map(async (step) => {
-              return await feeForStep(step, gasPriceLevel.value as GasPriceLevel);
+              return await feeForStep(step, gasPriceLevel.value as GasPriceLevel)
             }),
-          );
+          )
         }
       },
-    );
-    const txToResolve = ref({});
-    const showChainError = ref(false);
-    const isTxHandlingModalOpen = ref(false);
+    )
+    const txToResolve = ref({})
+    const showChainError = ref(false)
+    const isTxHandlingModalOpen = ref(false)
     const toggleTxHandlingModal = () => {
-      isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value;
-    };
-    const transaction = ref({});
+      isTxHandlingModalOpen.value = !isTxHandlingModalOpen.value
+    }
+    const transaction = ref({})
     const allTransactionResponses = ref({
       responses: [],
       fees: {},
       hashes: [],
-    });
+    })
     const nextTx = () => {
-      txToResolve.value['resolver']();
-    };
-    const currentStep = ref(0);
-    const txstatus = ref('keplr-sign');
-    const errorDetails = ref(undefined);
-    const acceptedWarning = ref(false);
+      txToResolve.value['resolver']()
+    }
+    const currentStep = ref(0)
+    const txstatus = ref('keplr-sign')
+    const errorDetails = ref(undefined)
+    const acceptedWarning = ref(false)
     const currentData = computed(() => {
-      const currentStepData = adjustedFeeData.value[currentStep.value];
+      const currentStepData = adjustedFeeData.value[currentStep.value]
       const modifiedData = {
         isSwap: false,
         title: '',
         fees: {},
         data: currentStepData,
       } as {
-        isSwap: boolean;
-        title: string;
-        fees: FeeTotals;
-        data: Step;
-      };
+        isSwap: boolean
+        title: string
+        fees: FeeTotals
+        data: Step
+      }
       switch (currentStepData.name) {
         //TODO: i18n
         case 'swap':
-          modifiedData.isSwap = true;
-          modifiedData.title = 'Review your swap details';
-          break;
+          modifiedData.isSwap = true
+          modifiedData.title = 'Review your swap details'
+          break
         case 'transfer':
-          modifiedData.isSwap = false;
-          modifiedData.title = 'Review your transfer details';
-          break;
+          modifiedData.isSwap = false
+          modifiedData.title = 'Review your transfer details'
+          break
         case 'redeem':
-          break;
+          break
         case 'addliquidity':
-          modifiedData.title = 'Review your pool liquidity provision';
-          break;
+          modifiedData.title = 'Review your pool liquidity provision'
+          break
         case 'withdrawliquidity':
-          modifiedData.title = 'Review your liquidity withdrawal';
-          break;
+          modifiedData.title = 'Review your liquidity withdrawal'
+          break
         case 'createpool':
-          modifiedData.title = 'Review your liquidity pool provision';
-          break;
+          modifiedData.title = 'Review your liquidity pool provision'
+          break
         case 'claim':
-          modifiedData.title = t('context.stake.claimRewards');
-          break;
+          modifiedData.title = t('context.stake.claimRewards')
+          break
       }
-      modifiedData.fees = fees.value[currentStep.value];
+      modifiedData.fees = fees.value[currentStep.value]
 
-      return modifiedData;
-    });
+      return modifiedData
+    })
 
     watch(
       () => fees.value,
       async (newData) => {
-        const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value));
+        const toCheckBalances: Balances = JSON.parse(JSON.stringify(balances.value))
         if (currentStep.value == 0) {
           if (feeWarning.value.feeWarning) {
             feeWarning.value = await validateStepsFeeBalances(
@@ -606,17 +606,17 @@ export default defineComponent({
               toCheckBalances,
               newData,
               gasPriceLevel.value,
-            );
-            feeWarning.value.feeWarning = true;
+            )
+            feeWarning.value.feeWarning = true
           } else {
             feeWarning.value = await validateStepsFeeBalances(
               adjustedFeeData.value,
               toCheckBalances,
               newData,
               gasPriceLevel.value,
-            );
+            )
           }
-          interstitialProceed.value = false;
+          interstitialProceed.value = false
         } else {
           feeWarning.value = {
             missingFees: [],
@@ -627,68 +627,68 @@ export default defineComponent({
               chain_name: '',
               denom: '',
             },
-          };
+          }
         }
       },
-    );
+    )
     const isDemoAccount = computed(() => {
-      return userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
-    });
+      return userstore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+    })
     const confirm = async () => {
       if (isDemoAccount.value) {
-        connectModalOpen.value = true;
-        return;
+        connectModalOpen.value = true
+        return
       }
-      let abort = false;
+      let abort = false
       if ((feeWarning.value.ibcWarning || feeWarning.value.missingFees.length > 0) && !acceptedWarning.value) {
-        feeWarning.value.feeWarning = true;
+        feeWarning.value.feeWarning = true
         feeWarning.value.ibcWarning
           ? event('ibc_fee_warning', { event_label: 'User got IBC fee warning', event_category: 'transactions' })
-          : event('fee_warning', { event_label: 'User got fee warning', event_category: 'transactions' });
+          : event('fee_warning', { event_label: 'User got fee warning', event_category: 'transactions' })
       } else {
         if (!chainsStatus.value.status || !chainsStatus.value.relayer) {
-          showChainError.value = true;
+          showChainError.value = true
           !chainsStatus.value.relayer
             ? event('relayer_warning', { event_label: 'User got Relayer down warning', event_category: 'transactions' })
             : event('chain_status_warning', {
                 event_label: 'User got chain down warning',
                 event_category: 'transactions',
-              });
-          return;
+              })
+          return
         }
         for (let [i, stepTx] of currentData.value.data.transactions.entries()) {
           if (!abort) {
-            const currentDataRaw = toRaw(currentData.value);
-            const isLastTransaction = i === currentDataRaw.data.transactions.length - 1;
-            const isLastStep = currentStep.value === adjustedFeeData.value.length - 1;
+            const currentDataRaw = toRaw(currentData.value)
+            const isLastTransaction = i === currentDataRaw.data.transactions.length - 1
+            const isLastStep = currentStep.value === adjustedFeeData.value.length - 1
 
             if (isLastTransaction && isLastStep) {
-              isFinal.value = true;
+              isFinal.value = true
             } else {
-              isFinal.value = false;
+              isFinal.value = false
             }
             do {
-              retry.value = false;
-              transaction.value = stepTx;
+              retry.value = false
+              transaction.value = stepTx
               if (currentDataRaw.data.transactions.length > i + 1) {
-                hasMore.value = true;
+                hasMore.value = true
               } else {
-                hasMore.value = false;
+                hasMore.value = false
               }
-              await nextTick();
-              txstatus.value = 'keplr-sign';
-              isTxHandlingModalOpen.value = true;
-              let txToResolveResolver;
+              await nextTick()
+              txstatus.value = 'keplr-sign'
+              isTxHandlingModalOpen.value = true
+              let txToResolveResolver
               const txToResolvePromise = {
                 promise: new Promise((resolve) => {
-                  txToResolveResolver = resolve;
+                  txToResolveResolver = resolve
                 }),
                 resolver: txToResolveResolver,
-              };
+              }
 
-              txToResolve.value = txToResolvePromise;
-              let res = await msgFromStepTransaction(stepTx, gasPriceLevel.value);
-              const feeOptions = await feeForStepTransaction(stepTx);
+              txToResolve.value = txToResolvePromise
+              let res = await msgFromStepTransaction(stepTx, gasPriceLevel.value)
+              const feeOptions = await feeForStepTransaction(stepTx)
               const fee = {
                 amount: [
                   {
@@ -700,12 +700,12 @@ export default defineComponent({
                   },
                 ],
                 gas: '' + userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
-              };
-              let tx;
+              }
+              let tx
               event('confirm_tx', {
                 event_label: 'Confirmed ' + stepTx.name + ' tx',
                 event_category: 'transactions',
-              });
+              })
               //for supporting multi msgs
 
               try {
@@ -715,53 +715,53 @@ export default defineComponent({
                   fee,
                   registry: res.registry,
                   memo: currentDataRaw.data.memo ?? '',
-                });
+                })
               } catch (e) {
-                console.error(e);
+                console.error(e)
                 errorDetails.value = {
                   message: e.message,
-                };
-                txstatus.value = 'keplr-reject';
-                await txToResolve.value['promise'];
-                continue;
+                }
+                txstatus.value = 'keplr-reject'
+                await txToResolve.value['promise']
+                continue
               }
               if (tx) {
                 event('signed_tx', {
                   event_label: 'Signed ' + stepTx.name + ' tx',
                   event_category: 'transactions',
-                });
-                errorDetails.value = undefined;
-                emit('transacting');
-                txstatus.value = 'transacting';
-                let result;
+                })
+                errorDetails.value = undefined
+                emit('transacting')
+                txstatus.value = 'transacting'
+                let result
                 try {
-                  await ensureTraceChannel(stepTx);
-                  result = await txstore.dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, tx);
+                  await ensureTraceChannel(stepTx)
+                  result = await txstore.dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, tx)
                 } catch (e) {
-                  console.error(e);
+                  console.error(e)
                   errorDetails.value = {
                     message: e?.message,
                     ticket: result?.ticket,
                     chain_name: res.chain_name,
-                  };
-                  emit('failed');
-                  txstatus.value = 'failed';
-                  await txToResolve.value['promise'];
-                  abort = true;
-                  continue;
+                  }
+                  emit('failed')
+                  txstatus.value = 'failed'
+                  await txToResolve.value['promise']
+                  abort = true
+                  continue
                 }
                 try {
                   let txResultData = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
                     subscribe: true,
                     params: { chain_name: res.chain_name, ticket: result.ticket },
-                  });
+                  })
 
-                  let delayTimeout;
+                  let delayTimeout
 
                   if (stepTx.name.startsWith('ibc')) {
                     delayTimeout = setTimeout(() => {
-                      txstatus.value = 'delay';
-                    }, 60000);
+                      txstatus.value = 'delay'
+                    }, 60000)
                   }
 
                   while (
@@ -775,18 +775,18 @@ export default defineComponent({
                     txResultData = await apistore.getters[GlobalDemerisGetterTypes.API.getTxStatus]({
                       chain_name: res.chain_name,
                       ticket: result.ticket,
-                    });
+                    })
 
                     if (txResultData.status.startsWith('stuck')) {
-                      txstatus.value = 'unknown';
-                      break;
+                      txstatus.value = 'unknown'
+                      break
                     } else if (txResultData.status === 'IBC_receive_failed') {
-                      txstatus.value = 'IBC_receive_failed';
+                      txstatus.value = 'IBC_receive_failed'
                     }
                   }
 
                   if (delayTimeout) {
-                    clearTimeout(delayTimeout);
+                    clearTimeout(delayTimeout)
                   }
 
                   if (!['IBC_receive_success', 'complete'].includes(txResultData.status)) {
@@ -794,54 +794,54 @@ export default defineComponent({
                       status: txResultData.status,
                       ticket: result.ticket,
                       chain_name: res.chain_name,
-                    };
+                    }
 
                     if (txResultData.error) {
-                      details['message'] = txResultData.error;
+                      details['message'] = txResultData.error
                     }
-                    errorDetails.value = details;
-                    throw new Error(txResultData.error || txResultData.status);
+                    errorDetails.value = details
+                    throw new Error(txResultData.error || txResultData.status)
                   }
 
-                  errorDetails.value = undefined;
+                  errorDetails.value = undefined
 
-                  let txhash: string;
-                  let chain_name: string;
+                  let txhash: string
+                  let chain_name: string
 
                   if (txResultData.status === 'IBC_receive_success') {
-                    const ticketData = txResultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
-                    txhash = ticketData.TxHash;
-                    chain_name = ticketData.Chain;
+                    const ticketData = txResultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success')
+                    txhash = ticketData.TxHash
+                    chain_name = ticketData.Chain
                   } else {
-                    txhash = result.ticket;
-                    chain_name = res.chain_name;
+                    txhash = result.ticket
+                    chain_name = res.chain_name
                   }
 
-                  allTransactionResponses.value.hashes.push({ txhash, chain_name });
+                  allTransactionResponses.value.hashes.push({ txhash, chain_name })
 
                   // sleep
-                  await new Promise((r) => setTimeout(r, 750));
+                  await new Promise((r) => setTimeout(r, 750))
 
                   if (!txResultData.error) {
                     if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentDataRaw.data.name)) {
                       //Get end block events
-                      let endBlockEvent = null;
-                      let retries = 0;
+                      let endBlockEvent = null
+                      let retries = 0
                       while (retries < 10) {
                         try {
                           endBlockEvent = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
                             height: txResultData.height,
                             stepType: currentDataRaw.data.name,
-                          });
-                          break;
+                          })
+                          break
                         } catch {
-                          retries++;
-                          await new Promise((r) => setTimeout(r, 2000));
+                          retries++
+                          await new Promise((r) => setTimeout(r, 2000))
                         }
                       }
 
                       if (endBlockEvent) {
-                        let resultData = endBlockEvent;
+                        let resultData = endBlockEvent
 
                         switch (currentDataRaw.data.name) {
                           case 'swap':
@@ -855,266 +855,266 @@ export default defineComponent({
                               demandCoinDenom: endBlockEvent.demand_coin_denom,
                               remainingOfferCoinAmount: endBlockEvent.remaining_offer_coin_amount,
                               offerCoinDenom: endBlockEvent.offer_coin_denom,
-                            };
-                            break;
+                            }
+                            break
                         }
 
-                        txResult.value = resultData;
+                        txResult.value = resultData
                       } else {
-                        txstatus.value = 'unknown';
+                        txstatus.value = 'unknown'
                         errorDetails.value = {
                           status: txResultData.status,
                           ticket: txhash,
                           chain_name,
-                        };
-                        throw new Error('Could not fetch transaction response');
+                        }
+                        throw new Error('Could not fetch transaction response')
                       }
                     } else {
-                      txResult.value = { ...currentDataRaw.data };
+                      txResult.value = { ...currentDataRaw.data }
                     }
 
                     txResult.value = {
                       ...txResult.value,
                       hashes: allTransactionResponses.value.hashes,
                       fees: { ...fees.value[currentStep.value] },
-                    };
+                    }
                   }
 
                   // TODO: deal with status here
-                  emit('complete');
-                  txstatus.value = 'complete';
+                  emit('complete')
+                  txstatus.value = 'complete'
                   event('completed_tx', {
                     event_label: 'Completed ' + stepTx.name + ' tx',
                     event_category: 'transactions',
-                  });
-                  let value;
-                  let base_denom;
+                  })
+                  let value
+                  let base_denom
                   switch (stepTx.name) {
                     case 'ibc_forward':
                       value = getPrice({
                         ...(stepTx.data as IBCForwardsData).amount,
                         chain_name: (stepTx.data as IBCForwardsData).from_chain,
-                      });
+                      })
                       base_denom = await getBaseDenom(
                         (stepTx.data as IBCForwardsData).amount.denom,
                         (stepTx.data as IBCForwardsData).from_chain,
-                      );
+                      )
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'IBC transfer ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: (stepTx.data as IBCForwardsData).amount.amount,
-                        });
-                      });
+                        })
+                      })
 
-                      break;
+                      break
                     case 'ibc_backward':
                       value = getPrice({
                         ...(stepTx.data as IBCBackwardsData).amount,
                         chain_name: (stepTx.data as IBCBackwardsData).from_chain,
-                      });
+                      })
                       base_denom = await getBaseDenom(
                         (stepTx.data as IBCBackwardsData).amount.denom,
                         (stepTx.data as IBCBackwardsData).from_chain,
-                      );
+                      )
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'IBC transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'IBC transfer ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: (stepTx.data as IBCBackwardsData).amount.amount,
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                     case 'swap':
-                      value = getPrice((stepTx.data as SwapData).from);
-                      base_denom = await getBaseDenom((stepTx.data as SwapData).from.denom);
-                      let to_denom = await getBaseDenom((stepTx.data as SwapData).to.denom);
+                      value = getPrice((stepTx.data as SwapData).from)
+                      base_denom = await getBaseDenom((stepTx.data as SwapData).from.denom)
+                      let to_denom = await getBaseDenom((stepTx.data as SwapData).to.denom)
 
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Swap USD volume',
                           event_category: 'volume',
                           value: value.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Swap ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: Math.floor(
                             (parseInt((stepTx.data as SwapData).from.amount) * txResult.value.swappedPercent) / 100,
                           ),
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Swap ' + base_denom + ' -> ' + to_denom + ' volume',
                           event_category: 'volume',
                           value: Math.floor(
                             (parseInt((stepTx.data as SwapData).from.amount) * txResult.value.swappedPercent) / 100,
                           ),
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                     case 'createpool':
-                      value = getPrice((stepTx.data as CreatePoolData).coinA);
+                      value = getPrice((stepTx.data as CreatePoolData).coinA)
 
-                      let cvalueB = getPrice((stepTx.data as CreatePoolData).coinB);
-                      base_denom = await getBaseDenom((stepTx.data as CreatePoolData).coinA.denom);
-                      let cbase_denomB = await getBaseDenom((stepTx.data as CreatePoolData).coinB.denom);
+                      let cvalueB = getPrice((stepTx.data as CreatePoolData).coinB)
+                      base_denom = await getBaseDenom((stepTx.data as CreatePoolData).coinA.denom)
+                      let cbase_denomB = await getBaseDenom((stepTx.data as CreatePoolData).coinB.denom)
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Create Pool USD volume',
                           event_category: 'volume',
                           value: value.value + cvalueB.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Create Pool ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: (stepTx.data as CreatePoolData).coinA.amount,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Create Pool ' + cbase_denomB + ' volume',
                           event_category: 'volume',
                           value: (stepTx.data as CreatePoolData).coinB.amount,
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                     case 'addliquidity':
-                      let coins = parseCoins(txResult.value.accepted_coins);
+                      let coins = parseCoins(txResult.value.accepted_coins)
 
-                      value = getPrice(coins[0]);
+                      value = getPrice(coins[0])
 
-                      let valueB = getPrice(coins[1]);
-                      base_denom = await getBaseDenom(coins[0].denom);
-                      let base_denomB = await getBaseDenom(coins[1].denom);
+                      let valueB = getPrice(coins[1])
+                      base_denom = await getBaseDenom(coins[0].denom)
+                      let base_denomB = await getBaseDenom(coins[1].denom)
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Add Liquidity USD volume',
                           event_category: 'volume',
                           value: value.value + valueB.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Add Liquidity ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: coins[0].amount,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Add Liquidity ' + base_denomB + ' volume',
                           event_category: 'volume',
                           value: coins[1].amount,
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                     case 'withdrawliquidity':
-                      value = getPrice((stepTx.data as WithdrawLiquidityData).poolCoin);
+                      value = getPrice((stepTx.data as WithdrawLiquidityData).poolCoin)
 
                       base_denom = await getDisplayName(
                         await getBaseDenom((stepTx.data as WithdrawLiquidityData).poolCoin.denom),
-                      );
+                      )
 
-                      let display_denom = await getDisplayName(base_denom);
+                      let display_denom = await getDisplayName(base_denom)
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Withdraw Liquidity USD volume',
                           event_category: 'volume',
                           value: value.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Withdraw Liquidity ' + display_denom + ' volume',
                           event_category: 'volume',
                           value: new BigNumber((stepTx.data as WithdrawLiquidityData).poolCoin.amount).shiftedBy(-6),
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                     case 'transfer':
                       value = getPrice({
                         ...(stepTx.data as TransferData).amount,
                         chain_name: (stepTx.data as TransferData).chain_name,
-                      });
+                      })
                       base_denom = await getBaseDenom(
                         (stepTx.data as TransferData).amount.denom,
                         (stepTx.data as TransferData).chain_name,
-                      );
+                      )
 
                       nextTick(() => {
                         event('usd_volume', {
                           event_label: 'Transfer USD volume',
                           event_category: 'volume',
                           value: value.value,
-                        });
+                        })
                         event('denom_volume', {
                           event_label: 'Transfer ' + base_denom + ' volume',
                           event_category: 'volume',
                           value: (stepTx.data as TransferData).amount.amount,
-                        });
-                      });
-                      break;
+                        })
+                      })
+                      break
                   }
-                  await txToResolve.value['promise'];
+                  await txToResolve.value['promise']
                 } catch (e) {
-                  console.error(e);
+                  console.error(e)
                   if (errorDetails.value === undefined) {
-                    errorDetails.value = e.message;
+                    errorDetails.value = e.message
                   }
-                  emit('failed');
+                  emit('failed')
                   if (txstatus.value !== 'unknown') {
                     event('failed_tx', {
                       event_label: 'Failed ' + stepTx.name + ' tx',
                       event_category: 'transactions',
-                    });
-                    txstatus.value = 'failed';
+                    })
+                    txstatus.value = 'failed'
                   }
-                  await txToResolve.value['promise'];
-                  abort = true;
-                  continue;
+                  await txToResolve.value['promise']
+                  abort = true
+                  continue
                 }
               }
-            } while (retry.value);
+            } while (retry.value)
           }
 
-          isTxHandlingModalOpen.value = false;
+          isTxHandlingModalOpen.value = false
         }
         if (currentStep.value == (adjustedFeeData.value as Step[]).length - 1) {
           // At the end, emit completion
-          emit('finish');
+          emit('finish')
         } else {
-          currentStep.value = currentStep.value + 1;
+          currentStep.value = currentStep.value + 1
         }
       }
-    };
+    }
 
     const emitHandler = (event) => {
-      emit(event);
-    };
+      emit(event)
+    }
 
     watch(
       refProps,
       () => {
         if (!interstitialProceed.value) {
-          let shouldOpenConfirmation = false;
+          let shouldOpenConfirmation = false
 
           if (props.actionName === 'move') {
-            shouldOpenConfirmation = true;
+            shouldOpenConfirmation = true
           } else if (props.actionName === 'transfer') {
             if (adjustedFeeData.value[0]?.transactions[0]?.name.includes('ibc')) {
-              shouldOpenConfirmation = true;
+              shouldOpenConfirmation = true
             }
           } else if (['swap', 'addliquidity'].includes(props.actionName)) {
-            shouldOpenConfirmation = adjustedFeeData.value?.length > 1;
+            shouldOpenConfirmation = adjustedFeeData.value?.length > 1
           }
 
-          isTransferConfirmationOpen.value = shouldOpenConfirmation;
+          isTransferConfirmationOpen.value = shouldOpenConfirmation
         }
       },
       { immediate: true },
-    );
+    )
     //TEST
     // setTimeout(()=> {
     //   txstatus.value = 'failed'
@@ -1146,9 +1146,9 @@ export default defineComponent({
       failedChainsText,
       showChainError,
       isDemoAccount,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

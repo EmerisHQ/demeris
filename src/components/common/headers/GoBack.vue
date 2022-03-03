@@ -7,10 +7,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   name: 'Goback',
@@ -30,12 +30,12 @@ export default defineComponent({
   emits: ['go-back'],
   setup(_, { emit }) {
     const handleGoBackClick = () => {
-      emit('go-back');
-    };
+      emit('go-back')
+    }
 
     return {
       handleGoBackClick,
-    };
+    }
   },
-});
+})
 </script>

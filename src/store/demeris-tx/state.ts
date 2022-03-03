@@ -1,17 +1,17 @@
-import * as API from '@/types/api';
+import * as API from '@/types/api'
 
 export type ChainMeta = {
-  primaryChannels?: Record<string, API.PrimaryChannel>;
-  relayerBalance?: API.RelayerBalance;
-  status?: boolean;
-};
-export type ChainData = API.Chain & ChainMeta;
+  primaryChannels?: Record<string, API.PrimaryChannel>
+  relayerBalance?: API.RelayerBalance
+  status?: boolean
+}
+export type ChainData = API.Chain & ChainMeta
 
 export type State = {
-  _Subscriptions: Set<string>;
-};
+  _Subscriptions: Set<string>
+}
 export function getDefaultState(): State {
   return {
     _Subscriptions: new Set(),
-  };
+  }
 }

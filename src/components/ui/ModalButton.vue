@@ -11,9 +11,9 @@
   />
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from './Button.vue';
+import Button from './Button.vue'
 
 export default defineComponent({
   name: 'ModalButton',
@@ -28,7 +28,7 @@ export default defineComponent({
     disabled: { type: Boolean, default: false },
     squared: { type: Boolean, default: false },
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 ::v-deep(.button) {

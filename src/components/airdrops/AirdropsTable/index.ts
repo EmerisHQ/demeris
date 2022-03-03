@@ -1,3 +1,3 @@
-import AirdropsTable from './AirdropsTable.vue';
+import AirdropsTable from './AirdropsTable.vue'
 
-export default AirdropsTable;
+export default AirdropsTable

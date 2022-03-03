@@ -15,11 +15,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRaw } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, toRaw } from 'vue'
+import { useStore } from 'vuex'
 
-import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import CaretRightIcon from '@/components/common/Icons/CaretRightIcon.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
 
 export default defineComponent({
   name: 'AirdropsCurrentBalance',
@@ -28,13 +28,13 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const apistore = useStore() as TypedAPIStore
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
-    });
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop])
+    })
 
-    return { selectedAirdrop };
+    return { selectedAirdrop }
   },
-});
+})
 </script>

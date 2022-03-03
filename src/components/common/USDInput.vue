@@ -2,12 +2,12 @@
   <AmountInput :model-value="usdValue" @update:model-value="onInput" />
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { defineComponent, nextTick, ref, toRefs, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountInput from '@/components/ui/AmountInput.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import AmountInput from '@/components/ui/AmountInput.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
 
 export default defineComponent({
   name: 'USDInput',
@@ -20,56 +20,56 @@ export default defineComponent({
   },
   emits: ['update:modelValue', 'update:price'],
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore()
     // Should not observe price changes
-    const price = ref(store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom }));
-    const usdValue = ref('');
-    const previousInput = ref('');
+    const price = ref(store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom }))
+    const usdValue = ref('')
+    const previousInput = ref('')
 
     const onInput = (value: string) => {
-      setUsdValue(value);
+      setUsdValue(value)
 
-      const bnValue = new BigNumber(value);
-      const amount = bnValue.isFinite() ? bnValue.dividedBy(price.value).decimalPlaces(6).toString() : '';
-      previousInput.value = amount;
-      emit('update:modelValue', amount);
-    };
+      const bnValue = new BigNumber(value)
+      const amount = bnValue.isFinite() ? bnValue.dividedBy(price.value).decimalPlaces(6).toString() : ''
+      previousInput.value = amount
+      emit('update:modelValue', amount)
+    }
 
     const setUsdValue = (value: string) => {
-      usdValue.value = value;
-      emit('update:price', value);
-    };
+      usdValue.value = value
+      emit('update:price', value)
+    }
 
     watch(
       props,
       () => {
         // Do not format values manually entered by the user
         if (props.modelValue === previousInput.value) {
-          return;
+          return
         }
 
-        const value = new BigNumber(props.modelValue);
+        const value = new BigNumber(props.modelValue)
 
         nextTick(() => {
           if (value.isFinite()) {
-            setUsdValue(value.multipliedBy(price.value).toFixed(2));
-            return;
+            setUsdValue(value.multipliedBy(price.value).toFixed(2))
+            return
           }
 
-          setUsdValue('');
-        });
+          setUsdValue('')
+        })
       },
       { immediate: true },
-    );
+    )
 
-    const { denom } = toRefs(props);
+    const { denom } = toRefs(props)
     watch(denom, (newDenom, oldDenom) => {
       if (newDenom !== oldDenom) {
-        price.value = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom });
+        price.value = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: props.denom })
       }
-    });
+    })
 
-    return { usdValue, onInput };
+    return { usdValue, onInput }
   },
-});
+})
 </script>

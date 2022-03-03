@@ -12,21 +12,21 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue';
-import { interpret, State } from 'xstate';
+import { onMounted, reactive } from 'vue'
+import { interpret, State } from 'xstate'
 
-import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
-import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
-import Button from '@/components/ui/Button.vue';
-import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
-import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
-import { useTransactionsStore } from '@/features/transactions/transactionsStore';
+import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json'
+import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json'
+import Button from '@/components/ui/Button.vue'
+import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue'
+import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine'
+import { useTransactionsStore } from '@/features/transactions/transactionsStore'
 
 const state = reactive({
   key: undefined,
-});
+})
 
-const transactionsStore = useTransactionsStore();
+const transactionsStore = useTransactionsStore()
 const customMachine = transactionProcessMachine.withConfig({
   services: {
     validateFees: () => Promise.resolve({ totals: [] }),
@@ -34,18 +34,18 @@ const customMachine = transactionProcessMachine.withConfig({
     validatePreviousTransaction: () => Promise.resolve(),
     signTransaction: () => Promise.reject(),
   },
-});
+})
 
 onMounted(() => {
-  addService('swap-success', SwapSuccessFixture);
-  addService('swap-partial', SwapPartialFixture);
-});
+  addService('swap-success', SwapSuccessFixture)
+  addService('swap-partial', SwapPartialFixture)
+})
 
 const addService = (key: string, stateDefinition: any) => {
-  const prevState = State.create(stateDefinition);
+  const prevState = State.create(stateDefinition)
   // @ts-ignore
-  const service = interpret(customMachine).start(prevState);
+  const service = interpret(customMachine).start(prevState)
   // @ts-ignore
-  transactionsStore.transactions[key] = service;
-};
+  transactionsStore.transactions[key] = service
+}
 </script>

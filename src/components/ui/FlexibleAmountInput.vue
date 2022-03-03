@@ -36,9 +36,9 @@
   </label>
 </template>
 <script lang="ts">
-import { computed, defineComponent, nextTick, PropType, reactive, ref, watch } from 'vue';
+import { computed, defineComponent, nextTick, PropType, reactive, ref, watch } from 'vue'
 
-import AmountInput from './AmountInput.vue';
+import AmountInput from './AmountInput.vue'
 
 export default defineComponent({
   name: 'FlexibleAmountInput',
@@ -74,51 +74,51 @@ export default defineComponent({
   emits: ['update:modelValue'],
 
   setup(props, { emit }) {
-    const containerElementRef = ref(null);
-    const sizeElementRef = ref(null);
-    const prefixElementRef = ref(null);
-    const suffixElementRef = ref(null);
+    const containerElementRef = ref(null)
+    const sizeElementRef = ref(null)
+    const prefixElementRef = ref(null)
+    const suffixElementRef = ref(null)
 
     const model = computed({
       get: () => props.modelValue,
       set: (value) => emit('update:modelValue', value),
-    });
+    })
 
     const state = reactive({
       width: 0,
       maxWidth: '100%',
       scale: 1,
-    });
+    })
 
     watch(
       [containerElementRef, sizeElementRef, prefixElementRef, suffixElementRef, model, props],
       ([containerEl, sizeEl, prefixEl, suffixEl]) => {
         if (!sizeEl) {
-          return;
+          return
         }
 
         nextTick(() => {
-          const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0);
-          const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1);
-          const fullWidth = width + extraWidth;
-          const maxWidth = containerEl?.offsetWidth;
+          const extraWidth = (prefixEl?.offsetWidth || 0) + (suffixEl?.offsetWidth || 0)
+          const width = Math.max(props.minWidth, sizeEl.offsetWidth + 1)
+          const fullWidth = width + extraWidth
+          const maxWidth = containerEl?.offsetWidth
 
-          const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1;
+          const scale = fullWidth >= maxWidth ? maxWidth / fullWidth : 1
 
-          state.width = width;
-          state.maxWidth = maxWidth;
-          state.scale = scale;
-        });
+          state.width = width
+          state.maxWidth = maxWidth
+          state.scale = scale
+        })
       },
       { immediate: true },
-    );
+    )
 
     const innerStyle = computed(() => {
       return {
         transform: `scale(${state.scale})`,
         maxWidth: state.maxWidth,
-      };
-    });
+      }
+    })
 
     const inputProps = computed(() => {
       return {
@@ -126,8 +126,8 @@ export default defineComponent({
         width: state.width,
         placeholder: props.placeholder,
         class: `flexible-input__input appearance-none placeholder-inactive overflow-hidden p-0 m-0 w-auto text-left border-none outline-none bg-transparent transition-colors`,
-      };
-    });
+      }
+    })
     return {
       model,
       state,
@@ -137,9 +137,9 @@ export default defineComponent({
       sizeElementRef,
       prefixElementRef,
       suffixElementRef,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss">

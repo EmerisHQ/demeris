@@ -1,3 +1,3 @@
-import SwitchForm from './SwitchForm.vue';
+import SwitchForm from './SwitchForm.vue'
 
-export default SwitchForm;
+export default SwitchForm

@@ -32,33 +32,29 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { computed, inject } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
+import ChainName from '@/components/common/ChainName.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
 
-import {
-  getCurrentTransaction,
-  getSourceChainFromTransaction,
-  ProvideViewerKey,
-} from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
+import { getCurrentTransaction, getSourceChainFromTransaction, ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
 
-const transactionsStore = useTransactionsStore();
-const { actor, minimizeModal, stepId } = inject(ProvideViewerKey);
-const { state } = actor;
+const transactionsStore = useTransactionsStore()
+const { actor, minimizeModal, stepId } = inject(ProvideViewerKey)
+const { state } = actor
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
-const sourceChain = computed(() => getSourceChainFromTransaction(transaction.value));
+const transaction = computed(() => getCurrentTransaction(state.value.context))
+const sourceChain = computed(() => getSourceChainFromTransaction(transaction.value))
 
 const onKeep = () => {
-  minimizeModal();
-};
+  minimizeModal()
+}
 
 const onCancel = () => {
-  transactionsStore.toggleCancelModal();
-  transactionsStore.removeTransactionFromPending(stepId);
-};
+  transactionsStore.toggleCancelModal()
+  transactionsStore.removeTransactionFromPending(stepId)
+}
 </script>

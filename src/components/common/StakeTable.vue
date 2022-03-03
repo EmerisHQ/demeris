@@ -122,7 +122,7 @@
                                 (x) => keyHashfromAddress(x.operator_address) == validator.validator_address,
                               ).jailed
                             ) {
-                              goStakeActionPage(StakingActions.STAKE, validator.validator_address);
+                              goStakeActionPage(StakingActions.STAKE, validator.validator_address)
                             }
                           }
                         "
@@ -204,27 +204,27 @@
   </div>
 </template>
 <script lang="tsx">
-import BigNumber from 'bignumber.js';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import { computed, defineComponent, ref, toRefs, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { computed, defineComponent, ref, toRefs, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import Price from '@/components/common/Price.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import useDenoms from '@/composables/useDenoms';
-import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { StakingActions } from '@/types/actions';
-import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue'
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import Price from '@/components/common/Price.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import useDenoms from '@/composables/useDenoms'
+import useStaking from '@/composables/useStaking'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { StakingActions } from '@/types/actions'
+import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic'
 
 export default defineComponent({
   components: {
@@ -243,161 +243,160 @@ export default defineComponent({
     },
   },
   setup(props) {
-    dayjs.extend(relativeTime);
-    const { useDenom } = useDenoms();
-    const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } =
-      useStaking();
-    const router = useRouter();
-    const { t } = useI18n({ useScope: 'global' });
-    const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount();
-    const store = useStore();
+    dayjs.extend(relativeTime)
+    const { useDenom } = useDenoms()
+    const { getValidatorsByBaseDenom, getChainDisplayInflationByBaseDenom, getStakingRewardsByBaseDenom } = useStaking()
+    const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
+    const { stakingBalancesByChain, unbondingDelegationsByChain } = useAccount()
+    const store = useStore()
     /* variables */
-    const selectedTab = ref<number>(1);
-    const assetStakingAPY = ref<number | string>('-');
-    const stakingRewardsData = ref(null);
-    const validatorList = ref<Array<any>>([]);
-    const propsRef = toRefs(props);
+    const selectedTab = ref<number>(1)
+    const assetStakingAPY = ref<number | string>('-')
+    const stakingRewardsData = ref(null)
+    const validatorList = ref<Array<any>>([])
+    const propsRef = toRefs(props)
 
     const chain_name = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-    );
+    )
     watch(
       () => chain_name.value,
       async (newVal, _) => {
         if (newVal) {
-          assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value);
-          validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value);
+          assetStakingAPY.value = await getChainDisplayInflationByBaseDenom(propsRef.denom.value)
+          validatorList.value = await getValidatorsByBaseDenom(propsRef.denom.value)
         }
       },
       { immediate: true },
-    );
+    )
 
     /* computeds */
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]
+    })
     const assetPrecision = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: propsRef.denom.value,
         }) ?? '6'
-      );
-    });
+      )
+    })
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-      );
-    });
+      )
+    })
     const getTimeToString = (isodate: string) => {
-      return dayjs().to(dayjs(isodate));
-    };
+      return dayjs().to(dayjs(isodate))
+    }
     const unbondingBalances = computed(() => {
       return unbondingDelegationsByChain(
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.denom.value }),
-      );
-    });
+      )
+    })
     const operator_prefix = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getBech32Config]({
         chain_name: store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({
           denom: propsRef.denom.value,
         }),
-      }).val_addr;
-    });
+      }).val_addr
+    })
     const totalStakedAssetDisplayAmount = computed(() => {
       const total = new BigNumber(totalRewardsAmount.value).plus(
         stakingBalances.value.reduce(
           (total, currentValue) => total.plus(new BigNumber(currentValue.amount)),
           new BigNumber(0),
         ),
-      );
+      )
       if (total.isLessThan(1)) {
-        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value)
       } else {
-        const totalDisplay = total.dividedBy(10 ** assetPrecision.value);
-        return totalDisplay.toFixed(assetPrecision.value);
+        const totalDisplay = total.dividedBy(10 ** assetPrecision.value)
+        return totalDisplay.toFixed(assetPrecision.value)
       }
-    });
+    })
     const isStakingAssetExist = computed(() => {
-      return stakingBalances.value.length > 0;
-    });
+      return stakingBalances.value.length > 0
+    })
     const isUnstakingAssetExist = computed(() => {
-      return unbondingBalances.value.length > 0;
-    });
+      return unbondingBalances.value.length > 0
+    })
     const stakingButtonName = computed(() => {
-      return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value });
-    });
+      return t('components.stakeTable.stakeAsset', { ticker: useDenom(props.denom).tickerName.value })
+    })
     const totalRewardsAmount = computed(() => {
-      return parseFloat(stakingRewardsData.value?.total ?? 0);
-    });
+      return parseFloat(stakingRewardsData.value?.total ?? 0)
+    })
     const totalRewardsDisplayAmount = computed(() => {
       if (totalRewardsAmount.value < 1) {
-        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value);
+        return '<' + (1 / 10 ** assetPrecision.value).toFixed(assetPrecision.value)
       }
       return new BigNumber(totalRewardsAmount.value ?? 0)
         .dividedBy(10 ** assetPrecision.value)
-        .toFixed(assetPrecision.value);
-    });
+        .toFixed(assetPrecision.value)
+    })
     const unstakingAssetValue = computed(() => {
       return unbondingBalances.value
         .map((x) => x.entries)
         .flat()
         .reduce((acc, entry) => {
-          return acc.plus(new BigNumber(entry.balance));
+          return acc.plus(new BigNumber(entry.balance))
         }, new BigNumber(0))
         .dividedBy(10 ** assetPrecision.value)
-        .toString();
-    });
+        .toString()
+    })
 
     /* functions */
     const selectTab = (tabNumber?: number): void => {
-      selectedTab.value = tabNumber;
-    };
+      selectedTab.value = tabNumber
+    }
     const getTabClass = (tabNumber: number): string => {
-      return selectedTab.value === tabNumber ? '' : 'text-inactive';
-    };
+      return selectedTab.value === tabNumber ? '' : 'text-inactive'
+    }
     const getDisplayAmount = (amount: any): number => {
-      return Number(amount) / 10 ** assetPrecision.value;
-    };
+      return Number(amount) / 10 ** assetPrecision.value
+    }
     const getValidatorMoniker = (address: string): string => {
-      let moniker;
+      let moniker
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
-          moniker = vali.moniker;
-          return true;
+          moniker = vali.moniker
+          return true
         } else {
-          return false;
+          return false
         }
-      });
-      return moniker;
-    };
+      })
+      return moniker
+    }
     const getValidatorData = (address: string): any => {
       validatorList.value.some((vali) => {
         if (keyHashfromAddress(vali.operator_address) === address) {
-          return vali;
+          return vali
         }
-      });
-    };
+      })
+    }
     const goStakeActionPage = (action: string, valAddress = '') => {
-      const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress);
+      const validatorAddress = chainAddressfromKeyhash(operator_prefix.value, valAddress)
       switch (action) {
         case StakingActions.STAKE:
         case StakingActions.UNSTAKE:
         case StakingActions.SWITCH:
-          router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`);
-          return;
+          router.push(`/staking/${props.denom}/${action}${validatorAddress ? `/${validatorAddress}` : ''}`)
+          return
         default:
-          router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`);
-          return;
+          router.push(`/staking/${props.denom}/${StakingActions.CLAIM}`)
+          return
       }
-    };
+    }
     /* watch */
     watch(
       () => isSignedIn.value,
       async () => {
-        stakingRewardsData.value = await getStakingRewardsByBaseDenom(props.denom);
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(props.denom)
       },
       { immediate: true },
-    );
+    )
 
     return {
       StakingActions,
@@ -421,9 +420,9 @@ export default defineComponent({
       selectTab,
       keyHashfromAddress,
       validatorList,
-    };
+    }
   },
-});
+})
 </script>
 <style scoped>
 * >>> .tippy-box {

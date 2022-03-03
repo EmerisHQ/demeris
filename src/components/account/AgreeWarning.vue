@@ -29,9 +29,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue'
 
 export default defineComponent({
   name: 'AgreeWarning',
@@ -44,15 +44,15 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const emitCancel = () => {
-      emit('cancel');
-    };
+      emit('cancel')
+    }
     const emitAgree = () => {
-      emit('agree');
-    };
+      emit('agree')
+    }
 
-    return { emitCancel, emitAgree };
+    return { emitCancel, emitAgree }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

@@ -37,21 +37,21 @@
 </template>
 
 <script lang="ts" setup>
-import { useDark } from '@vueuse/core';
-import { ref } from 'vue';
+import { useDark } from '@vueuse/core'
+import { ref } from 'vue'
 
-import surfer from '@/assets/images/maintenance-surfer.png';
-import surferDark from '@/assets/images/maintenance-surfer-dark.png';
-import Brandmark from '@/components/common/Brandmark.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-const isBrowserDarkMode = useDark();
+import surfer from '@/assets/images/maintenance-surfer.png'
+import surferDark from '@/assets/images/maintenance-surfer-dark.png'
+import Brandmark from '@/components/common/Brandmark.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+const isBrowserDarkMode = useDark()
 const footerLinks = ref([
   { label: 'Telegram', url: 'https://t.me/EmerisHQ' },
   { label: 'Medium', url: 'https://medium.com/emeris-blog' },
   { label: 'Twitter', url: 'https://twitter.com/emerisHQ' },
-]);
+])
 function openURL(url) {
-  window.open(url, '_blank', 'noopener');
+  window.open(url, '_blank', 'noopener')
 }
 </script>

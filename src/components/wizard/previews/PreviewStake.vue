@@ -51,21 +51,21 @@
   </List>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Price from '@/components/common/Price.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import { List, ListItem } from '@/components/ui/List';
-import useAccount from '@/composables/useAccount';
-import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
-import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
-import { keyHashfromAddress } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Price from '@/components/common/Price.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import { List, ListItem } from '@/components/ui/List'
+import useAccount from '@/composables/useAccount'
+import useStaking from '@/composables/useStaking'
+import { GlobalDemerisGetterTypes } from '@/store'
+import * as Actions from '@/types/actions'
+import * as Base from '@/types/base'
+import { keyHashfromAddress } from '@/utils/basic'
 
 export default defineComponent({
   name: 'PreviewStake',
@@ -99,39 +99,39 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
-    const { getValidatorsByBaseDenom } = useStaking();
-    const propsRef = toRefs(props);
-    const { stakingBalancesByChain } = useAccount();
-    const validators = ref([]);
-    const tx = propsRef.step.value.transactions[0];
-    const chainName = (tx.data as Actions.StakeData[])[0].chain_name;
-    const baseDenom = (tx.data as Actions.StakeData[])[0].amount.denom;
+    const store = useStore()
+    const { getValidatorsByBaseDenom } = useStaking()
+    const propsRef = toRefs(props)
+    const { stakingBalancesByChain } = useAccount()
+    const validators = ref([])
+    const tx = propsRef.step.value.transactions[0]
+    const chainName = (tx.data as Actions.StakeData[])[0].chain_name
+    const baseDenom = (tx.data as Actions.StakeData[])[0].amount.denom
     const totalStaked = (tx.data as Actions.StakeData[])
       .reduce((acc, txdata) => {
-        return acc.plus(new BigNumber(txdata.amount.amount));
+        return acc.plus(new BigNumber(txdata.amount.amount))
       }, new BigNumber(0))
-      .toString();
+      .toString()
 
     onMounted(async () => {
-      validators.value = await getValidatorsByBaseDenom(baseDenom);
-    });
+      validators.value = await getValidatorsByBaseDenom(baseDenom)
+    })
 
     const stakingBalances = computed(() => {
       return stakingBalancesByChain(
         store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
-      );
-    });
+      )
+    })
     const getStakingBalance = (address) => {
-      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0;
-    };
+      return stakingBalances.value.find((x) => x.validator_address == keyHashfromAddress(address))?.amount ?? 0
+    }
     const getValidatorMoniker = (address) => {
-      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
-    };
-    const size = props.context === 'default' ? 'md' : 'sm';
+      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown'
+    }
+    const size = props.context === 'default' ? 'md' : 'sm'
     const getValidator = (address) => {
-      return validators.value.find((x) => x.operator_address == address);
-    };
+      return validators.value.find((x) => x.operator_address == address)
+    }
     return {
       store,
       size,
@@ -142,8 +142,8 @@ export default defineComponent({
       baseDenom,
       chainName,
       totalStaked,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

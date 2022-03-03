@@ -15,15 +15,15 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import Price from '@/components/common/Price.vue';
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import Price from '@/components/common/Price.vue'
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
 
-import ValidatorBadge from '../common/ValidatorBadge.vue';
+import ValidatorBadge from '../common/ValidatorBadge.vue'
 
 export default defineComponent({
   name: 'ValidatorDisplay',
@@ -33,29 +33,29 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
     size: { type: String, required: false, default: 'md' },
   },
   setup(props) {
-    const store = useStore() as RootStoreType;
-    const propsRef = toRefs(props);
+    const store = useStore() as RootStoreType
+    const propsRef = toRefs(props)
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name });
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value?.chain_name })
+    })
     const stakingDenom = computed(() => {
-      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;
-    });
+      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null
+    })
     const stakingBalance = computed(() => {
-      return propsRef.validator.value?.stakedAmount;
-    });
+      return propsRef.validator.value?.stakedAmount
+    })
     return {
       stakingDenom,
       stakingBalance,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

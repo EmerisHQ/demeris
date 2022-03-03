@@ -1,4 +1,4 @@
-import * as API from '@/types/api';
+import * as API from '@/types/api'
 
 export enum DemerisMutationTypes {
   RESET_STATE = 'RESET_STATE',
@@ -6,9 +6,9 @@ export enum DemerisMutationTypes {
   UNSUBSCRIBE = 'UNSUBSCRIBE',
 }
 
-export type DemerisMutationArgs = void;
+export type DemerisMutationArgs = void
 
 export type DemerisMutations = {
-  params?: API.APIRequests;
-  value: DemerisMutationArgs;
-};
+  params?: API.APIRequests
+  value: DemerisMutationArgs
+}

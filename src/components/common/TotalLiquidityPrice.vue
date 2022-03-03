@@ -3,11 +3,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue'
 
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import usePool from '@/composables/usePool';
-import { Pool } from '@/types/actions';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import usePool from '@/composables/usePool'
+import { Pool } from '@/types/actions'
 
 //import TrendingUpIcon from '../common/Icons/TrendingUpIcon.vue';
 
@@ -24,9 +24,9 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { totalLiquidityPrice } = usePool(props.pool.id);
+    const { totalLiquidityPrice } = usePool(props.pool.id)
 
-    return { totalLiquidityPrice };
+    return { totalLiquidityPrice }
   },
-});
+})
 </script>

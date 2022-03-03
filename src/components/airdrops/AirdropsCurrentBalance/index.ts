@@ -1,3 +1,3 @@
-import AirdropsCurrentBalance from './AirdropsCurrentBalance.vue';
+import AirdropsCurrentBalance from './AirdropsCurrentBalance.vue'
 
-export default AirdropsCurrentBalance;
+export default AirdropsCurrentBalance

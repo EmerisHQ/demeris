@@ -67,7 +67,7 @@ export const demoAccount = {
     'ffa2a069d1531f0301fc685ad3c9b24c4753125c',
     '43ac5d4fcea9f31a42e28b9b976d94404497366a',
   ],
-};
+}
 export const demoAddresses = {
   'cosmos-hub': 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
   akash: 'akash10ms58lgajy69z2x62shj0nxc6r3a0r7qyw4y4d',
@@ -86,4 +86,4 @@ export const demoAddresses = {
   likecoin: 'cosmos10ms58lgajy69z2x62shj0nxc6r3a0r7qf4crvh',
   juno: 'juno10ms58lgajy69z2x62shj0nxc6r3a0r7ql8mctt',
   bitcanna: 'bcna10ms58lgajy69z2x62shj0nxc6r3a0r7qn9gzy9',
-};
+}

@@ -66,12 +66,12 @@
 </template>
 
 <script lang="ts">
-import { computed, CSSProperties, defineComponent, PropType } from 'vue';
+import { computed, CSSProperties, defineComponent, PropType } from 'vue'
 
-import Button from './Button.vue';
-import Icon from './Icon.vue';
+import Button from './Button.vue'
+import Icon from './Icon.vue'
 
-type ModalVariant = 'dialog' | 'center' | 'takeover' | 'bottom';
+type ModalVariant = 'dialog' | 'center' | 'takeover' | 'bottom'
 
 export default defineComponent({
   name: 'Modal',
@@ -125,28 +125,28 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const bodyStyle = computed(() => {
-      const styles: CSSProperties = {};
+      const styles: CSSProperties = {}
 
       if (props.height !== undefined) {
-        styles.height = props.height as string;
+        styles.height = props.height as string
       }
 
-      return styles;
-    });
+      return styles
+    })
 
     const emitClose = () => {
-      emit('close');
-    };
+      emit('close')
+    }
 
     const onOverlayClick = () => {
       if (props.closeOnOverlayClick) {
-        emitClose();
+        emitClose()
       }
-    };
+    }
 
-    return { bodyStyle, emitClose, onOverlayClick };
+    return { bodyStyle, emitClose, onOverlayClick }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

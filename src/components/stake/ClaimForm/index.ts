@@ -1,3 +1,3 @@
-import ClaimForm from './ClaimForm.vue';
+import ClaimForm from './ClaimForm.vue'
 
-export default ClaimForm;
+export default ClaimForm

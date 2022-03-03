@@ -1,3 +1,3 @@
-import AirdropsFilter from './AirdropsFilter.vue';
+import AirdropsFilter from './AirdropsFilter.vue'
 
-export default AirdropsFilter;
+export default AirdropsFilter

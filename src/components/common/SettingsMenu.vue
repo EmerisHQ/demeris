@@ -67,12 +67,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useStore } from 'vuex'
 
-import Icon from '@/components/ui/Icon.vue';
-import Switch from '@/components/ui/Switch.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store';
+import Icon from '@/components/ui/Icon.vue'
+import Switch from '@/components/ui/Switch.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedUSERStore } from '@/store'
 
 export default defineComponent({
   components: {
@@ -80,15 +80,15 @@ export default defineComponent({
     Switch,
   },
   setup() {
-    const store = useStore() as TypedUSERStore;
-    const menuRef = ref(null);
+    const store = useStore() as TypedUSERStore
+    const menuRef = ref(null)
 
-    const isOpen = ref(false);
-    const toggleOpen = () => (isOpen.value = !isOpen.value);
+    const isOpen = ref(false)
+    const toggleOpen = () => (isOpen.value = !isOpen.value)
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
-    };
+      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } })
+    }
 
     const settings = reactive({
       theme: 'system',
@@ -104,27 +104,27 @@ export default defineComponent({
         get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
-    });
+    })
 
     const toggleSetting = (key: string) => {
-      settings[key] = !settings[key];
-    };
+      settings[key] = !settings[key]
+    }
 
     const clickOutsideListener = (event: Event) => {
       if (event.composedPath().includes(menuRef.value)) {
-        return;
+        return
       }
 
-      isOpen.value = false;
-    };
+      isOpen.value = false
+    }
 
     onMounted(() => {
-      window.addEventListener('pointerdown', clickOutsideListener);
-    });
+      window.addEventListener('pointerdown', clickOutsideListener)
+    })
 
     onUnmounted(() => {
-      window.removeEventListener('pointerdown', clickOutsideListener);
-    });
+      window.removeEventListener('pointerdown', clickOutsideListener)
+    })
 
     return {
       isOpen,
@@ -132,9 +132,9 @@ export default defineComponent({
       settings,
       toggleOpen,
       toggleSetting,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss">

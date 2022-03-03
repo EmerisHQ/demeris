@@ -61,18 +61,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import { List, ListItem } from '@/components/ui/List';
-import usePool from '@/composables/usePool';
-import { GlobalDemerisGetterTypes } from '@/store';
-import * as Actions from '@/types/actions';
-import { WithdrawLiquidityEndBlockResponse } from '@/types/api';
-import * as Base from '@/types/base';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import { List, ListItem } from '@/components/ui/List'
+import usePool from '@/composables/usePool'
+import { GlobalDemerisGetterTypes } from '@/store'
+import * as Actions from '@/types/actions'
+import { WithdrawLiquidityEndBlockResponse } from '@/types/api'
+import * as Base from '@/types/base'
 
 export default defineComponent({
   name: 'PreviewWithdrawLiquidity',
@@ -106,47 +106,47 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
+    const store = useStore()
 
     const data = computed(() => {
       if (props.response) {
-        const { pool } = usePool(props.response.pool_id);
-        const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom };
+        const { pool } = usePool(props.response.pool_id)
+        const poolCoin = { amount: props.response.pool_coin_amount, denom: props.response.pool_coin_denom }
         const precisions = {
           coinA:
             store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: pool.reserveBaseDenoms[0] }) ?? 6,
           coinB:
             store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: pool.reserveBaseDenoms[1] }) ?? 6,
-        };
+        }
 
-        return { pool, poolCoin, precisions };
+        return { pool, poolCoin, precisions }
       }
 
-      return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData;
-    });
+      return (props.step as Actions.Step).transactions[0].data as Actions.WithdrawLiquidityData
+    })
 
     const chainName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getDexChain]
+    })
 
-    const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id);
+    const { pool, pairName, getPoolWithdrawBalances } = usePool(data.value.pool.id)
 
     const precisions = computed(() => {
       return [
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: pool.value.reserveBaseDenoms[0] }) ?? 6,
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: pool.value.reserveBaseDenoms[1] }) ?? 6,
-      ];
-    });
+      ]
+    })
 
     const receiveAmount = computed(() => {
-      const result = getPoolWithdrawBalances(+data.value.poolCoin.amount);
-      const isReverse = data.value.pool.reserve_coin_denoms[0] !== result[0].denom;
+      const result = getPoolWithdrawBalances(+data.value.poolCoin.amount)
+      const isReverse = data.value.pool.reserve_coin_denoms[0] !== result[0].denom
       return {
         coinA: result[0],
         coinB: result[1],
         ratio: Number(result[isReverse ? 0 : 1].amount) / Number(result[isReverse ? 1 : 0].amount),
-      };
-    });
+      }
+    })
 
     return {
       chainName,
@@ -155,9 +155,9 @@ export default defineComponent({
       pairName,
       receiveAmount,
       precisions,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

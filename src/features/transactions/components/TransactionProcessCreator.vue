@@ -10,8 +10,8 @@
       class="relative z-10"
       @goback="
         () => {
-          transactionsStore.removeTransaction(stepId);
-          emits('close');
+          transactionsStore.removeTransaction(stepId)
+          emits('close')
         }
       "
       @close="handleCloseHeader"
@@ -32,16 +32,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useActor } from '@xstate/vue';
-import { computed, PropType, watch } from 'vue';
+import { useActor } from '@xstate/vue'
+import { computed, PropType, watch } from 'vue'
 
-import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
-import GobackWithClose from '@/components/common/headers/GobackWithClose.vue';
-import useAccount from '@/composables/useAccount';
-import { Step } from '@/types/actions';
+import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue'
+import GobackWithClose from '@/components/common/headers/GobackWithClose.vue'
+import useAccount from '@/composables/useAccount'
+import { Step } from '@/types/actions'
 
-import { useTransactionsStore } from '../transactionsStore';
-import TransactionProcessViewer from './TransactionProcessViewer.vue';
+import { useTransactionsStore } from '../transactionsStore'
+import TransactionProcessViewer from './TransactionProcessViewer.vue'
 
 const props = defineProps({
   steps: {
@@ -52,31 +52,31 @@ const props = defineProps({
     type: String,
     required: true,
   },
-});
+})
 
-const emits = defineEmits(['pending', 'close', 'previous', 'onReceiptState']);
+const emits = defineEmits(['pending', 'close', 'previous', 'onReceiptState'])
 
-const transactionsStore = useTransactionsStore();
+const transactionsStore = useTransactionsStore()
 
-const { balances } = useAccount();
+const { balances } = useAccount()
 
 const [stepId, service] = transactionsStore.createTransaction({
   action: props.action,
   steps: props.steps,
   balances: balances.value,
-});
-const isPending = computed(() => transactionsStore.isPending(stepId));
+})
+const isPending = computed(() => transactionsStore.isPending(stepId))
 
-const { state } = useActor(service);
+const { state } = useActor(service)
 
-const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
-const onClose = () => emits('close');
-const onPrevious = () => emits('previous');
-const onReceiptState = () => emits('onReceiptState');
+const handleCloseHeader = () => transactionsStore.setTransactionAsPending()
+const onClose = () => emits('close')
+const onPrevious = () => emits('previous')
+const onReceiptState = () => emits('onReceiptState')
 
 watch(isPending, (value) => {
   if (value) {
-    emits('pending');
+    emits('pending')
   }
-});
+})
 </script>

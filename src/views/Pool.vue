@@ -180,28 +180,28 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, Ref, ref, unref, watch } from 'vue';
-import { useMeta } from 'vue-meta';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, Ref, ref, unref, watch } from 'vue'
+import { useMeta } from 'vue-meta'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import Price from '@/components/common/Price.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Pools from '@/components/liquidity/Pools.vue';
-import Button from '@/components/ui/Button.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import useAccount from '@/composables/useAccount';
-import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { pageview } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import Price from '@/components/common/Price.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import Pools from '@/components/liquidity/Pools.vue'
+import Button from '@/components/ui/Button.vue'
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import useAccount from '@/composables/useAccount'
+import usePool from '@/composables/usePool'
+import usePools from '@/composables/usePools'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { pageview } from '@/utils/analytics'
+import { parseCoins } from '@/utils/basic'
 
 export default defineComponent({
   name: 'Pool',
@@ -220,121 +220,121 @@ export default defineComponent({
   },
 
   setup() {
-    const router = useRouter();
-    const route = useRoute();
-    const apistore = useStore() as TypedAPIStore;
-    const denoms = ref([]);
-    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id });
+    const router = useRouter()
+    const route = useRoute()
+    const apistore = useStore() as TypedAPIStore
+    const denoms = ref([])
+    pageview({ page_title: 'Pool: ' + route.params.id, page_path: '/pool/' + route.params.id })
 
-    const poolId = computed(() => route.params.id as string);
+    const poolId = computed(() => route.params.id as string)
 
-    const { balancesByDenom } = useAccount();
-    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools();
+    const { balancesByDenom } = useAccount()
+    const { getPoolName, filterPoolsByDenom, getReserveBaseDenoms } = usePools()
 
     const hasPrices = computed(() => {
-      let baseDenoms = denoms.value;
+      let baseDenoms = denoms.value
       if (!baseDenoms.length) {
-        baseDenoms = pool.value.reserve_coin_denoms;
+        baseDenoms = pool.value.reserve_coin_denoms
       }
-      const coinA = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const coinB = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
-      const all = coinA && coinB;
+      const coinA = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] })
+      const coinB = !!apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] })
+      const all = coinA && coinB
 
       return {
         coinA,
         coinB,
         all,
-      };
-    });
+      }
+    })
 
-    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null)
     watch(
       () => poolId.value,
       async () => {
-        const inst = usePool(poolId);
-        await inst.initPromise;
-        usePoolInstance.value = inst;
+        const inst = usePool(poolId)
+        await inst.initPromise
+        usePoolInstance.value = inst
       },
       { immediate: true },
-    );
+    )
 
     const pool = computed(() => {
-      return unref(usePoolInstance.value?.pool);
-    });
+      return unref(usePoolInstance.value?.pool)
+    })
     const pairName = computed(() => {
-      return unref(usePoolInstance.value?.pairName);
-    });
+      return unref(usePoolInstance.value?.pairName)
+    })
     const isReverse = computed(() => {
-      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0];
-      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom;
-      return firstDenom !== reserveBalanceFirstDenom;
-    });
+      const firstDenom = pool.value?.reserve_coin_denoms[isReversePairName.value ? 1 : 0]
+      const reserveBalanceFirstDenom = usePoolInstance.value?.reserveBalances[0]?.denom
+      return firstDenom !== reserveBalanceFirstDenom
+    })
     const reserveBalances = computed(() => {
       return unref(
         isReverse.value
           ? [...usePoolInstance.value?.reserveBalances].reverse()
           : usePoolInstance.value?.reserveBalances,
-      );
-    });
+      )
+    })
     const totalSupply = computed(() => {
-      return unref(usePoolInstance.value?.totalSupply);
-    });
+      return unref(usePoolInstance.value?.totalSupply)
+    })
     const totalLiquidityPrice = computed(() => {
-      return unref(usePoolInstance.value?.totalLiquidityPrice);
-    });
+      return unref(usePoolInstance.value?.totalLiquidityPrice)
+    })
     const isReversePairName = computed(() => {
-      return unref(usePoolInstance.value?.isReversePairName);
-    });
+      return unref(usePoolInstance.value?.isReversePairName)
+    })
 
     const metaSource = computed(() => ({
       title: pairName.value ? pairName.value : 'Gravity DEX Pool',
-    }));
-    useMeta(metaSource);
+    }))
+    useMeta(metaSource)
 
     const walletBalances = computed(() => {
       if (!pool.value || !reserveBalances.value?.length) {
-        return;
+        return
       }
 
-      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom);
+      const poolCoinBalances = balancesByDenom(pool.value.pool_coin_denom)
 
       const poolCoin = {
         denom: pool.value.pool_coin_denom,
         base_denom: pool.value.pool_coin_denom,
         amount: poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
-      };
+      }
 
       const withdrawBalances = isReverse.value
         ? usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount).reverse()
-        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount);
+        : usePoolInstance.value.getPoolWithdrawBalances(poolCoin.amount)
 
       return {
         coinA: withdrawBalances[0],
         coinB: withdrawBalances[1],
         poolCoin,
-      };
-    });
+      }
+    })
 
     const exchangeAmount = computed(() => {
       if (!reserveBalances.value?.length) {
-        return;
+        return
       }
 
       const fromPrecision =
         apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: reserveBalances.value[0].base_denom,
-        }) ?? '6';
+        }) ?? '6'
       const toPrecision =
         apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: reserveBalances.value[1].base_denom,
-        }) ?? '6';
-      let balanceA = reserveBalances.value[0].amount;
-      let balanceB = reserveBalances.value[1].amount;
+        }) ?? '6'
+      let balanceA = reserveBalances.value[0].amount
+      let balanceB = reserveBalances.value[1].amount
       if (balanceA && balanceB) {
-        return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100;
+        return Math.round((balanceB / balanceA / 10 ** Math.abs(fromPrecision - toPrecision)) * 100) / 100
       }
-      return undefined;
-    });
+      return undefined
+    })
 
     const relatedPools = computed(() => {
       // TODO: Order by descending  %ownership
@@ -343,42 +343,42 @@ export default defineComponent({
         ...filterPoolsByDenom(pool.value.reserve_coin_denoms[1]),
       ]
         .filter((item) => item.id !== pool.value.id)
-        .slice(0, 3);
-    });
+        .slice(0, 3)
+    })
 
     const addLiquidityHandler = () => {
-      router.push({ name: 'AddLiquidity', params: { id: pool.value.id } });
-    };
+      router.push({ name: 'AddLiquidity', params: { id: pool.value.id } })
+    }
 
     const withdrawLiquidityHandler = () => {
-      router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } });
-    };
+      router.push({ name: 'WithdrawLiquidity', params: { id: pool.value.id } })
+    }
 
     const updateDenoms = async () => {
       if (!pool.value) {
-        return;
+        return
       }
 
-      const reserveDenoms = await getReserveBaseDenoms(pool.value);
-      denoms.value = reserveDenoms;
-    };
+      const reserveDenoms = await getReserveBaseDenoms(pool.value)
+      denoms.value = reserveDenoms
+    }
 
     const ownShare = computed(() => {
       if (!pool.value || !totalSupply.value || !walletBalances.value.poolCoin.amount) {
-        return 0;
+        return 0
       }
 
       return new BigNumber(walletBalances.value.poolCoin.amount)
         .dividedBy(totalSupply.value)
         .multipliedBy(100)
-        .toNumber();
-    });
+        .toNumber()
+    })
 
     const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.base_denom } });
-    };
+      router.push({ name: 'Asset', params: { denom: asset.base_denom } })
+    }
 
-    watch(reserveBalances, updateDenoms, { immediate: true });
+    watch(reserveBalances, updateDenoms, { immediate: true })
 
     return {
       hasPrices,
@@ -395,9 +395,9 @@ export default defineComponent({
       openAssetPage,
       exchangeAmount,
       isReversePairName,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

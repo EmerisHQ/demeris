@@ -72,10 +72,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   name: 'ListItem',
@@ -142,15 +142,15 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const isCollapsed = ref(props.collapsed);
+    const isCollapsed = ref(props.collapsed)
 
     const toggleCollapse = () => {
-      isCollapsed.value = !isCollapsed.value;
-    };
+      isCollapsed.value = !isCollapsed.value
+    }
 
-    return { isCollapsed, toggleCollapse };
+    return { isCollapsed, toggleCollapse }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

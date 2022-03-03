@@ -84,29 +84,29 @@
 /*
  * when customSize is set glow is forced to false
  */
-import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue'
+import { useStore } from 'vuex'
 
-type CircleSymbolVariant = 'asset' | 'chain';
-type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type CircleSymbolVariant = 'asset' | 'chain'
+type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
-import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
-import usePools from '@/composables/usePools';
-import symbolsData from '@/data/symbols';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Chains, VerifiedDenoms } from '@/types/api';
-import { getBaseDenom } from '@/utils/actionHandler';
-import { hexToRGB } from '@/utils/basic';
+import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue'
+import usePools from '@/composables/usePools'
+import symbolsData from '@/data/symbols'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { Chains, VerifiedDenoms } from '@/types/api'
+import { getBaseDenom } from '@/utils/actionHandler'
+import { hexToRGB } from '@/utils/basic'
 
 const defaultColors = {
   primary: '#E1E1E1',
   secondary: '#F4F4F4',
   tertiary: '#F9F9F9',
-};
+}
 
 const findSymbolColors = (symbol: string) => {
-  return symbolsData[symbol]?.colors || defaultColors;
-};
+  return symbolsData[symbol]?.colors || defaultColors
+}
 
 export default defineComponent({
   name: 'CircleSymbol',
@@ -151,150 +151,150 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { pools, getReserveBaseDenoms } = usePools();
+    const { pools, getReserveBaseDenoms } = usePools()
 
-    const apistore = useStore() as TypedAPIStore;
-    const denoms = ref<string[]>([]);
-    const isLoaded = ref(false);
+    const apistore = useStore() as TypedAPIStore
+    const denoms = ref<string[]>([])
+    const isLoaded = ref(false)
 
     const isPoolCoin = computed(() => {
       if (props.variant === 'asset') {
-        return (props.denom as string).startsWith('pool') || props.poolDenoms.length > 0;
+        return (props.denom as string).startsWith('pool') || props.poolDenoms.length > 0
       }
 
-      return false;
-    });
+      return false
+    })
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
-      const chains: Chains = apistore.getters[GlobalDemerisGetterTypes.API.getChains] || [];
+      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || []
+      const chains: Chains = apistore.getters[GlobalDemerisGetterTypes.API.getChains] || []
 
-      const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);
+      const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0])
 
       if (!denomConfig) {
-        return;
+        return
       }
 
-      const chainConfig = chains[denomConfig.chain_name];
-      denomConfig.logo = denomConfig.logo || chainConfig?.logo;
+      const chainConfig = chains[denomConfig.chain_name]
+      denomConfig.logo = denomConfig.logo || chainConfig?.logo
 
-      return { ...denomConfig };
-    });
+      return { ...denomConfig }
+    })
 
     const isVerified = computed(() => {
       if (!isLoaded.value) {
-        return true;
+        return true
       }
 
       if (isPoolCoin.value) {
-        return true;
+        return true
       }
 
       if (assetConfig.value) {
-        return assetConfig.value.verified;
+        return assetConfig.value.verified
       }
 
-      return true;
-    });
+      return true
+    })
 
     const isNativeChain = computed(() => {
       if (props.chainName === undefined) {
-        return true;
+        return true
       }
 
       if (props.variant === 'asset') {
-        return assetConfig.value?.chain_name === props.chainName;
+        return assetConfig.value?.chain_name === props.chainName
       }
 
-      return false;
-    });
+      return false
+    })
 
     const generateBackground = (colors: Record<string, string>) => {
-      const hexArray = Object.values(colors).reverse();
-      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
-      const colorStops = [];
+      const hexArray = Object.values(colors).reverse()
+      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%']
+      const colorStops = []
 
       for (const [index, hex] of Object.entries(hexArray)) {
-        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`)
       }
 
       return `radial-gradient(
 					ellipse farthest-corner at 16.67% 16.67%,
 					${colorStops.join(',')}
-				)`;
-    };
+				)`
+    }
 
     const innerStyle = computed(() => {
-      let colors: Record<string, string> = {};
+      let colors: Record<string, string> = {}
 
       if (isPoolCoin.value) {
-        colors.primary = findSymbolColors(denoms.value[0]).primary;
-        colors.secondary = findSymbolColors('gdex').primary;
-        colors.tertiary = findSymbolColors(denoms.value[1]).primary;
+        colors.primary = findSymbolColors(denoms.value[0]).primary
+        colors.secondary = findSymbolColors('gdex').primary
+        colors.tertiary = findSymbolColors(denoms.value[1]).primary
       } else {
-        colors = findSymbolColors(denoms.value[0]);
+        colors = findSymbolColors(denoms.value[0])
       }
 
-      const background = generateBackground(colors);
-      const boxShadow = `rgba(${hexToRGB(colors.secondary)}, 0.5) 0px 2.4px 10px 1px`;
+      const background = generateBackground(colors)
+      const boxShadow = `rgba(${hexToRGB(colors.secondary)}, 0.5) 0px 2.4px 10px 1px`
 
       return {
         background,
         boxShadow,
-      };
-    });
+      }
+    })
 
     const clipPathId =
       'clip-' +
       Math.random()
         .toString(36)
         .replace(/[^a-z]+/g, '')
-        .substr(2, 10);
+        .substr(2, 10)
 
     const ringStyle = computed(() => {
-      const colors = findSymbolColors(props.chainName as string);
+      const colors = findSymbolColors(props.chainName as string)
 
-      const background = generateBackground(colors);
-      const clipPath = `url(#${clipPathId})`;
+      const background = generateBackground(colors)
+      const clipPath = `url(#${clipPathId})`
 
       return {
         background,
         clipPath,
-      };
-    });
+      }
+    })
 
     const symbolImage = computed(() => {
       if (isPoolCoin.value) {
-        return require(`@/assets/svg/symbols/gdex.svg`);
+        return require(`@/assets/svg/symbols/gdex.svg`)
       }
 
-      return undefined;
-    });
+      return undefined
+    })
 
     watch(
       () => toRefs(props),
       async () => {
         if (isPoolCoin.value) {
-          let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string));
+          let existingPool = pools.value?.find((pool) => pool.pool_coin_denom === (props.denom as string))
 
           if (existingPool) {
-            denoms.value = await getReserveBaseDenoms(existingPool);
+            denoms.value = await getReserveBaseDenoms(existingPool)
           } else if (props.poolDenoms.filter(Boolean).length) {
-            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)));
+            denoms.value = await Promise.all(props.poolDenoms.map((item) => getBaseDenom(item, props.chainName)))
           }
         } else {
-          let baseDenom = props.denom;
+          let baseDenom = props.denom
           try {
-            baseDenom = await getBaseDenom(props.denom as string, props.chainName);
+            baseDenom = await getBaseDenom(props.denom as string, props.chainName)
           } catch {
             //
           }
-          denoms.value = [baseDenom];
+          denoms.value = [baseDenom]
         }
-        isLoaded.value = true;
+        isLoaded.value = true
       },
       { immediate: true },
-    );
+    )
 
     return {
       assetConfig,
@@ -307,9 +307,9 @@ export default defineComponent({
       clipPathId,
       ringStyle,
       symbolImage,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

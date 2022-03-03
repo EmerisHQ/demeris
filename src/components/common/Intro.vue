@@ -11,16 +11,16 @@
   </a>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import LogoWordmark from '@/components/common/LogoWordmark.vue';
+import LogoWordmark from '@/components/common/LogoWordmark.vue'
 
 export default defineComponent({
   name: 'Intro',
   components: {
     LogoWordmark,
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .intro-panel {

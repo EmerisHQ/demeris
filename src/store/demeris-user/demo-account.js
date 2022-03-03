@@ -68,7 +68,7 @@ export const demoAccount = {
     'ba551d35b2224ec1beabf8da7a678222b1e8ca76',
     'e4d038a2d7e008a9cb83fc07e86cce89d79a0329',
   ],
-};
+}
 export const demoAddresses = {
   emoney: 'emoney14y53meat0ehx2k0c38knym9zczzezedrtshfy0',
   juno: 'juno14y53meat0ehx2k0c38knym9zczzezedrjpwx5w',
@@ -91,4 +91,4 @@ export const demoAddresses = {
   sifchain: 'sif14y53meat0ehx2k0c38knym9zczzezedrpwztue',
   akash: 'akash14y53meat0ehx2k0c38knym9zczzezedrfgq62g',
   cheqd: 'cheqd14y53meat0ehx2k0c38knym9zczzezedr23pacr',
-};
+}

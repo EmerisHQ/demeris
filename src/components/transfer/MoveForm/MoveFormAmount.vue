@@ -31,7 +31,7 @@
               <Button
                 :click-function="
                   () => {
-                    state.isUSDInputChecked = !state.isUSDInputChecked;
+                    state.isUSDInputChecked = !state.isUSDInputChecked
                   }
                 "
                 size="sm"
@@ -62,9 +62,9 @@
                   @update:price="state.usdValue = $event"
                   @update:modelValue="
                     ($event) => {
-                      state.isMaximumAmountChecked = false;
+                      state.isMaximumAmountChecked = false
                       if (state.isUSDInputChecked) {
-                        form.balance.amount = $event;
+                        form.balance.amount = $event
                       }
                     }
                   "
@@ -84,7 +84,7 @@
               <Button
                 :click-function="
                   () => {
-                    state.isMaximumAmountChecked = true;
+                    state.isMaximumAmountChecked = true
                   }
                 "
                 :name="$t('generic_cta.max')"
@@ -227,31 +227,31 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, inject, onMounted, PropType, reactive, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import Price from '@/components/common/Price.vue';
-import USDInput from '@/components/common/USDInput.vue';
-import Button from '@/components/ui/Button.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { GasPriceLevel, MoveAssetsForm } from '@/types/actions';
-import { Balances, Chain } from '@/types/api';
-import { getTicker } from '@/utils/actionHandler';
-import { parseCoins } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue'
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue'
+import Price from '@/components/common/Price.vue'
+import USDInput from '@/components/common/USDInput.vue'
+import Button from '@/components/ui/Button.vue'
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
+import { GasPriceLevel, MoveAssetsForm } from '@/types/actions'
+import { Balances, Chain } from '@/types/api'
+import { getTicker } from '@/utils/actionHandler'
+import { parseCoins } from '@/utils/basic'
 
 export default defineComponent({
   name: 'MoveFormAmount',
@@ -286,11 +286,11 @@ export default defineComponent({
   emits: ['next'],
 
   setup(props, { emit }) {
-    const store = useStore();
-    const form = inject<MoveAssetsForm>('moveForm');
-    const router = useRouter();
+    const store = useStore()
+    const form = inject<MoveAssetsForm>('moveForm')
+    const router = useRouter()
 
-    const { nativeBalances, orderBalancesByPrice } = useAccount();
+    const { nativeBalances, orderBalancesByPrice } = useAccount()
 
     const state = reactive({
       currentAsset: undefined,
@@ -303,204 +303,204 @@ export default defineComponent({
       usdValue: '',
       fees: {},
       gasPrice: '',
-    });
+    })
 
     const feesAmount = computed(() => {
-      const result = {};
+      const result = {}
 
       if (state.fees) {
         for (const [, obj] of Object.entries(state.fees)) {
           for (const [denom, value] of Object.entries(obj)) {
-            result[denom] = value;
+            result[denom] = value
           }
         }
       }
 
-      return result;
-    });
+      return result
+    })
 
     const hasPrice = computed(() => {
       if (!state.currentAsset) {
-        return false;
+        return false
       }
 
-      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom });
+      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: state.currentAsset.base_denom })
 
-      return !!price;
-    });
+      return !!price
+    })
 
     const denomDecimals = computed(() => {
       if (state.currentAsset) {
         const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: state.currentAsset.base_denom,
-        });
+        })
 
-        return Math.pow(10, precision);
+        return Math.pow(10, precision)
       } else {
-        return 1;
+        return 1
       }
-    });
+    })
 
     const availableBalances = computed(() => {
       if (props.balances.length) {
-        return props.balances;
+        return props.balances
       }
 
-      return nativeBalances.value;
-    });
+      return nativeBalances.value
+    })
 
     const availableChains = computed(() => {
-      const chains = store.getters[GlobalDemerisGetterTypes.API.getChains] as Record<string, ChainData>;
-      let results = [];
+      const chains = store.getters[GlobalDemerisGetterTypes.API.getChains] as Record<string, ChainData>
+      let results = []
 
       if (state.chainsModalSource === 'to') {
         results = Object.values(chains)
           .map((item) => {
             const balance = props.balances.find(
               (balance) => balance.on_chain === item.chain_name && balance.base_denom === state.currentAsset.base_denom,
-            );
+            )
 
             return {
               amount: balance?.amount || '0' + state.currentAsset.base_denom,
               base_denom: state.currentAsset.base_denom,
               on_chain: item.chain_name,
-            };
+            }
           })
-          .filter((item) => item.on_chain !== state.currentAsset?.on_chain);
+          .filter((item) => item.on_chain !== state.currentAsset?.on_chain)
       } else {
         if (props.balances.length) {
-          results = props.balances;
+          results = props.balances
         } else {
-          const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+          const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain]
           results = [
             {
               amount: '0' + state.currentAsset.base_denom,
               base_denom: state.currentAsset.base_denom,
               on_chain: dexChain,
             },
-          ];
+          ]
         }
       }
 
       results.sort((a, b) => {
-        const coinA = parseCoins(a.amount)[0];
-        const coinB = parseCoins(b.amount)[0];
-        return +coinB.amount - +coinA.amount;
-      });
+        const coinA = parseCoins(a.amount)[0]
+        const coinB = parseCoins(b.amount)[0]
+        return +coinB.amount - +coinA.amount
+      })
 
-      return results;
-    });
+      return results
+    })
 
     const hasFunds = computed(() => {
       if (!state.currentAsset) {
-        return false;
+        return false
       }
 
-      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount;
+      const totalAmount = parseCoins(state.currentAsset.amount)[0].amount
 
-      return +totalAmount > 0;
-    });
+      return +totalAmount > 0
+    })
 
     const hasSufficientFunds = computed(() => {
       if (!state.currentAsset) {
-        return true;
+        return true
       }
 
       if (!hasFunds.value) {
-        return false;
+        return false
       }
 
       const precision =
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision);
-      const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6
+      const amount = new BigNumber(form.balance.amount || 0).shiftedBy(precision)
+      const fee = feesAmount.value[state.currentAsset.base_denom] || 0
 
-      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount);
-    });
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.currentAsset.amount)[0].amount)
+    })
 
     const isValid = computed(() => {
-      const value = new BigNumber(form.balance.amount);
+      const value = new BigNumber(form.balance.amount)
 
       if (!value.isFinite() || value.isLessThanOrEqualTo(0)) {
-        return false;
+        return false
       }
 
       if (!hasSufficientFunds.value) {
-        return false;
+        return false
       }
 
       if (!form.to_chain || !form.to_chain || form.to_chain === form.on_chain) {
-        return false;
+        return false
       }
 
-      return true;
-    });
+      return true
+    })
 
     const toggleDenomModal = (asset?: Record<string, unknown>) => {
       if (asset) {
-        setCurrentAsset(asset);
+        setCurrentAsset(asset)
       }
-      state.isDenomModalOpen = !state.isDenomModalOpen;
-    };
+      state.isDenomModalOpen = !state.isDenomModalOpen
+    }
 
     const toggleChainsModal = (asset?: Record<string, unknown>, source = state.chainsModalSource) => {
       if (asset) {
         if (state.chainsModalSource === 'to') {
-          form.to_chain = asset.on_chain as string;
+          form.to_chain = asset.on_chain as string
         } else {
-          setCurrentAsset(asset);
+          setCurrentAsset(asset)
         }
       }
 
-      state.chainsModalSource = source;
-      state.isChainsModalOpen = !state.isChainsModalOpen;
-    };
+      state.chainsModalSource = source
+      state.isChainsModalOpen = !state.isChainsModalOpen
+    }
 
     const onSubmit = () => {
-      emit('next');
-    };
+      emit('next')
+    }
 
     const openAssetPage = () => {
-      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } });
-    };
+      router.push({ name: 'Asset', params: { denom: state.currentAsset.base_denom } })
+    }
 
     const findDefaultDestinationChain = () => {
       if (state.chainsModalSource === 'from') {
-        const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain]
         const nativeChain = nativeBalances.value.find(
           (item) => item.base_denom === state.currentAsset?.base_denom,
-        )?.on_chain;
+        )?.on_chain
 
         if (form.on_chain === nativeChain && nativeChain !== dexChain) {
-          form.to_chain = dexChain;
+          form.to_chain = dexChain
         } else if (form.on_chain !== nativeChain) {
-          form.to_chain = nativeChain;
+          form.to_chain = nativeChain
         }
       }
-    };
+    }
 
     const setCurrentAsset = async (asset: Record<string, unknown>) => {
-      const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain];
+      const dexChain = store.getters[GlobalDemerisGetterTypes.API.getDexChain]
       const targetChains = Object.values(store.getters[GlobalDemerisGetterTypes.API.getChains]).filter(
         (chain: Chain) => chain.chain_name !== dexChain,
-      );
+      )
 
-      state.currentAsset = asset;
-      form.balance.denom = parseCoins(asset.amount as string)[0].denom;
+      state.currentAsset = asset
+      form.balance.denom = parseCoins(asset.amount as string)[0].denom
       if (location.search) {
-        form.on_chain = dexChain;
+        form.on_chain = dexChain
       } else {
-        form.on_chain = asset.on_chain as string;
+        form.on_chain = asset.on_chain as string
       }
-      form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name;
+      form.to_chain = asset.on_chain !== dexChain ? dexChain : (targetChains[0] as Chain).chain_name
 
-      findDefaultDestinationChain();
-      state.assetTicker = await getTicker(asset.base_denom, dexChain);
-    };
+      findDefaultDestinationChain()
+      state.assetTicker = await getTicker(asset.base_denom, dexChain)
+    }
 
     onMounted(() => {
-      state.gasPrice = store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE;
-    });
+      state.gasPrice = store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel] || GasPriceLevel.AVERAGE
+    })
 
     // TODO: Select chain based in user option
     watch(
@@ -508,45 +508,45 @@ export default defineComponent({
       () => {
         if (state.isMaximumAmountChecked) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6;
-          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount);
-          const fee = feesAmount.value[state.currentAsset.base_denom] || 0;
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.currentAsset.base_denom }) || 6
+          const assetAmount = new BigNumber(parseCoins(state.currentAsset.amount)[0].amount)
+          const fee = feesAmount.value[state.currentAsset.base_denom] || 0
 
-          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
-          return;
+          form.balance.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString()
+          return
         }
       },
-    );
+    )
 
     watch(
       () => props.balances,
       (newVal) => {
         if (newVal.length > 0 && !state.currentAsset) {
-          let asset;
+          let asset
           if (location.search) {
-            const params = new URL(location.href).searchParams;
-            form.balance.denom = params.get('base_denom');
+            const params = new URL(location.href).searchParams
+            form.balance.denom = params.get('base_denom')
             const precision =
-              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.balance.denom }) ?? 6;
-            form.balance.amount = new BigNumber(params.get('amount') ?? 0).shiftedBy(-precision).toString();
+              store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: form.balance.denom }) ?? 6
+            form.balance.amount = new BigNumber(params.get('amount') ?? 0).shiftedBy(-precision).toString()
           }
 
           if (form.balance.denom) {
             asset = props.balances.find((item) => {
-              const balance = parseCoins(item.amount)[0];
-              return balance.denom === form.balance.denom;
-            });
+              const balance = parseCoins(item.amount)[0]
+              return balance.denom === form.balance.denom
+            })
           }
 
           if (!asset) {
-            asset = orderBalancesByPrice(props.balances)[0];
+            asset = orderBalancesByPrice(props.balances)[0]
           }
 
-          setCurrentAsset(asset);
+          setCurrentAsset(asset)
         }
       },
       { immediate: true },
-    );
+    )
 
     return {
       availableBalances,
@@ -563,9 +563,9 @@ export default defineComponent({
       toggleChainsModal,
       openAssetPage,
       availableChains,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

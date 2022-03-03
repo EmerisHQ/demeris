@@ -26,14 +26,14 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
 
-import { ProvideViewerKey } from '../../transactionProcessHelpers';
+import { ProvideViewerKey } from '../../transactionProcessHelpers'
 
-const { actor, closeModal } = inject(ProvideViewerKey);
-const { state } = actor;
+const { actor, closeModal } = inject(ProvideViewerKey)
+const { state } = actor
 </script>

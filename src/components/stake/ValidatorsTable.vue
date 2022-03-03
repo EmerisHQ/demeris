@@ -28,7 +28,7 @@
                 class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
                 @click="
                   () => {
-                    sort('name');
+                    sort('name')
                   }
                 "
               >
@@ -42,7 +42,7 @@
                 class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
                 @click="
                   () => {
-                    sort('power');
+                    sort('power')
                   }
                 "
               >
@@ -59,7 +59,7 @@
                 class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
                 @click="
                   () => {
-                    sort('commission');
+                    sort('commission')
                   }
                 "
               >
@@ -73,7 +73,7 @@
                 class="thead-button px-2 py-4 rounded-lg hover:text-text border-none focus:outline-none focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50 active:opacity-70 active:transform-none transition hover:transition-none cursor-pointer select-none overflow-ellipsis whitespace-nowrap"
                 @click="
                   () => {
-                    sort('staked');
+                    sort('staked')
                   }
                 "
               >
@@ -105,8 +105,8 @@
             @click="
               () => {
                 if (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
-                  return;
-                detailedValidator = validator;
+                  return
+                detailedValidator = validator
               }
             "
           >
@@ -194,7 +194,7 @@
                         currentlyEditing == validator.operator_address) &&
                       !validator.jailed
                     ) {
-                      selectValidator(validator);
+                      selectValidator(validator)
                     }
                   }
                 "
@@ -222,7 +222,7 @@
           "
           @close="
             () => {
-              detailedValidator = null;
+              detailedValidator = null
             }
           "
           @clicked="
@@ -231,7 +231,7 @@
                 currentlyEditing == detailedValidator.operator_address) &&
               !detailedValidator.jailed
             ) {
-              selectValidator(detailedValidator);
+              selectValidator(detailedValidator)
             }
           "
         />
@@ -241,25 +241,25 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import Price from '@/components/common/Price.vue';
-import Search from '@/components/common/Search.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import ValidatorCard from '@/components/stake/ValidatorCard.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import Price from '@/components/common/Price.vue'
+import Search from '@/components/common/Search.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import ValidatorCard from '@/components/stake/ValidatorCard.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
 
 enum ValStyle {
   LIST = 'list',
   ACTIONLIST = 'actionlist',
 }
-type ValStyleType = `${ValStyle}`;
+type ValStyleType = `${ValStyle}`
 //TODO: implement type for validator list
 export default defineComponent({
   name: 'ValidatorsTable',
@@ -302,78 +302,76 @@ export default defineComponent({
   emits: ['selectValidator'],
   setup(props, { emit }) {
     /* hooks */
-    const store = useStore();
-    const isDisabled = ref(false);
-    const propsRef = toRefs(props);
+    const store = useStore()
+    const isDisabled = ref(false)
+    const propsRef = toRefs(props)
     /* preset variables */
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({
         chain_name: propsRef.validatorList.value[0].chain_name,
-      });
-    });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
-    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom });
-    const detailedValidator = ref(null);
+      })
+    })
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name
+    const precision = store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: baseDenom })
+    const detailedValidator = ref(null)
     /* variables */
-    const keyword = ref<string>('');
-    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null);
-    const sortBy = ref(props.sortingBy);
-    const sortOrder = ref(props.sortingOrder);
+    const keyword = ref<string>('')
+    const hasActions = computed(() => props.tableStyle == ValStyle.ACTIONLIST && detailedValidator.value === null)
+    const sortBy = ref(props.sortingBy)
+    const sortOrder = ref(props.sortingOrder)
     const totalStakedAmount = computed(() => {
       return propsRef.validatorList.value
         .reduce((acc, validator) => {
-          return acc.plus(new BigNumber(validator.tokens));
+          return acc.plus(new BigNumber(validator.tokens))
         }, new BigNumber(0))
-        .toString();
-    });
+        .toString()
+    })
     /* functions */
     const filteredAndSortedValidatorList = computed(() => {
-      const query = keyword.value.toLowerCase();
+      const query = keyword.value.toLowerCase()
       return propsRef.validatorList.value
         .filter((vali: any) => vali.moniker?.toLowerCase().indexOf(query) !== -1)
         .sort((a, b) => {
           switch (sortBy.value) {
             case 'power':
-              if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+              if (Number(a.tokens) < Number(b.tokens)) return sortOrder.value == 'asc' ? -1 : 1
+              if (Number(a.tokens) > Number(b.tokens)) return sortOrder.value == 'asc' ? 1 : -1
+              return 0
             case 'name':
-              if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1;
-              if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+              if (a.moniker < b.moniker) return sortOrder.value == 'asc' ? -1 : 1
+              if (a.moniker > b.moniker) return sortOrder.value == 'asc' ? 1 : -1
+              return 0
             case 'commission':
-              if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+              if (Number(a.commission_rate) < Number(b.commission_rate)) return sortOrder.value == 'asc' ? -1 : 1
+              if (Number(a.commission_rate) > Number(b.commission_rate)) return sortOrder.value == 'asc' ? 1 : -1
+              return 0
             case 'staked':
-              if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1;
-              if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1;
-              return 0;
+              if (Number(a.stakedAmount) < Number(b.stakedAmount)) return sortOrder.value == 'asc' ? -1 : 1
+              if (Number(a.stakedAmount) > Number(b.stakedAmount)) return sortOrder.value == 'asc' ? 1 : -1
+              return 0
           }
-        });
-    });
+        })
+    })
     const sort = (by) => {
       if (sortBy.value == by && sortOrder.value == 'asc') {
-        sortOrder.value = 'desc';
+        sortOrder.value = 'desc'
       } else {
-        sortOrder.value = 'asc';
+        sortOrder.value = 'asc'
       }
-      sortBy.value = by;
-    };
+      sortBy.value = by
+    }
     const getCommissionDisplayValue = (value) => {
-      return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
-    };
+      return Math.trunc(parseFloat(value) * 10000) / 100 + '%'
+    }
     const getAmountDisplayValue = (value) => {
-      return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US');
-    };
+      return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US')
+    }
     const getVotingPowerPercDisplayValue = (value) => {
-      return (
-        new BigNumber(value).dividedBy(totalStakedAmount.value).multipliedBy(100).decimalPlaces(2).toString() + '%'
-      );
-    };
+      return new BigNumber(value).dividedBy(totalStakedAmount.value).multipliedBy(100).decimalPlaces(2).toString() + '%'
+    }
     const selectValidator = (vali) => {
-      emit('selectValidator', vali);
-    };
+      emit('selectValidator', vali)
+    }
 
     return {
       baseDenom,
@@ -389,9 +387,9 @@ export default defineComponent({
       sortBy,
       sortOrder,
       isDisabled,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

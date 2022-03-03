@@ -35,9 +35,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue'
 
-import HintIcon from '@/components/common/Icons/HintIcon.vue';
+import HintIcon from '@/components/common/Icons/HintIcon.vue'
 
 export default defineComponent({
   name: 'Input',
@@ -68,20 +68,20 @@ export default defineComponent({
     const model = computed({
       get: () => props.modelValue,
       set: (value) => {
-        let currentValue = value;
+        let currentValue = value
         if (props.valueFormatter) {
-          currentValue = props.valueFormatter(currentValue);
+          currentValue = props.valueFormatter(currentValue)
         }
-        emit('update:modelValue', currentValue);
+        emit('update:modelValue', currentValue)
       },
-    });
+    })
 
-    const hasStartSlot = computed(() => !!slots.start);
-    const hasEndSlot = computed(() => !!slots.end);
+    const hasStartSlot = computed(() => !!slots.start)
+    const hasEndSlot = computed(() => !!slots.end)
 
-    return { model, hasStartSlot, hasEndSlot };
+    return { model, hasStartSlot, hasEndSlot }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

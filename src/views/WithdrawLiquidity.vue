@@ -43,7 +43,7 @@
                   <Button
                     :click-function="
                       () => {
-                        state.isMaximumAmountChecked = true;
+                        state.isMaximumAmountChecked = true
                       }
                     "
                     :name="$t('generic_cta.max')"
@@ -182,14 +182,14 @@
               action="withdrawliquidity"
               @pending="
                 () => {
-                  closeModal();
-                  resetHandler();
+                  closeModal()
+                  resetHandler()
                 }
               "
               @close="
                 () => {
-                  closeModal();
-                  resetHandler();
+                  closeModal()
+                  resetHandler()
                 }
               "
               @previous="goBack"
@@ -202,36 +202,36 @@
 </template>
 
 <script lang="ts">
-import { computed, reactive, Ref, ref, unref, watch } from '@vue/runtime-core';
-import BigNumber from 'bignumber.js';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, reactive, Ref, ref, unref, watch } from '@vue/runtime-core'
+import BigNumber from 'bignumber.js'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
-import DenomSelect from '@/components/common/DenomSelect.vue';
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
-import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
-import Icon from '@/components/ui/Icon.vue';
-import ListItem from '@/components/ui/List/ListItem.vue';
-import useAccount from '@/composables/useAccount';
-import usePool from '@/composables/usePool';
-import usePools from '@/composables/usePools';
-import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { WithdrawLiquidityAction } from '@/types/actions';
-import { Balance } from '@/types/api';
-import { actionHandler } from '@/utils/actionHandler';
-import { event, pageview } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue'
+import DenomSelect from '@/components/common/DenomSelect.vue'
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue'
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue'
+import TxStepsModal from '@/components/common/TxStepsModal.vue'
+import Alert from '@/components/ui/Alert.vue'
+import Button from '@/components/ui/Button.vue'
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue'
+import Icon from '@/components/ui/Icon.vue'
+import ListItem from '@/components/ui/List/ListItem.vue'
+import useAccount from '@/composables/useAccount'
+import usePool from '@/composables/usePool'
+import usePools from '@/composables/usePools'
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue'
+import { useTransactionsStore } from '@/features/transactions/transactionsStore'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { WithdrawLiquidityAction } from '@/types/actions'
+import { Balance } from '@/types/api'
+import { actionHandler } from '@/utils/actionHandler'
+import { event, pageview } from '@/utils/analytics'
+import { parseCoins } from '@/utils/basic'
 
 export default {
   name: 'WithdrawLiquidity',
@@ -252,27 +252,27 @@ export default {
   },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
+    const { t } = useI18n({ useScope: 'global' })
 
     useMeta(
       computed(() => ({
         title: t('components.withdrawLiquidity.title'),
       })),
-    );
+    )
 
-    const route = useRoute();
-    const router = useRouter();
-    const store = useStore();
-    const transactionsStore = useTransactionsStore();
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
+    const transactionsStore = useTransactionsStore()
 
-    const actionSteps = ref([]);
-    pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id });
-    const poolId = computed(() => route.params.id as string);
+    const actionSteps = ref([])
+    pageview({ page_title: 'Withdraw Liquidity', page_path: '/pools/withdraw/' + route.params.id })
+    const poolId = computed(() => route.params.id as string)
 
-    const { getPoolName } = usePools();
-    const { balancesByDenom } = useAccount();
+    const { getPoolName } = usePools()
+    const { balancesByDenom } = useAccount()
 
-    const steps = ['amount', 'review', 'send'];
+    const steps = ['amount', 'review', 'send']
 
     const state = reactive({
       step: 'amount',
@@ -292,146 +292,146 @@ export default {
           denom: '',
         },
       },
-    });
+    })
 
     const feesAmount = computed(() => {
-      const result = {};
+      const result = {}
 
       if (state.fees) {
         for (const [, obj] of Object.entries(state.fees)) {
           for (const [denom, value] of Object.entries(obj)) {
-            result[denom] = value;
+            result[denom] = value
           }
         }
       }
 
-      return result;
-    });
+      return result
+    })
 
-    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null);
+    let usePoolInstance: Ref<ReturnType<typeof usePool>> = ref(null)
     watch(
       () => poolId.value,
       async () => {
-        const inst = usePool(poolId);
-        await inst.initPromise;
-        usePoolInstance.value = inst;
+        const inst = usePool(poolId)
+        await inst.initPromise
+        usePoolInstance.value = inst
       },
       { immediate: true },
-    );
+    )
     const pool = computed(() => {
-      return unref(usePoolInstance.value?.pool);
-    });
+      return unref(usePoolInstance.value?.pool)
+    })
     const pairName = computed(() => {
-      return unref(usePoolInstance.value?.pairName);
-    });
+      return unref(usePoolInstance.value?.pairName)
+    })
     const reserveBaseDenoms = computed(() => {
-      return unref(usePoolInstance.value?.reserveBaseDenoms);
-    });
+      return unref(usePoolInstance.value?.reserveBaseDenoms)
+    })
     const reserveBalances = computed(() => {
-      return unref(usePoolInstance.value?.reserveBalances);
-    });
+      return unref(usePoolInstance.value?.reserveBalances)
+    })
     const totalSupply = computed(() => {
-      return unref(usePoolInstance.value?.totalSupply);
-    });
-    const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom);
-    const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0]);
-    const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1]);
+      return unref(usePoolInstance.value?.totalSupply)
+    })
+    const isReverse = computed(() => pool.value.reserve_coin_denoms[0] !== reserveBalances.value[0].denom)
+    const coinA = computed(() => reserveBalances.value[isReverse.value ? 1 : 0])
+    const coinB = computed(() => reserveBalances.value[isReverse.value ? 0 : 1])
     const precisionA = computed(
       () =>
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: reserveBaseDenoms.value[isReverse.value ? 1 : 0],
         }) || 6,
-    );
+    )
     const precisionB = computed(
       () =>
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: reserveBaseDenoms.value[isReverse.value ? 0 : 1],
         }) || 6,
-    );
+    )
 
     const precisionDiff = computed(() => {
       return (
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[0] }) -
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: reserveBaseDenoms.value[1] })
-      );
-    });
+      )
+    })
 
     const exchangeAmount = computed(() => {
       if (reserveBalances.value?.length) {
-        return new BigNumber(coinB.value.amount).dividedBy(coinA.value.amount).shiftedBy(6).toNumber();
+        return new BigNumber(coinB.value.amount).dividedBy(coinA.value.amount).shiftedBy(6).toNumber()
       }
 
-      return undefined;
-    });
+      return undefined
+    })
 
     const dexChain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getDexChain];
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getDexChain]
+    })
 
     // TODO: Fetch from API the wallet available amount
     const balances = computed(() => {
-      return balancesByDenom(pool.value?.pool_coin_denom);
-    });
+      return balancesByDenom(pool.value?.pool_coin_denom)
+    })
 
     const needsTransferToHub = computed(() => {
       if (state.selectedAsset?.on_chain !== dexChain.value) {
-        return true;
+        return true
       }
 
-      return false;
-    });
+      return false
+    })
 
     const hasSufficientFunds = computed(() => {
       if (!state.selectedAsset) {
-        return false;
+        return false
       }
 
       const precision =
-        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6;
-      const amount = new BigNumber(state.amount || 0).shiftedBy(precision);
-      const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
+        store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6
+      const amount = new BigNumber(state.amount || 0).shiftedBy(precision)
+      const fee = feesAmount.value[state.selectedAsset.base_denom] || 0
 
-      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.selectedAsset.amount)[0].amount);
-    });
+      return amount.plus(fee).isLessThanOrEqualTo(parseCoins(state.selectedAsset.amount)[0].amount)
+    })
 
     const hasPrices = computed(() => {
       if (!reserveBaseDenoms.value?.length) {
-        return false;
+        return false
       }
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] })
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] })
 
       if (!priceA || !priceB) {
-        return false;
+        return false
       }
 
-      return true;
-    });
+      return true
+    })
 
     const isValid = computed(() => {
       if (+state.amount <= 0) {
-        return false;
+        return false
       }
 
       if (!hasSufficientFunds.value) {
-        return false;
+        return false
       }
 
-      return true;
-    });
+      return true
+    })
 
     const updateReceiveAmount = () => {
       if (!pool.value) {
-        return;
+        return
       }
 
       if (!+state.receiveAmounts.coinA.amount && !+state.receiveAmounts.coinB.amount) {
-        state.amount = '';
-        return;
+        state.amount = ''
+        return
       }
-      const amountA = state.receiveAmounts.coinA.amount;
-      const amountB = state.receiveAmounts.coinB.amount;
+      const amountA = state.receiveAmounts.coinA.amount
+      const amountB = state.receiveAmounts.coinB.amount
 
       const result = usePoolInstance.value.calculateSupplyTokenAmount([
         {
@@ -442,160 +442,160 @@ export default {
           amount: new BigNumber(amountB).shiftedBy(isReverse.value ? precisionA.value : precisionB.value).toNumber(),
           denom: reserveBaseDenoms.value[1],
         },
-      ]);
+      ])
 
-      state.amount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString();
-    };
+      state.amount = new BigNumber(result).shiftedBy(-6).decimalPlaces(6).toString()
+    }
 
     const closeModal = () => {
-      router.push('/');
-    };
+      router.push('/')
+    }
 
     const updateTotalCurrencyPrice = () => {
-      let total = new BigNumber(0);
+      let total = new BigNumber(0)
 
       if (!hasPrices.value) {
-        return;
+        return
       }
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
-      total = total.plus(new BigNumber(priceA).multipliedBy(state.receiveAmounts.coinA.amount));
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] })
+      total = total.plus(new BigNumber(priceA).multipliedBy(state.receiveAmounts.coinA.amount))
 
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
-      total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount));
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] })
+      total = total.plus(new BigNumber(priceB).multipliedBy(state.receiveAmounts.coinB.amount))
 
-      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : '';
-    };
+      state.totalEstimatedPrice = total.isFinite() ? total.toFixed(2) : ''
+    }
 
     const currencyAmountHandler = () => {
-      state.isMaximumAmountChecked = false;
+      state.isMaximumAmountChecked = false
 
       if (!state.totalEstimatedPrice || +!state.totalEstimatedPrice) {
-        state.amount = '';
-        state.receiveAmounts.coinA.amount = '';
-        state.receiveAmounts.coinB.amount = '';
-        return;
+        state.amount = ''
+        state.receiveAmounts.coinA.amount = ''
+        state.receiveAmounts.coinB.amount = ''
+        return
       }
 
-      const isReverse = reserveBalances.value[0].base_denom !== reserveBaseDenoms.value[0];
+      const isReverse = reserveBalances.value[0].base_denom !== reserveBaseDenoms.value[0]
 
-      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] });
-      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] });
+      const priceA = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[0] })
+      const priceB = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: reserveBaseDenoms.value[1] })
 
       const totalA = new BigNumber(reserveBalances.value[isReverse ? 1 : 0].amount)
         .multipliedBy(priceA)
-        .shiftedBy(isReverse ? -precisionB.value : -precisionA.value);
+        .shiftedBy(isReverse ? -precisionB.value : -precisionA.value)
       const totalB = new BigNumber(reserveBalances.value[isReverse ? 0 : 1].amount)
         .multipliedBy(priceB)
-        .shiftedBy(isReverse ? -precisionA.value : -precisionB.value);
-      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB));
-      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin);
+        .shiftedBy(isReverse ? -precisionA.value : -precisionB.value)
+      const pricePerCoin = new BigNumber(totalSupply.value).shiftedBy(-6).dividedBy(totalA.plus(totalB))
+      const poolCoinAmount = new BigNumber(state.totalEstimatedPrice).multipliedBy(pricePerCoin)
 
-      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.shiftedBy(6).toNumber());
+      const result = usePoolInstance.value.getPoolWithdrawBalances(poolCoinAmount.shiftedBy(6).toNumber())
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse ? 1 : 0].amount)
         .shiftedBy(isReverse ? -precisionB.value : -precisionA.value)
         .decimalPlaces(6)
-        .toString();
+        .toString()
       state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse ? 0 : 1].amount)
         .shiftedBy(isReverse ? -precisionA.value : -precisionB.value)
         .decimalPlaces(6)
-        .toString();
-      updateReceiveAmount();
-    };
+        .toString()
+      updateReceiveAmount()
+    }
 
     const coinAChangeHandler = () => {
-      state.isMaximumAmountChecked = false;
+      state.isMaximumAmountChecked = false
 
       if (!exchangeAmount.value) {
-        return;
+        return
       }
 
       const result = new BigNumber(exchangeAmount.value)
         .shiftedBy(-6)
         .multipliedBy(state.receiveAmounts.coinA.amount)
-        .shiftedBy(isReverse.value ? precisionB.value : precisionA.value);
+        .shiftedBy(isReverse.value ? precisionB.value : precisionA.value)
       state.receiveAmounts.coinB.amount = result.isFinite()
         ? result
             .shiftedBy(isReverse.value ? -precisionA.value : -precisionB.value)
             .decimalPlaces(6)
             .toString()
-        : '';
-      updateReceiveAmount();
-      updateTotalCurrencyPrice();
-    };
+        : ''
+      updateReceiveAmount()
+      updateTotalCurrencyPrice()
+    }
 
     const coinBChangeHandler = () => {
-      state.isMaximumAmountChecked = false;
+      state.isMaximumAmountChecked = false
 
       if (!exchangeAmount.value) {
-        return;
+        return
       }
 
       const result = new BigNumber(state.receiveAmounts.coinB.amount)
         .dividedBy(new BigNumber(exchangeAmount.value).shiftedBy(-6))
-        .shiftedBy(isReverse.value ? precisionA.value : precisionB.value);
+        .shiftedBy(isReverse.value ? precisionA.value : precisionB.value)
       state.receiveAmounts.coinA.amount = result.isFinite()
         ? result
             .shiftedBy(isReverse.value ? -precisionB.value : -precisionA.value)
             .decimalPlaces(6)
             .toString()
-        : '';
-      updateReceiveAmount();
-      updateTotalCurrencyPrice();
-    };
+        : ''
+      updateReceiveAmount()
+      updateTotalCurrencyPrice()
+    }
 
     const coinPoolChangeHandler = () => {
-      state.isMaximumAmountChecked = false;
-      const result = usePoolInstance.value.getPoolWithdrawBalances(new BigNumber(state.amount).shiftedBy(6).toNumber());
+      state.isMaximumAmountChecked = false
+      const result = usePoolInstance.value.getPoolWithdrawBalances(new BigNumber(state.amount).shiftedBy(6).toNumber())
 
       state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
         .shiftedBy(isReverse.value ? -precisionB.value : -precisionA.value)
         .decimalPlaces(6)
-        .toString();
+        .toString()
       state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
         .shiftedBy(isReverse.value ? -precisionA.value : -precisionB.value)
         .decimalPlaces(6)
-        .toString();
-      updateTotalCurrencyPrice();
-    };
+        .toString()
+      updateTotalCurrencyPrice()
+    }
 
     const toggleChainsModal = (asset?: Balance) => {
       if (asset) {
-        state.selectedAsset = asset;
+        state.selectedAsset = asset
       }
-      state.isChainsModalOpen = !state.isChainsModalOpen;
-    };
+      state.isChainsModalOpen = !state.isChainsModalOpen
+    }
 
     const onClose = () => {
-      transactionsStore.setTransactionAsPending();
-      router.push('/pools');
-    };
+      transactionsStore.setTransactionAsPending()
+      router.push('/pools')
+    }
 
     const goBack = () => {
-      transactionsStore.removeTransaction(transactionsStore.currentId);
-      const currentStepIndex = steps.findIndex((item) => item === state.step);
+      transactionsStore.removeTransaction(transactionsStore.currentId)
+      const currentStepIndex = steps.findIndex((item) => item === state.step)
 
       if (currentStepIndex > 0) {
-        state.step = steps[currentStepIndex - 1];
-        return;
+        state.step = steps[currentStepIndex - 1]
+        return
       }
 
-      router.back();
-    };
+      router.back()
+    }
 
     const goToReview = () => {
       event('review_tx', {
         event_label: 'Reviewing withdraw liquidity tx',
         event_category: 'transactions',
-      });
+      })
 
-      goToStep('review');
-    };
+      goToStep('review')
+    }
 
     const goToStep = (step: 'amount' | 'review' | 'send') => {
-      state.step = step;
-    };
+      state.step = step
+    }
 
     const generateActionsSteps = async () => {
       const action: WithdrawLiquidityAction = {
@@ -610,64 +610,63 @@ export default {
             chain_name: state.selectedAsset.on_chain,
           },
         },
-      };
-      actionSteps.value = await actionHandler(action);
-    };
+      }
+      actionSteps.value = await actionHandler(action)
+    }
 
     const resetHandler = () => {
-      state.amount = '';
-      actionSteps.value = [];
-      updateTotalCurrencyPrice();
+      state.amount = ''
+      actionSteps.value = []
+      updateTotalCurrencyPrice()
 
-      goToStep('amount');
-    };
+      goToStep('amount')
+    }
 
     watch(
       balances,
       () => {
         if (!state.selectedAsset) {
-          state.selectedAsset = balances.value[0];
+          state.selectedAsset = balances.value[0]
         }
       },
       { immediate: true },
-    );
+    )
 
     watch(
       () => [state.amount, state.selectedAsset, pool],
       () => {
         if (pool.value) {
-          generateActionsSteps();
+          generateActionsSteps()
         }
       },
-    );
+    )
 
     watch(
       () => [state.isMaximumAmountChecked, state.selectedAsset, state.fees],
       () => {
         if (state.isMaximumAmountChecked && state.selectedAsset) {
           const precision =
-            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) ||
-            6;
-          const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount);
-          const fee = feesAmount.value[state.selectedAsset.base_denom] || 0;
+            store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: state.selectedAsset.base_denom }) || 6
+          const assetAmount = new BigNumber(parseCoins(state.selectedAsset.amount)[0].amount)
+          const fee = feesAmount.value[state.selectedAsset.base_denom] || 0
 
-          state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString();
+          state.amount = assetAmount.minus(fee).shiftedBy(-precision).decimalPlaces(precision).toString()
           const result = usePoolInstance.value.getPoolWithdrawBalances(
             new BigNumber(state.amount).shiftedBy(6).toNumber(),
-          );
+          )
 
           state.receiveAmounts.coinA.amount = new BigNumber(result[isReverse.value ? 1 : 0].amount)
             .shiftedBy(isReverse.value ? -precisionB.value : -precisionA.value)
             .decimalPlaces(6)
-            .toString();
+            .toString()
           state.receiveAmounts.coinB.amount = new BigNumber(result[isReverse.value ? 0 : 1].amount)
             .shiftedBy(isReverse.value ? -precisionA.value : -precisionB.value)
             .decimalPlaces(6)
-            .toString();
-          updateTotalCurrencyPrice();
+            .toString()
+          updateTotalCurrencyPrice()
         }
       },
-    );
+    )
 
     return {
       closeModal,
@@ -697,9 +696,9 @@ export default {
       resetHandler,
       store,
       precisionDiff,
-    };
+    }
   },
-};
+}
 </script>
 
 <style lang="scss"></style>

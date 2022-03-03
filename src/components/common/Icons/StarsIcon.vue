@@ -60,10 +60,10 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'Starsicon',
-});
+})
 </script>
 
 <style lang="scss" scoped>

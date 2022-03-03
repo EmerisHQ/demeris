@@ -19,9 +19,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue'
 
 export default defineComponent({
   name: 'GetDesktop',
@@ -32,10 +32,10 @@ export default defineComponent({
 
   setup() {
     const openUrl = () => {
-      window.open('https://emeris.com');
-    };
+      window.open('https://emeris.com')
+    }
 
-    return { openUrl };
+    return { openUrl }
   },
-});
+})
 </script>

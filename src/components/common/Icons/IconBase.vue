@@ -21,5 +21,5 @@ export default {
     height: { type: [Number, String], default: 18 },
     iconColor: { type: String, default: 'transparent' },
   },
-};
+}
 </script>

@@ -1,9 +1,9 @@
-import { assign, createMachine, Interpreter, State } from 'xstate';
+import { assign, createMachine, Interpreter, State } from 'xstate'
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions';
-import { FeeTotals, FeeWarning, GasPriceLevel, Step, StepTransaction } from '@/types/actions';
-import { Balance } from '@/types/api';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store'
+import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions'
+import { FeeTotals, FeeWarning, GasPriceLevel, Step, StepTransaction } from '@/types/actions'
+import { Balance } from '@/types/api'
 import {
   chainStatusForSteps,
   ensureTraceChannel,
@@ -11,9 +11,9 @@ import {
   feeForStepTransaction,
   msgFromStepTransaction,
   validateStepsFeeBalances,
-} from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
-import { useStore } from '@/utils/useStore';
+} from '@/utils/actionHandler'
+import { event } from '@/utils/analytics'
+import { useStore } from '@/utils/useStore'
 
 import {
   DoneEventData,
@@ -22,38 +22,38 @@ import {
   getCurrentTransaction,
   getSourceChainFromTransaction,
   logAmountVolume,
-} from './transactionProcessHelpers';
+} from './transactionProcessHelpers'
 
 interface ContextInputSchema {
-  action: string;
-  gasPriceLevel: GasPriceLevel;
-  gasLimit: number;
-  steps: Step[];
-  balances: Balance[];
+  action: string
+  gasPriceLevel: GasPriceLevel
+  gasLimit: number
+  steps: Step[]
+  balances: Balance[]
 }
 
 export interface TransactionProcessContext {
-  input: ContextInputSchema;
-  formattedSteps: Step[];
-  currentStepIndex: number;
-  currentTransactionIndex: number;
-  cursor: number;
+  input: ContextInputSchema
+  formattedSteps: Step[]
+  currentStepIndex: number
+  currentTransactionIndex: number
+  cursor: number
   results: Record<
     string,
     {
-      txhash: string;
-      chain_name: string;
-      status: any;
-      endBlock: any;
-      transaction: StepTransaction;
-      stepIndex: number;
+      txhash: string
+      chain_name: string
+      status: any
+      endBlock: any
+      transaction: StepTransaction
+      stepIndex: number
     }
-  >;
+  >
   fees: {
-    totals: FeeTotals[];
-    validation: FeeWarning | undefined;
-  };
-  error: undefined;
+    totals: FeeTotals[]
+    validation: FeeWarning | undefined
+  }
+  error: undefined
 }
 
 export type TransactionProcessEvents =
@@ -63,7 +63,7 @@ export type TransactionProcessEvents =
   | { type: 'ABORT' }
   | { type: 'RETRY' }
   | { type: 'CONTINUE' }
-  | { type: 'VERIFY_QUEUE' };
+  | { type: 'VERIFY_QUEUE' }
 
 export const transactionProcessMachine = createMachine<TransactionProcessContext, TransactionProcessEvents>(
   {
@@ -345,29 +345,29 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       validateFees: async (context) => {
         const totals = await Promise.all(
           context.input.steps.map((step) => feeForStep(step, context.input.gasPriceLevel)),
-        );
+        )
         const validation = await validateStepsFeeBalances(
           context.formattedSteps,
           context.input.balances,
           totals,
           context.input.gasPriceLevel,
-        );
-        return { totals, validation };
+        )
+        return { totals, validation }
       },
       validateChainStatus: async (context) => {
-        const result = await chainStatusForSteps(context.formattedSteps);
+        const result = await chainStatusForSteps(context.formattedSteps)
         if (!result.status) {
-          throw result;
+          throw result
         }
-        return result;
+        return result
       },
       validateTraceChannel: (context) => {
-        return ensureTraceChannel(getCurrentTransaction(context));
+        return ensureTraceChannel(getCurrentTransaction(context))
       },
       signTransaction: async (context) => {
-        const currentTransaction = getCurrentTransaction(context);
-        const msgResult = await msgFromStepTransaction(currentTransaction, context.input.gasPriceLevel);
-        const feeResult = await feeForStepTransaction(currentTransaction);
+        const currentTransaction = getCurrentTransaction(context)
+        const msgResult = await msgFromStepTransaction(currentTransaction, context.input.gasPriceLevel)
+        const feeResult = await feeForStepTransaction(currentTransaction)
         const fee = {
           amount: [
             {
@@ -376,7 +376,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             },
           ],
           gas: '' + context.input.gasLimit,
-        };
+        }
 
         return useStore().dispatch(GlobalDemerisActionTypes.TX.SIGN_WITH_KEPLR, {
           msgs: msgResult.msg,
@@ -384,37 +384,37 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           fee,
           registry: msgResult.registry,
           memo: getCurrentStep(context).memo ?? '',
-        });
+        })
       },
       broadcastTransaction: async (_, event: DoneEventData<DemerisTxParams>) => {
-        return useStore().dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, event.data);
+        return useStore().dispatch(GlobalDemerisActionTypes.TX.BROADCAST_TX, event.data)
       },
       fetchTransactionResponse: (context, event: DoneEventData<TicketResponse>) => (callback) => {
-        const currentStep = getCurrentStep(context);
-        const currentTransaction = getCurrentTransaction(context);
+        const currentStep = getCurrentStep(context)
+        const currentTransaction = getCurrentTransaction(context)
 
-        const sourceChain = getSourceChainFromTransaction(currentTransaction);
+        const sourceChain = getSourceChainFromTransaction(currentTransaction)
 
         const responseData = {
           txhash: event.data.ticket,
           chain_name: sourceChain,
           status: undefined,
           endBlock: undefined,
-        };
+        }
 
         // @ts-ignore
-        callback({ type: 'SET_DATA', data: responseData });
+        callback({ type: 'SET_DATA', data: responseData })
 
         useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
           subscribe: true,
           params: { chain_name: sourceChain, ticket: event.data.ticket },
-        });
+        })
 
-        let shouldRetry = true;
+        let shouldRetry = true
 
         const fetchEndBlock = async (height: number) => {
-          let retries = 0;
-          let endBlockEvent = undefined;
+          let retries = 0
+          let endBlockEvent = undefined
 
           if (['swap', 'addliquidity', 'withdrawliquidity'].includes(currentStep.name)) {
             while (retries < 10 && shouldRetry) {
@@ -422,30 +422,30 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
                 endBlockEvent = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_END_BLOCK_EVENTS, {
                   height: height,
                   stepType: currentStep.name,
-                });
-                break;
+                })
+                break
               } catch {
-                retries++;
-                await new Promise((r) => setTimeout(r, 2000));
+                retries++
+                await new Promise((r) => setTimeout(r, 2000))
               }
             }
 
             if (!endBlockEvent) {
               // @ts-ignore
-              return callback({ type: 'GOT_UNKNOWN', data: { ...responseData, endBlock: endBlockEvent } });
+              return callback({ type: 'GOT_UNKNOWN', data: { ...responseData, endBlock: endBlockEvent } })
             }
 
             if (endBlockEvent.success === 'failure') {
               // @ts-ignore
-              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } });
+              return callback({ type: 'GOT_FAILURE', data: { ...responseData, endBlock: endBlockEvent } })
             }
           }
 
-          return endBlockEvent;
-        };
+          return endBlockEvent
+        }
 
         const fetchStatus = async () => {
-          let resultData = undefined;
+          let resultData = undefined
           const breakStatuses = [
             'complete',
             'failed',
@@ -454,42 +454,42 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             'IBC_receive_success',
             'Tokens_unlocked_timeout',
             'Tokens_unlocked_ack',
-          ];
+          ]
 
           while (!breakStatuses.includes(resultData?.status) && shouldRetry) {
             resultData = await useStore().getters[GlobalDemerisGetterTypes.API.getTxStatus]({
               chain_name: sourceChain,
               ticket: event.data.ticket,
-            });
-            await new Promise((resolve) => setTimeout(resolve, 750));
+            })
+            await new Promise((resolve) => setTimeout(resolve, 750))
           }
 
           if (resultData.status === 'stuck') {
             // @ts-ignore
-            return callback({ type: 'GOT_UNKNOWN', data: responseData });
+            return callback({ type: 'GOT_UNKNOWN', data: responseData })
           }
 
           if (!['IBC_receive_success', 'complete'].includes(resultData.status) || resultData.error) {
-            throw new Error(resultData.error || 'error');
+            throw new Error(resultData.error || 'error')
           }
 
           if (resultData.status === 'IBC_receive_success') {
-            const ticketData = resultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success');
-            responseData.txhash = ticketData.TxHash;
-            responseData.chain_name = ticketData.Chain;
+            const ticketData = resultData.tx_hashes?.find((item) => item.Status === 'IBC_receive_success')
+            responseData.txhash = ticketData.TxHash
+            responseData.chain_name = ticketData.Chain
           }
 
-          responseData.status = resultData;
-          const endBlockResult = await fetchEndBlock(resultData.height);
-          responseData.endBlock = endBlockResult;
+          responseData.status = resultData
+          const endBlockResult = await fetchEndBlock(resultData.height)
+          responseData.endBlock = endBlockResult
 
           // @ts-ignore
-          callback({ type: 'GOT_RESPONSE', data: responseData });
-        };
+          callback({ type: 'GOT_RESPONSE', data: responseData })
+        }
 
-        setTimeout(fetchStatus, 0);
+        setTimeout(fetchStatus, 0)
 
-        return () => (shouldRetry = false);
+        return () => (shouldRetry = false)
       },
     },
 
@@ -514,12 +514,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       }),
       goNextTransaction: assign((context: TransactionProcessContext) => {
         const hasCompletedStep =
-          context.currentTransactionIndex + 1 >= context.input.steps[context.currentStepIndex].transactions.length;
+          context.currentTransactionIndex + 1 >= context.input.steps[context.currentStepIndex].transactions.length
         return {
           cursor: context.cursor + 1,
           currentStepIndex: hasCompletedStep ? context.currentStepIndex + 1 : context.currentStepIndex,
           currentTransactionIndex: hasCompletedStep ? 0 : context.currentTransactionIndex + 1,
-        };
+        }
       }),
       setTransactionResponse: assign({
         results: (context, event: DoneEventData<any>) => ({
@@ -532,44 +532,44 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         }),
       }),
       logEvent: (context, __, meta) => {
-        const key = meta.action.key;
-        let data = {};
+        const key = meta.action.key
+        let data = {}
 
         switch (key) {
           case 'chain_status_warning':
             data = {
               event_label: 'User got chain down warning',
               event_category: 'transactions',
-            };
-            break;
+            }
+            break
           case 'ibc_fee_warning':
-            data = { event_label: 'User got IBC fee warning', event_category: 'transactions' };
-            break;
+            data = { event_label: 'User got IBC fee warning', event_category: 'transactions' }
+            break
           case 'fee_warning':
-            data = { event_label: 'User got fee warning', event_category: 'transactions' };
-            break;
+            data = { event_label: 'User got fee warning', event_category: 'transactions' }
+            break
           case 'confirm_tx':
             data = {
               event_label: 'Confirmed ' + getCurrentTransaction(context).name + ' tx',
               event_category: 'transactions',
-            };
-            break;
+            }
+            break
           case 'signed_tx':
             data = {
               event_label: 'Signed ' + getCurrentTransaction(context).name + ' tx',
               event_category: 'transactions',
-            };
-            break;
+            }
+            break
           case 'completed_tx':
             data = {
               event_label: 'Completed ' + getCurrentTransaction(context).name + ' tx',
               event_category: 'transactions',
-            };
-            logAmountVolume(context);
-            break;
+            }
+            logAmountVolume(context)
+            break
         }
 
-        event(key, data);
+        event(key, data)
       },
     },
 
@@ -580,12 +580,12 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
         getCurrentStep(context).transactions.length > context.currentTransactionIndex + 1,
       needsTransferToHub: (context) => {
         if (context.input.action === 'move') {
-          return true;
+          return true
         }
 
         if (context.input.action === 'transfer') {
           if (getCurrentStep(context).transactions[0].name.includes('ibc')) {
-            return true;
+            return true
           }
         }
 
@@ -593,21 +593,21 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           ['swap', 'addliquidity', 'stake', 'multistake'].includes(context.input.action) &&
           context.input.steps.length > 1
         ) {
-          return true;
+          return true
         }
 
-        return false;
+        return false
       },
 
       hasMissingFees: (context) => context.fees?.validation?.missingFees.length > 0,
       hasIBCFeeWarning: (context) => context.fees?.validation?.ibcWarning === true,
     },
   },
-);
+)
 
-export type TransactionProcessState = State<TransactionProcessContext, TransactionProcessEvents>;
+export type TransactionProcessState = State<TransactionProcessContext, TransactionProcessEvents>
 export type TransactionProcessService = Interpreter<
   TransactionProcessContext,
   TransactionProcessState,
   TransactionProcessEvents
->;
+>

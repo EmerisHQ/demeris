@@ -35,23 +35,23 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { MoveAction, MoveAssetsForm } from '@/types/actions';
-import { Balances } from '@/types/api';
-import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue'
+import TxStepsModal from '@/components/common/TxStepsModal.vue'
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { MoveAction, MoveAssetsForm } from '@/types/actions'
+import { Balances } from '@/types/api'
+import { actionHandler, getBaseDenom } from '@/utils/actionHandler'
+import { event } from '@/utils/analytics'
 
-import MoveFormAmount from './MoveFormAmount.vue';
+import MoveFormAmount from './MoveFormAmount.vue'
 
-type Step = 'amount' | 'review' | 'move';
+type Step = 'amount' | 'review' | 'move'
 
 export default defineComponent({
   name: 'MoveForm',
@@ -77,13 +77,13 @@ export default defineComponent({
   emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
-    const steps = ref([]);
-    const store = useStore();
-    const router = useRouter();
+    const steps = ref([])
+    const store = useStore()
+    const router = useRouter()
 
     const gasPrice = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]
+    })
 
     const form: MoveAssetsForm = reactive({
       balance: {
@@ -92,16 +92,16 @@ export default defineComponent({
       },
       on_chain: '',
       to_chain: '',
-    });
+    })
 
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
-    });
+    })
 
     const closeModal = () => {
-      router.push('/');
-    };
+      router.push('/')
+    }
 
     watch(form, async () => {
       if (
@@ -115,7 +115,7 @@ export default defineComponent({
         const precision =
           store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: await getBaseDenom(form.balance.denom, form.on_chain),
-          }) || 6;
+          }) || 6
 
         const action: MoveAction = {
           name: 'move',
@@ -131,43 +131,43 @@ export default defineComponent({
               chain_name: form.to_chain,
             },
           },
-        };
-        steps.value = await actionHandler(action);
+        }
+        steps.value = await actionHandler(action)
       } else {
-        steps.value = [];
+        steps.value = []
       }
-    });
+    })
 
     const goToReview = async () => {
-      event('review_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' });
-      goToStep('review');
-    };
+      event('review_tx', { event_label: 'Reviewing move tx', event_category: 'transactions' })
+      goToStep('review')
+    }
 
     const goToStep = (value: Step) => {
-      step.value = value;
-    };
+      step.value = value
+    }
 
     const resetHandler = () => {
       form.balance = {
         denom: '',
         amount: '',
-      };
-      form.on_chain = '';
-      form.to_chain = '';
-      steps.value = [];
+      }
+      form.on_chain = ''
+      form.to_chain = ''
+      steps.value = []
 
-      goToStep('amount');
-    };
-
-    if (!props.step) {
-      step.value = 'amount';
+      goToStep('amount')
     }
 
-    provide('moveForm', form);
+    if (!props.step) {
+      step.value = 'amount'
+    }
 
-    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal };
+    provide('moveForm', form)
+
+    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal }
   },
-});
+})
 </script>
 
 <style lang="scss"></style>

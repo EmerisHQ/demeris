@@ -74,20 +74,20 @@
   </div>
 </template>
 <script lang="ts">
-import orderBy from 'lodash.orderby';
-import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import orderBy from 'lodash.orderby'
+import { computed, defineComponent } from 'vue'
+import { useStore } from 'vuex'
 
-import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue';
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Balance } from '@/types/api';
-import { parseCoins } from '@/utils/basic';
+import AssetChainsIndicator from '@/components/assets/AssetChainsIndicator/AssetChainsIndicator.vue'
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainDownWarning from '@/components/common/ChainDownWarning.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { Balance } from '@/types/api'
+import { parseCoins } from '@/utils/basic'
 
 export default defineComponent({
   name: 'CoinList',
@@ -108,47 +108,47 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props) {
-    const apistore = useStore() as TypedAPIStore;
-    const modifiedData = computed(() => getUniqueCoinList(props.data));
+    const apistore = useStore() as TypedAPIStore
+    const modifiedData = computed(() => getUniqueCoinList(props.data))
 
     function setWordColorByKeyword(keyword, word) {
-      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive';
+      return keyword.toLowerCase().includes(word.toLowerCase()) ? 'text-text' : 'text-inactive'
     }
 
     function getUniqueCoinList(data) {
       if (props.type !== 'pay') {
         return data.map((item) => {
-          const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain });
+          const unavailableChains = props.type === 'receive' ? [] : getUnavailableChains({ on_chain: item.on_chain })
           return {
             ...item,
             unavailableChains,
             isFullAmountUnavailable: !!unavailableChains.length,
-          };
-        });
+          }
+        })
       }
 
-      const newData = JSON.parse(JSON.stringify(data));
-      let denomNameObejct = {};
-      let modifiedData = [];
+      const newData = JSON.parse(JSON.stringify(data))
+      let denomNameObejct = {}
+      let modifiedData = []
 
       newData.forEach((denom) => {
         if (denomNameObejct[denom.base_denom]) {
           // Remove from available amount if chain is down
           if (denomNameObejct[denom.base_denom].unavailableChains.some((item) => item.chain === denom.on_chain)) {
-            return;
+            return
           }
 
           denomNameObejct[denom.base_denom].amount =
-            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount);
+            parseInt(denomNameObejct[denom.base_denom].amount) + parseInt(denom.amount)
         } else {
-          denomNameObejct[denom.base_denom] = denom;
-          const unavailableChains = getUnavailableChains(denom);
-          const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full';
-          let amount = denom.amount;
+          denomNameObejct[denom.base_denom] = denom
+          const unavailableChains = getUnavailableChains(denom)
+          const isFullAmountUnavailable = unavailableChains[0]?.unavailable === 'full'
+          let amount = denom.amount
 
           // Remove from available amount if chain is down
           if (unavailableChains.some((item) => item.chain === denom.on_chain)) {
-            amount = `0${parseCoins(denom.amount)[0].denom}`;
+            amount = `0${parseCoins(denom.amount)[0].denom}`
           }
 
           denomNameObejct[denom.base_denom] = {
@@ -156,48 +156,48 @@ export default defineComponent({
             amount,
             unavailableChains,
             isFullAmountUnavailable,
-          };
+          }
         }
-      });
+      })
 
       for (let denom in denomNameObejct) {
-        modifiedData.push(denomNameObejct[denom]);
+        modifiedData.push(denomNameObejct[denom])
       }
 
-      return modifiedData;
+      return modifiedData
     }
 
     const getUnavailableChains = ({ base_denom, on_chain }: Partial<Balance>) => {
-      const result = [];
-      let uniqueChainsList: string[] = [on_chain];
+      const result = []
+      let uniqueChainsList: string[] = [on_chain]
 
       if (props.type === 'pay') {
         const chainList: string[] = props.data
           .filter((item) => item.base_denom === base_denom)
-          .map((item) => item.on_chain);
-        uniqueChainsList = [...new Set(chainList)];
+          .map((item) => item.on_chain)
+        uniqueChainsList = [...new Set(chainList)]
       }
 
       for (const chain of uniqueChainsList) {
-        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain });
+        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: chain })
         if (!status) {
           result.push({
             chain,
             denom: base_denom,
             unavailable: uniqueChainsList.length > 1 ? 'part' : 'full',
-          });
+          })
         }
       }
 
-      return result;
-    };
+      return result
+    }
 
     const coinsByType = computed(() => {
-      return orderBy(modifiedData.value, [(c) => c.value], ['desc']);
-    });
+      return orderBy(modifiedData.value, [(c) => c.value], ['desc'])
+    })
 
-    return { setWordColorByKeyword, coinsByType };
+    return { setWordColorByKeyword, coinsByType }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

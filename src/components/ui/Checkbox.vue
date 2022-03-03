@@ -10,9 +10,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue'
 
-import useTheme from '@/composables/useTheme';
+import useTheme from '@/composables/useTheme'
 
 export default defineComponent({
   name: 'Checkbox',
@@ -38,29 +38,29 @@ export default defineComponent({
     const model = computed({
       get: () => props.modelValue,
       set: (value) => emit('update:modelValue', value),
-    });
+    })
 
     const checkboxBackground = {
       lightTheme: `center / contain no-repeat url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E") #000`,
       darkTheme: `center / contain no-repeat url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E") #fff`,
       gradientTheme: `center / contain no-repeat url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E"), center / cover no-repeat url(${require('@/assets/images/gradient-primary.jpg')})`,
-    };
-    const theme = useTheme();
+    }
+    const theme = useTheme()
 
     const checkboxStyle = computed(() => {
       if (props.isGradientOnlyTheme) {
-        return checkboxBackground.gradientTheme;
+        return checkboxBackground.gradientTheme
       }
       return theme.value === 'dark'
         ? checkboxBackground.darkTheme
         : theme.value === 'light'
         ? checkboxBackground.lightTheme
-        : checkboxBackground.gradientTheme;
-    });
+        : checkboxBackground.gradientTheme
+    })
 
-    return { checkboxStyle, model };
+    return { checkboxStyle, model }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

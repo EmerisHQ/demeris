@@ -1,3 +1,3 @@
-import AirdropsInfo from './AirdropsInfo.vue';
+import AirdropsInfo from './AirdropsInfo.vue'
 
-export default AirdropsInfo;
+export default AirdropsInfo

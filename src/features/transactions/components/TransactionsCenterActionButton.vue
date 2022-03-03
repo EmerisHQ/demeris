@@ -23,106 +23,106 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
-import { TransactionProcessState } from '../transactionProcessMachine';
-import { useTransactionsStore } from '../transactionsStore';
-import TransactionProcessItem from './TransactionProcessItem.vue';
+import { TransactionProcessState } from '../transactionProcessMachine'
+import { useTransactionsStore } from '../transactionsStore'
+import TransactionProcessItem from './TransactionProcessItem.vue'
 
-const transactionsStore = useTransactionsStore();
+const transactionsStore = useTransactionsStore()
 
-const subscriptions = ref({});
+const subscriptions = ref({})
 
-const tippyRef = ref(null);
+const tippyRef = ref(null)
 const state = reactive({
   notifications: {},
   updates: {},
   lastUpdatedHash: undefined,
   lastUpdatedService: undefined,
-});
+})
 
-const pendingsCount = computed(() => Object.keys(transactionsStore.pending).length);
-const notificationsCount = computed(() => Object.keys(state.notifications).length);
+const pendingsCount = computed(() => Object.keys(transactionsStore.pending).length)
+const notificationsCount = computed(() => Object.keys(state.notifications).length)
 
 const handleClick = () => {
-  transactionsStore.toggleBottomSheet();
-  state.notifications = [];
-};
+  transactionsStore.toggleBottomSheet()
+  state.notifications = []
+}
 
 const showTippy = async () => {
-  await nextTick();
-  tippyRef.value.show();
-  setTimeout(() => tippyRef.value?.hide(), 5000);
-};
+  await nextTick()
+  tippyRef.value.show()
+  setTimeout(() => tippyRef.value?.hide(), 5000)
+}
 
 const showNotification = (hash: string, skipTippy = false) => {
-  state.notifications[hash] = null;
+  state.notifications[hash] = null
   if (skipTippy) {
-    return;
+    return
   }
-  showTippy();
-};
+  showTippy()
+}
 
 const subscribe = (pendingHash: string, skipInitialUpdate = true) => {
   if (subscriptions.value[pendingHash]) {
-    return;
+    return
   }
 
-  const pendingService = transactionsStore.pending[pendingHash];
+  const pendingService = transactionsStore.pending[pendingHash]
 
   const onUpdate = (emitted: TransactionProcessState) => {
-    state.updates[pendingHash] = (state.updates[pendingHash] ?? 0) + 1;
+    state.updates[pendingHash] = (state.updates[pendingHash] ?? 0) + 1
 
     if (state.updates[pendingHash] === 1 && skipInitialUpdate) {
-      showNotification(pendingHash, true);
-      return;
+      showNotification(pendingHash, true)
+      return
     }
 
-    state.lastUpdatedService = pendingService;
-    state.lastUpdatedHash = pendingHash;
+    state.lastUpdatedService = pendingService
+    state.lastUpdatedHash = pendingHash
 
-    const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event);
+    const needsAction = (event: string) => ['CONTINUE', 'RETRY', 'SIGN'].includes(event)
 
     nextTick(() => {
       if (emitted.nextEvents.some(needsAction)) {
-        showNotification(pendingHash);
+        showNotification(pendingHash)
       } else {
-        showTippy();
+        showTippy()
       }
-    });
-  };
+    })
+  }
 
   const subscription = pendingService.subscribe({
     next: onUpdate,
     error: () => void 0,
     complete: () => void 0,
-  });
+  })
 
-  subscriptions.value[pendingHash] = subscription;
-};
+  subscriptions.value[pendingHash] = subscription
+}
 
 // Detects new transaction
 watch(pendingsCount, (value, oldValue) => {
   if (value > (oldValue ?? 0)) {
-    const lastPendingHash = Object.keys(transactionsStore.pending)[0];
-    subscribe(lastPendingHash, false);
-    showNotification(lastPendingHash);
+    const lastPendingHash = Object.keys(transactionsStore.pending)[0]
+    subscribe(lastPendingHash, false)
+    showNotification(lastPendingHash)
   }
-});
+})
 
 onMounted(() => {
   for (const hash of Object.keys(transactionsStore.pending).reverse()) {
-    subscribe(hash);
+    subscribe(hash)
   }
-});
+})
 
 onUnmounted(() => {
   for (const subscription of Object.values(subscriptions.value)) {
     // @ts-ignore
-    subscription.unsubscribe();
+    subscription.unsubscribe()
   }
-});
+})
 </script>

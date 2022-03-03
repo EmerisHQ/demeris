@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Denom from '@/components/common/Denom.vue';
-import Icon from '@/components/ui/Icon.vue';
+import ChainName from '@/components/common/ChainName.vue'
+import Denom from '@/components/common/Denom.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   components: {
@@ -61,15 +61,15 @@ export default defineComponent({
     const i18nPath = computed(() => {
       if (props.unavailable === 'full') {
         if (props.chains?.length > 1) {
-          return `components.chainDown.fullUnavailableMultiple`;
+          return `components.chainDown.fullUnavailableMultiple`
         }
-        return `components.chainDown.fullUnavailable`;
+        return `components.chainDown.fullUnavailable`
       }
 
-      return `components.chainDown.partUnavailable`;
-    });
+      return `components.chainDown.partUnavailable`
+    })
 
-    return { i18nPath };
+    return { i18nPath }
   },
-});
+})
 </script>

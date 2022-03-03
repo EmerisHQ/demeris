@@ -48,33 +48,33 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
+import { computed, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
-import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
-import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue';
-import PreviewStake from '@/components/wizard/previews/PreviewStake.vue';
-import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue';
-import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue';
-import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
-import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue';
-import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import Alert from '@/components/ui/Alert.vue'
+import Button from '@/components/ui/Button.vue'
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue'
+import PreviewClaim from '@/components/wizard/previews/PreviewClaim.vue'
+import PreviewStake from '@/components/wizard/previews/PreviewStake.vue'
+import PreviewSwap from '@/components/wizard/previews/PreviewSwap.vue'
+import PreviewSwitch from '@/components/wizard/previews/PreviewSwitch.vue'
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue'
+import PreviewUnstake from '@/components/wizard/previews/PreviewUnstake.vue'
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
 
-import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
+import { getCurrentStep, ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
 
-const transactionsStore = useTransactionsStore();
-const store = useStore();
+const transactionsStore = useTransactionsStore()
+const store = useStore()
 
-const { actor, isSwapComponent } = inject(ProvideViewerKey);
-const { state, send } = actor;
-const { t } = useI18n({ useScope: 'global' });
+const { actor, isSwapComponent } = inject(ProvideViewerKey)
+const { state, send } = actor
+const { t } = useI18n({ useScope: 'global' })
 
-const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]);
+const isDemoAccount = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount])
 
 const previewComponentMap = {
   transfer: PreviewTransfer,
@@ -88,7 +88,7 @@ const previewComponentMap = {
   createpool: PreviewAddLiquidity,
   claim: PreviewClaim,
   switch: PreviewSwitch,
-};
+}
 
 const titleMap = {
   transfer: t('context.transactions.review.transfer'),
@@ -102,10 +102,10 @@ const titleMap = {
   createpool: t('context.transactions.review.createpool'),
   claim: t('context.transactions.review.claim'),
   switch: t('context.transactions.review.switch'),
-};
+}
 
-const step = computed(() => getCurrentStep(state.value.context));
+const step = computed(() => getCurrentStep(state.value.context))
 
-const onContinue = () => send('SIGN');
-const onConnectWallet = () => transactionsStore.toggleConnectWalletModal();
+const onContinue = () => send('SIGN')
+const onConnectWallet = () => transactionsStore.toggleConnectWalletModal()
 </script>

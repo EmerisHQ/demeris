@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'List',
@@ -22,7 +22,7 @@ export default defineComponent({
       default: true,
     },
   },
-});
+})
 </script>
 
 <style lang="scss"></style>

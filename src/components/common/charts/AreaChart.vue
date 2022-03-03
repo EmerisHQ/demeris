@@ -35,13 +35,13 @@
 </template>
 
 <script lang="ts">
-import maxBy from 'lodash.maxby';
-import minBy from 'lodash.minby';
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+import maxBy from 'lodash.maxby'
+import minBy from 'lodash.minby'
+import { computed, defineComponent, PropType, ref, watch } from 'vue'
 
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import useTheme from '@/composables/useTheme';
-import { TokenPrices } from '@/types/api';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import useTheme from '@/composables/useTheme'
+import { TokenPrices } from '@/types/api'
 
 export default defineComponent({
   name: 'AreaChart',
@@ -88,9 +88,9 @@ export default defineComponent({
         text: 'All',
         value: 'max',
       },
-    ]);
+    ])
 
-    const theme = useTheme();
+    const theme = useTheme()
 
     const chartData = ref({
       options: {
@@ -101,7 +101,7 @@ export default defineComponent({
           },
           y: {
             formatter: (value) => {
-              return `$${value}`;
+              return `$${value}`
             },
             title: {
               formatter: () => '',
@@ -166,35 +166,35 @@ export default defineComponent({
           data: ref(null),
         },
       ],
-    });
+    })
 
-    const activeFilterItem = ref('1');
-    let highestPrice = ref('');
-    let lowestPrice = ref('');
-    let openingPrice = ref(0);
-    let closingPrice = ref(0);
-    let priceDiff = ref('');
-    let priceDiffPercent = ref('');
+    const activeFilterItem = ref('1')
+    let highestPrice = ref('')
+    let lowestPrice = ref('')
+    let openingPrice = ref(0)
+    let closingPrice = ref(0)
+    let priceDiff = ref('')
+    let priceDiffPercent = ref('')
 
     const setActiveFilter = (filterObject): void => {
-      activeFilterItem.value = filterObject.value;
-      emit('filterChanged', activeFilterItem.value, false);
-    };
+      activeFilterItem.value = filterObject.value
+      emit('filterChanged', activeFilterItem.value, false)
+    }
 
     const hasData = computed(() => {
-      return chartData.value.series[0].data.length > 0;
-    });
+      return chartData.value.series[0].data.length > 0
+    })
 
     const emitPriceDiffObject = (openingPrice, closingPrice, indicator): void => {
-      let rawPriceDiff = 0;
+      let rawPriceDiff = 0
       if (indicator === 'gain') {
-        rawPriceDiff = closingPrice - openingPrice;
-        priceDiff.value = `$${rawPriceDiff.toFixed(2)}`;
-        priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+        rawPriceDiff = closingPrice - openingPrice
+        priceDiff.value = `$${rawPriceDiff.toFixed(2)}`
+        priceDiffPercent.value = `${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`
       } else {
-        rawPriceDiff = openingPrice - closingPrice;
-        priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`;
-        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`;
+        rawPriceDiff = openingPrice - closingPrice
+        priceDiff.value = `-$${rawPriceDiff.toFixed(2)}`
+        priceDiffPercent.value = `-${((rawPriceDiff / openingPrice) * 100).toFixed(2)}%`
       }
 
       emit('priceDiff', {
@@ -202,51 +202,51 @@ export default defineComponent({
         rawDiff: rawPriceDiff,
         indicator: indicator,
         percent: priceDiffPercent.value,
-      });
-    };
+      })
+    }
 
     const gainColor = computed(() => {
-      return theme.value === 'light' ? '#00CF30' : '#89FF9B';
-    });
+      return theme.value === 'light' ? '#00CF30' : '#89FF9B'
+    })
 
     const lossColor = computed(() => {
-      return theme.value === 'light' ? '#FE475F' : '#FF3D56';
-    });
+      return theme.value === 'light' ? '#FE475F' : '#FF3D56'
+    })
 
     watch(
       () => [props.dataStream, props.variant],
       async () => {
-        chartData.value.series[0].data = props.dataStream;
+        chartData.value.series[0].data = props.dataStream
 
-        const high = (maxBy(props.dataStream, 'y') ? maxBy(props.dataStream, 'y').y : 0).toFixed(2);
-        highestPrice.value = '$' + high.toString();
+        const high = (maxBy(props.dataStream, 'y') ? maxBy(props.dataStream, 'y').y : 0).toFixed(2)
+        highestPrice.value = '$' + high.toString()
 
-        const low = (minBy(props.dataStream, 'y') ? minBy(props.dataStream, 'y').y : 0).toFixed(2);
-        lowestPrice.value = '$' + low.toString();
+        const low = (minBy(props.dataStream, 'y') ? minBy(props.dataStream, 'y').y : 0).toFixed(2)
+        lowestPrice.value = '$' + low.toString()
 
-        openingPrice.value = props.dataStream[0] ? props.dataStream[0].y : 0;
+        openingPrice.value = props.dataStream[0] ? props.dataStream[0].y : 0
         closingPrice.value = props.dataStream[props.dataStream.length - 1]
           ? props.dataStream[props.dataStream.length - 1].y
-          : 0;
+          : 0
 
         if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = gainColor.value;
-          chartData.value.options.fill.colors[0] = gainColor.value;
+          chartData.value.options.colors[0] = gainColor.value
+          chartData.value.options.fill.colors[0] = gainColor.value
 
-          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain')
         } else {
-          chartData.value.options.colors[0] = lossColor.value;
-          chartData.value.options.fill.colors[0] = lossColor.value;
+          chartData.value.options.colors[0] = lossColor.value
+          chartData.value.options.fill.colors[0] = lossColor.value
 
-          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
+          emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss')
         }
 
         if (props.variant === 'mini') {
-          chartData.value.options.tooltip.enabled = false;
+          chartData.value.options.tooltip.enabled = false
         }
       },
       { immediate: true },
-    );
+    )
 
     return {
       theme,
@@ -257,9 +257,9 @@ export default defineComponent({
       highestPrice,
       lowestPrice,
       setActiveFilter,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss">

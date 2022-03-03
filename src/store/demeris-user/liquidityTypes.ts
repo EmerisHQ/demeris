@@ -1,70 +1,70 @@
-import { AminoMsg } from '@cosmjs/amino';
-import { Coin } from '@cosmjs/stargate/build/codec/cosmos/base/v1beta1/coin';
+import { AminoMsg } from '@cosmjs/amino'
+import { Coin } from '@cosmjs/stargate/build/codec/cosmos/base/v1beta1/coin'
 import {
   MsgCreatePool,
   MsgDepositWithinBatch,
   MsgSwapWithinBatch,
   MsgWithdrawWithinBatch,
-} from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx';
-import Long from 'long';
+} from '@starport/tendermint-liquidity-js/gravity-devs/liquidity/tendermint.liquidity.v1beta1/module/types/tendermint/liquidity/v1beta1/tx'
+import Long from 'long'
 export interface AminoMsgCreatePool extends AminoMsg {
-  readonly type: 'liquidity/MsgCreatePool';
+  readonly type: 'liquidity/MsgCreatePool'
   readonly value: {
     /** Bech32 account address */
-    readonly pool_creator_address: string;
-    readonly pool_type_id: number;
-    readonly deposit_coins: readonly Coin[];
-  };
+    readonly pool_creator_address: string
+    readonly pool_type_id: number
+    readonly deposit_coins: readonly Coin[]
+  }
 }
 
 export interface AminoMsgSwapWithinBatch extends AminoMsg {
-  readonly type: 'liquidity/MsgSwapWithinBatch';
+  readonly type: 'liquidity/MsgSwapWithinBatch'
   readonly value: {
     /** Bech32 account address */
-    readonly swap_requester_address: string;
-    readonly pool_id: string;
-    readonly swap_type_id: number;
-    readonly offer_coin: Coin;
-    readonly demand_coin_denom: string;
-    readonly offer_coin_fee: Coin;
-    readonly order_price: string;
-  };
+    readonly swap_requester_address: string
+    readonly pool_id: string
+    readonly swap_type_id: number
+    readonly offer_coin: Coin
+    readonly demand_coin_denom: string
+    readonly offer_coin_fee: Coin
+    readonly order_price: string
+  }
 }
 
 export interface AminoMsgDepositWithinBatch extends AminoMsg {
-  readonly type: 'liquidity/MsgDepositWithinBatch';
+  readonly type: 'liquidity/MsgDepositWithinBatch'
   readonly value: {
     /** Bech32 account address */
-    readonly depositor_address: string;
-    readonly pool_id: string;
-    readonly deposit_coins: readonly Coin[];
-  };
+    readonly depositor_address: string
+    readonly pool_id: string
+    readonly deposit_coins: readonly Coin[]
+  }
 }
 
 export interface AminoMsgWithdrawWithinBatch extends AminoMsg {
-  readonly type: 'liquidity/MsgWithdrawWithinBatch';
+  readonly type: 'liquidity/MsgWithdrawWithinBatch'
   readonly value: {
     /** Bech32 account address */
-    readonly withdrawer_address: string;
-    readonly pool_id: string;
-    readonly pool_coin: Coin;
-  };
+    readonly withdrawer_address: string
+    readonly pool_id: string
+    readonly pool_coin: Coin
+  }
 }
 
 function omitDefault<T extends string | number | Long>(input: T): T | undefined {
   if (typeof input === 'string') {
-    return input === '' ? undefined : input;
+    return input === '' ? undefined : input
   }
 
   if (typeof input === 'number') {
-    return input === 0 ? undefined : input;
+    return input === 0 ? undefined : input
   }
 
   if (Long.isLong(input)) {
-    return input.isZero() ? undefined : input;
+    return input.isZero() ? undefined : input
   }
 
-  throw new Error(`Got unsupported type '${typeof input}'`);
+  throw new Error(`Got unsupported type '${typeof input}'`)
 }
 
 export const liquidityTypes = {
@@ -92,11 +92,11 @@ export const liquidityTypes = {
       offerCoinFee,
       orderPrice,
     }: MsgSwapWithinBatch): AminoMsgSwapWithinBatch['value'] => {
-      const order_price = orderPrice.split('');
+      const order_price = orderPrice.split('')
       while (order_price.length < 19) {
-        order_price.unshift('0');
+        order_price.unshift('0')
       }
-      order_price.splice(order_price.length - 18, 0, '.');
+      order_price.splice(order_price.length - 18, 0, '.')
       return {
         swap_requester_address: swapRequesterAddress,
         pool_id: '' + omitDefault(poolId)?.toString(),
@@ -105,7 +105,7 @@ export const liquidityTypes = {
         demand_coin_denom: demandCoinDenom,
         offer_coin_fee: offerCoinFee,
         order_price: order_price.join(''),
-      };
+      }
     },
     fromAmino: ({
       swap_requester_address,
@@ -167,4 +167,4 @@ export const liquidityTypes = {
       poolCoin: pool_coin,
     }),
   },
-};
+}

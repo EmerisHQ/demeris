@@ -182,15 +182,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import Address from '@/components/ui/Address.vue';
-import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
-import Input from '@/components/ui/Input.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
+import AlertIcon from '@/components/common/Icons/AlertIcon.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import Address from '@/components/ui/Address.vue'
+import Alert from '@/components/ui/Alert.vue'
+import Button from '@/components/ui/Button.vue'
+import Input from '@/components/ui/Input.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 export default defineComponent({
   components: {
@@ -211,7 +211,7 @@ export default defineComponent({
         moniker: 'Jailed Valerie',
         jailed: true,
       },
-    };
+    }
   },
-});
+})
 </script>

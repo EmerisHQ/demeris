@@ -68,37 +68,37 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue'
+import { useMeta } from 'vue-meta'
+import { useRouter } from 'vue-router'
 
-import AgreeWarning from '@/components/account/AgreeWarning.vue';
-import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import GetBrowser from '@/components/account/GetBrowser.vue';
-import GetDesktop from '@/components/account/GetDesktop.vue';
-import GetKeplr from '@/components/account/GetKeplr.vue';
-import Brandmark from '@/components/common/Brandmark.vue';
-import { pageview } from '@/utils/analytics';
+import AgreeWarning from '@/components/account/AgreeWarning.vue'
+import ConnectKeplr from '@/components/account/ConnectKeplr.vue'
+import GetBrowser from '@/components/account/GetBrowser.vue'
+import GetDesktop from '@/components/account/GetDesktop.vue'
+import GetKeplr from '@/components/account/GetKeplr.vue'
+import Brandmark from '@/components/common/Brandmark.vue'
+import { pageview } from '@/utils/analytics'
 
 async function getKeplrInstance() {
   if (window.keplr) {
-    return window.keplr;
+    return window.keplr
   }
 
   if (document.readyState === 'complete') {
-    return window.keplr;
+    return window.keplr
   }
 
   return new Promise((resolve) => {
     const documentStateChange = (event: Event) => {
       if (event.target && (event.target as Document).readyState === 'complete') {
-        resolve(window.keplr);
-        document.removeEventListener('readystatechange', documentStateChange);
+        resolve(window.keplr)
+        document.removeEventListener('readystatechange', documentStateChange)
       }
-    };
+    }
 
-    document.addEventListener('readystatechange', documentStateChange);
-  });
+    document.addEventListener('readystatechange', documentStateChange)
+  })
 }
 
 export default defineComponent({
@@ -121,61 +121,61 @@ export default defineComponent({
   },
 
   setup() {
-    useMeta({ title: '' });
-    pageview({ page_title: 'Welcome Page', page_path: '/welcome' });
-    const router = useRouter();
-    const connectKeplrRef = ref(null);
-    const agreeWarningRef = ref(null);
-    const getKeplrRef = ref(null);
-    const getBrowserRef = ref(null);
-    const isEmerisSupported = ref(null);
-    const isKeplrInstalled = ref(null);
-    const isLoading = ref(true);
-    const isMobile = ref(null);
-    const isReturnUser = ref(null);
-    const isWarningAgreed = ref(null);
-    const isWarningNeeded = ref(null);
+    useMeta({ title: '' })
+    pageview({ page_title: 'Welcome Page', page_path: '/welcome' })
+    const router = useRouter()
+    const connectKeplrRef = ref(null)
+    const agreeWarningRef = ref(null)
+    const getKeplrRef = ref(null)
+    const getBrowserRef = ref(null)
+    const isEmerisSupported = ref(null)
+    const isKeplrInstalled = ref(null)
+    const isLoading = ref(true)
+    const isMobile = ref(null)
+    const isReturnUser = ref(null)
+    const isWarningAgreed = ref(null)
+    const isWarningNeeded = ref(null)
 
     const cancelConnectKeplr = () => {
-      connectKeplrRef.value.cancel();
-      isReturnUser.value = true;
-      router.push('/');
-    };
+      connectKeplrRef.value.cancel()
+      isReturnUser.value = true
+      router.push('/')
+    }
     const cancelAgreeWarning = () => {
-      isWarningNeeded.value = null;
-    };
+      isWarningNeeded.value = null
+    }
 
     const agreeWarning = () => {
-      isWarningNeeded.value = false;
-      isWarningAgreed.value = true;
-      connectKeplrRef.value.signIn();
-    };
+      isWarningNeeded.value = false
+      isWarningAgreed.value = true
+      connectKeplrRef.value.signIn()
+    }
 
     const showWarning = () => {
-      isWarningNeeded.value = true;
-    };
+      isWarningNeeded.value = true
+    }
 
     // TODO: Implement demo account
     // right now it skips past the welcome flow
     const tryDemo = () => {
-      isReturnUser.value = true;
-      router.push('/');
-    };
+      isReturnUser.value = true
+      router.push('/')
+    }
 
     onMounted(async () => {
-      isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches;
-      isReturnUser.value = window.localStorage.getItem('isReturnUser');
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
-      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
+      isMobile.value = window.matchMedia('only screen and (max-width: 480px)').matches
+      isReturnUser.value = window.localStorage.getItem('isReturnUser')
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed')
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded')
 
       // @ts-ignore
-      let isChromium = window.chrome;
-      let winNav = window.navigator;
-      let vendorName = winNav.vendor;
+      let isChromium = window.chrome
+      let winNav = window.navigator
+      let vendorName = winNav.vendor
       // @ts-ignore
       // let isBrave = typeof navigator.brave !== 'undefined';
       // @ts-ignore
-      let isOpera = typeof window.opr !== 'undefined';
+      let isOpera = typeof window.opr !== 'undefined'
       // let isIEedge = winNav.userAgent.indexOf('Edg') > -1;
 
       isEmerisSupported.value =
@@ -184,32 +184,32 @@ export default defineComponent({
         vendorName === 'Google Inc.' &&
         // isBrave === false &&
         // isIEedge === false &&
-        isOpera === false;
+        isOpera === false
 
       // dont present spinner forever if not Chromium
       if (!isEmerisSupported.value) {
-        isLoading.value = false;
+        isLoading.value = false
       }
 
-      await getKeplrInstance();
-      await nextTick();
+      await getKeplrInstance()
+      await nextTick()
 
       nextTick(() => {
         // detect keplr installed
         // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
-    });
+        isKeplrInstalled.value = !!window.keplr
+      })
+    })
 
     watch(isWarningAgreed, () => {
-      window.localStorage.setItem('isWarningAgreed', 'true');
-    });
+      window.localStorage.setItem('isWarningAgreed', 'true')
+    })
     watch(isWarningNeeded, (newVal: string) => {
-      window.localStorage.setItem('isWarningNeeded', newVal);
-    });
+      window.localStorage.setItem('isWarningNeeded', newVal)
+    })
     watch(isReturnUser, (newVal: string) => {
-      window.localStorage.setItem('isReturnUser', newVal);
-    });
+      window.localStorage.setItem('isReturnUser', newVal)
+    })
 
     return {
       agreeWarning,
@@ -228,9 +228,9 @@ export default defineComponent({
       cancelAgreeWarning,
       cancelConnectKeplr,
       tryDemo,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss">

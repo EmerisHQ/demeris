@@ -7,14 +7,14 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, nextTick, PropType, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { Amount } from '@/types/base';
-import { getBaseDenom } from '@/utils/actionHandler';
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import useTheme from '@/composables/useTheme'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { Amount } from '@/types/base'
+import { getBaseDenom } from '@/utils/actionHandler'
 
 export default defineComponent({
   name: 'Price',
@@ -44,35 +44,35 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
-    const denom = ref((props.amount as Amount).denom);
-    const isLoaded = ref(false);
-    const theme = useTheme();
-    const price = ref();
+    const store = useStore()
+    const denom = ref((props.amount as Amount).denom)
+    const isLoaded = ref(false)
+    const theme = useTheme()
+    const price = ref()
 
     const priceObserver = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value });
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: denom.value })
+    })
 
     const displayPrice = computed(() => {
       const precision =
         store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
           name: denom.value,
-        }) ?? '6';
-      let value;
+        }) ?? '6'
+      let value
 
       if ((props.amount as Amount).amount) {
         value = price.value
           ? (price.value * parseInt((props.amount as Amount).amount)) / Math.pow(10, parseInt(precision))
-          : 0;
+          : 0
       } else if (!props.showZero) {
-        value = price.value;
+        value = price.value
       } else {
-        value = 0;
+        value = 0
       }
 
-      return value;
-    });
+      return value
+    })
 
     /*
      There are 2 reasons to update the price. Either amount changed or price changed.
@@ -84,58 +84,58 @@ export default defineComponent({
     watch(
       () => props.amount as Amount,
       async (value) => {
-        denom.value = await getBaseDenom((value as Amount).denom);
-        price.value = priceObserver.value;
+        denom.value = await getBaseDenom((value as Amount).denom)
+        price.value = priceObserver.value
       },
       { immediate: true },
-    );
+    )
     watch(
       () => priceObserver.value,
       (newPrice) => {
         if (props.autoUpdate || !isLoaded.value) {
-          price.value = newPrice;
-          isLoaded.value = true;
+          price.value = newPrice
+          isLoaded.value = true
         }
       },
-    );
+    )
     watch(
       () => props.autoUpdate,
       (autoUpdate) => {
         if (autoUpdate) {
           nextTick(() => {
-            price.value = priceObserver.value;
-          });
+            price.value = priceObserver.value
+          })
         }
       },
-    );
+    )
 
     const showPriceDiff = computed(() => {
-      return props.priceDiffObject && props.priceDiffObject.rawDiff;
-    });
+      return props.priceDiffObject && props.priceDiffObject.rawDiff
+    })
 
     const priceDiffIndicator = computed(() => {
-      return props.priceDiffObject.indicator;
-    });
+      return props.priceDiffObject.indicator
+    })
 
     const priceDiffColor = computed(() => {
       if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
-        return 'color-gain-light';
+        return 'color-gain-light'
       } else if (priceDiffIndicator.value === 'gain' && theme.value === 'system') {
-        return 'color-gain-system';
+        return 'color-gain-system'
       } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
-        return 'color-gain-dark';
+        return 'color-gain-dark'
       } else if (priceDiffIndicator.value === 'loss' && theme.value === 'light') {
-        return 'color-loss-light';
+        return 'color-loss-light'
       } else if (priceDiffIndicator.value === 'loss' && theme.value === 'system') {
-        return 'color-loss-system';
+        return 'color-loss-system'
       } else {
-        return 'color-loss-dark';
+        return 'color-loss-dark'
       }
-    });
+    })
 
-    return { theme, displayPrice, showPriceDiff, priceDiffIndicator, priceDiffColor };
+    return { theme, displayPrice, showPriceDiff, priceDiffIndicator, priceDiffColor }
   },
-});
+})
 </script>
 
 <style scoped>

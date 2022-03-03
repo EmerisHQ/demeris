@@ -13,4 +13,4 @@ module.exports = {
       '<rootDir>/tests/__mocks__/file-mock.js',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-};
+}

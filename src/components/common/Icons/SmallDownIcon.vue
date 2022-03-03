@@ -15,10 +15,10 @@
   </svg>
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'SmallDownIcon',
-});
+})
 </script>
 <style lang="scss" scoped>
 svg {

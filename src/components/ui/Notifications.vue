@@ -111,25 +111,25 @@
 </template>
 
 <script lang="ts" setup>
-import { onClickOutside, useDebounceFn } from '@vueuse/core';
-import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
+import { onClickOutside, useDebounceFn } from '@vueuse/core'
+import { computed, onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 interface NotificationMessage {
-  message: string;
-  id: number | string;
+  message: string
+  id: number | string
 }
 
 interface Props {
-  autoDismiss?: boolean;
-  button1Label?: string;
-  button2Label?: string;
-  clearAllLabel: string;
-  dismissInterval?: number;
-  messages?: NotificationMessage[];
-  showLessLabel: string;
+  autoDismiss?: boolean
+  button1Label?: string
+  button2Label?: string
+  clearAllLabel: string
+  dismissInterval?: number
+  messages?: NotificationMessage[]
+  showLessLabel: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -140,7 +140,7 @@ const props = withDefaults(defineProps<Props>(), {
   dismissInterval: 5000,
   messages: () => [],
   showLessLabel: '',
-});
+})
 
 const {
   autoDismiss,
@@ -150,164 +150,164 @@ const {
   messages: notificationMessages,
   showLessLabel,
   dismissInterval,
-} = toRefs(props);
+} = toRefs(props)
 
 const emit = defineEmits<{
-  (e: 'onButton2Click', id: number | string);
-  (e: 'onButton1Click', id: number | string);
-  (e: 'onUpdate', messages: NotificationMessage[]);
-}>();
+  (e: 'onButton2Click', id: number | string)
+  (e: 'onButton1Click', id: number | string)
+  (e: 'onUpdate', messages: NotificationMessage[])
+}>()
 
-const isStacked = ref<boolean>(true);
-const isMouseOverComponent = ref<boolean>(false);
-const isHoverClearAllButton = ref<boolean>(false);
-const notificationViewportHeight = ref<number>(0);
-const clickableAreaRef = ref<HTMLElement | null>(null);
-const viewportRef = ref<HTMLElement | null>(null);
-const notificationHTMLRefs = ref<HTMLDivElement[]>([]);
-const notificationComputedStyles = ref<string[]>([]);
-const inactivityTimeoutId = ref(null);
-const styleCalculationTimeoutId = ref(null);
+const isStacked = ref<boolean>(true)
+const isMouseOverComponent = ref<boolean>(false)
+const isHoverClearAllButton = ref<boolean>(false)
+const notificationViewportHeight = ref<number>(0)
+const clickableAreaRef = ref<HTMLElement | null>(null)
+const viewportRef = ref<HTMLElement | null>(null)
+const notificationHTMLRefs = ref<HTMLDivElement[]>([])
+const notificationComputedStyles = ref<string[]>([])
+const inactivityTimeoutId = ref(null)
+const styleCalculationTimeoutId = ref(null)
 
-const visibleNotificationMessages = computed(() => [...notificationMessages.value]?.reverse() ?? []);
+const visibleNotificationMessages = computed(() => [...notificationMessages.value]?.reverse() ?? [])
 
-const totalStackedNotifications = 3;
+const totalStackedNotifications = 3
 
 function computeNotificationsStyles(): void {
   // styles are computed on demand to update dom
-  if (visibleNotificationMessages.value.length === 0) return;
-  const notificationSpacerPx = 5;
+  if (visibleNotificationMessages.value.length === 0) return
+  const notificationSpacerPx = 5
   visibleNotificationMessages.value.forEach((_, index) => {
     const heightPreviousNotifications = [...Array(index)].reduce(
       (totalHeight, _, i) => totalHeight + notificationHTMLRefs.value[i]?.offsetHeight + notificationSpacerPx,
       0,
-    );
-    let style = '';
+    )
+    let style = ''
     if (!isStacked.value) {
       style = `
         bottom: ${heightPreviousNotifications}px;
         opacity: 1;
         width: 100%;
         z-index: ${visibleNotificationMessages.value.length - index};
-      `;
+      `
     } else {
-      const isVisible = index < totalStackedNotifications;
-      const firstToastHeight = notificationHTMLRefs.value[0]?.offsetHeight;
-      const toastHeight = index === 0 ? '' : `height:${firstToastHeight}px;`;
+      const isVisible = index < totalStackedNotifications
+      const firstToastHeight = notificationHTMLRefs.value[0]?.offsetHeight
+      const toastHeight = index === 0 ? '' : `height:${firstToastHeight}px;`
       style = `
         bottom: ${index === 0 ? 0 : 8 * index}px;
         ${toastHeight}
         opacity: ${isVisible ? 1 - index * 0.1 : 0};
         width: ${100 - index * 4}%;
         z-index: ${visibleNotificationMessages.value.length - index};
-      `;
+      `
     }
-    notificationComputedStyles.value[index] = style;
+    notificationComputedStyles.value[index] = style
     notificationViewportHeight.value = visibleNotificationMessages.value.reduce(
       (calculatedViewportHeight, _, i) =>
         calculatedViewportHeight + notificationHTMLRefs.value[i]?.offsetHeight + notificationSpacerPx,
       0,
-    );
-  });
+    )
+  })
 }
 
 function clearAllNotifications(): void {
-  emit('onUpdate', []);
-  isStacked.value = true;
+  emit('onUpdate', [])
+  isStacked.value = true
 }
 
 function expandNotifications(): void {
-  if (!isStacked.value || notificationMessages.value.length === 1) return;
-  isStacked.value = false;
+  if (!isStacked.value || notificationMessages.value.length === 1) return
+  isStacked.value = false
 }
 
 function dismissNotification(id: number | string): void {
-  emit('onUpdate', [...notificationMessages.value.filter((tm) => tm.id !== id)]);
-  if (visibleNotificationMessages.value.length === 0) isStacked.value = false;
+  emit('onUpdate', [...notificationMessages.value.filter((tm) => tm.id !== id)])
+  if (visibleNotificationMessages.value.length === 0) isStacked.value = false
 }
 
 function startInactivityTimer(): void {
   if (isMouseOverComponent.value || !autoDismiss.value) {
-    return;
+    return
   }
-  startDismissNotificationTimeout();
+  startDismissNotificationTimeout()
 }
 
 function startDismissNotificationTimeout(): void {
-  clearTimeout(inactivityTimeoutId.value);
+  clearTimeout(inactivityTimeoutId.value)
   inactivityTimeoutId.value = setTimeout(() => {
     if (isMouseOverComponent.value) {
-      return;
+      return
     }
-    const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id;
-    if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
-    if (visibleNotificationMessages.value.length > 0) startInactivityTimer();
-  }, dismissInterval.value);
+    const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id
+    if (lastNotificationId >= 0) dismissNotification(lastNotificationId)
+    if (visibleNotificationMessages.value.length > 0) startInactivityTimer()
+  }, dismissInterval.value)
 }
 
 function showClearButton(index): boolean {
-  return isMouseOverComponent.value && isStacked.value && index === 0;
+  return isMouseOverComponent.value && isStacked.value && index === 0
 }
 
 function scrollNotificationsViewportToBottom(): void {
-  if (viewportRef.value) viewportRef.value.scrollTop = viewportRef.value.scrollHeight;
+  if (viewportRef.value) viewportRef.value.scrollTop = viewportRef.value.scrollHeight
 }
 
 function updateNotificationPositions(): void {
-  computeNotificationsStyles();
-  scrollNotificationsViewportToBottom();
-  clearTimeout(styleCalculationTimeoutId.value);
+  computeNotificationsStyles()
+  scrollNotificationsViewportToBottom()
+  clearTimeout(styleCalculationTimeoutId.value)
   styleCalculationTimeoutId.value = setTimeout(() => {
     window.requestAnimationFrame(() => {
-      computeNotificationsStyles();
-      scrollNotificationsViewportToBottom();
-    });
-  }, 100);
+      computeNotificationsStyles()
+      scrollNotificationsViewportToBottom()
+    })
+  }, 100)
 }
 
 function observeNotificationsDimensionChange() {
   const resizeObserver = new ResizeObserver((e) => {
     if (e)
       useDebounceFn(() => {
-        updateNotificationPositions();
-      }, 1000);
-  });
+        updateNotificationPositions()
+      }, 1000)
+  })
   notificationHTMLRefs.value.forEach((e) => {
     if (e) {
-      resizeObserver.unobserve(e);
-      resizeObserver.observe(e);
+      resizeObserver.unobserve(e)
+      resizeObserver.observe(e)
     }
-  });
+  })
 }
 
 watch(
   () => [isStacked.value, visibleNotificationMessages.value],
   () => {
-    startInactivityTimer();
-    updateNotificationPositions();
-    observeNotificationsDimensionChange();
-    if (visibleNotificationMessages.value.length === 1) isStacked.value = true;
+    startInactivityTimer()
+    updateNotificationPositions()
+    observeNotificationsDimensionChange()
+    if (visibleNotificationMessages.value.length === 1) isStacked.value = true
   },
-);
+)
 
 watch(
   () => isMouseOverComponent.value,
   () => {
-    if (!isMouseOverComponent.value) startInactivityTimer();
+    if (!isMouseOverComponent.value) startInactivityTimer()
   },
-);
+)
 
 onClickOutside(clickableAreaRef, () => {
-  isStacked.value = true;
-});
+  isStacked.value = true
+})
 
 onMounted(() => {
-  startInactivityTimer();
-});
+  startInactivityTimer()
+})
 
 onUnmounted(() => {
-  clearTimeout(inactivityTimeoutId.value);
-});
+  clearTimeout(inactivityTimeoutId.value)
+})
 </script>
 
 <style lang="postcss">

@@ -56,13 +56,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { useStore } from '@/utils/useStore';
+import Button from '@/components/ui/Button.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store'
+import { useStore } from '@/utils/useStore'
 
-import Spinner from '../ui/Spinner.vue';
+import Spinner from '../ui/Spinner.vue'
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -82,55 +82,55 @@ export default defineComponent({
   emits: ['cancel', 'connect', 'warning', 'try-demo'],
 
   setup(_, { emit }) {
-    const store = useStore();
-    const isConnecting = ref(false);
-    const isWarningAgreed = ref(null);
-    const isWarningNeeded = ref(null);
+    const store = useStore()
+    const isConnecting = ref(false)
+    const isWarningAgreed = ref(null)
+    const isWarningNeeded = ref(null)
 
     const emitCancel = () => {
-      cancel();
-      emit('cancel');
-    };
+      cancel()
+      emit('cancel')
+    }
 
     const cancel = () => {
-      isConnecting.value = false;
-    };
+      isConnecting.value = false
+    }
 
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]
+    })
 
     const trySignIn = () => {
       if (isWarningAgreed.value) {
-        signIn();
+        signIn()
       } else {
-        emit('warning');
+        emit('warning')
       }
-    };
+    }
 
     const signIn = () => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN);
-      isConnecting.value = true;
-    };
+      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN)
+      isConnecting.value = true
+    }
 
     onMounted(() => {
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
-      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded');
-    });
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed')
+      isWarningNeeded.value = window.localStorage.getItem('isWarningNeeded')
+    })
 
     const signInDemo = () => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
-      isConnecting.value = true;
-    };
+      store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER)
+      isConnecting.value = true
+    }
     watch(isSignedIn, () => {
       if (isSignedIn.value) {
-        emit('connect');
+        emit('connect')
       }
-    });
+    })
 
-    return { isConnecting, emitCancel, cancel, signIn, trySignIn, signInDemo };
+    return { isConnecting, emitCancel, cancel, signIn, trySignIn, signInDemo }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 a {

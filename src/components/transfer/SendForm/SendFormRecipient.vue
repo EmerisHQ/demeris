@@ -29,16 +29,16 @@
 </template>
 
 <script lang="ts">
-import { bech32 } from 'bech32';
-import { computed, defineComponent, inject } from 'vue';
-import { useStore } from 'vuex';
+import { bech32 } from 'bech32'
+import { computed, defineComponent, inject } from 'vue'
+import { useStore } from 'vuex'
 
-import Address from '@/components/ui/Address.vue';
-import Button from '@/components/ui/Button.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import Input from '@/components/ui/Input.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store/index';
-import { SendAddressForm } from '@/types/actions';
+import Address from '@/components/ui/Address.vue'
+import Button from '@/components/ui/Button.vue'
+import Checkbox from '@/components/ui/Checkbox.vue'
+import Input from '@/components/ui/Input.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store/index'
+import { SendAddressForm } from '@/types/actions'
 
 export default defineComponent({
   name: 'SendFormRecipient',
@@ -53,35 +53,35 @@ export default defineComponent({
   emits: ['next'],
 
   setup(_, { emit }) {
-    const form = inject<SendAddressForm>('transferForm');
-    const apistore = useStore() as TypedAPIStore;
+    const form = inject<SendAddressForm>('transferForm')
+    const apistore = useStore() as TypedAPIStore
     const isValid = computed(() => {
-      return form.isTermChecked && isValidAddress.value;
-    });
+      return form.isTermChecked && isValidAddress.value
+    })
 
     const isValidAddress = computed(() => {
-      const chains = Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains]);
+      const chains = Object.values(apistore.getters[GlobalDemerisGetterTypes.API.getChains])
 
       try {
-        const prefix = bech32.decode(form.recipient).prefix;
+        const prefix = bech32.decode(form.recipient).prefix
         //@ts-ignore
         if (chains.find((item) => item.node_info.bech32_config.prefix_account == prefix)) {
-          return true;
+          return true
         }
 
-        return false;
+        return false
       } catch (e) {
-        return false;
+        return false
       }
-    });
+    })
 
     const onSubmit = () => {
       if (isValid.value) {
-        emit('next');
+        emit('next')
       }
-    };
+    }
 
-    return { form, isValid, isValidAddress, onSubmit };
+    return { form, isValid, isValidAddress, onSubmit }
   },
-});
+})
 </script>

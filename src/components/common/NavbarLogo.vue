@@ -6,16 +6,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Brandmark from '../common/Brandmark.vue';
+import Brandmark from '../common/Brandmark.vue'
 
 export default defineComponent({
   name: 'NavbarLogo',
   components: {
     Brandmark,
   },
-});
+})
 </script>
 
 <style scoped lang="scss">

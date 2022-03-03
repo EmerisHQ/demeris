@@ -12,7 +12,7 @@
   />
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue'
 
 export default defineComponent({
   name: 'AmountInput',
@@ -33,52 +33,52 @@ export default defineComponent({
   emits: ['update:modelValue'],
 
   setup(props, { emit }) {
-    const inputRef = ref(null);
+    const inputRef = ref(null)
 
     const format = (value: string) => {
-      let newValue = value;
+      let newValue = value
       // Replace commas
-      newValue = newValue.replace(',', '.');
+      newValue = newValue.replace(',', '.')
       // Only numbers
-      newValue = newValue.replace(/[^0-9.]/g, '');
+      newValue = newValue.replace(/[^0-9.]/g, '')
 
       if (newValue.startsWith('.')) {
-        newValue = '0' + newValue;
+        newValue = '0' + newValue
       }
 
       if (newValue.split('').filter((char) => char === '.').length > 1) {
         // Remove subsequent separators
-        newValue = newValue.replace(/(?<=\..*)\./g, '');
+        newValue = newValue.replace(/(?<=\..*)\./g, '')
       }
 
-      const [integerDigits, fractionDigits] = newValue.split('.');
+      const [integerDigits, fractionDigits] = newValue.split('.')
 
       if (fractionDigits?.length > props.maxDecimals) {
-        newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`;
+        newValue = `${integerDigits}.${fractionDigits.slice(0, props.maxDecimals)}`
       }
 
-      return newValue;
-    };
+      return newValue
+    }
 
     const model = computed({
       get: () => (props.modelValue || '').toString(),
       set: (value) => {
         if (!inputRef.value) {
-          return;
+          return
         }
 
-        let currentValue = value;
+        let currentValue = value
 
         while (parseFloat(currentValue) > Number.MAX_SAFE_INTEGER) {
-          currentValue = currentValue.slice(0, -1);
+          currentValue = currentValue.slice(0, -1)
         }
 
-        const formatted = format(currentValue);
-        emit('update:modelValue', formatted);
-        inputRef.value.value = formatted;
+        const formatted = format(currentValue)
+        emit('update:modelValue', formatted)
+        inputRef.value.value = formatted
       },
-    });
-    return { inputRef, format, model };
+    })
+    return { inputRef, format, model }
   },
-});
+})
 </script>

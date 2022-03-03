@@ -1,70 +1,70 @@
-import BigNumber from 'bignumber.js';
-import { computed, ref, watch } from 'vue';
+import BigNumber from 'bignumber.js'
+import { computed, ref, watch } from 'vue'
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Pool } from '@/types/actions';
-import { getBaseDenom, getTicker } from '@/utils/actionHandler';
-import { keyHashfromAddress, parseCoins } from '@/utils/basic';
-import { useStore } from '@/utils/useStore';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { Pool } from '@/types/actions'
+import { getBaseDenom, getTicker } from '@/utils/actionHandler'
+import { keyHashfromAddress, parseCoins } from '@/utils/basic'
+import { useStore } from '@/utils/useStore'
 
-let usePoolsInstance = null;
+let usePoolsInstance = null
 function usePools() {
-  let init = false;
+  let init = false
 
-  let initialized;
+  let initialized
   const initPromise = new Promise((resolve) => {
-    initialized = resolve;
-  });
-  const libStore = useStore();
-  const apistore = libStore as TypedAPIStore;
+    initialized = resolve
+  })
+  const libStore = useStore()
+  const apistore = libStore as TypedAPIStore
   // Pool validation has been moved to the Vuex store so allPools only contains validated pools
   const allPools = computed<Pool[]>(() => {
-    return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools];
-  });
+    return apistore.getters[GlobalDemerisGetterTypes.API.getAllValidPools]
+  })
   /*
      Following reference and watcher ensure that
      a. pools is ONLY updated if the list of pools changes to avoid expensive recalculations/rerenders
      b. we get the pool's reserve account balances for any newly added pools
   */
 
-  const pools = ref(allPools.value);
+  const pools = ref(allPools.value)
   watch(
     () => allPools.value,
     async (newPools, oldPools) => {
       if (newPools === null) {
-        return;
+        return
       }
       if (newPools.length > 0) {
         if (!oldPools && init) {
-          return;
+          return
         }
-        init = true;
-        let oldIds = [];
+        init = true
+        let oldIds = []
         if (oldPools) {
-          oldIds = oldPools.map((x) => x.id);
+          oldIds = oldPools.map((x) => x.id)
         }
-        const newIds = newPools.map((x) => x.id);
-        const addedIds = newIds.filter((x) => !oldIds.includes(x));
+        const newIds = newPools.map((x) => x.id)
+        const addedIds = newIds.filter((x) => !oldIds.includes(x))
         if (addedIds.length > 0) {
-          pools.value = newPools;
-          const addedPools = newPools.filter((x) => addedIds.includes(x.id));
+          pools.value = newPools
+          const addedPools = newPools.filter((x) => addedIds.includes(x.id))
           await Promise.all(
             addedPools.map(async (addedPool) => {
-              const hashAddress = keyHashfromAddress(addedPool.reserve_account_address);
+              const hashAddress = keyHashfromAddress(addedPool.reserve_account_address)
               await apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
                 subscribe: false,
                 params: { address: hashAddress },
-              });
+              })
             }),
-          );
+          )
         }
       } else {
-        pools.value = newPools;
+        pools.value = newPools
       }
-      initialized();
+      initialized()
     },
     { immediate: true },
-  );
+  )
   /*
     All helper functions accept a specific pool as an argument.
     To allow them to be used via pool_id only, we add the following function.
@@ -76,24 +76,24 @@ function usePools() {
   */
 
   const getPoolById = (id: string) => {
-    return pools.value?.find((item) => item.id === id) ?? null;
-  };
+    return pools.value?.find((item) => item.id === id) ?? null
+  }
 
   /*
     For performance reasons we do not subscribe to GET_POOL_BALANCES.
     Following function is used to trigger updates as needed
   */
   const updatePool = async (pool: Pool) => {
-    await initPromise;
-    const hashAddress = keyHashfromAddress(pool.reserve_account_address);
+    await initPromise
+    const hashAddress = keyHashfromAddress(pool.reserve_account_address)
     apistore.dispatch(GlobalDemerisActionTypes.API.GET_POOL_BALANCES, {
       subscribe: false,
       params: { address: hashAddress },
-    });
-  };
+    })
+  }
   const getPoolName = async (pool: Pool) => {
     if (!pool) {
-      return '-/-';
+      return '-/-'
     }
     return (
       await Promise.all(
@@ -103,12 +103,12 @@ function usePools() {
       )
     )
       .sort()
-      .join(' · ');
-  };
+      .join(' · ')
+  }
 
   const getReserveBaseDenoms = async (pool: Pool) => {
-    return await Promise.all(pool?.reserve_coin_denoms.map((denom) => getBaseDenom(denom)) ?? []);
-  };
+    return await Promise.all(pool?.reserve_coin_denoms.map((denom) => getBaseDenom(denom)) ?? [])
+  }
 
   /*
     compare an order of reserve denoms to an order of tickers
@@ -116,59 +116,59 @@ function usePools() {
   */
   const getIsReversePairName = async (pool: Pool, poolName: string) => {
     if (!pool?.reserve_coin_denoms[0] || !pool) {
-      return;
+      return
     }
     return (
       poolName?.split(' · ')[0] !==
       (await getTicker(pool.reserve_coin_denoms[0], apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]))
-    );
-  };
+    )
+  }
 
   // reminder: when calling this function, use ibc/xxxx if the denom is an IBC denom (and NOT the base denom)
   const filterPoolsByDenom = (denom: string) => {
-    return pools.value?.filter((item) => item.reserve_coin_denoms.includes(denom)) ?? [];
-  };
+    return pools.value?.filter((item) => item.reserve_coin_denoms.includes(denom)) ?? []
+  }
 
   const getPoolPrice = async (pool: Pool) => {
     const balances = apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
       address: keyHashfromAddress(pool.reserve_account_address),
-    });
+    })
 
     const balanceA = balances.find((x) => {
-      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0];
-    });
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0]
+    })
     const balanceB = balances.find((x) => {
-      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1];
-    });
-    return parseInt(parseCoins(balanceA.amount)[0].amount) / parseInt(parseCoins(balanceB.amount)[0].amount);
-  };
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1]
+    })
+    return parseInt(parseCoins(balanceA.amount)[0].amount) / parseInt(parseCoins(balanceB.amount)[0].amount)
+  }
 
   const getLiquidityShare = (pool: Pool, poolCoinAmount: number) => {
     if (!pool) {
-      return;
+      return
     }
 
-    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
-    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']()
+    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount
 
-    return new BigNumber(poolCoinAmount).dividedBy(totalSupply).multipliedBy(100).toNumber();
-  };
+    return new BigNumber(poolCoinAmount).dividedBy(totalSupply).multipliedBy(100).toNumber()
+  }
 
   const getWithdrawBalances = (pool: Pool, poolCoinAmount: number) => {
     if (!pool) {
-      return;
+      return
     }
 
-    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']();
-    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount;
+    const supplies = libStore.getters['cosmos.bank.v1beta1/getTotalSupply']()
+    const totalSupply = supplies?.supply.find((token) => token.denom === pool.pool_coin_denom)?.amount
 
     const reserveBalances = (
       apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
         address: keyHashfromAddress(pool.reserve_account_address),
       }) || []
     ).map((x) => {
-      return parseCoins(x.amount)[0];
-    });
+      return parseCoins(x.amount)[0]
+    })
 
     /**
      * TODO: Consider fee proportion
@@ -176,7 +176,7 @@ function usePools() {
      * @see https://github.com/tendermint/liquidity/blob/develop/x/liquidity/keeper/liquidity_pool.go#L407
      */
 
-    const hasParams = totalSupply && reserveBalances;
+    const hasParams = totalSupply && reserveBalances
 
     const withdrawCoins = [
       {
@@ -199,29 +199,29 @@ function usePools() {
               .toNumber(),
         denom: reserveBalances[1]?.denom || '',
       },
-    ];
+    ]
 
-    return withdrawCoins;
-  };
+    return withdrawCoins
+  }
   const getNextPoolId = () => {
-    return libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1;
-  };
+    return libStore.getters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools.length + 1
+  }
   const getReserveBalances = async (pool: Pool) => {
     const balances = apistore.getters[GlobalDemerisGetterTypes.API.getBalances]({
       address: keyHashfromAddress(pool.reserve_account_address),
-    });
+    })
 
     const balanceA = balances.find((x) => {
-      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0];
-    });
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[0]
+    })
     const balanceB = balances.find((x) => {
-      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1];
-    });
+      return parseCoins(x.amount)[0].denom == pool.reserve_coin_denoms[1]
+    })
     return {
       balanceA: parseInt(parseCoins(balanceA.amount)[0].amount),
       balanceB: parseInt(parseCoins(balanceB.amount)[0].amount),
-    };
-  };
+    }
+  }
 
   return {
     pools,
@@ -237,11 +237,11 @@ function usePools() {
     getNextPoolId,
     getReserveBalances,
     initPromise,
-  };
+  }
 }
 export default function usePoolsFactory() {
   if (!usePoolsInstance) {
-    usePoolsInstance = usePools();
+    usePoolsInstance = usePools()
   }
-  return usePoolsInstance as ReturnType<typeof usePools>;
+  return usePoolsInstance as ReturnType<typeof usePools>
 }

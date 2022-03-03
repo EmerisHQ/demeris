@@ -1,4 +1,4 @@
-import * as API from '@/types/api';
+import * as API from '@/types/api'
 export enum DemerisActionTypes {
   // Cross-chain endpoint actions
   GET_BALANCES = 'GET_BALANCES',
@@ -91,52 +91,52 @@ export enum GlobalDemerisActionTypes {
   STORE_UPDATE = 'demerisAPI/STORE_UPDATE',
 }
 export type DemerisActionParams = {
-  subscribe: boolean;
-  params?: API.APIRequests;
-};
+  subscribe: boolean
+  params?: API.APIRequests
+}
 export type DemerisActionsByAddressParams = {
-  subscribe: boolean;
-  params?: API.AddrReq;
-};
+  subscribe: boolean
+  params?: API.AddrReq
+}
 export type DemerisActionByTokenPriceParams = {
-  subscribe: boolean;
-  params?: API.TokenPriceReq;
-};
+  subscribe: boolean
+  params?: API.TokenPriceReq
+}
 export type DemerisActionGetGitAirdropsListParams = {
-  subscribe: boolean;
-};
+  subscribe: boolean
+}
 export type DemerisActionGetAirdropsParams = {
-  subscribe: boolean;
-  params: API.GitAirdropsListReq;
-};
+  subscribe: boolean
+  params: API.GitAirdropsListReq
+}
 export type DemerisActionSetAirdropParams = {
-  params?: API.selectedAirdropReq;
-};
+  params?: API.selectedAirdropReq
+}
 export type DemerisActionByTokenIdParams = {
-  subscribe: boolean;
-  params?: API.TokenIdReq;
-};
+  subscribe: boolean
+  params?: API.TokenIdReq
+}
 export type DemerisActionsByChainAddressParams = {
-  subscribe: boolean;
-  params?: API.ChainAddrReq;
-};
+  subscribe: boolean
+  params?: API.ChainAddrReq
+}
 export type DemerisActionsByChainParams = {
-  subscribe: boolean;
-  params?: API.ChainReq;
-};
+  subscribe: boolean
+  params?: API.ChainReq
+}
 export type DemerisActionsByTicketParams = {
-  subscribe: boolean;
-  params?: API.TicketReq;
-};
+  subscribe: boolean
+  params?: API.TicketReq
+}
 export type DemerisActionsGetTxsParams = {
-  txhash: string;
-  chain_name: string;
-};
+  txhash: string
+  chain_name: string
+}
 export type DemerisActionsTraceParams = {
-  subscribe: boolean;
-  cache?: boolean;
-  params?: API.VerifyTraceReq;
-};
+  subscribe: boolean
+  cache?: boolean
+  params?: API.VerifyTraceReq
+}
 export type DemerisSubscriptions = {
   action: Exclude<
     DemerisActionTypes,
@@ -144,6 +144,6 @@ export type DemerisSubscriptions = {
     | typeof DemerisActionTypes.RESET_STATE
     | typeof DemerisActionTypes.UNSUBSCRIBE
     | typeof DemerisActionTypes.STORE_UPDATE
-  >;
-  payload: Omit<DemerisActionParams, 'subscribe'>;
-};
+  >
+  payload: Omit<DemerisActionParams, 'subscribe'>
+}

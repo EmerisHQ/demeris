@@ -172,35 +172,35 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
-import { useMeta } from 'vue-meta';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, onUnmounted, ref, watch } from 'vue'
+import { useMeta } from 'vue-meta'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
-import StakingBanner from '@/components/banners/StakingBanner.vue';
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
-import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import AreaChart from '@/components/common/charts/AreaChart.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import Price from '@/components/common/Price.vue';
-import StakeTable from '@/components/common/StakeTable.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Pools from '@/components/liquidity/Pools.vue';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import TooltipPools from '@/components/liquidity/TooltipPools.vue';
-import useAccount from '@/composables/useAccount';
-import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { LoadingState, VerifiedDenoms } from '@/types/api';
-import { getDisplayName } from '@/utils/actionHandler';
-import { pageview } from '@/utils/analytics';
-import { generateDenomHash, parseCoins } from '@/utils/basic';
-import { featureRunning } from '@/utils/FeatureManager';
+import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue'
+import StakingBanner from '@/components/banners/StakingBanner.vue'
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue'
+import ChainDownWarning from '@/components/common/ChainDownWarning.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import AreaChart from '@/components/common/charts/AreaChart.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import Price from '@/components/common/Price.vue'
+import StakeTable from '@/components/common/StakeTable.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import Pools from '@/components/liquidity/Pools.vue'
+import LiquiditySwap from '@/components/liquidity/Swap.vue'
+import TooltipPools from '@/components/liquidity/TooltipPools.vue'
+import useAccount from '@/composables/useAccount'
+import usePools from '@/composables/usePools'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { LoadingState, VerifiedDenoms } from '@/types/api'
+import { getDisplayName } from '@/utils/actionHandler'
+import { pageview } from '@/utils/analytics'
+import { generateDenomHash, parseCoins } from '@/utils/basic'
+import { featureRunning } from '@/utils/FeatureManager'
 
 export default defineComponent({
   name: 'Asset',
@@ -225,64 +225,64 @@ export default defineComponent({
   },
 
   setup() {
-    const displayName = ref('');
+    const displayName = ref('')
     const metaSource = computed(() => {
-      return { title: displayName.value };
-    });
-    useMeta(metaSource);
+      return { title: displayName.value }
+    })
+    useMeta(metaSource)
     const isPoolCoin = computed(() => {
-      return denom.value.startsWith('pool');
-    });
-    const stakingEnabled = featureRunning('STAKING');
-    const apistore = useStore() as TypedAPIStore;
-    const route = useRoute();
-    const router = useRouter();
-    const denom = computed(() => route.params.denom as string);
-    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom });
+      return denom.value.startsWith('pool')
+    })
+    const stakingEnabled = featureRunning('STAKING')
+    const apistore = useStore() as TypedAPIStore
+    const route = useRoute()
+    const router = useRouter()
+    const denom = computed(() => route.params.denom as string)
+    pageview({ page_title: 'Asset: ' + route.params.denom, page_path: '/asset/' + route.params.denom })
     const { balances, balancesByDenom, stakingBalancesByChain, nativeBalances, unbondingDelegationsByChain } =
-      useAccount();
-    const { filterPoolsByDenom, getWithdrawBalances } = usePools();
+      useAccount()
+    const { filterPoolsByDenom, getWithdrawBalances } = usePools()
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
-      return verifiedDenoms.find((item) => item.name === denom.value);
-    });
+      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || []
+      return verifiedDenoms.find((item) => item.name === denom.value)
+    })
     if (!assetConfig.value) {
-      router.push('/');
+      router.push('/')
     }
 
     const nativeAsset = computed(() => {
-      return nativeBalances.value.find((item) => item.base_denom === denom.value);
-    });
+      return nativeBalances.value.find((item) => item.base_denom === denom.value)
+    })
 
-    const assets = computed(() => balancesByDenom(denom.value));
+    const assets = computed(() => balancesByDenom(denom.value))
     const unavailableChains = computed(() => {
-      const result = {};
+      const result = {}
       for (const asset of assets.value) {
-        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain });
+        const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: asset.on_chain })
         if (!status) {
           result[asset.on_chain] = {
             chain: asset.on_chain,
             denom: asset.base_denom,
             unavailable: 'full',
-          };
+          }
         }
       }
-      return result;
-    });
+      return result
+    })
 
-    const poolDenom = ref(denom.value);
+    const poolDenom = ref(denom.value)
 
     watch(
       denom,
       async () => {
-        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]
 
         if (assetConfig.value && assetConfig.value?.chain_name != dexChain) {
           await apistore.dispatch(GlobalDemerisActionTypes.API.GET_CHAIN, {
             subscribe: false,
             params: { chain_name: dexChain },
-          });
+          })
           const invPrimaryChannel =
             apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
               chain_name: dexChain,
@@ -295,79 +295,79 @@ export default defineComponent({
                 params: { chain_name: dexChain, destination_chain_name: assetConfig.value.chain_name },
               },
               { root: true },
-            ));
+            ))
 
-          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value);
+          poolDenom.value = generateDenomHash(invPrimaryChannel, denom.value)
         }
 
-        displayName.value = await getDisplayName(denom.value, dexChain);
+        displayName.value = await getDisplayName(denom.value, dexChain)
       },
       { immediate: true },
-    );
+    )
 
-    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value));
+    const poolsWithAsset = computed(() => filterPoolsByDenom(poolDenom.value))
 
     const availableAmount = computed(() => {
-      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0);
-    });
+      return assets.value.reduce((acc, item) => acc + parseInt(parseCoins(item.amount)[0].amount), 0)
+    })
 
     const stakingBalance = computed(() => {
       // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
       if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
-        return stakingBalancesByChain(assetConfig.value.chain_name);
+        return stakingBalancesByChain(assetConfig.value.chain_name)
       }
-      return 0;
-    });
+      return 0
+    })
     const unbondingDelegation = computed(() => {
       // TODO: This needs fixing for a chain that supports MULTIPLE stakeable assets (if any ever exist)
       if (assetConfig.value && assetConfig.value.chain_name && assetConfig.value.stakable) {
-        return unbondingDelegationsByChain(assetConfig.value.chain_name);
+        return unbondingDelegationsByChain(assetConfig.value.chain_name)
       }
-      return [];
-    });
+      return []
+    })
 
     const stakedAmount = computed(() => {
-      let staked = stakingBalance.value;
-      let totalStakedAmount = 0;
+      let staked = stakingBalance.value
+      let totalStakedAmount = 0
       if (Array.isArray(staked)) {
         for (let i = 0; i < staked.length; i++) {
-          let amount = parseFloat(staked[i].amount);
+          let amount = parseFloat(staked[i].amount)
           if (amount) {
-            totalStakedAmount += amount;
+            totalStakedAmount += amount
           }
         }
       }
-      return totalStakedAmount;
-    });
+      return totalStakedAmount
+    })
 
     const unstakedAmount = computed(() => {
-      let totalUnstakedAmount = 0;
+      let totalUnstakedAmount = 0
       if (unbondingDelegation.value.length > 0) {
         const unstakedAmounts = unbondingDelegation.value
           .map((y) => y.entries)
           .flat()
-          .map((z) => z.balance);
+          .map((z) => z.balance)
         if (unstakedAmounts.length > 0) {
-          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0);
-          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount;
+          const unstakedAmount = unstakedAmounts.reduce((acc, item) => +parseInt(item) + acc, 0)
+          totalUnstakedAmount = totalUnstakedAmount + unstakedAmount
         }
       }
-      return totalUnstakedAmount;
-    });
+      return totalUnstakedAmount
+    })
     const poolsInvestedWithAsset = computed(() => {
-      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
-      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value))
+      const balancesCopy = JSON.parse(JSON.stringify(balances.value))
 
       return poolsCopy.filter((item) =>
         balancesCopy.some(
           (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount > 0,
         ),
-      );
-    });
+      )
+    })
 
     const poolsNotInvestedWithAsset = computed(() => {
-      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value));
-      const balancesCopy = JSON.parse(JSON.stringify(balances.value));
+      const poolsCopy = JSON.parse(JSON.stringify(poolsWithAsset.value))
+      const balancesCopy = JSON.parse(JSON.stringify(balances.value))
 
       return poolsCopy.filter(
         (item) =>
@@ -375,60 +375,60 @@ export default defineComponent({
           balancesCopy.some(
             (item2) => item.pool_coin_denom == item2.base_denom && +parseCoins(item2.amount)[0].amount == 0,
           ),
-      );
-    });
+      )
+    })
 
     const poolsDisplay = computed(() => {
-      const fillBy = 3 - poolsInvestedWithAsset.value.length;
+      const fillBy = 3 - poolsInvestedWithAsset.value.length
 
       if (fillBy > 0) {
-        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0, fillBy));
+        return poolsInvestedWithAsset.value.concat(poolsNotInvestedWithAsset.value.slice(0, fillBy))
       }
 
-      return poolsInvestedWithAsset.value;
-    });
+      return poolsInvestedWithAsset.value
+    })
 
     const pooledAmount = computed(() => {
-      let assetPooledAmount = 0;
+      let assetPooledAmount = 0
 
       for (const pool of poolsInvestedWithAsset.value) {
-        const poolCoinBalances = balancesByDenom(pool.pool_coin_denom);
+        const poolCoinBalances = balancesByDenom(pool.pool_coin_denom)
         const withdrawBalances = getWithdrawBalances(
           pool,
           poolCoinBalances.reduce((acc, item) => acc + +parseCoins(item.amount)[0].amount, 0),
-        );
+        )
 
-        const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value);
+        const assetBalanceInPool = withdrawBalances.find((x) => x.denom == poolDenom.value)
         if (assetBalanceInPool) {
-          assetPooledAmount += assetBalanceInPool.amount;
+          assetPooledAmount += assetBalanceInPool.amount
         }
       }
 
-      return assetPooledAmount;
-    });
+      return assetPooledAmount
+    })
 
     const totalAmount = computed(() => {
-      return availableAmount.value + stakedAmount.value + unstakedAmount.value;
-    });
+      return availableAmount.value + stakedAmount.value + unstakedAmount.value
+    })
 
-    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false;
+    const isAreaChartFeatureRunning = featureRunning('PRICE_CHART_ON_ASSET_PAGE') ? true : false
     const dataStream = computed(() => {
-      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices];
-    });
+      return apistore.getters[GlobalDemerisGetterTypes.API.getTokenPrices]
+    })
 
-    const getTokenPrices = ref(null);
-    let priceDiffObject = ref(null);
+    const getTokenPrices = ref(null)
+    let priceDiffObject = ref(null)
 
     const setPriceDifference = (priceDiff: any) => {
-      priceDiffObject.value = priceDiff;
-    };
+      priceDiffObject.value = priceDiff
+    }
 
     if (featureRunning('PRICE_CHART_ON_ASSET_PAGE')) {
       watch(displayName, async () => {
         if (displayName.value) {
-          getTokenPrices.value('1', true);
+          getTokenPrices.value('1', true)
         }
-      });
+      })
 
       getTokenPrices.value = async (days: string, showSkeleton: boolean) => {
         const chainName = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_ID, {
@@ -437,7 +437,7 @@ export default defineComponent({
             token: displayName.value.toLowerCase(),
             showSkeleton,
           },
-        });
+        })
 
         if (chainName) {
           await apistore.dispatch(GlobalDemerisActionTypes.API.GET_TOKEN_PRICES, {
@@ -448,31 +448,31 @@ export default defineComponent({
               currency: 'usd',
               showSkeleton,
             },
-          });
+          })
         }
-      };
+      }
     }
 
     const isDenomAPool = computed(() => {
-      return denom.value.includes('pool');
-    });
+      return denom.value.includes('pool')
+    })
 
     const showPriceChart = computed(() => {
-      return isAreaChartFeatureRunning && !isDenomAPool.value;
-    });
+      return isAreaChartFeatureRunning && !isDenomAPool.value
+    })
 
     const showPriceChartLoadingSkeleton = computed(() => {
       return (
         apistore.getters[GlobalDemerisGetterTypes.API.getTokenPricesLoadingStatus] === LoadingState.LOADING ||
         apistore.getters[GlobalDemerisGetterTypes.API.getTokenIdLoadingStatus] === LoadingState.LOADING
-      );
-    });
+      )
+    })
 
     onUnmounted(() => {
-      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
-    });
+      apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES)
+    })
 
-    const isStakingRunning = featureRunning('STAKING');
+    const isStakingRunning = featureRunning('STAKING')
 
     return {
       nativeAsset,
@@ -496,9 +496,9 @@ export default defineComponent({
       priceDiffObject,
       setPriceDifference,
       isStakingRunning,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

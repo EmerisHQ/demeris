@@ -1,8 +1,8 @@
-import { GasPriceLevel, Pool } from '@/types/actions';
-import * as API from '@/types/api';
+import { GasPriceLevel, Pool } from '@/types/actions'
+import * as API from '@/types/api'
 
-import { DemerisConfig } from './actions';
-import { ChainData } from './state';
+import { DemerisConfig } from './actions'
+import { ChainData } from './state'
 
 export enum DemerisMutationTypes {
   SET_BALANCES = 'SET_BALANCES',
@@ -42,24 +42,24 @@ export enum DemerisMutationTypes {
   UNSUBSCRIBE = 'UNSUBSCRIBE',
 }
 export type APIPromise = {
-  hash: string;
-  promise: Promise<void>;
-};
+  hash: string
+  promise: Promise<void>
+}
 export type UserData = {
-  customSlippage?: boolean;
-  viewLPAssetPools?: boolean;
-  viewUnverified?: boolean;
-  gasPriceLevel?: GasPriceLevel;
-  hasSeenRedeem?: boolean;
-  slippagePerc?: number;
-  isDemoAccount?: boolean;
-  theme?: string;
-  updateDT?: number;
-};
+  customSlippage?: boolean
+  viewLPAssetPools?: boolean
+  viewUnverified?: boolean
+  gasPriceLevel?: GasPriceLevel
+  hasSeenRedeem?: boolean
+  slippagePerc?: number
+  isDemoAccount?: boolean
+  theme?: string
+  updateDT?: number
+}
 export type UserSession = {
-  walletName: string;
-  walletData: UserData;
-};
+  walletName: string
+  walletData: UserData
+}
 export type DemerisMutationArgs =
   | API.Balances
   | boolean
@@ -87,9 +87,9 @@ export type DemerisMutationArgs =
   | API.VerifiedDenoms
   | DemerisConfig
   | string
-  | Pool[];
+  | Pool[]
 
 export type DemerisMutations = {
-  params?: API.APIRequests;
-  value: DemerisMutationArgs;
-};
+  params?: API.APIRequests
+  value: DemerisMutationArgs
+}

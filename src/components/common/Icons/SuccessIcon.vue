@@ -8,10 +8,10 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'SuccessIcon',
-});
+})
 </script>
 
 <style lang="scss" scoped>

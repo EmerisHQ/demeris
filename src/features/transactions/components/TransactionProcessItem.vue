@@ -162,26 +162,26 @@
 </template>
 
 <script lang="ts" setup>
-import { useActor } from '@xstate/vue';
-import { computed, PropType, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { useActor } from '@xstate/vue'
+import { computed, PropType, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import Spinner from '@/components/ui/Spinner.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions';
-import { getBaseDenomSync } from '@/utils/actionHandler';
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Spinner from '@/components/ui/Spinner.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { AddLiquidityData, CreatePoolData, SwapData, TransferData, WithdrawLiquidityData } from '@/types/actions'
+import { getBaseDenomSync } from '@/utils/actionHandler'
 
 import {
   getCurrentTransaction,
   getSourceChainFromTransaction,
   getTransactionFromAction,
   getTransactionOffset,
-} from '../transactionProcessHelpers';
-import { TransactionProcessService } from '../transactionProcessMachine';
+} from '../transactionProcessHelpers'
+import { TransactionProcessService } from '../transactionProcessMachine'
 
 const props = defineProps({
   service: {
@@ -192,51 +192,51 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
-const globalStore = useStore();
-const { service } = toRefs(props);
-const { state, send } = useActor(service);
+const globalStore = useStore()
+const { service } = toRefs(props)
+const { state, send } = useActor(service)
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
-const transactionAction = computed(() => getTransactionFromAction(state.value.context));
-const action = computed(() => state.value.context.input.action);
-const chainName = computed(() => getSourceChainFromTransaction(transaction.value));
+const transaction = computed(() => getCurrentTransaction(state.value.context))
+const transactionAction = computed(() => getTransactionFromAction(state.value.context))
+const action = computed(() => state.value.context.input.action)
+const chainName = computed(() => getSourceChainFromTransaction(transaction.value))
 
-const transactionOffset = computed(() => getTransactionOffset(state.value.context));
+const transactionOffset = computed(() => getTransactionOffset(state.value.context))
 
 const getIconAssets = () => {
-  const name = transaction.value.name;
-  const assets = [];
+  const name = transaction.value.name
+  const assets = []
 
   if (name === 'transfer' || name.startsWith('ibc')) {
-    const denom = (transaction.value.data as TransferData).amount.denom;
-    const chainName = getSourceChainFromTransaction(transaction.value);
-    assets.push({ denom, chainName });
+    const denom = (transaction.value.data as TransferData).amount.denom
+    const chainName = getSourceChainFromTransaction(transaction.value)
+    assets.push({ denom, chainName })
   }
 
   if (name === 'swap') {
-    const denom = (transaction.value.data as SwapData).to.denom;
-    assets.push({ denom });
+    const denom = (transaction.value.data as SwapData).to.denom
+    assets.push({ denom })
   }
 
   if (name === 'addliquidity') {
-    const denomA = (transaction.value.data as AddLiquidityData).coinA.denom;
-    const denomB = (transaction.value.data as AddLiquidityData).coinB.denom;
-    assets.push({ denom: denomA }, { denom: denomB });
+    const denomA = (transaction.value.data as AddLiquidityData).coinA.denom
+    const denomB = (transaction.value.data as AddLiquidityData).coinB.denom
+    assets.push({ denom: denomA }, { denom: denomB })
   }
 
   if (name === 'withdrawliquidity') {
-    const denoms = (transaction.value.data as WithdrawLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync);
-    assets.push(...denoms);
+    const denoms = (transaction.value.data as WithdrawLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync)
+    assets.push(...denoms)
   }
 
   if (name === 'createpool') {
-    const denomA = (transaction.value.data as CreatePoolData).coinA.denom;
-    const denomB = (transaction.value.data as CreatePoolData).coinB.denom;
-    assets.push({ denom: denomA }, { denom: denomB });
+    const denomA = (transaction.value.data as CreatePoolData).coinA.denom
+    const denomB = (transaction.value.data as CreatePoolData).coinB.denom
+    assets.push({ denom: denomA }, { denom: denomB })
   }
 
-  return assets;
-};
+  return assets
+}
 </script>

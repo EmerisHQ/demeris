@@ -40,10 +40,10 @@
   </nav>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
-import { featureRunning } from '@/utils/FeatureManager';
+import StarsIcon from '@/components/common/Icons/StarsIcon.vue'
+import { featureRunning } from '@/utils/FeatureManager'
 
 export default defineComponent({
   name: 'Navbar',
@@ -51,13 +51,13 @@ export default defineComponent({
     StarsIcon,
   },
   setup() {
-    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
+    const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE')
 
     return {
       isAirdropsFeatureRunning,
-    };
+    }
   },
-});
+})
 </script>
 
 <style scoped lang="scss">

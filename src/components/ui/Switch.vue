@@ -1,5 +1,5 @@
 <script>
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
@@ -15,11 +15,11 @@ export default defineComponent({
     const model = computed({
       get: () => props.modelValue,
       set: (value) => emit('update:modelValue', value),
-    });
+    })
 
-    return { model };
+    return { model }
   },
-});
+})
 </script>
 
 <template>

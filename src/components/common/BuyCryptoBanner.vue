@@ -13,16 +13,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import useCountry from '@/composables/useCountry';
-import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { event } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
+import useCountry from '@/composables/useCountry'
+import useEmitter from '@/composables/useEmitter'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { event } from '@/utils/analytics'
+import { featureRunning } from '@/utils/FeatureManager'
 export default defineComponent({
   name: 'BuyCryptoBanner',
   props: {
@@ -36,10 +36,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
-    const emitter = useEmitter();
-    const userCountry = useCountry();
-    const route = useRoute();
+    const store = useStore()
+    const emitter = useEmitter()
+    const userCountry = useCountry()
+    const route = useRoute()
     //remove query check. just for testing
     const bannerType = ref(
       route.query?.buyType
@@ -47,40 +47,40 @@ export default defineComponent({
         : userCountry.includes('America') && featureRunning('SIMPLEX')
         ? 'simplex'
         : 'moonpay',
-    );
-    const { t } = useI18n({ useScope: 'global' });
+    )
+    const { t } = useI18n({ useScope: 'global' })
     const bannerTitle = computed(() => {
       return bannerType.value === 'simplex'
         ? t('components.simplexBanner.title', { asset: props.asset })
-        : t('components.moonpayBanner.title', { asset: props.asset });
-    });
+        : t('components.moonpayBanner.title', { asset: props.asset })
+    })
     const bannerSubtitle = computed(() => {
       return bannerType.value === 'simplex'
         ? t('components.simplexBanner.poweredBy')
-        : t('components.moonpayBanner.poweredBy');
-    });
+        : t('components.moonpayBanner.poweredBy')
+    })
     const isSignedIn = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]
+    })
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+    })
     const openModal = () => {
       if (isSignedIn.value && !isDemoAccount.value) {
-        emitter.emit(bannerType.value);
+        emitter.emit(bannerType.value)
         if (bannerType.value === 'simplex') {
           event('simplex_transaction', {
             event_label: 'Transaction with Simplex initiated',
             event_category: 'Fiat Onramp',
-          });
+          })
         }
       } else {
-        emitter.emit('toggle-settings-modal');
+        emitter.emit('toggle-settings-modal')
       }
-    };
-    return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType };
+    }
+    return { isSignedIn, openModal, isDemoAccount, bannerTitle, bannerSubtitle, bannerType }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

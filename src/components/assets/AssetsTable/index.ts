@@ -1,3 +1,3 @@
-import AssetsTable from './AssetsTable.vue';
+import AssetsTable from './AssetsTable.vue'
 
-export default AssetsTable;
+export default AssetsTable

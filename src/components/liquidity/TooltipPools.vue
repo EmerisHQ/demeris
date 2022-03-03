@@ -6,11 +6,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue'
 
-import { Pool as PoolType } from '@/types/actions';
+import { Pool as PoolType } from '@/types/actions'
 
-import TooltipPool from './TooltipPool.vue';
+import TooltipPool from './TooltipPool.vue'
 
 export default defineComponent({
   name: 'TooltipPools',
@@ -36,12 +36,12 @@ export default defineComponent({
 
   setup(props) {
     const availablePools = computed(() => {
-      return (props.pools as PoolType[]).slice(0, props.limit as number);
-    });
+      return (props.pools as PoolType[]).slice(0, props.limit as number)
+    })
 
     return {
       availablePools,
-    };
+    }
   },
-});
+})
 </script>

@@ -75,22 +75,22 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRaw } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, toRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AirdropClaim from '@/components/airdrops/AirdropClaim';
-import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance';
-import GoBack from '@/components/common/headers/GoBack.vue';
-import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
-import LinkIcon from '@/components/common/Icons/LinkIcon.vue';
-import Divider from '@/components/ui/Divider.vue';
-import NoMarginLayout from '@/layouts/NoMarginLayout.vue';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Airdrop } from '@/types/api';
-import { pageview } from '@/utils/analytics';
+import AirdropClaim from '@/components/airdrops/AirdropClaim'
+import AirdropsCurrentBalance from '@/components/airdrops/AirdropsCurrentBalance'
+import GoBack from '@/components/common/headers/GoBack.vue'
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue'
+import LinkIcon from '@/components/common/Icons/LinkIcon.vue'
+import Divider from '@/components/ui/Divider.vue'
+import NoMarginLayout from '@/layouts/NoMarginLayout.vue'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { Airdrop } from '@/types/api'
+import { pageview } from '@/utils/analytics'
 
 export default defineComponent({
   name: 'Airdrop',
@@ -105,37 +105,37 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Airdrops', page_path: '/' });
+    const apistore = useStore() as TypedAPIStore
+    const { t } = useI18n({ useScope: 'global' })
+    pageview({ page_title: 'Airdrops', page_path: '/' })
     useMeta(
       computed(() => ({
         title: t('navbar.airdrops'),
       })),
-    );
+    )
 
-    const router = useRouter();
+    const router = useRouter()
 
     const openAirdropPage = (airdrop: Airdrop) => {
-      router.push('/airdrop');
+      router.push('/airdrop')
       apistore.dispatch(GlobalDemerisActionTypes.API.SET_SELECTED_AIRDROP, {
         params: {
           airdrop,
         },
-      });
-    };
+      })
+    }
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
-    });
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop])
+    })
 
     const goBackToAirdropspage = () => {
-      router.push('/airdrops');
-    };
+      router.push('/airdrops')
+    }
 
-    return { openAirdropPage, selectedAirdrop, goBackToAirdropspage };
+    return { openAirdropPage, selectedAirdrop, goBackToAirdropspage }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

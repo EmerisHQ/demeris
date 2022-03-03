@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRaw } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, toRaw } from 'vue'
+import { useStore } from 'vuex'
 
-import Icon from '@/components/ui/Icon.vue';
-import useTheme from '@/composables/useTheme';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import Icon from '@/components/ui/Icon.vue'
+import useTheme from '@/composables/useTheme'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
 
 export default defineComponent({
   name: 'AirdropClaimablePanel',
@@ -46,27 +46,27 @@ export default defineComponent({
     },
   },
   setup() {
-    const theme = useTheme();
-    const apistore = useStore() as TypedAPIStore;
+    const theme = useTheme()
+    const apistore = useStore() as TypedAPIStore
 
     const selectedAirdrop = computed(() => {
-      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop]);
-    });
+      return toRaw(apistore.getters[GlobalDemerisGetterTypes.API.getSelectedAirdrop])
+    })
 
     const isDemoAccountBanner = computed(() => {
       return (
         !apistore.getters[GlobalDemerisGetterTypes.USER.isSignedIn] ||
         apistore.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
-      );
-    });
+      )
+    })
 
     return {
       theme,
       selectedAirdrop,
       isDemoAccountBanner,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

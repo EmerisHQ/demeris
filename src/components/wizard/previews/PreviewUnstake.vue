@@ -52,17 +52,17 @@
   </List>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Price from '@/components/common/Price.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import { List, ListItem } from '@/components/ui/List';
-import useStaking from '@/composables/useStaking';
-import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Price from '@/components/common/Price.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import { List, ListItem } from '@/components/ui/List'
+import useStaking from '@/composables/useStaking'
+import * as Actions from '@/types/actions'
+import * as Base from '@/types/base'
 export default defineComponent({
   name: 'PreviewUnstake',
   components: {
@@ -95,44 +95,44 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
-    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking();
+    const store = useStore()
+    const { getValidatorsByBaseDenom, getStakingRewardsByBaseDenom } = useStaking()
 
-    const propsRef = toRefs(props);
-    const validators = ref([]);
-    const tx = propsRef.step.value.transactions[0];
-    const baseDenom = (tx.data as Actions.UnstakeData).amount.denom;
-    const chainName = (tx.data as Actions.UnstakeData).chain_name;
+    const propsRef = toRefs(props)
+    const validators = ref([])
+    const tx = propsRef.step.value.transactions[0]
+    const baseDenom = (tx.data as Actions.UnstakeData).amount.denom
+    const chainName = (tx.data as Actions.UnstakeData).chain_name
 
-    const stakingRewardsData = ref(null);
-    const unStaked = (tx.data as Actions.UnstakeData).amount.amount;
+    const stakingRewardsData = ref(null)
+    const unStaked = (tx.data as Actions.UnstakeData).amount.amount
 
     onMounted(async () => {
       try {
-        stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
+        stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom)
       } catch (e) {}
-      validators.value = await getValidatorsByBaseDenom(baseDenom);
-    });
+      validators.value = await getValidatorsByBaseDenom(baseDenom)
+    })
 
     const validator = computed(() => {
-      return validators.value.find((x) => x.operator_address == (tx.data as Actions.UnstakeData).validatorAddress);
-    });
+      return validators.value.find((x) => x.operator_address == (tx.data as Actions.UnstakeData).validatorAddress)
+    })
     const stakingRewards = computed(() => {
       if (stakingRewardsData.value !== null) {
         return parseFloat(
           stakingRewardsData.value.rewards.find(
             (x) => x.validator_address == (tx.data as Actions.UnstakeData).validatorAddress,
           )?.reward ?? '0',
-        ).toString();
+        ).toString()
       } else {
-        return '0';
+        return '0'
       }
-    });
-    const size = props.context === 'default' ? 'md' : 'sm';
+    })
+    const size = props.context === 'default' ? 'md' : 'sm'
 
-    const availableAtTime = new Date();
-    availableAtTime.setDate(availableAtTime.getDate() + 21);
-    const availableAt = availableAtTime.toLocaleString();
+    const availableAtTime = new Date()
+    availableAtTime.setDate(availableAtTime.getDate() + 21)
+    const availableAt = availableAtTime.toLocaleString()
     return {
       store,
       size,
@@ -144,8 +144,8 @@ export default defineComponent({
       unStaked,
       stakingRewards,
       validator,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

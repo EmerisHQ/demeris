@@ -767,4 +767,4 @@ export const messages = {
       },
     },
   },
-};
+}

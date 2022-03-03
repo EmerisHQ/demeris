@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { toCanvas } from 'qrcode';
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { toCanvas } from 'qrcode'
+import { defineComponent, onMounted, ref, watch } from 'vue'
 
 export default defineComponent({
   name: 'QrCode',
@@ -31,7 +31,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    const canvas = ref(null);
+    const canvas = ref(null)
 
     const generate = () => {
       const options = {
@@ -41,15 +41,15 @@ export default defineComponent({
           dark: props.color,
           light: props.background,
         },
-      };
+      }
 
-      toCanvas(canvas.value, props.value, options);
-    };
+      toCanvas(canvas.value, props.value, options)
+    }
 
-    onMounted(generate);
-    watch(props, generate);
+    onMounted(generate)
+    watch(props, generate)
 
-    return { canvas };
+    return { canvas }
   },
-});
+})
 </script>

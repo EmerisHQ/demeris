@@ -17,10 +17,10 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'InfoStarIcon',
-});
+})
 </script>
 
 <style lang="scss" scoped>

@@ -293,7 +293,7 @@ export const TEST_DATA = {
     //   },
     // },
   ],
-};
+}
 
 export const SWAP_TEST_DATA = {
   steps: [
@@ -337,4 +337,4 @@ export const SWAP_TEST_DATA = {
     },
     chain_name: 'gaia',
   },
-};
+}

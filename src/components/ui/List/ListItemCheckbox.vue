@@ -12,9 +12,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from 'vue'
 
-import Checkbox from '@/components/ui/Checkbox.vue';
+import Checkbox from '@/components/ui/Checkbox.vue'
 
 export default defineComponent({
   name: 'ListItemCheckbox',
@@ -37,16 +37,16 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const listItemRef = ref({ iconUrl: props.iconUrl, isChecked: props.isChecked, text: props.text });
+    const listItemRef = ref({ iconUrl: props.iconUrl, isChecked: props.isChecked, text: props.text })
 
     const onUpdate = (e) => {
-      listItemRef.value = { ...listItemRef.value, isChecked: e };
-      emit('update:modelValue', listItemRef.value);
-    };
+      listItemRef.value = { ...listItemRef.value, isChecked: e }
+      emit('update:modelValue', listItemRef.value)
+    }
 
-    return { onUpdate };
+    return { onUpdate }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

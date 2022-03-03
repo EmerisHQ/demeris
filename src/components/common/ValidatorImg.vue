@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
-import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
+import axios from 'axios'
+import { defineComponent, onMounted, ref, toRefs, watch } from 'vue'
 
-import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic';
+import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic'
 export default defineComponent({
   name: 'ValidatorImg',
   props: {
@@ -21,43 +21,43 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
   },
   setup(props) {
-    const { validator } = toRefs(props);
-    const imgUrl = ref('');
-    const monikerFirst = ref('');
+    const { validator } = toRefs(props)
+    const imgUrl = ref('')
+    const monikerFirst = ref('')
     watch(
       () => validator.value,
       async (newValue) => {
-        imgUrl.value = await fetchValidatorImg(newValue);
-        monikerFirst.value = getFirstAlphabet(newValue.moniker);
+        imgUrl.value = await fetchValidatorImg(newValue)
+        monikerFirst.value = getFirstAlphabet(newValue.moniker)
       },
-    );
+    )
 
     onMounted(async () => {
-      imgUrl.value = await fetchValidatorImg(validator.value);
-      monikerFirst.value = getFirstAlphabet(validator.value.moniker);
-    });
+      imgUrl.value = await fetchValidatorImg(validator.value)
+      monikerFirst.value = getFirstAlphabet(validator.value.moniker)
+    })
     return {
       imgUrl,
       monikerFirst,
-    };
+    }
   },
-});
+})
 
 async function fetchValidatorImg(validator: Record<string, string>): Promise<string> {
-  if (!checkStringIsKeybase(validator?.identity)) return '';
+  if (!checkStringIsKeybase(validator?.identity)) return ''
   try {
     const res = await axios.get(
       'https://keybase.io/_/api/1.0/user/lookup.json?key_suffix=' + validator.identity + '&fields=pictures',
-    );
-    const url = res.data?.them[0]?.pictures?.primary?.url ?? '';
-    return url;
+    )
+    const url = res.data?.them[0]?.pictures?.primary?.url ?? ''
+    return url
   } catch (e) {
-    return '';
+    return ''
   }
 }
 </script>

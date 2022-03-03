@@ -1,3 +1,3 @@
 export default function useCountry() {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
 }

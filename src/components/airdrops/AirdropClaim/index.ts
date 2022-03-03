@@ -1,3 +1,3 @@
-import AirdropClaim from './AirdropClaim.vue';
+import AirdropClaim from './AirdropClaim.vue'
 
-export default AirdropClaim;
+export default AirdropClaim

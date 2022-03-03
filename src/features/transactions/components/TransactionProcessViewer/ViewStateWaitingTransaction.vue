@@ -33,23 +33,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import ChainName from '@/components/common/ChainName.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
-import {
-  getCurrentTransaction,
-  getSourceChainFromTransaction,
-  ProvideViewerKey,
-} from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
-const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey);
-const { state } = actor;
-const { t } = useI18n({ useScope: 'global' });
-const transactionsStore = useTransactionsStore();
+import { getCurrentTransaction, getSourceChainFromTransaction, ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
+const { actor, isSwapComponent, closeModal } = inject(ProvideViewerKey)
+const { state } = actor
+const { t } = useI18n({ useScope: 'global' })
+const transactionsStore = useTransactionsStore()
 const transactionNameMap = {
   transfer: t('context.transactions.type.transfer'),
   ibc_forward: t('context.transactions.type.transfer'),
@@ -58,18 +54,18 @@ const transactionNameMap = {
   addliquidity: t('context.transactions.type.addliquidity'),
   withdrawliquidity: t('context.transactions.type.withdrawliquidity'),
   createpool: t('context.transactions.type.createpool'),
-};
-const transaction = computed(() => getCurrentTransaction(state.value.context));
-const sourceChain = computed(() => getSourceChainFromTransaction(transaction.value));
+}
+const transaction = computed(() => getCurrentTransaction(state.value.context))
+const sourceChain = computed(() => getSourceChainFromTransaction(transaction.value))
 
 const confirm = () => {
-  transactionsStore.setTransactionAsPending();
+  transactionsStore.setTransactionAsPending()
   if (!isSwapComponent.value) {
-    closeModal();
+    closeModal()
   }
-};
+}
 
 const cancel = () => {
-  transactionsStore.toggleCancelModal();
-};
+  transactionsStore.toggleCancelModal()
+}
 </script>

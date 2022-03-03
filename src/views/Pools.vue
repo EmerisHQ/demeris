@@ -10,35 +10,35 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/reactivity';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
+import { computed } from '@vue/reactivity'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
 
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import PoolsTable from '@/components/liquidity/PoolsTable.vue';
-import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { pageview } from '@/utils/analytics';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import PoolsTable from '@/components/liquidity/PoolsTable.vue'
+import usePools from '@/composables/usePools'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { pageview } from '@/utils/analytics'
 
 export default {
   name: 'Pools',
   components: { AppLayout, PoolsTable, SkeletonLoader },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Pools', page_path: '/pools' });
+    const { t } = useI18n({ useScope: 'global' })
+    pageview({ page_title: 'Pools', page_path: '/pools' })
     useMeta(
       computed(() => ({
         title: t('context.pools.title'),
       })),
-    );
+    )
 
-    const { pools } = usePools();
+    const { pools } = usePools()
     return {
       pools,
-    };
+    }
   },
-};
+}
 </script>
 
 <style lang="scss" scoped></style>

@@ -8,7 +8,7 @@
               <Button
                 :click-function="
                   () => {
-                    state.isUSDInputChecked = !state.isUSDInputChecked;
+                    state.isUSDInputChecked = !state.isUSDInputChecked
                   }
                 "
                 size="sm"
@@ -39,9 +39,9 @@
                   @update:price="state.usdValue = $event"
                   @update:modelValue="
                     ($event) => {
-                      state.isMaximumAmountChecked = false;
+                      state.isMaximumAmountChecked = false
                       if (state.isUSDInputChecked) {
-                        form.amount = $event;
+                        form.amount = $event
                       }
                     }
                   "
@@ -61,7 +61,7 @@
               <Button
                 :click-function="
                   () => {
-                    state.isMaximumAmountChecked = true;
+                    state.isMaximumAmountChecked = true
                   }
                 "
                 :name="$t('generic_cta.max')"
@@ -128,25 +128,25 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, inject, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, inject, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import Price from '@/components/common/Price.vue';
-import USDInput from '@/components/common/USDInput.vue';
-import Button from '@/components/ui/Button.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue';
-import Icon from '@/components/ui/Icon.vue';
-import ListItem from '@/components/ui/List/ListItem.vue';
-import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { RestakeForm, Step } from '@/types/actions';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue'
+import Price from '@/components/common/Price.vue'
+import USDInput from '@/components/common/USDInput.vue'
+import Button from '@/components/ui/Button.vue'
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import FlexibleAmountInput from '@/components/ui/FlexibleAmountInput.vue'
+import Icon from '@/components/ui/Icon.vue'
+import ListItem from '@/components/ui/List/ListItem.vue'
+import useStaking from '@/composables/useStaking'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
+import { RestakeForm, Step } from '@/types/actions'
 
-import ValidatorDisplay from '../ValidatorDisplay.vue';
+import ValidatorDisplay from '../ValidatorDisplay.vue'
 
 export default defineComponent({
   name: 'SwitchValidatorAmount',
@@ -172,36 +172,36 @@ export default defineComponent({
   },
   emits: ['previous', 'next'],
   setup(props, { emit }) {
-    const store = useStore();
+    const store = useStore()
 
-    const { getStakingRewardsByBaseDenom } = useStaking();
+    const { getStakingRewardsByBaseDenom } = useStaking()
 
-    const form = inject<RestakeForm>('switchForm');
+    const form = inject<RestakeForm>('switchForm')
 
-    const propsRef = toRefs(props);
-    const fees = ref({});
-    const stakingRewardsData = ref(null);
+    const propsRef = toRefs(props)
+    const fees = ref({})
+    const stakingRewardsData = ref(null)
 
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({
         chain_name: propsRef.validators.value[0].chain_name,
-      });
-    });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+      })
+    })
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
-    );
+    )
 
     const denomDecimals = computed(() => {
-      return Math.pow(10, precision.value);
-    });
+      return Math.pow(10, precision.value)
+    })
     const hasPrice = computed(() => {
-      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom });
+      const price = store.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenom })
 
-      return !!price;
-    });
+      return !!price
+    })
 
     const state = reactive({
       currentAsset: undefined,
@@ -214,59 +214,59 @@ export default defineComponent({
       usdValue: '',
       fees: {},
       gasPrice: '',
-    });
+    })
     watch(
       () => state.isMaximumAmountChecked,
       () => {
         if (state.isMaximumAmountChecked) {
-          form.amount = new BigNumber(stakingBalance.value).dividedBy(10 ** precision.value).toString();
-          return;
+          form.amount = new BigNumber(stakingBalance.value).dividedBy(10 ** precision.value).toString()
+          return
         }
       },
-    );
+    )
     const stakingRewards = computed(() => {
       if (stakingRewardsData.value !== null) {
         return parseFloat(
           stakingRewardsData.value.rewards.find((x) => x.validator_address == form.validatorAddress)?.reward ?? '0',
-        ).toString();
+        ).toString()
       } else {
-        return '0';
+        return '0'
       }
-    });
+    })
     const stakingBalance = computed(() => {
-      return propsRef.validators.value.find((x) => x.operator_address == form.validatorAddress).stakedAmount;
-    });
+      return propsRef.validators.value.find((x) => x.operator_address == form.validatorAddress).stakedAmount
+    })
     const displayStakingBalance = computed(() => {
-      const bn = new BigNumber(stakingBalance.value ?? 0);
-      return bn.dividedBy(10 ** precision.value);
-    });
+      const bn = new BigNumber(stakingBalance.value ?? 0)
+      return bn.dividedBy(10 ** precision.value)
+    })
     const remainingStake = computed(() => {
       return new BigNumber(stakingBalance.value ?? 0)
         .minus(new BigNumber(form.amount != '' ? form.amount ?? 0 : 0).multipliedBy(10 ** precision.value))
-        .toString();
-    });
+        .toString()
+    })
 
     const hasSufficientFunds = computed(() => {
-      return new BigNumber(remainingStake.value).isGreaterThanOrEqualTo(0);
-    });
+      return new BigNumber(remainingStake.value).isGreaterThanOrEqualTo(0)
+    })
     const fromValidator = computed(() => {
-      return propsRef.validators.value.find((x) => x.operator_address == form.validatorAddress);
-    });
+      return propsRef.validators.value.find((x) => x.operator_address == form.validatorAddress)
+    })
     const toValidator = computed(() => {
-      return propsRef.validators.value.find((x) => x.operator_address == form.toValidatorAddress);
-    });
+      return propsRef.validators.value.find((x) => x.operator_address == form.toValidatorAddress)
+    })
     const isValid = computed(() => {
-      return parseFloat(remainingStake.value) >= 0;
-    });
+      return parseFloat(remainingStake.value) >= 0
+    })
     const goToReview = () => {
-      emit('next');
-    };
+      emit('next')
+    }
     const validatorSelectHandler = () => {
-      emit('previous');
-    };
+      emit('previous')
+    }
     onMounted(async () => {
-      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
-    });
+      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom)
+    })
     return {
       displayStakingBalance,
       baseDenom,
@@ -283,7 +283,7 @@ export default defineComponent({
       form,
       denomDecimals,
       hasSufficientFunds,
-    };
+    }
   },
-});
+})
 </script>

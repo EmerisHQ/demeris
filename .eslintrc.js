@@ -1,4 +1,4 @@
-require('@rushstack/eslint-patch/modern-module-resolution');
+require('@rushstack/eslint-patch/modern-module-resolution')
 
 module.exports = {
   env: {
@@ -40,7 +40,7 @@ module.exports = {
       {
         trailingComma: 'all',
         tabWidth: 2,
-        semi: true,
+        semi: false,
         singleQuote: true,
         printWidth: 120,
         endOfLine: 'auto',
@@ -57,4 +57,4 @@ module.exports = {
       },
     },
   ],
-};
+}

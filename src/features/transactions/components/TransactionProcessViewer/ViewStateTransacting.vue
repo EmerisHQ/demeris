@@ -111,25 +111,25 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import Button from '@/components/ui/Button.vue';
-import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
-import { AddLiquidityData } from '@/types/actions';
-import { getBaseDenomSync } from '@/utils/actionHandler';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import Button from '@/components/ui/Button.vue'
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue'
+import { AddLiquidityData } from '@/types/actions'
+import { getBaseDenomSync } from '@/utils/actionHandler'
 
-import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers';
+import { getCurrentTransaction, ProvideViewerKey } from '../../transactionProcessHelpers'
 
-const { t } = useI18n({ useScope: 'global' });
-const { actor, isSwapComponent, minimizeModal } = inject(ProvideViewerKey);
-const { state } = actor;
+const { t } = useI18n({ useScope: 'global' })
+const { actor, isSwapComponent, minimizeModal } = inject(ProvideViewerKey)
+const { state } = actor
 
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const transaction = computed(() => getCurrentTransaction(state.value.context))
 const titleMap = {
   transfer: t('components.txHandlingModal.transferAction'),
   ibc_forward: t('components.txHandlingModal.transferAction'),
@@ -143,18 +143,18 @@ const titleMap = {
   unstake: t('components.txHandlingModal.unstakeAction'),
   switch: t('components.txHandlingModal.switchAction'),
   claim: t('components.txHandlingModal.claimAction'),
-};
+}
 
 const getDepositDenoms = () => {
-  return (transaction.value.data as AddLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync).sort();
-};
+  return (transaction.value.data as AddLiquidityData).pool.reserve_coin_denoms.map(getBaseDenomSync).sort()
+}
 
 const subtitle = computed(() => {
   if (transaction.value.name.startsWith('ibc')) {
-    return t('components.txHandlingModal.ibcTransferSubtitle');
+    return t('components.txHandlingModal.ibcTransferSubtitle')
   }
-  return t('components.txHandlingModal.txProgress');
-});
+  return t('components.txHandlingModal.txProgress')
+})
 </script>
 
 <style scoped>

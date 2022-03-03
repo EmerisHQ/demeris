@@ -47,17 +47,17 @@
   </List>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent, onMounted, PropType, ref, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Price from '@/components/common/Price.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import { List, ListItem } from '@/components/ui/List';
-import useStaking from '@/composables/useStaking';
-import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Price from '@/components/common/Price.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import { List, ListItem } from '@/components/ui/List'
+import useStaking from '@/composables/useStaking'
+import * as Actions from '@/types/actions'
+import * as Base from '@/types/base'
 export default defineComponent({
   name: 'PreviewSwitch',
   components: {
@@ -90,28 +90,28 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
-    const { getValidatorsByBaseDenom } = useStaking();
+    const store = useStore()
+    const { getValidatorsByBaseDenom } = useStaking()
 
-    const propsRef = toRefs(props);
-    const validators = ref([]);
-    const tx = propsRef.step.value.transactions[0];
-    const baseDenom = (tx.data as Actions.RestakeData).amount.denom;
-    const chainName = (tx.data as Actions.RestakeData).chain_name;
+    const propsRef = toRefs(props)
+    const validators = ref([])
+    const tx = propsRef.step.value.transactions[0]
+    const baseDenom = (tx.data as Actions.RestakeData).amount.denom
+    const chainName = (tx.data as Actions.RestakeData).chain_name
 
-    const totalStaked = (tx.data as Actions.RestakeData).amount.amount;
+    const totalStaked = (tx.data as Actions.RestakeData).amount.amount
 
     onMounted(async () => {
-      validators.value = await getValidatorsByBaseDenom(baseDenom);
-    });
+      validators.value = await getValidatorsByBaseDenom(baseDenom)
+    })
     const getValidatorMoniker = (address) => {
-      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown';
-    };
+      return validators.value.find((x) => x.operator_address == address)?.moniker ?? 'unknown'
+    }
 
     const getValidator = (address) => {
-      return validators.value.find((x) => x.operator_address == address);
-    };
-    const size = props.context === 'default' ? 'md' : 'sm';
+      return validators.value.find((x) => x.operator_address == address)
+    }
+    const size = props.context === 'default' ? 'md' : 'sm'
 
     return {
       store,
@@ -122,8 +122,8 @@ export default defineComponent({
       baseDenom,
       chainName,
       totalStaked,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

@@ -58,45 +58,45 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useStore } from 'vuex';
+import { computed, inject } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
-import useCountry from '@/composables/useCountry';
-import useEmitter from '@/composables/useEmitter';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { featureRunning } from '@/utils/FeatureManager';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
+import useCountry from '@/composables/useCountry'
+import useEmitter from '@/composables/useEmitter'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { featureRunning } from '@/utils/FeatureManager'
 
-import { ProvideViewerKey } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
+import { ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
 
-const { actor, stepId } = inject(ProvideViewerKey);
-const { state, send } = actor;
+const { actor, stepId } = inject(ProvideViewerKey)
+const { state, send } = actor
 
-const emits = defineEmits(['close']);
-const transactionsStore = useTransactionsStore();
-const emitter = useEmitter();
-const store = useStore();
+const emits = defineEmits(['close'])
+const transactionsStore = useTransactionsStore()
+const emitter = useEmitter()
+const store = useStore()
 
-const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn]);
-const action = computed(() => state.value.context.input.action);
-const feeWarning = computed(() => state.value.context.fees.validation);
+const isSignedIn = computed(() => store.getters[GlobalDemerisGetterTypes.USER.isSignedIn])
+const action = computed(() => state.value.context.input.action)
+const feeWarning = computed(() => state.value.context.fees.validation)
 
 const goMoon = () => {
   if (isSignedIn.value) {
-    const userCountry = useCountry();
-    userCountry.includes('America') && featureRunning('SIMPLEX') ? emitter.emit('simplex') : emitter.emit('moonpay');
+    const userCountry = useCountry()
+    userCountry.includes('America') && featureRunning('SIMPLEX') ? emitter.emit('simplex') : emitter.emit('moonpay')
   } else {
-    emitter.emit('toggle-settings-modal');
+    emitter.emit('toggle-settings-modal')
   }
-};
+}
 
 const cancel = () => {
-  transactionsStore.removeTransaction(stepId);
-  emits('close');
-};
-const proceed = () => send('PROCEED_FEE');
+  transactionsStore.removeTransaction(stepId)
+  emits('close')
+}
+const proceed = () => send('PROCEED_FEE')
 </script>

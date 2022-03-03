@@ -22,17 +22,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue';
-import usePool from '@/composables/usePool';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { Pool } from '@/types/actions';
-import { isNative } from '@/utils/basic';
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import OwnLiquidityPrice from '@/components/common/OwnLiquidityPrice.vue'
+import usePool from '@/composables/usePool'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { Pool } from '@/types/actions'
+import { isNative } from '@/utils/basic'
 
-import CurrencyDisplay from '../ui/CurrencyDisplay.vue';
+import CurrencyDisplay from '../ui/CurrencyDisplay.vue'
 
 export default defineComponent({
   name: 'Pool',
@@ -47,34 +47,34 @@ export default defineComponent({
   },
 
   setup(props) {
-    const newPool = JSON.parse(JSON.stringify(props.pool as Pool));
-    const apistore = useStore() as TypedAPIStore;
+    const newPool = JSON.parse(JSON.stringify(props.pool as Pool))
+    const apistore = useStore() as TypedAPIStore
 
-    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id);
-    const truedenoms = ref((newPool as Pool).reserve_coin_denoms);
-    const denoms = ref((newPool as Pool).reserve_coin_denoms);
+    const { pairName, totalLiquidityPrice } = usePool((props.pool as Pool).id)
+    const truedenoms = ref((newPool as Pool).reserve_coin_denoms)
+    const denoms = ref((newPool as Pool).reserve_coin_denoms)
 
     const hasPrices = computed(() => {
-      let baseDenoms = denoms.value;
+      let baseDenoms = denoms.value
       if (!baseDenoms.length) {
-        baseDenoms = props.pool.reserve_coin_denoms;
+        baseDenoms = props.pool.reserve_coin_denoms
       }
 
-      const priceA = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] });
-      const priceB = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] });
+      const priceA = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[0] })
+      const priceB = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: baseDenoms[1] })
 
       if (!priceA || !priceB) {
-        return false;
+        return false
       }
 
-      return true;
-    });
+      return true
+    })
 
     watch(
       () => truedenoms.value,
       async (newDenoms) => {
         if (isNative(newDenoms[0])) {
-          denoms.value[0] = newDenoms[0];
+          denoms.value[0] = newDenoms[0]
         } else {
           try {
             const verifyTrace =
@@ -92,14 +92,14 @@ export default defineComponent({
                   },
                 },
                 { root: true },
-              ));
-            denoms.value[0] = verifyTrace.base_denom;
+              ))
+            denoms.value[0] = verifyTrace.base_denom
           } catch (e) {
-            denoms.value[0] = newDenoms[0];
+            denoms.value[0] = newDenoms[0]
           }
         }
         if (isNative(newDenoms[1])) {
-          denoms.value[1] = newDenoms[1];
+          denoms.value[1] = newDenoms[1]
         } else {
           try {
             const verifyTrace =
@@ -117,19 +117,19 @@ export default defineComponent({
                   },
                 },
                 { root: true },
-              ));
-            denoms.value[1] = verifyTrace.base_denom;
+              ))
+            denoms.value[1] = verifyTrace.base_denom
           } catch (e) {
-            denoms.value[1] = newDenoms[1];
+            denoms.value[1] = newDenoms[1]
           }
         }
       },
       { immediate: true },
-    );
+    )
 
-    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice };
+    return { hasPrices, denoms, truedenoms, pairName, totalLiquidityPrice }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

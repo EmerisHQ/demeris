@@ -26,11 +26,11 @@
   </button>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
-import useButton from '@/composables/useButton.vue';
-import { ButtonFunctionData } from '@/types/setups';
+import Icon from '@/components/ui/Icon.vue'
+import useButton from '@/composables/useButton.vue'
+import { ButtonFunctionData } from '@/types/setups'
 
 export default defineComponent({
   name: 'IconButton',
@@ -42,7 +42,7 @@ export default defineComponent({
     type: {
       type: String,
       default: () => {
-        return '';
+        return ''
       },
     },
     status: { type: String, required: true },
@@ -51,15 +51,15 @@ export default defineComponent({
   emits: ['click'],
   // eslint-disable-next-line
   setup(props: any, { emit }) {
-    const { buttonFunction } = useButton();
+    const { buttonFunction } = useButton()
     const buttonName = computed(() => {
-      return props.name;
-    });
+      return props.name
+    })
 
-    let isIcon = true;
+    let isIcon = true
 
     if (!props.name.includes('Icon')) {
-      isIcon = false;
+      isIcon = false
     }
 
     function clickFunction() {
@@ -67,15 +67,15 @@ export default defineComponent({
         buttonFunction({
           type: props.data.type,
           function: props.data.function,
-        });
+        })
       }
 
-      emit('click');
+      emit('click')
     }
 
-    return { isIcon, buttonName, clickFunction };
+    return { isIcon, buttonName, clickFunction }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .icon-button {

@@ -34,16 +34,16 @@
 </template>
 
 <script lang="ts">
-import MD5 from 'crypto-js/md5';
-import avatar from 'gradient-avatar';
-import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import MD5 from 'crypto-js/md5'
+import avatar from 'gradient-avatar'
+import { computed, defineComponent } from 'vue'
+import { useStore } from 'vuex'
 
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import TotalPrice from '@/components/common/TotalPrice.vue';
-import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { featureRunning } from '@/utils/FeatureManager';
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import TotalPrice from '@/components/common/TotalPrice.vue'
+import useAccount from '@/composables/useAccount'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { featureRunning } from '@/utils/FeatureManager'
 
 export default defineComponent({
   name: 'AvatarBalance',
@@ -57,45 +57,45 @@ export default defineComponent({
   },
 
   setup() {
-    const store = useStore();
+    const store = useStore()
 
-    const { balances } = useAccount();
+    const { balances } = useAccount()
 
     const keplrAccountName = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAccountName];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAccountName]
+    })
     const keplrAddress = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAddress];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.getKeplrAddress]
+    })
     const isPriceApiAvailable = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false;
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getPrices].Fiats.length > 0 ? true : false
+    })
 
     const initialLoadComplete = computed(() => {
       if (featureRunning('REQUEST_PARALLELIZATION')) {
-        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad]
       } else {
-        return true;
+        return true
       }
-    });
+    })
     return {
       balances,
       keplrAddress,
       initialLoadComplete,
       keplrAccountName,
       isPriceApiAvailable,
-    };
+    }
   },
   methods: {
     getAvatar: function (name: string): string {
       if (name == 'Demo Account') {
-        return '<svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.5" filter="url(#filter0_f)"> <circle cx="29" cy="29" r="16" fill="#D5BC83"/> <circle cx="29" cy="29" r="16" fill="url(#paint0_angular)"/> </g> <circle cx="29" cy="25" r="16" fill="#D5BC83"/> <circle cx="29" cy="25" r="16" fill="url(#paint1_angular)"/> <defs> <filter id="filter0_f" x="0.2" y="0.2" width="57.6" height="57.6" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"> <feFlood flood-opacity="0" result="BackgroundImageFix"/> <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/> <feGaussianBlur stdDeviation="6.4" result="effect1_foregroundBlur"/> </filter> <radialGradient id="paint0_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 29) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> <radialGradient id="paint1_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 25) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> </defs> </svg> ';
+        return '<svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="0.5" filter="url(#filter0_f)"> <circle cx="29" cy="29" r="16" fill="#D5BC83"/> <circle cx="29" cy="29" r="16" fill="url(#paint0_angular)"/> </g> <circle cx="29" cy="25" r="16" fill="#D5BC83"/> <circle cx="29" cy="25" r="16" fill="url(#paint1_angular)"/> <defs> <filter id="filter0_f" x="0.2" y="0.2" width="57.6" height="57.6" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"> <feFlood flood-opacity="0" result="BackgroundImageFix"/> <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/> <feGaussianBlur stdDeviation="6.4" result="effect1_foregroundBlur"/> </filter> <radialGradient id="paint0_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 29) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> <radialGradient id="paint1_angular" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(29 25) rotate(90) scale(16)"> <stop offset="0.00013659" stop-color="#FFF1C3"/> <stop offset="0.2068" stop-color="#9B7C3A"/> <stop offset="0.321793" stop-color="#FFF0CA"/> <stop offset="0.399828" stop-color="#D3AD5F"/> <stop offset="0.490214" stop-color="#FFECC4"/> <stop offset="0.646492" stop-color="#997736"/> <stop offset="0.791185" stop-color="#FFF2C0"/> <stop offset="0.885516" stop-color="#CEA851"/> </radialGradient> </defs> </svg> '
       } else {
-        return avatar(MD5(name) + '', 64);
+        return avatar(MD5(name) + '', 64)
       }
     },
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

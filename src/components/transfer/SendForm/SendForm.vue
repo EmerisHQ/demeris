@@ -29,14 +29,14 @@
           action="transfer"
           @pending="
             () => {
-              closeModal();
-              resetHandler();
+              closeModal()
+              resetHandler()
             }
           "
           @close="
             () => {
-              closeModal();
-              resetHandler();
+              closeModal()
+              resetHandler()
             }
           "
           @previous="$emit('previous')"
@@ -47,25 +47,25 @@
 </template>
 
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, PropType, provide, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
-import TxStepsModal from '@/components/common/TxStepsModal.vue';
-import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { SendAddressForm, TransferAction } from '@/types/actions';
-import { Balances } from '@/types/api';
-import { actionHandler, getBaseDenom } from '@/utils/actionHandler';
-import { event } from '@/utils/analytics';
-import { getChainFromRecipient } from '@/utils/basic';
+import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue'
+import TxStepsModal from '@/components/common/TxStepsModal.vue'
+import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { SendAddressForm, TransferAction } from '@/types/actions'
+import { Balances } from '@/types/api'
+import { actionHandler, getBaseDenom } from '@/utils/actionHandler'
+import { event } from '@/utils/analytics'
+import { getChainFromRecipient } from '@/utils/basic'
 
-import SendFormAmount from './SendFormAmount.vue';
-import SendFormRecipient from './SendFormRecipient.vue';
+import SendFormAmount from './SendFormAmount.vue'
+import SendFormRecipient from './SendFormRecipient.vue'
 
-type Step = 'recipient' | 'amount' | 'review' | 'send';
+type Step = 'recipient' | 'amount' | 'review' | 'send'
 
 export default defineComponent({
   name: 'SendForm',
@@ -92,9 +92,9 @@ export default defineComponent({
   emits: ['update:step', 'previous'],
 
   setup(props, { emit }) {
-    const steps = ref([]);
-    const store = useStore();
-    const router = useRouter();
+    const steps = ref([])
+    const store = useStore()
+    const router = useRouter()
 
     const form: SendAddressForm = reactive({
       recipient: '',
@@ -105,20 +105,20 @@ export default defineComponent({
         amount: '',
       },
       isTermChecked: false,
-    });
+    })
 
     const state = reactive({
       fees: {},
-    });
+    })
 
     const step = computed({
       get: () => props.step,
       set: (value) => emit('update:step', value),
-    });
+    })
 
     const closeModal = () => {
-      router.push('/');
-    };
+      router.push('/')
+    }
 
     watch(
       () => [form.balance.amount, form.balance.denom, form.chain_name],
@@ -127,7 +127,7 @@ export default defineComponent({
           const precision =
             store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: await getBaseDenom(form.balance.denom, form.chain_name),
-            }) || 6;
+            }) || 6
           const action: TransferAction = {
             name: form.memo && form.memo != '' ? 'memo-transfer' : 'transfer',
             memo: form.memo,
@@ -144,42 +144,42 @@ export default defineComponent({
                 address: form.recipient,
               },
             },
-          };
-          steps.value = await actionHandler(action);
+          }
+          steps.value = await actionHandler(action)
         }
       },
-    );
+    )
     const goToReview = async () => {
-      event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' });
-      goToStep('review');
-    };
+      event('review_tx', { event_label: 'Reviewing send tx', event_category: 'transactions' })
+      goToStep('review')
+    }
 
     const resetHandler = () => {
-      form.recipient = '';
-      form.chain_name = '';
-      form.memo = '';
+      form.recipient = ''
+      form.chain_name = ''
+      form.memo = ''
       form.balance = {
         denom: '',
         amount: undefined,
-      };
-      form.isTermChecked = false;
-      steps.value = [];
+      }
+      form.isTermChecked = false
+      steps.value = []
 
-      goToStep('recipient');
-    };
+      goToStep('recipient')
+    }
     const goToStep = (value: Step) => {
-      step.value = value;
-    };
-
-    if (!props.step) {
-      step.value = 'recipient';
+      step.value = value
     }
 
-    provide('transferForm', form);
+    if (!props.step) {
+      step.value = 'recipient'
+    }
 
-    return { steps, form, goToStep, goToReview, resetHandler, state, closeModal };
+    provide('transferForm', form)
+
+    return { steps, form, goToStep, goToReview, resetHandler, state, closeModal }
   },
-});
+})
 </script>
 
 <style lang="scss"></style>

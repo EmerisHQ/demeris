@@ -21,24 +21,24 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { useCookie } from 'vue-cookie-next';
+import { defineComponent, ref } from 'vue'
+import { useCookie } from 'vue-cookie-next'
 
-import Button from '@/components/ui/Button.vue';
+import Button from '@/components/ui/Button.vue'
 
 export default defineComponent({
   name: 'CookieConsent',
   components: { Button },
   setup() {
-    const { setCookie, getCookie } = useCookie();
-    const consented = ref(getCookie('cookie-consent-accepted'));
+    const { setCookie, getCookie } = useCookie()
+    const consented = ref(getCookie('cookie-consent-accepted'))
     const acceptCookies = () => {
-      setCookie('cookie-consent-accepted', 'true', { domain: '.emeris.com' });
-      consented.value = 'true';
-    };
-    return { consented, acceptCookies };
+      setCookie('cookie-consent-accepted', 'true', { domain: '.emeris.com' })
+      consented.value = 'true'
+    }
+    return { consented, acceptCookies }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

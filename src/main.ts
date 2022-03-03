@@ -1,25 +1,25 @@
-import './assets/scss/index.scss';
-import 'tippy.js/dist/tippy.css';
+import './assets/scss/index.scss'
+import 'tippy.js/dist/tippy.css'
 
-import { BrowserTracing } from '@sentry/tracing';
-import * as Sentry from '@sentry/vue';
-import vueLib from '@starport/vue';
-import mitt from 'mitt';
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import { VueCookieNext } from 'vue-cookie-next';
-import VueGtag from 'vue-gtag';
-import { createI18n } from 'vue-i18n';
-import { createMetaManager } from 'vue-meta';
-import VueTippy from 'vue-tippy';
-import VueApexCharts from 'vue3-apexcharts';
+import { BrowserTracing } from '@sentry/tracing'
+import * as Sentry from '@sentry/vue'
+import vueLib from '@starport/vue'
+import mitt from 'mitt'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
+import { VueCookieNext } from 'vue-cookie-next'
+import VueGtag from 'vue-gtag'
+import { createI18n } from 'vue-i18n'
+import { createMetaManager } from 'vue-meta'
+import VueTippy from 'vue-tippy'
+import VueApexCharts from 'vue3-apexcharts'
 
-import { messages } from '@/locales/en';
+import { messages } from '@/locales/en'
 
-import App from './App.vue';
-import router from './router';
-import { store } from './store/setup';
-import { featureRunning } from './utils/FeatureManager';
+import App from './App.vue'
+import router from './router'
+import { store } from './store/setup'
+import { featureRunning } from './utils/FeatureManager'
 
 const i18n = createI18n({
   globalInjection: true,
@@ -36,14 +36,14 @@ const i18n = createI18n({
       },
     },
   },
-});
-const emitter = mitt();
+})
+const emitter = mitt()
 
-const app = createApp(App);
+const app = createApp(App)
 
-app.config.globalProperties.emitter = emitter;
-app.config.globalProperties._depsLoaded = true;
-app.use(VueApexCharts);
+app.config.globalProperties.emitter = emitter
+app.config.globalProperties._depsLoaded = true
+app.use(VueApexCharts)
 
 if (featureRunning('SENTRY')) {
   Sentry.init({
@@ -59,7 +59,7 @@ if (featureRunning('SENTRY')) {
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: parseFloat(process.env.VUE_APP_SENTRY_TRACES_SAMPLE_RATE),
-  });
+  })
 }
 
 app
@@ -80,6 +80,6 @@ app
       },
     },
   })
-  .mount('#app');
+  .mount('#app')
 
-VueCookieNext.config({ expire: '180d', domain: '.emeris.com' });
+VueCookieNext.config({ expire: '180d', domain: '.emeris.com' })

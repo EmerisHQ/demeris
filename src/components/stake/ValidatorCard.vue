@@ -39,12 +39,12 @@
   </section>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from 'vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue'
 
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import Button from '@/components/ui/Button.vue';
-import List from '@/components/ui/List/List.vue';
-import ListItem from '@/components/ui/List/ListItem.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import Button from '@/components/ui/Button.vue'
+import List from '@/components/ui/List/List.vue'
+import ListItem from '@/components/ui/List/ListItem.vue'
 
 export default defineComponent({
   name: 'ValidatorCard',
@@ -54,7 +54,7 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
     disabled: {
@@ -66,34 +66,34 @@ export default defineComponent({
   },
   emits: ['close', 'clicked'],
   setup(props, { emit }) {
-    const propsRef = toRefs(props);
+    const propsRef = toRefs(props)
     const toPerc = (val) => {
-      return Math.trunc(parseFloat(val) * 10000) / 100 + '%';
-    };
+      return Math.trunc(parseFloat(val) * 10000) / 100 + '%'
+    }
     const commission = computed(() => {
-      return toPerc(propsRef.validator.value.commission_rate);
-    });
+      return toPerc(propsRef.validator.value.commission_rate)
+    })
     const maxCommission = computed(() => {
-      return toPerc(propsRef.validator.value.max_rate);
-    });
+      return toPerc(propsRef.validator.value.max_rate)
+    })
     const maxChange = computed(() => {
-      return toPerc(propsRef.validator.value.max_change_rate);
-    });
+      return toPerc(propsRef.validator.value.max_change_rate)
+    })
     const close = () => {
-      emit('close');
-    };
+      emit('close')
+    }
     const clicked = () => {
-      emit('clicked');
-    };
+      emit('clicked')
+    }
     return {
       close,
       clicked,
       commission,
       maxCommission,
       maxChange,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

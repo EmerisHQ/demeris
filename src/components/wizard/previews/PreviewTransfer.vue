@@ -102,19 +102,19 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Address from '@/components/ui/Address.vue';
-import { List, ListItem } from '@/components/ui/List';
-import { GlobalDemerisGetterTypes } from '@/store';
-import * as Actions from '@/types/actions';
-import * as Base from '@/types/base';
-import { getBaseDenom } from '@/utils/actionHandler';
-import { getOwnAddress } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Address from '@/components/ui/Address.vue'
+import { List, ListItem } from '@/components/ui/List'
+import { GlobalDemerisGetterTypes } from '@/store'
+import * as Actions from '@/types/actions'
+import * as Base from '@/types/base'
+import { getBaseDenom } from '@/utils/actionHandler'
+import { getOwnAddress } from '@/utils/basic'
 
 export default defineComponent({
   name: 'PreviewTransfer',
@@ -157,65 +157,65 @@ export default defineComponent({
   },
 
   setup(props) {
-    const store = useStore();
-    const denomName = ref('-');
+    const store = useStore()
+    const denomName = ref('-')
 
-    const gasPriceLevel = computed(() => store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
+    const gasPriceLevel = computed(() => store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel])
 
     const currentStep = computed(() => {
-      return props.response || props.step;
-    });
-    const displayFrom = ref('-');
-    const displayTo = ref('-');
+      return props.response || props.step
+    })
+    const displayFrom = ref('-')
+    const displayTo = ref('-')
     const stepType = computed(() => {
-      const description = currentStep.value.description;
+      const description = currentStep.value.description
       const descriptionKeyMap = {
         'Assets Must be transferred to hub first': 'transfer-to-hub',
         'AssetA must be transferred to hub': 'transfer-to-hub',
         'AssetB must be transferred to hub': 'transfer-to-hub',
         'Assets Moved': 'move',
         'Assets Transferred': 'transfer',
-      };
+      }
 
-      return descriptionKeyMap[description] || 'transfer';
-    });
+      return descriptionKeyMap[description] || 'transfer'
+    })
 
     const hasMultipleTransactions = computed(() => {
-      return currentStep.value.transactions.length > 1;
-    });
+      return currentStep.value.transactions.length > 1
+    })
     const includedFees = computed(() => {
-      const included = [];
-      const transactions = (props.step as Actions.Step).transactions;
+      const included = []
+      const transactions = (props.step as Actions.Step).transactions
       for (const tx of transactions) {
         if (tx.addFee) {
-          included.push(tx.feeToAdd[0].denom);
+          included.push(tx.feeToAdd[0].denom)
         }
       }
-      return included;
-    });
+      return included
+    })
     const transactionInfo = computed(() => {
-      const transactions = currentStep.value.transactions;
-      const firstTransaction = transactions[0] as Record<string, any>;
+      const transactions = currentStep.value.transactions
+      const firstTransaction = transactions[0] as Record<string, any>
       const [lastTransaction] = (transactions.length > 1 ? transactions.slice(-1) : transactions) as Record<
         string,
         any
-      >[];
+      >[]
 
-      const isIBC = ['ibc_forward', 'ibc_backward'].includes(firstTransaction.name);
-      let fromAmount = firstTransaction.data.amount.amount;
+      const isIBC = ['ibc_forward', 'ibc_backward'].includes(firstTransaction.name)
+      let fromAmount = firstTransaction.data.amount.amount
       if (firstTransaction.addFee) {
         fromAmount = (
           parseInt(fromAmount) +
           parseFloat(firstTransaction.feeToAdd[0].amount[gasPriceLevel.value]) *
             store.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
-        ).toString();
+        ).toString()
       }
       const from = {
         address: '',
         amount: fromAmount,
         chain: firstTransaction.data.from_chain || firstTransaction.data.chain_name,
         denom: (firstTransaction.data.amount as Base.Amount).denom,
-      };
+      }
 
       const to = {
         amount: firstTransaction.data.amount.amount,
@@ -225,7 +225,7 @@ export default defineComponent({
           lastTransaction.data.destination_chain_name ||
           lastTransaction.data.chain_name,
         denom: (lastTransaction.data.amount as Base.Amount).denom,
-      };
+      }
 
       //from.address = store.getters['demerisAPI/getOwnAddress']({ chain_name: from.chain });
 
@@ -233,46 +233,46 @@ export default defineComponent({
         isIBC,
         from,
         to,
-      };
-    });
+      }
+    })
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
-      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
+      const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name })
       // @ts-ignore
-      return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`;
-    };
+      return `Fee ${getName(transaction.data.from_chain)} -> ${getName(transaction.data.to_chain)}`
+    }
 
     const formatChain = (name: string) => {
-      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
-    };
+      return 'Fees on ' + store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name })
+    }
 
     const truncateAddress = (address: string) => {
       return `${address.substring(0, address.indexOf('1') + 6)}…${address.substring(
         address.length - 3,
         address.length,
-      )}`;
-    };
+      )}`
+    }
 
     watch(
       transactionInfo,
       async (detail) => {
         if (!detail.from.address) {
-          displayFrom.value = await getOwnAddress({ chain_name: detail.from.chain });
+          displayFrom.value = await getOwnAddress({ chain_name: detail.from.chain })
         }
         if (detail.to.chain && detail.to.address) {
-          displayTo.value = detail.to.address;
+          displayTo.value = detail.to.address
         }
         if (detail.to.chain && !detail.to.address) {
-          displayTo.value = await getOwnAddress({ chain_name: detail.to.chain });
+          displayTo.value = await getOwnAddress({ chain_name: detail.to.chain })
         }
         if (detail.isIBC) {
-          denomName.value = await getBaseDenom(detail.from.denom, detail.from.chain);
+          denomName.value = await getBaseDenom(detail.from.denom, detail.from.chain)
         } else {
-          denomName.value = detail.from.denom;
+          denomName.value = detail.from.denom
         }
       },
       { immediate: true },
-    );
+    )
 
     return {
       denomName,
@@ -286,9 +286,9 @@ export default defineComponent({
       includedFees,
       displayFrom,
       displayTo,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

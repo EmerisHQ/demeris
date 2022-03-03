@@ -40,18 +40,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
+import { computed, defineComponent, PropType, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import TransferImage from '@/assets/images/transfer-interstitial.png';
-import TransferSwapImage from '@/assets/images/transfer-interstitial-swap.png';
-import Button from '@/components/ui/Button.vue';
-import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { TypedAPIStore } from '@/store';
-import { BaseAction, IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions';
-import { getBaseDenom, getDisplayName } from '@/utils/actionHandler';
+import TransferImage from '@/assets/images/transfer-interstitial.png'
+import TransferSwapImage from '@/assets/images/transfer-interstitial-swap.png'
+import Button from '@/components/ui/Button.vue'
+import useAccount from '@/composables/useAccount'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { TypedAPIStore } from '@/store'
+import { BaseAction, IBCBackwardsData, IBCForwardsData, Step, TransferData } from '@/types/actions'
+import { getBaseDenom, getDisplayName } from '@/utils/actionHandler'
 
 export default defineComponent({
   components: {
@@ -75,77 +75,77 @@ export default defineComponent({
   emits: ['continue'],
 
   setup(props, { emit }) {
-    const apistore = useStore() as TypedAPIStore;
-    const { nativeBalances } = useAccount();
-    const { t } = useI18n({ useScope: 'global' });
-    const denoms = ref([]);
-    const chains = ref([]);
+    const apistore = useStore() as TypedAPIStore
+    const { nativeBalances } = useAccount()
+    const { t } = useI18n({ useScope: 'global' })
+    const denoms = ref([])
+    const chains = ref([])
 
-    const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage));
+    const imageBanner = computed(() => (props.isSwapComponent ? TransferSwapImage : TransferImage))
 
     const currentAction = computed(() => {
       if (props.action === 'move') {
-        return 'transfer';
+        return 'transfer'
       }
-      return props.action;
-    });
+      return props.action
+    })
 
     const hasMultiple = computed(() => {
       if (currentAction.value === 'addliquidity') {
-        return props.steps.length > 2;
+        return props.steps.length > 2
       }
 
-      return props.steps.length > 1;
-    });
+      return props.steps.length > 1
+    })
 
     const title = computed(() => {
-      let result = '';
+      let result = ''
 
       switch (currentAction.value) {
         case 'transfer':
-          result = t('components.transferToHub.transfer');
-          break;
+          result = t('components.transferToHub.transfer')
+          break
         case 'addliquidity':
-          result = t('components.transferToHub.addLiquidity');
-          break;
+          result = t('components.transferToHub.addLiquidity')
+          break
         case 'swap':
-          result = t('components.transferToHub.swap');
-          break;
+          result = t('components.transferToHub.swap')
+          break
         case 'stake':
         case 'multistake':
-          result = t('components.transferToHub.stake', { denom: denoms.value[0], chain: chains.value[0] });
-          break;
+          result = t('components.transferToHub.stake', { denom: denoms.value[0], chain: chains.value[0] })
+          break
       }
 
-      return result;
-    });
+      return result
+    })
 
     const subtitle = computed(() => {
-      let result = '';
+      let result = ''
 
       if (currentAction.value === 'transfer') {
-        const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
+        const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData
         let fromChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
           name: backwardData.from_chain,
-        });
-        let toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: backwardData.to_chain });
+        })
+        let toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: backwardData.to_chain })
 
         if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
-          const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
-          toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain });
+          const forwardData = props.steps[0].transactions[1].data as IBCForwardsData
+          toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name: forwardData.to_chain })
         }
 
-        return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain });
+        return t('components.transferToHub.transferSubtitle', { from: fromChain, to: toChain })
       }
 
-      return result;
-    });
+      return result
+    })
 
     const description = computed(() => {
-      let description = '';
+      let description = ''
 
       if (!denoms.value.length) {
-        return description;
+        return description
       }
 
       switch (currentAction.value) {
@@ -154,97 +154,94 @@ export default defineComponent({
             description = t('components.transferToHub.addLiquidityDescriptionMultiple', {
               denomA: denoms.value[0],
               denomB: denoms.value[1],
-            });
+            })
           } else {
-            description = t('components.transferToHub.addLiquidityDescription', { denom: denoms.value[0] });
+            description = t('components.transferToHub.addLiquidityDescription', { denom: denoms.value[0] })
           }
-          break;
+          break
         case 'swap':
-          description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] });
-          break;
+          description = t('components.transferToHub.swapDescription', { denom: denoms.value[0] })
+          break
         case 'stake':
         case 'multistake':
           description = t('components.transferToHub.stakeDescription', {
             denom: denoms.value[0],
             chain: chains.value[0],
-          });
-          break;
+          })
+          break
         case 'transfer':
           if (props.steps[0].transactions.length > 1 && props.steps[0].transactions[1].name.startsWith('ibc')) {
-            const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData;
-            const forwardData = props.steps[0].transactions[1].data as IBCForwardsData;
+            const backwardData = props.steps[0].transactions[0].data as IBCBackwardsData
+            const forwardData = props.steps[0].transactions[1].data as IBCForwardsData
 
             const fromChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
               name: backwardData.from_chain,
-            });
+            })
             const toChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
               name: forwardData.to_chain,
-            });
-            const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom);
+            })
+            const asset = nativeBalances.value.find((item) => item.base_denom === backwardData.base_denom)
             const nativeChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
               name: asset.on_chain,
-            });
+            })
 
             const translateKeyPath =
-              props.steps[0].transactions.length > 2
-                ? 'transferDescriptionMultipleMemo'
-                : 'transferDescriptionMultiple';
+              props.steps[0].transactions.length > 2 ? 'transferDescriptionMultipleMemo' : 'transferDescriptionMultiple'
 
             description = t(`components.transferToHub.${translateKeyPath}`, {
               denom: denoms.value[0],
               fromChain,
               toChain,
               nativeChain,
-            });
+            })
           } else {
-            description = t('components.transferToHub.transferDescription');
+            description = t('components.transferToHub.transferDescription')
           }
-          break;
+          break
       }
 
-      return description;
-    });
+      return description
+    })
 
     const emitContinue = () => {
-      emit('continue');
-    };
+      emit('continue')
+    }
 
     watch(
       props.steps,
       async () => {
-        let stepDenoms = [];
-        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+        let stepDenoms = []
+        const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]
 
         stepDenoms = props.steps
           .map((step) => {
-            const transaction = step.transactions[0];
+            const transaction = step.transactions[0]
             if (!transaction.name.startsWith('ibc')) {
-              return;
+              return
             }
-            const chain = (transaction.data as IBCForwardsData).from_chain || dexChain;
-            const tochain = (transaction.data as IBCForwardsData).to_chain || dexChain;
+            const chain = (transaction.data as IBCForwardsData).from_chain || dexChain
+            const tochain = (transaction.data as IBCForwardsData).to_chain || dexChain
 
-            const denom = (transaction.data as TransferData).amount.denom;
-            return { chain, denom, tochain };
+            const denom = (transaction.data as TransferData).amount.denom
+            return { chain, denom, tochain }
           })
-          .filter(Boolean);
-
-        (chains.value = stepDenoms.map((item) => {
+          .filter(Boolean)
+        ;(chains.value = stepDenoms.map((item) => {
           const displayChain = apistore.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({
             name: item.tochain,
-          });
-          return displayChain;
+          })
+          return displayChain
         })),
           (denoms.value = await Promise.all(
             stepDenoms.map(async (item) => {
-              const denom = await getBaseDenom(item.denom, item.chain);
-              const displayDenom = await getDisplayName(denom, item.chain);
-              return displayDenom;
+              const denom = await getBaseDenom(item.denom, item.chain)
+              const displayDenom = await getDisplayName(denom, item.chain)
+              return displayDenom
             }),
-          ));
+          ))
       },
       { immediate: true },
-    );
+    )
 
     return {
       imageBanner,
@@ -253,9 +250,9 @@ export default defineComponent({
       subtitle,
       description,
       emitContinue,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

@@ -46,11 +46,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
-import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
-import Modal from '@/components/ui/Modal.vue';
+import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue'
+import InformationIcon from '@/components/common/Icons/InformationIcon.vue'
+import Modal from '@/components/ui/Modal.vue'
 
 export default defineComponent({
   name: 'AirdropClaimModal',
@@ -70,11 +70,11 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const closeClaimModal = () => {
-      emit('close');
-    };
+      emit('close')
+    }
     return {
       closeClaimModal,
-    };
+    }
   },
-});
+})
 </script>

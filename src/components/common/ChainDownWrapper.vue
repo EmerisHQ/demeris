@@ -23,12 +23,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/runtime-core';
-import { useStore } from 'vuex';
+import { computed, defineComponent } from '@vue/runtime-core'
+import { useStore } from 'vuex'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
+import ChainName from '@/components/common/ChainName.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
 
 export default defineComponent({
   components: {
@@ -37,16 +37,16 @@ export default defineComponent({
   },
 
   setup() {
-    const apistore = useStore() as TypedAPIStore;
+    const apistore = useStore() as TypedAPIStore
 
-    const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
+    const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain]
 
     const isHubDown = computed(() => {
-      const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: dexChain });
-      return status === false;
-    });
+      const status = apistore.getters[GlobalDemerisGetterTypes.API.getChainStatus]({ chain_name: dexChain })
+      return status === false
+    })
 
-    return { dexChain, isHubDown };
+    return { dexChain, isHubDown }
   },
-});
+})
 </script>

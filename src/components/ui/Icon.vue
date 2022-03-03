@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, shallowRef } from 'vue';
+import { defineComponent, ref, shallowRef } from 'vue'
 
 export default defineComponent({
   name: 'Icon',
@@ -23,17 +23,17 @@ export default defineComponent({
   },
 
   setup(props) {
-    const currentIcon = shallowRef('');
-    const isReady = ref(false);
+    const currentIcon = shallowRef('')
+    const isReady = ref(false)
     import(`@/components/common/Icons/${props.name}.vue`).then((val) => {
-      currentIcon.value = val.default;
-      isReady.value = true;
-    });
+      currentIcon.value = val.default
+      isReady.value = true
+    })
 
     return {
       currentIcon,
       isReady,
-    };
+    }
   },
-});
+})
 </script>

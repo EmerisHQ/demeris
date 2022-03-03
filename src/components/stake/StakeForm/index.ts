@@ -1,3 +1,3 @@
-import StakeForm from './StakeForm.vue';
+import StakeForm from './StakeForm.vue'
 
-export default StakeForm;
+export default StakeForm

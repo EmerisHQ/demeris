@@ -60,98 +60,98 @@
 </template>
 
 <script lang="ts">
-import { reactive, toRefs } from '@vue/reactivity';
-import { computed, watch } from '@vue/runtime-core';
-import orderBy from 'lodash.orderby';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
+import { reactive, toRefs } from '@vue/reactivity'
+import { computed, watch } from '@vue/runtime-core'
+import orderBy from 'lodash.orderby'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
 
-import ChainName from '@/components/common/ChainName.vue';
-import Denom from '@/components/common/Denom.vue';
-import DenomSelectModal from '@/components/common/DenomSelectModal.vue';
-import QrCode from '@/components/common/QrCode.vue';
-import Address from '@/components/ui/Address.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import symbolsData from '@/data/symbols';
-import { Balance } from '@/types/api';
-import { pageview } from '@/utils/analytics';
-import { getOwnAddress, hexToRGB } from '@/utils/basic';
+import ChainName from '@/components/common/ChainName.vue'
+import Denom from '@/components/common/Denom.vue'
+import DenomSelectModal from '@/components/common/DenomSelectModal.vue'
+import QrCode from '@/components/common/QrCode.vue'
+import Address from '@/components/ui/Address.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import symbolsData from '@/data/symbols'
+import { Balance } from '@/types/api'
+import { pageview } from '@/utils/analytics'
+import { getOwnAddress, hexToRGB } from '@/utils/basic'
 
 const defaultColors = {
   primary: '#fffd38',
   secondary: '#30ffdf',
   tertiary: '#64dafb',
-};
+}
 
 export default {
   name: 'Receive',
   components: { Address, Button, ChainName, Denom, Icon, DenomSelectModal, QrCode },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Receive assets', page_path: '/receive' });
+    const { t } = useI18n({ useScope: 'global' })
+    pageview({ page_title: 'Receive assets', page_path: '/receive' })
     useMeta(
       computed(() => ({
         title: t('navbar.receive'),
       })),
-    );
+    )
 
-    const { nativeBalances } = useAccount();
+    const { nativeBalances } = useAccount()
 
     const assetsList = computed(() => {
-      return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1));
-    });
+      return orderBy(nativeBalances.value, (item) => (item.base_denom.startsWith('pool') ? 1 : -1))
+    })
 
     const state = reactive({
       selectedAsset: undefined,
       recipientAddress: undefined,
-    });
+    })
 
     const generateBackground = (colors: Record<string, string>) => {
-      const hexArray = Object.values(colors).reverse();
-      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%'];
-      const colorStops = [];
+      const hexArray = Object.values(colors).reverse()
+      const positions = hexArray.length > 2 ? ['0%', '49%', '82%'] : ['0%', '82%']
+      const colorStops = []
 
       for (const [index, hex] of Object.entries(hexArray)) {
-        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`);
+        colorStops.push(`rgb(${hexToRGB(hex)}) ${positions[index]}`)
       }
 
       return `radial-gradient(
 					ellipse farthest-corner at 16.67% 16.67%,
 					${colorStops.join(',')}
-				)`;
-    };
+				)`
+    }
 
     const gradientStyle = computed(() => {
-      const colors = symbolsData[state.selectedAsset?.base_denom]?.colors;
+      const colors = symbolsData[state.selectedAsset?.base_denom]?.colors
       return {
         background: generateBackground(colors || defaultColors),
         color: colors ? '#ffffff' : '#000000',
-      };
-    });
+      }
+    })
 
     const goBack = () => {
-      state.selectedAsset = undefined;
-    };
+      state.selectedAsset = undefined
+    }
 
     const assetSelectHandler = (asset: Balance) => {
-      state.selectedAsset = asset;
-    };
+      state.selectedAsset = asset
+    }
 
-    const { selectedAsset, recipientAddress } = toRefs(state);
+    const { selectedAsset, recipientAddress } = toRefs(state)
     watch(selectedAsset, async (value) => {
       if (value) {
-        state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain });
+        state.recipientAddress = await getOwnAddress({ chain_name: state.selectedAsset.on_chain })
       } else {
-        state.recipientAddress = undefined;
+        state.recipientAddress = undefined
       }
-    });
+    })
 
-    return { balances: assetsList, gradientStyle, state, recipientAddress, goBack, assetSelectHandler };
+    return { balances: assetsList, gradientStyle, state, recipientAddress, goBack, assetSelectHandler }
   },
-};
+}
 </script>
 
 <style lang="scss">

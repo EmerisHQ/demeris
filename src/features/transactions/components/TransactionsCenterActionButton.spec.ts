@@ -1,6 +1,6 @@
-import { mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils'
 
-import TransactionsCenterActionButton from './TransactionsCenterActionButton.vue';
+import TransactionsCenterActionButton from './TransactionsCenterActionButton.vue'
 
 test('should render', () => {
   const wrapper = mount(TransactionsCenterActionButton, {
@@ -13,6 +13,6 @@ test('should render', () => {
         },
       },
     },
-  });
-  expect(wrapper.html()).toBeTruthy();
-});
+  })
+  expect(wrapper.html()).toBeTruthy()
+})

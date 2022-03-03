@@ -1,39 +1,39 @@
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { Denom } from '@/types/api';
-import { AmountWithMeta } from '@/types/base';
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
+import { Denom } from '@/types/api'
+import { AmountWithMeta } from '@/types/base'
 
-import { useStore } from './useStore';
+import { useStore } from './useStore'
 
 export async function addChain(chain_name: string): Promise<void> {
-  const apistore = useStore() as TypedAPIStore;
+  const apistore = useStore() as TypedAPIStore
   const chain = apistore.getters[GlobalDemerisGetterTypes.API.getChain]({
     chain_name,
-  }) as ChainData;
-  let rpc;
-  let rest;
+  }) as ChainData
+  let rpc
+  let rest
   if (chain.chain_name == 'terra') {
-    rpc = 'https://rpc-columbus.keplr.app';
-    rest = 'https://lcd-columbus.keplr.app';
+    rpc = 'https://rpc-columbus.keplr.app'
+    rest = 'https://lcd-columbus.keplr.app'
   } else if (chain.chain_name == 'microtick') {
-    rpc = 'https://microtick.chorus.one';
-    rest = 'https://microtick-lcd.chorus.one';
+    rpc = 'https://microtick.chorus.one'
+    rest = 'https://microtick-lcd.chorus.one'
   } else if (chain.chain_name == 'bitcanna') {
-    rpc = 'https://rpc.bitcanna.io';
-    rest = 'https://lcd.bitcanna.io';
+    rpc = 'https://rpc.bitcanna.io'
+    rest = 'https://lcd.bitcanna.io'
   } else if (chain.chain_name == 'juno') {
-    rpc = 'https://rpc-juno.nodes.guru';
-    rest = 'https://api-juno.nodes.guru';
+    rpc = 'https://rpc-juno.nodes.guru'
+    rest = 'https://api-juno.nodes.guru'
   } else if (chain.chain_name == 'likecoin') {
-    rpc = 'https://mainnet-node.like.co/rpc';
-    rest = 'https://mainnet-node.like.co';
+    rpc = 'https://mainnet-node.like.co/rpc'
+    rest = 'https://mainnet-node.like.co'
   } else {
     rpc = chain.public_node_endpoints.tendermint_rpc
       ? chain.public_node_endpoints.tendermint_rpc[0]
-      : 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
+      : 'https://' + chain.chain_name + '-emeris.app.alpha.starport.cloud'
     rest = chain.public_node_endpoints.cosmos_api
       ? chain.public_node_endpoints.cosmos_api[0]
-      : 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud';
+      : 'https://api.' + chain.chain_name + '-emeris.app.alpha.starport.cloud'
   }
   try {
     await window.keplr.experimentalSuggestChain({
@@ -64,15 +64,15 @@ export async function addChain(chain_name: string): Promise<void> {
           coinDenom: '',
           coinMinimalDenom: '',
           coinDecimals: 0,
-        };
-        y.coinDenom = x.display_name;
-        y.coinMinimalDenom = x.name;
-        y.coinDecimals = parseInt(x.precision);
+        }
+        y.coinDenom = x.display_name
+        y.coinMinimalDenom = x.name
+        y.coinDecimals = parseInt(x.precision)
 
         if (isNaN(y.coinDecimals)) {
-          y.coinDecimals = 6;
+          y.coinDecimals = 6
         }
-        return y;
+        return y
       }),
       feeCurrencies: chain.denoms
         .filter((x) => x.fee_token)
@@ -83,14 +83,14 @@ export async function addChain(chain_name: string): Promise<void> {
             coinDenom: '',
             coinMinimalDenom: '',
             coinDecimals: 0,
-          };
-          y.coinDenom = x.display_name.toUpperCase();
-          y.coinMinimalDenom = x.name;
-          y.coinDecimals = parseInt(x.precision);
-          if (isNaN(y.coinDecimals)) {
-            y.coinDecimals = 6;
           }
-          return y;
+          y.coinDenom = x.display_name.toUpperCase()
+          y.coinMinimalDenom = x.name
+          y.coinDecimals = parseInt(x.precision)
+          if (isNaN(y.coinDecimals)) {
+            y.coinDecimals = 6
+          }
+          return y
         }),
       coinType: parseInt(chain.derivation_path.split('/')[2].slice(0, -1)),
       gasPriceStep: {
@@ -99,8 +99,8 @@ export async function addChain(chain_name: string): Promise<void> {
         high: 0.04,
       },
       features: ['stargate', 'ibc-transfer'],
-    });
+    })
   } catch (_e) {
-    console.error('Could not suggest chain: ' + chain.node_info.chain_id);
+    console.error('Could not suggest chain: ' + chain.node_info.chain_id)
   }
 }

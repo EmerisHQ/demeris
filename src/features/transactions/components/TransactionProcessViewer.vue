@@ -37,80 +37,80 @@
 </template>
 
 <script lang="ts" setup>
-import { useActor } from '@xstate/vue';
-import { computed, provide, watch } from 'vue';
+import { useActor } from '@xstate/vue'
+import { computed, provide, watch } from 'vue'
 
-import Spinner from '@/components/ui/Spinner.vue';
-import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
+import Spinner from '@/components/ui/Spinner.vue'
+import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue'
 
-import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers';
-import { TransactionProcessService } from '../transactionProcessMachine';
-import { useTransactionsStore } from '../transactionsStore';
-import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
-import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
-import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue';
-import ModalPendingTransaction from './TransactionProcessViewer/ModalPendingTransaction.vue';
-import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
-import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
-import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
-import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue';
-import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransacting.vue';
-import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue';
+import { isSwapAction, ProvideViewerKey } from '../transactionProcessHelpers'
+import { TransactionProcessService } from '../transactionProcessMachine'
+import { useTransactionsStore } from '../transactionsStore'
+import ModalCancel from './TransactionProcessViewer/ModalCancel.vue'
+import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue'
+import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue'
+import ModalPendingTransaction from './TransactionProcessViewer/ModalPendingTransaction.vue'
+import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue'
+import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue'
+import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue'
+import ViewStateSigning from './TransactionProcessViewer/ViewStateSigning.vue'
+import ViewStateTransacting from './TransactionProcessViewer/ViewStateTransacting.vue'
+import ViewStateWaitingTransaction from './TransactionProcessViewer/ViewStateWaitingTransaction.vue'
 
 const props = defineProps({
   stepId: {
     type: String,
     default: undefined,
   },
-});
+})
 
-const emits = defineEmits(['close', 'minimize', 'previous', 'onReceiptState']);
+const emits = defineEmits(['close', 'minimize', 'previous', 'onReceiptState'])
 
-const transactionsStore = useTransactionsStore();
-const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
+const transactionsStore = useTransactionsStore()
+const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService)
 const isSwapComponent = computed(
   () =>
     isSwapAction(state.value.context) && !transactionsStore.isViewerModalOpen && !transactionsStore.isPendingModalOpen,
-);
+)
 
-const actor = useActor(transactionService);
-const { state, send } = actor;
+const actor = useActor(transactionService)
+const { state, send } = actor
 
 const minimizeModal = () => {
-  transactionsStore.setTransactionAsPending();
+  transactionsStore.setTransactionAsPending()
 
   if (transactionsStore.isPendingModalOpen) {
-    transactionsStore.closePendingModal();
+    transactionsStore.closePendingModal()
   }
 
   if (transactionsStore.isViewerModalOpen) {
-    closeModal();
+    closeModal()
   }
-};
+}
 
 watch(
   () => state.value,
   (newState) => {
     if (newState.matches('receipt') || newState.matches('success')) {
-      emits('onReceiptState');
+      emits('onReceiptState')
     }
   },
-);
+)
 
-const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'));
-const showReviewState = computed(() => state.value.matches('review'));
-const showSigningState = computed(() => state.value.matches('signing'));
-const showTransactingState = computed(() => state.value.matches('transacting'));
-const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
-const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'));
+const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'))
+const showReviewState = computed(() => state.value.matches('review'))
+const showSigningState = computed(() => state.value.matches('signing'))
+const showTransactingState = computed(() => state.value.matches('transacting'))
+const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'))
+const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'))
 
-const closeModal = () => emits('close');
-const goBack = () => emits('previous');
+const closeModal = () => emits('close')
+const goBack = () => emits('previous')
 
 const removeTransactionAndClose = () => {
-  transactionsStore.removeTransaction(props.stepId);
-  closeModal();
-};
+  transactionsStore.removeTransaction(props.stepId)
+  closeModal()
+}
 provide(ProvideViewerKey, {
   actor,
   closeModal,
@@ -118,5 +118,5 @@ provide(ProvideViewerKey, {
   removeTransactionAndClose,
   isSwapComponent,
   stepId: props.stepId,
-});
+})
 </script>

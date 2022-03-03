@@ -30,9 +30,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Modal from '@/components/ui/Modal.vue';
+import Modal from '@/components/ui/Modal.vue'
 
 export default defineComponent({
   name: 'Confirmation',
@@ -71,13 +71,13 @@ export default defineComponent({
   emits: ['no', 'yes', 'close'],
 
   setup(_, { emit }) {
-    const emitNo = () => emit('no');
-    const emitYes = () => emit('yes');
-    const emitClose = () => emit('close');
+    const emitNo = () => emit('no')
+    const emitYes = () => emit('yes')
+    const emitClose = () => emit('close')
 
-    return { emitNo, emitYes, emitClose };
+    return { emitNo, emitYes, emitClose }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

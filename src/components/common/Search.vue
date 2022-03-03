@@ -26,7 +26,7 @@
         :icon-size="1"
         @click="
           () => {
-            $emit('update:keyword', '');
+            $emit('update:keyword', '')
           }
         "
       />
@@ -39,9 +39,9 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, ref, toRefs, watch } from 'vue';
+import { defineComponent, nextTick, ref, toRefs, watch } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/Icon.vue'
 export default defineComponent({
   name: 'Search',
   components: { Icon },
@@ -56,33 +56,33 @@ export default defineComponent({
   },
   emits: ['update:keyword', 'blur:value', 'focus:value'],
   setup(props) {
-    const searchInput = ref(null);
-    const isFocused = ref(false);
+    const searchInput = ref(null)
+    const isFocused = ref(false)
 
     function setFocus() {
-      isFocused.value = true;
-      searchInput.value.focus();
+      isFocused.value = true
+      searchInput.value.focus()
     }
 
-    const { autofocus } = toRefs(props);
+    const { autofocus } = toRefs(props)
 
     watch(
       autofocus,
       (value) => {
         if (value) {
-          nextTick(() => setFocus());
+          nextTick(() => setFocus())
         }
       },
       { immediate: true },
-    );
+    )
 
     return {
       searchInput,
       setFocus,
       isFocused,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 input {

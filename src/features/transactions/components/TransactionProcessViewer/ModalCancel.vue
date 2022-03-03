@@ -15,29 +15,29 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { inject } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
 
-import { ProvideViewerKey } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
+import { ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
 
-const transactionsStore = useTransactionsStore();
-const { actor, removeTransactionAndClose, minimizeModal } = inject(ProvideViewerKey);
-const { send } = actor;
+const transactionsStore = useTransactionsStore()
+const { actor, removeTransactionAndClose, minimizeModal } = inject(ProvideViewerKey)
+const { send } = actor
 
 const onKeep = () => {
-  transactionsStore.toggleCancelModal();
-  transactionsStore.setTransactionAsPending();
-  minimizeModal();
-};
+  transactionsStore.toggleCancelModal()
+  transactionsStore.setTransactionAsPending()
+  minimizeModal()
+}
 
 const onCancel = () => {
-  transactionsStore.toggleCancelModal();
-  transactionsStore.closePendingModal();
-  removeTransactionAndClose();
-  send('ABORT');
-};
+  transactionsStore.toggleCancelModal()
+  transactionsStore.closePendingModal()
+  removeTransactionAndClose()
+  send('ABORT')
+}
 </script>

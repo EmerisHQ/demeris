@@ -56,16 +56,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, defineComponent, onMounted, PropType, ref, toRefs } from 'vue'
+import { useRoute } from 'vue-router'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Price from '@/components/common/Price.vue';
-import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import { List, ListItem } from '@/components/ui/List';
-import useStaking from '@/composables/useStaking';
-import * as Actions from '@/types/actions';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Price from '@/components/common/Price.vue'
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue'
+import { List, ListItem } from '@/components/ui/List'
+import useStaking from '@/composables/useStaking'
+import * as Actions from '@/types/actions'
 
 export default defineComponent({
   name: 'PreviewClaim',
@@ -104,35 +104,35 @@ export default defineComponent({
   },
 
   setup(props: any) {
-    const route = useRoute();
-    const { getValidatorsByBaseDenom } = useStaking();
+    const route = useRoute()
+    const { getValidatorsByBaseDenom } = useStaking()
 
-    const baseDenom = route.params.denom as string;
-    const validatorList = ref([]);
-    const propsRef = toRefs(props);
+    const baseDenom = route.params.denom as string
+    const validatorList = ref([])
+    const propsRef = toRefs(props)
     const rewardsDenom = computed(() => {
-      return propsRef.step.value.transactions[0].data.total.replace(/[0-9.,]+/gi, '');
-    });
+      return propsRef.step.value.transactions[0].data.total.replace(/[0-9.,]+/gi, '')
+    })
     const rewardsAmount = computed(() => {
-      return parseInt(propsRef.step.value.transactions[0].data.total).toString();
-    });
+      return parseInt(propsRef.step.value.transactions[0].data.total).toString()
+    })
     const validators = computed(() => {
-      return propsRef.step.value.transactions[0].data.rewards;
-    });
+      return propsRef.step.value.transactions[0].data.rewards
+    })
     onMounted(async () => {
-      validatorList.value = await getValidatorsByBaseDenom(baseDenom);
-    });
+      validatorList.value = await getValidatorsByBaseDenom(baseDenom)
+    })
     const getValidator = (val_address) => {
-      return validatorList.value.find((x) => x.operator_address == val_address);
-    };
+      return validatorList.value.find((x) => x.operator_address == val_address)
+    }
     return {
       rewardsDenom,
       rewardsAmount,
       validators,
       getValidator,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

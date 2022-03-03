@@ -39,9 +39,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue'
 
-type SpinnerVariant = 'solid' | 'gold';
+type SpinnerVariant = 'solid' | 'gold'
 
 export default defineComponent({
   name: 'Spinner',
@@ -61,13 +61,13 @@ export default defineComponent({
     const randomId = Math.random()
       .toString(36)
       .replace(/[^a-z]+/g, '')
-      .substr(2, 10);
+      .substr(2, 10)
 
     return {
       fillId: `spinner-fill-${randomId}`,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

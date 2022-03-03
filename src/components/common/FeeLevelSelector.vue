@@ -92,22 +92,22 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, onMounted, PropType, reactive, ref, toRefs, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import Alert from '@/components/ui/Alert.vue';
-import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Alert from '@/components/ui/Alert.vue'
+import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue'
+import Icon from '@/components/ui/Icon.vue'
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
   RootStoreType,
   TypedAPIStore,
   TypedUSERStore,
-} from '@/store';
-import { GasPriceLevel, Step, SwapData } from '@/types/actions';
-import { feeForSteps, getTicker } from '@/utils/actionHandler';
+} from '@/store'
+import { GasPriceLevel, Step, SwapData } from '@/types/actions'
+import { feeForSteps, getTicker } from '@/utils/actionHandler'
 
 export default defineComponent({
   name: 'FeeLevelSelector',
@@ -124,117 +124,117 @@ export default defineComponent({
   },
   emits: ['update:fees'],
   setup(props, { emit }) {
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
-    const libStore = useStore() as RootStoreType;
-    const lowFee = ref({});
-    const avgFee = ref({});
-    const highFee = ref({});
+    const apistore = useStore() as TypedAPIStore
+    const userstore = useStore() as TypedUSERStore
+    const libStore = useStore() as RootStoreType
+    const lowFee = ref({})
+    const avgFee = ref({})
+    const highFee = ref({})
     onMounted(async () => {
-      lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
-      avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
-      highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
-    });
+      lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW)
+      avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE)
+      highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH)
+    })
     watch(
       () => props.steps,
       async () => {
-        lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW);
-        avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE);
-        highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH);
+        lowFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.LOW)
+        avgFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.AVERAGE)
+        highFee.value = await feeForSteps(props.steps as Step[], GasPriceLevel.HIGH)
       },
-    );
+    )
     const txCount = computed(() => {
-      let count = 0;
+      let count = 0
       for (let step of props.steps as Step[]) {
-        count = count + step.transactions.length;
+        count = count + step.transactions.length
       }
-      return count;
-    });
+      return count
+    })
     const lowFeeUSD = computed(() => {
-      let value = 0;
+      let value = 0
       for (const chain_name in lowFee.value) {
         for (const denom in lowFee.value[chain_name]) {
           const precision =
             apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? '6'
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom })
           value =
             value +
             new BigNumber(lowFee.value[chain_name][denom])
               .multipliedBy(price)
               .shiftedBy(-precision)
               .decimalPlaces(precision)
-              .toNumber();
+              .toNumber()
         }
       }
-      return value;
-    });
+      return value
+    })
 
     const avgFeeUSD = computed(() => {
-      let value = 0;
+      let value = 0
       for (const chain_name in avgFee.value) {
         for (const denom in avgFee.value[chain_name]) {
           const precision =
             apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? '6'
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom })
           value =
             value +
             new BigNumber(avgFee.value[chain_name][denom])
               .multipliedBy(price)
               .shiftedBy(-precision)
               .decimalPlaces(precision)
-              .toNumber();
+              .toNumber()
         }
       }
-      return value;
-    });
+      return value
+    })
     const highFeeUSD = computed(() => {
-      let value = 0;
+      let value = 0
       for (const chain_name in highFee.value) {
         for (const denom in highFee.value[chain_name]) {
           const precision =
             apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
               name: denom,
-            }) ?? '6';
-          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom });
+            }) ?? '6'
+          const price = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom })
           value =
             value +
             new BigNumber(highFee.value[chain_name][denom])
               .multipliedBy(price)
               .shiftedBy(-precision)
               .decimalPlaces(precision)
-              .toNumber();
+              .toNumber()
         }
       }
-      return value;
-    });
+      return value
+    })
     const fees = computed(() => {
-      const fees = {};
-      fees[GasPriceLevel.LOW] = lowFeeUSD.value;
-      fees[GasPriceLevel.AVERAGE] = avgFeeUSD.value;
-      fees[GasPriceLevel.HIGH] = highFeeUSD.value;
-      return fees;
-    });
+      const fees = {}
+      fees[GasPriceLevel.LOW] = lowFeeUSD.value
+      fees[GasPriceLevel.AVERAGE] = avgFeeUSD.value
+      fees[GasPriceLevel.HIGH] = highFeeUSD.value
+      return fees
+    })
 
     // get swap tx
     const swapTx = computed(() => {
-      return props.steps.find((step) => step.name === 'swap')?.transactions[0].data as SwapData;
-    });
+      return props.steps.find((step) => step.name === 'swap')?.transactions[0].data as SwapData
+    })
 
     //if swap tx is exist, check from/to coins denoms to identify pool coin
     const hasPoolCoinToSwap = computed(() => {
       if (swapTx.value) {
-        return swapTx.value.from.denom.startsWith('pool') || swapTx.value.to.denom.startsWith('pool');
+        return swapTx.value.from.denom.startsWith('pool') || swapTx.value.to.denom.startsWith('pool')
       } else {
-        return false;
+        return false
       }
-    });
+    })
 
     //if pool coin(s) exist, get display name.
-    const poolCoinDisplayDenoms = ref([]);
+    const poolCoinDisplayDenoms = ref([])
     watch(
       () => props.steps,
       async () => {
@@ -242,71 +242,71 @@ export default defineComponent({
           poolCoinDisplayDenoms.value[0] = await getTicker(
             swapTx.value.from.denom,
             apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
-          );
+          )
           poolCoinDisplayDenoms.value[1] = await getTicker(
             swapTx.value.to.denom,
             apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
-          );
+          )
         }
       },
       { immediate: true },
-    );
+    )
 
     const poolCoinSwapFees = computed(() => {
       if (hasPoolCoinToSwap.value) {
-        const swapFees = [];
+        const swapFees = []
         const swapFeeRate =
-          parseFloat(libStore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2;
-        const tx = swapTx.value;
+          parseFloat(libStore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2
+        const tx = swapTx.value
         const precision =
           apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
             name: tx.from.denom, //pool coin precision is same
-          }) ?? 6;
+          }) ?? 6
         if (tx.from.denom.startsWith('pool')) {
-          swapFees[0] = ((Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision)).toFixed(4);
+          swapFees[0] = ((Number(tx.from.amount) * swapFeeRate) / Math.pow(10, precision)).toFixed(4)
         }
         if (tx.to.denom.startsWith('pool')) {
-          swapFees[1] = ((Number(tx.to.amount) * swapFeeRate) / Math.pow(10, precision)).toFixed(4);
+          swapFees[1] = ((Number(tx.to.amount) * swapFeeRate) / Math.pow(10, precision)).toFixed(4)
         }
-        return swapFees;
+        return swapFees
       } else {
-        return null;
+        return null
       }
-    });
+    })
 
     //if steps include swap tx
     const swapDollarFee = computed(() => {
       if (swapTx.value) {
-        let value = 0;
-        const tx = swapTx.value;
+        let value = 0
+        const tx = swapTx.value
         const swapFeeRate =
-          parseFloat(apistore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015;
+          parseFloat(apistore.getters['tendermint.liquidity.v1beta1/getParams']().params?.swap_fee_rate) / 2 ?? 0.0015
 
         const fromPrecision =
-          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? '6';
+          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.from.denom }) ?? '6'
         const toPrecision =
-          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? '6';
-        const fromPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.from.denom });
-        const toPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.to.denom });
+          apistore.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({ name: tx.to.denom }) ?? '6'
+        const fromPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.from.denom })
+        const toPrice = apistore.getters[GlobalDemerisGetterTypes.API.getPrice]({ denom: tx.to.denom })
 
         value =
           ((fromPrice * Number(tx.from.amount) * swapFeeRate) / Math.pow(10, parseInt(fromPrecision)) ?? 0) +
-          ((toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision)) ?? 0);
-        return value;
+          ((toPrice * Number(tx.to.amount) * swapFeeRate) / Math.pow(10, parseInt(toPrecision)) ?? 0)
+        return value
       } else {
-        return null;
+        return null
       }
-    });
+    })
 
     const swapFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
         return `${swapDollarFee.value ? formatAmount(swapDollarFee.value) + ' +' : ''} ${
           poolCoinSwapFees.value[0] ? `${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]} + ` : ''
-        } ${poolCoinSwapFees.value[1] ? `${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''}`;
+        } ${poolCoinSwapFees.value[1] ? `${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''}`
       } else {
-        return formatAmount(swapDollarFee.value);
+        return formatAmount(swapDollarFee.value)
       }
-    });
+    })
 
     const totalFee = computed(() => {
       if (hasPoolCoinToSwap.value) {
@@ -315,45 +315,45 @@ export default defineComponent({
           `${poolCoinSwapFees.value[0] ? ` + ${poolCoinSwapFees.value[0]} ${poolCoinDisplayDenoms.value[0]}` : ''} ${
             poolCoinSwapFees.value[1] ? ` + ${poolCoinSwapFees.value[1]} ${poolCoinDisplayDenoms.value[1]}` : ''
           }`
-        );
+        )
       } else {
-        return formatAmount(swapDollarFee.value + fees.value[gasPriceLevel.value] * txCount.value);
+        return formatAmount(swapDollarFee.value + fees.value[gasPriceLevel.value] * txCount.value)
       }
-    });
+    })
 
     const gasPriceLevel = computed({
       get: () => apistore.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel],
       set: (level: GasPriceLevel) => {
-        userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } });
+        userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { gasPriceLevel: level } })
       },
-    });
+    })
 
     const data = reactive({
       isFeesOpen: false,
       toggle: () => {
-        data.isFeesOpen = !data.isFeesOpen;
+        data.isFeesOpen = !data.isFeesOpen
       },
       gasPriceLevel,
       GasPriceLevel,
       feeIconColor: getComputedStyle(document.body).getPropertyValue('--inactive'),
-    });
+    })
 
     watch([fees, props], () => {
       const feeMap = {
         [GasPriceLevel.LOW]: lowFee.value,
         [GasPriceLevel.AVERAGE]: avgFee.value,
         [GasPriceLevel.HIGH]: highFee.value,
-      };
-      emit('update:fees', feeMap[gasPriceLevel.value]);
-    });
+      }
+      emit('update:fees', feeMap[gasPriceLevel.value])
+    })
 
     const formatAmount = (value: number | string) => {
-      const bgValue = new BigNumber(value);
-      let maximumFractionDigits = 2;
+      const bgValue = new BigNumber(value)
+      let maximumFractionDigits = 2
 
       // This will prevent formatting smaller values like 0.0001 to 0.00
       if (bgValue.decimalPlaces(2).isZero()) {
-        maximumFractionDigits = bgValue.decimalPlaces();
+        maximumFractionDigits = bgValue.decimalPlaces()
       }
 
       return new Intl.NumberFormat('en-US', {
@@ -363,8 +363,8 @@ export default defineComponent({
         // These options are needed to round to whole numbers if that's what you want.
         //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
         //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
-      }).format(bgValue.toNumber());
-    };
+      }).format(bgValue.toNumber())
+    }
 
     return {
       ...toRefs(data),
@@ -377,8 +377,8 @@ export default defineComponent({
       hasPoolCoinToSwap,
       poolCoinSwapFees,
       poolCoinDisplayDenoms,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

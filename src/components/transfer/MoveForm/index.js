@@ -1,3 +1,3 @@
-import MoveForm from './MoveForm.vue';
+import MoveForm from './MoveForm.vue'
 
-export default MoveForm;
+export default MoveForm

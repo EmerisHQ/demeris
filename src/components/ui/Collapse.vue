@@ -23,10 +23,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, PropType, reactive, watch } from 'vue';
+import { defineComponent, nextTick, PropType, reactive, watch } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   name: 'Collapse',
@@ -58,34 +58,34 @@ export default defineComponent({
     const state = reactive({
       height: '0',
       isOpen: props.isOpen,
-    });
+    })
 
     const toggle = () => {
-      state.isOpen = !state.isOpen;
-      emit('update:isOpen', state.isOpen);
-    };
+      state.isOpen = !state.isOpen
+      emit('update:isOpen', state.isOpen)
+    }
 
     const enter = (el: Element) => {
-      const scrollHeight = `${el.scrollHeight}px`;
-      state.height = '0';
-      nextTick(() => (state.height = scrollHeight || 'auto'));
-    };
+      const scrollHeight = `${el.scrollHeight}px`
+      state.height = '0'
+      nextTick(() => (state.height = scrollHeight || 'auto'))
+    }
 
     const afterEnter = () => {
-      setTimeout(() => (state.height = 'auto'), 5);
-    };
+      setTimeout(() => (state.height = 'auto'), 5)
+    }
 
     const leave = (el: Element) => {
-      state.height = getComputedStyle(el).height;
-      setTimeout(() => (state.height = '0'), 100);
-    };
+      state.height = getComputedStyle(el).height
+      setTimeout(() => (state.height = '0'), 100)
+    }
 
     watch(props, () => {
-      state.isOpen = props.isOpen;
-    });
-    return { state, toggle, enter, afterEnter, leave };
+      state.isOpen = props.isOpen
+    })
+    return { state, toggle, enter, afterEnter, leave }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .collapse {

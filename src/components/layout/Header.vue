@@ -43,18 +43,18 @@
   </header>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, ref } from 'vue'
+import { useStore } from 'vuex'
 
-import Settings from '@/components/common/Settings.vue';
-import Navbar from '@/components/layout/Navbar.vue';
-import useAccount from '@/composables/useAccount';
-import { GlobalDemerisGetterTypes } from '@/store';
+import Settings from '@/components/common/Settings.vue'
+import Navbar from '@/components/layout/Navbar.vue'
+import useAccount from '@/composables/useAccount'
+import { GlobalDemerisGetterTypes } from '@/store'
 
-import ReceiveIcon from '../common/Icons/ReceiveIcon.vue';
-import SendIcon from '../common/Icons/SendIcon.vue';
-import NavbarLogo from '../common/NavbarLogo.vue';
-import IconButton from '../ui/IconButton.vue';
+import ReceiveIcon from '../common/Icons/ReceiveIcon.vue'
+import SendIcon from '../common/Icons/SendIcon.vue'
+import NavbarLogo from '../common/NavbarLogo.vue'
+import IconButton from '../ui/IconButton.vue'
 export default defineComponent({
   name: 'Header',
   components: {
@@ -66,22 +66,22 @@ export default defineComponent({
     IconButton,
   },
   setup() {
-    const { redeemableBalances } = useAccount();
-    const store = useStore();
+    const { redeemableBalances } = useAccount()
+    const store = useStore()
     let tip = computed(() => {
       return redeemableBalances.value.length == 1
         ? (tip = 'You have 1 asset to redeem')
-        : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem');
-    });
+        : (tip = 'You have ' + redeemableBalances.value.length + ' assets to redeem')
+    })
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
-    });
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+    })
     const showBadge = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.hasSeenReedem] ? false : true;
-    });
-    const settingsRef = ref(null);
+      return store.getters[GlobalDemerisGetterTypes.USER.hasSeenReedem] ? false : true
+    })
+    const settingsRef = ref(null)
 
-    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef };
+    return { redeemableBalances, tip, showBadge, isDemoAccount, settingsRef }
   },
-});
+})
 </script>

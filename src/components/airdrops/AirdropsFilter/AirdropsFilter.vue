@@ -22,15 +22,15 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default {
   emits: ['active-filter'],
   setup(_, { emit }) {
-    const { t } = useI18n({ useScope: 'global' });
+    const { t } = useI18n({ useScope: 'global' })
 
-    const activeFilterItem = ref('all');
+    const activeFilterItem = ref('all')
     const filtersItems = [
       {
         text: t('context.airdrops.airdropstableFilterItems.all'),
@@ -52,14 +52,14 @@ export default {
         text: t('context.airdrops.airdropstableFilterItems.past'),
         value: 'past',
       },
-    ];
+    ]
 
     const setActiveFilter = (item: any) => {
-      activeFilterItem.value = item.value;
-      emit('active-filter', activeFilterItem.value);
-    };
+      activeFilterItem.value = item.value
+      emit('active-filter', activeFilterItem.value)
+    }
 
-    return { filtersItems, setActiveFilter, activeFilterItem };
+    return { filtersItems, setActiveFilter, activeFilterItem }
   },
-};
+}
 </script>

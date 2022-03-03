@@ -324,7 +324,7 @@
         variant="link"
         :click-function="
           () => {
-            router.push(`/send/move?base_denom=${sendBaseDenom}&amount=${sendAmount}`);
+            router.push(`/send/move?base_denom=${sendBaseDenom}&amount=${sendAmount}`)
           }
         "
       />
@@ -338,7 +338,7 @@
               ? emitRetry()
               : isFinal
               ? emitDone()
-              : emitNext();
+              : emitNext()
           }
         "
       />
@@ -361,27 +361,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, onMounted, PropType, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
-import Collapse from '@/components/ui/Collapse.vue';
-import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import SpinnerIcon from '@/components/ui/Spinner.vue';
-import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue';
-import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue';
-import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue';
-import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import Alert from '@/components/ui/Alert.vue'
+import Button from '@/components/ui/Button.vue'
+import Collapse from '@/components/ui/Collapse.vue'
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import SpinnerIcon from '@/components/ui/Spinner.vue'
+import PreviewAddLiquidity from '@/components/wizard/previews/PreviewAddLiquidity.vue'
+import PreviewTransfer from '@/components/wizard/previews/PreviewTransfer.vue'
+import PreviewWithdrawLiquidity from '@/components/wizard/previews/PreviewWithdrawLiquidity.vue'
+import usePools from '@/composables/usePools'
+import { GlobalDemerisGetterTypes } from '@/store'
 import {
   AddLiquidityData,
   CreatePoolData,
@@ -389,9 +389,9 @@ import {
   StepTransaction,
   SwapData,
   WithdrawLiquidityData,
-} from '@/types/actions';
-import { getDisplayName } from '@/utils/actionHandler';
-import { getBaseDenom } from '@/utils/actionHandler';
+} from '@/types/actions'
+import { getDisplayName } from '@/utils/actionHandler'
+import { getBaseDenom } from '@/utils/actionHandler'
 
 type Status =
   | 'keplr-sign'
@@ -401,14 +401,14 @@ type Status =
   | 'unknown'
   | 'IBC_receive_failed'
   | 'failed'
-  | 'complete';
+  | 'complete'
 type Result = {
-  demandCoinDenom: string;
-  swappedPercent: number;
-  demandCoinSwappedAmount: number;
-  offerCoinDenom: string;
-  remainingOfferCoinAmount: number;
-};
+  demandCoinDenom: string
+  swappedPercent: number
+  demandCoinSwappedAmount: number
+  offerCoinDenom: string
+  remainingOfferCoinAmount: number
+}
 export default defineComponent({
   name: 'TxHandlingModal',
   components: {
@@ -460,61 +460,61 @@ export default defineComponent({
   emits: ['close', 'next', 'retry', 'reset', 'done'],
   setup(props, { emit }) {
     // Set Icon from status
-    const { t } = useI18n({ useScope: 'global' });
-    const router = useRouter();
-    const store = useStore();
-    const { updatePool } = usePools();
+    const { t } = useI18n({ useScope: 'global' })
+    const router = useRouter()
+    const store = useStore()
+    const { updatePool } = usePools()
 
     const iconType = computed(() => {
       if (props.status == 'keplr-sign' || (props.status == 'transacting' && props.tx.name == 'swap')) {
-        return 'pending';
+        return 'pending'
       }
       if (props.status == 'keplr-reject') {
-        return 'warning';
+        return 'warning'
       }
       if (props.status == 'unknown') {
-        return 'unknown';
+        return 'unknown'
       }
       if (props.status == 'failed') {
-        return 'error';
+        return 'error'
       }
-      return null;
-    });
+      return null
+    })
 
     //Set default texts
-    const overline = ref(t('components.txHandlingModal.openKeplr'));
-    const title = ref(t('components.txHandlingModal.signTx'));
-    const subtitle = ref('');
-    const secondaryButton = ref(t('generic_cta.cancel'));
-    const primaryButton = ref('');
-    const baseDenoms = reactive({});
-    const sendBaseDenom = ref('');
-    const sendAmount = ref(0);
+    const overline = ref(t('components.txHandlingModal.openKeplr'))
+    const title = ref(t('components.txHandlingModal.signTx'))
+    const subtitle = ref('')
+    const secondaryButton = ref(t('generic_cta.cancel'))
+    const primaryButton = ref('')
+    const baseDenoms = reactive({})
+    const sendBaseDenom = ref('')
+    const sendAmount = ref(0)
 
     const isIBC = computed(() => {
-      return ['ibc_forward', 'ibc_backward'].includes(props.tx.name);
-    });
+      return ['ibc_forward', 'ibc_backward'].includes(props.tx.name)
+    })
 
     const getDenom = (denom: string) => {
-      return baseDenoms[denom] || denom;
-    };
+      return baseDenoms[denom] || denom
+    }
 
     const getExplorerLink = (chainName: string) => {
       const chainMintScanMap = {
         'cosmos-hub': 'cosmos',
-      };
-      const chain = chainMintScanMap[chainName] || chainName;
+      }
+      const chain = chainMintScanMap[chainName] || chainName
 
       if (!chain) {
-        return;
+        return
       }
 
-      return `https://www.mintscan.io/${chain}`;
-    };
+      return `https://www.mintscan.io/${chain}`
+    }
 
     const getExplorerTx = (tx: { txhash: string; chain_name: string }) => {
-      return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`;
-    };
+      return `${getExplorerLink(tx.chain_name)}/txs/${tx.txhash}`
+    }
 
     // Watch for status changes
     watch(
@@ -522,75 +522,75 @@ export default defineComponent({
       async (newStatus) => {
         switch (newStatus) {
           case 'keplr-sign':
-            overline.value = t('components.txHandlingModal.openKeplr');
-            title.value = t('components.txHandlingModal.signTx');
-            secondaryButton.value = t('generic_cta.cancel');
-            primaryButton.value = '';
-            break;
+            overline.value = t('components.txHandlingModal.openKeplr')
+            title.value = t('components.txHandlingModal.signTx')
+            secondaryButton.value = t('generic_cta.cancel')
+            primaryButton.value = ''
+            break
           case 'keplr-reject':
-            overline.value = '';
-            title.value = t('components.txHandlingModal.signError');
-            secondaryButton.value = t('generic_cta.cancel');
-            primaryButton.value = t('components.txHandlingModal.tryAgain');
-            break;
+            overline.value = ''
+            title.value = t('components.txHandlingModal.signError')
+            secondaryButton.value = t('generic_cta.cancel')
+            primaryButton.value = t('components.txHandlingModal.tryAgain')
+            break
           case 'delay':
-            title.value = t('components.txHandlingModal.ibcTransferDelayTitle');
-            subtitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle');
-            overline.value = '';
-            primaryButton.value = '';
-            secondaryButton.value = '';
-            break;
+            title.value = t('components.txHandlingModal.ibcTransferDelayTitle')
+            subtitle.value = t('components.txHandlingModal.ibcTransferDelaySubtitle')
+            overline.value = ''
+            primaryButton.value = ''
+            secondaryButton.value = ''
+            break
           case 'unknown':
-            title.value = t('components.txHandlingModal.couldNotFetchTransactionResult');
-            subtitle.value = t('components.txHandlingModal.checkTransactionOnBlockExplorer');
-            primaryButton.value = t('generic_cta.done');
-            overline.value = '';
-            break;
+            title.value = t('components.txHandlingModal.couldNotFetchTransactionResult')
+            subtitle.value = t('components.txHandlingModal.checkTransactionOnBlockExplorer')
+            primaryButton.value = t('generic_cta.done')
+            overline.value = ''
+            break
           case 'IBC_receive_failed':
-            title.value = t('components.txHandlingModal.somethingWentWrong');
-            subtitle.value = t('components.txHandlingModal.revertTx');
-            primaryButton.value = t('components.txHandlingModal.backToPortfolio');
-            overline.value = '';
-            break;
+            title.value = t('components.txHandlingModal.somethingWentWrong')
+            subtitle.value = t('components.txHandlingModal.revertTx')
+            primaryButton.value = t('components.txHandlingModal.backToPortfolio')
+            overline.value = ''
+            break
           case 'transacting':
             if ((props.tx as StepTransaction).name.startsWith('ibc')) {
-              overline.value = t('components.txHandlingModal.ibcTransferSubtitle');
+              overline.value = t('components.txHandlingModal.ibcTransferSubtitle')
             } else {
-              overline.value = t('components.txHandlingModal.txProgress');
+              overline.value = t('components.txHandlingModal.txProgress')
             }
-            secondaryButton.value = '';
-            primaryButton.value = '';
+            secondaryButton.value = ''
+            primaryButton.value = ''
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = t('components.txHandlingModal.transferAction');
-                break;
+                title.value = t('components.txHandlingModal.transferAction')
+                break
               case 'ibc_backward':
-                title.value = t('components.txHandlingModal.transferAction');
-                break;
+                title.value = t('components.txHandlingModal.transferAction')
+                break
               case 'transfer':
-                title.value = t('components.txHandlingModal.transferAction');
-                break;
+                title.value = t('components.txHandlingModal.transferAction')
+                break
               case 'swap':
-                title.value = t('components.txHandlingModal.pleaseWait');
-                break;
+                title.value = t('components.txHandlingModal.pleaseWait')
+                break
               case 'addliquidity':
-                title.value = t('components.txHandlingModal.addLiqAction');
-                break;
+                title.value = t('components.txHandlingModal.addLiqAction')
+                break
               case 'withdrawliquidity':
-                title.value = t('components.txHandlingModal.withdrawing');
-                break;
+                title.value = t('components.txHandlingModal.withdrawing')
+                break
               case 'createpool':
-                title.value = t('components.txHandlingModal.createPoolAction');
-                break;
+                title.value = t('components.txHandlingModal.createPoolAction')
+                break
             }
-            break;
+            break
           case 'complete':
-            overline.value = '';
+            overline.value = ''
             if (props.isFinal && !props.hasMore) {
-              primaryButton.value = t('generic_cta.done');
+              primaryButton.value = t('generic_cta.done')
               if (props.tx.name === 'swap' && props.txResult) {
-                sendBaseDenom.value = await getBaseDenom(props.txResult.demandCoinDenom);
+                sendBaseDenom.value = await getBaseDenom(props.txResult.demandCoinDenom)
                 sendAmount.value =
                   props.txResult.demandCoinSwappedAmount /
                   Math.pow(
@@ -598,136 +598,136 @@ export default defineComponent({
                     store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
                       name: sendBaseDenom.value,
                     }),
-                  );
+                  )
                 secondaryButton.value = t('components.txHandlingModal.sendAfterSwap', {
                   displayName: await getDisplayName(
                     props.txResult.demandCoinDenom,
                     store.getters[GlobalDemerisGetterTypes.API.getDexChain],
                   ),
-                });
+                })
               } else {
-                secondaryButton.value = t('components.txHandlingModal.reset');
+                secondaryButton.value = t('components.txHandlingModal.reset')
               }
             } else {
               props.hasMore
                 ? (primaryButton.value = t('components.txHandlingModal.next'))
-                : (primaryButton.value = t('generic_cta.continue'));
-              secondaryButton.value = '';
+                : (primaryButton.value = t('generic_cta.continue'))
+              secondaryButton.value = ''
             }
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'ibc_forward':
-                title.value = t('components.txHandlingModal.transferred');
-                break;
+                title.value = t('components.txHandlingModal.transferred')
+                break
               case 'ibc_backward':
-                title.value = t('components.txHandlingModal.transferred');
-                break;
+                title.value = t('components.txHandlingModal.transferred')
+                break
               case 'transfer':
-                title.value = t('components.txHandlingModal.transferred');
-                break;
+                title.value = t('components.txHandlingModal.transferred')
+                break
               case 'swap':
-                updatePool(((props.tx as StepTransaction).data as SwapData).pool);
+                updatePool(((props.tx as StepTransaction).data as SwapData).pool)
                 if (props.txResult.swappedPercent === 100) {
-                  title.value = t('components.txHandlingModal.swapActionComplete');
+                  title.value = t('components.txHandlingModal.swapActionComplete')
                 } else if (props.txResult.swappedPercent === 0) {
-                  title.value = t('components.txHandlingModal.swapActionFail');
-                  primaryButton.value = t('components.txHandlingModal.tryAgain');
-                  secondaryButton.value = t('generic_cta.cancel');
+                  title.value = t('components.txHandlingModal.swapActionFail')
+                  primaryButton.value = t('components.txHandlingModal.tryAgain')
+                  secondaryButton.value = t('generic_cta.cancel')
                 } else {
                   title.value = t('components.txHandlingModal.swapActionPartiallyComplete', {
                     swappedPercent: parseInt(`${props.txResult.swappedPercent}`),
-                  });
+                  })
                 }
-                break;
+                break
               case 'addliquidity':
-                updatePool(((props.tx as StepTransaction).data as AddLiquidityData).pool);
-                title.value = t('components.txHandlingModal.addLiqActionComplete');
-                break;
+                updatePool(((props.tx as StepTransaction).data as AddLiquidityData).pool)
+                title.value = t('components.txHandlingModal.addLiqActionComplete')
+                break
               case 'withdrawliquidity':
-                updatePool(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool);
-                title.value = t('components.txHandlingModal.withdrawLiqActionComplete');
-                break;
+                updatePool(((props.tx as StepTransaction).data as WithdrawLiquidityData).pool)
+                title.value = t('components.txHandlingModal.withdrawLiqActionComplete')
+                break
               case 'createpool':
-                title.value = t('components.txHandlingModal.createPoolActionComplete');
-                break;
+                title.value = t('components.txHandlingModal.createPoolActionComplete')
+                break
             }
-            break;
+            break
           case 'failed':
-            title.value = t('components.txHandlingModal.txFail');
+            title.value = t('components.txHandlingModal.txFail')
             switch ((props.tx as StepTransaction).name) {
               //'ibc_forward' | 'ibc_backward' | 'swap' | 'transfer' | 'addliquidity' | 'withdrawliquidity' | 'createpool';
               case 'swap':
-                title.value = t('components.txHandlingModal.swapActionFail');
-                break;
+                title.value = t('components.txHandlingModal.swapActionFail')
+                break
               case 'addliquidity':
-                title.value = t('components.txHandlingModal.addLiqActionFail');
-                break;
+                title.value = t('components.txHandlingModal.addLiqActionFail')
+                break
               case 'withdrawliquidity':
-                title.value = t('components.txHandlingModal.withdrawLiqActionFail');
-                break;
+                title.value = t('components.txHandlingModal.withdrawLiqActionFail')
+                break
               case 'createpool':
-                title.value = t('components.txHandlingModal.createPoolActionFail');
-                break;
+                title.value = t('components.txHandlingModal.createPoolActionFail')
+                break
             }
 
-            overline.value = '';
-            secondaryButton.value = t('generic_cta.cancel');
-            primaryButton.value = t('components.txHandlingModal.tryAgain');
-            break;
+            overline.value = ''
+            secondaryButton.value = t('generic_cta.cancel')
+            primaryButton.value = t('components.txHandlingModal.tryAgain')
+            break
         }
       },
-    );
+    )
     onMounted(async () => {
-      let denoms = [];
-      let chain = undefined;
+      let denoms = []
+      let chain = undefined
 
       if (isIBC.value) {
-        denoms.push((props.tx.data as IBCForwardsData).amount.denom);
-        chain = (props.tx.data as IBCForwardsData).from_chain;
+        denoms.push((props.tx.data as IBCForwardsData).amount.denom)
+        chain = (props.tx.data as IBCForwardsData).from_chain
       } else if (props.tx.name === 'swap') {
-        denoms.push((props.tx.data as SwapData).from.denom);
+        denoms.push((props.tx.data as SwapData).from.denom)
       } else if (props.tx.name === 'addliquidity') {
-        denoms.push((props.tx.data as AddLiquidityData).coinA.denom);
-        denoms.push((props.tx.data as AddLiquidityData).coinB.denom);
+        denoms.push((props.tx.data as AddLiquidityData).coinA.denom)
+        denoms.push((props.tx.data as AddLiquidityData).coinB.denom)
       } else if (props.tx.name === 'createpool') {
-        denoms.push((props.tx.data as CreatePoolData).coinA.denom);
-        denoms.push((props.tx.data as CreatePoolData).coinB.denom);
+        denoms.push((props.tx.data as CreatePoolData).coinA.denom)
+        denoms.push((props.tx.data as CreatePoolData).coinB.denom)
       } else if (props.tx.name === 'withdrawliquidity') {
-        denoms.push((props.tx.data as WithdrawLiquidityData).poolCoin.denom);
+        denoms.push((props.tx.data as WithdrawLiquidityData).poolCoin.denom)
       }
 
       if (!denoms.length) {
-        return;
+        return
       }
 
       for (const denom of denoms) {
         if (!baseDenoms[denom]) {
-          baseDenoms[denom] = await getBaseDenom(denom, chain);
+          baseDenoms[denom] = await getBaseDenom(denom, chain)
         }
       }
-    });
+    })
     function emitClose() {
-      emit('close');
+      emit('close')
     }
 
     function emitAnother() {
-      emit('reset');
+      emit('reset')
     }
     function emitRetry() {
-      emit('retry');
+      emit('retry')
     }
     function emitNext() {
-      emit('next');
+      emit('next')
     }
     function emitDone() {
-      emit('done');
+      emit('done')
     }
 
     function unknownHandler() {
       if (location.pathname !== '/') {
-        router.push('/');
+        router.push('/')
       } else {
-        emitAnother();
+        emitAnother()
       }
     }
 
@@ -749,9 +749,9 @@ export default defineComponent({
       sendBaseDenom,
       sendAmount,
       unknownHandler,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,10 +1,10 @@
 type SymbolConfig = {
   colors: {
-    primary: string;
-    secondary: string;
-    tertiary?: string;
-  };
-};
+    primary: string
+    secondary: string
+    tertiary?: string
+  }
+}
 
 const Cosmos: SymbolConfig = {
   colors: {
@@ -12,21 +12,21 @@ const Cosmos: SymbolConfig = {
     secondary: '#375DF1',
     tertiary: '#E88CFE',
   },
-};
+}
 
 const Akash: SymbolConfig = {
   colors: {
     primary: '#EC4C4C',
     secondary: '#FB8686',
   },
-};
+}
 
 const CryptoOrg: SymbolConfig = {
   colors: {
     primary: '#5044E7',
     secondary: '#5070FF',
   },
-};
+}
 
 const Iris: SymbolConfig = {
   colors: {
@@ -34,28 +34,28 @@ const Iris: SymbolConfig = {
     secondary: '#7F53BF',
     tertiary: '#E1395D',
   },
-};
+}
 
 const Osmosis: SymbolConfig = {
   colors: {
     primary: '#0002E9',
     secondary: '#FF00C7',
   },
-};
+}
 
 const Persistence: SymbolConfig = {
   colors: {
     primary: '#1A1A1A',
     secondary: '#626262',
   },
-};
+}
 
 const Sentinel: SymbolConfig = {
   colors: {
     primary: '#02182F',
     secondary: '#031D38',
   },
-};
+}
 
 const Regen: SymbolConfig = {
   colors: {
@@ -63,7 +63,7 @@ const Regen: SymbolConfig = {
     secondary: '#87EB9C',
     tertiary: '#D7F8DD',
   },
-};
+}
 
 const Ion: SymbolConfig = {
   colors: {
@@ -71,7 +71,7 @@ const Ion: SymbolConfig = {
     secondary: '#4199FD',
     tertiary: '#50CCC9',
   },
-};
+}
 
 const Terra: SymbolConfig = {
   colors: {
@@ -79,28 +79,28 @@ const Terra: SymbolConfig = {
     secondary: '#344D8C',
     tertiary: '#FFE14B',
   },
-};
+}
 
 const Ixo: SymbolConfig = {
   colors: {
     primary: '#233F88',
     secondary: '#739FE0',
   },
-};
+}
 
 const EMoney: SymbolConfig = {
   colors: {
     primary: '#023B40',
     secondary: '#0C919D',
   },
-};
+}
 
 const Microtick: SymbolConfig = {
   colors: {
     primary: '#BAE941',
     secondary: '#F3FFE4',
   },
-};
+}
 
 const Starname: SymbolConfig = {
   colors: {
@@ -108,14 +108,14 @@ const Starname: SymbolConfig = {
     secondary: '#8FBC9D',
     tertiary: '#00AAFB',
   },
-};
+}
 
 const Sifchain: SymbolConfig = {
   colors: {
     primary: '#F9C82A',
     secondary: '#FFF824',
   },
-};
+}
 
 const Injective: SymbolConfig = {
   colors: {
@@ -123,35 +123,35 @@ const Injective: SymbolConfig = {
     secondary: '#3D477B',
     tertiary: '#05ACE8',
   },
-};
+}
 
 const GravityDex: SymbolConfig = {
   colors: {
     primary: '#E88CFE',
     secondary: '#A4FAFF',
   },
-};
+}
 
 const Juno: SymbolConfig = {
   colors: {
     primary: '#FD675C',
     secondary: '#FFBDBA',
   },
-};
+}
 
 const LikeCoin: SymbolConfig = {
   colors: {
     primary: '#286A7A',
     secondary: '#60D1E2',
   },
-};
+}
 
 const BitCanna: SymbolConfig = {
   colors: {
     primary: '#46DD94',
     secondary: '#77EFE9',
   },
-};
+}
 
 const chains: Record<string, SymbolConfig> = {
   'cosmos-hub': Cosmos,
@@ -170,7 +170,7 @@ const chains: Record<string, SymbolConfig> = {
   juno: Juno,
   likecoin: LikeCoin,
   bitcanna: BitCanna,
-};
+}
 
 const denoms: Record<string, SymbolConfig> = {
   udvpn: Sentinel,
@@ -192,15 +192,15 @@ const denoms: Record<string, SymbolConfig> = {
   ujuno: Juno,
   nanolike: LikeCoin,
   ubcna: BitCanna,
-};
+}
 
 const protocols: Record<string, SymbolConfig> = {
   gdex: GravityDex,
   osmosis: Osmosis,
-};
+}
 
 export default {
   ...chains,
   ...denoms,
   ...protocols,
-};
+}

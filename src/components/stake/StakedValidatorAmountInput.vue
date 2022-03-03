@@ -39,17 +39,17 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import Price from '@/components/common/Price.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
-import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import Price from '@/components/common/Price.vue'
+import AmountInput from '@/components/ui/AmountInput.vue'
+import { GlobalDemerisGetterTypes, RootStoreType } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
 
-import ValidatorBadge from '../common/ValidatorBadge.vue';
+import ValidatorBadge from '../common/ValidatorBadge.vue'
 
 export default defineComponent({
   name: 'StakedValidatorAmountInput',
@@ -64,47 +64,47 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
     size: { type: String, required: false, default: 'md' },
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const store = useStore() as RootStoreType;
+    const store = useStore() as RootStoreType
 
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name })
+    })
     const stakingDenom = computed(() => {
-      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null;
-    });
-    const propsRef = toRefs(props);
+      return (chain.value as ChainData)?.denoms.find((x) => x.stakable) ?? null
+    })
+    const propsRef = toRefs(props)
 
     const model = computed({
       get: () => propsRef.modelValue.value,
       set: (value) => emit('update:modelValue', value),
-    });
+    })
     const modelInBase = computed(() => {
-      return new BigNumber(model.value).multipliedBy(10 ** parseInt(stakingDenom.value.precision)).toString();
-    });
+      return new BigNumber(model.value).multipliedBy(10 ** parseInt(stakingDenom.value.precision)).toString()
+    })
     const setMax = () => {
       model.value = new BigNumber(propsRef.validator.value.stakedAmount)
         .dividedBy(10 ** parseInt(stakingDenom.value.precision))
-        .toString();
-    };
+        .toString()
+    }
     const stakingBalance = computed(() => {
-      return propsRef.validator.value.stakedAmount;
-    });
+      return propsRef.validator.value.stakedAmount
+    })
     return {
       stakingDenom,
       model,
       modelInBase,
       stakingBalance,
       setMax,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

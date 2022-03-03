@@ -39,10 +39,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Spinner from '@/components/ui/Spinner.vue';
+import Button from '@/components/ui/Button.vue'
+import Spinner from '@/components/ui/Spinner.vue'
 
 export default defineComponent({
   name: 'ConnectKeplr',
@@ -67,21 +67,21 @@ export default defineComponent({
 
   setup(_, { emit }) {
     const emitCancel = () => {
-      emit('cancel');
-    };
+      emit('cancel')
+    }
 
     const emitTryDemo = () => {
-      emit('try-demo');
-    };
+      emit('try-demo')
+    }
 
     const openUrlChrome = () => {
-      window.open('https://www.google.com/chrome/', '_blank', 'noopener');
-    };
+      window.open('https://www.google.com/chrome/', '_blank', 'noopener')
+    }
     const openUrlBrave = () => {
-      window.open('https://www.brave.com', '_blank', 'noopener');
-    };
+      window.open('https://www.brave.com', '_blank', 'noopener')
+    }
 
-    return { emitCancel, openUrlChrome, openUrlBrave, emitTryDemo };
+    return { emitCancel, openUrlChrome, openUrlBrave, emitTryDemo }
   },
-});
+})
 </script>

@@ -7,24 +7,24 @@
   />
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from 'vue'
 export default defineComponent({
   name: 'WhiteOverlay',
   setup() {
-    const isMouseOver = ref(false);
+    const isMouseOver = ref(false)
 
     function toggleVisibilitiy() {
       if (isMouseOver.value) {
         setTimeout(() => {
-          isMouseOver.value = !isMouseOver.value;
-        }, 5000);
+          isMouseOver.value = !isMouseOver.value
+        }, 5000)
       } else {
-        isMouseOver.value = !isMouseOver.value;
+        isMouseOver.value = !isMouseOver.value
       }
     }
-    return { toggleVisibilitiy, isMouseOver };
+    return { toggleVisibilitiy, isMouseOver }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .white-overlay {

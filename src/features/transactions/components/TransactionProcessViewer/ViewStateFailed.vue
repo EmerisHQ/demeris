@@ -189,29 +189,29 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import Denom from '@/components/common/Denom.vue';
-import Alert from '@/components/ui/Alert.vue';
-import Button from '@/components/ui/Button.vue';
-import Collapse from '@/components/ui/Collapse.vue';
-import Icon from '@/components/ui/Icon.vue';
-import { getBaseDenomSync } from '@/utils/actionHandler';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import Denom from '@/components/common/Denom.vue'
+import Alert from '@/components/ui/Alert.vue'
+import Button from '@/components/ui/Button.vue'
+import Collapse from '@/components/ui/Collapse.vue'
+import Icon from '@/components/ui/Icon.vue'
+import { getBaseDenomSync } from '@/utils/actionHandler'
 
-import { getCurrentTransaction, getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers';
-import { useTransactionsStore } from '../../transactionsStore';
+import { getCurrentTransaction, getExplorerTx, ProvideViewerKey } from '../../transactionProcessHelpers'
+import { useTransactionsStore } from '../../transactionsStore'
 
-const { t } = useI18n({ useScope: 'global' });
+const { t } = useI18n({ useScope: 'global' })
 
-const transactionsStore = useTransactionsStore();
-const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey);
-const { state, send } = actor;
+const transactionsStore = useTransactionsStore()
+const { isSwapComponent, actor, removeTransactionAndClose } = inject(ProvideViewerKey)
+const { state, send } = actor
 
-const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
-const transaction = computed(() => getCurrentTransaction(state.value.context));
+const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0])
+const transaction = computed(() => getCurrentTransaction(state.value.context))
 
 const titleMap = {
   transfer: t('components.txHandlingModal.txFail'),
@@ -226,44 +226,44 @@ const titleMap = {
   unstake: t('components.txHandlingModal.unstakeActionFail'),
   switch: t('components.txHandlingModal.switchActionFail'),
   claim: t('components.txHandlingModal.claimActionFail'),
-};
+}
 
 const title = computed(() => {
   if (lastResult.value?.status === 'IBC_receive_failed') {
-    return t('components.txHandlingModal.somethingWentWrong');
+    return t('components.txHandlingModal.somethingWentWrong')
   }
 
   if (state.value.matches('failed.unknown')) {
-    return t('components.txHandlingModal.couldNotFetchTransactionResult');
+    return t('components.txHandlingModal.couldNotFetchTransactionResult')
   }
 
   if (state.value.matches('failed.sign')) {
-    return t('components.txHandlingModal.signError');
+    return t('components.txHandlingModal.signError')
   }
 
   if (titleMap[transaction.value.name]) {
-    return titleMap[transaction.value.name];
+    return titleMap[transaction.value.name]
   }
 
-  return t('components.txHandlingModal.somethingWentWrong');
-});
+  return t('components.txHandlingModal.somethingWentWrong')
+})
 
 const subtitle = computed(() => {
   if (state.value.matches('failed.unknown')) {
-    return t('components.txHandlingModal.checkTransactionOnBlockExplorer');
+    return t('components.txHandlingModal.checkTransactionOnBlockExplorer')
   }
 
   if (lastResult.value?.status === 'IBC_receive_failed') {
-    return t('components.txHandlingModal.revertTx');
+    return t('components.txHandlingModal.revertTx')
   }
 
-  return undefined;
-});
+  return undefined
+})
 
 const onDone = () => {
-  send('ABORT');
-  removeTransactionAndClose();
-};
+  send('ABORT')
+  removeTransactionAndClose()
+}
 
-const onCancel = () => transactionsStore.toggleCancelModal();
+const onCancel = () => transactionsStore.toggleCancelModal()
 </script>

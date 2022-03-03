@@ -33,10 +33,10 @@ export default {
       // Either use the given fixed width or
       // a random width between the given min
       // and max values.
-      return this.width || `${Math.floor(Math.random() * (this.maxWidth - this.minWidth) + this.minWidth)}%`;
+      return this.width || `${Math.floor(Math.random() * (this.maxWidth - this.minWidth) + this.minWidth)}%`
     },
   },
-};
+}
 </script>
 
 <style lang="scss">

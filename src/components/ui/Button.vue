@@ -54,9 +54,9 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from 'vue'
 
-import Spinner from '@/components/ui/Spinner.vue';
+import Spinner from '@/components/ui/Spinner.vue'
 export default defineComponent({
   name: 'Button',
   components: {
@@ -76,20 +76,20 @@ export default defineComponent({
   },
   emits: ['click'],
   setup(props, { emit }) {
-    const buttonTooltipRef = ref(null);
+    const buttonTooltipRef = ref(null)
     function toggleToolTip(type) {
       if (props.tooltipText) {
         if (type === 'show') {
-          buttonTooltipRef.value.show();
+          buttonTooltipRef.value.show()
         } else {
-          buttonTooltipRef.value.hide();
+          buttonTooltipRef.value.hide()
         }
       }
     }
 
-    return { buttonTooltipRef, toggleToolTip, emit };
+    return { buttonTooltipRef, toggleToolTip, emit }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .button-primary,

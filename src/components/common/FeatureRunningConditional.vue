@@ -4,22 +4,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
-import { featureRunning } from '@/utils/FeatureManager';
+import { featureRunning } from '@/utils/FeatureManager'
 
 const props = defineProps({
   name: {
     type: String,
     required: true,
   },
-});
+})
 
 const isActivated = computed(() => {
-  const result = featureRunning(props.name);
+  const result = featureRunning(props.name)
   if (result === undefined) {
-    return false;
+    return false
   }
-  return !!result;
-});
+  return !!result
+})
 </script>

@@ -7,13 +7,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRefs } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, toRefs } from 'vue'
+import { useStore } from 'vuex'
 
-import Ticker from '@/components/common/Ticker.vue';
-import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { VerifiedDenoms } from '@/types/api';
+import Ticker from '@/components/common/Ticker.vue'
+import usePools from '@/composables/usePools'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { VerifiedDenoms } from '@/types/api'
 
 export default defineComponent({
   name: 'LPAsset',
@@ -27,23 +27,23 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
-    const propsRef = toRefs(props);
+    const store = useStore()
+    const propsRef = toRefs(props)
     const verifiedDenoms = computed<VerifiedDenoms>(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
-    });
+      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? []
+    })
     const validPool = computed(() => {
-      return verifiedDenoms.value.find((x) => x.name == propsRef.name.value) ?? false;
-    });
-    const { pools } = usePools();
+      return verifiedDenoms.value.find((x) => x.name == propsRef.name.value) ?? false
+    })
+    const { pools } = usePools()
     const pool = computed(() => {
-      return pools.value?.find((x) => x.pool_coin_denom == propsRef.name.value);
-    });
+      return pools.value?.find((x) => x.pool_coin_denom == propsRef.name.value)
+    })
     return {
       validPool,
       pool,
-    };
+    }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

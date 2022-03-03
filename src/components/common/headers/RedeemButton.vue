@@ -8,27 +8,27 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent } from 'vue'
+import { useStore } from 'vuex'
 
-import RedeemIcon from '@/components/common/Icons/RedeemIcon.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
+import RedeemIcon from '@/components/common/Icons/RedeemIcon.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
 
 export default defineComponent({
   name: 'RedeemButton',
   components: { RedeemIcon },
   setup() {
-    const store = useStore();
+    const store = useStore()
 
-    const balances = store.getters[GlobalDemerisGetterTypes.API.getAllBalances];
-    const redeemable = [];
+    const balances = store.getters[GlobalDemerisGetterTypes.API.getAllBalances]
+    const redeemable = []
     for (let balance of balances) {
       // TODO: check for redeemable
-      redeemable.push(balance);
+      redeemable.push(balance)
     }
-    return { redeemable };
+    return { redeemable }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .redeem-button {

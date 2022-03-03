@@ -51,16 +51,16 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue'
 
-import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
-import CoinList from '@/components/common/CoinList.vue';
-import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import Search from '@/components/common/Search.vue';
-import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
-import { useStore } from '@/utils/useStore';
+import ChainSelectModal from '@/components/common/ChainSelectModal.vue'
+import CoinList from '@/components/common/CoinList.vue'
+import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue'
+import Search from '@/components/common/Search.vue'
+import WhiteOverlay from '@/components/common/WhiteOverlay.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { getDisplayName } from '@/utils/actionHandler'
+import { useStore } from '@/utils/useStore'
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -76,7 +76,7 @@ export default defineComponent({
     otherAssets: {
       type: Object,
       default: () => {
-        return {};
+        return {}
       },
     },
     counterDenom: { type: Object, required: false, default: null },
@@ -87,14 +87,14 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props, { emit }) {
-    const isModalOpen = ref(false);
-    const keyword = ref('');
-    const selectedDenom = ref(null);
+    const isModalOpen = ref(false)
+    const keyword = ref('')
+    const selectedDenom = ref(null)
 
-    const chainSelectModalData = ref(props.assets);
+    const chainSelectModalData = ref(props.assets)
 
-    const displayNameAddedList = ref([]);
-    const displayNameAddedOtherList = ref([]);
+    const displayNameAddedList = ref([])
+    const displayNameAddedOtherList = ref([])
 
     watch(
       () => props.assets,
@@ -109,10 +109,10 @@ export default defineComponent({
                     asset.base_denom,
                     useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
                   ),
-                };
+                }
               }),
             ),
-          ];
+          ]
 
           if (props.otherAssets.length > 0) {
             displayNameAddedOtherList.value = [
@@ -124,19 +124,19 @@ export default defineComponent({
                       asset.base_denom,
                       useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
                     ),
-                  };
+                  }
                 }),
               ),
-            ];
+            ]
           }
         } else {
-          return [];
+          return []
         }
       },
       { immediate: true },
-    );
+    )
 
-    const displaySelectedPair = ref('');
+    const displaySelectedPair = ref('')
     watch(
       () => props.counterDenom?.base_denom,
       async () => {
@@ -144,55 +144,55 @@ export default defineComponent({
           displaySelectedPair.value = await getDisplayName(
             props.counterDenom.base_denom,
             useStore().getters[GlobalDemerisGetterTypes.API.getDexChain],
-          );
+          )
         }
       },
       { immediate: true },
-    );
+    )
 
     const keywordFilteredAssets = computed(() => {
       const filteredAssets = (displayNameAddedList.value[0] ?? []).filter((asset) => {
-        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
-      });
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+      })
       const filteredOtherAssets = (displayNameAddedOtherList.value[0] ?? []).filter((asset) => {
-        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1;
-      });
+        return asset.display_name?.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+      })
 
-      return [filteredAssets, filteredOtherAssets];
-    });
+      return [filteredAssets, filteredOtherAssets]
+    })
 
     function coinListselectHandler(payload) {
       if (props.title === 'Receive') {
-        payload.type = props.title;
-        emit('select', payload);
+        payload.type = props.title
+        emit('select', payload)
       } else {
-        selectedDenom.value = payload.base_denom;
+        selectedDenom.value = payload.base_denom
 
         if (props.assets.filter((asset) => asset.base_denom === payload.base_denom).length > 1) {
-          chainSelectModalData.value = props.assets;
-          toggleChainSelectModal();
-          return;
+          chainSelectModalData.value = props.assets
+          toggleChainSelectModal()
+          return
         } else if (
           props.otherAssets.length > 0 &&
           props.otherAssets.filter((asset) => asset.base_denom === payload.base_denom).length > 1
         ) {
-          chainSelectModalData.value = props.otherAssets;
-          toggleChainSelectModal();
-          return;
+          chainSelectModalData.value = props.otherAssets
+          toggleChainSelectModal()
+          return
         }
 
-        emit('select', payload);
+        emit('select', payload)
       }
     }
 
     function chainSelectHandler(payload) {
-      emit('select', payload);
-      toggleChainSelectModal();
+      emit('select', payload)
+      toggleChainSelectModal()
     }
 
     function toggleChainSelectModal() {
-      isModalOpen.value = !isModalOpen.value;
-      keyword.value = '';
+      isModalOpen.value = !isModalOpen.value
+      keyword.value = ''
     }
 
     return {
@@ -206,9 +206,9 @@ export default defineComponent({
       displayNameAddedList,
       selectedDenom,
       displaySelectedPair,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

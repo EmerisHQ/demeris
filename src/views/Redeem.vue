@@ -96,20 +96,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { defineComponent, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import ChainName from '@/components/common/ChainName.vue';
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
-import { actionHandler } from '@/utils/actionHandler';
-import { event, pageview } from '@/utils/analytics';
-import { parseCoins } from '@/utils/basic';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import ChainName from '@/components/common/ChainName.vue'
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store'
+import { actionHandler } from '@/utils/actionHandler'
+import { event, pageview } from '@/utils/analytics'
+import { parseCoins } from '@/utils/basic'
 
 export default defineComponent({
   name: 'Redeem',
@@ -117,29 +117,29 @@ export default defineComponent({
   components: { Button, Icon, AmountDisplay, ChainName, FeeLevelSelector },
 
   setup() {
-    const router = useRouter();
-    const { redeemableBalances } = useAccount();
-    const steps = ['assets', 'review', 'transfer', 'redeemed'];
-    const apistore = useStore() as TypedAPIStore;
-    const userstore = useStore() as TypedUSERStore;
+    const router = useRouter()
+    const { redeemableBalances } = useAccount()
+    const steps = ['assets', 'review', 'transfer', 'redeemed']
+    const apistore = useStore() as TypedAPIStore
+    const userstore = useStore() as TypedUSERStore
 
-    pageview({ page_title: 'Redeem', page_path: '/redeem' });
-    userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } });
+    pageview({ page_title: 'Redeem', page_path: '/redeem' })
+    userstore.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { hasSeenRedeem: true } })
     const state = reactive({
       step: 'assets',
       selectedAsset: undefined,
       showInstruction: true,
-    });
+    })
 
-    const augmentedBalances = ref([]);
+    const augmentedBalances = ref([])
 
     watch(
       () => redeemableBalances.value,
       async (newBalances) => {
         augmentedBalances.value = await Promise.all(
           newBalances.map(async (newBalance) => {
-            let balance = { ...newBalance };
-            balance.hops = [];
+            let balance = { ...newBalance }
+            balance.hops = []
             const verifyTrace =
               apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
                 chain_name: balance.on_chain,
@@ -155,9 +155,9 @@ export default defineComponent({
                   },
                 },
                 { root: true },
-              ));
+              ))
             for (let hop of verifyTrace.trace) {
-              balance.hops.unshift(hop.counterparty_name);
+              balance.hops.unshift(hop.counterparty_name)
             }
             balance.steps = await actionHandler({
               name: 'redeem',
@@ -167,61 +167,61 @@ export default defineComponent({
                   chain_name: balance.on_chain,
                 },
               ],
-            });
+            })
 
-            return balance;
+            return balance
           }),
-        );
+        )
       },
       { immediate: true },
-    );
+    )
 
     const onClose = () => {
-      router.push('/pools');
-    };
+      router.push('/pools')
+    }
 
     const getRoute = (hash, chain_name) => {
       const verifyTrace = apistore.getters[GlobalDemerisGetterTypes.API.getVerifyTrace]({
         chain_name,
         hash,
-      });
-      const hops = [];
+      })
+      const hops = []
       for (let hop of verifyTrace.trace) {
-        hops.unshift(hop.counterparty_name);
+        hops.unshift(hop.counterparty_name)
       }
-      return hops;
-    };
+      return hops
+    }
     const goBack = () => {
-      const currentStepIndex = steps.findIndex((item) => item === state.step);
+      const currentStepIndex = steps.findIndex((item) => item === state.step)
 
       if (currentStepIndex > 0) {
-        state.step = steps[currentStepIndex - 1];
-        return;
+        state.step = steps[currentStepIndex - 1]
+        return
       }
 
-      router.back();
-    };
+      router.back()
+    }
 
     const goToStep = (step: string) => {
-      state.step = step;
-    };
+      state.step = step
+    }
 
     const selectAsset = (asset: Record<string, unknown>) => {
-      state.selectedAsset = asset;
-      event('review_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' });
-      goToStep('review');
-    };
+      state.selectedAsset = asset
+      event('review_tx', { event_label: 'Reviewing redeem tx', event_category: 'transactions' })
+      goToStep('review')
+    }
 
     const closeInstruction = () => {
-      state.showInstruction = false;
-    };
+      state.showInstruction = false
+    }
 
     const resetHandler = () => {
-      state.selectedAsset = undefined;
-      state.showInstruction = false;
+      state.selectedAsset = undefined
+      state.showInstruction = false
 
-      goToStep('assets');
-    };
+      goToStep('assets')
+    }
 
     return {
       augmentedBalances,
@@ -235,9 +235,9 @@ export default defineComponent({
       parseCoins,
       getRoute,
       resetHandler,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

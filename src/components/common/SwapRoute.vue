@@ -33,12 +33,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
-import Denom from '@/components/common/Denom.vue';
-import Icon from '@/components/ui/Icon.vue';
+import ChainName from '@/components/common/ChainName.vue'
+import CircleSymbol from '@/components/common/CircleSymbol.vue'
+import Denom from '@/components/common/Denom.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   name: 'SwapRoute',
@@ -60,10 +60,10 @@ export default defineComponent({
       { denom: 'uiris', chain: 'irischain', subItems: ['Transfer x', 'Swap Y'] },
       { denom: 'uatom', chain: 'osmosis', subItems: ['Transfer x', 'Swap Y'] },
       { denom: 'lastcoin', chain: 'lastchain' },
-    ]);
-    return { items };
+    ])
+    return { items }
   },
-});
+})
 </script>
 <style lang="scss" scoped>
 .timeline-container {

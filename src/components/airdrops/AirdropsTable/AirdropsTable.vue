@@ -64,12 +64,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue'
 
-import ChainName from '@/components/common/ChainName.vue';
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import Ticker from '@/components/common/Ticker.vue';
-import { Airdrop } from '@/types/api';
+import ChainName from '@/components/common/ChainName.vue'
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import Ticker from '@/components/common/Ticker.vue'
+import { Airdrop } from '@/types/api'
 
 export default defineComponent({
   name: 'AirdropsTable',
@@ -96,18 +96,18 @@ export default defineComponent({
   },
   emits: ['row-click'],
   setup(props, { emit }) {
-    const keyword = ref<string>('');
+    const keyword = ref<string>('')
 
     const handleClick = (airdrop: Airdrop) => {
-      emit('row-click', airdrop);
-    };
+      emit('row-click', airdrop)
+    }
 
     return {
       keyword,
       handleClick,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

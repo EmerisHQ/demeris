@@ -10,9 +10,9 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/Icon.vue'
 export default defineComponent({
   name: 'GobackWithClose',
   components: { Icon },
@@ -25,10 +25,10 @@ export default defineComponent({
   emits: ['goback', 'close'],
   setup(props, { emit }) {
     function clickIcon(event) {
-      emit(event);
+      emit(event)
     }
-    return { clickIcon };
+    return { clickIcon }
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

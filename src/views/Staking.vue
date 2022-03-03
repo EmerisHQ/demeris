@@ -78,27 +78,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, defineComponent, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import ClaimForm from '@/components/stake/ClaimForm/ClaimForm.vue';
-import StakeForm from '@/components/stake/StakeForm';
-import SwitchForm from '@/components/stake/SwitchForm/SwitchForm.vue';
-import UnstakeForm from '@/components/stake/UnstakeForm';
-import Button from '@/components/ui/Button.vue';
-import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
-import Icon from '@/components/ui/Icon.vue';
-import useAccount from '@/composables/useAccount';
-import useStaking from '@/composables/useStaking';
-import { useTransactionsStore } from '@/features/transactions/transactionsStore';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { pageview } from '@/utils/analytics';
-import { keyHashfromAddress } from '@/utils/basic';
+import ClaimForm from '@/components/stake/ClaimForm/ClaimForm.vue'
+import StakeForm from '@/components/stake/StakeForm'
+import SwitchForm from '@/components/stake/SwitchForm/SwitchForm.vue'
+import UnstakeForm from '@/components/stake/UnstakeForm'
+import Button from '@/components/ui/Button.vue'
+import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue'
+import Icon from '@/components/ui/Icon.vue'
+import useAccount from '@/composables/useAccount'
+import useStaking from '@/composables/useStaking'
+import { useTransactionsStore } from '@/features/transactions/transactionsStore'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { pageview } from '@/utils/analytics'
+import { keyHashfromAddress } from '@/utils/basic'
 
-type ActionType = 'stake' | 'unstake' | 'claim' | 'switch';
+type ActionType = 'stake' | 'unstake' | 'claim' | 'switch'
 
 export default defineComponent({
   name: 'Staking',
@@ -113,113 +113,113 @@ export default defineComponent({
   },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    const router = useRouter();
-    const transactionsStore = useTransactionsStore();
-    const route = useRoute();
-    const { getValidatorsByBaseDenom } = useStaking();
-    const { stakingBalances } = useAccount();
-    const actionType = route.params.action as ActionType;
-    const validator = route.params.validator as string;
-    const baseDenom = route.params.denom as string;
-    const rawValidatorList = ref([]);
-    const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator');
-    const inModal = ref(undefined);
-    const store = useStore();
+    const { t } = useI18n({ useScope: 'global' })
+    const router = useRouter()
+    const transactionsStore = useTransactionsStore()
+    const route = useRoute()
+    const { getValidatorsByBaseDenom } = useStaking()
+    const { stakingBalances } = useAccount()
+    const actionType = route.params.action as ActionType
+    const validator = route.params.validator as string
+    const baseDenom = route.params.denom as string
+    const rawValidatorList = ref([])
+    const step = actionType == 'claim' ? ref('review') : actionType == 'unstake' ? ref('amount') : ref('validator')
+    const inModal = ref(undefined)
+    const store = useStore()
     const chain_name = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
-    );
+    )
 
     watch(
       () => chain_name.value,
       async (newVal, _) => {
         if (newVal) {
-          rawValidatorList.value = await getValidatorsByBaseDenom(baseDenom);
+          rawValidatorList.value = await getValidatorsByBaseDenom(baseDenom)
         }
       },
       { immediate: true },
-    );
+    )
     const validatorList = computed(() => {
-      const validators = [];
+      const validators = []
       if (stakingBalances.value.length) {
         rawValidatorList.value.forEach((vali: any) => {
           const stakedValidator = stakingBalances.value.find(
             (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
-          );
+          )
           if (stakedValidator) {
-            validators.push({ ...vali, stakedAmount: parseInt(stakedValidator.amount) });
+            validators.push({ ...vali, stakedAmount: parseInt(stakedValidator.amount) })
           } else {
-            validators.push({ ...vali, stakedAmount: 0 });
+            validators.push({ ...vali, stakedAmount: 0 })
           }
-        });
+        })
       } else {
         rawValidatorList.value.forEach((vali: any) => {
-          validators.push({ ...vali, stakedAmount: 0 });
-        });
+          validators.push({ ...vali, stakedAmount: 0 })
+        })
       }
-      return validators;
-    });
-    pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType });
+      return validators
+    })
+    pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType })
 
     const showBackButton = computed(() => {
       if (step.value === 'staked' || step.value === 'unstaked') {
-        return false;
+        return false
       }
-      return (currentStepIndex.value > 0 && !!actionType) || inModal.value;
-    });
+      return (currentStepIndex.value > 0 && !!actionType) || inModal.value
+    })
     const isBackDisabled = computed(() => {
       return (
         (step.value === 'validator' && !inModal.value) ||
         (actionType === 'claim' && step.value === 'review') ||
         (actionType === 'unstake' && step.value === 'amount')
-      );
-    });
+      )
+    })
     const allSteps = {
       stake: ['validator', 'amount', 'review', 'staked'],
       unstake: ['amount', 'review', 'unstake'],
       switch: ['validator', 'amount', 'review', 'restake'],
       claim: ['review', 'claim'],
-    };
+    }
 
-    const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
+    const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value))
 
     const metaSource = computed(() => {
-      let title = t('context.stake.title');
+      let title = t('context.stake.title')
 
       return {
         title,
-      };
-    });
-    useMeta(metaSource);
+      }
+    })
+    useMeta(metaSource)
 
     const goBack = () => {
       if (inModal.value) {
-        step.value = inModal.value;
-        inModal.value = undefined;
+        step.value = inModal.value
+        inModal.value = undefined
       } else {
-        transactionsStore.removeTransaction(transactionsStore.currentId);
+        transactionsStore.removeTransaction(transactionsStore.currentId)
         if (currentStepIndex.value > 0) {
-          step.value = allSteps[actionType][currentStepIndex.value - 1];
-          return;
+          step.value = allSteps[actionType][currentStepIndex.value - 1]
+          return
         }
 
-        step.value = undefined;
-        router.back();
+        step.value = undefined
+        router.back()
       }
-    };
+    }
 
     const onClose = () => {
-      transactionsStore.removeTransaction(transactionsStore.currentId);
-      const hasPrevPath = !!router.options.history.state.back;
-      hasPrevPath ? router.back() : router.push('/');
-    };
+      transactionsStore.removeTransaction(transactionsStore.currentId)
+      const hasPrevPath = !!router.options.history.state.back
+      hasPrevPath ? router.back() : router.push('/')
+    }
 
     const showNavigation = computed(() => {
       if (step.value === 'staked' || step.value === 'unstaked') {
-        return false;
+        return false
       }
-      return actionType && !inModal.value;
-    });
+      return actionType && !inModal.value
+    })
 
     return {
       actionType,
@@ -233,9 +233,9 @@ export default defineComponent({
       validator,
       showNavigation,
       inModal,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

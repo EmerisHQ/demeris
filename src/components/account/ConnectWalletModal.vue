@@ -55,33 +55,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
+import { defineComponent, nextTick, onMounted, ref, watch } from 'vue'
 
-import AgreeWarning from '@/components/account/AgreeWarning.vue';
-import ConnectKeplr from '@/components/account/ConnectKeplr.vue';
-import GetBrowser from '@/components/account/GetBrowser.vue';
-import GetKeplr from '@/components/account/GetKeplr.vue';
-import Modal from '@/components/ui/Modal.vue';
+import AgreeWarning from '@/components/account/AgreeWarning.vue'
+import ConnectKeplr from '@/components/account/ConnectKeplr.vue'
+import GetBrowser from '@/components/account/GetBrowser.vue'
+import GetKeplr from '@/components/account/GetKeplr.vue'
+import Modal from '@/components/ui/Modal.vue'
 
 async function getKeplrInstance() {
   if (window.keplr) {
-    return window.keplr;
+    return window.keplr
   }
 
   if (document.readyState === 'complete') {
-    return window.keplr;
+    return window.keplr
   }
 
   return new Promise((resolve) => {
     const documentStateChange = (event: Event) => {
       if (event.target && (event.target as Document).readyState === 'complete') {
-        resolve(window.keplr);
-        document.removeEventListener('readystatechange', documentStateChange);
+        resolve(window.keplr)
+        document.removeEventListener('readystatechange', documentStateChange)
       }
-    };
+    }
 
-    document.addEventListener('readystatechange', documentStateChange);
-  });
+    document.addEventListener('readystatechange', documentStateChange)
+  })
 }
 
 export default defineComponent({
@@ -105,64 +105,64 @@ export default defineComponent({
   emits: ['close'],
 
   setup(_, { emit }) {
-    const connectKeplrRef = ref(null);
-    const agreeWarningRef = ref(null);
-    const getKeplrRef = ref(null);
-    const getBrowserRef = ref(null);
-    const isWarningAgreed = ref(null);
-    const isKeplrSupported = ref(null);
-    const isKeplrInstalled = ref(null);
-    const isLoading = ref(true);
+    const connectKeplrRef = ref(null)
+    const agreeWarningRef = ref(null)
+    const getKeplrRef = ref(null)
+    const getBrowserRef = ref(null)
+    const isWarningAgreed = ref(null)
+    const isKeplrSupported = ref(null)
+    const isKeplrInstalled = ref(null)
+    const isLoading = ref(true)
 
     const closeConnectKeplr = () => {
-      connectKeplrRef.value.cancel();
-      emit('close');
-    };
+      connectKeplrRef.value.cancel()
+      emit('close')
+    }
     const closeAgreeWarning = () => {
-      emit('close');
-    };
+      emit('close')
+    }
     const closeGetKeplr = () => {
-      emit('close');
-    };
+      emit('close')
+    }
     const closeGetBrowser = () => {
-      emit('close');
-    };
+      emit('close')
+    }
 
     const agreeWarning = () => {
-      isWarningAgreed.value = true;
-      connectKeplrRef.value.signIn();
-    };
+      isWarningAgreed.value = true
+      connectKeplrRef.value.signIn()
+    }
 
     // TODO: Implement demo account
     const tryDemo = () => {
-      emit('close');
-    };
+      emit('close')
+    }
 
     onMounted(async () => {
-      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed');
+      isWarningAgreed.value = window.localStorage.getItem('isWarningAgreed')
 
       // dont present spinner forever if not Chrome
       // @ts-ignore
       if (!window.chrome) {
-        isLoading.value = false;
+        isLoading.value = false
       }
 
-      await getKeplrInstance();
-      await nextTick();
+      await getKeplrInstance()
+      await nextTick()
 
       // @ts-ignore
-      isKeplrSupported.value = !!window.chrome;
+      isKeplrSupported.value = !!window.chrome
 
       nextTick(() => {
         // detect keplr installed
         // @ts-ignore
-        isKeplrInstalled.value = !!window.keplr;
-      });
-    });
+        isKeplrInstalled.value = !!window.keplr
+      })
+    })
 
     watch(isWarningAgreed, () => {
-      window.localStorage.setItem('isWarningAgreed', 'true');
-    });
+      window.localStorage.setItem('isWarningAgreed', 'true')
+    })
 
     return {
       agreeWarning,
@@ -179,9 +179,9 @@ export default defineComponent({
       closeGetKeplr,
       closeGetBrowser,
       tryDemo,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss">

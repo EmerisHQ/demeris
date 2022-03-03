@@ -20,12 +20,12 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue'
 
-import Search from '@/components/common/Search.vue';
-import ListItemCheckbox from '@/components/ui/List/ListItemCheckbox.vue';
+import Search from '@/components/common/Search.vue'
+import ListItemCheckbox from '@/components/ui/List/ListItemCheckbox.vue'
 
-type Exchange = { name: string; symbolUrl: string; isSelected: boolean };
+type Exchange = { name: string; symbolUrl: string; isSelected: boolean }
 
 export default defineComponent({
   name: 'ExchangesFilter',
@@ -41,38 +41,38 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const searchValue = ref('');
-    const exchanges = ref(props.exchanges);
+    const searchValue = ref('')
+    const exchanges = ref(props.exchanges)
 
     const onInput = (value: string) => {
-      searchValue.value = value;
-    };
+      searchValue.value = value
+    }
 
     const selectedExchangesLength = computed(() => {
       const selectedExchanges = exchanges?.value?.filter((exchange) => {
-        return exchange?.isSelected;
-      });
-      return selectedExchanges?.length;
-    });
+        return exchange?.isSelected
+      })
+      return selectedExchanges?.length
+    })
 
     const filteredExchanges = computed(() => {
       const filtered = exchanges?.value?.filter((exchange) => {
-        return exchange?.name?.includes(searchValue.value);
-      });
-      return filtered;
-    });
+        return exchange?.name?.includes(searchValue.value)
+      })
+      return filtered
+    })
 
     const onUpdate = (e) => {
       exchanges.value.forEach((exchange) => {
         if (exchange?.name === e.text) {
-          exchange.isSelected = e.isChecked;
+          exchange.isSelected = e.isChecked
         }
-      });
-      emit('update:modelValue', exchanges.value);
-    };
-    return { searchValue, onInput, onUpdate, selectedExchangesLength, filteredExchanges };
+      })
+      emit('update:modelValue', exchanges.value)
+    }
+    return { searchValue, onInput, onUpdate, selectedExchangesLength, filteredExchanges }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

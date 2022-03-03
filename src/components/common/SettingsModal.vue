@@ -93,7 +93,7 @@
           <Button
             :click-function="
               () => {
-                toggleAdvancedSettings();
+                toggleAdvancedSettings()
               }
             "
             variant="link"
@@ -163,7 +163,7 @@
           name="Cancel"
           :click-function="
             () => {
-              toggleWarningCustomSlippage();
+              toggleWarningCustomSlippage()
             }
           "
         />
@@ -171,7 +171,7 @@
           name="Proceed"
           :click-function="
             () => {
-              toggleSetting('allowCustomSlippage');
+              toggleSetting('allowCustomSlippage')
             }
           "
         />
@@ -201,7 +201,7 @@
           name="Cancel"
           :click-function="
             () => {
-              toggleWarningViewUnverified();
+              toggleWarningViewUnverified()
             }
           "
         />
@@ -209,7 +209,7 @@
           name="Proceed"
           :click-function="
             () => {
-              toggleSetting('viewUnverified');
+              toggleSetting('viewUnverified')
             }
           "
         />
@@ -239,7 +239,7 @@
           name="Cancel"
           :click-function="
             () => {
-              toggleWarningViewLPAssetPools();
+              toggleWarningViewLPAssetPools()
             }
           "
         />
@@ -247,7 +247,7 @@
           name="Proceed"
           :click-function="
             () => {
-              toggleSetting('viewLPAssetPools');
+              toggleSetting('viewLPAssetPools')
             }
           "
         />
@@ -257,18 +257,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref } from 'vue';
+import { computed, defineComponent, reactive, ref } from 'vue'
 
-import AvatarBalance from '@/components/account/AvatarBalance.vue';
-import AmountInput from '@/components/ui/AmountInput.vue';
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
-import Modal from '@/components/ui/Modal.vue';
-import ModalButton from '@/components/ui/ModalButton.vue';
-import Switch from '@/components/ui/Switch.vue';
-import useTheme from '@/composables/useTheme';
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
-import { useStore } from '@/utils/useStore';
+import AvatarBalance from '@/components/account/AvatarBalance.vue'
+import AmountInput from '@/components/ui/AmountInput.vue'
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
+import Modal from '@/components/ui/Modal.vue'
+import ModalButton from '@/components/ui/ModalButton.vue'
+import Switch from '@/components/ui/Switch.vue'
+import useTheme from '@/composables/useTheme'
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store'
+import { useStore } from '@/utils/useStore'
 
 export default defineComponent({
   name: 'SettingsModal',
@@ -283,35 +283,35 @@ export default defineComponent({
   },
   emits: ['disconnect', 'connect'],
   setup(_, { emit }) {
-    const gitVersion = process.env.VUE_APP_GIT_VERSION;
-    const appVersion = process.env.VUE_APP_VERSION;
+    const gitVersion = process.env.VUE_APP_GIT_VERSION
+    const appVersion = process.env.VUE_APP_VERSION
 
-    const store = useStore();
-    const theme = useTheme();
+    const store = useStore()
+    const theme = useTheme()
 
-    const isAdvancedSettingsOpen = ref(false);
-    const isWarningCustomSlippageOpen = ref(false);
-    const isWarningViewUnverifiedOpen = ref(false);
-    const isWarningViewLPAssetPoolsOpen = ref(false);
+    const isAdvancedSettingsOpen = ref(false)
+    const isWarningCustomSlippageOpen = ref(false)
+    const isWarningViewUnverifiedOpen = ref(false)
+    const isWarningViewLPAssetPoolsOpen = ref(false)
     const isDemoAccount = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount];
-    });
-    const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value);
-    const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value);
-    const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value);
+      return store.getters[GlobalDemerisGetterTypes.USER.isDemoAccount]
+    })
+    const toggleAdvancedSettings = () => (isAdvancedSettingsOpen.value = !isAdvancedSettingsOpen.value)
+    const toggleWarningCustomSlippage = () => (isWarningCustomSlippageOpen.value = !isWarningCustomSlippageOpen.value)
+    const toggleWarningViewUnverified = () => (isWarningViewUnverifiedOpen.value = !isWarningViewUnverifiedOpen.value)
     const toggleWarningViewLPAssetPools = () =>
-      (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value);
+      (isWarningViewLPAssetPoolsOpen.value = !isWarningViewLPAssetPoolsOpen.value)
 
     const updateSession = (key: string, value: any) => {
-      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } });
-    };
+      store.dispatch(GlobalDemerisActionTypes.USER.SET_SESSION_DATA, { data: { [key]: value } })
+    }
 
     const settings = reactive({
       theme,
       gasLimit: computed({
         get: () => store.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
         set: (value: number) => {
-          store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value });
+          store.dispatch(GlobalDemerisActionTypes.USER.SET_GAS_LIMIT, { gasLimit: value })
         },
       }),
       allowCustomSlippage: computed({
@@ -326,46 +326,46 @@ export default defineComponent({
         get: () => store.getters[GlobalDemerisGetterTypes.USER.viewLPAssetPools],
         set: (value: boolean) => updateSession('viewLPAssetPools', value),
       }),
-    });
+    })
 
     const toggleWarningModals = (key: string) => {
       switch (key) {
         case 'allowCustomSlippage':
-          toggleWarningCustomSlippage();
-          break;
+          toggleWarningCustomSlippage()
+          break
         case 'viewUnverified':
-          toggleWarningViewUnverified();
-          break;
+          toggleWarningViewUnverified()
+          break
         case 'viewLPAssetPools':
-          toggleWarningViewLPAssetPools();
-          break;
+          toggleWarningViewLPAssetPools()
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
     const confirmToggleSetting = (key: string) => {
       if (!settings[key]) {
-        toggleWarningModals(key);
+        toggleWarningModals(key)
       } else {
-        settings[key] = !settings[key];
+        settings[key] = !settings[key]
       }
-    };
+    }
 
     const toggleSetting = (key: string) => {
-      toggleWarningModals(key);
-      settings[key] = !settings[key];
-    };
+      toggleWarningModals(key)
+      settings[key] = !settings[key]
+    }
 
     const disconnectWallet = () => {
       if (isDemoAccount.value) {
-        emit('connect');
+        emit('connect')
       } else {
-        emit('disconnect');
-        window.localStorage.setItem('lastEmerisSession', '');
-        store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER);
+        emit('disconnect')
+        window.localStorage.setItem('lastEmerisSession', '')
+        store.dispatch(GlobalDemerisActionTypes.USER.SIGN_IN_WITH_WATCHER)
       }
-    };
+    }
 
     return {
       appVersion,
@@ -383,9 +383,9 @@ export default defineComponent({
       toggleWarningViewLPAssetPools,
       disconnectWallet,
       isDemoAccount,
-    };
+    }
   },
-});
+})
 </script>
 
 <style>

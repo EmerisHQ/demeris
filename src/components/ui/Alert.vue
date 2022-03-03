@@ -35,12 +35,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue'
 
-import Icon from '@/components/ui/Icon.vue';
+import Icon from '@/components/ui/Icon.vue'
 
-type AlertStatus = 'error' | 'info' | 'warning';
-type AlertSize = 'sm' | 'md';
+type AlertStatus = 'error' | 'info' | 'warning'
+type AlertSize = 'sm' | 'md'
 
 export default defineComponent({
   name: 'Alert',
@@ -72,25 +72,25 @@ export default defineComponent({
     const iconName = computed(() => {
       switch (props.status) {
         case 'error':
-          return 'WarningTriangleIcon';
-          break;
+          return 'WarningTriangleIcon'
+          break
         case 'warning':
-          return 'ExclamationIcon';
-          break;
+          return 'ExclamationIcon'
+          break
         case 'info':
-          return 'InformationIcon';
-          break;
+          return 'InformationIcon'
+          break
         default:
-          return null;
-          break;
+          return null
+          break
       }
-    });
+    })
 
     return {
       iconName,
-    };
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped></style>

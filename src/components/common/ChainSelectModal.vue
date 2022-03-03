@@ -30,14 +30,14 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { defineComponent, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import CoinList from '@/components/common/CoinList.vue';
-import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue';
-import WhiteOverlay from '@/components/common/WhiteOverlay.vue';
-import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { getDisplayName } from '@/utils/actionHandler';
+import CoinList from '@/components/common/CoinList.vue'
+import TitleWithGoback from '@/components/common/headers/TitleWithGoback.vue'
+import WhiteOverlay from '@/components/common/WhiteOverlay.vue'
+import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store'
+import { getDisplayName } from '@/utils/actionHandler'
 export default defineComponent({
   name: 'DenomSelectModal',
   components: {
@@ -55,42 +55,42 @@ export default defineComponent({
   },
   emits: ['select'],
   setup(props, { emit }) {
-    const selectedDenomDisplay = ref(props.selectedDenom);
-    const chainsNumber = ref(0);
-    const apistore = useStore() as TypedAPIStore;
+    const selectedDenomDisplay = ref(props.selectedDenom)
+    const chainsNumber = ref(0)
+    const apistore = useStore() as TypedAPIStore
     onMounted(async () => {
       selectedDenomDisplay.value = await getDisplayName(
         props.selectedDenom,
         apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
-      );
-    });
+      )
+    })
     watch(
       () => props.selectedDenom,
       async (newName) => {
         selectedDenomDisplay.value = await getDisplayName(
           newName,
           apistore.getters[GlobalDemerisGetterTypes.API.getDexChain],
-        );
+        )
       },
-    );
+    )
     function filterAsset(assets, keyword) {
       const filteredList = assets.filter((asset) => {
-        return asset.base_denom == keyword;
-      });
+        return asset.base_denom == keyword
+      })
 
-      chainsNumber.value = filteredList.length;
+      chainsNumber.value = filteredList.length
 
-      return filteredList;
+      return filteredList
     }
 
     function coinListselectHandler(payload) {
-      payload.type = props.title;
-      emit('select', payload);
+      payload.type = props.title
+      emit('select', payload)
     }
 
-    return { coinListselectHandler, filterAsset, chainsNumber, selectedDenomDisplay };
+    return { coinListselectHandler, filterAsset, chainsNumber, selectedDenomDisplay }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

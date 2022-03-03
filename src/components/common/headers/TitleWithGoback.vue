@@ -5,7 +5,7 @@
       variant="link"
       :click-function="
         () => {
-          func();
+          func()
         }
       "
     >
@@ -15,10 +15,10 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
-import Button from '@/components/ui/Button.vue';
-import Icon from '@/components/ui/Icon.vue';
+import Button from '@/components/ui/Button.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 export default defineComponent({
   name: 'TitleWithGoback',
@@ -39,11 +39,11 @@ export default defineComponent({
       required: false,
       default() {
         return () => {
-          return '';
-        };
+          return ''
+        }
       },
     },
   },
-});
+})
 </script>
 <style lang="scss" scoped></style>

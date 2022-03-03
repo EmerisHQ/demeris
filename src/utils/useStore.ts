@@ -1,7 +1,7 @@
-let store = undefined;
+let store = undefined
 export function setStore(setStore) {
-  store = setStore;
+  store = setStore
 }
 export function useStore() {
-  return store;
+  return store
 }

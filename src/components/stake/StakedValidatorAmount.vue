@@ -34,21 +34,21 @@
   </div>
 </template>
 <script lang="ts">
-import BigNumber from 'bignumber.js';
-import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
-import { useStore } from 'vuex';
+import BigNumber from 'bignumber.js'
+import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import AmountDisplay from '@/components/common/AmountDisplay.vue';
-import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
-import Price from '@/components/common/Price.vue';
-import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmountInput.vue';
-import Button from '@/components/ui/Button.vue';
-import ListItem from '@/components/ui/List/ListItem.vue';
-import useStaking from '@/composables/useStaking';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { ChainData } from '@/store/demeris-api/state';
-import { Step, UnstakeAction } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
+import AmountDisplay from '@/components/common/AmountDisplay.vue'
+import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue'
+import Price from '@/components/common/Price.vue'
+import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmountInput.vue'
+import Button from '@/components/ui/Button.vue'
+import ListItem from '@/components/ui/List/ListItem.vue'
+import useStaking from '@/composables/useStaking'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { ChainData } from '@/store/demeris-api/state'
+import { Step, UnstakeAction } from '@/types/actions'
+import { actionHandler } from '@/utils/actionHandler'
 
 export default defineComponent({
   name: 'StakedValidatorAmount',
@@ -70,32 +70,32 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
   },
   emits: ['previous', 'next', 'update:modelValue'],
   setup(props, { emit }) {
-    const store = useStore();
-    const { getStakingRewardsByBaseDenom } = useStaking();
-    const actionSteps = ref<Step[]>([]);
-    const propsRef = toRefs(props);
-    const fees = ref({});
-    const stakingRewardsData = ref(null);
+    const store = useStore()
+    const { getStakingRewardsByBaseDenom } = useStaking()
+    const actionSteps = ref<Step[]>([])
+    const propsRef = toRefs(props)
+    const fees = ref({})
+    const stakingRewardsData = ref(null)
     const model = computed({
       get: () => propsRef.modelValue.value,
       set: (value) => emit('update:modelValue', value),
-    });
+    })
 
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
-    });
-    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name })
+    })
+    const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
         name: baseDenom,
       }),
-    );
+    )
     const action = computed(() => {
       return {
         name: 'unstake',
@@ -111,46 +111,46 @@ export default defineComponent({
             chain_name: propsRef.validator.value.chain_name,
           },
         },
-      } as UnstakeAction;
-    });
+      } as UnstakeAction
+    })
     watch(
       () => action.value,
       async (action, _) => {
-        actionSteps.value = await actionHandler(action);
+        actionSteps.value = await actionHandler(action)
       },
-    );
+    )
 
     const stakingRewards = computed(() => {
       if (stakingRewardsData.value !== null) {
         return parseFloat(
           stakingRewardsData.value.rewards.find((x) => x.validator_address == propsRef.validator.value.operator_address)
             ?.reward ?? '0',
-        ).toString();
+        ).toString()
       } else {
-        return '0';
+        return '0'
       }
-    });
+    })
     const stakingBalance = computed(() => {
-      return propsRef.validator.value.stakedAmount;
-    });
+      return propsRef.validator.value.stakedAmount
+    })
     const displayStakingBalance = computed(() => {
-      const bn = new BigNumber(stakingBalance.value ?? 0);
-      return bn.dividedBy(10 ** precision.value);
-    });
+      const bn = new BigNumber(stakingBalance.value ?? 0)
+      return bn.dividedBy(10 ** precision.value)
+    })
     const remainingStake = computed(() => {
       return new BigNumber(stakingBalance.value ?? 0)
         .minus(new BigNumber(model.value != '' ? model.value ?? 0 : 0).multipliedBy(10 ** precision.value))
-        .toString();
-    });
+        .toString()
+    })
     const isValid = computed(() => {
-      return parseFloat(remainingStake.value) >= 0;
-    });
+      return parseFloat(remainingStake.value) >= 0
+    })
     const goToReview = () => {
-      emit('next', actionSteps.value);
-    };
+      emit('next', actionSteps.value)
+    }
     onMounted(async () => {
-      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
-    });
+      stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom)
+    })
     return {
       displayStakingBalance,
       model,
@@ -161,7 +161,7 @@ export default defineComponent({
       isValid,
       actionSteps,
       stakingRewards,
-    };
+    }
   },
-});
+})
 </script>

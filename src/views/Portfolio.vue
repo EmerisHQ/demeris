@@ -55,26 +55,26 @@
 </template>
 
 <script lang="ts">
-import { computed } from '@vue/runtime-core';
-import { useI18n } from 'vue-i18n';
-import { useMeta } from 'vue-meta';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed } from '@vue/runtime-core'
+import { useI18n } from 'vue-i18n'
+import { useMeta } from 'vue-meta'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import AssetsTable from '@/components/assets/AssetsTable';
-import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
-import Intro from '@/components/common/Intro.vue';
-import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
-import TotalPrice from '@/components/common/TotalPrice.vue';
-import Pools from '@/components/liquidity/Pools.vue';
-import LiquiditySwap from '@/components/liquidity/Swap.vue';
-import Button from '@/components/ui/Button.vue';
-import useAccount from '@/composables/useAccount';
-import usePools from '@/composables/usePools';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { GlobalDemerisGetterTypes } from '@/store';
-import { pageview } from '@/utils/analytics';
-import { featureRunning } from '@/utils/FeatureManager';
+import AssetsTable from '@/components/assets/AssetsTable'
+import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue'
+import Intro from '@/components/common/Intro.vue'
+import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue'
+import TotalPrice from '@/components/common/TotalPrice.vue'
+import Pools from '@/components/liquidity/Pools.vue'
+import LiquiditySwap from '@/components/liquidity/Swap.vue'
+import Button from '@/components/ui/Button.vue'
+import useAccount from '@/composables/useAccount'
+import usePools from '@/composables/usePools'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { GlobalDemerisGetterTypes } from '@/store'
+import { pageview } from '@/utils/analytics'
+import { featureRunning } from '@/utils/FeatureManager'
 
 export default {
   name: 'Portfolio',
@@ -91,42 +91,42 @@ export default {
   },
 
   setup() {
-    const { t } = useI18n({ useScope: 'global' });
-    pageview({ page_title: 'Portfolio', page_path: '/' });
+    const { t } = useI18n({ useScope: 'global' })
+    pageview({ page_title: 'Portfolio', page_path: '/' })
     useMeta(
       computed(() => ({
         title: t('navbar.portfolio'),
       })),
-    );
+    )
 
-    const router = useRouter();
-    const { balances } = useAccount();
-    const { pools } = usePools();
+    const router = useRouter()
+    const { balances } = useAccount()
+    const { pools } = usePools()
 
-    const store = useStore();
+    const store = useStore()
     const openAssetPage = (asset: Record<string, string>) => {
-      router.push({ name: 'Asset', params: { denom: asset.denom } });
-    };
+      router.push({ name: 'Asset', params: { denom: asset.denom } })
+    }
 
     const openPoolsPage = () => {
-      router.push({ name: 'Pools' });
-    };
+      router.push({ name: 'Pools' })
+    }
 
     const initialLoadComplete = computed(() => {
       if (featureRunning('REQUEST_PARALLELIZATION')) {
-        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad];
+        return !store.getters[GlobalDemerisGetterTypes.USER.getFirstLoad]
       } else {
-        return true;
+        return true
       }
-    });
+    })
     const poolsInvested = computed(() => {
-      const poolsCopy = pools.value?.slice() ?? [];
-      return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom));
-    });
+      const poolsCopy = pools.value?.slice() ?? []
+      return poolsCopy.filter((item) => balances.value.some((item2) => item.pool_coin_denom == item2.base_denom))
+    })
 
-    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete };
+    return { balances, poolsInvested, openAssetPage, openPoolsPage, initialLoadComplete }
   },
-};
+}
 </script>
 <style lang="scss" scoped>
 ::v-deep(.skeleton-loader) {

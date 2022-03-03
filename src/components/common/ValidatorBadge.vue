@@ -8,11 +8,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue'
 
-import ValidatorImg from '@/components/common/ValidatorImg.vue';
+import ValidatorImg from '@/components/common/ValidatorImg.vue'
 
-export type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 export default defineComponent({
   name: 'ValidatorBadge',
@@ -22,7 +22,7 @@ export default defineComponent({
       type: Object,
       required: true,
       default: () => {
-        return {};
+        return {}
       },
     },
     size: {
@@ -30,7 +30,7 @@ export default defineComponent({
       default: 'md',
     },
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>

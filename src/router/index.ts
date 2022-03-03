@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-import { featureRunning } from '@/utils/FeatureManager';
-import Portfolio from '@/views/Portfolio.vue';
+import { featureRunning } from '@/utils/FeatureManager'
+import Portfolio from '@/views/Portfolio.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -84,13 +84,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/playground',
     component: () => import('../views/Playground.vue'),
   },
-];
+]
 if (featureRunning('STAKING')) {
   routes.push({
     path: '/staking/:denom/:action/:validator?',
     name: 'Staking',
     component: () => import('@/views/Staking.vue'),
-  });
+  })
 }
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
@@ -98,15 +98,15 @@ const router = createRouter({
   // @ts-ignore
   scrollBehavior(to, _, savedPosition) {
     if (savedPosition) {
-      return savedPosition;
+      return savedPosition
     } else if (to.hash) {
       return {
         selector: to.hash,
-      };
+      }
     } else {
-      return { left: 0, top: 0 };
+      return { left: 0, top: 0 }
     }
   },
-});
+})
 
-export default router;
+export default router
