@@ -21,7 +21,6 @@
           v-if="label"
           class="text-left flex items-center"
           :class="{
-            'font-light': labelFontWeight == 'light',
             'font-normal': labelFontWeight == 'normal',
             'font-medium': labelFontWeight == 'medium',
           }"
