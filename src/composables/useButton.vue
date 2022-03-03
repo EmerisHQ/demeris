@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router';
 
 import { ButtonFunctionData } from '@/types/setups';
-export default function() {
+export default function () {
   const router = useRouter();
 
   function buttonFunction(data: ButtonFunctionData) {

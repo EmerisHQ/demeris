@@ -9,8 +9,10 @@
             <CircleSymbol class="relative" variant="chain" :chain-name="item.chain" :glow="false" size="md" />
             <CircleSymbol :style="{ position: 'absolute' }" class="ml-1" :denom="item.denom" :glow="true" size="sm" />
           </span>
-          <span class="ml-4"><span class="denom"><Denom :name="item.denom" /> </span>
-            <span class="text-muted">&middot; <ChainName :name="item.chain" /></span></span>
+          <span class="ml-4"
+            ><span class="denom"><Denom :name="item.denom" /> </span>
+            <span class="text-muted">&middot; <ChainName :name="item.chain" /></span
+          ></span>
         </span>
         <div v-if="item && item.subItems && !!item.subItems.length" class="my-6">
           <template v-for="subItem in item?.subItems" :key="subItem">

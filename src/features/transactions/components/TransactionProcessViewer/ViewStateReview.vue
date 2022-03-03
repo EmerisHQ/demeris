@@ -33,7 +33,8 @@
       <p class="px-8 text-center text-muted -text-1">
         {{ $t('components.txHandlingModal.noRevert') }}
         <a class="underline" href="https://emeris.com/terms" target="_blank" rel="noopener noreferrer">
-          {{ $t('components.settingsMenu.tos') }} </a>.
+          {{ $t('components.settingsMenu.tos') }} </a
+        >.
       </p>
     </div>
 

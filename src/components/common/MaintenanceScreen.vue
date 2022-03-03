@@ -9,11 +9,11 @@
     <div class="w-full flex-1 pb-16">
       <div class="flex flex-col justify-center w-full h-full">
         <div class="mb-16 w-full text-center flex justify-center">
-          <img v-if="!isBrowserDarkMode" :src="surfer" style="max-width:577px" />
-          <img v-else :src="surferDark" style="max-width:577px" />
+          <img v-if="!isBrowserDarkMode" :src="surfer" style="max-width: 577px" />
+          <img v-else :src="surferDark" style="max-width: 577px" />
         </div>
         <div class="w-full text-center flex justify-center mb-8">
-          <div style="max-width:495px">
+          <div style="max-width: 495px">
             <h1 class="font-bold text-3 mb-4">{{ $t('maintenance.title') }}</h1>
             <p class="text-text opacity-60">{{ $t('maintenance.subTitle') }}</p>
           </div>
@@ -21,13 +21,14 @@
       </div>
     </div>
     <div class="flex w-full items-center justify-center text-link h-32 pb-32">
-      <Button 
-        v-for="{url,label} in footerLinks" 
+      <Button
+        v-for="{ url, label } in footerLinks"
         :key="url"
         size="sm"
         variant="link"
-        :name="`${label}&#8599;`" class="mr-6 align-middle -text-1"
-        @click="openURL(url)" 
+        :name="`${label}&#8599;`"
+        class="mr-6 align-middle -text-1"
+        @click="openURL(url)"
       >
         <Icon name="LinkIcon" class="text-text opacity-30 dark:opacity-1" :icon-size="0.813" />
       </Button>
@@ -36,21 +37,21 @@
 </template>
 
 <script lang="ts" setup>
-import { useDark } from '@vueuse/core'
-import { ref }from 'vue'
+import { useDark } from '@vueuse/core';
+import { ref } from 'vue';
 
-import surfer from "@/assets/images/maintenance-surfer.png"
-import surferDark from "@/assets/images/maintenance-surfer-dark.png"
+import surfer from '@/assets/images/maintenance-surfer.png';
+import surferDark from '@/assets/images/maintenance-surfer-dark.png';
 import Brandmark from '@/components/common/Brandmark.vue';
-import Button from '@/components/ui/Button.vue'
+import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
-const isBrowserDarkMode = useDark()
+const isBrowserDarkMode = useDark();
 const footerLinks = ref([
   { label: 'Telegram', url: 'https://t.me/EmerisHQ' },
   { label: 'Medium', url: 'https://medium.com/emeris-blog' },
   { label: 'Twitter', url: 'https://twitter.com/emerisHQ' },
-])
-function openURL(url){
-  window.open(url, '_blank', 'noopener')
+]);
+function openURL(url) {
+  window.open(url, '_blank', 'noopener');
 }
 </script>

@@ -33,7 +33,8 @@
                 "
               >
                 {{ $t('components.validatorTable.validator') }}
-                <span v-if="sortBy == 'name' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'name'">&darr;</span>
+                <span v-if="sortBy == 'name' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'name'">&darr;</span>
               </button>
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'power' }">
@@ -46,7 +47,8 @@
                 "
               >
                 {{ $t('components.validatorTable.votingPower') }}
-                <span v-if="sortBy == 'power' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'power'">&darr;</span>
+                <span v-if="sortBy == 'power' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'power'">&darr;</span>
               </button>
             </th>
             <th
@@ -62,7 +64,8 @@
                 "
               >
                 {{ $t('components.validatorTable.commission') }}
-                <span v-if="sortBy == 'commission' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'commission'">&darr;</span>
+                <span v-if="sortBy == 'commission' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'commission'">&darr;</span>
               </button>
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'staked' }">
@@ -75,7 +78,8 @@
                 "
               >
                 {{ $t('components.validatorTable.staked') }}
-                <span v-if="sortBy == 'staked' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'staked'">&darr;</span>
+                <span v-if="sortBy == 'staked' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'staked'">&darr;</span>
               </button>
             </th>
             <th class="align-middle py-4 sticky top-0 z-20 bg-app"></th>
@@ -181,7 +185,7 @@
                 :name="$t('components.validatorTable.stake')"
                 :disabled="
                   validator.jailed ||
-                    (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
+                  (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
                 "
                 @click.stop="
                   () => {
@@ -213,8 +217,8 @@
           :validator="detailedValidator"
           :disabled="
             detailedValidator.jailed ||
-              (disabledList.includes(detailedValidator.operator_address) &&
-                currentlyEditing != detailedValidator.operator_address)
+            (disabledList.includes(detailedValidator.operator_address) &&
+              currentlyEditing != detailedValidator.operator_address)
           "
           @close="
             () => {
@@ -263,7 +267,7 @@ export default defineComponent({
   props: {
     tableTitle: {
       type: String as PropType<string>,
-      required:true,
+      required: true,
     },
     validatorList: {
       type: Array as PropType<any[]>,
