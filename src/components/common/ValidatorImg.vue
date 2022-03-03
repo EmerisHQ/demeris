@@ -1,20 +1,19 @@
 <template>
   <template v-if="imgUrl !== ''">
-    <img :src="imgUrl" :alt="validator.moniker" class="w-full h-full rounded-full relative z-10" />
+    <img :src="imgUrl" :alt="validator.moniker" class="w-full h-full block rounded-full relative z-10" />
   </template>
   <template v-else>
     <div class="w-full h-full rounded-full relative z-10 flex items-center justify-center">
       <p class="font-medium">{{ monikerFirst }}</p>
     </div>
   </template>
-  <img alt="Logo glow" :src="imgUrl" class="logo-glow absolute w-full h-full opacity-50 filter" />
 </template>
 
 <script lang="ts">
 import axios from 'axios';
 import { defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 
-import { checkStringIsKeybase,getFirstAlphabet } from '@/utils/basic';
+import { checkStringIsKeybase, getFirstAlphabet } from '@/utils/basic';
 export default defineComponent({
   name: 'ValidatorImg',
   props: {
@@ -63,9 +62,4 @@ async function fetchValidatorImg(validator: Record<string, string>): Promise<str
 }
 </script>
 
-<style lang="scss" scoped>
-.logo-glow {
-  filter: blur(calc(0.4 * var(--symbol-size)));
-  top: 12.5%;
-}
-</style>
+<style lang="scss" scoped></style>
