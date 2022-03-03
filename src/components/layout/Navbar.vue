@@ -40,7 +40,7 @@
   </nav>
 </template>
 <script lang="ts">
-import { computed,defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';

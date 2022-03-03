@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref,toRaw } from 'vue';
+import { computed, defineComponent, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import ConnectWalletModal from '@/components/account/ConnectWalletModal.vue';
