@@ -205,6 +205,14 @@ export default defineComponent({
       });
     };
 
+    const gainColor = computed(() => {
+      return theme.value === 'light' ? '#00CF30' : '#89FF9B';
+    });
+
+    const lossColor = computed(() => {
+      return theme.value === 'light' ? '#FE475F' : '#FF3D56';
+    });
+
     watch(
       () => [props.dataStream, props.variant],
       async () => {
@@ -222,13 +230,13 @@ export default defineComponent({
           : 0;
 
         if (openingPrice.value <= closingPrice.value) {
-          chartData.value.options.colors[0] = theme.value === 'light' ? '#00CF30' : '#89FF9B';
-          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#00CF30' : '#89FF9B';
+          chartData.value.options.colors[0] = gainColor.value;
+          chartData.value.options.fill.colors[0] = gainColor.value;
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'gain');
         } else {
-          chartData.value.options.colors[0] = theme.value === 'light' ? '#FE475F' : '#FF3D56';
-          chartData.value.options.fill.colors[0] = theme.value === 'light' ? '#FE475F' : '#FF3D56';
+          chartData.value.options.colors[0] = lossColor.value;
+          chartData.value.options.fill.colors[0] = lossColor.value;
 
           emitPriceDiffObject(openingPrice.value, closingPrice.value, 'loss');
         }
