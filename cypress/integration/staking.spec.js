@@ -6,7 +6,7 @@ describe('Check Staking functionality', function () {
     let asset = new Asset();
     let welcomePage = new WelcomePage();
 
-    cy.visit(Cypress.config().baseUrl);
+    cy.visit(Cypress.config().baseUrl + '?VUE_APP_FEATURE_TRANSACTIONS_CENTER=true&VUE_APP_FEATURE_STAKING=true');
     welcomePage.connectKeplrButton().click();
     welcomePage.betaAgreeButton().click();
     asset.goToAtom();
