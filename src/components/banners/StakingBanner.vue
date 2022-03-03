@@ -1,14 +1,13 @@
 <template>
   <router-link
-    class="staking-banner bg-darkBanner theme-inverse shadow-card w-full flex flex-col items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
+    class="staking-banner theme-inverse dark:theme-inverse bg-app shadow-card w-full flex flex-col justify-between items-stretch p-6 relative rounded-2xl bg-cover transform hover:-translate-y-px active:transform-none active:opacity-70 transition text-text"
     :to="`/staking/${baseDenom}/stake`"
   >
-    <h5 class="font-medium text-1">{{ $t('components.stakingBanner.title') }} {{ displayDenom }}</h5>
-    <p class="staking-banner__text -text-1 leading-5 mt-3 text-muted">
+    <h5 class="font-bold text-1">{{ $t('components.stakingBanner.title') }} {{ displayDenom }}</h5>
+    <p class="staking-banner__text -text-1 leading-5 text-muted">
       {{ $t('components.stakingBanner.text') }}
-      <span class="text-text"> {{ apy || '-.-' }}% {{ $t('components.stakingBanner.textAPY') }} </span>
+      <span class="text-text font-medium"> {{ apr || '-.-' }}% {{ $t('components.stakingBanner.textAPR') }}. </span>
     </p>
-    <p className="mt-3 ">{{ $t('components.stakingBanner.cta') }} &#8594;</p>
     <img
       :src="require(`@/assets/images/stake-panel-ephemeris.png`)"
       class="right-0 rounded-2xl absolute top-0 h-full z-0"
@@ -52,7 +51,7 @@ export default defineComponent({
     const store = useStore();
 
     const propsRef = toRefs(props);
-    const apy = ref<string>('');
+    const apr = ref<string>('');
 
     const chain_name = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: propsRef.baseDenom.value }),
@@ -65,12 +64,12 @@ export default defineComponent({
 
         //   display -.- instead of a faulty 0 value APY
         if (isNaN(inflation) || Number(inflation) <= 0) return;
-        apy.value = new BigNumber(inflation).toFixed(2);
+        apr.value = new BigNumber(inflation).toFixed(2);
       },
       { immediate: true },
     );
     return {
-      apy,
+      apr,
     };
   },
 });
@@ -79,7 +78,7 @@ export default defineComponent({
 .staking-banner {
   height: 160px;
   &__text {
-    width: 205px;
+    width: 232px;
   }
   &__circles {
     > div {

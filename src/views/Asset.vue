@@ -163,7 +163,7 @@
           v-else-if="isStakingRunning"
           :display-denom="nativeAsset.displayName"
           :base-denom="nativeAsset.base_denom"
-          class="mt-5"
+          class="mt-4"
         />
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
