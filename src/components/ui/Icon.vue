@@ -37,10 +37,3 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>

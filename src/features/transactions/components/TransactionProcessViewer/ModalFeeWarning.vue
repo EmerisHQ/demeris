@@ -44,7 +44,7 @@
       <template
         v-if="
           feeWarning.missingFees.length > 1 ||
-            (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
+          (feeWarning.missingFees.length == 1 && feeWarning.missingFees[0].denom != 'uatom')
         "
       >
         <ModalButton :name="$t('generic_cta.understand')" :click-function="cancel" />

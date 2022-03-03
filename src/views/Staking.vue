@@ -59,7 +59,7 @@
               v-model:step="step"
               v-model:inModal="inModal"
               :validators="validatorList"
-              :preselected="validator"              
+              :preselected="validator"
               @previous="goBack"
             />
           </div>
@@ -118,7 +118,7 @@ export default defineComponent({
     const transactionsStore = useTransactionsStore();
     const route = useRoute();
     const { getValidatorsByBaseDenom } = useStaking();
-    const {  stakingBalances } = useAccount();
+    const { stakingBalances } = useAccount();
     const actionType = route.params.action as ActionType;
     const validator = route.params.validator as string;
     const baseDenom = route.params.denom as string;
@@ -129,39 +129,38 @@ export default defineComponent({
     const chain_name = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getChainNameByBaseDenom]({ denom: baseDenom }),
     );
-    
+
     watch(
       () => chain_name.value,
       async (newVal, _) => {
         if (newVal) {
-      
           rawValidatorList.value = await getValidatorsByBaseDenom(baseDenom);
         }
       },
       { immediate: true },
     );
     const validatorList = computed(() => {
-      const validators=[];
+      const validators = [];
       if (stakingBalances.value.length) {
         rawValidatorList.value.forEach((vali: any) => {
           const stakedValidator = stakingBalances.value.find(
             (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
           );
           if (stakedValidator) {
-            validators.push({...vali, stakedAmount: parseInt(stakedValidator.amount) });
+            validators.push({ ...vali, stakedAmount: parseInt(stakedValidator.amount) });
           } else {
-            validators.push({...vali, stakedAmount: 0 });
+            validators.push({ ...vali, stakedAmount: 0 });
           }
         });
       } else {
         rawValidatorList.value.forEach((vali: any) => {
-          validators.push({...vali, stakedAmount: 0 });
+          validators.push({ ...vali, stakedAmount: 0 });
         });
       }
       return validators;
-    })
+    });
     pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType });
-   
+
     const showBackButton = computed(() => {
       return (currentStepIndex.value > 0 && !!actionType) || inModal.value;
     });
@@ -180,7 +179,7 @@ export default defineComponent({
     };
 
     const currentStepIndex = computed(() => allSteps[actionType]?.indexOf(step.value));
-   
+
     const metaSource = computed(() => {
       let title = t('context.stake.title');
 
@@ -192,9 +191,9 @@ export default defineComponent({
 
     const goBack = () => {
       if (inModal.value) {
-        step.value=inModal.value;
-        inModal.value=undefined;
-      }else{
+        step.value = inModal.value;
+        inModal.value = undefined;
+      } else {
         transactionsStore.removeTransaction(transactionsStore.currentId);
         if (currentStepIndex.value > 0) {
           step.value = allSteps[actionType][currentStepIndex.value - 1];
@@ -205,7 +204,7 @@ export default defineComponent({
         router.back();
       }
     };
-   
+
     const onClose = () => {
       transactionsStore.removeTransaction(transactionsStore.currentId);
       const hasPrevPath = !!router.options.history.state.back;
