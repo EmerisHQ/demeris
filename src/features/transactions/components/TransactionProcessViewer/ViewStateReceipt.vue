@@ -184,6 +184,7 @@
               :context="isSwapComponent ? 'widget' : 'default'"
               :class="{ '-text-1': isSwapComponent }"
               :bordered="isSwapComponent"
+              :is-receipt="true"
               :fees="state.context.fees.totals[lastResult.stepIndex]"
               class="border-b"
             />

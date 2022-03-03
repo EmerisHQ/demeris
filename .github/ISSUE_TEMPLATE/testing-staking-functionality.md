@@ -4,7 +4,6 @@ about: Use this to report issues with the staking functionality
 title: 'Staking: {short issue description}'
 labels: ''
 assignees: ''
-
 ---
 
 **Ensure that the issue is not reported before**

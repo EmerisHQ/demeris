@@ -8,7 +8,7 @@
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
-  "plugins": ["@typescript-eslint", "simple-import-sort"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "unused-imports", "prettier"],
   "extends": [
     "@vue/typescript/recommended",
     "plugin:vue/vue3-recommended",
@@ -26,14 +26,18 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
-      "warn", 
-      { 
+      "warn",
+      {
         "argsIgnorePattern": "^_",
         "varsIgnorePattern": "^_",
         "caughtErrorsIgnorePattern": "^_"
       }
+    ],
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {"vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
     ]
   },
   "overrides": [

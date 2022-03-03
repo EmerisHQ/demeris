@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, watch } from 'vue';
 import { useStore } from 'vuex';
 
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
@@ -47,6 +47,7 @@ import { List, ListItem } from '@/components/ui/List';
 import { GlobalDemerisGetterTypes } from '@/store';
 import * as Actions from '@/types/actions';
 import * as Base from '@/types/base';
+import { getOwnAddress } from '@/utils/basic';
 
 export default defineComponent({
   name: 'PreviewRedeem',
@@ -67,6 +68,11 @@ export default defineComponent({
     fees: {
       type: Object as PropType<Actions.FeeTotals>,
       required: true,
+    },
+    isReceipt: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
     },
   },
 
@@ -126,12 +132,6 @@ export default defineComponent({
         denom: (lastTransaction.data.amount as Base.Amount).denom,
       };
 
-      from.address = store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: from.chain });
-
-      if (to.chain) {
-        to.address = store.getters[GlobalDemerisGetterTypes.API.getOwnAddress]({ chain_name: to.chain });
-      }
-
       if (stepType.value === 'transfer') {
         to.amount = to.amount - totalFees;
       }
@@ -141,6 +141,19 @@ export default defineComponent({
         to,
       };
     });
+
+    watch(
+      () => transactionInfo.value,
+      async (newVal) => {
+        if (newVal.to.chain) {
+          newVal.to.address = await getOwnAddress({ chain_name: newVal.to.chain });
+        }
+        if (newVal.from.chain) {
+          newVal.from.address = await getOwnAddress({ chain_name: newVal.from.chain });
+        }
+      },
+      { immediate: true },
+    );
 
     const formatMultipleChannel = (transaction: Actions.TransferData) => {
       const getName = (name: string) => store.getters[GlobalDemerisGetterTypes.API.getDisplayChain]({ name });
