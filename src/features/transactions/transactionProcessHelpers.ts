@@ -345,8 +345,8 @@ export type ProvideViewerSchema = {
   };
   isSwapComponent: ComputedRef<boolean>;
   stepId: string;
-  removeTransactionAndClose: () => void;
-  closeModal: () => void;
+  removeTransactionAndClose: (payload?: Record<string, any>) => void;
+  closeModal: (payload?: Record<string, any>) => void;
   minimizeModal: () => void;
 };
 

@@ -45,7 +45,7 @@
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
-                amount: stakedAmount,
+                amount: getStakedAmount(),
                 denom: getBaseDenomSync(transaction.data[0].amount.denom),
               }"
             />
@@ -55,7 +55,7 @@
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
-                amount: stakedAmount,
+                amount: getStakedAmount(),
                 denom: getBaseDenomSync(transaction.data.amount.denom),
               }"
             />
@@ -65,7 +65,7 @@
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
-                amount: stakedAmount,
+                amount: getStakedAmount(),
                 denom: getBaseDenomSync(transaction.data.amount.denom),
               }"
             />
@@ -75,7 +75,7 @@
           <p class="font-medium text-1">
             <AmountDisplay
               :amount="{
-                amount: stakedAmount,
+                amount: getStakedAmount(),
                 denom: getBaseDenomSync(parseCoins(transaction.data.total)[0].denom),
               }"
             />
@@ -249,7 +249,7 @@
 
 <script lang="ts" setup>
 import BigNumber from 'bignumber.js';
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -277,11 +277,12 @@ import { parseCoins } from '@/utils/basic';
 import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
 
 const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
-
 const { state, send } = actor;
+
 const globalStore = useStore();
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
+
 const lastResult = computed(() => Object.values(state.value.context.results).slice(-1)[0]);
 const transaction = computed(() => lastResult.value.transaction);
 
@@ -325,37 +326,40 @@ const title = computed(() => {
 
   return titleMap[transaction.value.name];
 });
-const stakedAmount = ref('0');
-if (transaction.value.name == 'stake') {
-  stakedAmount.value = (transaction.value.data as StakeData[])
-    .reduce((acc, tx) => {
-      return acc.plus(new BigNumber(tx.amount.amount));
-    }, new BigNumber(0))
-    .toString();
-}
-if (transaction.value.name == 'unstake') {
-  stakedAmount.value = (transaction.value.data as UnstakeData).amount.amount;
-}
-if (transaction.value.name == 'switch') {
-  stakedAmount.value = (transaction.value.data as RestakeData).amount.amount;
-}
-if (transaction.value.name == 'claim') {
-  stakedAmount.value = parseCoins((transaction.value.data as ClaimData).total)[0].amount;
-}
+
 const onNext = () => {
   send('CONTINUE');
 };
 
 const goToMove = () => {
   router.push(`/send/move`);
-  removeTransactionAndClose();
+  removeTransactionAndClose({ source: 'move-btn' });
 };
 
 const goToSend = () => {
   const amount = lastResult.value.endBlock?.exchanged_demand_coin_amount;
   const denom = lastResult.value.endBlock?.demand_coin_denom;
   router.push(`/send/move?base_denom=${denom}&amount=${amount}`);
-  removeTransactionAndClose();
+  removeTransactionAndClose({ source: 'send-btn' });
+};
+
+const getStakedAmount = () => {
+  if (transaction.value.name == 'stake') {
+    return (transaction.value.data as StakeData[])
+      .reduce((acc, tx) => {
+        return acc.plus(new BigNumber(tx.amount.amount));
+      }, new BigNumber(0))
+      .toString();
+  }
+  if (transaction.value.name == 'unstake') {
+    return (transaction.value.data as UnstakeData).amount.amount;
+  }
+  if (transaction.value.name == 'switch') {
+    return (transaction.value.data as RestakeData).amount.amount;
+  }
+  if (transaction.value.name == 'claim') {
+    return parseCoins((transaction.value.data as ClaimData).total)[0].amount;
+  }
 };
 
 const getDepositTotal = () => {

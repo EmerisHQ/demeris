@@ -104,13 +104,14 @@ const showTransactingState = computed(() => state.value.matches('transacting'));
 const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
 const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'));
 
-const closeModal = () => emits('close');
+const closeModal = (payload?) => emits('close', payload);
 const goBack = () => emits('previous');
 
-const removeTransactionAndClose = () => {
+const removeTransactionAndClose = (payload) => {
   transactionsStore.removeTransaction(props.stepId);
-  closeModal();
+  closeModal(payload);
 };
+
 provide(ProvideViewerKey, {
   actor,
   closeModal,

@@ -21,6 +21,7 @@ type Namespaced<T, N extends string> = {
 };
 export type DemerisConfig = {
   endpoint: string;
+  wsEndpoint?: string;
   refreshTime?: number;
   hub_chain?: string;
   gas_limit?: number;
