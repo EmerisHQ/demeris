@@ -231,9 +231,6 @@ export default defineComponent({
       isBackDisabled,
       validatorList,
       validator,
-      unstakeAmount,
-      fromValidator,
-      toValidator,
       showNavigation,
       inModal,
     };
