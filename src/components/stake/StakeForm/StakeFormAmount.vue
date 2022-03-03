@@ -90,7 +90,12 @@
             </Alert>
 
             <!-- Continue button -->
-            <Button :name="$t('generic_cta.continue')" :disabled="disabled" @click="goToReview" />
+            <Button
+              :name="$t('generic_cta.continue')"
+              :disabled="disabled"
+              data-cy="stake-continue-button"
+              @click="goToReview"
+            />
           </div>
         </div>
       </main>

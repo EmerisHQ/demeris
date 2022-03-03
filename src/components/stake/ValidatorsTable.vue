@@ -187,6 +187,7 @@
                   validator.jailed ||
                   (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
                 "
+                data-cy="validator-table-stake"
                 @click.stop="
                   () => {
                     if (
