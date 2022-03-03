@@ -229,7 +229,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.GET_BALANCES]({ commit, dispatch, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BALANCES](
+    { commit, dispatch, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
 
@@ -400,7 +403,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_STAKING_BALANCES](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
 
@@ -438,7 +444,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getStakingBalances'](params);
     }
   },
-  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
 
@@ -649,7 +658,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getPrices'];
     }
   },
-  async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters,rootGetters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
@@ -714,7 +723,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state, rootGetters }, { subscribe = false, cache = true, params }) {
+  async [DemerisActionTypes.GET_VERIFY_TRACE](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, cache = true, params },
+  ) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
     if (state._InProgess.get(reqHash) && cache) {
@@ -973,7 +985,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters, rootGetters }, { height, stepType }: DemerisTxResultParams) {
+  async [DemerisActionTypes.GET_END_BLOCK_EVENTS](
+    { getters, rootGetters },
+    { height, stepType }: DemerisTxResultParams,
+  ) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     function sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));

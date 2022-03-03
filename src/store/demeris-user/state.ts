@@ -31,7 +31,7 @@ export function getDefaultState(): State {
     balancesFirstLoad: true,
     stakingBalancesFirstLoad: true,
     pricesFirstLoad: true,
-    correlationId: '',    
+    correlationId: '',
     keplr: null,
     _Subscriptions: new Set(),
     _Session: {},
