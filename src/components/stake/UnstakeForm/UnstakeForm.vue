@@ -89,9 +89,9 @@ export default defineComponent({
     const router = useRouter();
 
     const propsRef = toRefs(props);
-    const validatorObj= computed(() => {       
+    const validatorObj = computed(() => {
       return propsRef.validators.value.find((x) => x.operator_address == propsRef.validator.value);
-    })
+    });
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name });
     });

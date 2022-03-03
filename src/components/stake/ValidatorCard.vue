@@ -19,7 +19,8 @@
       v-tippy
       content="Validator jailed. Staking temporarily unavailable."
       class="mt-3 py-1 px-3 rounded-3xl border border-negative-text text-negative-text -text-1"
-    >Unavailable</span>
+      >Unavailable</span
+    >
     <p class="text-muted mt-4 w-full text-left">{{ validator.details }}</p>
     <List class="w-full mt-8">
       <ListItem size="sm" direction="col">

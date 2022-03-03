@@ -38,10 +38,18 @@
 
             <!-- Links -->
             <div class="w-full flex justify-between items-center mt-12">
-              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
-              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a>
-              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a>
-              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a>
+              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a
+              >
+              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a
+              >
+              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a
+              >
+              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a
+              >
             </div>
           </div>
 

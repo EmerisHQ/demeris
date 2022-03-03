@@ -61,7 +61,7 @@ export default defineComponent({
     let showMaintenanceScreen = false;
     if (featureRunning('MAINTENANCE_SCREEN')) {
       return {
-        showMaintenanceScreen: true
+        showMaintenanceScreen: true,
       };
     }
     const store = useStore();

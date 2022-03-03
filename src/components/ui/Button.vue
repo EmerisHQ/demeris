@@ -45,7 +45,9 @@
         v-if="name"
         class="inline-flex gap-x-2 items-center"
         :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
-      ><slot /><span>{{ name }}</span><slot name="right" /></span>
+        ><slot /><span>{{ name }}</span
+        ><slot name="right"
+      /></span>
 
       <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
     </button>

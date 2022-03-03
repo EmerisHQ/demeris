@@ -52,7 +52,8 @@
                       v-if="visibleNotificationMessages.length > 1 && isHoverClearAllButton"
                       key="text"
                       class="text-text"
-                    >{{ clearAllLabel }}</span>
+                      >{{ clearAllLabel }}</span
+                    >
                   </button>
                 </Transition>
                 <div
