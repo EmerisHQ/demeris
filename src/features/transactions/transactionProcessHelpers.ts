@@ -75,7 +75,7 @@ export const isSwapAction = (context: TransactionProcessContext) => {
   return context.input.action === 'swap';
 };
 
-export const isProcessing = (state: TransactionProcessState) => {
+export const isProcessingState = (state: TransactionProcessState) => {
   return ['transacting', 'signing'].some(state.matches);
 };
 

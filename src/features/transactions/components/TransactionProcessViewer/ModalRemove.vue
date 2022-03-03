@@ -6,7 +6,7 @@
     <p class="text-muted leading-copy mb-8">
       <i18n-t
         :keypath="
-          isProcessing(state)
+          isProcessingState(state)
             ? `context.transactions.remove.descriptionProcessing`
             : `context.transactions.remove.description`
         "
@@ -34,7 +34,7 @@ import ModalButton from '@/components/ui/ModalButton.vue';
 import {
   getCurrentTransaction,
   getSourceChainFromTransaction,
-  isProcessing,
+  isProcessingState,
   ProvideViewerKey,
 } from '../../transactionProcessHelpers';
 import { useTransactionsStore } from '../../transactionsStore';

@@ -1,8 +1,9 @@
 <template>
   <Button
+    v-if="!hideControls"
     v-tippy="{
       placement: 'left',
-      trigger: !state.done ? 'mouseenter focus' : 'manual',
+      trigger: isProcessingState(state) || state.done ? 'manual' : 'mouseenter focus',
     }"
     size="none"
     class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
@@ -200,6 +201,7 @@ import {
   getSourceChainFromTransaction,
   getTransactionFromAction,
   getTransactionOffset,
+  isProcessingState
 } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 
