@@ -17,6 +17,12 @@ export const messages = {
       },
     },
     components: {
+      stakingBanner: {
+        title: 'Stake',
+        text: 'Stake with a validator to receive an average',
+        textAPR: 'APR',
+        cta: 'Start staking',
+      },
       addLiquidity: {
         navigation: {
           amount: 'Amount',
@@ -637,9 +643,10 @@ export const messages = {
       showDetails: 'Show details',
       hideDetails: 'Hide details',
     },
-    maintenance:{
-      title:'Emeris will be back soon',
-      subTitle:'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.'
+    maintenance: {
+      title: 'Emeris will be back soon',
+      subTitle:
+        'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.',
     },
     navbar: {
       portfolio: 'Portfolio',
