@@ -36,6 +36,9 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_PRICES_FIRST_LOAD](state: State, payload: boolean) {
     state.pricesFirstLoad = payload;
   },
+  [MutationTypes.SET_CORRELATION_ID](state: State, payload: string) {
+    state.correlationId = payload;
+  },
   [MutationTypes.SET_STAKING_BALANCES_FIRST_LOAD](state: State, payload: boolean) {
     state.stakingBalancesFirstLoad = payload;
   },
