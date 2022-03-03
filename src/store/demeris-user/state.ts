@@ -18,6 +18,7 @@ export type TransactionItem = {
 export type State = {
   gas_limit: number;
   balancesFirstLoad: boolean;
+  correlationId: string;
   stakingBalancesFirstLoad: boolean;
   pricesFirstLoad: boolean;
   keplr: KeplrKeyData;
@@ -30,6 +31,7 @@ export function getDefaultState(): State {
     balancesFirstLoad: true,
     stakingBalancesFirstLoad: true,
     pricesFirstLoad: true,
+    correlationId: '',    
     keplr: null,
     _Subscriptions: new Set(),
     _Session: {},
