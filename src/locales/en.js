@@ -575,7 +575,7 @@ export const messages = {
         },
         waitingPrevious: {
           title: 'Pending transaction',
-          description: 'Your transaction is pending, waiting for other transactions to complete on the {chain} chain.',
+          description: 'Your transaction will be signable after your other transactions on the {chain} complete.',
         },
         receipt: {
           swappedOnHub: 'Swapped on the Cosmos Hub',
@@ -625,6 +625,7 @@ export const messages = {
       confirm: 'Confirm',
       close: 'Close',
       continue: 'Continue',
+      signLater: 'Sign transaction later',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",

@@ -19,10 +19,10 @@
     </div>
 
     <div class="pt-4 w-full space-y-4" :class="isSwapComponent ? 'px-8' : 'px-16'">
-      <p class="text-muted text-center mt-2">{{ $t('context.transactions.transacting.notifiedWhenCompletes') }}</p>
+      <p class="text-muted text-center mt-2">{{ $t('context.transactions.transacting.notifiedWhenComplete') }}</p>
       <Button variant="secondary" @click="confirm">
         <template v-if="isSwapComponent">{{ $t('context.transactions.controls.swapAnotherAsset') }}</template>
-        <template v-else>{{ $t('generic_cta.continue') }}</template>
+        <template v-else>{{ $t('generic_cta.signLater') }}</template>
       </Button>
 
       <Button variant="link" class="text-negative" @click="cancel">
