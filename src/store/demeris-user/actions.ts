@@ -8,7 +8,7 @@ import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { config as analyticsConfig, event } from '@/utils/analytics';
-import { fromHexString, keyHashfromAddress, toHexString } from '@/utils/basic';
+import { fromHexString, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
@@ -229,9 +229,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
           address: fromHexString(keyHashfromAddress(account.address)),
         };
       }
+      commit(DemerisMutationTypes.SET_CORRELATION_ID, keyHashfromAddress(keyData.bech32Address));
       commit(DemerisMutationTypes.SET_KEPLR, keyData);
       event('sign_in', { event_label: 'Sign in with Keplr', event_category: 'authentication' });
-      analyticsConfig({ user_id: toHexString(keyData.address) });
+      analyticsConfig({ user_id: keyHashfromAddress(keyData.bech32Address) });
 
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: keyData.name, isDemoAccount: false });
       for (const chain of toQuery) {
@@ -289,7 +290,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       }
       await dispatch(DemerisActionTypes.LOAD_SESSION_DATA, { walletName: key.name, isDemoAccount: true });
       dispatch('common/wallet/signIn', { keplr: null }, { root: true });
+      commit(DemerisMutationTypes.SET_CORRELATION_ID, keyHashfromAddress(key.bech32Address));
       event('sign_in_demo', { event_label: 'Sign in with Demo Account', event_category: 'authentication' });
+      analyticsConfig({ user_id: keyHashfromAddress(key.bech32Address) });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_UNBONDING_DELEGATIONS, { subscribe: true }, { root: true });
       dispatch(GlobalDemerisActionTypes.API.GET_ALL_BALANCES, { subscribe: true }, { root: true });
       dispatch(

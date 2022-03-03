@@ -135,6 +135,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
 
   async [DemerisActionTypes.BROADCAST_TX]({ rootGetters }, { tx, chain_name, address }: DemerisTxParams) {
+    axios.defaults.headers.post['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.post(rootGetters[GlobalDemerisGetterTypes.API.getEndpoint] + '/tx/' + chain_name, {
         tx_bytes: tx,

@@ -16,7 +16,13 @@
       "
       @close="handleCloseHeader"
     />
-    <TransactionProcessViewer v-if="stepId" :step-id="stepId" @close="onClose" @previous="onPrevious" />
+    <TransactionProcessViewer
+      v-if="stepId"
+      :step-id="stepId"
+      @close="onClose"
+      @previous="onPrevious"
+      @onReceiptState="onReceiptState"
+    />
     <ConnectWalletModal
       v-if="transactionsStore"
       :open="transactionsStore.isConnectWalletModalOpen"
@@ -48,7 +54,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['pending', 'close', 'previous']);
+const emits = defineEmits(['pending', 'close', 'previous', 'onReceiptState']);
 
 const transactionsStore = useTransactionsStore();
 
@@ -66,6 +72,7 @@ const { state } = useActor(service);
 const handleCloseHeader = () => transactionsStore.setTransactionAsPending();
 const onClose = () => emits('close');
 const onPrevious = () => emits('previous');
+const onReceiptState = () => emits('onReceiptState');
 
 watch(isPending, (value) => {
   if (value) {
