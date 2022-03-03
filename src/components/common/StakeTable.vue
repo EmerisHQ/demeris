@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Title -->
-    <div v-if="isStakingAssetExist" class="flex justify-between">
+    <div v-if="isStakingAssetExist" class="flex justify-between mt-16">
       <div class="flex">
         <h2 class="text-2 font-bold cursor-pointer" :class="getTabClass(1)" @click="selectTab(1)">
           {{ $t('components.stakeTable.staking') }}
@@ -30,49 +30,16 @@
       </Button>
     </div>
 
-    <!-- Staking info banner -->
-    <template v-if="!isStakingAssetExist">
-      <div
-        class="stake__banner relative border border-border rounded-2xl p-6 flex flex-col justify-between bg-right bg-no-repeat"
-      >
-        <div class="flex-1 max-w-xs">
-          <h3 class="text-1 font-bold">{{ $t('components.stakeTable.earnRewards') }} <Ticker :name="denom" /></h3>
-          <p class="text-muted leading-copy mt-3">
-            <i18n-t scope="global" keypath="components.stakeTable.lockUpAndEarnRewards">
-              <template #ticker>
-                <Ticker :name="denom" />
-              </template>
-              <template #apy>
-                <strong>{{ assetStakingAPY }}% {{ $t('components.stakeTable.apy') }}.</strong>
-              </template>
-            </i18n-t>
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          :name="stakingButtonName"
-          class="mt-8"
-          :click-function="() => goStakeActionPage(StakingActions.STAKE)"
-          :full-width="false"
-        />
-
-        <div class="absolute top-1/2 right-32 transform -translate-y-1/2">
-          <CircleSymbol :denom="denom" size="xl" />
-        </div>
-      </div>
-    </template>
-
     <template v-else>
       <template v-if="validatorList.length > 0">
         <div v-show="selectedTab === 1">
           <!-- staking reward table -->
           <table class="w-full table-fixed mt-8 text-right">
             <colgroup>
-              <col width="29%" />
-              <col width="29%" />
-              <col width="29%" />
-              <col width="13%" />
+              <col width="32%" />
+              <col width="38%" />
+              <col width="20%" />
+              <col width="8%" />
             </colgroup>
 
             <!-- table body -->
@@ -100,11 +67,13 @@
                   </div>
                 </td>
                 <td class="text-right rounded-r-xl bg-surface">
-                  <Icon
-                    name="CaretRightIcon"
-                    :icon-size="1"
-                    class="ml-4 p-2 self-stretch text-muted group-hover:text-text transition-colors"
-                  />
+                  <div class="flex justify-end">
+                    <Icon
+                      name="CaretRightIcon"
+                      :icon-size="1"
+                      class="ml-1.5 mr-1 px-1 self-stretch text-muted group-hover:text-text transition-colors"
+                    />
+                  </div>
                 </td>
               </tr>
 
@@ -116,7 +85,6 @@
                       :validator="
                         validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
                       "
-                      class="w-8 h-8 rounded-full bg-fg z-1"
                     />
                   </div>
                   <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
@@ -185,7 +153,56 @@
             </tbody>
           </table>
         </div>
-        <div v-show="selectedTab === 2">unstaking</div>
+        <div v-show="selectedTab === 2">
+          <table class="w-full table-fixed mt-8 text-right">
+            <colgroup>
+              <col width="30%" />
+              <col width="20%" />
+              <col width="25%" />
+              <col width="25%" />
+            </colgroup>
+
+            <!-- table body -->
+            <tbody>
+              <!-- staked validators -->
+              <template v-for="unbondingBalance of unbondingBalances">
+                <tr
+                  v-for="(entry, index) of unbondingBalance.entries"
+                  :key="unbondingBalance.validator_address + '_' + index"
+                  class="group"
+                >
+                  <td class="py-6 flex items-center transition">
+                    <div class="inline-flex items-center mr-4">
+                      <ValidatorBadge
+                        :validator="
+                          validatorList.find(
+                            (x) => keyHashfromAddress(x.operator_address) == unbondingBalance.validator_address,
+                          )
+                        "
+                        class="w-8 h-8 rounded-full bg-fg z-1"
+                      />
+                    </div>
+                    <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
+                      {{ getValidatorMoniker(unbondingBalance.validator_address) }}
+                    </span>
+                  </td>
+                  <td class="text-left text-muted">
+                    <div class="inline-flex items-center">
+                      <TimeIcon class="mr-2" />
+                      <span>
+                        {{ getTimeToString(entry.completion_time) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-right text-muted">{{ getDisplayAmount(entry.balance) }} <Ticker :name="denom" /></td>
+                  <td class="text-right font-medium">
+                    <Price :amount="{ denom: denom, amount: entry.balance }" />
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </template>
       <SkeletonLoader v-else width="100%" height="300px" />
     </template>
@@ -200,7 +217,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
-import CircleSymbol from '@/components/common/CircleSymbol.vue';
+import TimeIcon from '@/components/common/Icons/TimeIcon.vue';
 import SkeletonLoader from '@/components/common/loaders/SkeletonLoader.vue';
 import Price from '@/components/common/Price.vue';
 import Ticker from '@/components/common/Ticker.vue';
@@ -217,12 +234,12 @@ import { chainAddressfromKeyhash, keyHashfromAddress } from '@/utils/basic';
 export default defineComponent({
   components: {
     Button,
-    CircleSymbol,
     Ticker,
     Price,
     Icon,
     ValidatorBadge,
     SkeletonLoader,
+    TimeIcon,
   },
   props: {
     denom: {

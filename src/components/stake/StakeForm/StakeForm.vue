@@ -5,6 +5,7 @@
       :validator-list="validators"
       :disabled-list="validatorsToDisable"
       :currently-editing="currentlyEditing"
+      :table-title="$t('components.stakeForm.selectTitle')"
       :table-style="'actionlist'"
       :sorting-by="isStaking ? 'staked' : 'power'"
       sorting-order="desc"
@@ -67,8 +68,12 @@ export default defineComponent({
 
   props: {
     step: {
-      type: String as PropType<Step>,
+      type: String as PropType<Step | undefined>,
       default: undefined,
+    },
+    inModal: {
+      type: String as PropType<Step>,
+      default: '',
     },
     validators: {
       type: Array as PropType<any[]>,
@@ -84,7 +89,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:step', 'previous'],
+  emits: ['update:step', 'update:inModal', 'previous'],
 
   setup(props, { emit }) {
     const steps = ref([]);
@@ -119,7 +124,10 @@ export default defineComponent({
       get: () => props.step,
       set: (value) => emit('update:step', value),
     });
-
+    const inModal = computed({
+      get: () => props.inModal,
+      set: (value) => emit('update:inModal', value),
+    });
     const closeModal = () => {
       router.push('/');
     };
@@ -169,7 +177,7 @@ export default defineComponent({
     };
     const selectAnother = (e) => {
       valToEdit.value = e;
-      goToStep('validator');
+      goToStepAsModal('validator');
     };
     const unselect = (validatorToRemove) => {
       form.stakes = form.stakes.filter((val) => val.validatorAddress !== validatorToRemove.validatorAddress);
@@ -178,9 +186,14 @@ export default defineComponent({
       }
     };
     const goToStep = (value: Step) => {
+      inModal.value = undefined;
       step.value = value;
     };
 
+    const goToStepAsModal = (value: Step) => {
+      inModal.value = 'amount';
+      step.value = value;
+    };
     const resetHandler = () => {
       form.stakes = [];
       steps.value = [];

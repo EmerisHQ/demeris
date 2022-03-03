@@ -7,7 +7,9 @@
         <div class="mt-8">
           <div class="text-3 font-bold mt-1 mb-2">{{ selectedAirdrop.project }} Airdrop</div>
           <div class="items-center">
-            <span class="text-muted">{{ selectedAirdrop.tokenTicker }} <span>{{ selectedAirdrop.chainName }} Chain</span></span><span class="live-tag -text-1 ml-2 font-medium">Live</span>
+            <span class="text-muted"
+              >{{ selectedAirdrop.tokenTicker }} <span>{{ selectedAirdrop.chainName }} Chain</span></span
+            ><span class="live-tag -text-1 ml-2 font-medium">Live</span>
           </div>
         </div>
       </div>
@@ -29,10 +31,18 @@
 
             <!-- Links -->
             <div class="w-full flex justify-between items-center mt-12">
-              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a>
-              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a>
-              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a>
-              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a>
+              <a :href="selectedAirdrop.projectWebsiteUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">{{ selectedAirdrop.projectWebsiteUrl }}</span></a
+              >
+              <a :href="selectedAirdrop.discordUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Discord↗️</span></a
+              >
+              <a :href="selectedAirdrop.mediumUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Medium↗️</span></a
+              >
+              <a :href="selectedAirdrop.twitterUrl" class="flex -text-1"
+                ><LinkIcon class="mr-2" /><span class="text-link">Twitter↗️</span></a
+              >
             </div>
           </div>
 

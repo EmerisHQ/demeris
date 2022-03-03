@@ -30,36 +30,13 @@
       <template v-else-if="state.selectedAsset && recipientAddress">
         <div class="md:flex items-center justify-end flex-1 w-full">
           <div
-            class="
-              self-stretch
-              h-80
-              md:h-auto
-              w-full
-              md:w-1/2
-              flex
-              items-center
-              justify-center
-              md:justify-end md:order-last
-              mb-8
-              md:mb-0
-            "
+            class="self-stretch h-80 md:h-auto w-full md:w-1/2 flex items-center justify-center md:justify-end md:order-last mb-8 md:mb-0"
           >
             <div
               class="receive__portal relative h-full w-full max-w-md mx-auto md:px-16 flex items-center justify-center"
             >
               <div
-                class="
-                  receive__portal__glow
-                  absolute
-                  inset-0
-                  -left-1/2
-                  z-0
-                  bg-fg
-                  origin-right
-                  opacity-20
-                  filter
-                  blur-md
-                "
+                class="receive__portal__glow absolute inset-0 -left-1/2 z-0 bg-fg origin-right opacity-20 filter blur-md"
                 :style="gradientStyle"
               ></div>
               <div class="receive__portal__bg absolute inset-0 z-0 bg-fg origin-right" :style="gradientStyle"></div>

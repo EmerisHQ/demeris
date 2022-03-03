@@ -2,7 +2,8 @@
   <metainfo>
     <template #title="{ content }">{{ content ? `${content} · Emeris` : `Emeris` }}</template>
   </metainfo>
-  <div v-if="initialized">
+  <MaintenanceScreen v-if="showMaintenanceScreen" />
+  <div v-else-if="initialized">
     <CookieConsent />
     <ChainDownWrapper>
       <router-view />
@@ -27,6 +28,7 @@ import { useStore } from 'vuex';
 
 import ChainDownWrapper from '@/components/common/ChainDownWrapper.vue';
 import CookieConsent from '@/components/common/CookieConsent.vue';
+import MaintenanceScreen from '@/components/common/MaintenanceScreen.vue';
 import MoonpayModal from '@/components/common/MoonpayModal.vue';
 import SimplexModal from '@/components/common/SimplexModal.vue';
 import EphemerisSpinner from '@/components/ui/EphemerisSpinner.vue';
@@ -52,9 +54,16 @@ export default defineComponent({
     FeatureRunningConditional,
     SimplexModal,
     MoonpayModal,
+    MaintenanceScreen,
   },
 
   setup() {
+    let showMaintenanceScreen = false;
+    if (featureRunning('MAINTENANCE_SCREEN')) {
+      return {
+        showMaintenanceScreen: true,
+      };
+    }
     const store = useStore();
     let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
     let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
@@ -294,7 +303,7 @@ export default defineComponent({
         }
       });
     }
-    return { initialized, status };
+    return { initialized, status, showMaintenanceScreen };
   },
   errorCaptured(err) {
     console.error(err);

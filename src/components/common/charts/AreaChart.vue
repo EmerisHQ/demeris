@@ -1,10 +1,15 @@
 <template>
   <div>
-    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 50}px`" class="mb-8" />
+    <SkeletonLoader v-if="showLoading" width="100%" :height="`${height - 17}px`" class="mb-8" />
     <div v-if="hasData">
       <apexchart
         v-if="!showLoading"
         class="w-full"
+        :class="{
+          'dark-mode': theme === 'dark',
+          'light-mode': theme === 'light',
+          'system-mode': theme === 'system',
+        }"
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
@@ -89,9 +94,6 @@ export default defineComponent({
 
     const chartData = ref({
       options: {
-        theme: {
-          mode: 'dark',
-        },
         tooltip: {
           enabled: true,
           x: {
@@ -120,7 +122,7 @@ export default defineComponent({
           background: 'transparent',
         },
         stroke: {
-          curve: 'straight',
+          // curve: 'straight',
           width: 2,
         },
         xaxis: {
@@ -129,6 +131,7 @@ export default defineComponent({
           },
           tooltip: {
             enabled: false,
+            theme: false,
           },
           axisBorder: {
             show: false,
@@ -165,7 +168,7 @@ export default defineComponent({
       ],
     });
 
-    const activeFilterItem = ref('max');
+    const activeFilterItem = ref('1');
     let highestPrice = ref('');
     let lowestPrice = ref('');
     let openingPrice = ref(0);
@@ -175,7 +178,7 @@ export default defineComponent({
 
     const setActiveFilter = (filterObject): void => {
       activeFilterItem.value = filterObject.value;
-      emit('filterChanged', activeFilterItem.value);
+      emit('filterChanged', activeFilterItem.value, false);
     };
 
     const hasData = computed(() => {
@@ -238,6 +241,7 @@ export default defineComponent({
     );
 
     return {
+      theme,
       filterItems,
       chartData,
       hasData,
@@ -249,3 +253,50 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.apexcharts-tooltip {
+  border-radius: 8px !important;
+}
+.system-mode {
+  .apexcharts-tooltip.apexcharts-theme-light {
+    background: rgba(30, 30, 30, 1) !important;
+    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
+    border: none !important;
+    color: white !important;
+    .apexcharts-tooltip-title {
+      background: inherit !important;
+      border-bottom: none !important;
+    }
+  }
+}
+.light-mode {
+  .apexcharts-tooltip.apexcharts-theme-light {
+    background: rgba(253, 255, 255, 1) !important;
+    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
+    border: none !important;
+    .apexcharts-tooltip-title {
+      background: inherit !important;
+      border-bottom: none !important;
+    }
+  }
+}
+.dark-mode {
+  .apexcharts-tooltip.apexcharts-theme-light {
+    background: rgba(30, 30, 30, 1) !important;
+    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
+    border: none !important;
+    .apexcharts-tooltip-title {
+      background: inherit !important;
+      border-bottom: none !important;
+    }
+  }
+}
+.apexcharts-tooltip-title {
+  margin-bottom: 0 !important;
+  padding: 6px 6px 0px !important;
+}
+.apexcharts-tooltip-series-group {
+  justify-content: center !important;
+}
+</style>

@@ -13,7 +13,8 @@
         <span
           ref="prefixElementRef"
           class="flexible-input__prefix self-start whitespace-nowrap leading-copy mt-1 mr-1"
-        >{{ prefix }}</span>
+          >{{ prefix }}</span
+        >
         <slot :model="model" v-bind="inputProps" @update:modelValue="model = $event">
           <AmountInput
             v-model="model"

@@ -2,7 +2,7 @@
   <div class="w-full max-w-lg mx-auto">
     <template v-if="step === 'amount'">
       <h2 class="text-3 font-bold py-8 text-center">{{ $t('components.unstakeForm.title') }}</h2>
-      <UnstakeFormAmount v-if="validator" :validator="validator" :steps="steps" @next="goToReview" />
+      <UnstakeFormAmount v-if="validatorObj" :validator="validatorObj" :steps="steps" @next="goToReview" />
     </template>
 
     <template v-else-if="['review', 'unstake', 'unstaked'].includes(step)">
@@ -53,12 +53,16 @@ export default defineComponent({
       type: String as PropType<Step>,
       default: undefined,
     },
-    validator: {
-      type: Object,
+    validators: {
+      type: Array as PropType<any[]>,
       required: true,
       default: () => {
-        return {};
+        return [];
       },
+    },
+    validator: {
+      type: String as PropType<string>,
+      required: true,
     },
   },
 
@@ -70,8 +74,11 @@ export default defineComponent({
     const router = useRouter();
 
     const propsRef = toRefs(props);
+    const validatorObj = computed(() => {
+      return propsRef.validators.value.find((x) => x.operator_address == propsRef.validator.value);
+    });
     const chain = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
+      return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validatorObj.value.chain_name });
     });
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
@@ -84,10 +91,10 @@ export default defineComponent({
     });
 
     const form: UnstakeForm = reactive({
-      validatorAddress: propsRef.validator.value.operator_address,
+      validatorAddress: validatorObj.value.operator_address,
       amount: '',
       denom: baseDenom,
-      chain_name: propsRef.validator.value.chain_name,
+      chain_name: validatorObj.value.chain_name,
     });
 
     const step = computed({
@@ -102,7 +109,7 @@ export default defineComponent({
       return {
         name: 'unstake',
         params: {
-          validatorAddress: propsRef.validator.value.operator_address,
+          validatorAddress: validatorObj.value.operator_address,
           amount: {
             amount: {
               amount: new BigNumber(form.amount != '' ? form.amount ?? 0 : 0)
@@ -110,7 +117,7 @@ export default defineComponent({
                 .toString(),
               denom: baseDenom,
             },
-            chain_name: propsRef.validator.value.chain_name,
+            chain_name: validatorObj.value.chain_name,
           },
         },
       } as UnstakeAction;
@@ -158,7 +165,7 @@ export default defineComponent({
 
     provide('unstakeForm', form);
 
-    return { gasPrice, steps, goToReview, goToUnstaked, form, goToStep, resetHandler, closeModal };
+    return { gasPrice, steps, goToReview, form, goToStep, resetHandler, closeModal, validatorObj, goToUnstaked };
   },
 });
 </script>
