@@ -17,6 +17,12 @@ export const messages = {
       },
     },
     components: {
+      stakingBanner: {
+        title: 'Stake',
+        text: 'Stake with a validator to receive an average',
+        textAPR: 'APR',
+        cta: 'Start staking',
+      },
       addLiquidity: {
         navigation: {
           amount: 'Amount',
@@ -569,7 +575,7 @@ export const messages = {
         },
         waitingPrevious: {
           title: 'Pending transaction',
-          description: 'Your transaction is pending, waiting for other transactions to complete on the {chain} chain.',
+          description: 'Your transaction will be signable after your other transactions on the {chain} complete.',
         },
         receipt: {
           swappedOnHub: 'Swapped on the Cosmos Hub',
@@ -619,6 +625,7 @@ export const messages = {
       confirm: 'Confirm',
       close: 'Close',
       continue: 'Continue',
+      signLater: 'Sign transaction later',
       noFunds: 'Insufficient funds',
       insufficientAmount: 'Insufficient amount',
       filterNoResults: "No results for '{keyword}'",
@@ -637,9 +644,10 @@ export const messages = {
       showDetails: 'Show details',
       hideDetails: 'Hide details',
     },
-    maintenance:{
-      title:'Emeris will be back soon',
-      subTitle:'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.'
+    maintenance: {
+      title: 'Emeris will be back soon',
+      subTitle:
+        'Emeris is currently undergoing maintenance. We will be back as soon as possible. Thank you for your patience.',
     },
     navbar: {
       portfolio: 'Portfolio',
