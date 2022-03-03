@@ -14,7 +14,7 @@
           </Button>
         </div>
 
-        <nav v-if="actionType && !inModal" class="flex-1 flex items-center justify-center space-x-12">
+        <nav v-if="showNavigation" class="flex-1 flex items-center justify-center space-x-12">
           <span
             v-for="label of allSteps[actionType]"
             :key="label"
@@ -162,6 +162,9 @@ export default defineComponent({
     pageview({ page_title: actionType + ': ' + baseDenom, page_path: '/staking/' + baseDenom + '/' + actionType });
 
     const showBackButton = computed(() => {
+      if (step.value === 'staked' || step.value === 'unstaked') {
+        return false;
+      }
       return (currentStepIndex.value > 0 && !!actionType) || inModal.value;
     });
     const isBackDisabled = computed(() => {
@@ -172,7 +175,7 @@ export default defineComponent({
       );
     });
     const allSteps = {
-      stake: ['validator', 'amount', 'review', 'stake'],
+      stake: ['validator', 'amount', 'review', 'staked'],
       unstake: ['amount', 'review', 'unstake'],
       switch: ['validator', 'amount', 'review', 'restake'],
       claim: ['review', 'claim'],
@@ -211,6 +214,13 @@ export default defineComponent({
       hasPrevPath ? router.back() : router.push('/');
     };
 
+    const showNavigation = computed(() => {
+      if (step.value === 'staked' || step.value === 'unstaked') {
+        return false;
+      }
+      return actionType && !inModal.value;
+    });
+
     return {
       actionType,
       step,
@@ -221,6 +231,7 @@ export default defineComponent({
       isBackDisabled,
       validatorList,
       validator,
+      showNavigation,
       inModal,
     };
   },

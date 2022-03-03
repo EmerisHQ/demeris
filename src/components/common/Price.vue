@@ -143,7 +143,10 @@ export default defineComponent({
   color: #008223;
 }
 .color-gain-dark {
-  color: #42ed05;
+  color: #89ff9b;
+}
+.color-gain-system {
+  color: #008223;
 }
 .color-gain-system {
   color: #008223;
@@ -153,6 +156,9 @@ export default defineComponent({
 }
 .color-loss-dark {
   color: #ff6072;
+}
+.color-loss-system {
+  color: #d80228;
 }
 .color-loss-system {
   color: #d80228;
