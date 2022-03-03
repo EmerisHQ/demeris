@@ -32,6 +32,7 @@ module.exports = {
       inactive: 'var(--inactive)',
       inverse: 'var(--inverse)',
       bg: 'var(--bg)',
+      darkBanner: 'var(--darkBanner)',
       fg: 'var(--fg)',
       'fg-solid': 'var(--fg-solid)',
       border: 'var(--border)',
