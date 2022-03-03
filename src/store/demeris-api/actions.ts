@@ -410,27 +410,28 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({commit, getters },{chain_name}) {
-    console.log('GET_UNSTAKING_PERIOD')
+  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({ commit, getters }, { chain_name }) {
+    console.log('GET_UNSTAKING_PERIOD chain_name:', chain_name);
     try {
       // const response = await axios.get(
       //   `${getters['getEndpoint']}/chain/${chainName}/staking/params`,
       // );
       // commit('SET_VALID_POOLS', 24);
-      console.log('created endpoint:',`${getters['getEndpoint']}/chain/${chain_name}/staking/params`)
-      const unbondingTime = 1814400000000000
-      commit('SET_UNSTAKING_PERIOD',{chain_name, unbondingTime});
-      return {
-        "params":{
-          "unbonding_time":unbondingTime,
-          "max_validators":100,
-          "max_entries":7,
-          "historical_entries":10000,
-          "bond_denom":"uatom"
-        }
-      }
+      console.log('created endpoint:', `${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
+      const unbondingTime = 1814400000000000;
+      const unstakingPeriod = {
+        params: {
+          unbonding_time: unbondingTime,
+          max_validators: 100,
+          max_entries: 7,
+          historical_entries: 10000,
+          bond_denom: 'uatom',
+        },
+      };
+      commit('SET_UNSTAKING_PERIOD', { chain_name, unstakingPeriod });
+      return unstakingPeriod;
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new SpVuexError('Demeris:getUnstakingPeriod', 'Could not retrieve staking period.');
     }
   },

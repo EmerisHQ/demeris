@@ -114,7 +114,7 @@ import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
-import TimeToUnstake from '@/components/stake/TimeToUnstake.vue'
+import TimeToUnstake from '@/components/stake/TimeToUnstake.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
@@ -175,7 +175,7 @@ export default defineComponent({
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
     });
-    const chainName= ref<string>(chain.value.chain_name)
+    const chainName = ref<string>(chain.value.chain_name);
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const hasIBC = computed(() => {
       const denomTypes = form.stakes.map((x) => {
