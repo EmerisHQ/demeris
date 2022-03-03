@@ -492,7 +492,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             let retriesDestCount = 0;
             let destTx;
 
-            await new Promise(resolve => setTimeout(resolve, 800)); // Wait for the block time
+            await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
 
             while (retriesDestCount < 15 && shouldRetry) {
               try {

@@ -201,7 +201,7 @@ import {
   getSourceChainFromTransaction,
   getTransactionFromAction,
   getTransactionOffset,
-  isProcessingState
+  isProcessingState,
 } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 

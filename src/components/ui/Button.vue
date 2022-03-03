@@ -22,8 +22,11 @@
         { 'w-full': fullWidth },
         { 'rounded-full': rounded },
         {
-          'bg-surface shadow-button transform hover:-translate-y-px focus:-translate-y-px focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
+          'bg-surface shadow-button transform focus-visible:ring-2 focus:ring-tertiary focus:ring-opacity-50':
             variant !== 'link',
+        },
+        {
+          'focus:-translate-y-px hover:-translate-y-px': animate,
         },
         { 'theme-inverse dark:theme-inverse text-text': variant === 'primary' },
         { 'relative inline': variant === 'link' },
@@ -43,7 +46,9 @@
         v-if="name"
         class="inline-flex gap-x-2 items-center"
         :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"
-      ><slot /><span>{{ name }}</span><slot name="right" /></span>
+        ><slot /><span>{{ name }}</span
+        ><slot name="right"
+      /></span>
 
       <span v-else :class="[{ invisible: status === 'loading' }, { relative: variant === 'link' }]"><slot /></span>
     </button>
@@ -72,6 +77,7 @@ export default defineComponent({
     tooltipText: { type: String, required: false, default: '' },
     isOutline: { type: Boolean, required: false, default: false },
     disabled: { type: Boolean, default: false },
+    animate: { type: Boolean, default: true },
   },
   emits: ['click'],
   setup(props, { emit }) {

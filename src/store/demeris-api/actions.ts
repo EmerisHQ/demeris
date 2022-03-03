@@ -180,7 +180,7 @@ export interface Actions {
     { subscribe }: DemerisActionGetGitAirdropsListParams,
   ): Promise<any>;
   [DemerisActionTypes.GET_AIRDROPS](
-    { commit }: ActionContext<State, RootState>,
+    { commit, getters }: ActionContext<State, RootState>,
     { subscribe, params }: DemerisActionGetAirdropsParams,
   ): Promise<any>;
   [DemerisActionTypes.SET_SELECTED_AIRDROP](
@@ -231,7 +231,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   // Cross-chain endpoint actions
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async [DemerisActionTypes.GET_BALANCES]({ commit, dispatch, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BALANCES](
+    { commit, dispatch, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -290,7 +294,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getBalances'](params);
     }
   },
-  async [DemerisActionTypes.GET_POOL_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_POOL_BALANCES]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_POOL_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -400,7 +405,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_STAKING_BALANCES]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_STAKING_BALANCES](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_STAKING_BALANCES, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -437,7 +446,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getStakingBalances'](params);
     }
   },
-  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_UNBONDING_DELEGATIONS](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, params },
+  ) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_UNBONDING_DELEGATIONS, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -474,7 +487,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getUnbondingDelegations'](params);
     }
   },
-  async [DemerisActionTypes.GET_NUMBERS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_NUMBERS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] + '/account/' + (params as API.AddrReq).address + '/numbers',
@@ -488,7 +502,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getNumbers'](params);
   },
-  async [DemerisActionTypes.GET_NUMBERS_CHAIN]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_NUMBERS_CHAIN]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
@@ -526,7 +541,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllNumbers'];
   },
-  async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit, getters }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_VERIFIED_DENOMS]({ commit, getters, rootGetters }, { subscribe = false }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/verified_denoms');
       commit(DemerisMutationTypes.SET_VERIFIED_DENOMS, { value: response.data.verified_denoms });
@@ -538,7 +554,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getVerifiedDenoms'];
   },
-  async [DemerisActionTypes.GET_FEE_ADDRESSES]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_FEE_ADDRESSES]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chains/fee/addresses');
       commit(DemerisMutationTypes.SET_FEE_ADDRESSES, { params, value: response.data.fee_addresses });
@@ -551,6 +568,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getFeeAddresses'](JSON.stringify(params));
   },
   async [DemerisActionTypes.GET_PRICES]({ commit, getters, rootGetters, state, dispatch }, { subscribe = false }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const isCypress = !!window['Cypress'];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_PRICES, payload: {} });
 
@@ -642,7 +660,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getPrices'];
     }
   },
-  async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_TX_STATUS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
@@ -661,7 +680,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getTxStatus'](params);
   },
-  async [DemerisActionTypes.GET_TX_DEST_HASH]({ getters }, { from_chain, to_chain, txhash }) {
+  async [DemerisActionTypes.GET_TX_DEST_HASH]({ getters, rootGetters }, { from_chain, to_chain, txhash }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(`${getters['getEndpoint']}/tx/${from_chain}/${to_chain}/${txhash}`);
       const data = response.data;
@@ -679,7 +699,9 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:GetTXDestHash', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_CHAINS]({ commit, getters }, { subscribe = false }) {
+
+  async [DemerisActionTypes.GET_CHAINS]({ commit, getters, rootGetters }, { subscribe = false }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chains');
       commit(DemerisMutationTypes.SET_CHAINS, { value: response.data.chains });
@@ -692,7 +714,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getChains'];
   },
 
-  async [DemerisActionTypes.GET_RELAYER_STATUS]({ commit, getters }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_RELAYER_STATUS]({ commit, getters, rootGetters }, { subscribe = false }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/relayer/status');
       commit(DemerisMutationTypes.SET_RELAYER_STATUS, { value: response.data.running });
@@ -704,7 +727,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getRelayerStatus'];
   },
-  async [DemerisActionTypes.GET_RELAYER_BALANCES]({ commit, getters }, { subscribe = false }) {
+  async [DemerisActionTypes.GET_RELAYER_BALANCES]({ commit, getters, rootGetters }, { subscribe = false }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/relayer/balance');
 
@@ -721,7 +745,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   },
   // Chain-specific endpoint actions
 
-  async [DemerisActionTypes.GET_VERIFY_TRACE]({ commit, getters, state }, { subscribe = false, cache = true, params }) {
+  async [DemerisActionTypes.GET_VERIFY_TRACE](
+    { commit, getters, state, rootGetters },
+    { subscribe = false, cache = true, params },
+  ) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_VERIFY_TRACE, payload: { params } });
     if (state._InProgess.get(reqHash) && cache) {
       await state._InProgess.get(reqHash);
@@ -764,7 +792,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getVerifyTrace'](params);
     }
   },
-  async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_FEE_ADDRESS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/fee/address',
@@ -778,7 +807,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getFeeAddress'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_BECH32_CONFIG]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_BECH32_CONFIG]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/bech32',
@@ -792,7 +822,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getBech32Config'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_CHAIN]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_CHAIN]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_CHAIN, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -826,7 +857,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       return getters['getChain'](params);
     }
   },
-  async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_PRIMARY_CHANNEL]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] +
@@ -844,7 +876,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getPrimaryChannel'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_PRIMARY_CHANNELS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_PRIMARY_CHANNELS]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(
         getters['getEndpoint'] + '/chain/' + (params as API.ChainReq).chain_name + '/primary_channels',
@@ -858,8 +891,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getPrimaryChannels'](JSON.stringify(params));
   },
-  async [DemerisActionTypes.GET_TOKEN_PRICES]({ commit, getters }, { subscribe = false, params }) {
-    commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, { value: API.LoadingState.LOADING });
+  async [DemerisActionTypes.GET_TOKEN_PRICES]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
+    commit(DemerisMutationTypes.SET_TOKEN_PRICES_STATUS, {
+      value: params.showSkeleton ? API.LoadingState.LOADING : API.LoadingState.LOADED,
+    });
     try {
       const response = await axios.get(
         getters['getEndpoint'] + `/oracle/chart/${params.token_id}?days=${params.days}&vs_currency=${params.currency}`,
@@ -886,11 +922,12 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
     try {
-      const response: any = await axios.get(
+      const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
       );
+
       commit(DemerisMutationTypes.SET_AIRDROPS, { value: response.data });
       if (subscribe) {
         commit('SUBSCRIBE', { action: DemerisActionTypes.GET_AIRDROPS, payload: { params } });
@@ -905,8 +942,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
   [DemerisActionTypes.RESET_TOKEN_PRICES]({ commit }) {
     commit(DemerisMutationTypes.SET_TOKEN_PRICES, { value: {} });
   },
-  async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters }, { subscribe = false, params }) {
-    commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, { value: API.LoadingState.LOADING });
+  async [DemerisActionTypes.GET_TOKEN_ID]({ commit, getters, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
+    commit(DemerisMutationTypes.SET_TOKEN_ID_STATUS, {
+      value: params.showSkeleton ? API.LoadingState.LOADING : API.LoadingState.LOADED,
+    });
     try {
       const response = await axios.get(getters['getEndpoint'] + `/oracle/geckoid?names=${params.token}`);
       commit(DemerisMutationTypes.SET_TOKEN_ID, { value: { ...response.data, token: params.token } });
@@ -920,7 +960,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
       console.error('Demeris:getTokenId: Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_CHAIN_STATUS]({ commit, getters, state, rootGetters }, { subscribe = false, params }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     const reqHash = hashObject({ action: DemerisActionTypes.GET_CHAIN_STATUS, payload: { params } });
 
     if (state._InProgess.get(reqHash)) {
@@ -957,7 +998,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_TXS]({ getters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
+  async [DemerisActionTypes.GET_TXS]({ getters, rootGetters }, { chain_name, txhash }: DemerisActionsGetTxsParams) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/txs/' + txhash);
       return response.data;
@@ -1028,7 +1070,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
     });
   },
 
-  async [DemerisActionTypes.GET_END_BLOCK_EVENTS]({ getters }, { height, stepType }: DemerisTxResultParams) {
+  async [DemerisActionTypes.GET_END_BLOCK_EVENTS](
+    { getters, rootGetters },
+    { height, stepType }: DemerisTxResultParams,
+  ) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     function sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -1083,7 +1129,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_VALIDATORS]({ getters }, { chain_name }: DemerisGetValidatorsParam) {
+  async [DemerisActionTypes.GET_VALIDATORS]({ getters, rootGetters }, { chain_name }: DemerisGetValidatorsParam) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/validators');
       return response.data?.validators;
@@ -1092,7 +1139,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_INFLATION]({ getters }, { chain_name }: DemerisGetInflationParam) {
+  async [DemerisActionTypes.GET_INFLATION]({ getters, rootGetters }, { chain_name }: DemerisGetInflationParam) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const response = await axios.get(getters['getEndpoint'] + '/chain/' + chain_name + '/mint/inflation');
       return Number(response.data?.inflation);
@@ -1101,7 +1149,8 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
-  async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters }, { chain_name }: DemerisGetRewardsParam) {
+  async [DemerisActionTypes.GET_STAKING_REWARDS]({ getters, rootGetters }, { chain_name }: DemerisGetRewardsParam) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
       const address = keyHashfromAddress(await getOwnAddress({ chain_name }));
       const response = await axios.get(

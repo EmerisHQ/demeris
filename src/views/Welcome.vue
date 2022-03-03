@@ -24,7 +24,7 @@
       v-show="
         ((isEmerisSupported && isKeplrInstalled && !isWarningNeeded) ||
           (isEmerisSupported && isKeplrInstalled && isWarningAgreed)) &&
-          !isMobile
+        !isMobile
       "
       class="welcome-modal__bg"
     >
