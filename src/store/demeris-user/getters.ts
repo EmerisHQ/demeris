@@ -17,6 +17,7 @@ export type Getters = {
   [GetterTypes.getGasLimit](state: State): number;
   [GetterTypes.isSignedIn](state: State): boolean;
   [GetterTypes.getKeyhashes](state: State): string[];
+  [GetterTypes.getCorrelationId](state: State): string;
   [GetterTypes.getKeplrAccountName](state: State): string | null;
   [GetterTypes.isDemoAccount](state: State): boolean;
   [GetterTypes.hasSeenReedem](state: State): boolean;
@@ -49,6 +50,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getPreferredGasPriceLevel]: (state) => {
     return state._Session.gasPriceLevel;
+  },
+  [GetterTypes.getCorrelationId]: (state) => {
+    return state.correlationId;
   },
   [GetterTypes.allowCustomSlippage]: (state) => {
     return state._Session.customSlippage;
