@@ -120,10 +120,14 @@ export default defineComponent({
     const priceDiffColor = computed(() => {
       if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
         return 'color-gain-light';
+      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'system') {
+        return 'color-gain-system';
       } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
         return 'color-gain-dark';
-      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'dark') {
+      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'light') {
         return 'color-loss-light';
+      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'system') {
+        return 'color-loss-system';
       } else {
         return 'color-loss-dark';
       }
@@ -141,10 +145,16 @@ export default defineComponent({
 .color-gain-dark {
   color: #42ed05;
 }
+.color-gain-system {
+  color: #008223;
+}
 .color-loss-light {
   color: #d80228;
 }
 .color-loss-dark {
   color: #ff6072;
+}
+.color-loss-system {
+  color: #d80228;
 }
 </style>
