@@ -241,7 +241,7 @@
           </Button>
         </template>
 
-        <Button @click="removeTransactionAndClose">{{ $t('context.transactions.controls.done') }}</Button>
+        <Button @click="minimizeModal">{{ $t('context.transactions.controls.done') }}</Button>
       </template>
     </div>
   </div>
@@ -276,7 +276,8 @@ import { parseCoins } from '@/utils/basic';
 
 import { getExplorerTx, getSwappedPercent, ProvideViewerKey } from '../../transactionProcessHelpers';
 
-const { actor, isSwapComponent, removeTransactionAndClose } = inject(ProvideViewerKey);
+const { actor, isSwapComponent, minimizeModal, removeTransactionAndClose } = inject(ProvideViewerKey);
+
 const { state, send } = actor;
 
 const globalStore = useStore();

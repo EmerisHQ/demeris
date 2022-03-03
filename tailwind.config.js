@@ -126,7 +126,7 @@ module.exports = {
     extend: {
       margin: ['last'],
       borderRadius: ['focus'],
-      opacity: ['active'],
+      opacity: ['active', 'focus', 'group-focus'],
       placeholderColor: ['hover'],
       ringWidth: ['focus-visible'],
       transform: ['active'],

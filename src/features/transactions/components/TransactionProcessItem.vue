@@ -1,5 +1,20 @@
 <template>
-  <button class="flex w-full items-center hover:bg-fg" :class="hideControls ? 'space-x-3' : 'space-x-4'">
+  <Button
+    v-if="!hideControls"
+    v-tippy="{
+      placement: 'left',
+      trigger: isProcessingState(state) || state.done ? 'manual' : 'mouseenter focus',
+    }"
+    size="none"
+    class="transactions-center__close-btn transition-all w-6 h-6 absolute inset-y-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 focus:opacity-75 group-hover:opacity-75 group-focus:opacity-75"
+    :content="$t('context.transactions.widget.removeItem')"
+    rounded
+    @click="removeTransactionItem"
+  >
+    <Icon name="CloseIcon" :icon-size="0.85" />
+  </Button>
+
+  <button v-bind="$attrs" class="flex w-full items-center" :class="hideControls ? 'space-x-3' : 'space-x-4'">
     <div class="item-icon w-8">
       <Icon v-if="state.matches('failed.unknown')" name="QuestionIcon" class="text-warning" />
       <Icon v-else-if="state.matches('failed')" name="WarningTriangleIcon" class="text-negative" />
@@ -161,6 +176,12 @@
   </button>
 </template>
 
+<script lang="ts">
+export default {
+  inheritAttrs: false,
+};
+</script>
+
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
 import { computed, PropType, toRefs } from 'vue';
@@ -180,6 +201,7 @@ import {
   getSourceChainFromTransaction,
   getTransactionFromAction,
   getTransactionOffset,
+  isProcessingState
 } from '../transactionProcessHelpers';
 import { TransactionProcessService } from '../transactionProcessMachine';
 
@@ -193,6 +215,9 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emit = defineEmits(['remove']);
+const removeTransactionItem = () => emit('remove');
 
 const globalStore = useStore();
 const { service } = toRefs(props);
@@ -240,3 +265,9 @@ const getIconAssets = () => {
   return assets;
 };
 </script>
+
+<style lang="postcss">
+.transactions-center__close-btn .button {
+  @apply w-6 h-6;
+}
+</style>

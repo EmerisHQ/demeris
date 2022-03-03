@@ -75,6 +75,10 @@ export const isSwapAction = (context: TransactionProcessContext) => {
   return context.input.action === 'swap';
 };
 
+export const isProcessingState = (state: TransactionProcessState) => {
+  return ['transacting', 'signing'].some(state.matches);
+};
+
 export const formatStepsWithFee = (context: TransactionProcessContext, balances: Balance[]): Step[] => {
   return context.input.steps.map((step) => {
     return {

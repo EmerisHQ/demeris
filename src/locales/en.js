@@ -635,6 +635,13 @@ export const messages = {
           title: 'Are you sure you want to cancel this transaction?',
           description: 'This action cannot be reverted.',
         },
+        remove: {
+          title: 'Transaction cancelled',
+          description: "Your transactions didn't complete. Your funds remain on {chain} chain.",
+          titleProcessing: 'Transaction item removed',
+          descriptionProcessing:
+            "Your transaction will still be processed, but you won't see a notification when it has completed.",
+        },
         type: {
           transfer: 'transfer',
           ibc_forward: 'transfer',
@@ -652,6 +659,9 @@ export const messages = {
           swappedOnHub: 'Swapped on the Cosmos Hub',
         },
         widget: {
+          title: 'Transactions',
+          emptyMessage: 'Your transactions will appear here.',
+          removeItem: 'Remove and cancel transaction',
           description: {
             validating: 'Preparing transaction...',
             transacting: 'Transaction in progress...',
@@ -673,6 +683,7 @@ export const messages = {
           ok: 'OK',
           cancel: 'Cancel',
           cancelTransaction: 'Cancel transaction',
+          details: 'Details',
           tryAgain: 'Try again',
           keepIt: 'Keep It',
           sign: 'Sign',
@@ -685,6 +696,10 @@ export const messages = {
           sendAnotherAsset: 'Send another asset',
           swapAnotherAsset: 'Swap another asset',
           backToEmeris: 'Back to Emeris',
+          showLess: 'Show less',
+          showMore: 'Show more',
+          undo: 'Undo',
+          clearAll: 'Clear all',
         },
       },
     },
