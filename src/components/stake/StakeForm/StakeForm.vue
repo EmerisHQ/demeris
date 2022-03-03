@@ -44,6 +44,7 @@ import { computed, defineComponent, onMounted, PropType, provide, reactive, ref,
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import FeatureRunningConditional from '@/components/common/FeatureRunningConditional.vue';
 import StakeFormAmount from '@/components/stake/StakeForm/StakeFormAmount.vue';
 import ValidatorsTable from '@/components/stake/ValidatorsTable.vue';
@@ -51,7 +52,6 @@ import TransactionProcessCreator from '@/features/transactions/components/Transa
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { MultiStakeAction, MultiStakeForm, StakeForm } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
 
 type Step = 'validator' | 'amount' | 'review' | 'staked';

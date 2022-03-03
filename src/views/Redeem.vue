@@ -100,6 +100,7 @@ import { defineComponent, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import ChainName from '@/components/common/ChainName.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
@@ -107,7 +108,6 @@ import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore, TypedUSERStore } from '@/store';
-import { actionHandler } from '@/utils/actionHandler';
 import { event, pageview } from '@/utils/analytics';
 import { parseCoins } from '@/utils/basic';
 

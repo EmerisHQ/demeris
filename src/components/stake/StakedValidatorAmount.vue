@@ -38,6 +38,7 @@ import BigNumber from 'bignumber.js';
 import { computed, defineComponent, onMounted, ref, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 
+import { actionHandler } from '@/actionhandler';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
@@ -48,7 +49,6 @@ import useStaking from '@/composables/useStaking';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { ChainData } from '@/store/demeris-api/state';
 import { Step, UnstakeAction } from '@/types/actions';
-import { actionHandler } from '@/utils/actionHandler';
 
 export default defineComponent({
   name: 'StakedValidatorAmount',
