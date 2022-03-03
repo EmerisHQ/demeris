@@ -410,7 +410,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({commit, getters }, { chain_name }) {
+  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({commit, getters },{chain_name}) {
     console.log('GET_UNSTAKING_PERIOD')
     try {
       // const response = await axios.get(
@@ -419,7 +419,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       // commit('SET_VALID_POOLS', 24);
       console.log('created endpoint:',`${getters['getEndpoint']}/chain/${chain_name}/staking/params`)
       const unbondingTime = 1814400000000000
-      commit('SET_UNSTAKING_PERIOD',{chain_name,unbondingTime});
+      commit('SET_UNSTAKING_PERIOD',{chain_name, unbondingTime});
       return {
         "params":{
           "unbonding_time":unbondingTime,
