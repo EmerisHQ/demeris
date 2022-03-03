@@ -162,6 +162,21 @@
         <li class="mt-4"><Alert status="warning" message="Warning alert" /></li>
         <li class="mt-4"><Alert status="info" message="Info alert" /></li>
       </ul>
+      <h2 class="text-4 font-bold mt-20">Validator symbols</h2>
+      <ul class="flex items-center mt-7 gap-8">
+        <li><ValidatorBadge :validator="validator1" size="xs" /></li>
+        <li><ValidatorBadge :validator="validator1" size="sm" /></li>
+        <li><ValidatorBadge :validator="validator1" size="md" /></li>
+        <li><ValidatorBadge :validator="validator1" size="lg" /></li>
+        <li><ValidatorBadge :validator="validator1" size="xl" /></li>
+      </ul>
+      <ul class="flex items-center mt-7 gap-8">
+        <li><ValidatorBadge :validator="validator2" size="xs" /></li>
+        <li><ValidatorBadge :validator="validator2" size="sm" /></li>
+        <li><ValidatorBadge :validator="validator2" size="md" /></li>
+        <li><ValidatorBadge :validator="validator2" size="lg" /></li>
+        <li><ValidatorBadge :validator="validator2" size="xl" /></li>
+      </ul>
     </div>
   </AppLayout>
 </template>
@@ -170,6 +185,7 @@
 import { defineComponent } from 'vue';
 
 import AlertIcon from '@/components/common/Icons/AlertIcon.vue';
+import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
 import Address from '@/components/ui/Address.vue';
 import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
@@ -184,6 +200,18 @@ export default defineComponent({
     AlertIcon,
     Button,
     Input,
+    ValidatorBadge,
+  },
+  data: () => {
+    return {
+      validator1: {
+        moniker: 'Valerie',
+      },
+      validator2: {
+        moniker: 'Jailed Valerie',
+        jailed: true,
+      },
+    };
   },
 });
 </script>
