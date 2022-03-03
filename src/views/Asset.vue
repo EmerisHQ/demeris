@@ -34,7 +34,6 @@
 
         <!-- Balance -->
         <BuyCryptoBanner v-if="!assets.length && denom === 'uatom'" class="mt-16" size="large" />
-
         <section v-else class="mt-16">
           <header class="space-y-0.5">
             <h2 class="text-muted">{{ $t('pages.asset.balance') }}</h2>
@@ -91,7 +90,7 @@
 
         <!-- Staking -->
         <template v-if="stakingEnabled">
-          <section v-if="assetConfig?.stakable" class="mt-16">
+          <section v-if="assetConfig?.stakable">
             <StakeTable class="mt-8" :denom="denom" />
           </section>
         </template>
@@ -160,6 +159,12 @@
       <aside class="flex flex-col mx-auto md:ml-8 lg:ml-12 md:mr-0 items-end max-w-xs">
         <LiquiditySwap :default-asset="nativeAsset" />
         <PoolBanner v-if="isPoolCoin" :name="denom" />
+        <StakingBanner
+          v-else-if="isStakingRunning"
+          :display-denom="nativeAsset.displayName"
+          :base-denom="nativeAsset.base_denom"
+          class="mt-4"
+        />
         <BuyCryptoBanner v-if="assets.length && denom == 'uatom'" size="small" class="mt-4" />
       </aside>
     </div>
@@ -173,6 +178,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import PoolBanner from '@/components/assets/AssetsTable/PoolBanner.vue';
+import StakingBanner from '@/components/banners/StakingBanner.vue';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import BuyCryptoBanner from '@/components/common/BuyCryptoBanner.vue';
 import ChainDownWarning from '@/components/common/ChainDownWarning.vue';
@@ -200,6 +206,7 @@ export default defineComponent({
   name: 'Asset',
 
   components: {
+    StakingBanner,
     AmountDisplay,
     ChainName,
     Denom,
@@ -465,6 +472,8 @@ export default defineComponent({
       apistore.dispatch(GlobalDemerisActionTypes.API.RESET_TOKEN_PRICES);
     });
 
+    const isStakingRunning = featureRunning('STAKING');
+
     return {
       nativeAsset,
       assetConfig,
@@ -486,6 +495,7 @@ export default defineComponent({
       showPriceChartLoadingSkeleton,
       priceDiffObject,
       setPriceDifference,
+      isStakingRunning,
     };
   },
 });

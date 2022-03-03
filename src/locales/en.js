@@ -17,6 +17,12 @@ export const messages = {
       },
     },
     components: {
+      stakingBanner: {
+        title: 'Stake',
+        text: 'Stake with a validator to receive an average',
+        textAPR: 'APR',
+        cta: 'Start staking',
+      },
       addLiquidity: {
         navigation: {
           amount: 'Amount',
