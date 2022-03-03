@@ -1,18 +1,18 @@
 <template>
   <div class="flex-1 flex flex-col w-full" :class="{ 'items-center': !isSwapComponent }">
     <TransferInterstitialConfirmation
-      v-if="state.matches('ibcConfirmation')"
+      v-if="showTransferInterstitialConfirmationState"
       :action="state.context.input.action"
       :steps="state.context.formattedSteps"
       :is-swap-component="isSwapComponent"
       class="max-w-lg"
       @continue="() => send('CONTINUE')"
     />
-    <ViewStateReview v-else-if="state.matches('review')" />
-    <ViewStateSigning v-else-if="state.matches('signing')" />
-    <ViewStateTransacting v-else-if="state.matches('transacting')" />
-    <ViewStateReceipt v-else-if="state.matches('receipt') || state.matches('success')" />
-    <ViewStateWaitingTransaction v-else-if="state.matches('waitingPreviousTransaction')" />
+    <ViewStateReview v-else-if="showReviewState" />
+    <ViewStateSigning v-else-if="showSigningState" />
+    <ViewStateTransacting v-else-if="showTransactingState" />
+    <ViewStateReceipt v-else-if="showReceiptState" />
+    <ViewStateWaitingTransaction v-else-if="showWaitingPreviousTransactionState" />
 
     <template v-else-if="state.matches('failed.chainStatus')">
       <ModalChainDown />
@@ -39,7 +39,7 @@
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, nextTick, provide } from 'vue';
+import { computed, nextTick, provide, watch } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
@@ -66,7 +66,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close', 'minimize', 'previous', 'undo']);
+const emit = defineEmits(['close', 'minimize', 'previous', 'onReceiptState', 'undo']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -90,13 +90,30 @@ const minimizeModal = () => {
   }
 };
 
-const closeModal = () => emit('close');
+watch(
+  () => state.value,
+  (newState) => {
+    if (newState.matches('receipt') || newState.matches('success')) {
+      emit('onReceiptState');
+    }
+  },
+);
+
+const showTransferInterstitialConfirmationState = computed(() => state.value.matches('ibcConfirmation'));
+const showReviewState = computed(() => state.value.matches('review'));
+const showSigningState = computed(() => state.value.matches('signing'));
+const showTransactingState = computed(() => state.value.matches('transacting'));
+const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
+const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'));
+
+const closeModal = (payload?) => emit('close', payload);
 const goBack = () => emit('previous');
 
-const removeTransactionAndClose = () => {
-  closeModal();
+const removeTransactionAndClose = (payload) => {
+  closeModal(payload);
   nextTick(() => transactionsStore.removeTransaction(props.stepId));
 };
+
 provide(ProvideViewerKey, {
   actor,
   closeModal,

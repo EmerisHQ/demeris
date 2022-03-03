@@ -58,13 +58,17 @@ export default defineComponent({
     const store = useStore();
     let liquidityEndpoint = process.env.VUE_APP_EMERIS_PROD_LIQUIDITY_ENDPOINT ?? 'https://api.emeris.com/v1/liquidity';
     let emerisEndpoint = process.env.VUE_APP_EMERIS_PROD_ENDPOINT ?? 'https://api.emeris.com/v1';
+    let wsEndpoint = process.env.VUE_APP_EMERIS_PROD_WEBSOCKET_ENDPOINT ?? 'wss://api.emeris.com/v1';
+
     if (featureRunning('USE_STAGING')) {
       liquidityEndpoint = process.env.VUE_APP_EMERIS_STAGING_LIQUIDITY_ENDPOINT;
       emerisEndpoint = process.env.VUE_APP_EMERIS_STAGING_ENDPOINT;
+      wsEndpoint = process.env.VUE_APP_EMERIS_STAGING_WEBSOCKET_ENDPOINT;
     }
     if (featureRunning('USE_DEV')) {
       liquidityEndpoint = process.env.VUE_APP_EMERIS_DEV_LIQUIDITY_ENDPOINT;
       emerisEndpoint = process.env.VUE_APP_EMERIS_DEV_ENDPOINT;
+      wsEndpoint = process.env.VUE_APP_EMERIS_DEV_WEBSOCKET_ENDPOINT;
     }
     setStore(store); // make store availabe in some composition functions used in the store itself
     const apistore = store as TypedAPIStore;
@@ -83,6 +87,7 @@ export default defineComponent({
           window.localStorage.setItem('gasLimit', gasLimit.toString());
         }
         await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
+          wsEndpoint: wsEndpoint,
           endpoint: emerisEndpoint,
           hub_chain: 'cosmos-hub',
           refreshTime: 5000,

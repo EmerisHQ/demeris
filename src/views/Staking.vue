@@ -14,7 +14,7 @@
           </Button>
         </div>
 
-        <nav v-if="actionType" class="flex-1 flex items-center justify-center space-x-12">
+        <nav v-if="showNavigation" class="flex-1 flex items-center justify-center space-x-12">
           <span
             v-for="label of allSteps[actionType]"
             :key="label"
@@ -170,6 +170,9 @@ export default defineComponent({
       }
     });
     const showBackButton = computed(() => {
+      if (step.value === 'staked' || step.value === 'unstaked') {
+        return false;
+      }
       return currentStepIndex.value > 0 && !!actionType;
     });
     const isBackDisabled = computed(() => {
@@ -181,7 +184,7 @@ export default defineComponent({
     });
     const steps = ref<Step[]>([]);
     const allSteps = {
-      stake: ['validator', 'amount', 'review', 'stake'],
+      stake: ['validator', 'amount', 'review', 'staked'],
       unstake: ['amount', 'review', 'unstake'],
       switch: ['validator', 'amount', 'review', 'restake'],
       claim: ['review', 'claim'],
@@ -236,6 +239,13 @@ export default defineComponent({
       hasPrevPath ? router.back() : router.push('/');
     };
 
+    const showNavigation = computed(() => {
+      if (step.value === 'staked' || step.value === 'unstaked') {
+        return false;
+      }
+      return actionType;
+    });
+
     return {
       balances,
       actionType,
@@ -258,6 +268,7 @@ export default defineComponent({
       unstakeAmount,
       fromValidator,
       toValidator,
+      showNavigation,
     };
   },
 });
