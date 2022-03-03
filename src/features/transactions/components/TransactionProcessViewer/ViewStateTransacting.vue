@@ -11,7 +11,7 @@
 
       <p class="text-muted">{{ subtitle }}</p>
 
-      <div class="w-full max-w-lg flex items-center justify-center -space-x-8">
+      <div :class="['w-full max-w-lg flex items-center justify-center', { '-space-x-8': transaction.name != 'stake' }]">
         <template v-if="transaction.name == 'swap'">
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.from.denom)" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
@@ -28,6 +28,15 @@
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[0])" />
           <EphemerisSpinner class="flex-grow max-w-xs" />
           <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data.pool.reserve_coin_denoms[1])" />
+        </template>
+
+        <template v-if="transaction.name == 'stake'">
+          <div class="absolute w-full flex items-center justify-center">
+            <CircleSymbol size="lg" :denom="getBaseDenomSync(transaction.data[0]?.amount.denom)" />
+          </div>
+          <div class="flex items-center justify-center w-full">
+            <EphemerisSpinner class="flex-grow max-w-xs" />
+          </div>
         </template>
 
         <template v-if="transaction.name == 'ibc_forward' || transaction.name == 'ibc_backward'">
@@ -52,6 +61,16 @@
       </div>
 
       <div class="text-center">
+        <template v-if="transaction.name === 'stake' && transaction.data[0]?.amount?.amount">
+          <p class="font-medium text-1">
+            <AmountDisplay
+              :amount="{
+                amount: transaction.data[0].amount.amount,
+                denom: getBaseDenomSync(transaction.data[0].amount.denom),
+              }"
+            />
+          </p>
+        </template>
         <template v-if="transaction.name === 'transfer' || transaction.name.startsWith('ibc')">
           <p class="font-medium text-1">
             <AmountDisplay
