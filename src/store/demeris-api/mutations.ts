@@ -291,6 +291,7 @@ export const mutations: MutationTree<State> & Mutations = {
         };
       });
       state.tokenPrices = historicalPrices;
+      window.dispatchEvent(new Event('resize'));
     } else {
       state.tokenPrices = [];
     }

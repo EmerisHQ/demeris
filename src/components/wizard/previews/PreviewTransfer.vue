@@ -42,15 +42,16 @@
         currentStep.transactions.length > 2
           ? $t('components.previews.transfer.txToSignMemoHint')
           : currentStep.memo && currentStep.memo != ''
-            ? $t('components.previews.transfer.txToSignMemoNoRedeemHint')
-            : $t('components.previews.transfer.txToSignHint')
+          ? $t('components.previews.transfer.txToSignMemoNoRedeemHint')
+          : $t('components.previews.transfer.txToSignHint')
       "
     >
       <ListItem v-for="(fee, chain) in fees" :key="'fee_' + chain" :description="formatChain(chain)" inset>
         <template v-for="(feeAmount, denom) in fee" :key="'fee' + chain + denom">
           <AmountDisplay :amount="{ amount: feeAmount.toString(), denom }" class="-text-1" />
           <span v-if="includedFees && includedFees.includes(denom)" class="-text-1">
-            ({{ $t('components.previews.transfer.includedFee') }})</span>
+            ({{ $t('components.previews.transfer.includedFee') }})</span
+          >
         </template>
       </ListItem>
     </ListItem>

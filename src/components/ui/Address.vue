@@ -10,23 +10,7 @@
     <textarea
       v-model="model"
       rows="1"
-      class="
-        address__field
-        relative
-        z-10
-        block
-        w-full
-        px-4
-        pt-3
-        pb-20
-        text-0
-        leading-copy
-        font-normal
-        text-text
-        border-none
-        rounded-xl
-        appearance-none
-      "
+      class="address__field relative z-10 block w-full px-4 pt-3 pb-20 text-0 leading-copy font-normal text-text border-none rounded-xl appearance-none"
       :class="[
         { 'bg-fg focus:bg-surface focus:rounded-lg': !readonly },
         { 'bg-transparent': readonly },

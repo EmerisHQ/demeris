@@ -1419,7 +1419,7 @@ export async function msgFromStepTransaction(
       fromAmount = (
         parseInt(fromAmount) +
         parseFloat(stepTx.feeToAdd[0].amount[gasPriceLevel]) *
-        userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
+          userstore.getters[GlobalDemerisGetterTypes.USER.getGasLimit]
       ).toString();
     }
     const msg = await libStore.dispatch('ibc.applications.transfer.v1/MsgTransfer', {
@@ -1961,7 +1961,7 @@ export async function feeForStep(step: Actions.Step, gasPriceLevel: Actions.GasP
     used = getUsedFee(fees, gasPriceLevel);
     feeTotals[used.chain_name][used.amount.denom]
       ? (feeTotals[used.chain_name][used.amount.denom] =
-        feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
+          feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
       : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
   }
   return feeTotals;
@@ -1986,7 +1986,7 @@ export async function feeForSteps(
 
         feeTotals[used.chain_name][used.amount.denom]
           ? (feeTotals[used.chain_name][used.amount.denom] =
-            feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
+              feeTotals[used.chain_name][used.amount.denom] + parseFloat(used.amount.amount))
           : (feeTotals[used.chain_name][used.amount.denom] = parseFloat(used.amount.amount));
       }
     }
@@ -3261,9 +3261,9 @@ export async function validateStepsFeeBalances(
           } else {
             throw new Error(
               'Insufficient balance: ' +
-              data.reduce((acc, txdata) => {
-                return acc + parseInt(txdata.amount.amount);
-              }, 0),
+                data.reduce((acc, txdata) => {
+                  return acc + parseInt(txdata.amount.amount);
+                }, 0),
             );
           }
         }
@@ -3331,7 +3331,7 @@ export async function isValidIBCReserveDenom(
     return false;
   }
   if (!verifyTrace || !verifyTrace.verified) {
-    console.error('Couldn\'t verify trace for', JSON.stringify(verifyTrace))
+    console.error("Couldn't verify trace for", JSON.stringify(verifyTrace));
     return false;
   }
   if (verifyTrace.path.split('/').length > 2) {

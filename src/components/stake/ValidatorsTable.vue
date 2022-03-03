@@ -1,8 +1,8 @@
 <template>
   <section class="flex items-start">
-    <div class="flex flex-col">
+    <div class="flex flex-col w-full">
       <header class="flex flex-wrap justify-between items-end">
-        <h2 class="text-3 font-bold pb-6">{{ $t('components.stakeForm.selectTitle') }}</h2>
+        <h2 class="text-3 font-bold pb-6">{{ tableTitle }}</h2>
         <!-- search -->
         <Search
           v-model:keyword="keyword"
@@ -13,19 +13,11 @@
       <!-- validator table -->
       <table class="validators-table table-fixed -ml-6 h-px">
         <colgroup>
-          <template v-if="hasActions">
-            <col width="25%" />
-            <col width="25%" />
-            <col width="10%" />
-            <col width="25%" />
-            <col width="15%" />
-          </template>
-          <template v-else>
-            <col width="30%" />
-            <col width="30%" />
-            <col width="15%" />
-            <col width="25%" />
-          </template>
+          <col class="w-1/5" />
+          <col class="w-1/5" />
+          <col class="w-1/6" />
+          <col class="w-1/4" />
+          <col :class="hasActions ? 'w-auto' : 'w-1/12'" />
         </colgroup>
 
         <!-- table header -->
@@ -41,7 +33,8 @@
                 "
               >
                 {{ $t('components.validatorTable.validator') }}
-                <span v-if="sortBy == 'name' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'name'">&darr;</span>
+                <span v-if="sortBy == 'name' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'name'">&darr;</span>
               </button>
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'power' }">
@@ -54,7 +47,8 @@
                 "
               >
                 {{ $t('components.validatorTable.votingPower') }}
-                <span v-if="sortBy == 'power' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'power'">&darr;</span>
+                <span v-if="sortBy == 'power' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'power'">&darr;</span>
               </button>
             </th>
             <th
@@ -70,7 +64,8 @@
                 "
               >
                 {{ $t('components.validatorTable.commission') }}
-                <span v-if="sortBy == 'commission' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'commission'">&darr;</span>
+                <span v-if="sortBy == 'commission' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'commission'">&darr;</span>
               </button>
             </th>
             <th class="align-middle sticky top-0 z-20 bg-app text-right" :class="{ 'text-text': sortBy == 'staked' }">
@@ -83,10 +78,11 @@
                 "
               >
                 {{ $t('components.validatorTable.staked') }}
-                <span v-if="sortBy == 'staked' && sortOrder == 'asc'">&uarr;</span><span v-else-if="sortBy == 'staked'">&darr;</span>
+                <span v-if="sortBy == 'staked' && sortOrder == 'asc'">&uarr;</span
+                ><span v-else-if="sortBy == 'staked'">&darr;</span>
               </button>
             </th>
-            <th v-if="hasActions" class="align-middle py-4 px-2 sticky top-0 z-20 bg-app text-right"></th>
+            <th class="align-middle py-4 sticky top-0 z-20 bg-app"></th>
           </tr>
         </thead>
 
@@ -95,33 +91,41 @@
           <tr
             v-for="validator of filteredAndSortedValidatorList"
             :key="validator.operator_address"
+            v-tippy
+            :content="validator.jailed ? 'Validator jailed. Staking temporarily unavailable.' : null"
             class="group"
             :class="{
               'opacity-50':
-                disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address,
+                validator.disabled ||
+                (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address),
               'cursor-pointer': !(
                 disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
               ),
             }"
             @click="
               () => {
+                if (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
+                  return;
                 detailedValidator = validator;
               }
             "
           >
             <td
               class="py-4 pr-2 items-center overflow-hidden overflow-ellipsis whitespace-nowrap"
-              :class="{
-                'group-hover:bg-fg transition': !(
-                  disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
-                ),
-              }"
+              :class="[
+                {
+                  'group-hover:bg-fg transition': !(
+                    disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
+                  ),
+                },
+                { 'text-negative-text': validator.jailed },
+              ]"
             >
               <div class="inline-flex items-center mr-4 align-middle">
                 <!-- TODO: get logo url -->
-                <ValidatorBadge :validator="validator" class="w-8 h-8 rounded-full bg-fg z-1" />
+                <ValidatorBadge :validator="validator" class="z-1" />
               </div>
-              <span class="text-left font-medium">
+              <span class="text-left font-medium" :class="{ 'text-inactive': validator.jailed }">
                 {{ validator.moniker }}
               </span>
             </td>
@@ -156,60 +160,65 @@
                 ),
               }"
             >
-              <Price :amount="{ denom: baseDenom, amount: validator.stakedAmount }" :show-zero="true" />
+              <Price
+                :amount="{ denom: baseDenom, amount: validator.stakedAmount }"
+                :show-zero="true"
+                class="font-medium"
+              />
               <div class="-text-1 text-muted">
                 {{ getAmountDisplayValue(validator.stakedAmount) }} <Ticker :name="baseDenom" />
               </div>
             </td>
 
             <td
-              v-if="hasActions"
-              class="py-4 pl-2 text-right"
+              class="py-4 pl-2 text-right items-center whitespace-nowrap"
               :class="{
                 'group-hover:bg-fg transition': !(
                   disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address
                 ),
               }"
             >
-              <div class="flex justify-center pl-4">
-                <Button
-                  v-tippy
-                  class="ml-8"
-                  :content="validator.jailed ? 'Validator jailed' : null"
-                  :name="$t('components.validatorTable.stake')"
-                  :disabled="
-                    validator.jailed ||
-                      (disabledList.includes(validator.operator_address) &&
-                        currentlyEditing != validator.operator_address)
-                  "
-                  @click.stop="
-                    () => {
-                      if (
-                        (!disabledList.includes(validator.operator_address) ||
-                          currentlyEditing == validator.operator_address) &&
-                        !validator.jailed
-                      ) {
-                        selectValidator(validator);
-                      }
+              <Button
+                v-if="hasActions"
+                class="ml-6 mr-5"
+                :full-width="false"
+                :name="$t('components.validatorTable.stake')"
+                :disabled="
+                  validator.jailed ||
+                  (disabledList.includes(validator.operator_address) && currentlyEditing != validator.operator_address)
+                "
+                @click.stop="
+                  () => {
+                    if (
+                      (!disabledList.includes(validator.operator_address) ||
+                        currentlyEditing == validator.operator_address) &&
+                      !validator.jailed
+                    ) {
+                      selectValidator(validator);
                     }
-                  "
-                />
-                <Icon class="text-muted ml-5" name="CaretRightIcon" :icon-size="1" />
-              </div>
+                  }
+                "
+              />
+              <Icon
+                class="text-muted inline-flex"
+                name="CaretRightIcon"
+                :icon-size="1"
+                :class="detailedValidator == validator || hasActions ? 'visible' : 'opacity-0'"
+              />
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="flex items-start pl-8 sticky top-0">
+    <div class="flex items-start pl-8 sticky top-8 z-20">
       <Transition>
         <ValidatorCard
           v-if="detailedValidator"
           :validator="detailedValidator"
           :disabled="
             detailedValidator.jailed ||
-              (disabledList.includes(detailedValidator.operator_address) &&
-                currentlyEditing != detailedValidator.operator_address)
+            (disabledList.includes(detailedValidator.operator_address) &&
+              currentlyEditing != detailedValidator.operator_address)
           "
           @close="
             () => {
@@ -253,9 +262,13 @@ enum ValStyle {
 type ValStyleType = `${ValStyle}`;
 //TODO: implement type for validator list
 export default defineComponent({
-  name: 'ValidatorTable',
+  name: 'ValidatorsTable',
   components: { Search, ValidatorBadge, Ticker, Button, Icon, Price, ValidatorCard },
   props: {
+    tableTitle: {
+      type: String as PropType<string>,
+      required: true,
+    },
     validatorList: {
       type: Array as PropType<any[]>,
       required: true,
