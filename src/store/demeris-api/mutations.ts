@@ -78,7 +78,9 @@ export const mutations: MutationTree<State> & Mutations = {
   [MutationTypes.SET_UNSTAKING_PERIOD](state: State, payload: DemerisMutations) {
     // TODO: store this in demerisAPI.chains by extending or in own property?
     console.log('mutation SET_UNSTAKING_PERIOD payload:', payload);
-    state.unstakingPeriods[payload.params.chain_name] = payload.value;
+    console.log('payload.params:', payload.params);
+    console.log('payload.value:', payload.value);
+    state.unstakingPeriods[payload.params] = payload.value;
   },
   [MutationTypes.SET_UNBONDING_DELEGATIONS](state: State, payload: DemerisMutations) {
     if (

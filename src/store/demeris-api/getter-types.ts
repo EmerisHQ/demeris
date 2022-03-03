@@ -1,6 +1,7 @@
 export enum GetterTypes {
   getBalances = 'getBalances',
   getStakingBalances = 'getStakingBalances',
+  getUnstakingPeriod = 'getUnstakingPeriod',
   getUnbondingDelegations = 'getUnbondingDelegations',
   getNumbers = 'getNumbers',
   getNumbersChain = 'getNumbersChain',
@@ -47,6 +48,7 @@ export enum GetterTypes {
 export enum GlobalGetterTypes {
   getBalances = 'demerisAPI/getBalances',
   getStakingBalances = 'demerisAPI/getStakingBalances',
+  getUnstakingPeriod = 'demerisAPI/getUnstakingPeriod',
   getUnbondingDelegations = 'demerisAPI/getUnbondingDelegations',
   getNumbers = 'demerisAPI/getNumbers',
   getNumbersChain = 'demerisAPI/getNumbersChain',

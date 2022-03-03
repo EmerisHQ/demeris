@@ -411,27 +411,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
     return getters['getAllValidPools'];
   },
   async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({ commit, getters }, { chain_name }) {
-    console.log('GET_UNSTAKING_PERIOD chain_name:', chain_name);
+    // TODO: should this data be a subscription?
     try {
-      // const response = await axios.get(
-      //   `${getters['getEndpoint']}/chain/${chainName}/staking/params`,
-      // );
-      // commit('SET_VALID_POOLS', 24);
-      console.log('created endpoint:', `${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
-      const unbondingTime = 1814400000000000;
-      const unstakingPeriod = {
-        params: {
-          unbonding_time: unbondingTime,
-          max_validators: 100,
-          max_entries: 7,
-          historical_entries: 10000,
-          bond_denom: 'uatom',
-        },
-      };
-      commit('SET_UNSTAKING_PERIOD', { chain_name, unstakingPeriod });
-      return unstakingPeriod;
+      const { data: { params: unstakingPeriod } = {} } = await axios.get(
+        `${getters['getEndpoint']}/chain/${chain_name}/staking/params`,
+      );
+      commit('SET_UNSTAKING_PERIOD', { params: chain_name, value: unstakingPeriod });
+      return Math.round((getters['getUnstakingPeriod'](chain_name) / 1000000000 / 60 / 60 / 24) * 100) / 100;
     } catch (e) {
-      console.log(e);
       throw new SpVuexError('Demeris:getUnstakingPeriod', 'Could not retrieve staking period.');
     }
   },
