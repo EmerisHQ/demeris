@@ -118,7 +118,6 @@
                       :validator="
                         validatorList.find((x) => keyHashfromAddress(x.operator_address) == validator.validator_address)
                       "
-                      class="w-8 h-8 rounded-full bg-fg z-1"
                     />
                   </div>
                   <span class="text-left overflow-hidden overflow-ellipsis whitespace-nowrap font-medium">
