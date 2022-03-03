@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMeta } from 'vue-meta';
 import { useRouter } from 'vue-router';
@@ -76,32 +76,12 @@ export default {
     );
 
     const activeFilter = ref('');
-    let gitAirdropsList = ref([]);
 
     const setActiveFilter = (value: string) => {
       activeFilter.value = value;
     };
 
     const router = useRouter();
-
-    const getAllAirdrops = async () => {
-      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
-        subscribe: false,
-      });
-
-      gitAirdropsList.value.forEach((item) => {
-        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
-          subscribe: false,
-          params: {
-            airdropFileName: item.name,
-          },
-        });
-      });
-    };
-
-    onMounted(() => {
-      getAllAirdrops();
-    });
 
     const airdrops = computed(() => {
       return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
