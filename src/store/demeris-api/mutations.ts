@@ -16,6 +16,10 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
+  [MutationTypes.SET_UNSTAKING_PERIOD](
+    state: S,
+    payload: { params: API.APIRequests; value: API.UnstakingPeriodReq },
+  ): void;
   [MutationTypes.SET_UNBONDING_DELEGATIONS](
     state: S,
     payload: { params: API.APIRequests; value: API.UnbondingDelegations },
@@ -76,11 +80,10 @@ export const mutations: MutationTree<State> & Mutations = {
     }
   },
   [MutationTypes.SET_UNSTAKING_PERIOD](state: State, payload: DemerisMutations) {
-    // TODO: store this in demerisAPI.chains by extending or in own property?
-    console.log('mutation SET_UNSTAKING_PERIOD payload:', payload);
-    console.log('payload.params:', payload.params);
-    console.log('payload.value:', payload.value);
-    state.unstakingPeriods[payload.params] = payload.value;
+    // state.unstakingPeriods[(payload.params as API.UnstakingPeriodReq).chain_name] =
+    //   payload.value as API.UnstakingPeriod;
+    state.unstakingPeriods[(payload.params as API.UnstakingPeriodReq).chain_name] =
+      payload.value as API.UnstakingPeriod;
   },
   [MutationTypes.SET_UNBONDING_DELEGATIONS](state: State, payload: DemerisMutations) {
     if (

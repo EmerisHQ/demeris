@@ -76,7 +76,7 @@ export type DemerisMutationArgs =
   | API.TokenId
   | API.Airdrop
   | API.StakingBalances
-  | API.UnstakingPeriods
+  | API.UnstakingPeriodReq
   | API.UnbondingDelegations
   | API.Numbers
   | API.SeqNumber

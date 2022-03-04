@@ -215,7 +215,7 @@ export interface Actions {
   [DemerisActionTypes.GET_UNSTAKING_PERIOD](
     { commit, getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetUnstakingPeriodParam,
-  ): Promise<unknown>;
+  ): Promise<number>;
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
@@ -410,15 +410,14 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({ commit, getters }, { chain_name }) {
-    // TODO: should this data be a subscription?
+  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({ commit, getters }, { chain_name }): Promise<number> {
     try {
-      const { data: { params: unstakingPeriod } = {} } = await axios.get(
-        `${getters['getEndpoint']}/chain/${chain_name}/staking/params`,
-      );
-      commit('SET_UNSTAKING_PERIOD', { params: chain_name, value: unstakingPeriod });
-      return Math.round((getters['getUnstakingPeriod'](chain_name) / 1000000000 / 60 / 60 / 24) * 100) / 100;
-    } catch (e) {
+      const {
+        data: { params: unstakingPeriod },
+      } = await axios.get(`${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
+      commit('SET_UNSTAKING_PERIOD', { params: { chain_name }, value: unstakingPeriod });
+      return Math.round((getters['getUnstakingPeriod']({ chain_name }) / 1000000000 / 60 / 60 / 24) * 100) / 100;
+    } catch {
       throw new SpVuexError('Demeris:getUnstakingPeriod', 'Could not retrieve staking period.');
     }
   },
@@ -919,7 +918,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,

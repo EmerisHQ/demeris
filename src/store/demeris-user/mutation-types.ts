@@ -47,6 +47,7 @@ export type DemerisMutationArgs =
   | API.PrimaryChannels
   | API.PrimaryChannel
   | API.StakingBalances
+  | API.UnstakingPeriods
   | API.Numbers
   | API.SeqNumber
   | API.VerifyTrace

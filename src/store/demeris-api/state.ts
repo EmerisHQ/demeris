@@ -19,7 +19,7 @@ export type State = {
   hub_chain: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
-  unstakingPeriods: Record<string, API.UnstakingPeriods>;
+  unstakingPeriods: Record<string, API.UnstakingPeriod>;
   unbondingDelegations: Record<string, API.UnbondingDelegations>;
   numbers: Record<string, API.Numbers>;
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
