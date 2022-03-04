@@ -22,6 +22,7 @@ type State = {
   isConnectWalletModalOpen: boolean;
   isCancelModalOpen: boolean;
   isPendingModalOpen: boolean;
+  isRemoveModalOpen: boolean;
   hasShownNotification: boolean;
   currentId: string;
 };
@@ -36,6 +37,7 @@ export const useTransactionsStore = defineStore('transactions', {
       isConnectWalletModalOpen: false,
       isCancelModalOpen: false,
       isPendingModalOpen: false,
+      isRemoveModalOpen: false,
       hasShownNotification: false,
       currentId: undefined,
     } as State),
@@ -51,6 +53,14 @@ export const useTransactionsStore = defineStore('transactions', {
 
     togglePendingModal() {
       this.isPendingModalOpen = !this.isPendingModalOpen;
+    },
+
+    toggleRemoveModal() {
+      this.isRemoveModalOpen = !this.isRemoveModalOpen;
+    },
+
+    closeRemoveModal() {
+      this.isRemoveModalOpen = false;
     },
 
     closePendingModal() {
@@ -77,14 +87,14 @@ export const useTransactionsStore = defineStore('transactions', {
       this.currentId = id;
     },
 
-    setTransactionAsPending() {
-      const stepId = this.currentId;
-      if (!this.transactions[stepId] || this.pending[stepId]) {
+    setTransactionAsPending(stepId?: string) {
+      const id = stepId || this.currentId;
+      if (!this.transactions[id] || this.pending[id]) {
         return;
       }
 
       this.pending = {
-        [stepId]: this.transactions[stepId],
+        [id]: this.transactions[id],
         ...this.pending,
       };
     },
@@ -160,7 +170,7 @@ export const useTransactionsStore = defineStore('transactions', {
         gasLimit: globalStore.getters[GlobalDemerisGetterTypes.USER.getGasLimit],
       });
 
-      service.subscribe(function (state) {
+      service.subscribe((state) => {
         if (state.matches('signing.active')) {
           Object.values(allTransactions()).forEach((itemService: TransactionProcessService) => {
             if (['receipt', 'review'].some(itemService.state.matches)) {
