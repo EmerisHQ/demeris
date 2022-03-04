@@ -75,6 +75,10 @@
           <CircleSymbol size="lg" :denom="getDenom(tx.data.pool.reserve_coin_denoms[1])" />
         </template>
 
+        <template v-if="tx.name == 'staking'">
+          <EphemerisSpinner class="flex-grow max-w-xs" />
+        </template>
+
         <template v-if="tx.name == 'ibc_forward' || tx.name == 'ibc_backward'">
           <CircleSymbol size="lg" variant="chain" :chain-name="tx.data.from_chain" />
           <EphemerisSpinner class="-my-6 flex-grow max-w-xs" />
