@@ -129,10 +129,10 @@ export type StakingBalancesResponse = {
 };
 
 // /chain/:chain_name/staking/params response data types
-export type UnstakingPeriodReq = {
+export type UnstakingParamReq = {
   chain_name: string;
 };
-export type UnstakingPeriod = {
+export type UnstakingParam = {
   chain_name: string;
   unbonding_time: number;
   max_validators: number;
@@ -140,7 +140,7 @@ export type UnstakingPeriod = {
   historical_entries: number;
   bond_denom: string;
 };
-export type UnstakingPeriods = Array<UnstakingPeriod>;
+export type UnstakingParams = Array<UnstakingParam>;
 
 // /unbonding_delegations/:address response data types
 export type UnbondingDelegationEntry = {
@@ -328,14 +328,7 @@ export type Numbers = Array<SeqNumber>;
 export type NumbersResponse = {
   numbers: Array<Numbers>;
 };
-export type APIRequests =
-  | AddrReq
-  | VerifyTraceReq
-  | ChainReq
-  | TicketReq
-  | ChainAddrReq
-  | DenomReq
-  | UnstakingPeriodReq;
+export type APIRequests = AddrReq | VerifyTraceReq | ChainReq | TicketReq | ChainAddrReq | DenomReq | UnstakingParamReq;
 
 export type SwapEndBlockResponse = {
   exchanged_offer_coin_amount: string;

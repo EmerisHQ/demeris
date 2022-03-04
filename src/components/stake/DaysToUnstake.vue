@@ -34,20 +34,25 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), { chainName: '' });
 const { chainName } = toRefs(props);
-const daysToUnstake = ref<number | null>();
+const daysToUnstake = ref<number | null>(null);
 const isResponseError = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 async function getDaysToUnstake() {
   isResponseError.value = false;
   isLoading.value = true;
   try {
-    daysToUnstake.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_UNSTAKING_PERIOD, {
+    const unstakingParams = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_UNSTAKING_PARAM, {
       chain_name: chainName.value,
     });
+    daysToUnstake.value = (Math.round(unstakingParams.unbonding_time / 1000000000 / 60 / 60 / 24) * 100) / 100;
   } catch {
     isResponseError.value = true;
   }
   isLoading.value = false;
 }
-if (featureRunning('TIME_TO_UNSTAKE_FROM_API') || !daysToUnstake.value) getDaysToUnstake();
+if (featureRunning('TIME_TO_UNSTAKE_FROM_API')) {
+  getDaysToUnstake();
+} else {
+  daysToUnstake.value = 21;
+}
 </script>

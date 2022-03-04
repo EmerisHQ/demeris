@@ -17,7 +17,7 @@ type Namespaced<T, N extends string> = {
 export type Getters = {
   [GetterTypes.getBalances](state: State): { (params: API.APIRequests): API.Balances | null };
   [GetterTypes.getStakingBalances](state: State): { (params: API.APIRequests): API.StakingBalances | null };
-  [GetterTypes.getUnstakingPeriod](state: State): { (params: API.UnstakingPeriodReq): number | null };
+  [GetterTypes.getUnstakingParam](state: State): { (params: API.UnstakingParamReq): API.UnstakingParam };
   [GetterTypes.getUnbondingDelegations](state: State): { (params: API.APIRequests): API.UnbondingDelegations | null };
   [GetterTypes.getNumbers](state: State): { (params: API.APIRequests): API.Numbers | null };
   [GetterTypes.getNumbersChain](state: State): { (params: API.APIRequests): API.SeqNumber | null };
@@ -87,8 +87,8 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getStakingBalances]: (state) => (params) => {
     return state.stakingBalances[(params as API.AddrReq).address] ?? null;
   },
-  [GetterTypes.getUnstakingPeriod]: (state) => (params) => {
-    return state.unstakingPeriods[(params as API.UnstakingPeriodReq).chain_name].unbonding_time ?? null;
+  [GetterTypes.getUnstakingParam]: (state) => (params) => {
+    return state.unstakingParams[(params as API.UnstakingParamReq).chain_name] ?? null;
   },
   [GetterTypes.getUnbondingDelegations]: (state) => (params) => {
     return state.unbondingDelegations[(params as API.AddrReq).address] ?? null;

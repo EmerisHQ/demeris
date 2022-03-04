@@ -212,10 +212,10 @@ export interface Actions {
     { getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetRewardsParam,
   ): Promise<unknown>;
-  [DemerisActionTypes.GET_UNSTAKING_PERIOD](
+  [DemerisActionTypes.GET_UNSTAKING_PARAM](
     { commit, getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetUnstakingPeriodParam,
-  ): Promise<number>;
+  ): Promise<API.UnstakingParam>;
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
@@ -410,15 +410,15 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getAllValidPools'];
   },
-  async [DemerisActionTypes.GET_UNSTAKING_PERIOD]({ commit, getters }, { chain_name }): Promise<number> {
+  async [DemerisActionTypes.GET_UNSTAKING_PARAM]({ commit, getters }, { chain_name }): Promise<API.UnstakingParam> {
     try {
       const {
-        data: { params: unstakingPeriod },
+        data: { params: unstakingParam },
       } = await axios.get(`${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
-      commit('SET_UNSTAKING_PERIOD', { params: { chain_name }, value: unstakingPeriod });
-      return Math.round((getters['getUnstakingPeriod']({ chain_name }) / 1000000000 / 60 / 60 / 24) * 100) / 100;
+      commit('SET_UNSTAKING_PARAM', { params: { chain_name }, value: unstakingParam });
+      return getters['getUnstakingParam']({ chain_name });
     } catch {
-      throw new SpVuexError('Demeris:getUnstakingPeriod', 'Could not retrieve staking period.');
+      throw new SpVuexError('Demeris:getUnstakingParam', 'Could not retrieve staking period.');
     }
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES](

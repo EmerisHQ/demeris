@@ -133,11 +133,11 @@ export default defineComponent({
     Button,
     ChainName,
     ChainSelectModal,
+    DaysToUnstake,
     FeeLevelSelector,
     Icon,
     ListItem,
     Price,
-    DaysToUnstake,
     ValidatorSelect,
   },
   props: {
@@ -175,7 +175,7 @@ export default defineComponent({
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
     });
-    const chainName = ref<string>(chain.value.chain_name);
+    const chainName = ref<string>(validators.value[0].chain_name);
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const hasIBC = computed(() => {
       const denomTypes = form.stakes.map((x) => {
