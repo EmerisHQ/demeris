@@ -137,7 +137,7 @@
                 ),
               }"
             >
-              {{ getAmountDisplayValue(validator.tokens) }} <Ticker :name="baseDenom" />
+              {{ getAmountDisplayValueTruncated(validator.tokens) }} <Ticker :name="baseDenom" />
               <div class="-text-1 text-muted">
                 {{ getVotingPowerPercDisplayValue(validator.tokens) }}
               </div>
@@ -364,8 +364,14 @@ export default defineComponent({
     const getCommissionDisplayValue = (value) => {
       return Math.trunc(parseFloat(value) * 10000) / 100 + '%';
     };
-    const getAmountDisplayValue = (value) => {
+    const getAmountDisplayValueTruncated = (value) => {
       return Math.trunc(new BigNumber(value).dividedBy(10 ** precision).toNumber()).toLocaleString('en-US');
+    };
+    const getAmountDisplayValue = (value) => {
+      return new BigNumber(value)
+        .dividedBy(10 ** precision)
+        .toNumber()
+        .toLocaleString('en-US');
     };
     const getVotingPowerPercDisplayValue = (value) => {
       return (
@@ -382,6 +388,7 @@ export default defineComponent({
       keyword,
       getCommissionDisplayValue,
       getAmountDisplayValue,
+      getAmountDisplayValueTruncated,
       getVotingPowerPercDisplayValue,
       selectValidator,
       detailedValidator,
