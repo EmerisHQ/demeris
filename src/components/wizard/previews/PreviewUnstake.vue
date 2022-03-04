@@ -33,7 +33,7 @@
 
     <ListItem direction="col">
       <ListItem size="sm" label="Time to unstake">
-        <TimeToUnstake :chain-name="chainName" />
+        <DaysToUnstake :chain-name="chainName" />
       </ListItem>
       <ListItem size="sm" :label="$t('components.previews.unstake.availLbl')" class="text-normal text-muted">
         {{ availableAt }}
@@ -61,7 +61,7 @@ import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import CircleSymbol from '@/components/common/CircleSymbol.vue';
 import Price from '@/components/common/Price.vue';
 import ValidatorBadge from '@/components/common/ValidatorBadge.vue';
-import TimeToUnstake from '@/components/stake/TimeToUnstake.vue';
+import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 import { List, ListItem } from '@/components/ui/List';
 import useStaking from '@/composables/useStaking';
 import * as Actions from '@/types/actions';
@@ -70,7 +70,7 @@ export default defineComponent({
   name: 'PreviewUnstake',
   components: {
     AmountDisplay,
-    TimeToUnstake,
+    DaysToUnstake,
     Price,
     CircleSymbol,
     List,

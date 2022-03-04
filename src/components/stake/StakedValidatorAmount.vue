@@ -7,7 +7,7 @@
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
             <ListItem inset size="md" label="Time to unstake">
-              <TimeToUnstake :chain-name="chainName" />
+              <DaysToUnstake :chain-name="chainName" />
             </ListItem>
 
             <ListItem inset size="md" label="Total stake remaining">
@@ -43,8 +43,8 @@ import { useStore } from 'vuex';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
+import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmountInput.vue';
-import TimeToUnstake from '@/components/stake/TimeToUnstake.vue';
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
 import useStaking from '@/composables/useStaking';
@@ -60,7 +60,7 @@ export default defineComponent({
     ListItem,
     AmountDisplay,
     Button,
-    TimeToUnstake,
+    DaysToUnstake,
     Price,
     FeeLevelSelector,
   },

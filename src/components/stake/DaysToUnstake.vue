@@ -1,8 +1,10 @@
 <template>
   <span v-if="!isResponseError">
     <span v-if="!isLoading">
-      {{ daysToUnstake }}
-      {{ daysToUnstake <= 1 ? $t('components.timeToUnstake.daySingular') : $t('components.timeToUnstake.dayPlural') }}
+      {{
+        `${daysToUnstake}
+       ${daysToUnstake <= 1 ? $t('components.daysToUnstake.daySingular') : $t('components.daysToUnstake.dayPlural')}`
+      }}
     </span>
     <span v-if="isLoading"><SkeletonLoader width="4rem" height="1rem" /></span>
   </span>
@@ -11,8 +13,8 @@
       size="sm"
       variant="link"
       class="text-negative"
-      :name="$t('components.timeToUnstake.errorButton')"
-      @click="getTimeToUnstake()"
+      :name="$t('components.daysToUnstake.errorButton')"
+      @click="getDaysToUnstake()"
     />
   </span>
 </template>
@@ -32,10 +34,10 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), { chainName: '' });
 const { chainName } = toRefs(props);
-const daysToUnstake = ref<number | null>(null);
+const daysToUnstake = ref<number | null>();
 const isResponseError = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
-async function getTimeToUnstake() {
+async function getDaysToUnstake() {
   isResponseError.value = false;
   isLoading.value = true;
   try {
@@ -47,7 +49,5 @@ async function getTimeToUnstake() {
   }
   isLoading.value = false;
 }
-if (featureRunning('TIME_TO_UNSTAKE_FROM_API') || !chainName.value) {
-  getTimeToUnstake();
-}
+if (featureRunning('TIME_TO_UNSTAKE_FROM_API') || !daysToUnstake.value) getDaysToUnstake();
 </script>

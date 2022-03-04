@@ -23,7 +23,7 @@ export const messages = {
         textAPR: 'APR',
         cta: 'Start staking',
       },
-      timeToUnstake: {
+      daysToUnstake: {
         daySingular: 'day',
         dayPlural: 'days',
         errorButton: 'Error: Retry',
