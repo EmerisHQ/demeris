@@ -34,11 +34,12 @@
 
   <ModalCancel v-if="transactionsStore.isCancelModalOpen" />
   <ModalPendingTransaction v-if="transactionsStore.isPendingModalOpen" />
+  <ModalRemove v-if="transactionsStore.isRemoveModalOpen" @undo="emit('undo')" />
 </template>
 
 <script lang="ts" setup>
 import { useActor } from '@xstate/vue';
-import { computed, provide, watch } from 'vue';
+import { computed, nextTick, provide, watch } from 'vue';
 
 import Spinner from '@/components/ui/Spinner.vue';
 import TransferInterstitialConfirmation from '@/components/wizard/TransferInterstitialConfirmation.vue';
@@ -50,6 +51,7 @@ import ModalCancel from './TransactionProcessViewer/ModalCancel.vue';
 import ModalChainDown from './TransactionProcessViewer/ModalChainDown.vue';
 import ModalFeeWarning from './TransactionProcessViewer/ModalFeeWarning.vue';
 import ModalPendingTransaction from './TransactionProcessViewer/ModalPendingTransaction.vue';
+import ModalRemove from './TransactionProcessViewer/ModalRemove.vue';
 import ViewStateFailed from './TransactionProcessViewer/ViewStateFailed.vue';
 import ViewStateReceipt from './TransactionProcessViewer/ViewStateReceipt.vue';
 import ViewStateReview from './TransactionProcessViewer/ViewStateReview.vue';
@@ -64,7 +66,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(['close', 'minimize', 'previous', 'onReceiptState']);
+const emit = defineEmits(['close', 'minimize', 'previous', 'onReceiptState', 'undo']);
 
 const transactionsStore = useTransactionsStore();
 const transactionService = computed(() => transactionsStore.transactions[props.stepId] as TransactionProcessService);
@@ -92,7 +94,7 @@ watch(
   () => state.value,
   (newState) => {
     if (newState.matches('receipt') || newState.matches('success')) {
-      emits('onReceiptState');
+      emit('onReceiptState');
     }
   },
 );
@@ -104,13 +106,14 @@ const showTransactingState = computed(() => state.value.matches('transacting'));
 const showWaitingPreviousTransactionState = computed(() => state.value.matches('waitingPreviousTransaction'));
 const showReceiptState = computed(() => state.value.matches('receipt') || state.value.matches('success'));
 
-const closeModal = () => emits('close');
-const goBack = () => emits('previous');
+const closeModal = (payload?) => emit('close', payload);
+const goBack = () => emit('previous');
 
-const removeTransactionAndClose = () => {
-  transactionsStore.removeTransaction(props.stepId);
-  closeModal();
+const removeTransactionAndClose = (payload) => {
+  closeModal(payload);
+  nextTick(() => transactionsStore.removeTransaction(props.stepId));
 };
+
 provide(ProvideViewerKey, {
   actor,
   closeModal,

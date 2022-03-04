@@ -11,6 +11,7 @@ import { Amount } from '@/types/base';
 import { validPools } from '@/utils/actionHandler';
 import { getOwnAddress, hashObject, keyHashfromAddress } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
+import TendermintWS from '@/utils/TendermintWS';
 
 import {
   DemerisActionByTokenIdParams,
@@ -33,6 +34,7 @@ import { ChainData, State } from './state';
 
 export type DemerisConfig = {
   endpoint: string;
+  wsEndpoint?: string;
   refreshTime?: number;
   hub_chain?: string;
   gas_limit?: number;
@@ -678,6 +680,26 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
     return getters['getTxStatus'](params);
   },
+  async [DemerisActionTypes.GET_TX_DEST_HASH]({ getters, rootGetters }, { from_chain, to_chain, txhash }) {
+    axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
+    try {
+      const response = await axios.get(`${getters['getEndpoint']}/tx/${from_chain}/${to_chain}/${txhash}`);
+      const data = response.data;
+
+      if (data.cause) {
+        throw new Error(data);
+      }
+
+      if (!data.tx_hash) {
+        throw new Error('Failed to fetch destination hash');
+      }
+
+      return response.data;
+    } catch (e) {
+      throw new SpVuexError('Demeris:GetTXDestHash', 'Could not perform API query.');
+    }
+  },
+
   async [DemerisActionTypes.GET_CHAINS]({ commit, getters, rootGetters }, { subscribe = false }) {
     axios.defaults.headers.get['X-Correlation-Id'] = rootGetters[GlobalDemerisGetterTypes.USER.getCorrelationId];
     try {
@@ -986,6 +1008,68 @@ export const actions: ActionTree<State, RootState> & Actions = {
     }
   },
 
+  async [DemerisActionTypes.TRACE_TX_RESPONSE]({ getters }, { txhash, chain_name }) {
+    return new Promise(async (resolve, reject) => {
+      const timeout = 60000;
+      const wsUrl = `${getters['getWebSocketEndpoint']}/chain/${chain_name}/websocket`;
+
+      const wss = new TendermintWS({ server: wsUrl, timeout: 5000, autoReconnect: false });
+      const txHash64 = Buffer.from(txhash, 'hex').toString('base64');
+      const subscribeQuery = `tm.event = 'Tx' AND tx.hash = '${txhash}'`;
+
+      let done = false;
+
+      const getTxRPC = async () => {
+        const result = await wss.call('tx', [txHash64, false]).catch(reject);
+        handleMessage(result);
+      };
+
+      const subscribeTxRPC = () => {
+        wss.subscribe(
+          {
+            query: subscribeQuery,
+          },
+          handleMessage,
+        );
+      };
+
+      const handleOpen = () => {
+        getTxRPC();
+        subscribeTxRPC();
+      };
+
+      const handleMessage = async (data: Record<string, any>) => {
+        if (done) return;
+
+        if (data.error) {
+          // Not found
+          if (data.error.code === -32603) return;
+
+          done = true;
+          reject(new Error(data.error));
+        }
+
+        if (data.result?.data?.value?.TxResult) {
+          done = true;
+          resolve(data.result.data.value.TxResult);
+        }
+
+        if (data?.result?.tx_result) {
+          done = true;
+          resolve(data.result.tx_result);
+        }
+      };
+
+      await wss.connect().catch(reject);
+      handleOpen();
+
+      setTimeout(() => {
+        done = true;
+        reject(new Error('Could not find transaction response'));
+      }, timeout);
+    });
+  },
+
   async [DemerisActionTypes.GET_END_BLOCK_EVENTS](
     { getters, rootGetters },
     { height, stepType }: DemerisTxResultParams,
@@ -1082,10 +1166,10 @@ export const actions: ActionTree<State, RootState> & Actions = {
 
   [DemerisActionTypes.INIT](
     { commit, dispatch },
-    { endpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
+    { endpoint, wsEndpoint, hub_chain = 'cosmos-hub', refreshTime = 5000, gas_limit = 500000 },
   ) {
     console.log('Vuex nodule: demeris initialized!');
-    commit('INIT', { endpoint, hub_chain, gas_limit });
+    commit('INIT', { wsEndpoint, endpoint, hub_chain, gas_limit });
     setInterval(() => {
       dispatch(DemerisActionTypes.STORE_UPDATE);
     }, refreshTime);
