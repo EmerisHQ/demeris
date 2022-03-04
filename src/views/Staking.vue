@@ -165,6 +165,7 @@ export default defineComponent({
       if (step.value === 'staked' || step.value === 'unstaked') {
         return false;
       }
+
       return (currentStepIndex.value > 0 && !!actionType) || inModal.value;
     });
     const isBackDisabled = computed(() => {
