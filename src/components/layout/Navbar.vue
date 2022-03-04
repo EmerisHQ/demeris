@@ -30,7 +30,7 @@
       {{ $t('navbar.airdrops') }}
       <span class="blinking"></span>
 
-      <div class="airdrop-hover py-3 px-4 mt-3 rounded-lg">
+      <div class="airdrop-hover bg-text text-inverse py-2.5 px-4 mt-4 rounded-lg">
         <div class="flex items-center">
           <StarsIcon />
           <p class="-text-1 ml-1">3 airdrops found</p>
@@ -40,9 +40,11 @@
   </nav>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import StarsIcon from '@/components/common/Icons/StarsIcon.vue';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
+import { apistore } from '@/store/setup';
 import { featureRunning } from '@/utils/FeatureManager';
 
 export default defineComponent({
@@ -51,10 +53,38 @@ export default defineComponent({
     StarsIcon,
   },
   setup() {
+    let gitAirdropsList = ref([]);
+
     const isAirdropsFeatureRunning = featureRunning('AIRDROPS_FEATURE');
+
+    const getAllAirdrops = async () => {
+      gitAirdropsList.value = await apistore.dispatch(GlobalDemerisActionTypes.API.GET_GIT_AIRDROPS_LIST, {
+        subscribe: false,
+      });
+
+      gitAirdropsList.value.forEach((item) => {
+        apistore.dispatch(GlobalDemerisActionTypes.API.GET_AIRDROPS, {
+          subscribe: false,
+          params: {
+            airdropFileName: item.name,
+          },
+        });
+      });
+    };
+
+    onMounted(() => {
+      if (isAirdropsFeatureRunning) {
+        getAllAirdrops();
+      }
+    });
+
+    const airdrops = computed(() => {
+      return apistore.getters[GlobalDemerisGetterTypes.API.getAirdrops];
+    });
 
     return {
       isAirdropsFeatureRunning,
+      airdrops,
     };
   },
 });
@@ -73,9 +103,8 @@ export default defineComponent({
     .airdrop-hover {
       position: relative;
       left: -25%;
-      background: black;
-      color: white;
       display: block;
+      animation: 0.5s zoom-in-zoom-out ease;
     }
   }
 }
@@ -88,10 +117,6 @@ export default defineComponent({
   display: inline-block;
   position: relative;
   top: -10px;
-  -webkit-animation: 1.3s blink ease infinite;
-  -moz-animation: 1.3s blink ease infinite;
-  -ms-animation: 1.3s blink ease infinite;
-  -o-animation: 1.3s blink ease infinite;
   animation: 1.3s blink ease infinite;
 }
 
@@ -102,6 +127,15 @@ export default defineComponent({
   }
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes zoom-in-zoom-out {
+  0% {
+    transform: scale(0.7, 0.7);
+  }
+  100% {
+    transform: scale(1, 1);
   }
 }
 </style>
