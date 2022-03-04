@@ -53,8 +53,9 @@ export type Getters = {
   [GetterTypes.getDenomPrecision](state: State): {
     (params: { name: string }): string;
   };
-  [GetterTypes.getEndpoint](state: State): string;
+  [GetterTypes.getWebSocketEndpoint](state: State): string;
   [GetterTypes.getAllValidPools](state: State): Pool[];
+  [GetterTypes.getEndpoint](state: State): string;
   [GetterTypes.getSupply](state: State, getters): { (params): number };
   [GetterTypes.getAllVerifiedTraces](state: State): Record<string, API.VerifyTrace>;
   [GetterTypes.getDexChain](state: State): string;
@@ -267,6 +268,9 @@ export const getters: GetterTree<State, RootState> & Getters = {
   },
   [GetterTypes.getEndpoint]: (state) => {
     return state.endpoint;
+  },
+  [GetterTypes.getWebSocketEndpoint]: (state) => {
+    return state.wsEndpoint;
   },
   [GetterTypes.getDexChain]: (state) => {
     return state.hub_chain;

@@ -2,7 +2,7 @@ import { assign, createMachine, Interpreter, State } from 'xstate';
 
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { DemerisTxParams, TicketResponse } from '@/store/demeris-user/actions';
-import { FeeTotals, FeeWarning, GasPriceLevel, Step, StepTransaction } from '@/types/actions';
+import { FeeTotals, FeeWarning, GasPriceLevel, IBCBackwardsData, Step, StepTransaction } from '@/types/actions';
 import { Balance } from '@/types/api';
 import {
   chainStatusForSteps,
@@ -13,6 +13,7 @@ import {
   validateStepsFeeBalances,
 } from '@/utils/actionHandler';
 import { event } from '@/utils/analytics';
+import { featureRunning } from '@/utils/FeatureManager';
 import { useStore } from '@/utils/useStore';
 
 import {
@@ -297,7 +298,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
       failed: {
         id: 'failed',
         initial: 'default',
-        entry: 'setError',
+        entry: ['setError', 'logError'],
         states: {
           default: {
             on: {
@@ -400,15 +401,11 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           chain_name: sourceChain,
           status: undefined,
           endBlock: undefined,
+          websocket: undefined,
         };
 
         // @ts-ignore
         callback({ type: 'SET_DATA', data: responseData });
-
-        useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
-          subscribe: true,
-          params: { chain_name: sourceChain, ticket: event.data.ticket },
-        });
 
         let shouldRetry = true;
 
@@ -441,6 +438,7 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
             }
           }
 
+          responseData.endBlock = endBlockEvent;
           return endBlockEvent;
         };
 
@@ -480,14 +478,77 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           }
 
           responseData.status = resultData;
-          const endBlockResult = await fetchEndBlock(resultData.height);
-          responseData.endBlock = endBlockResult;
+
+          await fetchEndBlock(resultData.height);
 
           // @ts-ignore
           callback({ type: 'GOT_RESPONSE', data: responseData });
         };
 
-        setTimeout(fetchStatus, 0);
+        const findIBCDestHash = async () => {
+          if (currentTransaction.name.includes('ibc')) {
+            const { from_chain, to_chain } = currentTransaction.data as IBCBackwardsData;
+
+            let retriesDestCount = 0;
+            let destTx;
+
+            await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for the block time
+
+            while (retriesDestCount < 15 && shouldRetry) {
+              try {
+                destTx = await useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_DEST_HASH, {
+                  from_chain,
+                  to_chain,
+                  txhash: responseData.txhash,
+                });
+
+                responseData.chain_name = destTx.dest_chain;
+                responseData.txhash = destTx.tx_hash;
+                break;
+              } catch {
+                retriesDestCount++;
+                await new Promise((r) => setTimeout(r, 4000));
+              }
+            }
+
+            if (!destTx) {
+              // @ts-ignore
+              return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+            }
+          }
+        };
+
+        const traceResponse = async () => {
+          await findIBCDestHash();
+
+          try {
+            const wsResult = await useStore().dispatch(GlobalDemerisActionTypes.API.TRACE_TX_RESPONSE, {
+              chain_name: responseData.chain_name,
+              txhash: responseData.txhash,
+              stepType: currentStep.name,
+            });
+            responseData.websocket = wsResult;
+
+            await fetchEndBlock(wsResult.height);
+
+            // @ts-ignore
+            callback({ type: 'GOT_RESPONSE', data: responseData });
+          } catch {
+            // @ts-ignore
+            return callback({ type: 'GOT_FAILURE', data: { ...responseData } });
+          }
+        };
+
+        if (featureRunning('WEBSOCKET_RESPONSE')) {
+          setTimeout(traceResponse, 0);
+        } else {
+          useStore().dispatch(GlobalDemerisActionTypes.API.GET_TX_STATUS, {
+            subscribe: true,
+            params: { chain_name: sourceChain, ticket: event.data.ticket },
+          });
+
+          setTimeout(fetchStatus, 0);
+        }
 
         return () => (shouldRetry = false);
       },
@@ -531,6 +592,9 @@ export const transactionProcessMachine = createMachine<TransactionProcessContext
           },
         }),
       }),
+      logError: (context, event) => {
+        console.error(event);
+      },
       logEvent: (context, __, meta) => {
         const key = meta.action.key;
         let data = {};
