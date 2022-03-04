@@ -75,6 +75,10 @@ export const isSwapAction = (context: TransactionProcessContext) => {
   return context.input.action === 'swap';
 };
 
+export const isProcessingState = (state: TransactionProcessState) => {
+  return ['transacting', 'signing'].some(state.matches);
+};
+
 export const formatStepsWithFee = (context: TransactionProcessContext, balances: Balance[]): Step[] => {
   return context.input.steps.map((step) => {
     return {
@@ -345,8 +349,8 @@ export type ProvideViewerSchema = {
   };
   isSwapComponent: ComputedRef<boolean>;
   stepId: string;
-  removeTransactionAndClose: () => void;
-  closeModal: () => void;
+  removeTransactionAndClose: (payload?: Record<string, any>) => void;
+  closeModal: (payload?: Record<string, any>) => void;
   minimizeModal: () => void;
 };
 

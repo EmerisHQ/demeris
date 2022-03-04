@@ -356,6 +356,7 @@ export const mutations: MutationTree<State> & Mutations = {
   },
   [MutationTypes.INIT](state: State, payload: DemerisConfig) {
     state.endpoint = payload.endpoint;
+    state.wsEndpoint = payload.wsEndpoint;
     state.hub_chain = payload.hub_chain;
   },
   [MutationTypes.RESET_STATE](state: State) {

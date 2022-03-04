@@ -16,6 +16,7 @@ export type TransactionItem = {
 };
 export type State = {
   endpoint: string;
+  wsEndpoint: string;
   hub_chain: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
@@ -42,6 +43,7 @@ export type State = {
 export function getDefaultState(): State {
   return {
     endpoint: '',
+    wsEndpoint: '',
     hub_chain: 'cosmoshub-4',
     balances: {},
     stakingBalances: {},
