@@ -21,7 +21,7 @@
           <div :style="`height:${isStacked ? 'auto' : notificationViewportHeight + 'px'};`" class="w-full absolute">
             <TransitionGroup name="notification-list" tag="div" appear>
               <div
-                v-for="({ message, id }, displayIndex) in visibleNotificationMessages"
+                v-for="({ message, id, hideButton2 }, displayIndex) in visibleNotificationMessages"
                 :ref="
                   (el:HTMLDivElement) => {
                     notificationHTMLRefs[displayIndex] = el;
@@ -36,7 +36,7 @@
                 <Transition name="fade" appear>
                   <button
                     v-if="showClearButton(displayIndex)"
-                    class="clear-all-button absolute z-40 bg-surface py-1 px-2 text-text -text-1 font-medium rounded-full focus:outline-none;"
+                    class="clear-all-button absolute z-40 bg-surface text-text -text-1 font-medium rounded-full focus:outline-none;"
                     :data-test="`clear-all-notifications-button-${displayIndex}`"
                     @click="clearAllNotifications()"
                     @mouseover="isHoverClearAllButton = true"
@@ -46,7 +46,7 @@
                       v-if="visibleNotificationMessages.length === 1 || !isHoverClearAllButton"
                       key="icon"
                       name="CloseIcon"
-                      :icon-size="0.563"
+                      :icon-size="0.85"
                     />
                     <span
                       v-if="visibleNotificationMessages.length > 1 && isHoverClearAllButton"
@@ -64,7 +64,7 @@
                   <div class="flex-1 text-text">{{ message }}</div>
                   <div v-if="button1Label || button2Label" class="flex items-center">
                     <Button
-                      v-if="button2Label"
+                      v-if="button2Label && !hideButton2"
                       :name="button2Label"
                       class="text-quaternary ml-3"
                       variant="link"
@@ -120,6 +120,7 @@ import Icon from '@/components/ui/Icon.vue';
 interface NotificationMessage {
   message: string;
   id: number | string;
+  hideButton2?: boolean;
 }
 
 interface Props {
@@ -240,7 +241,7 @@ function startDismissNotificationTimeout(): void {
       return;
     }
     const lastNotificationId = visibleNotificationMessages.value[visibleNotificationMessages.value.length - 1]?.id;
-    if (lastNotificationId >= 0) dismissNotification(lastNotificationId);
+    if (lastNotificationId) dismissNotification(lastNotificationId);
     if (visibleNotificationMessages.value.length > 0) startInactivityTimer();
   }, dismissInterval.value);
 }
@@ -294,6 +295,18 @@ watch(
   () => isMouseOverComponent.value,
   () => {
     if (!isMouseOverComponent.value) startInactivityTimer();
+  },
+);
+
+watch(
+  () => autoDismiss.value,
+  () => {
+    if (autoDismiss.value) {
+      startInactivityTimer();
+      return;
+    }
+
+    clearTimeout(inactivityTimeoutId.value);
   },
 );
 

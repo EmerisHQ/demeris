@@ -157,7 +157,7 @@ export default defineComponent({
       form.to_chain = '';
       steps.value = [];
 
-      goToStep('amount');
+      goToStep(undefined);
     };
 
     if (!props.step) {

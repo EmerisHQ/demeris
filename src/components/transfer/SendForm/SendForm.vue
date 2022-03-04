@@ -34,8 +34,8 @@
             }
           "
           @close="
-            () => {
-              closeModal();
+            (payload) => {
+              closeModal(payload);
               resetHandler();
             }
           "
@@ -117,7 +117,11 @@ export default defineComponent({
       set: (value) => emit('update:step', value),
     });
 
-    const closeModal = () => {
+    const closeModal = (payload?: any) => {
+      if (payload?.source === 'send-btn' || payload?.source === 'move-btn') {
+        return;
+      }
+
       router.push('/');
     };
 
@@ -166,7 +170,7 @@ export default defineComponent({
       form.isTermChecked = false;
       steps.value = [];
 
-      goToStep('recipient');
+      goToStep(undefined);
     };
     const goToStep = (value: Step) => {
       step.value = value;
