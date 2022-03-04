@@ -73,7 +73,7 @@ export type DemerisGetInflationParam = {
 export type DemerisGetRewardsParam = {
   chain_name: string;
 };
-export type DemerisGetUnstakingPeriodParam = {
+export type DemerisGetUnstakingParam = {
   chain_name: string;
 };
 type Namespaced<T, N extends string> = {
@@ -214,7 +214,7 @@ export interface Actions {
   ): Promise<unknown>;
   [DemerisActionTypes.GET_UNSTAKING_PARAM](
     { commit, getters }: ActionContext<State, RootState>,
-    { chain_name }: DemerisGetUnstakingPeriodParam,
+    { chain_name }: DemerisGetUnstakingParam,
   ): Promise<API.UnstakingParam>;
 
   [DemerisActionTypes.INIT](
@@ -418,7 +418,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       commit('SET_UNSTAKING_PARAM', { params: { chain_name }, value: unstakingParam });
       return getters['getUnstakingParam']({ chain_name });
     } catch {
-      throw new SpVuexError('Demeris:getUnstakingParam', 'Could not retrieve staking period.');
+      throw new SpVuexError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
     }
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES](
