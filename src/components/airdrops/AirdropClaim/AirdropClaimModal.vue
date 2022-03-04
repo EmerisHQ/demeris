@@ -15,18 +15,18 @@
     <!-- Content Area -->
     <div class="w-full px-16 py-8">
       <div
-        v-for="(item, index) in [1, 2, 3, 4, 5]"
+        v-for="(item, index) in selectedAirdrop.claimActions"
         :key="index"
         class="flex justify-between items-center text-muted border border-border rounded-xl px-6 py-4 mb-4"
       >
-        <div class="w-6 h-6 rounded-md pt-1 text-center -text-1 mr-4">{{ item }}</div>
+        <div class="w-6 h-6 bg-text text-inverse rounded-md pt-1 text-center -text-1 mr-4">{{ index + 1 }}</div>
         <p class="w-96 -text-1 mr-6">
-          Airdrop is not financial advice. Eligibility, claim action can change based on the project.
+          {{ item.description }}
         </p>
-        <div class="w-40 flex items-center text-right">
+        <div class="w-30 flex items-center text-right">
           <div>
             <p class="-text-1 font-medium">Completed</p>
-            <p class="uppercase -text-2">200 LIKE (Unlock 20%)</p>
+            <p v-if="selectedAirdrop.unanimousClaim" class="uppercase -text-2">(Unlock {{ item.unlockPercentage }}%)</p>
           </div>
         </div>
         <div class="w-6">
@@ -46,11 +46,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import ClaimedIcon from '@/components/common/Icons/ClaimedIcon.vue';
 import InformationIcon from '@/components/common/Icons/InformationIcon.vue';
 import Modal from '@/components/ui/Modal.vue';
+import { Airdrop } from '@/types/api';
 
 export default defineComponent({
   name: 'AirdropClaimModal',
@@ -63,6 +64,10 @@ export default defineComponent({
     open: {
       type: Boolean,
       default: false,
+    },
+    selectedAirdrop: {
+      type: Object as PropType<Airdrop>,
+      default: null,
     },
   },
 
