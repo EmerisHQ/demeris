@@ -2,30 +2,34 @@ import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as baseUseStore } from 'vuex';
 
 import {
-  DemerisStore as DemerisStoreAPI,
   GlobalDemerisActionTypes as GlobalDemerisActionTypesAPI,
   module as moduleAPI,
   namespace as namespaceAPI,
+  NamespacedDemerisStore as DemerisStoreAPI,
 } from '@/store/demeris-api';
-import { DemerisStore as DemerisStoreTX, module as moduleTX, namespace as namespaceTX } from '@/store/demeris-tx';
 import {
-  DemerisStore as DemerisStoreUSER,
+  module as moduleTX,
+  namespace as namespaceTX,
+  NamespacedDemerisStore as DemerisStoreTX,
+} from '@/store/demeris-tx';
+import {
   module as moduleUSER,
   namespace as namespaceUSER,
+  NamespacedDemerisStore as DemerisStoreUSER,
 } from '@/store/demeris-user';
 
 import init from './config';
 import { RootState } from './index';
 
-export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStoreUSER<S>;
+export type RootStore<S> = DemerisStoreAPI<S> & DemerisStoreTX<S> & DemerisStoreUSER<S> & VuexStore<S>;
 
-export type RootStoreType = RootStore<Pick<RootState, typeof namespaceAPI | typeof namespaceTX | typeof namespaceUSER>>;
+export type RootStoreType = RootStore<RootState>;
 
 export type TypedAPIStore = DemerisStoreAPI<Pick<RootState, typeof namespaceAPI>>;
 export type TypedUSERStore = DemerisStoreUSER<Pick<RootState, typeof namespaceUSER>>;
 export type TypedTXStore = DemerisStoreTX<Pick<RootState, typeof namespaceTX>>;
 
-export const key: InjectionKey<VuexStore<RootState>> = Symbol();
+export const key: InjectionKey<RootStoreType> = Symbol();
 // add all modules to vuex
 const initstore = createStore<RootState>({
   modules: {
@@ -46,7 +50,7 @@ initstore.subscribe((mutation) => {
 });
 
 //Module typed exports
-export const store = initstore as VuexStore<any>;
+export const store = initstore as RootStoreType;
 export const apistore: TypedAPIStore = initstore as TypedAPIStore;
 export const userstore: TypedUSERStore = initstore as TypedUSERStore;
 export const txstore: TypedTXStore = initstore as TypedTXStore;

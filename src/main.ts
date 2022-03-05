@@ -18,7 +18,7 @@ import { messages } from '@/locales/en';
 
 import App from './App.vue';
 import router from './router';
-import { store } from './store/setup';
+import { key, store } from './store/setup';
 import { featureRunning } from './utils/FeatureManager';
 
 const i18n = createI18n({
@@ -64,7 +64,7 @@ if (featureRunning('SENTRY')) {
 
 app
   .use(i18n)
-  .use(store)
+  .use(store, key)
   .use(router)
   .use(vueLib)
   .use(VueTippy)

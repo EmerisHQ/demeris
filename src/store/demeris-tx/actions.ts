@@ -5,11 +5,12 @@ import { SpVuexError } from '@starport/vuex';
 import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState, RootStoreType } from '@/store';
 import { DemerisMutationTypes } from '@/store/demeris-tx/mutation-types';
 import { Amount } from '@/types/base';
 import { keyHashfromAddress } from '@/utils/basic';
 
+import { DemerisStore } from '.';
 import { DemerisActionTypes } from './action-types';
 import { DemerisSubscriptions } from './action-types';
 import DemerisSigningClient from './demerisSigningClient';
@@ -48,6 +49,15 @@ export type DemerisSignParams = {
 
 export type TicketResponse = {
   ticket: string;
+};
+
+type TXActionContext = {
+  dispatch: Pick<DemerisStore<State>, 'dispatch'>['dispatch'] | Pick<RootStoreType, 'dispatch'>['dispatch'];
+  commit: Pick<DemerisStore<State>, 'commit'>['commit'];
+  state: State;
+  getters: Pick<DemerisStore<State>, 'getters'>['getters'];
+  rootState: RootState;
+  rootGetters: Pick<RootStoreType, 'getters'>['getters'];
 };
 export interface Actions {
   [DemerisActionTypes.BROADCAST_TX](

@@ -54,10 +54,7 @@ export enum GlobalDemerisActionTypes {
   GET_ALL_BALANCES = 'demerisAPI/GET_ALL_BALANCES',
   GET_ALL_STAKING_BALANCES = 'demerisAPI/GET_ALL_STAKING_BALANCES',
   GET_ALL_UNBONDING_DELEGATIONS = 'demerisAPI/GET_ALL_UNBONDING_DELEGATIONS',
-  GET_NUMBERS = 'demerisAPI/GET_NUMBERS',
   GET_NUMBERS_CHAIN = 'demerisAPI/GET_NUMBERS_CHAIN',
-  GET_ALL_NUMBERS = 'demerisAPI/GET_ALL_NUMBERS',
-  GET_FEE_ADDRESSES = 'demerisAPI/GET_FEE_ADDRESSES',
   GET_VERIFIED_DENOMS = 'demerisAPI/GET_VERIFIED_DENOMS',
   GET_CHAINS = 'demerisAPI/GET_CHAINS',
   GET_PRICES = 'demerisAPI/GET_PRICES',
@@ -65,11 +62,7 @@ export enum GlobalDemerisActionTypes {
   GET_END_BLOCK_EVENTS = 'demerisAPI/GET_END_BLOCK_EVENTS',
   VALIDATE_POOLS = 'demerisAPI/VALIDATE_POOLS',
   GET_VERIFY_TRACE = 'demerisAPI/GET_VERIFY_TRACE',
-  GET_FEE_ADDRESS = 'demerisAPI/GET_FEE_ADDRESS',
-  GET_BECH32_CONFIG = 'demerisAPI/GET_BECH32_CONFIG',
   GET_CHAIN = 'demerisAPI/GET_CHAIN',
-  GET_PRIMARY_CHANNEL = 'demerisAPI/GET_PRIMARY_CHANNEL',
-  GET_PRIMARY_CHANNELS = 'demerisAPI/GET_PRIMARY_CHANNELS',
   GET_TOKEN_PRICES = 'demerisAPI/GET_TOKEN_PRICES',
   RESET_TOKEN_PRICES = 'demerisAPI/RESET_TOKEN_PRICES',
   GET_TOKEN_ID = 'demerisAPI/GET_TOKEN_ID',
@@ -90,14 +83,13 @@ export enum GlobalDemerisActionTypes {
   UNSUBSCRIBE = 'demerisAPI/UNSUBSCRIBE',
   STORE_UPDATE = 'demerisAPI/STORE_UPDATE',
 }
-export type DemerisActionParams = {
+export type Subscribable<T> = {
   subscribe: boolean;
-  params?: API.APIRequests;
+} & T;
+export type ActionParams<A> = {
+  params: A;
 };
-export type DemerisActionsByAddressParams = {
-  subscribe: boolean;
-  params?: API.AddrReq;
-};
+export type SimpleSubscribable = Pick<Subscribable<unknown>, 'subscribe'>;
 export type DemerisActionByTokenPriceParams = {
   subscribe: boolean;
   params?: API.TokenPriceReq;

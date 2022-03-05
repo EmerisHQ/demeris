@@ -4,13 +4,14 @@ import { EncodeObject, Registry } from '@cosmjs/proto-signing';
 import { SpVuexError } from '@starport/vuex';
 import { ActionContext, ActionTree } from 'vuex';
 
-import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
+import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState, RootStoreType } from '@/store';
 import { GasPriceLevel } from '@/types/actions';
 import { Amount } from '@/types/base';
 import { config as analyticsConfig, event } from '@/utils/analytics';
 import { fromHexString, keyHashfromAddress } from '@/utils/basic';
 import { addChain } from '@/utils/keplr';
 
+import { DemerisStore } from '.';
 import { DemerisActionTypes, DemerisSubscriptions } from './action-types';
 import { demoAccount } from './demo-account';
 import { DemerisMutationTypes, UserData } from './mutation-types';
@@ -51,6 +52,15 @@ export type DemerisSessionParams = {
 };
 export type TicketResponse = {
   ticket: string;
+};
+
+type UserActionContext = {
+  dispatch: Pick<DemerisStore<State>, 'dispatch'>['dispatch'] | Pick<RootStoreType, 'dispatch'>['dispatch'];
+  commit: Pick<DemerisStore<State>, 'commit'>['commit'];
+  state: State;
+  getters: Pick<DemerisStore<State>, 'getters'>['getters'];
+  rootState: RootState;
+  rootGetters: Pick<RootStoreType, 'getters'>['getters'];
 };
 export interface Actions {
   [DemerisActionTypes.REDEEM_GET_HAS_SEEN]({ commit, getters }: ActionContext<State, RootState>): Promise<boolean>;
