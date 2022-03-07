@@ -1,8 +1,22 @@
+import { QueryClient, setupIbcExtension } from '@cosmjs/stargate';
+import { Tendermint34Client } from '@cosmjs/tendermint-rpc';
+
 import { chainAddressfromKeyhash } from '../utils/basic';
 
 export default function useBalances() {
   const traces = JSON.parse(localStorage.getItem('traces') || '{}');
   const channels = JSON.parse(localStorage.getItem('channels') || '{}');
+  const clients = {};
+
+  async function getIbcClient(chainConfig) {
+    if (clients[chainConfig.id]) {
+      return clients[chainConfig.id];
+    }
+    const tmClient = await Tendermint34Client.connect(chainConfig.rpcUrl);
+    const ibcClient = QueryClient.withExtensions(tmClient, setupIbcExtension);
+    clients[chainConfig.id] = ibcClient;
+    return ibcClient;
+  }
 
   const safeTraces = () => {
     localStorage.setItem('traces', JSON.stringify(traces));
@@ -16,33 +30,38 @@ export default function useBalances() {
       return traces[chainConfig.id][ibcDenom];
     }
     const hash = ibcDenom.substring(4);
-    const { denom_trace } = await fetch(chainConfig.apiUrl + `/ibc/apps/transfer/v1/denom_traces/${hash}`).then((res) =>
-      res.json(),
-    );
+    const ibcClient = await getIbcClient(chainConfig);
+    const { denomTrace } = await ibcClient.ibc.transfer.denomTrace(hash);
+    // const { denom_trace } = await fetch(chainConfig.apiUrl + `/ibc/apps/transfer/v1/denom_traces/${hash}`).then((res) =>
+    //     res.json(),
+    // );
     traces[chainConfig.id] = traces[chainConfig.id] || {};
-    traces[chainConfig.id][ibcDenom] = denom_trace;
+    traces[chainConfig.id][ibcDenom] = denomTrace;
     safeTraces();
-    return denom_trace;
+    return denomTrace;
   };
 
   const chainConfigs = {
-    'cosmos-hub-4': {
+    'cosmoshub-4': {
       id: 'cosmos-hub',
       prefix: 'cosmos',
       stakingDenom: 'uatom',
       apiUrl: 'https://api.cosmos.network',
+      rpcUrl: 'https://rpc.cosmos.network',
     },
     osmosis: {
       id: 'osmosis',
       prefix: 'osmo',
       stakingDenom: 'uosmo',
       apiUrl: 'https://lcd-osmosis.blockapsis.com',
+      rpcUrl: 'https://rpc-osmosis.blockapsis.com',
     },
     'iov-mainnet-ibc': {
       id: 'iov',
       prefix: 'star',
       stakingDenom: 'iov',
-      apiUrl: 'https://lcd-iov.keplr.app/',
+      apiUrl: 'https://lcd-iov.keplr.app',
+      rpcUrl: 'https://rpc-iov.keplr.app',
     },
     // 'akash-testnet': {
     //     prefix: 'akash',
@@ -56,14 +75,14 @@ export default function useBalances() {
     return chainConfig;
   };
   const getIbcTokenChain = async (ibcDenom, chainConfig) => {
-    try {
-      const trace = await getTrace(ibcDenom, chainConfig);
-      const chainId = await getIbcTokenChainFromPath(trace.path, chainConfig);
-      return { baseDenom: trace.base_denom, chainId };
-    } catch (err) {
-      console.log('failed to get ibc token chain', ibcDenom, 'on', chainConfig.id);
-      return {};
-    }
+    // try {
+    const trace = await getTrace(ibcDenom, chainConfig);
+    const chainId = await getIbcTokenChainFromPath(trace.path, chainConfig);
+    return { baseDenom: trace.baseDenom, chainId };
+    // } catch (err) {
+    //     console.log('failed to get ibc token chain', ibcDenom, 'on', chainConfig.id);
+    //     return {};
+    // }
   };
   const getIbcTokenChainFromPath = async (path, chainConfig) => {
     if (channels[chainConfig.id] && channels[chainConfig.id][path]) {
@@ -72,24 +91,27 @@ export default function useBalances() {
 
     // const ibcClient = (await getChainClients(chainConfig)).ibcClient
     const splitDenomTrace = path.split('/');
-    const { identified_client_state } = await fetch(
-      chainConfig.apiUrl +
-        `/ibc/core/channel/v1/channels/${splitDenomTrace[1]}/ports/${splitDenomTrace[0]}/client_state`,
-    ).then((res) => res.json());
+    const ibcClient = await getIbcClient(chainConfig);
+    const { identifiedClientState } = await ibcClient.ibc.channel.clientState(splitDenomTrace[0], splitDenomTrace[1]);
+    const clientId = identifiedClientState.clientId;
+    const { chainId: currentChainId } = await ibcClient.ibc.client.stateTm(clientId);
+    // const { identified_client_state } = await fetch(
+    //     chainConfig.apiUrl +
+    //     `/ibc/core/channel/v1/channels/${splitDenomTrace[1]}/ports/${splitDenomTrace[0]}/client_state`,
+    // ).then((res) => res.json());
     // if the trace is longer then 2 there is more then 1 hop so we do a recursive search
     let chainId;
     if (splitDenomTrace.length > 2) {
-      chainId = await getIbcTokenChainFromPath(
-        splitDenomTrace.slice(2).join('/'),
-        getChainConfig(identified_client_state.clientState.chain_id),
-      );
+      chainId = await getIbcTokenChainFromPath(splitDenomTrace.slice(2).join('/'), getChainConfig(currentChainId));
     } else {
-      chainId = identified_client_state.client_state.chain_id;
+      chainId = currentChainId;
     }
 
     channels[chainConfig.id] = channels[chainConfig.id] || {};
     channels[chainConfig.id][path] = chainId;
     safeChannels();
+
+    return chainId;
   };
   const getDelegations = async (address, chainConfig) => {
     try {
