@@ -75,6 +75,9 @@ export type DemerisGetInflationParam = {
 export type DemerisGetRewardsParam = {
   chain_name: string;
 };
+export type DemerisGetUnstakingParam = {
+  chain_name: string;
+};
 type Namespaced<T, N extends string> = {
   [P in keyof T & string as `${N}/${P}`]: T[P];
 };
@@ -211,6 +214,10 @@ export interface Actions {
     { getters }: ActionContext<State, RootState>,
     { chain_name }: DemerisGetRewardsParam,
   ): Promise<unknown>;
+  [DemerisActionTypes.GET_UNSTAKING_PARAM](
+    { commit, getters }: ActionContext<State, RootState>,
+    { chain_name }: DemerisGetUnstakingParam,
+  ): Promise<API.UnstakingParam>;
 
   [DemerisActionTypes.INIT](
     { commit, dispatch }: ActionContext<State, RootState>,
@@ -404,6 +411,17 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:ValidatePools', 'Could not perform pool validation.');
     }
     return getters['getAllValidPools'];
+  },
+  async [DemerisActionTypes.GET_UNSTAKING_PARAM]({ commit, getters }, { chain_name }): Promise<API.UnstakingParam> {
+    try {
+      const {
+        data: { params: unstakingParam },
+      } = await axios.get(`${getters['getEndpoint']}/chain/${chain_name}/staking/params`);
+      commit('SET_UNSTAKING_PARAM', { params: { chain_name }, value: unstakingParam });
+      return getters['getUnstakingParam']({ chain_name });
+    } catch {
+      throw new SpVuexError('Demeris:getUnstakingParam', 'Could not retrieve staking param.');
+    }
   },
   async [DemerisActionTypes.GET_STAKING_BALANCES](
     { commit, getters, state, rootGetters },
@@ -922,7 +940,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
