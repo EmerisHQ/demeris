@@ -922,7 +922,7 @@ export const actions: ActionTree<State, RootState> & Actions = {
       throw new SpVuexError('Demeris:gitAirdropsList', 'Could not perform API query.');
     }
   },
-  async [DemerisActionTypes.GET_AIRDROPS]({ commit, getters }, { subscribe = false, params }) {
+  async [DemerisActionTypes.GET_AIRDROPS]({ commit }, { subscribe = false, params }) {
     try {
       const response = await axios.get(
         `https://raw.githubusercontent.com/allinbits/Emeris-Airdrop/main/airdropList/${params.airdropFileName}`,
