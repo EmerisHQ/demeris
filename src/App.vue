@@ -58,6 +58,7 @@ export default defineComponent({
   },
 
   setup() {
+    console.log('testing change');
     let showMaintenanceScreen = false;
     if (featureRunning('MAINTENANCE_SCREEN')) {
       return {
