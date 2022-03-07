@@ -1,21 +1,48 @@
 import { chainAddressfromKeyhash } from '../utils/basic';
 
 export default function useBalances() {
+  const traces = JSON.parse(localStorage.getItem('traces') || '{}');
+  const channels = JSON.parse(localStorage.getItem('channels') || '{}');
+
+  const safeTraces = () => {
+    localStorage.setItem('traces', JSON.stringify(traces));
+  };
+  const safeChannels = () => {
+    localStorage.setItem('channels', JSON.stringify(channels));
+  };
+
   const getTrace = async (ibcDenom, chainConfig) => {
+    if (traces[chainConfig.id] && traces[chainConfig.id][ibcDenom]) {
+      return traces[chainConfig.id][ibcDenom];
+    }
     const hash = ibcDenom.substring(4);
     const { denom_trace } = await fetch(chainConfig.apiUrl + `/ibc/apps/transfer/v1/denom_traces/${hash}`).then((res) =>
       res.json(),
     );
+    traces[chainConfig.id] = traces[chainConfig.id] || {};
+    traces[chainConfig.id][ibcDenom] = denom_trace;
+    safeTraces();
     return denom_trace;
   };
 
   const chainConfigs = {
     'cosmos-hub-4': {
+      id: 'cosmos-hub',
       prefix: 'cosmos',
-      // rpcUrl: 'https://rpc.cosmos.network',
       stakingDenom: 'uatom',
       apiUrl: 'https://api.cosmos.network',
-      // apiUrl: 'https://cosmos-hub-emeris.app.alpha.starport.cloud'
+    },
+    osmosis: {
+      id: 'osmosis',
+      prefix: 'osmo',
+      stakingDenom: 'uosmo',
+      apiUrl: 'https://lcd-osmosis.blockapsis.com',
+    },
+    'iov-mainnet-ibc': {
+      id: 'iov',
+      prefix: 'star',
+      stakingDenom: 'iov',
+      apiUrl: 'https://lcd-iov.keplr.app/',
     },
     // 'akash-testnet': {
     //     prefix: 'akash',
@@ -29,12 +56,20 @@ export default function useBalances() {
     return chainConfig;
   };
   const getIbcTokenChain = async (ibcDenom, chainConfig) => {
-    const trace = await getTrace(ibcDenom, chainConfig);
-    console.log(trace.path);
-    const chainId = await getIbcTokenChainFromPath(trace.path, chainConfig);
-    return { baseDenom: trace.base_denom, chainId };
+    try {
+      const trace = await getTrace(ibcDenom, chainConfig);
+      const chainId = await getIbcTokenChainFromPath(trace.path, chainConfig);
+      return { baseDenom: trace.base_denom, chainId };
+    } catch (err) {
+      console.log('failed to get ibc token chain', ibcDenom, 'on', chainConfig.id);
+      return {};
+    }
   };
   const getIbcTokenChainFromPath = async (path, chainConfig) => {
+    if (channels[chainConfig.id] && channels[chainConfig.id][path]) {
+      return channels[chainConfig.id][path];
+    }
+
     // const ibcClient = (await getChainClients(chainConfig)).ibcClient
     const splitDenomTrace = path.split('/');
     const { identified_client_state } = await fetch(
@@ -42,20 +77,29 @@ export default function useBalances() {
         `/ibc/core/channel/v1/channels/${splitDenomTrace[1]}/ports/${splitDenomTrace[0]}/client_state`,
     ).then((res) => res.json());
     // if the trace is longer then 2 there is more then 1 hop so we do a recursive search
+    let chainId;
     if (splitDenomTrace.length > 2) {
-      return getIbcTokenChainFromPath(
+      chainId = await getIbcTokenChainFromPath(
         splitDenomTrace.slice(2).join('/'),
         getChainConfig(identified_client_state.clientState.chain_id),
       );
     } else {
-      return identified_client_state.client_state.chain_id;
+      chainId = identified_client_state.client_state.chain_id;
     }
+
+    channels[chainConfig.id] = channels[chainConfig.id] || {};
+    channels[chainConfig.id][path] = chainId;
+    safeChannels();
   };
   const getDelegations = async (address, chainConfig) => {
-    const { delegation_responses } = await fetch(
-      chainConfig.apiUrl + `/cosmos/staking/v1beta1/delegations/${address}`,
-    ).then((res) => res.json());
-    return delegation_responses.map(({ balance }) => balance);
+    try {
+      const { delegation_responses } = await fetch(
+        chainConfig.apiUrl + `/cosmos/staking/v1beta1/delegations/${address}`,
+      ).then((res) => res.json());
+      return delegation_responses.map(({ balance }) => balance);
+    } catch (err) {
+      return [];
+    }
   };
   const getUndelegations = async (address, chainConfig) => {
     const { unbonding_responses } = await fetch(
@@ -150,4 +194,4 @@ export default function useBalances() {
   };
 }
 
-useBalances().getBalances('a9291de7ab7e6e6559f889ed326ca2c0859165a3');
+useBalances().getBalances('d990be2d42c20d603e6f3fbc70c594eaf4d6d322');
