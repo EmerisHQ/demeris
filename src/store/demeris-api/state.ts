@@ -20,6 +20,7 @@ export type State = {
   hub_chain: string;
   balances: Record<string, API.Balances>;
   stakingBalances: Record<string, API.StakingBalances>;
+  unstakingParams: Record<string, API.UnstakingParam>;
   unbondingDelegations: Record<string, API.UnbondingDelegations>;
   numbers: Record<string, API.Numbers>;
   chainnumbers: Record<string, Record<string, API.SeqNumber>>;
@@ -46,6 +47,7 @@ export function getDefaultState(): State {
     hub_chain: 'cosmoshub-4',
     balances: {},
     stakingBalances: {},
+    unstakingParams: {},
     unbondingDelegations: {},
     numbers: {},
     chainnumbers: {},

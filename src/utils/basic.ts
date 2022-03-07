@@ -168,6 +168,22 @@ export function parseCoins(input: string): Coin[] {
     });
 }
 
+/**
+ * @desc splits a string by the number part and character part
+ * @param input
+ */
+export function alphanumericSplit(input: string): Coin {
+  const denom = input.match(/([a-zA-Z])+$/)[0];
+  const numeric = input.match(/^\d+(\.\d{1,2})?/)[0];
+  if (!denom || !numeric) {
+    throw new Error(`Alphanumeric Split failed for string - [${input}]`);
+  }
+  return {
+    amount: numeric,
+    denom: denom,
+  };
+}
+
 // A = 65, z = 122
 export function getFirstAlphabet(str: string) {
   const index = findIndex(str, (letter) => {
