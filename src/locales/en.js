@@ -23,6 +23,11 @@ export const messages = {
         textAPR: 'APR',
         cta: 'Start staking',
       },
+      daysToUnstake: {
+        daySingular: 'day',
+        dayPlural: 'days',
+        errorButton: 'Error: Retry',
+      },
       addLiquidity: {
         navigation: {
           amount: 'Amount',
