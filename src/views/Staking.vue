@@ -146,7 +146,7 @@ export default defineComponent({
           const stakedValidator = stakingBalances.value.find(
             (stakedVali) => stakedVali.validator_address === keyHashfromAddress(vali.operator_address),
           );
-          if (stakedValidator) {
+          if (stakedValidator && Math.floor(parseFloat(stakedValidator.amount)) > 0) {
             validators.push({ ...vali, stakedAmount: parseInt(stakedValidator.amount) });
           } else {
             validators.push({ ...vali, stakedAmount: 0 });
