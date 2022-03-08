@@ -111,7 +111,7 @@ export default {
           document.head?.appendChild(styleTag);
         }
       } catch (e) {
-        console.log('simplex: ', e);
+        console.error('simplex: ', e);
       }
     };
 
