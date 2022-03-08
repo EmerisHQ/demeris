@@ -1,7 +1,7 @@
 <template>
   <div>
     <CurrencyDisplay :value="displayPrice" :show-dash="showDash" />
-    <div v-if="showPriceDiff" class="-text-1 font-normal" :class="priceDiffColor">
+    <div v-if="showPriceDiff" class="text-0 font-normal" :class="priceDiffColor">
       {{ $t('pages.asset.priceDiff', priceDiffObject) }}
     </div>
   </div>
@@ -118,18 +118,12 @@ export default defineComponent({
     });
 
     const priceDiffColor = computed(() => {
-      if (priceDiffIndicator.value === 'gain' && theme.value === 'light') {
-        return 'color-gain-light';
-      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'system') {
-        return 'color-gain-system';
-      } else if (priceDiffIndicator.value === 'gain' && theme.value === 'dark') {
-        return 'color-gain-dark';
-      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'light') {
-        return 'color-loss-light';
-      } else if (priceDiffIndicator.value === 'loss' && theme.value === 'system') {
-        return 'color-loss-system';
+      if (priceDiffIndicator.value === 'gain') {
+        return 'text-positive-text';
+      } else if (priceDiffIndicator.value === 'loss') {
+        return 'text-negative-text';
       } else {
-        return 'color-loss-dark';
+        return 'text-muted';
       }
     });
 
@@ -137,30 +131,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.color-gain-light {
-  color: #008223;
-}
-.color-gain-dark {
-  color: #89ff9b;
-}
-.color-gain-system {
-  color: #008223;
-}
-.color-gain-system {
-  color: #008223;
-}
-.color-loss-light {
-  color: #d80228;
-}
-.color-loss-dark {
-  color: #ff6072;
-}
-.color-loss-system {
-  color: #d80228;
-}
-.color-loss-system {
-  color: #d80228;
-}
-</style>

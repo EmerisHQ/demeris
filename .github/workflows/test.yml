@@ -7,10 +7,14 @@ on:
     branches:
       - develop
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '0,30 * * * *'
 
 env:
   VUE_APP_EMERIS_MNEMONIC: ${{ secrets.VUE_APP_EMERIS_MNEMONIC }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   unit:
@@ -99,7 +103,7 @@ jobs:
       - name: Notify Slack
         if: |
           failure() &&
-          github.event.schedule == '*/15 * * * *'
+          github.event.schedule == '0,30 * * * *'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: emeris-frontend-github

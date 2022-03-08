@@ -39,6 +39,7 @@ export enum DemerisActionTypes {
   GET_VALIDATORS = 'GET_VALIDATORS',
   GET_INFLATION = 'GET_INFLATION',
   GET_STAKING_REWARDS = 'GET_STAKING_REWARDS',
+  GET_UNSTAKING_PARAM = 'GET_UNSTAKING_PARAM',
   // Internal module actions
   INIT = 'INIT',
   RESET_STATE = 'RESET_STATE',
@@ -86,6 +87,7 @@ export enum GlobalDemerisActionTypes {
   GET_VALIDATORS = 'demerisAPI/GET_VALIDATORS',
   GET_INFLATION = 'demerisAPI/GET_INFLATION',
   GET_STAKING_REWARDS = 'demerisAPI/GET_STAKING_REWARDS',
+  GET_UNSTAKING_PARAM = 'demerisAPI/GET_UNSTAKING_PARAM',
   // Internal module actions
   INIT = 'demerisAPI/INIT',
   RESET_STATE = 'demerisAPI/RESET_STATE',

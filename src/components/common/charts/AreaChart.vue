@@ -4,12 +4,7 @@
     <div v-if="hasData">
       <apexchart
         v-if="!showLoading"
-        class="w-full"
-        :class="{
-          'dark-mode': theme === 'dark',
-          'light-mode': theme === 'light',
-          'system-mode': theme === 'system',
-        }"
+        class="w-full chart"
         :height="height"
         :options="chartData.options"
         :series="chartData.series"
@@ -116,6 +111,13 @@ export default defineComponent({
           toolbar: {
             show: false,
           },
+          animations: {
+            enabled: true,
+            easing: 'linear',
+            dynamicAnimation: {
+              speed: 250,
+            },
+          },
           zoom: {
             enabled: false,
           },
@@ -149,8 +151,8 @@ export default defineComponent({
           gradient: {
             type: 'vertical',
             shade: 'light',
-            opacityFrom: 0.6,
-            opacityTo: 0.1,
+            opacityFrom: 0.1,
+            opacityTo: 0,
           },
         },
         yaxis: {
@@ -206,11 +208,11 @@ export default defineComponent({
     };
 
     const gainColor = computed(() => {
-      return theme.value === 'light' ? '#00CF30' : '#89FF9B';
+      return 'var(--chart-positive)';
     });
 
     const lossColor = computed(() => {
-      return theme.value === 'light' ? '#FE475F' : '#FF3D56';
+      return 'var(--chart-negative)';
     });
 
     watch(
@@ -263,48 +265,51 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.chart {
+  --chart-positive: var(--positive);
+  --chart-negative: var(--negative);
+}
+.dark .chart {
+  --chart-positive: var(--positive-text);
+}
+
 .apexcharts-tooltip {
-  border-radius: 8px !important;
+  background: var(--surface-image) !important;
+  box-shadow: theme('boxShadow.button') !important;
+  color: theme('colors.text') !important;
+  border-radius: theme('borderRadius.lg');
+  border: none !important;
+  padding: theme('spacing[3]') theme('spacing.4') !important;
+  font-size: theme('fontSize.-1') !important;
+  line-height: theme('lineHeight.copy') !important;
 }
-.system-mode {
-  .apexcharts-tooltip.apexcharts-theme-light {
-    background: rgba(30, 30, 30, 1) !important;
-    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
-    border: none !important;
-    color: white !important;
-    .apexcharts-tooltip-title {
-      background: inherit !important;
-      border-bottom: none !important;
-    }
-  }
-}
-.light-mode {
-  .apexcharts-tooltip.apexcharts-theme-light {
-    background: rgba(253, 255, 255, 1) !important;
-    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
-    border: none !important;
-    .apexcharts-tooltip-title {
-      background: inherit !important;
-      border-bottom: none !important;
-    }
-  }
-}
-.dark-mode {
-  .apexcharts-tooltip.apexcharts-theme-light {
-    background: rgba(30, 30, 30, 1) !important;
-    box-shadow: 3px 9px 32px -4px rgba(0, 0, 0, 0.07) !important;
-    border: none !important;
-    .apexcharts-tooltip-title {
-      background: inherit !important;
-      border-bottom: none !important;
-    }
-  }
-}
+
 .apexcharts-tooltip-title {
+  background: none !important;
+  border-bottom: none !important;
   margin-bottom: 0 !important;
-  padding: 6px 6px 0px !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  line-height: inherit !important;
+  @apply text-muted;
 }
+
+.apexcharts-tooltip-text {
+  font-size: inherit !important;
+  font-family: inherit !important;
+  font-weight: theme('fontWeight.bold') !important;
+  line-height: inherit !important;
+  padding: 0 !important;
+}
+
 .apexcharts-tooltip-series-group {
+  font-size: inherit !important;
+  padding: 0 !important;
   justify-content: center !important;
+}
+
+.apexcharts-tooltip-y-group {
+  padding: 0 !important;
 }
 </style>
