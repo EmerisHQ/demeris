@@ -10,7 +10,16 @@
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
   <hr />
-  <BestPrice class="m-4" />
+  <BestPrice
+    class="m-4"
+    number-of-exchanges-searched="2"
+    dex="gravity"
+    expected-rate="1.567"
+    limit-price="1.555"
+    denom="OSMO"
+    max-slippage="0.3"
+    min-received="9940.34"
+  />
 </template>
 
 <script lang="ts" setup>
