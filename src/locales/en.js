@@ -19,7 +19,7 @@ export const messages = {
     components: {
       stakingBanner: {
         title: 'Stake',
-        text: 'Stake with a validator to receive an average',
+        text: 'Stake with a validator to receive over',
         textAPR: 'APR',
         cta: 'Start staking',
       },
