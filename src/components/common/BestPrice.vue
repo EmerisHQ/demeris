@@ -2,30 +2,34 @@
   <div class="w-72 bg-surface rounded-2xl theme-inverse dark:theme-inverse text-text -text-1">
     <div class="px-5 pt-5 pb-4">
       <div class="flex items-start text-muted mb-1">
-        {{ numberOfExchangesSearched }} exchanges searched <StarIcon class="ml-auto" />
+        {{ numberOfExchangesSearched }} {{ $t('components.bestPrice.exchangesSearched') }} <StarIcon class="ml-auto" />
       </div>
       <div class="title text-0">
-        Emeris found the best price from <span class="text-positive-text capitalize">{{ dex }}</span>
+        {{ $t('components.bestPrice.bestPriceFrom') }} <span class="text-positive-text capitalize">{{ dex }}</span>
       </div>
     </div>
     <hr class="border-border" />
     <div class="px-5 pt-4 pb-5">
       <div class="flex text-muted mb-3">
-        Expected rate <span class="ml-auto text-text">~{{ expectedRate }} {{ denom }}</span>
+        {{ $t('components.bestPrice.expectedRate')
+        }}<span class="ml-auto text-text">~{{ expectedRate }} {{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
-        Limit price <span class="ml-auto text-text">~{{ limitPrice }}{{ denom }}</span>
+        {{ $t('components.bestPrice.limitPrice') }}<span class="ml-auto text-text">~{{ limitPrice }}{{ denom }}</span>
       </div>
       <div class="flex text-muted mb-3">
-        Max slippage <span class="ml-auto text-text">{{ maxSlippage }}%</span>
+        {{ $t('components.bestPrice.maxSlippage') }}<span class="ml-auto text-text">{{ maxSlippage }}%</span>
       </div>
       <div class="flex text-muted">
-        Min. received <br />(if 100% swapped) <span class="ml-auto text-text"> {{ minReceived }} {{ denom }}</span>
+        {{ $t('components.bestPrice.minReceived') }}<br />{{ $t('components.bestPrice.fullSwapped')
+        }}<span class="ml-auto text-text"> {{ minReceived }} {{ denom }}</span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import StarIcon from '@/components/common/Icons/StarIcon.vue';
 // because props is unused
 // eslint-disable-next-line
@@ -59,6 +63,8 @@ const props = defineProps({
     required: true,
   },
 });
+// eslint-disable-next-line
+const { t } = useI18n({ useScope: 'global' });
 </script>
 <style lang="scss" scoped>
 .title {
