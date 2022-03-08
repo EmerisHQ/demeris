@@ -16,6 +16,10 @@ export type Mutations<S = State> = {
     state: S,
     payload: { params: API.APIRequests; value: API.StakingBalances },
   ): void;
+  [MutationTypes.SET_UNSTAKING_PARAM](
+    state: S,
+    payload: { params: API.APIRequests; value: API.UnstakingParamReq },
+  ): void;
   [MutationTypes.SET_UNBONDING_DELEGATIONS](
     state: S,
     payload: { params: API.APIRequests; value: API.UnbondingDelegations },
@@ -74,6 +78,9 @@ export const mutations: MutationTree<State> & Mutations = {
     ) {
       state.stakingBalances[(payload.params as API.AddrReq).address] = payload.value as API.StakingBalances;
     }
+  },
+  [MutationTypes.SET_UNSTAKING_PARAM](state: State, payload: DemerisMutations) {
+    state.unstakingParams[(payload.params as API.UnstakingParamReq).chain_name] = payload.value as API.UnstakingParam;
   },
   [MutationTypes.SET_UNBONDING_DELEGATIONS](state: State, payload: DemerisMutations) {
     if (
