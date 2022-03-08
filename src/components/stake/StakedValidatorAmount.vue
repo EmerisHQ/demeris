@@ -6,7 +6,9 @@
           <StakedValidatorAmountInput v-if="validator" v-model="model" :validator="validator" />
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
-            <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
+            <ListItem inset size="md" label="Time to unstake">
+              <DaysToUnstake :chain-name="chainName" />
+            </ListItem>
 
             <ListItem inset size="md" label="Total stake remaining">
               <AmountDisplay :amount="{ amount: remainingStake, denom: baseDenom }" />
@@ -42,6 +44,7 @@ import { actionHandler } from '@/actionhandler';
 import AmountDisplay from '@/components/common/AmountDisplay.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
+import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 import StakedValidatorAmountInput from '@/components/stake/StakedValidatorAmountInput.vue';
 import Button from '@/components/ui/Button.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
@@ -57,6 +60,7 @@ export default defineComponent({
     ListItem,
     AmountDisplay,
     Button,
+    DaysToUnstake,
     Price,
     FeeLevelSelector,
   },
@@ -90,6 +94,7 @@ export default defineComponent({
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: propsRef.validator.value.chain_name });
     });
+    const chainName = ref<string>(propsRef.validator.value.chain_name);
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const precision = computed(() =>
       store.getters[GlobalDemerisGetterTypes.API.getDenomPrecision]({
@@ -152,6 +157,7 @@ export default defineComponent({
       stakingRewardsData.value = await getStakingRewardsByBaseDenom(baseDenom);
     });
     return {
+      chainName,
       displayStakingBalance,
       model,
       baseDenom,

@@ -70,7 +70,9 @@
           </Button>
           <div class="mt-2 w-full max-w-sm mx-auto">
             <!-- Stake Info -->
-            <ListItem inset size="md" label="Time to unstake"> 21 days </ListItem>
+            <ListItem inset size="md" label="Time to unstake">
+              <DaysToUnstake :chain-name="chainName" />
+            </ListItem>
 
             <ListItem inset size="md" label="Total stake">
               <AmountDisplay :amount="{ amount: totalToStake, denom: baseDenom }" />
@@ -111,8 +113,9 @@ import ChainSelectModal from '@/components/common/ChainSelectModal.vue';
 import FeeLevelSelector from '@/components/common/FeeLevelSelector.vue';
 import Price from '@/components/common/Price.vue';
 import ValidatorSelect from '@/components/common/ValidatorSelect.vue';
-import Alert from '@/components/ui/Alert.vue';
+import DaysToUnstake from '@/components/stake/DaysToUnstake.vue';
 /* import AmountInput from '@/components/ui/AmountInput.vue'; */
+import Alert from '@/components/ui/Alert.vue';
 import Button from '@/components/ui/Button.vue';
 import Icon from '@/components/ui/Icon.vue';
 import ListItem from '@/components/ui/List/ListItem.vue';
@@ -126,15 +129,16 @@ export default defineComponent({
   name: 'StakeFormAmount',
   components: {
     Alert,
-    Price,
     AmountDisplay,
     Button,
     ChainName,
     ChainSelectModal,
-    ValidatorSelect,
+    DaysToUnstake,
     FeeLevelSelector,
     Icon,
     ListItem,
+    Price,
+    ValidatorSelect,
   },
   props: {
     validators: { type: Array as PropType<any[]>, required: true, default: () => [] },
@@ -171,6 +175,7 @@ export default defineComponent({
     const chain = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChain]({ chain_name: validators.value[0].chain_name });
     });
+    const chainName = ref<string>(validators.value[0].chain_name);
     const baseDenom = (chain.value as ChainData)?.denoms.find((x) => x.stakable).name;
     const hasIBC = computed(() => {
       const denomTypes = form.stakes.map((x) => {
@@ -289,23 +294,24 @@ export default defineComponent({
       )[0]?.amount;
     };
     return {
-      state,
+      balances,
+      baseDenom,
+      chainName,
+      chainBalance,
+      disabled,
       form,
       fees,
-      disabled,
-      balances,
+      goToReview,
+      isGreaterWithPrecision,
+      hasIBC,
       precision,
-      baseDenom,
+      state,
+      toggleChainsModal,
+      totalToStake,
       validatorSelectHandler,
       validatorUnselectHandler,
       validatorAddHandler,
-      toggleChainsModal,
-      goToReview,
-      isGreaterWithPrecision,
-      totalToStake,
       validatorsToStakeWith,
-      hasIBC,
-      chainBalance,
     };
   },
 });
