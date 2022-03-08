@@ -9,6 +9,8 @@
     <Button class="flex-1">Add Liquidity</Button>
     <Button class="flex-1">Withdraw Liquidity</Button>
   </div>
+  <hr />
+  <BestPrice class="m-4" />
 </template>
 
 <script lang="ts" setup>
@@ -17,6 +19,7 @@ import { interpret, State } from 'xstate';
 
 import SwapPartialFixture from '@/../tests/fixtures/transaction-process/swap-partial-osmo-cosmos.json';
 import SwapSuccessFixture from '@/../tests/fixtures/transaction-process/swap-success-osmo-cosmos.json';
+import BestPrice from '@/components/common/BestPrice.vue';
 import Button from '@/components/ui/Button.vue';
 import TransactionProcessViewer from '@/features/transactions/components/TransactionProcessViewer.vue';
 import { transactionProcessMachine } from '@/features/transactions/transactionProcessMachine';
