@@ -93,6 +93,7 @@ type CircleSymbolSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 import CircleSymbolStatus from '@/components/common/CircleSymbolStatus.vue';
 import usePools from '@/composables/usePools';
 import symbolsData from '@/data/symbols';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { Chains, VerifiedDenoms } from '@/types/api';
 import { getBaseDenom } from '@/utils/actionHandler';
@@ -152,7 +153,7 @@ export default defineComponent({
 
   setup(props) {
     const { pools, getReserveBaseDenoms } = usePools();
-
+    const denomsStore = useDenoms();
     const apistore = useStore() as TypedAPIStore;
     const denoms = ref<string[]>([]);
     const isLoaded = ref(false);
@@ -166,7 +167,7 @@ export default defineComponent({
     });
 
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+      const verifiedDenoms: VerifiedDenoms = denomsStore.verifiedDenoms;
       const chains: Chains = apistore.getters[GlobalDemerisGetterTypes.API.getChains] || [];
 
       const denomConfig = verifiedDenoms.find((item) => item.name === props.denom || item.name === denoms.value[0]);

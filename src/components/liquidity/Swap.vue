@@ -181,6 +181,7 @@ import usePrice from '@/composables/usePrice';
 import TransactionProcessCreator from '@/features/transactions/components/TransactionProcessCreator.vue';
 import { getTransactionOffset } from '@/features/transactions/transactionProcessHelpers';
 import { useTransactionsStore } from '@/features/transactions/transactionsStore';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes } from '@/store';
 import { SwapAction } from '@/types/actions';
 import { Balance } from '@/types/api';
@@ -234,7 +235,7 @@ export default defineComponent({
     const isSignedIn = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.USER.isSignedIn];
     });
-
+    const denoms = useDenoms();
     const dexStatus = computed(() => {
       return store.getters[GlobalDemerisGetterTypes.API.getChainStatus]({
         chain_name: store.getters[GlobalDemerisGetterTypes.API.getDexChain],
@@ -244,7 +245,7 @@ export default defineComponent({
     const gasPriceLevel = computed(() => store.getters[GlobalDemerisGetterTypes.USER.getPreferredGasPriceLevel]);
 
     const verifiedDenoms = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return denoms.verifiedDenoms;
     });
 
     onUnmounted(() => {

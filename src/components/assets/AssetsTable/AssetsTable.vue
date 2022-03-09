@@ -167,8 +167,9 @@ import Button from '@/components/ui/Button.vue';
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import Icon from '@/components/ui/Icon.vue';
 import useAccount from '@/composables/useAccount';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes } from '@/store';
-import { Balances } from '@/types/api';
+import { Balance, Balances } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { parseCoins } from '@/utils/basic';
 import { featureRunning } from '@/utils/FeatureManager';
@@ -229,10 +230,11 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const store = useStore();
+    const denoms = useDenoms();
     const currentLimit = ref(props.limitRows);
     const { stakingBalances, unbondingDelegations } = useAccount();
     const verifiedDenoms = computed(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return denoms.verifiedDenoms;
     });
 
     const allBalances = computed<Balances>(() => {
@@ -240,11 +242,14 @@ export default defineComponent({
       if (props.showAllAssets) {
         balances = [
           ...(props.balances as Balances),
-          ...verifiedDenoms.value.map((denom) => ({
-            base_denom: denom.name,
-            on_chain: denom.chain_name,
-            amount: '0' + denom.name,
-          })),
+          ...verifiedDenoms.value.map(
+            (denom) =>
+              ({
+                base_denom: denom.name,
+                on_chain: denom.chain_name,
+                amount: '0' + denom.name,
+              } as Balance),
+          ),
         ];
       }
 
@@ -269,11 +274,10 @@ export default defineComponent({
 
     const balancesByAsset = computed(() => {
       const denomsAggregate = groupBy(allBalances.value, 'base_denom');
-      const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
       const summary = Object.entries(denomsAggregate).map(([denom, balances = []]) => {
         let totalAmount = balances.reduce((acc, item) => +parseCoins(item.amount)[0].amount + acc, 0);
         const chainsNames = balances.map((item) => item.on_chain);
-        const denom_details = verifiedDenoms.filter((x) => x.name == denom && x.stakable);
+        const denom_details = verifiedDenoms.value.filter((x) => x.name == denom && x.stakable);
         if (denom_details.length > 0) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom_details[0].chain_name);
           if (stakedAmounts.length > 0) {
@@ -299,7 +303,7 @@ export default defineComponent({
         };
       });
       if (allBalances.value.length > 0) {
-        for (const denom of verifiedDenoms.filter((x) => x.stakable)) {
+        for (const denom of verifiedDenoms.value.filter((x) => x.stakable)) {
           const stakedAmounts = stakingBalances.value.filter((x) => x.chain_name == denom.chain_name);
           if (!summary.find((x) => x.denom == denom.name) && stakedAmounts.length > 0) {
             summary.push({

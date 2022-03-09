@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { ComputedRef, InjectionKey, Ref } from 'vue';
 import { Sender } from 'xstate';
 
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes } from '@/store';
 import {
   CreatePoolData,
@@ -289,11 +290,9 @@ export const logAmountVolume = (context: TransactionProcessContext) => {
       usdAmount = getDisplayPrice(baseDenom, denomAmount);
 
       const usdAmountWithdraw = getDisplayPrice(getBaseDenomSync(amounts[1].denom), amounts[1].amount);
-
+      const denoms = useDenoms();
       const poolCoin = (stepTx.data as WithdrawLiquidityData).poolCoin.denom;
-      const displayName =
-        useStore().getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == poolCoin)
-          ?.display_name ?? null;
+      const displayName = denoms.verifiedDenoms?.find((x) => x.name == poolCoin)?.display_name ?? null;
 
       event('usd_volume', {
         event_label: 'Withdraw Liquidity USD volume',

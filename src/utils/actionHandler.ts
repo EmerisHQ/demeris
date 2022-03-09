@@ -2,6 +2,7 @@ import { MsgSwapWithinBatch } from '@starport/tendermint-liquidity-js/gravity-de
 import { bech32 } from 'bech32';
 import Long from 'long';
 
+import { useDenoms } from '@/pinia/denoms';
 import {
   GlobalDemerisActionTypes,
   GlobalDemerisGetterTypes,
@@ -937,7 +938,6 @@ export async function withdrawLiquidity({ pool_id, poolCoin }: { pool_id: bigint
 }
 
 export async function stake({ validatorAddress, amount }: { validatorAddress: string; amount: Amount }) {
-  const apistore = useStore() as TypedAPIStore;
   const result = {
     steps: [],
     output: {
@@ -948,7 +948,8 @@ export async function stake({ validatorAddress, amount }: { validatorAddress: st
       chain_name: '',
     },
   };
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+  const denoms = useDenoms();
+  const verifiedDenoms = denoms.verifiedDenoms;
   const verified = verifiedDenoms.find((x) => x.name == amount.denom && x.stakable == true);
   if (!verified) {
     throw new Error('Token is not stakable');
@@ -1604,7 +1605,9 @@ export function getBaseDenomSync(denom: string) {
 export async function getBaseDenom(denom: string, chainName = null): Promise<string> {
   const apistore = useStore() as TypedAPIStore;
   const chain_name = chainName || apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+
+  const denoms = useDenoms();
+  const verifiedDenoms = denoms.verifiedDenoms;
 
   if (verifiedDenoms.find((item) => item.name === denom)) {
     return denom;
@@ -1636,7 +1639,9 @@ export async function getBaseDenom(denom: string, chainName = null): Promise<str
 export async function getNativeChain(denom: string, chainName = null): Promise<string> {
   const apistore = useStore() as TypedAPIStore;
   const chain_name = chainName || apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+
+  const denoms = useDenoms();
+  const verifiedDenoms = denoms.verifiedDenoms;
 
   const verified = verifiedDenoms.find((item) => item.name === denom);
   if (verified) {
@@ -1818,10 +1823,10 @@ export async function ensureTraceChannel(transaction: Actions.StepTransaction) {
 
 export async function getDisplayName(name, chain_name = null) {
   const apistore = useStore() as TypedAPIStore;
+
+  const denoms = useDenoms();
   if (isNative(name)) {
-    const displayName =
-      apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.display_name ??
-      null;
+    const displayName = denoms.verifiedDenoms?.find((x) => x.name == name)?.display_name ?? null;
     if (displayName) {
       return displayName;
     }
@@ -1847,9 +1852,9 @@ export async function getDisplayName(name, chain_name = null) {
 }
 export async function getTicker(name, chain_name = null) {
   const apistore = useStore() as TypedAPIStore;
+  const denoms = useDenoms();
   if (isNative(name)) {
-    const ticker =
-      apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]?.find((x) => x.name == name)?.ticker ?? null;
+    const ticker = denoms.verifiedDenoms?.find((x) => x.name == name)?.ticker ?? null;
     if (ticker) {
       return ticker;
     }
@@ -2057,7 +2062,9 @@ export async function toRedeem(balances: Balances): Promise<Balances> {
 export async function validBalances(balances: Balances): Promise<Balances> {
   const apistore = useStore() as RootStoreType;
   const validBalances = [];
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+
+  const denoms = useDenoms();
+  const verifiedDenoms = denoms.verifiedDenoms;
 
   if (featureRunning('REQUEST_PARALLELIZATION')) {
     await Promise.all(
@@ -2185,58 +2192,64 @@ export async function validBalances(balances: Balances): Promise<Balances> {
 export async function validPools(pools: Actions.Pool[]): Promise<Actions.Pool[]> {
   const apistore = useStore() as TypedAPIStore;
   const validPools = [];
-  const verifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+
+  const denoms = useDenoms();
+  const verifiedDenoms = denoms.verifiedDenoms;
   const dexChain = apistore.getters[GlobalDemerisGetterTypes.API.getDexChain];
 
   if (featureRunning('REQUEST_PARALLELIZATION')) {
     await Promise.all(
       pools.map(async (pool) => {
-        const firstDenom = pool.reserve_coin_denoms[0];
-        const secondDenom = pool.reserve_coin_denoms[1];
+        try {
+          const firstDenom = pool.reserve_coin_denoms[0];
+          const secondDenom = pool.reserve_coin_denoms[1];
 
-        if (!firstDenom.includes('ibc')) {
-          if (verifiedDenoms.find((item) => item.name === firstDenom)) {
-            // first denom is base denom and valid, check second denom
-            if (!secondDenom.includes('ibc')) {
-              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-                // first denom is base denom and valid, second denom is base denom and valid
+          if (!firstDenom.includes('ibc')) {
+            if (verifiedDenoms.find((item) => item.name === firstDenom)) {
+              // first denom is base denom and valid, check second denom
+              if (!secondDenom.includes('ibc')) {
+                if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                  // first denom is base denom and valid, second denom is base denom and valid
 
-                validPools.push(pool);
+                  validPools.push(pool);
+                } else {
+                  return;
+                }
               } else {
-                return;
+                if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                  // first denom is base and valid, second denom is IBC and valid
+                  validPools.push(pool);
+                } else {
+                  return;
+                }
               }
             } else {
-              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-                // first denom is base and valid, second denom is IBC and valid
-                validPools.push(pool);
-              } else {
-                return;
-              }
+              return;
             }
           } else {
-            return;
-          }
-        } else {
-          if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
-            if (!secondDenom.includes('ibc')) {
-              // second denom is not IBC denom
-              if (verifiedDenoms.find((item) => item.name === secondDenom)) {
-                // first denom is IBC and valid, second denom is base and valid
-                validPools.push(pool);
+            if (await isValidIBCReserveDenom(firstDenom, dexChain, verifiedDenoms)) {
+              if (!secondDenom.includes('ibc')) {
+                // second denom is not IBC denom
+                if (verifiedDenoms.find((item) => item.name === secondDenom)) {
+                  // first denom is IBC and valid, second denom is base and valid
+                  validPools.push(pool);
+                } else {
+                  return;
+                }
               } else {
-                return;
+                // second denom is IBC denom, check if it goes through primary channel
+                if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
+                  validPools.push(pool);
+                } else {
+                  return;
+                }
               }
             } else {
-              // second denom is IBC denom, check if it goes through primary channel
-              if (await isValidIBCReserveDenom(secondDenom, dexChain, verifiedDenoms)) {
-                validPools.push(pool);
-              } else {
-                return;
-              }
+              return;
             }
-          } else {
-            return;
           }
+        } catch (_e) {
+          return;
         }
       }),
     );
@@ -3340,24 +3353,26 @@ export async function isValidIBCReserveDenom(
   if (!verifiedDenoms.find((item) => item.name === verifyTrace.base_denom)) {
     return false;
   }
+  try {
+    const primaryChannel =
+      apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
+        chain_name: dexChain,
+        destination_chain_name: verifyTrace.trace[0].counterparty_name,
+      }) ??
+      (await apistore.dispatch(
+        GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
+        {
+          subscribe: false,
+          params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
+        },
+        { root: true },
+      ));
 
-  const primaryChannel =
-    apistore.getters[GlobalDemerisGetterTypes.API.getPrimaryChannel]({
-      chain_name: dexChain,
-      destination_chain_name: verifyTrace.trace[0].counterparty_name,
-    }) ??
-    (await apistore.dispatch(
-      GlobalDemerisActionTypes.API.GET_PRIMARY_CHANNEL,
-      {
-        subscribe: false,
-        params: { chain_name: dexChain, destination_chain_name: verifyTrace.trace[0].counterparty_name },
-      },
-      { root: true },
-    ));
-
-  if (primaryChannel == getChannel(verifyTrace.path, 0)) {
-    return true;
+    if (primaryChannel == getChannel(verifyTrace.path, 0)) {
+      return true;
+    }
+  } catch (e) {
+    return false;
   }
-
   return false;
 }

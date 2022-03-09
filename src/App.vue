@@ -40,6 +40,8 @@ import { setStore } from '@/utils/useStore';
 
 import FeatureRunningConditional from './components/common/FeatureRunningConditional.vue';
 import usePoolsFactory from './composables/usePools';
+import { useDenoms } from './pinia/denoms';
+import { useEnvironment } from './pinia/environment';
 import { autoLogin, autoLoginDemo } from './utils/basic';
 import { featureRunning } from './utils/FeatureManager';
 
@@ -84,6 +86,8 @@ export default defineComponent({
     const userstore = store as TypedUSERStore;
     const initialized = ref(false);
     const router = useRouter();
+    const denoms = useDenoms();
+    const environment = useEnvironment();
     const { pools: _pools } = usePoolsFactory();
     const { t } = useI18n({ useScope: 'global' });
     const status = ref(t('appInit.status.initializing'));
@@ -95,6 +99,12 @@ export default defineComponent({
           gasLimit = 500000;
           window.localStorage.setItem('gasLimit', gasLimit.toString());
         }
+        environment.$patch({
+          wsEndpoint: wsEndpoint,
+          endpoint: emerisEndpoint,
+          hub_chain: 'cosmos-hub',
+          refreshTime: 5000,
+        });
         await apistore.dispatch(GlobalDemerisActionTypes.API.INIT, {
           wsEndpoint: wsEndpoint,
           endpoint: emerisEndpoint,
@@ -105,7 +115,7 @@ export default defineComponent({
           gasLimit: gasLimit,
         });
         try {
-          await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+          await denoms.getVerified({
             subscribe: true,
           });
         } catch (e) {
@@ -226,7 +236,7 @@ export default defineComponent({
           gasLimit: gasLimit,
         });
         status.value = t('appInit.status.assetLoading');
-        await apistore.dispatch(GlobalDemerisActionTypes.API.GET_VERIFIED_DENOMS, {
+        await denoms.getVerified({
           subscribe: true,
         });
         status.value = t('appInit.status.chainLoading');

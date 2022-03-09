@@ -195,8 +195,9 @@ import TooltipPools from '@/components/liquidity/TooltipPools.vue';
 import useAccount from '@/composables/useAccount';
 import usePools from '@/composables/usePools';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
-import { LoadingState, VerifiedDenoms } from '@/types/api';
+import { LoadingState } from '@/types/api';
 import { getDisplayName } from '@/utils/actionHandler';
 import { pageview } from '@/utils/analytics';
 import { generateDenomHash, parseCoins } from '@/utils/basic';
@@ -243,8 +244,9 @@ export default defineComponent({
       useAccount();
     const { filterPoolsByDenom, getWithdrawBalances } = usePools();
 
+    const denoms = useDenoms();
     const assetConfig = computed(() => {
-      const verifiedDenoms: VerifiedDenoms = apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] || [];
+      const verifiedDenoms = denoms.verifiedDenoms;
       return verifiedDenoms.find((item) => item.name === denom.value);
     });
     if (!assetConfig.value) {

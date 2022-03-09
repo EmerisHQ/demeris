@@ -104,12 +104,12 @@ export type FeeAddress = string;
 
 // /balances/:address response data types
 export type Balance = {
-  address: string;
+  address?: string;
   base_denom: string;
-  verified: boolean;
+  verified?: boolean;
   amount: string;
   on_chain: string;
-  ibc: IbcInfo | Record<string, never>;
+  ibc?: IbcInfo | Record<string, never>;
 };
 export type Balances = Array<Balance>;
 export type BalancesResponse = {

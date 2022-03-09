@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ActionContext, ActionTree } from 'vuex';
 
 import usePool from '@/composables/usePool';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisActionTypes, GlobalDemerisGetterTypes, RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
@@ -617,9 +618,11 @@ export const actions: ActionTree<State, RootState> & Actions = {
           } else {
             commit(DemerisMutationTypes.SET_PRICES, { value: response.data.data });
           }
+
+          const denoms = useDenoms();
           // Set initial prices so pool calculations can find them
           await Promise.all(
-            getters['getVerifiedDenoms'].map(async (denom) => {
+            denoms.verifiedDenoms.map(async (denom) => {
               if (denom.name.startsWith('pool')) {
                 const pools = rootGetters['tendermint.liquidity.v1beta1/getLiquidityPools']().pools;
 

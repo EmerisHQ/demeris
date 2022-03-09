@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { GetterTree } from 'vuex';
 
+import { useDenoms } from '@/pinia/denoms';
 import { RootState } from '@/store';
 import { Pool } from '@/types/actions';
 import * as API from '@/types/api';
@@ -147,16 +148,18 @@ export const getters: GetterTree<State, RootState> & Getters = {
     }
     return feeAddresses.length != 0 ? feeAddresses : null;
   },
-  [GetterTypes.isVerified]: (state) => (params) => {
-    return state.verifiedDenoms.find((x) => x.name == params.denom)?.verified ?? false;
+  [GetterTypes.isVerified]: (_state) => (params) => {
+    const denoms = useDenoms();
+    return denoms.isVerified(params.denom);
   },
   [GetterTypes.getVerifiedDenoms]: (state) => {
     return state.verifiedDenoms.length != 0 ? state.verifiedDenoms : null;
   },
   [GetterTypes.getTicker]:
-    (state, getters) =>
+    (_state, getters) =>
     ({ name }) => {
-      const ticker = state.verifiedDenoms.find((x) => x.name == name)?.ticker ?? null;
+      const denoms = useDenoms();
+      const ticker = denoms.getTicker(name);
       if (ticker) {
         return ticker;
       }
@@ -179,9 +182,10 @@ export const getters: GetterTree<State, RootState> & Getters = {
       return state.chains[name]?.display_name ?? null;
     },
   [GetterTypes.getDenomPrecision]:
-    (state) =>
+    (_state) =>
     ({ name }) => {
-      return state.verifiedDenoms.find((x) => x.name == name)?.precision ?? null;
+      const denoms = useDenoms();
+      return denoms.getDenomPrecision(name);
     },
   [GetterTypes.getChains]: (state) => {
     return Object.keys(state.chains).length != 0 ? state.chains : null;
@@ -192,7 +196,6 @@ export const getters: GetterTree<State, RootState> & Getters = {
   [GetterTypes.getExchangeAmountFromATOMPool]: (state, getters) => (base_denom: string) => {
     const traces = getters['getAllVerifiedTraces'];
     const pools = getters['getAllValidPools'];
-
     let referencePool = null;
     let reserveBaseDenoms = [];
     if (pools) {

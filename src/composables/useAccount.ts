@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import orderBy from 'lodash.orderby';
 import { computed, Ref, ref, unref, watch } from 'vue';
 
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes, RootStoreType } from '@/store';
 import { Balances, StakingBalances, UnbondingDelegations } from '@/types/api';
 import { validBalances } from '@/utils/actionHandler';
@@ -76,7 +77,8 @@ export default function useAccount() {
   const getNativeBalances = (
     { balances, aggregate }: { balances?: Balances | Ref<Balances>; aggregate?: boolean } = { balances: [] },
   ) => {
-    const verifiedDenoms = store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+    const denoms = useDenoms();
+    const verifiedDenoms = denoms.verifiedDenoms;
     const result = [];
 
     for (const verifiedDenom of verifiedDenoms) {

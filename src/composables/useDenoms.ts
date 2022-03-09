@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue';
 
+import { useDenoms as useDenomsStore } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes, TypedAPIStore } from '@/store';
 import { getDisplayName } from '@/utils/actionHandler';
 import { getTicker } from '@/utils/actionHandler';
@@ -9,9 +10,9 @@ let useDenomsInstance = null;
 
 function useDenoms() {
   const apistore = useStore() as TypedAPIStore;
-
+  const denoms = useDenomsStore();
   const verifiedDenoms = computed(() => {
-    return apistore.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms];
+    return denoms.verifiedDenoms;
   });
   const useDenomInstances = {};
 

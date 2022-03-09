@@ -8,11 +8,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, toRefs } from 'vue';
-import { useStore } from 'vuex';
 
 import Ticker from '@/components/common/Ticker.vue';
 import usePools from '@/composables/usePools';
-import { GlobalDemerisGetterTypes } from '@/store';
+import { useDenoms } from '@/pinia/denoms';
 import { VerifiedDenoms } from '@/types/api';
 
 export default defineComponent({
@@ -27,10 +26,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
+    const denoms = useDenoms();
     const propsRef = toRefs(props);
     const verifiedDenoms = computed<VerifiedDenoms>(() => {
-      return store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms] ?? [];
+      return denoms.verifiedDenoms;
     });
     const validPool = computed(() => {
       return verifiedDenoms.value.find((x) => x.name == propsRef.name.value) ?? false;

@@ -9,6 +9,7 @@ import { useStore } from 'vuex';
 
 import CurrencyDisplay from '@/components/ui/CurrencyDisplay.vue';
 import useAccount from '@/composables/useAccount';
+import { useDenoms } from '@/pinia/denoms';
 import { GlobalDemerisGetterTypes } from '@/store';
 import { Balances } from '@/types/api';
 
@@ -26,10 +27,11 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const denoms = useDenoms();
     const propsRef = toRefs(props);
     const { stakingBalances, unbondingDelegations } = useAccount();
 
-    const verifiedDenoms = computed(() => store.getters[GlobalDemerisGetterTypes.API.getVerifiedDenoms]);
+    const verifiedDenoms = computed(() => denoms.verifiedDenoms);
     const liquidValue = computed(() => {
       if (propsRef.balances.value.length > 0) {
         return (propsRef.balances.value as Balances).reduce((total, balance) => {
