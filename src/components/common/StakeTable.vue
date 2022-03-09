@@ -44,7 +44,7 @@
           <tbody>
             <!-- claim rewards -->
             <tr
-              v-if="totalRewardsAmount"
+              v-if="totalRewardsAmount && totalRewardsAmount > 1"
               class="group cursor-pointer shadow-card hover:shadow-dropdown transition-shadow rounded-xl"
               @click="goStakeActionPage(StakingActions.CLAIM)"
             >
