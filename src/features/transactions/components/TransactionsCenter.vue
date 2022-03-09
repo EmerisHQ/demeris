@@ -54,7 +54,9 @@
       <Button
         v-if="hasMore || state.viewAll"
         :full-width="false"
-        :name="state.viewAll ? $t('context.transactions.widget.showLess') : $t('context.transactions.widget.showMore')"
+        :name="
+          state.viewAll ? $t('context.transactions.controls.showLess') : $t('context.transactions.controls.showMore')
+        "
         size="sm"
         variant="secondary"
         class="absolute bottom-5 left-0 right-0 items-center justify-center"
